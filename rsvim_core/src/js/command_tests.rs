@@ -20,7 +20,7 @@ async fn test_js_echo1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
     )),
@@ -43,10 +43,10 @@ async fn test_js_echo1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -84,9 +84,9 @@ async fn test_js_throw1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -124,9 +124,9 @@ async fn test_js_invalid1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -144,7 +144,7 @@ async fn test_buf_write1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("w".to_compact_string()),
     )),
@@ -184,10 +184,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -205,7 +205,7 @@ async fn test_buf_write2() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("w".to_compact_string()),
     )),
@@ -245,10 +245,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -266,7 +266,7 @@ async fn test_buf_write_failed1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("w".to_compact_string()),
     )),
@@ -302,10 +302,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -323,7 +323,7 @@ async fn test_async_command() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("msg".to_compact_string()),
     )),
@@ -369,10 +369,10 @@ Rsvim.cmd.create("msg", msg);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert_eq!(actual.unwrap(), "n:12");
   }

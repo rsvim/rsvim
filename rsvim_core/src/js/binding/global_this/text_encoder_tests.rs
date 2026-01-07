@@ -47,12 +47,9 @@ async fn test_encode1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "encoding:utf-8");
   }
 
@@ -101,7 +98,7 @@ async fn test_encode2() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
+    let actual = contents.cmdline_message_history().is_empty();
     assert!(actual);
   }
 
@@ -150,7 +147,7 @@ async fn test_encode3() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
+    let actual = contents.cmdline_message_history().is_empty();
     assert!(actual);
   }
 
@@ -209,22 +206,13 @@ async fn test_decode1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 3);
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "utf-8");
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "false");
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "false");
   }
 
@@ -283,22 +271,13 @@ async fn test_decode2() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 3);
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "utf-8");
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "true");
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     assert_eq!(actual, "false");
   }
 
@@ -342,7 +321,7 @@ async fn test_decode3() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
+    let actual = contents.cmdline_message_history().is_empty();
     assert!(actual);
   }
 
@@ -394,7 +373,7 @@ async fn test_decode4() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
+    let actual = contents.cmdline_message_history().is_empty();
     assert!(actual);
   }
 
@@ -433,7 +412,7 @@ async fn test_decode5() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
+    let actual = contents.cmdline_message_history().is_empty();
     assert!(actual);
   }
 
@@ -468,12 +447,9 @@ async fn test_decode_failed1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
-    let actual = contents
-      .command_line_message_history_mut()
-      .try_pop()
-      .unwrap();
+    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
     info!("actual:{:?}", actual);
     assert!(actual.contains("encoding is unknown: FooEncoding"));
   }

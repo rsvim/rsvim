@@ -52,7 +52,7 @@ mod tests_current1 {
     // After running
     {
       let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
+      let payload = contents.cmdline_message().rope().to_string();
       info!("After payload:{payload:?}");
       let payload = payload.trim();
       assert!(payload.is_empty());
@@ -124,7 +124,7 @@ mod tests_current1 {
     // After running
     {
       let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
+      let payload = contents.cmdline_message().rope().to_string();
       info!("After payload:{payload:?}");
       let payload = payload.trim();
       assert!(payload.is_empty());
@@ -193,7 +193,7 @@ mod tests_current1 {
 
       // After running
       let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
+      let payload = contents.cmdline_message().rope().to_string();
       info!("After payload-1:{payload:?}");
       let payload = payload.trim();
       let expect =
@@ -227,7 +227,7 @@ mod tests_current1 {
 
       // After running
       let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
+      let payload = contents.cmdline_message().rope().to_string();
       info!("After payload-2:{payload:?}");
       let payload = payload.trim();
       let expect =

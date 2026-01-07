@@ -1,7 +1,7 @@
 //! Commandline's input content widget.
 
 use crate::content::TextContentsWk;
-use crate::inode_impl;
+use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -17,7 +17,7 @@ pub struct CmdlineInput {
   viewport: ViewportWk,
 }
 
-inode_impl!(CmdlineInput);
+inodify_impl!(CmdlineInput);
 
 impl CmdlineInput {
   pub fn new(
@@ -46,7 +46,7 @@ impl Widgetable for CmdlineInput {
       let contents = lock!(contents);
       let viewport = self.viewport.upgrade().unwrap();
 
-      viewport.draw(contents.command_line_input(), &actual_shape, canvas);
+      viewport.draw(contents.cmdline_input(), &actual_shape, canvas);
     }
   }
 }

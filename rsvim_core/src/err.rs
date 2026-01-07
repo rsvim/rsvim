@@ -83,10 +83,3 @@ pub enum TheErr {
 pub type TheResult<T> = Result<T, TheErr>;
 
 // thiserror }
-
-#[macro_export]
-macro_rules! bail {
-  ($e:expr) => {
-    return Err($e)
-  };
-}

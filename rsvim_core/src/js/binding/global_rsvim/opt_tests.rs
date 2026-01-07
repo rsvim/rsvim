@@ -100,7 +100,7 @@ mod tests_tab_stop {
       assert_eq!(global_local_options.tab_stop(), 4);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
 
@@ -146,7 +146,7 @@ mod tests_tab_stop {
       assert_eq!(global_local_options.tab_stop(), 1);
 
       let contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
+      let n = contents.cmdline_message_history().occupied_len();
       assert_eq!(n, 0);
     }
 
@@ -192,9 +192,9 @@ mod tests_tab_stop {
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
       let mut contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
+      let n = contents.cmdline_message_history().occupied_len();
       assert_eq!(n, 1);
-      let actual = contents.command_line_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       info!("actual:{:?}", actual);
@@ -258,7 +258,7 @@ mod tests_file_encoding {
       );
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
 
@@ -304,7 +304,7 @@ mod tests_file_encoding {
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect =
@@ -364,7 +364,7 @@ mod tests_file_format {
       assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
 
@@ -410,7 +410,7 @@ mod tests_file_format {
       assert_eq!(global_local_options.file_format(), FILE_FORMAT);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect = r####""Rsvim.opt.fileFormat" value is an invalid option"####;
@@ -465,7 +465,7 @@ mod tests_expand_tab {
       assert!(global_local_options.expand_tab());
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
 
@@ -511,7 +511,7 @@ mod tests_expand_tab {
       assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect =
@@ -569,7 +569,7 @@ mod tests_shift_width {
       assert_eq!(global_local_options.shift_width(), 4);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
+      let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
 
@@ -615,7 +615,7 @@ mod tests_shift_width {
       assert_eq!(global_local_options.shift_width(), 255);
 
       let contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
+      let n = contents.cmdline_message_history().occupied_len();
       assert_eq!(n, 0);
     }
 
@@ -661,9 +661,9 @@ mod tests_shift_width {
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
 
       let mut contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
+      let n = contents.cmdline_message_history().occupied_len();
       assert_eq!(n, 1);
-      let actual = contents.command_line_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(actual.contains(

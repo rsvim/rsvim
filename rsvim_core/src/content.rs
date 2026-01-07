@@ -9,59 +9,51 @@ use std::fmt::Debug;
 
 /// Temporary contents except buffers.
 pub struct TextContents {
-  command_line_input: Text,
-  command_line_message: Text,
-  command_line_message_history: HeapRb<String>,
+  cmdline_input: Text,
+  cmdline_message: Text,
+  cmdline_message_history: HeapRb<String>,
 }
 
 arc_mutex_ptr!(TextContents);
 
 impl TextContents {
   pub fn new(canvas_size: U16Size) -> Self {
-    let command_line_opts = BufferOptionsBuilder::default().build().unwrap();
+    let cmdline_opts = BufferOptionsBuilder::default().build().unwrap();
     Self {
-      command_line_input: Text::new(
-        command_line_opts,
-        canvas_size,
-        Rope::new(),
-      ),
-      command_line_message: Text::new(
-        command_line_opts,
-        canvas_size,
-        Rope::new(),
-      ),
-      command_line_message_history: HeapRb::new(500),
+      cmdline_input: Text::new(cmdline_opts, canvas_size, Rope::new()),
+      cmdline_message: Text::new(cmdline_opts, canvas_size, Rope::new()),
+      cmdline_message_history: HeapRb::new(500),
     }
   }
 
-  /// Get "command line" input content
-  pub fn command_line_input(&self) -> &Text {
-    &self.command_line_input
+  /// Command-line input content
+  pub fn cmdline_input(&self) -> &Text {
+    &self.cmdline_input
   }
 
-  /// Get mutable "command line" input content
-  pub fn command_line_input_mut(&mut self) -> &mut Text {
-    &mut self.command_line_input
+  /// Mutable command-line input content
+  pub fn cmdline_input_mut(&mut self) -> &mut Text {
+    &mut self.cmdline_input
   }
 
-  /// Get "command line" message
-  pub fn command_line_message(&self) -> &Text {
-    &self.command_line_message
+  /// Command-line message
+  pub fn cmdline_message(&self) -> &Text {
+    &self.cmdline_message
   }
 
-  /// Get mutable "command line" message
-  pub fn command_line_message_mut(&mut self) -> &mut Text {
-    &mut self.command_line_message
+  /// Mutable command-line message
+  pub fn cmdline_message_mut(&mut self) -> &mut Text {
+    &mut self.cmdline_message
   }
 
-  /// Get "command line" message history
-  pub fn command_line_message_history(&self) -> &HeapRb<String> {
-    &self.command_line_message_history
+  /// Command-line message history
+  pub fn cmdline_message_history(&self) -> &HeapRb<String> {
+    &self.cmdline_message_history
   }
 
-  /// Get mutable "command line" message history
-  pub fn command_line_message_history_mut(&mut self) -> &mut HeapRb<String> {
-    &mut self.command_line_message_history
+  /// Mutable command-line message history
+  pub fn cmdline_message_history_mut(&mut self) -> &mut HeapRb<String> {
+    &mut self.cmdline_message_history
   }
 }
 

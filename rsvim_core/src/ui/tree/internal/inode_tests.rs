@@ -1,5 +1,5 @@
 use super::inode::*;
-use crate::inode_impl;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 // use crate::tests::log::init as test_log_init;
@@ -11,7 +11,7 @@ struct TestNode {
   pub __node: InodeBase,
 }
 
-inode_impl!(TestNode);
+inodify_impl!(TestNode);
 
 impl TestNode {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {

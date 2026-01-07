@@ -9,10 +9,10 @@ use crate::buf::opt::FileFormatOption;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
-use crate::state::fsm::InsertStateful;
+use crate::state::fsm::Insert;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cmdline_ops;
@@ -81,7 +81,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let state_machine = NormalStateful::default();
+    let state_machine = Normal::default();
     state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
@@ -115,7 +115,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let state_machine = NormalStateful::default();
+    let state_machine = Normal::default();
     state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
@@ -149,7 +149,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -190,7 +190,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
@@ -224,7 +224,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let state_machine = NormalStateful::default();
+    let state_machine = Normal::default();
     state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
 
@@ -258,7 +258,7 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
@@ -298,7 +298,7 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
@@ -334,7 +334,7 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
@@ -370,7 +370,7 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
 
@@ -406,7 +406,7 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
@@ -450,7 +450,7 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
@@ -502,7 +502,7 @@ mod tests_raw_cursor_move_by {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Step-1
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((5, 0)));
 
@@ -558,7 +558,7 @@ mod tests_raw_cursor_move_by {
         lines,
       );
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -617,7 +617,7 @@ mod tests_raw_cursor_move_by {
         lines.clone(),
       );
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -668,7 +668,7 @@ mod tests_raw_cursor_move_to {
         lines,
       );
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -729,7 +729,7 @@ mod tests_raw_cursor_move_to {
         lines,
       );
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -789,7 +789,7 @@ mod tests_raw_cursor_move_to {
         lines.clone(),
       );
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -854,7 +854,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
@@ -936,7 +936,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
@@ -1022,7 +1022,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
@@ -1106,7 +1106,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
@@ -1195,7 +1195,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-1
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
@@ -1226,7 +1226,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-2
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
@@ -1249,7 +1249,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-3
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
@@ -1272,7 +1272,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-4
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(4));
 
@@ -1303,7 +1303,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-5
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
@@ -1334,7 +1334,7 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-6
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(3));
 
@@ -1421,7 +1421,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
@@ -1523,7 +1523,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(8));
 
@@ -1562,7 +1562,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
@@ -1601,7 +1601,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(3));
 
@@ -1624,7 +1624,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(2));
 
@@ -1724,7 +1724,7 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
@@ -1801,7 +1801,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
@@ -1883,7 +1883,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
@@ -1978,7 +1978,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -2062,7 +2062,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
       Operation::WindowScrollRightBy(12),
@@ -2146,7 +2146,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
       Operation::WindowScrollRightBy(12),
@@ -2180,7 +2180,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
       Operation::WindowScrollRightBy(10),
@@ -2209,7 +2209,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
       Operation::WindowScrollRightBy(160),
@@ -2237,7 +2237,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
       Operation::WindowScrollLeftBy(156),
@@ -2322,7 +2322,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-1
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
@@ -2353,7 +2353,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-2
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
@@ -2384,7 +2384,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-3
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -2415,7 +2415,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-4
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(4));
 
@@ -2446,7 +2446,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-5
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -2477,7 +2477,7 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-6
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(3));
 
@@ -2564,7 +2564,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
@@ -2660,7 +2660,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(8));
 
@@ -2699,7 +2699,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
@@ -2740,7 +2740,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(3));
 
@@ -2781,7 +2781,7 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -2884,7 +2884,7 @@ mod tests_raw_window_scroll_to {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 1)));
 
@@ -2969,7 +2969,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-1
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 4)));
 
@@ -3000,7 +3000,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-2
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 8)));
 
@@ -3023,7 +3023,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-3
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 7)));
 
@@ -3046,7 +3046,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-4
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 3)));
 
@@ -3077,7 +3077,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-5
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 2)));
 
@@ -3108,7 +3108,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-6
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
 
@@ -3189,7 +3189,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-1
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((4, 0)));
 
@@ -3220,7 +3220,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-2
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((8, 0)));
 
@@ -3251,7 +3251,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-3
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((7, 0)));
 
@@ -3282,7 +3282,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-4
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((3, 0)));
 
@@ -3313,7 +3313,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-5
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((2, 0)));
 
@@ -3344,7 +3344,7 @@ mod tests_raw_window_scroll_to {
     }
 
     // Scroll-6
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
 
@@ -3394,7 +3394,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let state_machine = NormalStateful::default();
+    let state_machine = Normal::default();
     state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
@@ -3427,7 +3427,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let state_machine = NormalStateful::default();
+    let state_machine = Normal::default();
     state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
@@ -3460,7 +3460,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -3576,7 +3576,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -3692,7 +3692,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -3804,7 +3804,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -4100,7 +4100,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -4396,7 +4396,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -4687,7 +4687,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveTo((21, 3)));
 
     // Move-1
@@ -4811,7 +4811,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -4977,7 +4977,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -5344,7 +5344,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -5560,7 +5560,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -5776,7 +5776,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -5988,7 +5988,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
@@ -6140,7 +6140,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
@@ -6293,7 +6293,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
@@ -6442,7 +6442,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
@@ -6568,7 +6568,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -6738,7 +6738,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -7109,7 +7109,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -7325,7 +7325,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
@@ -7472,7 +7472,7 @@ mod tests_cursor_move {
       );
     }
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(300));
 
     // Move-1
@@ -7635,7 +7635,7 @@ mod tests_cursor_move {
   }
 }
 #[cfg(test)]
-mod tests_goto_command_line_ex_mode {
+mod tests_goto_cmdline_ex_mode {
   use super::*;
 
   #[test]
@@ -7654,8 +7654,8 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
-    stateful.goto_command_line_ex_mode(&data_access);
+    let stateful = Normal::default();
+    stateful.goto_cmdline_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
     let actual_cursor = cmdline_cursor_viewport(tree.clone());
@@ -7711,9 +7711,9 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
-    let next_stateful = stateful.goto_command_line_ex_mode(&data_access);
+    let next_stateful = stateful.goto_cmdline_ex_mode(&data_access);
 
     // Goto Command-Line-Ex-1
     {
@@ -7728,9 +7728,9 @@ mod tests_goto_command_line_ex_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    assert!(matches!(next_stateful, StateMachine::CommandLineExMode(_)));
+    assert!(matches!(next_stateful, State::CmdlineEx(_)));
     let stateful = match next_stateful {
-      StateMachine::CommandLineExMode(s) => s,
+      State::CmdlineEx(s) => s,
       _ => unreachable!(),
     };
 
@@ -7787,7 +7787,7 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Goto Insert-1 (Keep)
     {
@@ -7796,10 +7796,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Keep,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::Insert(Insert::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -7818,7 +7815,7 @@ mod tests_goto_insert_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
     // Insert-2
     {
       stateful.cursor_insert(
@@ -7874,7 +7871,7 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Goto Insert-1 (Append)
     {
@@ -7883,10 +7880,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Append,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::Insert(Insert::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -7905,7 +7899,7 @@ mod tests_goto_insert_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
     // Insert-2
     {
       stateful.cursor_insert(
@@ -7961,7 +7955,7 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Goto Insert-1 (Append)
     {
@@ -7970,10 +7964,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Append,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::Insert(Insert::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -7992,7 +7983,7 @@ mod tests_goto_insert_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
     // Insert-2
     {
       stateful.cursor_insert(
@@ -8048,7 +8039,7 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Goto Insert-1 (NewLine)
     {
@@ -8056,10 +8047,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::NewLine,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::Insert(Insert::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -8078,7 +8066,7 @@ mod tests_goto_insert_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
     // Insert-2
     {
       stateful.cursor_insert(
@@ -8149,7 +8137,7 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     stateful.goto_insert_mode(
       &data_access,
@@ -8161,10 +8149,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::NewLine,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::Insert(Insert::default()));
 
       let tree = data_access.tree.clone();
       let expect_canvas = vec![

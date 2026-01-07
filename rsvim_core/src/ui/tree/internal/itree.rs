@@ -11,7 +11,7 @@ use taffy::TaffyResult;
 #[derive(Clone)]
 pub struct Itree<T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   // The tree context.
   context: TreeContextRc,
@@ -22,7 +22,7 @@ where
 
 impl<T> Debug for Itree<T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Itree")
@@ -33,7 +33,7 @@ where
 
 impl<T> Default for Itree<T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   fn default() -> Self {
     Self::new()
@@ -42,7 +42,7 @@ where
 
 impl<T> Itree<T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   pub fn new() -> Self {
     Self {
@@ -92,7 +92,7 @@ where
 
 impl<T> Itree<T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   pub fn raw_move_position_by(
     &self,
@@ -201,7 +201,7 @@ where
 #[derive(Debug)]
 pub struct ItreeIter<'a, T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   tree: &'a Itree<T>,
   que: VecDeque<TreeNodeId>,
@@ -209,7 +209,7 @@ where
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   type Item = &'a T;
 
@@ -243,7 +243,7 @@ where
 
 impl<'a, T> ItreeIter<'a, T>
 where
-  T: Inodeable,
+  T: Inodify,
 {
   pub fn new(tree: &'a Itree<T>, start_id: Option<TreeNodeId>) -> Self {
     let mut que = VecDeque::new();

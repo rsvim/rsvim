@@ -24,15 +24,15 @@ use crate::msg::MasterMessage;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
-use fsm::CommandLineExStateful;
-use fsm::CommandLineSearchBackwardStateful;
-use fsm::CommandLineSearchForwardStateful;
-use fsm::InsertStateful;
-use fsm::NormalStateful;
-use fsm::OperatorPendingStateful;
-use fsm::SelectStateful;
-use fsm::TerminalStateful;
-use fsm::VisualStateful;
+use fsm::CmdlineEx;
+use fsm::CmdlineSearchBackward;
+use fsm::CmdlineSearchForward;
+use fsm::Insert;
+use fsm::Normal;
+use fsm::OperatorPending;
+use fsm::Select;
+use fsm::Terminal;
+use fsm::Visual;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Debug)]
@@ -68,24 +68,20 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine;
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> State;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(
-    &self,
-    data_access: StateDataAccess,
-    op: Operation,
-  ) -> StateMachine;
+  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State;
 }
 
 /// Generate enum dispatcher for `Stateful`.
 #[macro_export]
-macro_rules! state_dispatcher {
+macro_rules! stateful_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+      fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle(data_access, event),
@@ -93,7 +89,7 @@ macro_rules! state_dispatcher {
         }
       }
 
-      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> StateMachine {
+      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle_op(data_access, op),
@@ -106,35 +102,35 @@ macro_rules! state_dispatcher {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
-pub enum StateMachine {
-  NormalMode(NormalStateful),
-  VisualMode(VisualStateful),
-  SelectMode(SelectStateful),
-  OperatorPendingMode(OperatorPendingStateful),
-  InsertMode(InsertStateful),
-  CommandLineExMode(CommandLineExStateful),
-  CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
-  CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
-  TerminalMode(TerminalStateful),
+pub enum State {
+  Normal(Normal),
+  Visual(Visual),
+  Select(Select),
+  OperatorPending(OperatorPending),
+  Insert(Insert),
+  CmdlineEx(CmdlineEx),
+  CmdlineSearchForward(CmdlineSearchForward),
+  CmdlineSearchBackward(CmdlineSearchBackward),
+  Terminal(Terminal),
 }
 
-state_dispatcher!(
-  StateMachine,
-  NormalMode,
-  VisualMode,
-  SelectMode,
-  OperatorPendingMode,
-  InsertMode,
-  CommandLineExMode,
-  CommandLineSearchForwardMode,
-  CommandLineSearchBackwardMode,
-  TerminalMode
+stateful_enum_impl!(
+  State,
+  Normal,
+  Visual,
+  Select,
+  OperatorPending,
+  Insert,
+  CmdlineEx,
+  CmdlineSearchForward,
+  CmdlineSearchBackward,
+  Terminal
 );
 
-impl Default for StateMachine {
-  /// Returns the default FMS state, by default it's the
-  /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
+impl Default for State {
+  /// Returns the default FMS state, by default it's the [`Normal`] editing
+  /// mode.
   fn default() -> Self {
-    StateMachine::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 }

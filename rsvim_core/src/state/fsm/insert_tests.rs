@@ -9,8 +9,8 @@ use crate::buf::opt::FileFormatOption;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -82,7 +82,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -192,7 +192,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -302,7 +302,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -418,7 +418,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -663,7 +663,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -908,7 +908,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -1149,7 +1149,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -1394,7 +1394,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -1639,7 +1639,7 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -1874,7 +1874,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -2093,7 +2093,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -2312,7 +2312,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -2526,7 +2526,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -2658,7 +2658,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -2965,7 +2965,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -3277,7 +3277,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Move-1
     {
@@ -3573,7 +3573,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -3633,7 +3633,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -3698,7 +3698,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -3776,7 +3776,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -4190,7 +4190,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -4604,7 +4604,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5000,7 +5000,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5063,7 +5063,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5126,7 +5126,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5282,7 +5282,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5672,7 +5672,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5735,7 +5735,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1
     {
@@ -5796,7 +5796,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Also Inserts ascii characters
     {
@@ -5878,7 +5878,7 @@ mod tests_insert_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Insert-1 special-chars
     {
@@ -6065,7 +6065,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {
@@ -6707,7 +6707,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {
@@ -7349,7 +7349,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {
@@ -7979,7 +7979,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {
@@ -8039,7 +8039,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {
@@ -8110,7 +8110,7 @@ mod tests_delete_text {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = InsertStateful::default();
+    let stateful = Insert::default();
 
     // Delete-1
     {

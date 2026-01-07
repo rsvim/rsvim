@@ -4,7 +4,7 @@ pub mod internal;
 
 use crate::buf::BufferWk;
 use crate::content::TextContentsWk;
-use crate::inode_dispatcher;
+use crate::inodify_enum_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -25,7 +25,7 @@ use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_dispatcher;
+use crate::widgetable_enum_impl;
 pub use internal::*;
 use std::fmt::Debug;
 use std::fmt::Formatter;
@@ -47,7 +47,7 @@ pub enum TreeNode {
   CmdlineMessage(CmdlineMessage),
 }
 
-inode_dispatcher!(
+inodify_enum_impl!(
   TreeNode,
   Panel,
   Cursor,
@@ -59,7 +59,7 @@ inode_dispatcher!(
   CmdlineMessage
 );
 
-widget_dispatcher!(
+widgetable_enum_impl!(
   TreeNode,
   Panel,
   Cursor,

@@ -8,7 +8,7 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_impl;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -35,10 +35,9 @@ pub struct Cmdline {
   message_viewport: ViewportArc,
 }
 
-inode_impl!(Cmdline);
+inodify_impl!(Cmdline);
 
 impl Cmdline {
-  #[allow(clippy::too_many_arguments)]
   pub fn new(
     id: TreeNodeId,
     ctx: TreeContextWk,
@@ -63,19 +62,19 @@ impl Cmdline {
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
         &options,
-        text_contents.command_line_input(),
+        text_contents.cmdline_input(),
         input_size,
         0,
         0,
       );
       let input_cursor_viewport = CursorViewport::from_top_left(
         &input_viewport,
-        text_contents.command_line_input(),
+        text_contents.cmdline_input(),
       );
 
       let message_viewport = Viewport::view(
         &options,
-        text_contents.command_line_message(),
+        text_contents.cmdline_message(),
         message_size,
         0,
         0,

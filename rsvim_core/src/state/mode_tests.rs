@@ -27,26 +27,26 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("insert"), Ok(Mode::Insert));
   assert_eq!(Mode::from_str("i"), Ok(Mode::Insert));
 
-  assert_eq!(format!("{}", Mode::CommandLineEx), "command-line");
-  assert_eq!(Mode::from_str("command-line"), Ok(Mode::CommandLineEx));
-  assert_eq!(Mode::from_str("cmdline"), Ok(Mode::CommandLineEx));
-  assert_eq!(Mode::from_str("c"), Ok(Mode::CommandLineEx));
+  assert_eq!(format!("{}", Mode::CmdlineEx), "command-line");
+  assert_eq!(Mode::from_str("command-line"), Ok(Mode::CmdlineEx));
+  assert_eq!(Mode::from_str("cmdline"), Ok(Mode::CmdlineEx));
+  assert_eq!(Mode::from_str("c"), Ok(Mode::CmdlineEx));
 
   assert_eq!(
-    format!("{}", Mode::CommandLineSearchForward),
+    format!("{}", Mode::CmdlineSearchForward),
     "command-line-search-forward"
   );
   assert_eq!(
     Mode::from_str("command-line-search-forward"),
-    Ok(Mode::CommandLineSearchForward)
+    Ok(Mode::CmdlineSearchForward)
   );
 
   assert_eq!(
-    format!("{}", Mode::CommandLineSearchBackward),
+    format!("{}", Mode::CmdlineSearchBackward),
     "command-line-search-backward"
   );
   assert_eq!(
     Mode::from_str("command-line-search-backward"),
-    Ok(Mode::CommandLineSearchBackward)
+    Ok(Mode::CmdlineSearchBackward)
   );
 }

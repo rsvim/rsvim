@@ -1,8 +1,8 @@
 //! The normal mode.
 
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
@@ -25,9 +25,9 @@ use crate::ui::viewport::ViewportSearchDirection;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
-pub struct NormalStateful {}
+pub struct Normal {}
 
-impl NormalStateful {
+impl Normal {
   fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
@@ -59,7 +59,7 @@ impl NormalStateful {
             KeyCode::Char('o') => {
               Some(Operation::GotoInsertMode(GotoInsertModeVariant::NewLine))
             }
-            KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
+            KeyCode::Char(':') => Some(Operation::GotoCmdlineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
             _ => None,
@@ -75,27 +75,21 @@ impl NormalStateful {
   }
 }
 
-impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+impl Stateful for Normal {
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    StateMachine::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 
-  fn handle_op(
-    &self,
-    data_access: StateDataAccess,
-    op: Operation,
-  ) -> StateMachine {
+  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
       }
-      Operation::GotoCommandLineExMode => {
-        self.goto_command_line_ex_mode(&data_access)
-      }
+      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(&data_access),
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
       // }
@@ -113,11 +107,8 @@ impl Stateful for NormalStateful {
   }
 }
 
-impl NormalStateful {
-  pub fn goto_command_line_ex_mode(
-    &self,
-    data_access: &StateDataAccess,
-  ) -> StateMachine {
+impl Normal {
+  pub fn goto_cmdline_ex_mode(&self, data_access: &StateDataAccess) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -174,42 +165,38 @@ impl NormalStateful {
       let contents = data_access.contents.clone();
       let contents = lock!(contents);
       let cmdline_input_content =
-        contents.command_line_input().rope().to_compact_string();
+        contents.cmdline_input().rope().to_compact_string();
       debug_assert!(cmdline_input_content.is_empty());
     }
 
-    StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
+    State::CmdlineEx(super::CmdlineEx::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
-  ) -> StateMachine {
-    StateMachine::CommandLineSearchForwardMode(
-      super::CommandLineSearchForwardStateful::default(),
-    )
+  ) -> State {
+    State::CmdlineSearchForward(super::CmdlineSearchForward::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
-  ) -> StateMachine {
-    StateMachine::CommandLineSearchBackwardMode(
-      super::CommandLineSearchBackwardStateful::default(),
-    )
+  ) -> State {
+    State::CmdlineSearchBackward(super::CmdlineSearchBackward::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   pub fn goto_insert_mode(
     &self,
     data_access: &StateDataAccess,
     insert_motion: GotoInsertModeVariant,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -258,17 +245,17 @@ impl NormalStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
 
-    StateMachine::InsertMode(super::InsertStateful::default())
+    State::Insert(super::Insert::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   /// Cursor move in current window, with buffer scroll.
   pub fn cursor_move(
     &self,
     data_access: &StateDataAccess,
     op: Operation,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -283,11 +270,11 @@ impl NormalStateful {
       op,
       false,
     );
-    StateMachine::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
   pub fn _target_cursor_exclude_eol(

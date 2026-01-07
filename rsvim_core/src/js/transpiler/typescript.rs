@@ -55,7 +55,7 @@ impl TypeScript {
 
     let program = match parser.parse_program() {
       Ok(module) => module,
-      Err(e) => bail!(TheErr::CompileTypeScriptFailed(e.kind().msg())),
+      Err(e) => return Err(TheErr::CompileTypeScriptFailed(e.kind().msg())),
     };
 
     // This is where we're gonna store the JavaScript output.

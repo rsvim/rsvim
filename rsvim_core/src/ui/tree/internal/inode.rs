@@ -7,7 +7,7 @@ use std::fmt::Debug;
 
 pub type TreeNodeId = i32;
 
-pub trait Inodeable: Sized + Clone + Debug {
+pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
   fn shape(&self) -> IRect;
@@ -21,11 +21,11 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn truncate_policy(&self) -> TruncatePolicy;
 }
 
-/// Generate getter/setter for `Inode`.
+/// Generate getter/setter for `Inodify`.
 #[macro_export]
-macro_rules! inode_impl {
+macro_rules! inodify_impl {
   ($name:ty) => {
-    impl Inodeable for $name {
+    impl Inodify for $name {
       fn id(&self) -> TreeNodeId {
         self.__node.id()
       }
@@ -53,11 +53,11 @@ macro_rules! inode_impl {
   };
 }
 
-/// Generate enum dispatcher for `Inode`.
+/// Generate enum dispatcher for `Inodify`.
 #[macro_export]
-macro_rules! inode_dispatcher {
+macro_rules! inodify_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
-    impl Inodeable for $enum {
+    impl Inodify for $enum {
       fn id(&self) -> TreeNodeId {
         match self {
           $(
@@ -125,7 +125,7 @@ impl InodeBase {
   }
 }
 
-impl Inodeable for InodeBase {
+impl Inodify for InodeBase {
   fn id(&self) -> TreeNodeId {
     self.id
   }

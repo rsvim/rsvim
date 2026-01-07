@@ -412,7 +412,6 @@ pub mod boost {
 
   impl JsRuntime {
     /// Creates a new JsRuntime with snapshot.
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
       options: JsRuntimeOptions,
       snapshot: SnapshotData,
@@ -504,7 +503,6 @@ pub mod boost {
 
     /// Creates a new JsRuntime from scratch, i.e. without snapshot, usually for
     /// testing purpose.
-    #[allow(clippy::too_many_arguments)]
     pub fn new_without_snapshot(
       options: JsRuntimeOptions,
       startup_moment: Instant,

@@ -26,7 +26,7 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
     //
     // See [crate::evloop::EventLoop::flush_pending_command_line_messages].
     contents
-      .command_line_message_history_mut()
+      .cmdline_message_history_mut()
       .push_overwrite(payload);
   }
 }

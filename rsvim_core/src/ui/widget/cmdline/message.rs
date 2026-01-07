@@ -1,7 +1,7 @@
 //! Commandline's message widget.
 
 use crate::content::TextContentsWk;
-use crate::inode_impl;
+use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -17,7 +17,7 @@ pub struct CmdlineMessage {
   viewport: ViewportWk,
 }
 
-inode_impl!(CmdlineMessage);
+inodify_impl!(CmdlineMessage);
 
 impl CmdlineMessage {
   pub fn new(
@@ -46,7 +46,7 @@ impl Widgetable for CmdlineMessage {
       let contents = lock!(contents);
       let viewport = self.viewport.upgrade().unwrap();
 
-      viewport.draw(contents.command_line_message(), &actual_shape, canvas);
+      viewport.draw(contents.cmdline_message(), &actual_shape, canvas);
     }
   }
 }

@@ -1,4 +1,4 @@
-//! The select mode.
+//! The command-line search backward mode.
 
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -7,14 +7,14 @@ use crate::state::ops::Operation;
 use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The select editing mode.
-pub struct Select {}
+/// The command-line search backward mode.
+pub struct CmdlineSearchBackward {}
 
-impl Stateful for Select {
+impl Stateful for CmdlineSearchBackward {
   fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
-    State::Select(Select::default())
+    State::CmdlineSearchBackward(CmdlineSearchBackward::default())
   }
   fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
-    State::Select(Select::default())
+    State::CmdlineSearchBackward(CmdlineSearchBackward::default())
   }
 }

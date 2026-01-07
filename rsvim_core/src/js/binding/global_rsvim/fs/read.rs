@@ -12,7 +12,7 @@ pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
   let mut buf: Vec<u8> = vec![0; bufsize];
   let n = match file.read(&mut buf) {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
+    Err(e) => return Err(TheErr::ReadFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.capacity());
   unsafe {
@@ -31,7 +31,7 @@ pub async fn async_fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
   let mut buf: Vec<u8> = vec![0; bufsize];
   let n = match file.read(&mut buf).await {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
+    Err(e) => return Err(TheErr::ReadFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.capacity());
   unsafe {
