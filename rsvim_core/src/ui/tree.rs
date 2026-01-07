@@ -4,7 +4,7 @@ pub mod internal;
 
 use crate::buf::BufferWk;
 use crate::content::TextContentsWk;
-use crate::inode_dispatcher;
+use crate::inodify_dispatch;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -47,7 +47,7 @@ pub enum TreeNode {
   CmdlineMessage(CmdlineMessage),
 }
 
-inode_dispatcher!(
+inodify_dispatch!(
   TreeNode,
   Panel,
   Cursor,

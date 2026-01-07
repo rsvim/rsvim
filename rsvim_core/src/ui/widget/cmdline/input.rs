@@ -1,7 +1,7 @@
 //! Commandline's input content widget.
 
 use crate::content::TextContentsWk;
-use crate::inodify;
+use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -17,7 +17,7 @@ pub struct CmdlineInput {
   viewport: ViewportWk,
 }
 
-inodify!(CmdlineInput);
+inodify_impl!(CmdlineInput);
 
 impl CmdlineInput {
   pub fn new(

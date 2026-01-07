@@ -1,6 +1,6 @@
 //! Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 
-use crate::inodify;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
@@ -35,7 +35,7 @@ pub struct CmdlineIndicator {
   symbol: CmdlineIndicatorSymbol,
 }
 
-inodify!(CmdlineIndicator);
+inodify_impl!(CmdlineIndicator);
 
 impl CmdlineIndicator {
   pub fn new(

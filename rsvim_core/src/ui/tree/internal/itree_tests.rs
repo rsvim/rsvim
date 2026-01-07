@@ -1,5 +1,5 @@
 use super::itree::*;
-use crate::inodify;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
@@ -18,7 +18,7 @@ impl TestValue {
   }
 }
 
-inodify!(TestValue);
+inodify_impl!(TestValue);
 
 #[test]
 fn new() {

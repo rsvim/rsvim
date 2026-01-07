@@ -1,7 +1,7 @@
 //! Cursor widget.
 
 use crate::flags_impl;
-use crate::inodify;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::canvas;
 use crate::ui::canvas::Canvas;
@@ -26,7 +26,7 @@ pub struct Cursor {
   cursor_style: CursorStyle,
 }
 
-inodify!(Cursor);
+inodify_impl!(Cursor);
 
 impl Cursor {
   pub fn new(

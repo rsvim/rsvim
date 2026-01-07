@@ -23,7 +23,7 @@ pub trait Inodify: Sized + Clone + Debug {
 
 /// Generate getter/setter for `Inodify`.
 #[macro_export]
-macro_rules! inodify {
+macro_rules! inodify_impl {
   ($name:ty) => {
     impl Inodify for $name {
       fn id(&self) -> TreeNodeId {
@@ -55,7 +55,7 @@ macro_rules! inodify {
 
 /// Generate enum dispatcher for `Inodify`.
 #[macro_export]
-macro_rules! inode_dispatcher {
+macro_rules! inodify_dispatch {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodify for $enum {
       fn id(&self) -> TreeNodeId {

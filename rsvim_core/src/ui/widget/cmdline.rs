@@ -8,7 +8,7 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inodify;
+use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -35,7 +35,7 @@ pub struct Cmdline {
   message_viewport: ViewportArc,
 }
 
-inodify!(Cmdline);
+inodify_impl!(Cmdline);
 
 impl Cmdline {
   #[allow(clippy::too_many_arguments)]
