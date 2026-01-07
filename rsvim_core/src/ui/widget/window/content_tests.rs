@@ -22,7 +22,7 @@ struct Arguments<'a> {
   pub viewport_start: Vec<(usize, usize)>,
 }
 
-fn test_buffer_lines(args: Arguments) {
+fn run_buffer_lines(args: Arguments) {
   test_log_init();
   let buffer = make_buffer_from_lines(
     args.terminal_size,
@@ -79,7 +79,7 @@ mod tests_nowrap {
       "          ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -109,7 +109,7 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -143,7 +143,7 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(33, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -187,7 +187,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(31, 20),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -258,7 +258,7 @@ mod tests_nowrap {
       "             ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(13, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -304,7 +304,7 @@ mod tests_nowrap {
       "                     ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(21, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -334,7 +334,7 @@ mod tests_nowrap_eol {
       "                               ",
     ];
 
-    test_buffer_lines(Arguments {
+    run_buffer_lines(Arguments {
       terminal_size: size!(31, 5),
       buffer_opts: BufferOptionsBuilder::default()
         .file_format(FileFormatOption::Dos)
@@ -349,25 +349,12 @@ mod tests_nowrap_eol {
 
   #[test]
   fn new1_cr_mac() {
-    test_log_init();
-
-    let terminal_size = size!(31, 5);
-    let buf_opts = BufferOptionsBuilder::default()
-      .file_format(FileFormatOption::Mac)
-      .build()
-      .unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\r",
-        "This is a quite simple and small test lines.\r",
-        "But still it contains several things we want to test:\r",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple and small test lines.\r",
+      "But still it contains several things we want to test:\r",
+    ];
+    let expect_canvas = vec![
       "Hello, RSVIM!                  ",
       "This is a quite simple and smal",
       "But still it contains several t",
@@ -375,9 +362,17 @@ mod tests_nowrap_eol {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_buffer_lines(Arguments {
+      terminal_size: size!(31, 5),
+      buffer_opts: BufferOptionsBuilder::default()
+        .file_format(FileFormatOption::Mac)
+        .build()
+        .unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines,
+      expect_canvas: vec![expect_canvas],
+      viewport_start: vec![(0, 0)],
+    });
   }
 
   #[test]
