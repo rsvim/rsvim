@@ -384,6 +384,19 @@ impl Debug for TreeContext {
             format!("{}", i)
           }
         };
+        let attributes = |i: TreeNodeId| {
+          let enabled = self.enabled(id).unwrap_or(false);
+          let zindex = self.zindex(id).unwrap_or(0);
+          let policy =
+            match self.truncate_policy(id).unwrap_or(DEFAULT_TRUNCATE_POLICY) {
+              TruncatePolicy::BRUTAL => "brutal",
+              TruncatePolicy::RESERVED => "reserved",
+            };
+          format!(
+            "attr(enabled:{:?},zindex:{},policy:{})",
+            enabled, zindex, policy
+          )
+        };
         let layout = |i: TreeNodeId| {
           let layout = self.ta.layout(i).unwrap();
           format!(
@@ -407,9 +420,10 @@ impl Debug for TreeContext {
         };
 
         let payload = format!(
-          "\n{}, parent:{},{},{}",
+          "\n{}, parent:{},{},{},{}",
           name(id),
           name(self.ta.parent(id).unwrap_or(-1)),
+          attributes(id),
           layout(id),
           shape(id)
         );
