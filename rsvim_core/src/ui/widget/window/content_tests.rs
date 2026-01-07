@@ -30,8 +30,13 @@ fn run_test(args: Arguments) {
     args.buffer_opts,
     args.buffer_lines,
   );
-  let viewport =
-    make_viewport(args.terminal_size, args.window_opts, buffer.clone(), 0, 0);
+  let viewport = make_viewport(
+    args.terminal_size,
+    args.window_opts,
+    buffer.clone(),
+    args.viewport_start.0,
+    args.viewport_start.1,
+  );
   let actual = make_canvas(
     args.terminal_size,
     args.window_opts,
