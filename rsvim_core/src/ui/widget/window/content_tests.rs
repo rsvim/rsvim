@@ -47,7 +47,7 @@ fn run_buffer_lines(args: Arguments) {
       buffer.clone(),
       viewport,
     );
-    assert_canvas(&actual, &expect);
+    assert_canvas(&actual, expect);
   }
 }
 
