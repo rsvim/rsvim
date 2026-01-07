@@ -641,25 +641,15 @@ mod tests_wrap_nolinebreak {
 
   #[test]
   fn new1() {
-    test_log_init();
-
-    let terminal_size = size!(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
+    let buffer_lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
     let expect = vec![
       "Hello, RSV",
       "IM!       ",
@@ -673,26 +663,21 @@ mod tests_wrap_nolinebreak {
       "s several ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_buffer_lines(Arguments {
+      terminal_size: size!(10, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      buffer_lines,
+      expect_canvas: vec![expect],
+      viewport_start: vec![(0, 0)],
+    });
   }
 
   #[test]
   fn new2() {
-    test_log_init();
-
-    let terminal_size = size!(27, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
+    let buffer_lines = vec![
+      "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
     let expect = vec![
       "                        * T",
       "he extra parts are split   ",
@@ -705,10 +690,14 @@ mod tests_wrap_nolinebreak {
       "内，一遍又一遍的重复这样的 ",
       "操作。This operation also e",
     ];
-
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_buffer_lines(Arguments {
+      terminal_size: size!(27, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      buffer_lines,
+      expect_canvas: vec![expect],
+      viewport_start: vec![(0, 0)],
+    });
   }
 
   #[test]
