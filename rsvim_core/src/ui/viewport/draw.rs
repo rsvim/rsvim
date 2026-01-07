@@ -25,7 +25,8 @@ pub fn draw(
   let width = actual_shape.width();
 
   // If viewport has no lines.
-  // WARNING: Don't quit `draw` method here.
+  // WARNING: Don't quit `draw` method here, let's the bottom part handle this
+  // empty viewport use case.
   //
   // if viewport.end_line_idx() <= viewport.start_line_idx() {
   //   trace!("Draw viewport, viewport is empty");
