@@ -1381,54 +1381,38 @@ mod tests_view_wrap_nolinebreak {
 
   #[test]
   fn new12() {
-    test_log_init();
-
-    let terminal_size = size!(31, 5);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = wrap();
-
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
-    let expect = vec![""];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
+    let buffer_lines = vec![""];
+    let expect_lines = vec![""];
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      1,
-      &expect_start_fills,
-      &expect_end_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(31, 5),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: wrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 1,
+      expect_start_fills,
+      expect_end_fills,
+    });
   }
 
   #[test]
   fn new13() {
-    test_log_init();
-
-    let terminal_size = size!(13, 8);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = wrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_lines = vec![
       "Hello, RSVIM!",
       "This is a qui",
       "te simple and",
@@ -1438,43 +1422,33 @@ mod tests_view_wrap_nolinebreak {
       "contains seve",
       "ral things we",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      3,
-      &expect_fills,
-      &expect_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(13, 8),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: wrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 3,
+      expect_start_fills: expect_fills.clone(),
+      expect_end_fills: expect_fills.clone(),
+    });
   }
 
   #[test]
   fn new14() {
-    test_log_init();
-
-    let terminal_size = size!(10, 6);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = wrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "AAAAAAAAAA\n",
-        "1st.\n",
-        "BBBBBBBBBBCCCCCCCCCC\n",
-        "3rd.\n",
-        "4th.\n",
-        "5th.\n",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "AAAAAAAAAA\n",
+      "1st.\n",
+      "BBBBBBBBBBCCCCCCCCCC\n",
+      "3rd.\n",
+      "4th.\n",
+      "5th.\n",
+    ];
+    let expect_lines = vec![
       "AAAAAAAAAA",
       "1st.\n",
       "BBBBBBBBBB",
@@ -1482,22 +1456,22 @@ mod tests_view_wrap_nolinebreak {
       "3rd.\n",
       "4th.\n",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      5,
-      &expect_fills,
-      &expect_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(10, 6),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: wrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 5,
+      expect_start_fills: expect_fills.clone(),
+      expect_end_fills: expect_fills.clone(),
+    });
   }
 
   #[test]
