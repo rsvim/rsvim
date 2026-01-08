@@ -20,6 +20,17 @@ pub enum CursorMoveDirection {
   Right,
 }
 
+fn _to_viewport_search_direction(
+  move_direction: CursorMoveDirection,
+) -> ViewportSearchDirection {
+  match move_direction {
+    CursorMoveDirection::Up => ViewportSearchDirection::Up,
+    CursorMoveDirection::Down => ViewportSearchDirection::Down,
+    CursorMoveDirection::Left => ViewportSearchDirection::Left,
+    CursorMoveDirection::Right => ViewportSearchDirection::Right,
+  }
+}
+
 fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
   if by_y > 0 {
     CursorMoveDirection::Down
@@ -454,14 +465,9 @@ fn _update_viewport_after_text_changed(
 
 /// High-level cursor move operation.
 ///
-/// This API will move the cursor (and possibly scroll the widget/window it belongs to), as if the
-/// user is operating the editor (for example, using `hjkl`), by below parameters:
-/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The `text` content binded to the parent widget/window node.
-///
-/// # Panics
-///
-/// It panics if the operation is not `Operation::CursorMove*`.
+/// This API will move the cursor (and possibly scroll the window/cmdline it
+/// belongs to), as if the user is operating the editor (for example, using
+/// `jk` to go up/down to view a very large file).
 pub fn cursor_move(
   tree: &mut Tree,
   id: TreeNodeId,
@@ -490,12 +496,7 @@ pub fn cursor_move(
     )
   };
 
-  let search_direction = match move_direction {
-    CursorMoveDirection::Up => ViewportSearchDirection::Up,
-    CursorMoveDirection::Down => ViewportSearchDirection::Down,
-    CursorMoveDirection::Left => ViewportSearchDirection::Left,
-    CursorMoveDirection::Right => ViewportSearchDirection::Right,
-  };
+  let search_direction = _to_viewport_search_direction(move_direction);
 
   let new_viewport: Option<ViewportArc> = {
     let (start_line, start_column) = viewport.search_anchor(
@@ -524,37 +525,34 @@ pub fn cursor_move(
   };
 
   // Then move cursor.
-  {
-    let current_viewport = new_viewport.unwrap_or(viewport);
+  let new_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = raw_cursor_viewport_move_to(
-      tree,
-      id,
-      &current_viewport,
-      text,
-      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-    );
+  let new_cursor_viewport = raw_cursor_viewport_move_to(
+    tree,
+    id,
+    &new_viewport,
+    text,
+    Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+  );
 
-    debug_assert!(tree.cursor_id().is_some());
-    tree
-      .cursor_move_position_to(
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      )
-      .unwrap();
-  }
+  debug_assert!(tree.cursor_id().is_some());
+  tree
+    .cursor_move_position_to(
+      new_cursor_viewport.column_idx() as isize,
+      new_cursor_viewport.row_idx() as isize,
+    )
+    .unwrap();
 }
 
 /// High-level cursor insert operation.
 ///
-/// This API will insert text at the cursor (and possibly scroll the widget/window it belongs to),
-/// as if user is typing in insert mode, by below parameters:
-/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The `text` content binded to the parent widget/window node.
+/// This API will insert text at the cursor (and possibly scroll the
+/// window/cmdline), as if user is typing in insert mode.
 ///
 /// # Returns
 ///
-/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if inserts successfully.
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if
+///   inserts successfully.
 /// - It returns `None` if failed.
 pub fn cursor_insert(
   tree: &mut Tree,
@@ -595,16 +593,14 @@ pub fn cursor_insert(
 
 /// High-level cursor delete operation.
 ///
-/// This API will delete text at the cursor to either left/right direction (and possibly scroll the
-/// widget/window it belongs to), as if user presses `backspace`/`delete` in insert mode, by below
-/// parameters:
-/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The `text` content binded to the parent widget/window node.
-/// 3. The `n` chars to be deleted, to the left if `n<0`, to the right if `n>0`.
+/// This API will delete text at the cursor to either left/right direction (and
+/// possibly scroll the window/cmdline), as if user presses
+/// `backspace`/`delete` in insert mode.
 ///
 /// # Returns
 ///
-/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if deletes successfully.
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if
+///   deletes successfully.
 /// - It returns `None` if delete nothing.
 pub fn cursor_delete(
   tree: &mut Tree,

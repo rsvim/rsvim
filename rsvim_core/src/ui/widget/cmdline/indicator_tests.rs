@@ -67,7 +67,7 @@ mod tests_nowrap {
     let cmdline_indicator = CmdlineIndicator::new(
       id,
       Rc::downgrade(&ctx),
-      CmdlineIndicatorSymbol::Ex,
+      CmdlineIndicatorSymbol::Colon,
     );
     let actual = make_canvas(terminal_size, &cmdline_indicator);
     assert_canvas(&actual, &expect);
