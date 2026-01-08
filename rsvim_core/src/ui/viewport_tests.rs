@@ -1338,30 +1338,24 @@ mod tests_view_wrap_nolinebreak {
 
   #[test]
   fn new10() {
-    test_log_init();
-
-    let terminal_size = size!(31, 5);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = wrap();
-
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
-    let expect = vec![""];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
+    let buffer_lines = vec![];
+    let expect_lines = vec![""];
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      1,
-      &expect_start_fills,
-      &expect_end_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(31, 5),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: wrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 1,
+      expect_start_fills,
+      expect_end_fills,
+    });
   }
 
   #[test]
