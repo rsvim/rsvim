@@ -241,10 +241,10 @@ fn run_empty(args: Arguments) {
     lock!(buf).text(),
     &actual,
     &args.expect_lines,
-    0,
-    1,
-    &expect_fills,
-    &expect_fills,
+    args.expect_start_line,
+    args.expect_end_line,
+    &args.expect_start_fills,
+    &args.expect_end_fills,
   );
 }
 
