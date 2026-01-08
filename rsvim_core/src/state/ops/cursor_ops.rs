@@ -454,14 +454,9 @@ fn _update_viewport_after_text_changed(
 
 /// High-level cursor move operation.
 ///
-/// This API will move the cursor (and possibly scroll the widget/window it belongs to), as if the
-/// user is operating the editor (for example, using `hjkl`), by below parameters:
-/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The `text` content binded to the parent widget/window node.
-///
-/// # Panics
-///
-/// It panics if the operation is not `Operation::CursorMove*`.
+/// This API will move the cursor (and possibly scroll the window/cmdline it
+/// belongs to), as if the user is operating the editor (for example, using
+/// `jk` to go up/down to view a very large file).
 pub fn cursor_move(
   tree: &mut Tree,
   id: TreeNodeId,
