@@ -831,7 +831,17 @@ mod tests_view_nowrap_startcol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_lines = vec![
+    let expect_lines1 = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "",
+    ];
+    let expect_lines2 = vec![
       "lo, RSVIM!",
       "s is a qui",
       " still it ",
@@ -841,7 +851,19 @@ mod tests_view_nowrap_startcol {
       "  * The ex",
       "",
     ];
-    let expect_fills: BTreeMap<usize, usize> = vec![
+    let expect_fills1: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+        .into_iter()
+        .collect();
+    let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
       (2, 0),
@@ -861,11 +883,11 @@ mod tests_view_nowrap_startcol {
       buffer_lines,
       update_start_line: vec![0],
       update_start_column: vec![3],
-      expect_lines: vec![expect_lines.clone(), expect_lines.clone()],
+      expect_lines: vec![expect_lines1, expect_lines2],
       expect_start_line: vec![0, 0],
       expect_end_line: vec![8, 8],
-      expect_start_fills: vec![expect_fills.clone(), expect_fills.clone()],
-      expect_end_fills: vec![expect_fills.clone(), expect_fills.clone()],
+      expect_start_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
+      expect_end_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
     });
   }
 
@@ -880,7 +902,17 @@ mod tests_view_nowrap_startcol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_lines = vec![
+    let expect_lines1 = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "",
+    ];
+    let expect_lines2 = vec![
       " RSVIM!\n",
       "s a quite ",
       "ill it con",
@@ -890,7 +922,19 @@ mod tests_view_nowrap_startcol {
       " The extra",
       "",
     ];
-    let expect_fills: BTreeMap<usize, usize> = vec![
+    let expect_fills1: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+        .into_iter()
+        .collect();
+    let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
       (2, 0),
@@ -908,13 +952,13 @@ mod tests_view_nowrap_startcol {
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
       buffer_lines,
-      update_start_line: 0,
-      update_start_column: 6,
-      expect_lines,
-      expect_start_line: 0,
-      expect_end_line: 8,
-      expect_start_fills: expect_fills.clone(),
-      expect_end_fills: expect_fills.clone(),
+      update_start_line: vec![0],
+      update_start_column: vec![6],
+      expect_lines: vec![expect_lines1, expect_lines2],
+      expect_start_line: vec![0, 0],
+      expect_end_line: vec![8, 8],
+      expect_start_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
+      expect_end_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
     });
   }
 
@@ -929,7 +973,17 @@ mod tests_view_nowrap_startcol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_lines = vec![
+    let expect_lines1 = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "",
+    ];
+    let expect_lines2 = vec![
       "",
       " simple an",
       "ntains sev",
@@ -939,7 +993,19 @@ mod tests_view_nowrap_startcol {
       "a parts ar",
       "",
     ];
-    let expect_fills: BTreeMap<usize, usize> = vec![
+    let expect_fills1: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+        .into_iter()
+        .collect();
+    let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
       (2, 0),
@@ -957,13 +1023,13 @@ mod tests_view_nowrap_startcol {
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
       buffer_lines,
-      update_start_line: 0,
-      update_start_column: 15,
-      expect_lines,
-      expect_start_line: 0,
-      expect_end_line: 8,
-      expect_start_fills: expect_fills.clone(),
-      expect_end_fills: expect_fills.clone(),
+      update_start_line: vec![0],
+      update_start_column: vec![15],
+      expect_lines: vec![expect_lines1, expect_lines2],
+      expect_start_line: vec![0, 0],
+      expect_end_line: vec![8, 8],
+      expect_start_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
+      expect_end_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
     });
   }
 
@@ -978,7 +1044,17 @@ mod tests_view_nowrap_startcol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_lines = vec![
+    let expect_lines1 = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "",
+    ];
+    let expect_lines2 = vec![
       "",
       "",
       "",
@@ -988,7 +1064,19 @@ mod tests_view_nowrap_startcol {
       "r line-wra",
       "",
     ];
-    let expect_fills: BTreeMap<usize, usize> = vec![
+    let expect_fills1: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+        .into_iter()
+        .collect();
+    let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
       (2, 0),
@@ -1006,13 +1094,13 @@ mod tests_view_nowrap_startcol {
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
       buffer_lines,
-      update_start_line: 0,
-      update_start_column: 60,
-      expect_lines,
-      expect_start_line: 0,
-      expect_end_line: 8,
-      expect_start_fills: expect_fills.clone(),
-      expect_end_fills: expect_fills.clone(),
+      update_start_line: vec![0],
+      update_start_column: vec![60],
+      expect_lines: vec![expect_lines1, expect_lines2],
+      expect_start_line: vec![0, 0],
+      expect_end_line: vec![8, 8],
+      expect_start_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
+      expect_end_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
     });
   }
 
@@ -1027,8 +1115,29 @@ mod tests_view_nowrap_startcol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_lines = vec!["", "", "", "", "", "", "", ""];
-    let expect_fills: BTreeMap<usize, usize> = vec![
+    let expect_lines1 = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+       ""];
+    let expect_lines2 = vec!["", "", "", "", "", "", "", ""];
+    let expect_fills1: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+        .into_iter()
+        .collect();
+    let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
       (2, 0),
@@ -1046,13 +1155,13 @@ mod tests_view_nowrap_startcol {
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
       buffer_lines,
-      update_start_line: 0,
-      update_start_column: 500,
-      expect_lines,
-      expect_start_line: 0,
-      expect_end_line: 8,
-      expect_start_fills: expect_fills.clone(),
-      expect_end_fills: expect_fills.clone(),
+      update_start_line: vec![0],
+      update_start_column: vec![500],
+      expect_lines: vec![expect_lines1, expect_lines2],
+      expect_start_line: vec![0, 0],
+      expect_end_line: vec![8, 8],
+      expect_start_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
+      expect_end_fills: vec![expect_fills1.clone(), expect_fills2.clone()],
     });
   }
 }
