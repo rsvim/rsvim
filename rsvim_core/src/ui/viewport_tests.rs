@@ -1476,24 +1476,14 @@ mod tests_view_wrap_nolinebreak {
 
   #[test]
   fn new15() {
-    test_log_init();
-
-    let terminal_size = size!(10, 6);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = wrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "1st.\n",
-        "BBBBBBBBBBCCCCCCCCCC\n",
-        "3rd.\n",
-        "4th.\n",
-        "5th.\n",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "1st.\n",
+      "BBBBBBBBBBCCCCCCCCCC\n",
+      "3rd.\n",
+      "4th.\n",
+      "5th.\n",
+    ];
+    let expect_lines = vec![
       "1st.\n",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
@@ -1501,22 +1491,22 @@ mod tests_view_wrap_nolinebreak {
       "4th.\n",
       "5th.\n",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      5,
-      &expect_fills,
-      &expect_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(10, 6),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: wrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 5,
+      expect_start_fills: expect_fills.clone(),
+      expect_end_fills: expect_fills.clone(),
+    });
   }
 
   #[test]
