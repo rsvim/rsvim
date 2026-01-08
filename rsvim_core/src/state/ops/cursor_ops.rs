@@ -20,6 +20,17 @@ pub enum CursorMoveDirection {
   Right,
 }
 
+fn _to_viewport_search_direction(
+  move_direction: CursorMoveDirection,
+) -> ViewportSearchDirection {
+  match move_direction {
+    CursorMoveDirection::Up => ViewportSearchDirection::Up,
+    CursorMoveDirection::Down => ViewportSearchDirection::Down,
+    CursorMoveDirection::Left => ViewportSearchDirection::Left,
+    CursorMoveDirection::Right => ViewportSearchDirection::Right,
+  }
+}
+
 fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
   if by_y > 0 {
     CursorMoveDirection::Down
@@ -485,12 +496,7 @@ pub fn cursor_move(
     )
   };
 
-  let search_direction = match move_direction {
-    CursorMoveDirection::Up => ViewportSearchDirection::Up,
-    CursorMoveDirection::Down => ViewportSearchDirection::Down,
-    CursorMoveDirection::Left => ViewportSearchDirection::Left,
-    CursorMoveDirection::Right => ViewportSearchDirection::Right,
-  };
+  let search_direction = _to_viewport_search_direction(move_direction);
 
   let new_viewport: Option<ViewportArc> = {
     let (start_line, start_column) = viewport.search_anchor(
