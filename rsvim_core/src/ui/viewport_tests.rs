@@ -469,26 +469,16 @@ mod tests_view_nowrap {
 
   #[test]
   fn new6() {
-    test_log_init();
-
-    let terminal_size = size!(27, 6);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = nowrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "你好，\tRSVIM！\n",
-        "这是\ta quite 简单而且很小的测试文字内容行。\n",
-        "But still\\it\t包含了好几种我们想测试的情况：\n",
-        "\t1. 当那条线\tis small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line 特别长而无法完全 to put in a row of the window content widget, there're multiple cases:\n",
-        "\t* The extra\tparts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "  * The extra parts\tare split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "你好，\tRSVIM！\n",
+      "这是\ta quite 简单而且很小的测试文字内容行。\n",
+      "But still\\it\t包含了好几种我们想测试的情况：\n",
+      "\t1. 当那条线\tis small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line 特别长而无法完全 to put in a row of the window content widget, there're multiple cases:\n",
+      "\t* The extra\tparts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "  * The extra parts\tare split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_lines = vec![
       "你好，\tRSVIM！\n",
       "这是\ta quite 简单而",  // 1 fills for '且'
       "But still\\it\t包含了", // 1 fills for '好'
@@ -496,9 +486,6 @@ mod tests_view_nowrap {
       "  2. When the line 特别长而",
       "\t* The extra\t",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
@@ -507,15 +494,18 @@ mod tests_view_nowrap {
       vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      6,
-      &expect_start_fills,
-      &expect_end_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(27, 6),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: nowrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 6,
+      expect_start_fills,
+      expect_end_fills,
+    });
   }
 
   #[test]
