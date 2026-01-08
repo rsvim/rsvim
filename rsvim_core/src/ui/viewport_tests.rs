@@ -687,47 +687,36 @@ mod tests_view_nowrap_eol {
 
   #[test]
   fn new1_cr_unix() {
-    test_log_init();
-
-    let terminal_size = size!(30, 5);
-    let buf_opts = BufferOptionsBuilder::default()
-      .file_format(FileFormatOption::Unix)
-      .build()
-      .unwrap();
-    let win_opts = nowrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\r",
-        "This is a quite simple lines.\r",
-        "But still it contains several things.\r",
-      ],
-    );
-
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple lines.\r",
+      "But still it contains several things.\r",
+    ];
+    let expect_lines = vec![
       "Hello, RSVIM!\r",
       "This is a quite simple lines.",
       "But still it contains several ",
       "",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 1), (2, 0), (3, 0)].into_iter().collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      4,
-      &expect_start_fills,
-      &expect_end_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(30, 5),
+      buffer_opts: BufferOptionsBuilder::default()
+        .file_format(FileFormatOption::Unix)
+        .build()
+        .unwrap(),
+      window_opts: nowrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 4,
+      expect_start_fills,
+      expect_end_fills,
+    });
   }
 
   #[test]
