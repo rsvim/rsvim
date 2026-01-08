@@ -229,6 +229,25 @@ fn run_lines(args: Arguments) {
   );
 }
 
+fn run_empty(args: Arguments) {
+  test_log_init();
+
+  let buf = make_empty_buffer(args.terminal_size, args.buffer_opts);
+
+  let (tree, window_id) =
+    make_window(args.terminal_size, buf.clone(), args.window_opts);
+  let actual = tree.window(window_id).unwrap().viewport();
+  assert_viewport(
+    lock!(buf).text(),
+    &actual,
+    &args.expect_lines,
+    0,
+    1,
+    &expect_fills,
+    &expect_fills,
+  );
+}
+
 mod tests_view_nowrap {
   use super::*;
 
@@ -364,28 +383,21 @@ mod tests_view_nowrap {
 
   #[test]
   fn new4() {
-    test_log_init();
-
-    let terminal_size = size!(20, 20);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = nowrap();
-
-    let buf = make_empty_buffer(terminal_size, buf_opts);
-    let expect = vec![""];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
+    let expect_lines = vec![""];
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      1,
-      &expect_fills,
-      &expect_fills,
-    );
+
+    run_empty(Arguments {
+      terminal_size: size!(20, 20),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: nowrap(),
+      buffer_lines: vec![],
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 1,
+      expect_start_fills: expect_fills.clone(),
+      expect_end_fills: expect_fills.clone(),
+    });
   }
 
   #[test]
