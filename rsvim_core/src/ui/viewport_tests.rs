@@ -32,15 +32,15 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Once;
 
-pub fn make_nowrap() -> WindowOptions {
+fn nowrap() -> WindowOptions {
   WindowOptionsBuilder::default().wrap(false).build().unwrap()
 }
 
-pub fn make_wrap_nolinebreak() -> WindowOptions {
+fn wrap() -> WindowOptions {
   WindowOptionsBuilder::default().build().unwrap()
 }
 
-pub fn make_wrap_linebreak() -> WindowOptions {
+fn wrap_linebreak() -> WindowOptions {
   WindowOptionsBuilder::default()
     .line_break(true)
     .build()
@@ -194,32 +194,56 @@ pub fn search_right_viewport(
   )
 }
 
+struct Arguments<'a> {
+  pub terminal_size: U16Size,
+  pub buffer_opts: BufferOptions,
+  pub window_opts: WindowOptions,
+  pub buffer_lines: Vec<&'a str>,
+  pub expect_lines: Vec<&'a str>,
+  pub expect_start_line: usize,
+  pub expect_end_line: usize,
+  pub expect_start_fills: BTreeMap<usize, usize>,
+  pub expect_end_fills: BTreeMap<usize, usize>,
+}
+
+fn run_lines(args: Arguments) {
+  test_log_init();
+
+  let buf = make_buffer_from_lines(
+    args.terminal_size,
+    args.buffer_opts,
+    args.buffer_lines.clone(),
+  );
+
+  let (tree, window_id) =
+    make_window(args.terminal_size, buf.clone(), args.window_opts);
+  let actual = tree.window(window_id).unwrap().viewport();
+  assert_viewport(
+    lock!(buf).text(),
+    &actual,
+    &args.expect_lines,
+    args.expect_start_line,
+    args.expect_end_line,
+    &args.expect_start_fills,
+    &args.expect_end_fills,
+  );
+}
+
 mod tests_view_nowrap {
   use super::*;
 
   #[test]
   fn new1() {
-    test_log_init();
-
-    let terminal_size = size!(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_lines = vec![
       "Hello, RSV",
       "This is a ",
       "But still ",
@@ -229,9 +253,6 @@ mod tests_view_nowrap {
       "     * The",
       "",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -244,38 +265,37 @@ mod tests_view_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      8,
-      &expect_fills,
-      &expect_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(10, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: nowrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 8,
+      expect_start_fills: expect_fills.clone(),
+      expect_end_fills: expect_fills.clone(),
+    });
   }
 
   #[test]
   fn new2() {
-    test_log_init();
+    let buffer_lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
 
     let terminal_size = size!(27, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
+    let buf = make_buffer_from_lines(terminal_size, buf_opts);
     let expect = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and ",
@@ -317,7 +337,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -363,7 +383,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(20, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
@@ -389,7 +409,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -466,7 +486,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(27, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -517,7 +537,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(20, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
@@ -543,7 +563,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(20, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
@@ -569,7 +589,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(20, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
@@ -595,7 +615,7 @@ mod tests_view_nowrap {
 
     let terminal_size = size!(13, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -660,7 +680,7 @@ mod tests_view_nowrap_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -705,7 +725,7 @@ mod tests_view_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -748,7 +768,7 @@ mod tests_view_nowrap_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -793,7 +813,7 @@ mod tests_view_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -837,7 +857,7 @@ mod tests_view_nowrap_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -896,7 +916,7 @@ mod tests_view_nowrap_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -955,7 +975,7 @@ mod tests_view_nowrap_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1014,7 +1034,7 @@ mod tests_view_nowrap_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1073,7 +1093,7 @@ mod tests_view_nowrap_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1129,7 +1149,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1176,7 +1196,7 @@ mod tests_view_wrap_nolinebreak {
   fn new2() {
     let terminal_size = size!(27, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1235,7 +1255,7 @@ mod tests_view_wrap_nolinebreak {
   fn new3() {
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1277,7 +1297,7 @@ mod tests_view_wrap_nolinebreak {
   fn new4() {
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
@@ -1301,7 +1321,7 @@ mod tests_view_wrap_nolinebreak {
   fn new5() {
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1341,7 +1361,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1382,7 +1402,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1423,7 +1443,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1464,7 +1484,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1506,7 +1526,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
@@ -1534,7 +1554,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
@@ -1562,7 +1582,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
@@ -1590,7 +1610,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(13, 8);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1637,7 +1657,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(10, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1683,7 +1703,7 @@ mod tests_view_wrap_nolinebreak {
 
     let terminal_size = size!(10, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1726,7 +1746,7 @@ mod tests_view_wrap_nolinebreak {
   fn update1() {
     let terminal_size = size!(15, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1809,7 +1829,7 @@ mod tests_view_wrap_nolinebreak {
   fn update2() {
     let terminal_size = size!(15, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1892,7 +1912,7 @@ mod tests_view_wrap_nolinebreak {
   fn update3() {
     let terminal_size = size!(15, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -1954,7 +1974,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2009,7 +2029,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2064,7 +2084,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2119,7 +2139,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2174,7 +2194,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2223,7 +2243,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2272,7 +2292,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2321,7 +2341,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2370,7 +2390,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2418,7 +2438,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2466,7 +2486,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2514,7 +2534,7 @@ mod tests_view_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2563,7 +2583,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2613,7 +2633,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2663,7 +2683,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2718,7 +2738,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2768,7 +2788,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let terminal_size = size!(31, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2814,7 +2834,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2865,7 +2885,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(27, 15);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2925,7 +2945,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(31, 11);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -2978,7 +2998,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
@@ -3002,7 +3022,7 @@ mod tests_view_wrap_linebreak {
   fn new5() {
     let terminal_size = size!(31, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3053,7 +3073,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(31, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3104,7 +3124,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(31, 11);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3156,7 +3176,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(31, 11);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3208,7 +3228,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3259,7 +3279,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3310,7 +3330,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(13, 31);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3384,7 +3404,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(13, 31);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3456,7 +3476,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(13, 31);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
@@ -3482,7 +3502,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(13, 31);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
@@ -3508,7 +3528,7 @@ mod tests_view_wrap_linebreak {
 
     let terminal_size = size!(13, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3563,7 +3583,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3615,7 +3635,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3667,7 +3687,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3719,7 +3739,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3771,7 +3791,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(31, 11);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3824,7 +3844,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -3868,7 +3888,7 @@ mod tests_search_anchor_downward_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -4037,7 +4057,7 @@ mod tests_search_anchor_downward_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -4255,7 +4275,7 @@ mod tests_search_anchor_downward_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -4479,7 +4499,7 @@ mod tests_search_anchor_downward_nowrap {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -4706,7 +4726,7 @@ mod tests_search_anchor_downward_nowrap {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -4863,7 +4883,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -5090,7 +5110,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -5317,7 +5337,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -5552,7 +5572,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -5783,7 +5803,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -5993,7 +6013,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6203,7 +6223,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6299,7 +6319,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6548,7 +6568,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6616,7 +6636,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6691,7 +6711,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -6943,7 +6963,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7195,7 +7215,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7276,7 +7296,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7348,7 +7368,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7547,7 +7567,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7751,7 +7771,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7920,7 +7940,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -7997,7 +8017,7 @@ mod tests_search_anchor_upward_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -8279,7 +8299,7 @@ mod tests_search_anchor_upward_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -8561,7 +8581,7 @@ mod tests_search_anchor_upward_nowrap {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -8870,7 +8890,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -9131,7 +9151,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -9386,7 +9406,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     let terminal_size = size!(21, 7);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -9684,7 +9704,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -9939,7 +9959,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -10192,7 +10212,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     let terminal_size = size!(21, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -10407,7 +10427,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -10907,7 +10927,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -11327,7 +11347,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -11760,7 +11780,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -12183,7 +12203,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -12606,7 +12626,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -13036,7 +13056,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = nowrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -13466,7 +13486,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -13994,7 +14014,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -14377,7 +14397,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -14653,7 +14673,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -15015,7 +15035,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -15401,7 +15421,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -15787,7 +15807,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -16066,7 +16086,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -16345,7 +16365,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -16707,7 +16727,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = wrap();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -17066,7 +17086,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -17258,7 +17278,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -17590,7 +17610,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
 
     let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -18062,7 +18082,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
@@ -18485,7 +18505,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
 
     let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_linebreak();
+    let win_opts = wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
