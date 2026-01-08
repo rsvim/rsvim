@@ -402,28 +402,18 @@ mod tests_view_nowrap {
 
   #[test]
   fn new5() {
-    test_log_init();
-
-    let terminal_size = size!(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = nowrap();
-
-    let buf = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello,\tRSVIM!\n",
-        "This\r",
-        "is a quite\tsimple and small test lines.\n",
-        "But still\\it\r",
-        "contains\tseveral things we want to test:\n",
-        "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello,\tRSVIM!\n",
+      "This\r",
+      "is a quite\tsimple and small test lines.\n",
+      "But still\\it\r",
+      "contains\tseveral things we want to test:\n",
+      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_lines = vec![
       "Hello,", // 4 fills for '\t'
       "This\r",
       "is a quite",
@@ -435,9 +425,6 @@ mod tests_view_nowrap {
       "\t", // 2 fills for '\t'
       "",
     ];
-
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let actual = tree.window(window_id).unwrap().viewport();
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -466,15 +453,18 @@ mod tests_view_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_viewport(
-      lock!(buf).text(),
-      &actual,
-      &expect,
-      0,
-      10,
-      &expect_start_fills,
-      &expect_end_fills,
-    );
+
+    run_lines(Arguments {
+      terminal_size: size!(10, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: nowrap(),
+      buffer_lines,
+      expect_lines,
+      expect_start_line: 0,
+      expect_end_line: 10,
+      expect_start_fills,
+      expect_end_fills,
+    });
   }
 
   #[test]
