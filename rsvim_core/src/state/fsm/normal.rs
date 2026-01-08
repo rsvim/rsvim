@@ -159,7 +159,7 @@ impl Normal {
       .cursor_mut()
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
-    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Ex);
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Colon);
 
     if cfg!(debug_assertions) {
       let contents = data_access.contents.clone();
