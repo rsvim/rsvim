@@ -12,18 +12,18 @@ use compact_str::ToCompactString;
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
 pub enum CmdlineIndicatorSymbol {
   Empty,
-  Ex,
-  SearchForward,
-  SearchBackward,
+  Colon,
+  Slash,
+  Question,
 }
 
 impl std::fmt::Display for CmdlineIndicatorSymbol {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match *self {
       CmdlineIndicatorSymbol::Empty => write!(f, " "),
-      CmdlineIndicatorSymbol::Ex => write!(f, ":"),
-      CmdlineIndicatorSymbol::SearchForward => write!(f, "/"),
-      CmdlineIndicatorSymbol::SearchBackward => write!(f, "?"),
+      CmdlineIndicatorSymbol::Colon => write!(f, ":"),
+      CmdlineIndicatorSymbol::Slash => write!(f, "/"),
+      CmdlineIndicatorSymbol::Question => write!(f, "?"),
     }
   }
 }
