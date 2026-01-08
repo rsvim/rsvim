@@ -525,12 +525,12 @@ pub fn cursor_move(
   };
 
   // Then move cursor.
-  let current_viewport = new_viewport.unwrap_or(viewport);
+  let new_viewport = new_viewport.unwrap_or(viewport);
 
   let new_cursor_viewport = raw_cursor_viewport_move_to(
     tree,
     id,
-    &current_viewport,
+    &new_viewport,
     text,
     Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
   );
