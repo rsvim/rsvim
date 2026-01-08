@@ -248,6 +248,49 @@ fn run_empty(args: Arguments) {
   );
 }
 
+struct UpdateArguments<'a> {
+  pub terminal_size: U16Size,
+  pub buffer_opts: BufferOptions,
+  pub window_opts: WindowOptions,
+  pub buffer_lines: Vec<&'a str>,
+  pub update_start_line: usize,
+  pub update_start_column: usize,
+  pub expect_lines: Vec<&'a str>,
+  pub expect_start_line: usize,
+  pub expect_end_line: usize,
+  pub expect_start_fills: BTreeMap<usize, usize>,
+  pub expect_end_fills: BTreeMap<usize, usize>,
+}
+
+fn run_update(args: UpdateArguments) {
+  test_log_init();
+
+  let buf = make_buffer_from_lines(
+    args.terminal_size,
+    args.buffer_opts,
+    args.buffer_lines,
+  );
+
+  let (mut tree, window_id) =
+    make_window(args.terminal_size, buf.clone(), args.window_opts);
+  let actual = update_viewport(
+    buf.clone(),
+    &mut tree,
+    window_id,
+    args.update_start_line,
+    args.update_start_column,
+  );
+  assert_viewport(
+    lock!(buf).text(),
+    &actual,
+    &args.expect_lines,
+    args.expect_start_line,
+    args.expect_end_line,
+    &args.expect_start_fills,
+    &args.expect_end_fills,
+  );
+}
+
 mod tests_view_nowrap {
   use super::*;
 
