@@ -546,10 +546,8 @@ pub fn cursor_move(
 
 /// High-level cursor insert operation.
 ///
-/// This API will insert text at the cursor (and possibly scroll the widget/window it belongs to),
-/// as if user is typing in insert mode, by below parameters:
-/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The `text` content binded to the parent widget/window node.
+/// This API will insert text at the cursor (and possibly scroll the
+/// window/cmdline it belongs to), as if user is typing in insert mode.
 ///
 /// # Returns
 ///
