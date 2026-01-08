@@ -52,8 +52,11 @@ def sccache():
 
 
 def _linker():
-    linker_enabled = LINUX and (X86 or ARM)
-    if NO_LINKER or (not linker_enabled):
+    supported_platform = LINUX and (X86 or ARM)
+    if not supported_platform:
+        return None
+
+    if NO_LINKER:
         logging.warning("mold/wild is disabled!")
         return None
 

@@ -525,25 +525,23 @@ pub fn cursor_move(
   };
 
   // Then move cursor.
-  {
-    let current_viewport = new_viewport.unwrap_or(viewport);
+  let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = raw_cursor_viewport_move_to(
-      tree,
-      id,
-      &current_viewport,
-      text,
-      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-    );
+  let new_cursor_viewport = raw_cursor_viewport_move_to(
+    tree,
+    id,
+    &current_viewport,
+    text,
+    Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+  );
 
-    debug_assert!(tree.cursor_id().is_some());
-    tree
-      .cursor_move_position_to(
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      )
-      .unwrap();
-  }
+  debug_assert!(tree.cursor_id().is_some());
+  tree
+    .cursor_move_position_to(
+      new_cursor_viewport.column_idx() as isize,
+      new_cursor_viewport.row_idx() as isize,
+    )
+    .unwrap();
 }
 
 /// High-level cursor insert operation.
