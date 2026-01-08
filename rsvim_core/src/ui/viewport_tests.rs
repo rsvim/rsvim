@@ -861,8 +861,8 @@ mod tests_view_nowrap_startcol {
       (6, 0),
       (7, 0),
     ]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -932,8 +932,8 @@ mod tests_view_nowrap_startcol {
       (6, 0),
       (7, 0),
     ]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1003,8 +1003,8 @@ mod tests_view_nowrap_startcol {
       (6, 0),
       (7, 0),
     ]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1074,8 +1074,8 @@ mod tests_view_nowrap_startcol {
       (6, 0),
       (7, 0),
     ]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1123,7 +1123,8 @@ mod tests_view_nowrap_startcol {
       "  2. When ",
       "     * The",
       "     * The",
-       ""];
+      "",
+    ];
     let expect_lines2 = vec!["", "", "", "", "", "", "", ""];
     let expect_fills1: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -1135,8 +1136,8 @@ mod tests_view_nowrap_startcol {
       (6, 0),
       (7, 0),
     ]
-        .into_iter()
-        .collect();
+    .into_iter()
+    .collect();
     let expect_fills2: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
