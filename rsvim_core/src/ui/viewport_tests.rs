@@ -253,16 +253,16 @@ struct UpdateArguments<'a> {
   pub buffer_opts: BufferOptions,
   pub window_opts: WindowOptions,
   pub buffer_lines: Vec<&'a str>,
-  pub update_start_line: usize,
-  pub update_start_column: usize,
-  pub expect_lines: Vec<&'a str>,
-  pub expect_start_line: usize,
-  pub expect_end_line: usize,
-  pub expect_start_fills: BTreeMap<usize, usize>,
-  pub expect_end_fills: BTreeMap<usize, usize>,
+  pub update_start_line: Vec<usize>,
+  pub update_start_column: Vec<usize>,
+  pub expect_lines: Vec<Vec<&'a str>>,
+  pub expect_start_line: Vec<usize>,
+  pub expect_end_line: Vec<usize>,
+  pub expect_start_fills: Vec<BTreeMap<usize, usize>>,
+  pub expect_end_fills: Vec<BTreeMap<usize, usize>>,
 }
 
-fn run_update(args: UpdateArguments) {
+fn run_updates(args: UpdateArguments) {
   test_log_init();
 
   let buf = make_buffer_from_lines(
@@ -273,22 +273,44 @@ fn run_update(args: UpdateArguments) {
 
   let (mut tree, window_id) =
     make_window(args.terminal_size, buf.clone(), args.window_opts);
-  let actual = update_viewport(
-    buf.clone(),
-    &mut tree,
-    window_id,
-    args.update_start_line,
-    args.update_start_column,
-  );
+  // First created
+  let actual = tree.window(window_id).unwrap().viewport();
   assert_viewport(
     lock!(buf).text(),
     &actual,
-    &args.expect_lines,
-    args.expect_start_line,
-    args.expect_end_line,
-    &args.expect_start_fills,
-    &args.expect_end_fills,
+    &args.expect_lines[0],
+    args.expect_start_line[0],
+    args.expect_end_line[0],
+    &args.expect_start_fills[0],
+    &args.expect_end_fills[0],
   );
+
+  assert_eq!(args.update_start_line.len(), args.update_start_column.len());
+  assert_eq!(args.expect_lines.len(), args.update_start_column.len() + 1);
+  assert_eq!(args.expect_lines.len(), args.expect_start_line.len());
+  assert_eq!(args.expect_lines.len(), args.expect_end_line.len());
+  assert_eq!(args.expect_lines.len(), args.expect_start_fills.len());
+  assert_eq!(args.expect_lines.len(), args.expect_end_fills.len());
+
+  for (i, update_start_line) in args.update_start_line.iter().enumerate() {
+    let update_start_column = args.update_start_column[i];
+    let actual = update_viewport(
+      buf.clone(),
+      &mut tree,
+      window_id,
+      *update_start_line,
+      update_start_column,
+    );
+    assert_viewport(
+      lock!(buf).text(),
+      &actual,
+      &args.expect_lines[i + 1],
+      args.expect_start_line[i + 1],
+      args.expect_end_line[i + 1],
+      &args.expect_start_fills[i + 1],
+      &args.expect_end_fills[i + 1],
+    );
+  }
 }
 
 mod tests_view_nowrap {
@@ -832,18 +854,18 @@ mod tests_view_nowrap_startcol {
     .into_iter()
     .collect();
 
-    run_update(UpdateArguments {
+    run_updates(UpdateArguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
       buffer_lines,
-      update_start_line: 0,
-      update_start_column: 3,
-      expect_lines,
-      expect_start_line: 0,
-      expect_end_line: 8,
-      expect_start_fills: expect_fills.clone(),
-      expect_end_fills: expect_fills.clone(),
+      update_start_line: vec![0],
+      update_start_column: vec![3],
+      expect_lines: vec![expect_lines.clone(), expect_lines.clone()],
+      expect_start_line: vec![0, 0],
+      expect_end_line: vec![8, 8],
+      expect_start_fills: vec![expect_fills.clone(), expect_fills.clone()],
+      expect_end_fills: vec![expect_fills.clone(), expect_fills.clone()],
     });
   }
 
@@ -881,7 +903,7 @@ mod tests_view_nowrap_startcol {
     .into_iter()
     .collect();
 
-    run_update(UpdateArguments {
+    run_updates(UpdateArguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
@@ -930,7 +952,7 @@ mod tests_view_nowrap_startcol {
     .into_iter()
     .collect();
 
-    run_update(UpdateArguments {
+    run_updates(UpdateArguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
@@ -979,7 +1001,7 @@ mod tests_view_nowrap_startcol {
     .into_iter()
     .collect();
 
-    run_update(UpdateArguments {
+    run_updates(UpdateArguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
@@ -1019,7 +1041,7 @@ mod tests_view_nowrap_startcol {
     .into_iter()
     .collect();
 
-    run_update(UpdateArguments {
+    run_updates(UpdateArguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: nowrap(),
