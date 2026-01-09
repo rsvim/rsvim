@@ -11,7 +11,7 @@ mod file_format_tests;
 pub use file_encoding::*;
 pub use file_format::*;
 
-// Buffer values.
+// Default values.
 pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
 pub const SHIFT_WIDTH: u8 = 8;
