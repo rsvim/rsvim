@@ -85,6 +85,8 @@ tikv-jemallocator = "0.6"
 oxc_resolver = "11.13.0"
 encoding_rs = "0.8.35"
 toml = "0.9.10"
+tree-sitter = "0.26.3"
+tree-sitter-highlight = "0.26.3"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
