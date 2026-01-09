@@ -4,10 +4,10 @@ use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use std::sync::LazyLock;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
@@ -20,9 +20,9 @@ use taffy::prelude::TaffyMaxContent;
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
-pub static DEFAULT_SHAPE: LazyLock<IRect> = LazyLock::new(|| rect!(0, 0, 0, 0));
-pub static DEFAULT_ACTUAL_SHAPE: LazyLock<U16Rect> =
-  LazyLock::new(|| rect!(0, 0, 0, 0));
+pub static DEFAULT_SHAPE: Lazy<IRect> = Lazy::new(|| rect!(0, 0, 0, 0));
+pub static DEFAULT_ACTUAL_SHAPE: Lazy<U16Rect> =
+  Lazy::new(|| rect!(0, 0, 0, 0));
 
 /// Next unique UI widget ID.
 ///
