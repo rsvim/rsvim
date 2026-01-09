@@ -20,29 +20,29 @@ fn cli_opt1() {
   };
 
   let expects = [
-    CliOptions::new(CliSpecialOptions::empty(), to_pb(vec![]), false),
+    CliOptions::new(SpecialCliOptions::empty(), to_pb(vec![]), false),
     CliOptions::new(
-      CliSpecialOptions::empty(),
+      SpecialCliOptions::empty(),
       to_pb(vec!["README.md"]),
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions::empty(),
+      SpecialCliOptions::empty(),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions::new(true, false, true),
+      SpecialCliOptions::new(true, false, true),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions::new(true, true, false),
+      SpecialCliOptions::new(true, true, false),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions::empty(),
+      SpecialCliOptions::empty(),
       to_pb(vec!["README.md", "LICENSE"]),
       true,
     ),

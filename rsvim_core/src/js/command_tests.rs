@@ -1,6 +1,6 @@
 // use super::command::*;
 use crate::cli::CliOptions;
-use crate::cli::CliSpecialOptions;
+use crate::cli::SpecialCliOptions;
 use crate::prelude::*;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -171,7 +171,7 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
 
   let buf_file = tp.xdg_data_home.join("test.txt");
   let cli_opts =
-    CliOptions::new(CliSpecialOptions::empty(), vec![buf_file], true);
+    CliOptions::new(SpecialCliOptions::empty(), vec![buf_file], true);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows, cli_opts);
 
@@ -232,7 +232,7 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
 
   let buf_file = tp.xdg_data_home.join("test.txt");
   let cli_opts =
-    CliOptions::new(CliSpecialOptions::empty(), vec![buf_file], true);
+    CliOptions::new(SpecialCliOptions::empty(), vec![buf_file], true);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows, cli_opts);
 

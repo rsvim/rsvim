@@ -8,13 +8,13 @@ use std::path::PathBuf;
 flags_impl!(SpecialFlags, u8, VERSION, SHORT_HELP, LONG_HELP);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CliSpecialOptions {
+pub struct SpecialCliOptions {
   pub version: bool,
   pub short_help: bool,
   pub long_help: bool,
 }
 
-impl CliSpecialOptions {
+impl SpecialCliOptions {
   #[cfg(test)]
   pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
     Self {
@@ -40,7 +40,7 @@ flags_impl!(Flags, u8, HEADLESS);
 /// Command line options.
 pub struct CliOptions {
   // Special opts
-  special_opts: CliSpecialOptions,
+  special_opts: SpecialCliOptions,
 
   headless: bool,
 
@@ -79,7 +79,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   }
 
   Ok(CliOptions {
-    special_opts: CliSpecialOptions {
+    special_opts: SpecialCliOptions {
       version,
       short_help,
       long_help,
@@ -109,7 +109,7 @@ impl CliOptions {
   }
 
   /// Special options.
-  pub fn special_opts(&self) -> &CliSpecialOptions {
+  pub fn special_opts(&self) -> &SpecialCliOptions {
     &self.special_opts
   }
 
@@ -125,7 +125,7 @@ impl CliOptions {
 
   #[cfg(test)]
   pub fn new(
-    special_opts: CliSpecialOptions,
+    special_opts: SpecialCliOptions,
     file: Vec<PathBuf>,
     headless: bool,
   ) -> Self {
@@ -139,7 +139,7 @@ impl CliOptions {
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      special_opts: CliSpecialOptions::empty(),
+      special_opts: SpecialCliOptions::empty(),
       headless: true,
       file: vec![],
     }
