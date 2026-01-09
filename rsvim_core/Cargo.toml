@@ -25,7 +25,6 @@ simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
-bitflags = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
 lexopt = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
