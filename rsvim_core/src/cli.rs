@@ -1,11 +1,8 @@
 //! Command line options.
 
-use crate::flags_impl;
 use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
-
-flags_impl!(SpecialFlags, u8, VERSION, SHORT_HELP, LONG_HELP);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SpecialCliOptions {
@@ -45,8 +42,6 @@ impl SpecialCliOptions {
     }
   }
 }
-
-flags_impl!(Flags, u8, HEADLESS);
 
 #[derive(Debug, Clone)]
 /// Command line options.
