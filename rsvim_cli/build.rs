@@ -60,7 +60,7 @@ fn version() {
           "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}",
           parser
         );
-        format!(" swc_ecma_parser {}", parser.unwrap())
+        format!(", swc_ecma_parser {}", parser.unwrap())
       }
       Err(e) => {
         println!("cargo:warning=[RSVIM] Parse Cargo.toml error:{:?}", e);
