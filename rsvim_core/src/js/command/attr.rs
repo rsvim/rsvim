@@ -99,7 +99,7 @@ impl StructToV8 for CommandAttributes {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, bang, ());
+    to_v8_prop!(self, obj, scope, bang);
     to_v8_prop!(self, obj, scope, nargs);
 
     obj
