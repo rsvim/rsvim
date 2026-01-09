@@ -32,20 +32,12 @@ fn cli_opt1() {
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions {
-        version: true,
-        short_help: false,
-        long_help: true,
-      },
+      CliSpecialOptions::new(true, false, true),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),
     CliOptions::new(
-      CliSpecialOptions {
-        version: true,
-        short_help: true,
-        long_help: false,
-      },
+      CliSpecialOptions::new(true, true, false),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),

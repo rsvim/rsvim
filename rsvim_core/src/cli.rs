@@ -16,6 +16,15 @@ pub struct CliSpecialOptions {
 
 impl CliSpecialOptions {
   #[cfg(test)]
+  pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
+    Self {
+      version,
+      short_help,
+      long_help,
+    }
+  }
+
+  #[cfg(test)]
   pub fn empty() -> Self {
     Self {
       version: false,
@@ -46,7 +55,6 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   let mut short_help: bool = false;
   let mut long_help: bool = false;
   let mut headless = false;
-  let mut flags: Flags = Flags::empty();
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
