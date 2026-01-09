@@ -43,7 +43,7 @@ fn version() {
     std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
   {
     if let Ok(parsed_manifest) = manifest.parse::<toml::Table>() {
-      eprintln!("parsed_manifest:{:?}", parsed_manifest);
+      println!("cargo:warning=parsed_manifest:{:?}", parsed_manifest);
     }
   }
 
