@@ -43,7 +43,7 @@ use crate::js::loader::FsModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use crate::util::paths;
-use std::sync::LazyLock;
+use once_cell::sync::Lazy;
 // use url::Url;
 pub use es_module::*;
 pub use import_map::*;
@@ -76,8 +76,8 @@ pub enum ModuleStatus {
   Ready,
 }
 
-pub static CORE_MODULES: LazyLock<FoldMap<&'static str, &'static str>> =
-  LazyLock::new(|| {
+pub static CORE_MODULES: Lazy<FoldMap<&'static str, &'static str>> =
+  Lazy::new(|| {
     let modules = vec![
       // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
       // ("console", include_str!("./js/console.js")),
@@ -132,8 +132,8 @@ pub fn create_origin<'s>(
 
 fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
   static CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
-  static FS_MODULE_LOADER: LazyLock<FsModuleLoader> =
-    LazyLock::new(FsModuleLoader::new);
+  static FS_MODULE_LOADER: Lazy<FsModuleLoader> =
+    Lazy::new(FsModuleLoader::new);
 
   let is_core_module_import = CORE_MODULES.contains_key(specifier);
   if is_core_module_import {
