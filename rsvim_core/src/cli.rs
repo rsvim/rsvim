@@ -22,7 +22,7 @@ impl SpecialCliOptions {
   pub fn short_help(&self) -> bool {
     self.short_help
   }
-  
+
   pub fn long_help(&self) -> bool {
     self.long_help
   }
