@@ -1,0 +1,3 @@
+//! Syntax
+
+pub struct Syntax {}
