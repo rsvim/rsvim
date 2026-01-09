@@ -68,7 +68,6 @@ bincode = { workspace = true }
 oxc_resolver = { workspace = true }
 encoding_rs = { workspace = true }
 tree-sitter = { workspace = true }
-tree-sitter-highlight = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
