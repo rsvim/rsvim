@@ -4,11 +4,14 @@ use rsvim_core::js::v8_version;
 use std::path::Path;
 
 fn version() {
+  let build_level = "cargo:info";
+  // let build_level = "cargo:warning";
+
   let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
   let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
   println!(
-    "cargo:warning=[RSVIM] Raw profile:{:?}, opt_level:{:?}, debug:{:?}",
+    "{build_level}=[RSVIM] Raw profile:{:?}, opt_level:{:?}, debug:{:?}",
     profile, opt_level, debug
   );
 
@@ -20,14 +23,14 @@ fn version() {
     && (opt_level == "s" || opt_level == "z")
     && debug != "true";
   if is_release_profile {
-    println!("cargo:warning=[RSVIM] Resolved profile:release");
+    println!("{build_level}=[RSVIM] Resolved profile:release");
   } else {
     let profile = if profile == "release" {
       "nightly".to_string()
     } else {
       profile
     };
-    println!("cargo:warning=[RSVIM] Resolved profile:{:?}", profile);
+    println!("{build_level}=[RSVIM] Resolved profile:{:?}", profile);
     let maybe_git_commit = match Repository::open(&workspace_dir) {
       Ok(repo) => {
         let head = repo.head().unwrap();
@@ -35,16 +38,16 @@ fn version() {
         let commit = repo.find_commit(oid).unwrap();
         let id = commit.id();
         let id = id.to_string();
-        println!("cargo:warning=[RSVIM] Git id:{:?}", id);
+        println!("{build_level}=[RSVIM] Git id:{:?}", id);
         format!("+{}", &id[0..8])
       }
       Err(e) => {
-        println!("cargo:warning=[RSVIM] Git error:{:?}", e);
+        println!("{build_level}=[RSVIM] Git error:{:?}", e);
         "".to_string()
       }
     };
     println!(
-      "cargo:warning=[RSVIM] Resolved version:{:?}, profile:{:?}, git_commit:{:?}",
+      "{build_level}=[RSVIM] Resolved version:{:?}, profile:{:?}, git_commit:{:?}",
       version, profile, maybe_git_commit
     );
     version = format!("{}+{}{}", version, profile, maybe_git_commit)
@@ -57,18 +60,18 @@ fn version() {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let parser = deps["swc_ecma_parser"].as_str();
         println!(
-          "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}",
+          "{build_level}=[RSVIM] Swc version, swc_ecma_parser:{:?}",
           parser
         );
         format!(", swc_ecma_parser {}", parser.unwrap())
       }
       Err(e) => {
-        println!("cargo:warning=[RSVIM] Parse Cargo.toml error:{:?}", e);
+        println!("{build_level}=[RSVIM] Parse Cargo.toml error:{:?}", e);
         "".to_string()
       }
     },
     Err(e) => {
-      println!("cargo:warning=[RSVIM] Read Cargo.toml error:{:?}", e);
+      println!("{build_level}=[RSVIM] Read Cargo.toml error:{:?}", e);
       "".to_string()
     }
   };
@@ -81,7 +84,7 @@ fn version() {
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
   eprintln!(
-    "[RSVIM] Writing version into {:?}...",
+    "{build_level}=[RSVIM] Writing version into {:?}...",
     output_path.as_path()
   );
 
