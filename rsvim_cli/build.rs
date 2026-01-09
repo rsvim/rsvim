@@ -11,8 +11,10 @@ fn version() {
     "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
   );
 
+  let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
   let mut version = env!("CARGO_PKG_VERSION").to_string();
 
+  // profile and git commit
   let is_release_profile = profile == "release"
     && (opt_level == "s" || opt_level == "z")
     && debug != "true";
@@ -22,8 +24,7 @@ fn version() {
     } else {
       profile
     };
-    let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-    let maybe_git_commit = match Repository::open(repo_path) {
+    let maybe_git_commit = match Repository::open(&workspace_dir) {
       Ok(repo) => {
         let head = repo.head().unwrap();
         let oid = head.target().unwrap();
@@ -35,6 +36,15 @@ fn version() {
       Err(_) => "".to_string(),
     };
     version = format!("{}+{}{}", version, profile, maybe_git_commit)
+  }
+
+  // swc version
+  if let Ok(manifest) =
+    std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
+  {
+    if let Ok(parsed_manifest) = manifest.parse::<toml::Table>() {
+      eprintln!("parsed_manifest:{:?}", parsed_manifest);
+    }
   }
 
   version = format!("{} (v8 {})", version, v8_version());
