@@ -2569,6 +2569,7 @@ dependencies = [
  "git2",
  "log",
  "mimalloc-safe",
+ "once_cell",
  "rsvim_core",
  "snmalloc-rs",
  "tikv-jemallocator",
