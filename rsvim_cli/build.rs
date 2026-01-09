@@ -12,6 +12,7 @@ fn version() {
   );
 
   let mut version = env!("CARGO_PKG_VERSION").to_string();
+
   let is_release_profile = profile == "release"
     && (opt_level == "s" || opt_level == "z")
     && debug != "true";
@@ -33,9 +34,9 @@ fn version() {
       }
       Err(_) => "".to_string(),
     };
-
     version = format!("{}+{}{}", version, profile, maybe_git_commit)
   }
+
   version = format!("{} (v8 {})", version, v8_version());
 
   let output_path =
