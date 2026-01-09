@@ -56,17 +56,11 @@ fn version() {
       Ok(parsed_manifest) => {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let parser = deps["swc_ecma_parser"].as_str();
-        let transforms_base =
-          deps["swc_ecma_transforms_base"]["version"].as_str();
         println!(
-          "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
-          parser, transforms_base,
+          "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}",
+          parser
         );
-        format!(
-          " swc_ecma_parser {}, swc_ecma_transforms_base {}",
-          parser.unwrap(),
-          transforms_base.unwrap()
-        )
+        format!(" swc_ecma_parser {}", parser.unwrap())
       }
       Err(e) => {
         println!("cargo:warning=[RSVIM] Parse Cargo.toml error:{:?}", e);
