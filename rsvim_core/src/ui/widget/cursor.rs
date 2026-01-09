@@ -12,8 +12,9 @@ use std::fmt::Debug;
 
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-pub const CURSOR_BLINKING: bool = false;
-pub const CURSOR_HIDDEN: bool = false;
+// Default values.
+pub const BLINKING: bool = false;
+pub const HIDDEN: bool = false;
 pub const CURSOR_STYLE: CursorStyle = CursorStyle::SteadyBlock;
 
 #[derive(Debug, Clone)]
@@ -47,7 +48,7 @@ impl Cursor {
   }
 
   pub fn default(id: TreeNodeId, ctx: TreeContextWk) -> Self {
-    Self::new(id, ctx, CURSOR_BLINKING, CURSOR_HIDDEN, CURSOR_STYLE)
+    Self::new(id, ctx, BLINKING, HIDDEN, CURSOR_STYLE)
   }
 
   pub fn blinking(&self) -> bool {

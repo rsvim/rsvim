@@ -6,9 +6,9 @@ use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::cursor::CURSOR_BLINKING;
-use crate::ui::widget::cursor::CURSOR_HIDDEN;
+use crate::ui::widget::cursor::BLINKING;
 use crate::ui::widget::cursor::CURSOR_STYLE;
+use crate::ui::widget::cursor::HIDDEN;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 use taffy::Style;
@@ -100,8 +100,8 @@ pub fn make_tree_with_buffers_cmdline(
     &mut tree,
     buf,
     text_contents,
-    CURSOR_BLINKING,
-    CURSOR_HIDDEN,
+    BLINKING,
+    HIDDEN,
     CURSOR_STYLE,
   );
 
