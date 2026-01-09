@@ -27,6 +27,7 @@ log = { workspace = true, features = [
   "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
+once_cell = { workspace = true, features = ["parking_lot"] }
 # zstd = { workspace = true }
 snmalloc-rs = { workspace = true, optional = true }
 mimalloc-safe = { workspace = true, optional = true }
