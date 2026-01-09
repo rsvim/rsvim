@@ -59,8 +59,17 @@ fn version() {
       Ok(parsed_manifest) => {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let parser = deps["swc_ecma_parser"].as_str();
-        println!("{LOG} Swc version, swc_ecma_parser:{:?}", parser);
-        format!(", swc_ecma_parser {}", parser.unwrap())
+        let transforms_base =
+          deps["swc_ecma_transforms_base"]["version"].as_str();
+        println!(
+          "{LOG} Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
+          parser, transforms_base
+        );
+        format!(
+          ", swc_ecma_parser {}, swc_ecma_transforms_base {}",
+          parser.unwrap().trim_start_matches("="),
+          transforms_base.unwrap().trim_start_matches("="),
+        )
       }
       Err(e) => {
         println!("{LOG} Parse Cargo.toml error:{:?}", e);
