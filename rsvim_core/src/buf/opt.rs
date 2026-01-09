@@ -8,7 +8,6 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use crate::flags_builder_impl;
 pub use file_encoding::*;
 pub use file_format::*;
 
