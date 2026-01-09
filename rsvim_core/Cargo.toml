@@ -105,6 +105,7 @@ v8 = { workspace = true, default-features = false, features = [
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
+bitflags = { workspace = true }
 unicode-width = { workspace = true }
 # unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
