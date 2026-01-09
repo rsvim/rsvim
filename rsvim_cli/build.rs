@@ -7,8 +7,9 @@ fn version() {
   let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
   let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
-  eprintln!(
-    "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
+  println!(
+    "cargo:warning=[RSVIM] Raw profile:{:?}, opt_level:{:?}, debug:{:?}",
+    profile, opt_level, debug
   );
 
   let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
@@ -18,12 +19,15 @@ fn version() {
   let is_release_profile = profile == "release"
     && (opt_level == "s" || opt_level == "z")
     && debug != "true";
-  if !is_release_profile {
+  if is_release_profile {
+    println!("cargo:warning=[RSVIM] Resolved profile:release");
+  } else {
     let profile = if profile == "release" {
       "nightly".to_string()
     } else {
       profile
     };
+    println!("cargo:warning=[RSVIM] Resolved profile:{:?}", profile);
     let maybe_git_commit = match Repository::open(&workspace_dir) {
       Ok(repo) => {
         let head = repo.head().unwrap();
@@ -31,19 +35,42 @@ fn version() {
         let commit = repo.find_commit(oid).unwrap();
         let id = commit.id();
         let id = id.to_string();
+        println!("cargo:warning=[RSVIM] Git id:{:?}", id);
         format!("+{}", &id[0..8])
       }
-      Err(_) => "".to_string(),
+      Err(e) => {
+        println!("cargo:warning=[RSVIM] Git error:{:?}", e);
+        "".to_string()
+      }
     };
+    println!(
+      "cargo:warning=[RSVIM] Resolved version:{:?}, profile:{:?}, git_commit:{:?}",
+      version, profile, maybe_git_commit
+    );
     version = format!("{}+{}{}", version, profile, maybe_git_commit)
   }
 
   // swc version
+  match std::fs::read_to_string(workspace_dir.join("Cargo.toml")) {
+    Ok(manifest) => match manifest.parse::<toml::Table>() {
+      Ok(parsed_manifest) => {}
+      Err(e) => {
+        println!("cargo:warning=[RSVIM] Parse Cargo.toml error:{:?}", e);
+      }
+    },
+    Err(e) => {
+      println!("cargo:warning=[RSVIM] Read Cargo.toml error:{:?}", e);
+    }
+  }
   if let Ok(manifest) =
     std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
   {
     if let Ok(parsed_manifest) = manifest.parse::<toml::Table>() {
-      println!("cargo:warning=parsed_manifest:{:?}", parsed_manifest);
+      let deps = &parsed_manifest["workspace"]["dependencies"];
+      println!(
+        "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
+        deps["swc_ecma_parser"], deps["swc_ecma_transforms_base"]["version"]
+      );
     }
   }
 
