@@ -1,60 +1,55 @@
 //! Command line options.
 
-use crate::flags_impl;
 use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
 
-flags_impl!(SpecialFlags, u8, VERSION, SHORT_HELP, LONG_HELP);
-
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CliSpecialOptions {
-  // version
-  // short_help
-  // long_help
-  flags: SpecialFlags,
+pub struct SpecialCliOptions {
+  pub version: bool,
+  pub short_help: bool,
+  pub long_help: bool,
 }
 
-impl CliSpecialOptions {
+impl SpecialCliOptions {
   pub fn version(&self) -> bool {
-    self.flags.contains(SpecialFlags::VERSION)
+    self.version
   }
 
   pub fn short_help(&self) -> bool {
-    self.flags.contains(SpecialFlags::SHORT_HELP)
+    self.short_help
   }
 
   pub fn long_help(&self) -> bool {
-    self.flags.contains(SpecialFlags::LONG_HELP)
+    self.long_help
   }
 
   #[cfg(test)]
   pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
-    let mut flags = SpecialFlags::empty();
-    flags.set(SpecialFlags::VERSION, version);
-    flags.set(SpecialFlags::SHORT_HELP, short_help);
-    flags.set(SpecialFlags::LONG_HELP, long_help);
-    Self { flags }
+    Self {
+      version,
+      short_help,
+      long_help,
+    }
   }
 
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      flags: SpecialFlags::empty(),
+      version: false,
+      short_help: false,
+      long_help: false,
     }
   }
 }
-
-flags_impl!(Flags, u8, HEADLESS);
 
 #[derive(Debug, Clone)]
 /// Command line options.
 pub struct CliOptions {
   // Special opts
-  special_opts: CliSpecialOptions,
+  special_opts: SpecialCliOptions,
 
-  // headless
-  flags: Flags,
+  headless: bool,
 
   // Normal opts
   file: Vec<PathBuf>,
@@ -63,26 +58,25 @@ pub struct CliOptions {
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
-  // let mut version: bool = false;
-  // let mut short_help: bool = false;
-  // let mut long_help: bool = false;
-  let mut special_flags: SpecialFlags = SpecialFlags::empty();
-  let mut flags: Flags = Flags::empty();
+  let mut version: bool = false;
+  let mut short_help: bool = false;
+  let mut long_help: bool = false;
+  let mut headless = false;
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') => {
-        special_flags.insert(SpecialFlags::SHORT_HELP);
+        short_help = true;
       }
       Long("help") => {
-        special_flags.insert(SpecialFlags::LONG_HELP);
+        long_help = true;
       }
       Short('V') | Long("version") => {
-        special_flags.insert(SpecialFlags::VERSION);
+        version = true;
       }
       Long("headless") => {
-        flags.insert(Flags::HEADLESS);
+        headless = true;
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -92,10 +86,12 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   }
 
   Ok(CliOptions {
-    special_opts: CliSpecialOptions {
-      flags: special_flags,
+    special_opts: SpecialCliOptions {
+      version,
+      short_help,
+      long_help,
     },
-    flags,
+    headless,
     file,
   })
 }
@@ -120,7 +116,7 @@ impl CliOptions {
   }
 
   /// Special options.
-  pub fn special_opts(&self) -> &CliSpecialOptions {
+  pub fn special_opts(&self) -> &SpecialCliOptions {
     &self.special_opts
   }
 
@@ -131,20 +127,18 @@ impl CliOptions {
 
   /// Headless mode.
   pub fn headless(&self) -> bool {
-    self.flags.contains(Flags::HEADLESS)
+    self.headless
   }
 
   #[cfg(test)]
   pub fn new(
-    special_opts: CliSpecialOptions,
+    special_opts: SpecialCliOptions,
     file: Vec<PathBuf>,
     headless: bool,
   ) -> Self {
-    let mut flags = Flags::empty();
-    flags.set(Flags::HEADLESS, headless);
     Self {
       special_opts,
-      flags,
+      headless,
       file,
     }
   }
@@ -152,9 +146,8 @@ impl CliOptions {
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      special_opts: CliSpecialOptions::empty(),
-      // headless=true
-      flags: Flags::HEADLESS,
+      special_opts: SpecialCliOptions::empty(),
+      headless: true,
       file: vec![],
     }
   }

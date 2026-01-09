@@ -1,19 +1,15 @@
 //! Cursor of canvas frame.
 
-use crate::flags_impl;
 use crate::prelude::*;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
-
-flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Terminal cursor.
 pub struct Cursor {
   pos: U16Pos,
-  // blinking=false
-  // hidden=false
-  flags: Flags,
+  blinking: bool,
+  hidden: bool,
   style: CursorStyle,
 }
 
@@ -25,10 +21,12 @@ impl Cursor {
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
-    let mut flags = Flags::empty();
-    flags.set(Flags::BLINKING, blinking);
-    flags.set(Flags::HIDDEN, hidden);
-    Cursor { pos, flags, style }
+    Self {
+      pos,
+      blinking,
+      hidden,
+      style,
+    }
   }
 
   /// Get position.
@@ -43,22 +41,22 @@ impl Cursor {
 
   /// Get blinking.
   pub fn blinking(&self) -> bool {
-    self.flags.contains(Flags::BLINKING)
+    self.blinking
   }
 
   /// Set blinking.
   pub fn set_blinking(&mut self, value: bool) {
-    self.flags.set(Flags::BLINKING, value);
+    self.blinking = value;
   }
 
   /// Get hidden.
   pub fn hidden(&self) -> bool {
-    self.flags.contains(Flags::HIDDEN)
+    self.hidden
   }
 
   /// Set hidden.
   pub fn set_hidden(&mut self, value: bool) {
-    self.flags.set(Flags::HIDDEN, value);
+    self.hidden = value;
   }
 
   /// Get style.
@@ -75,12 +73,15 @@ impl Cursor {
 impl Default for Cursor {
   /// Make default cursor.
   fn default() -> Self {
+    use crate::ui::widget::cursor::BLINKING;
+    use crate::ui::widget::cursor::CURSOR_STYLE;
+    use crate::ui::widget::cursor::HIDDEN;
+
     Cursor {
       pos: point!(0_u16, 0_u16),
-      // blinking=false
-      // hidden=false
-      flags: Flags::empty(),
-      style: CursorStyle::SteadyBlock,
+      blinking: BLINKING,
+      hidden: HIDDEN,
+      style: CURSOR_STYLE,
     }
   }
 }

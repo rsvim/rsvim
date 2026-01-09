@@ -125,7 +125,7 @@ impl CommandsManager {
   ) -> TheResult<Option<CommandDefinitionRc>> {
     let alias = definition.options.alias.clone();
 
-    if !definition.options.force() {
+    if !definition.options.force {
       if self.commands.contains_key(&name) {
         return Err(TheErr::CommandAlreadyExist(name));
       }

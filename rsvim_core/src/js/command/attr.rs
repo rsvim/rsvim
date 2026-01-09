@@ -1,24 +1,17 @@
 //! Ex command attributes.
 
-use crate::flags_builder_impl;
-use crate::flags_impl;
 use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
 use std::str::FromStr;
 
-flags_impl!(Flags, u8, BANG);
-
 /// Command attribute name.
 pub const BANG: &str = "bang";
 pub const NARGS: &str = "nargs";
 
-/// Default command attributes.
-pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
+/// Default values.
 pub const BANG_DEFAULT: bool = false;
-
-// bang=false
-const FLAGS: Flags = Flags::empty();
+pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
 
 #[derive(
   Debug,
@@ -75,23 +68,11 @@ impl StringToV8 for Nargs {
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
-  #[builder(default = FLAGS)]
-  #[builder(setter(custom))]
-  // bang
-  flags: Flags,
+  #[builder(default = BANG_DEFAULT)]
+  pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
   pub nargs: Nargs,
-}
-
-impl CommandAttributesBuilder {
-  flags_builder_impl!(flags, bang);
-}
-
-impl CommandAttributes {
-  pub fn bang(&self) -> bool {
-    self.flags.contains(Flags::BANG)
-  }
 }
 
 #[allow(non_camel_case_types)]
@@ -118,7 +99,7 @@ impl StructToV8 for CommandAttributes {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, bang, ());
+    to_v8_prop!(self, obj, scope, bang);
     to_v8_prop!(self, obj, scope, nargs);
 
     obj

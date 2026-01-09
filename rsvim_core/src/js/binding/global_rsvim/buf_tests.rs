@@ -1,5 +1,5 @@
 use crate::cli::CliOptions;
-use crate::cli::CliSpecialOptions;
+use crate::cli::SpecialCliOptions;
 use crate::prelude::*;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::GotoInsertModeVariant;
@@ -109,7 +109,7 @@ mod tests_current1 {
       terminal_cols,
       terminal_rows,
       CliOptions::new(
-        CliSpecialOptions::empty(),
+        SpecialCliOptions::empty(),
         vec![Path::new("README.md").to_path_buf()],
         true,
       ),
@@ -179,7 +179,7 @@ mod tests_current1 {
         terminal_cols,
         terminal_rows,
         CliOptions::new(
-          CliSpecialOptions::empty(),
+          SpecialCliOptions::empty(),
           vec![f1.to_path_buf()],
           true,
         ),
@@ -213,7 +213,7 @@ mod tests_current1 {
         terminal_cols,
         terminal_rows,
         CliOptions::new(
-          CliSpecialOptions::empty(),
+          SpecialCliOptions::empty(),
           vec![f1.to_path_buf()],
           true,
         ),
