@@ -34,7 +34,7 @@ fn version() {
       Err(_) => "".to_string(),
     };
 
-    version = format!("{}+{}{}", version, profile, maybe_git_commit,)
+    version = format!("{}+{}{}", version, profile, maybe_git_commit)
   }
   version = format!("{} (v8 {})", version, v8_version());
 
