@@ -1,7 +1,5 @@
 //! Open file APIs.
 
-use crate::flags_builder_impl;
-use crate::flags_impl;
 use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
@@ -12,18 +10,7 @@ use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 
-// See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
-flags_impl!(
-  FsOpenOptionFlags,
-  u8,
-  APPEND,
-  CREATE,
-  CREATE_NEW,
-  READ,
-  TRUNCATE,
-  WRITE
-);
-
+// Attribute names.
 pub const APPEND: &str = "append";
 pub const CREATE: &str = "create";
 pub const CREATE_NEW: &str = "createNew";
@@ -31,6 +18,7 @@ pub const READ: &str = "read";
 pub const TRUNCATE: &str = "truncate";
 pub const WRITE: &str = "write";
 
+// Default values.
 pub const APPEND_DEFAULT: bool = false;
 pub const CREATE_DEFAULT: bool = false;
 pub const CREATE_NEW_DEFAULT: bool = false;
@@ -42,58 +30,50 @@ pub const WRITE_DEFAULT: bool = false;
 const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
+// See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
-  #[builder(default = FS_OPEN_OPTION_FLAGS)]
-  #[builder(setter(custom))]
-  // append
-  // create
-  // create_new
-  // read
-  // truncate
-  // write
-  fs_open_option_flags: FsOpenOptionFlags,
-}
+  #[builder(default = APPEND_DEFAULT)]
+  append: bool,
 
-impl FsOpenOptionsBuilder {
-  flags_builder_impl!(fs_open_option_flags, append);
-  flags_builder_impl!(fs_open_option_flags, create);
-  flags_builder_impl!(fs_open_option_flags, create_new);
-  flags_builder_impl!(fs_open_option_flags, read);
-  flags_builder_impl!(fs_open_option_flags, truncate);
-  flags_builder_impl!(fs_open_option_flags, write);
+  #[builder(default = CREATE_DEFAULT)]
+  create: bool,
+
+  #[builder(default = CREATE_NEW_DEFAULT)]
+  create_new: bool,
+
+  #[builder(default = READ_DEFAULT)]
+  read: bool,
+
+  #[builder(default = TRUNCATE_DEFAULT)]
+  truncate: bool,
+
+  #[builder(default = WRITE_DEFAULT)]
+  write: bool,
 }
 
 impl FsOpenOptions {
   pub fn append(&self) -> bool {
-    self
-      .fs_open_option_flags
-      .contains(FsOpenOptionFlags::APPEND)
+    self.append
   }
 
   pub fn create(&self) -> bool {
-    self
-      .fs_open_option_flags
-      .contains(FsOpenOptionFlags::CREATE)
+    self.create
   }
 
   pub fn create_new(&self) -> bool {
-    self
-      .fs_open_option_flags
-      .contains(FsOpenOptionFlags::CREATE_NEW)
+    self.create_new
   }
 
   pub fn read(&self) -> bool {
-    self.fs_open_option_flags.contains(FsOpenOptionFlags::READ)
+    self.read
   }
 
   pub fn truncate(&self) -> bool {
-    self
-      .fs_open_option_flags
-      .contains(FsOpenOptionFlags::TRUNCATE)
+    self.truncate
   }
 
   pub fn write(&self) -> bool {
-    self.fs_open_option_flags.contains(FsOpenOptionFlags::WRITE)
+    self.write
   }
 }
 
