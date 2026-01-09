@@ -51,30 +51,38 @@ fn version() {
   }
 
   // swc version
-  match std::fs::read_to_string(workspace_dir.join("Cargo.toml")) {
+  let swc = match std::fs::read_to_string(workspace_dir.join("Cargo.toml")) {
     Ok(manifest) => match manifest.parse::<toml::Table>() {
-      Ok(parsed_manifest) => {}
+      Ok(parsed_manifest) => {
+        let deps = &parsed_manifest["workspace"]["dependencies"];
+        let parser = deps["swc_ecma_parser"].as_str();
+        let transforms_base =
+          deps["swc_ecma_transforms_base"]["version"].as_str();
+        println!(
+          "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
+          parser, transforms_base,
+        );
+        format!(
+          " swc_ecma_parser {}, swc_ecma_transforms_base {}",
+          parser.unwrap(),
+          transforms_base.unwrap()
+        )
+      }
       Err(e) => {
         println!("cargo:warning=[RSVIM] Parse Cargo.toml error:{:?}", e);
+        "".to_string()
       }
     },
     Err(e) => {
       println!("cargo:warning=[RSVIM] Read Cargo.toml error:{:?}", e);
+      "".to_string()
     }
-  }
-  if let Ok(manifest) =
-    std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
-  {
-    if let Ok(parsed_manifest) = manifest.parse::<toml::Table>() {
-      let deps = &parsed_manifest["workspace"]["dependencies"];
-      println!(
-        "cargo:warning=[RSVIM] Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
-        deps["swc_ecma_parser"], deps["swc_ecma_transforms_base"]["version"]
-      );
-    }
-  }
+  };
 
-  version = format!("{} (v8 {})", version, v8_version());
+  // v8 version
+  let v8 = format!("v8 {}", v8_version());
+
+  version = format!("{} ({}{})", version, v8, swc);
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
