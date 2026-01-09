@@ -26,9 +26,6 @@ pub const READ_DEFAULT: bool = false;
 pub const TRUNCATE_DEFAULT: bool = false;
 pub const WRITE_DEFAULT: bool = false;
 
-// All flags are false
-const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
