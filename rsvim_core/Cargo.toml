@@ -68,6 +68,7 @@ bincode = { workspace = true }
 oxc_resolver = { workspace = true }
 encoding_rs = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
+tree-sitter = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
