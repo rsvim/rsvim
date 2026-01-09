@@ -15,6 +15,18 @@ pub struct SpecialCliOptions {
 }
 
 impl SpecialCliOptions {
+  pub fn version(&self) -> bool {
+    self.version
+  }
+
+  pub fn short_help(&self) -> bool {
+    self.short_help
+  }
+  
+  pub fn long_help(&self) -> bool {
+    self.long_help
+  }
+
   #[cfg(test)]
   pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
     Self {
