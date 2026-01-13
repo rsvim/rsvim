@@ -1,3 +1,3 @@
-//! Language syntax.
+//! Text syntax.
 
 pub struct Syntax {}
