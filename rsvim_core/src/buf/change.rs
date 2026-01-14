@@ -24,7 +24,7 @@ pub struct Replace {
 }
 
 pub struct MultiLineReplace {
-  lines: BTreeMap<usize, Replace>,
+  lines: Vec<Replace>,
 }
 
 pub enum Change {
