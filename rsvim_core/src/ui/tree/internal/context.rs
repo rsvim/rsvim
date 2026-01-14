@@ -412,7 +412,7 @@ impl Debug for TreeContext {
           "\n{}{},parent:{},{},{},{}",
           enabled,
           name(id),
-          name(self.ta.parent(id).unwrap_or(-1)),
+          name(self.ta.parent(id).unwrap_or(TreeNodeId::negative_one())),
           attributes,
           layout,
           shape
