@@ -29,5 +29,17 @@ macro_rules! struct_id_impl {
         f.write_fmt(format_args!("{}", self.0))
       }
     }
+
+    impl From<$ty> for $name {
+      fn from(value: $ty) -> Self {
+        Self(value)
+      }
+    }
+
+    impl From<$name> for $ty {
+      fn from(value: $name) -> Self {
+        value.0
+      }
+    }
   };
 }
