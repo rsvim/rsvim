@@ -12,6 +12,7 @@ mod text_tests;
 mod unicode_tests;
 
 use crate::prelude::*;
+use crate::struct_id_impl;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -25,15 +26,14 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use text::Text;
 
-/// Buffer ID.
-pub type BufferId = i32;
+struct_id_impl!(BufferId, i32, negative);
 
 /// Next unique buffer ID.
 ///
 /// NOTE: Start form 1.
 pub fn next_buffer_id() -> BufferId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
-  VALUE.fetch_add(1, Ordering::Relaxed)
+  BufferId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 #[derive(Debug)]
