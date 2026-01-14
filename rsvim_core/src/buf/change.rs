@@ -31,5 +31,5 @@ pub enum Change {
   Insert(Insert),
   Delete(Delete),
   Replace(Replace),
-  MultiLineReplace(MultiReplace),
+  MultiReplace(MultiReplace),
 }
