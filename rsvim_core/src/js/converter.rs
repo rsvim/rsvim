@@ -1,10 +1,10 @@
 //! Converters between rust and v8 values.
 
+use crate::buf::BufferId;
+use crate::ui::tree::TreeNodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
-
-use crate::ui::tree::TreeNodeId;
 
 pub trait U32ToV8 {
   fn to_v8<'s>(
