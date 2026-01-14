@@ -42,4 +42,14 @@ macro_rules! struct_id_impl {
       }
     }
   };
+
+  ($name:ident,$ty:ty,negative) => {
+    struct_id_impl!($name, $ty);
+
+    impl $name {
+      pub const fn negative_one() -> Self {
+        Self(-1)
+      }
+    }
+  };
 }

@@ -8,7 +8,7 @@ use std::fmt::Debug;
 
 // pub type TreeNodeId = i32;
 
-struct_id_impl!(TreeNodeId, i32);
+struct_id_impl!(TreeNodeId, i32, negative);
 
 pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
