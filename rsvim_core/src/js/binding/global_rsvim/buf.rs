@@ -21,7 +21,7 @@ pub fn current(
       let buf = current_window.buffer().upgrade().unwrap();
       let buf_id = lock!(buf).id();
       trace!("Rsvim.buf.current: {:?}", buf_id);
-      rv.set_int32(buf_id);
+      rv.set_int32(buf_id.into());
     }
     None => {
       trace!("Rsvim.buf.current: not exist");
