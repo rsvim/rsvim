@@ -16,8 +16,9 @@ pub struct Delete {
 }
 
 pub struct Replace {
-  line_idx: usize,
+  start_line_idx: usize,
   start_char_idx: usize,
+  end_line_idx: usize,
   end_char_idx: usize,
   payload: CompactString,
 }
