@@ -6,21 +6,9 @@ use crate::ui::tree::internal::context::TreeContextWk;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
-pub type TreeNodeId = i32;
+// pub type TreeNodeId = i32;
 
 struct_id_impl!(TreeNodeId, i32);
-
-impl From<i32> for TreeNodeId {
-  fn from(value: i32) -> Self {
-    Self(value)
-  }
-}
-
-impl From<TreeNodeId> for i32 {
-  fn from(value: TreeNodeId) -> Self {
-    value.0
-  }
-}
 
 pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
