@@ -102,6 +102,38 @@ impl TreeNodeIdFromV8 for TreeNodeId {
   }
 }
 
+pub trait BufferIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl BufferIdToV8 for BufferId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait BufferIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl BufferIdFromV8 for BufferId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    BufferId::from(value.int32_value(scope).unwrap())
+  }
+}
+
 pub trait F64ToV8 {
   fn to_v8<'s>(
     &self,
