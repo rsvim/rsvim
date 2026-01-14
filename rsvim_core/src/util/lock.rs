@@ -7,11 +7,30 @@ macro_rules! arc_mutex_ptr {
     paste::paste! {
       pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
       pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
-      pub type [<$name ReasGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
+      pub type [<$name MutexGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
 
       impl $name {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
           std::sync::Arc::new(parking_lot::Mutex::new(value))
+        }
+      }
+    }
+  };
+}
+
+/// Generate Arc<RwLock<_>> pointers.
+#[macro_export]
+macro_rules! arc_rwlock_ptr {
+  ($name:ident) => {
+    paste::paste! {
+      pub type [<$name Arc>] = std::sync::Arc<parking_lot::RwLock<$name>>;
+      pub type [<$name Wk>] = std::sync::Weak<parking_lot::RwLock<$name>>;
+      pub type [<$name ReadGuard>]<'a> = parking_lot::RwLockReadGuard<'a, $name>;
+      pub type [<$name WriteGuard>]<'a> = parking_lot::RwLockWriteGuard<'a, $name>;
+
+      impl $name {
+        pub fn to_arc(value: $name) -> [<$name Arc>] {
+          std::sync::Arc::new(parking_lot::RwLock::new(value))
         }
       }
     }
@@ -39,6 +58,20 @@ macro_rules! arc_ptr {
 macro_rules! lock {
   ($id:expr) => {
     ($id).try_lock_for(*$crate::consts::MUTEX_TIMEOUT).unwrap()
+  };
+}
+
+#[macro_export]
+macro_rules! rlock {
+  ($id:expr) => {
+    ($id).try_read_for(*$crate::consts::MUTEX_TIMEOUT).unwrap()
+  };
+}
+
+#[macro_export]
+macro_rules! wlock {
+  ($id:expr) => {
+    ($id).try_write_for(*$crate::consts::MUTEX_TIMEOUT).unwrap()
   };
 }
 
