@@ -163,7 +163,7 @@ impl JsTimerIdFromV8 for JsTimerId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
-    BufferId::from(value.int32_value(scope).unwrap())
+    JsTimerId::from(value.int32_value(scope).unwrap())
   }
 }
 
