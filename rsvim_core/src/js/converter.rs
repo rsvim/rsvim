@@ -1,5 +1,8 @@
 //! Converters between rust and v8 values.
 
+use crate::buf::BufferId;
+use crate::js::JsTimerId;
+use crate::ui::tree::TreeNodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
@@ -65,6 +68,102 @@ impl I32FromV8 for i32 {
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
     value.int32_value(scope).unwrap()
+  }
+}
+
+pub trait TreeNodeIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl TreeNodeIdToV8 for TreeNodeId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait TreeNodeIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl TreeNodeIdFromV8 for TreeNodeId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    TreeNodeId::from(value.int32_value(scope).unwrap())
+  }
+}
+
+pub trait BufferIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl BufferIdToV8 for BufferId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait BufferIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl BufferIdFromV8 for BufferId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    BufferId::from(value.int32_value(scope).unwrap())
+  }
+}
+
+pub trait JsTimerIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl JsTimerIdToV8 for JsTimerId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait JsTimerIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl JsTimerIdFromV8 for JsTimerId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    JsTimerId::from(value.int32_value(scope).unwrap())
   }
 }
 

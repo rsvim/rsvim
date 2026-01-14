@@ -74,14 +74,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-15,
-            macos-15-intel,
-            windows-2022,
-          ]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
@@ -93,6 +86,8 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+        with:
+          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
@@ -104,14 +99,7 @@ jobs:
     name: Test Coverage
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-15,
-            macos-15-intel,
-            windows-2022,
-          ]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
@@ -123,6 +111,8 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+        with:
+          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
@@ -150,6 +140,8 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+        with:
+          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add clippy

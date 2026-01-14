@@ -35,6 +35,7 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
+use crate::struct_id_impl;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
@@ -76,19 +77,19 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-pub type JsTimerId = i32;
-pub type JsTaskId = usize;
+struct_id_impl!(JsTimerId, i32);
+struct_id_impl!(JsTaskId, usize);
 
 /// Next task ID. It starts form 1.
 pub fn next_task_id() -> JsTaskId {
   static VALUE: AtomicUsize = AtomicUsize::new(1);
-  VALUE.fetch_add(1, Ordering::Relaxed)
+  JsTaskId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 /// Next timer ID. It starts form 1.
 pub fn next_timer_id() -> JsTimerId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
-  VALUE.fetch_add(1, Ordering::Relaxed)
+  JsTimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 /// Snapshot data.
