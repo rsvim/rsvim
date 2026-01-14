@@ -3,8 +3,6 @@
 use crate::prelude::*;
 use compact_str::CompactString;
 
-pub enum Change {}
-
 pub struct Insert {
   line_idx: usize,
   char_idx: usize,
@@ -26,4 +24,11 @@ pub struct Replace {
 
 pub struct MultiLineReplace {
   lines: BTreeMap<usize, Replace>,
+}
+
+pub enum Change {
+  Insert(Insert),
+  Delete(Delete),
+  Replace(Replace),
+  MultiLineReplace(MultiLineReplace),
 }
