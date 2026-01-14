@@ -23,7 +23,7 @@ pub struct Replace {
   payload: CompactString,
 }
 
-pub struct MultiReplace {
+pub struct MultipleReplaces {
   replaces: Vec<Replace>,
 }
 
@@ -31,5 +31,5 @@ pub enum Change {
   Insert(Insert),
   Delete(Delete),
   Replace(Replace),
-  MultiReplace(MultiReplace),
+  MultipleReplaces(MultipleReplaces),
 }
