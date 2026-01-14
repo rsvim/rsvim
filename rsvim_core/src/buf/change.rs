@@ -24,7 +24,7 @@ pub struct Replace {
 }
 
 pub struct MultiLineReplace {
-  lines: Vec<Replace>,
+  replaces: Vec<Replace>,
 }
 
 pub enum Change {
