@@ -1,6 +1,7 @@
 //! Converters between rust and v8 values.
 
 use crate::buf::BufferId;
+use crate::js::JsTimerId;
 use crate::ui::tree::TreeNodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -126,6 +127,38 @@ pub trait BufferIdFromV8 {
 }
 
 impl BufferIdFromV8 for BufferId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    BufferId::from(value.int32_value(scope).unwrap())
+  }
+}
+
+pub trait JsTimerIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl JsTimerIdToV8 for JsTimerId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait JsTimerIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl JsTimerIdFromV8 for JsTimerId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
