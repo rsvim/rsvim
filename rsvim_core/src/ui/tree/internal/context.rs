@@ -17,7 +17,7 @@ use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
 
-pub const INVALID_ROOT_ID: TreeNodeId = -1;
+pub const INVALID_ROOT_ID: TreeNodeId = TreeNodeId::negative_one();
 pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 pub static DEFAULT_SHAPE: Lazy<IRect> = Lazy::new(|| rect!(0, 0, 0, 0));
@@ -29,7 +29,7 @@ pub static DEFAULT_ACTUAL_SHAPE: Lazy<U16Rect> =
 /// NOTE: Start from 100001, so be different from buffer ID.
 pub fn next_node_id() -> TreeNodeId {
   static VALUE: AtomicI32 = AtomicI32::new(100001);
-  VALUE.fetch_add(1, Ordering::Relaxed)
+  TreeNodeId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 #[derive(Debug, Clone)]
@@ -412,7 +412,7 @@ impl Debug for TreeContext {
           "\n{}{},parent:{},{},{},{}",
           enabled,
           name(id),
-          name(self.ta.parent(id).unwrap_or(-1)),
+          name(self.ta.parent(id).unwrap_or(TreeNodeId::negative_one())),
           attributes,
           layout,
           shape

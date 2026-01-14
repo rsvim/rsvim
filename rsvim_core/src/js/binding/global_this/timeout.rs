@@ -108,7 +108,7 @@ pub fn create_timer<'s>(
     repeated,
     Box::new(timer_cb),
   );
-  rv.set_int32(timer_id);
+  rv.set_int32(timer_id.into());
   trace!(
     "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
     timer_id, delay, repeated

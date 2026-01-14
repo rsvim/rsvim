@@ -15,8 +15,8 @@ pub const CURRENT_WINDOW_ID: &str = "currentWindowId";
 /// Default command attributes.
 pub const BANG_DEFAULT: bool = false;
 pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
-pub const CURRENT_BUFFER_ID_DEFAULT: BufferId = -1;
-pub const CURRENT_WINDOW_ID_DEFAULT: TreeNodeId = -1;
+pub const CURRENT_BUFFER_ID_DEFAULT: BufferId = BufferId::negative_one();
+pub const CURRENT_WINDOW_ID_DEFAULT: TreeNodeId = TreeNodeId::negative_one();
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandContext {

@@ -2,3 +2,4 @@
 
 pub mod lock;
 pub mod paths;
+pub mod struct_id;
