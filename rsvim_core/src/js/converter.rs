@@ -54,15 +54,6 @@ impl I32ToV8 for i32 {
   }
 }
 
-impl I32ToV8 for TreeNodeId {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, std::converter::Into::<i32>::into(*self))
-  }
-}
-
 pub trait I32FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
@@ -76,6 +67,38 @@ impl I32FromV8 for i32 {
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
     value.int32_value(scope).unwrap()
+  }
+}
+
+pub trait TreeNodeIdToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl TreeNodeIdToV8 for TreeNodeId {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+  }
+}
+
+pub trait TreeNodeIdFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl TreeNodeIdFromV8 for TreeNodeId {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    TreeNodeId::from(value.int32_value(scope).unwrap())
   }
 }
 
@@ -108,22 +131,6 @@ impl F64FromV8 for f64 {
     value: v8::Local<'s, v8::Number>,
   ) -> Self {
     value.number_value(scope).unwrap()
-  }
-}
-
-pub trait TreeNodeIdToV8 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number>;
-}
-
-impl TreeNodeIdToV8 for TreeNodeId {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number> {
-    v8::Number::new(scope, *self)
   }
 }
 
