@@ -10,15 +10,15 @@ pub type TreeNodeId = i32;
 
 struct_id_impl!(TreeNodeId, i32);
 
-impl std::fmt::Debug for TreeNodeId {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_fmt(format_args!("{:?}", self.0))
+impl From<i32> for TreeNodeId {
+  fn from(value: i32) -> Self {
+    Self(value)
   }
 }
 
-impl std::fmt::Display for TreeNodeId {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_fmt(format_args!("{}", self.0))
+impl From<TreeNodeId> for i32 {
+  fn from(value: TreeNodeId) -> Self {
+    value.0
   }
 }
 
