@@ -73,11 +73,13 @@ where
   /// Whether two ranges `a` and `b` is overlapped.
   ///
   /// It returns:
-  /// - Not: `a` and `b` is not overlapped
-  /// - Left: `a` and `b` is overlapped, `a` has left non-overlapped part
-  /// - Right: `a` and `b` is overlapped, `a` has right non-overlapped part
-  /// - Inside: `a` and `b` is overlapped, `a` is inside of `b`
-  /// - Outside: `a` and `b` is overlapped, `a` is outside of `b`
+  /// - Not: not overlapped
+  /// - Left: overlapped, `a` has left non-overlapped part
+  /// - Right: overlapped, `a` has right non-overlapped part
+  /// - Inside: overlapped, `a` is inside of `b`, `a` has no non-overlapped 
+  ///   part
+  /// - Outside: overlapped, `a` is outside of `b`, `a` has 2 non-overlapped 
+  ///   parts
   pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> RangeOverlappedResult
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
@@ -120,10 +122,10 @@ where
       self.map.range((range.start, K::MAX)..(range.end, K::MAX));
 
     for (&(start, end), value) in candidate_range {
-      // check if overlap: `range.start < end && start < range.end`
-      // since we already limit `start < range.end`, here only need to check
-      // `range.start < end`
       match Self::is_overlapped(&range, &Range { start, end }) {
+        RangeOverlappedResult::Inside {
+          to_remove.push((start, end));
+        }
         RangeOverlappedResult::Inside | RangeOverlappedResult::Outside => {
           to_remove.push((start, end));
         }
