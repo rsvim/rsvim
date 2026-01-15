@@ -25,6 +25,10 @@ fn test1() {
   tree.insert(10..20, 1);
   info!("tree:{:?}", tree);
   assert_range(&tree, 10..20, 1);
+
+  tree.insert(10..20, 2);
+  info!("tree:{:?}", tree);
+  assert_range(&tree, 10..20, 2);
 }
 
 #[test]
