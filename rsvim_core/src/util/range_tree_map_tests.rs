@@ -1,16 +1,31 @@
 use super::range_tree_map::*;
+use crate::prelude::*;
+use crate::tests::log::init as test_log_init;
 
 #[test]
 fn test1() {
+  test_log_init();
+
   let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
-
-  // 测试用例 1
-  println!("=== 测试用例 1 ===");
   tree.insert(10..20, 1);
-  println!("插入 key(start:10, end:20) = value(1)");
-  // tree.print_all();
-  println!();
+  info!("tree:{:?}", tree);
 
+  for i in 0..10 {
+    assert_eq!(tree.query(i), None);
+  }
+  for i in 10..20 {
+    assert_eq!(tree.query(i), Some(&1));
+  }
+  for i in 20..50 {
+    assert_eq!(tree.query(i), None);
+  }
+}
+
+#[test]
+fn test2() {
+  test_log_init();
+
+  let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
   tree.insert(15..25, 2);
   println!("插入 key(start:15, end:25) = value(2)");
   // tree.print_all();
