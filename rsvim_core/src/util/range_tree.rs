@@ -50,11 +50,11 @@ where
       return;
     }
 
-    // Collect all ranges (include overlap and neighbor)
+    // collect all ranges (include overlap and neighbor)
     let mut to_remove = Vec::new();
     let mut to_insert = Vec::new();
 
-    // Only query ranges that can overlap.
+    // only query ranges that can overlap.
     // i.e. `start < range.end && end > range.start`.
 
     // find all `start < range.end` range
