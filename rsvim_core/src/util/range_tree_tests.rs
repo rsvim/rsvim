@@ -9,12 +9,12 @@ fn main() {
   println!("=== 测试用例 1 ===");
   tree.insert(10..20, 1);
   println!("插入 key(start:10, end:20) = value(1)");
-  tree.print_all();
+  // tree.print_all();
   println!();
 
   tree.insert(15..25, 2);
   println!("插入 key(start:15, end:25) = value(2)");
-  tree.print_all();
+  // tree.print_all();
   println!();
 
   // 重置并测试用例 2
@@ -27,5 +27,5 @@ fn main() {
   println!("  key(start:10, end:20) = value(1)");
   println!("  key(start:15, end:25) = value(2)");
   println!("  key(start:11, end:13) = value(3)");
-  tree2.print_all();
+  // tree2.print_all();
 }
