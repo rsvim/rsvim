@@ -110,13 +110,13 @@ where
       match Self::is_overlapped(&range, &Range { start, end }) {
         IsOverlappedResult::Inside => {
           to_remove.push((start, end));
+          // for left non-overlap part
+          to_insert.push(((start, range.start), value.clone()));
+          // for right non-overlap part
+          to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Outside => {
           to_remove.push((start, end));
-          // for left non-overlap part
-          to_insert.push(((range.start, start), value.clone()));
-          // for right non-overlap part
-          to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Left => {
           to_remove.push((start, end));
