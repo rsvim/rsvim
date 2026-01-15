@@ -9,7 +9,7 @@ use std::ops::Range;
 /// belongs to one range.
 pub struct RangeTree<K, V>
 where
-  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  K: geo::CoordNum + min_max_traits::Max + Ord + PartialOrd,
   V: Clone,
 {
   map: BTreeMap<(K, K), V>,
@@ -17,7 +17,7 @@ where
 
 impl<K, V> Default for RangeTree<K, V>
 where
-  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  K: geo::CoordNum + min_max_traits::Max + Ord + PartialOrd,
   V: Clone,
 {
   fn default() -> Self {
@@ -27,7 +27,7 @@ where
 
 impl<K, V> RangeTree<K, V>
 where
-  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  K: geo::CoordNum + min_max_traits::Max + Ord + PartialOrd,
   V: Clone,
 {
   pub fn new() -> Self {
