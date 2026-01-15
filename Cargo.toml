@@ -86,6 +86,7 @@ oxc_resolver = "11.13.0"
 encoding_rs = "0.8.35"
 toml = "0.9.10"
 once_cell = { version = "1.21.3", features = ["parking_lot"] }
+min_max_traits = "0.1.0"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 

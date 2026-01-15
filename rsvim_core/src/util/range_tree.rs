@@ -8,14 +8,26 @@ use std::ops::Range;
 /// will override old value on the same range.
 pub struct RangeTree<K, V>
 where
-  K: geo::CoordNum,
+  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  V: Clone,
 {
   map: BTreeMap<(K, K), V>,
 }
 
+impl<K, V> Default for RangeTree<K, V>
+where
+  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  V: Clone,
+{
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl<K, V> RangeTree<K, V>
 where
-  K: geo::CoordNum,
+  K: geo::CoordNum + min_max_traits::Max + Ord + std::cmp::PartialOrd,
+  V: Clone,
 {
   pub fn new() -> Self {
     Self {
@@ -114,13 +126,4 @@ where
   //     );
   //   }
   // }
-}
-
-impl<K, V> Default for RangeTree<K, V>
-where
-  K: geo::CoordNum,
-{
-  fn default() -> Self {
-    Self::new()
-  }
 }
