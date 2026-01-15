@@ -73,12 +73,20 @@ where
     debug_assert!(b.start < b.end);
 
     if Self::_case1(a, b) {
+      // a is inside of b
+      // [b-----{a-a}------b]
       RangeOverlappedResult::Inside
     } else if Self::_case1(b, a) {
+      // a is outside of b
+      // [a-----{b-b}------a]
       RangeOverlappedResult::Outside
     } else if Self::_case2(a, b) {
+      // a has left non-overlapped part
+      // [a----{b--a]------b}
       RangeOverlappedResult::Left
     } else if Self::_case2(b, a) {
+      // a has right non-overlapped part
+      // [b----{a--b]------a}
       RangeOverlappedResult::Right
     } else {
       RangeOverlappedResult::Not
@@ -113,6 +121,10 @@ where
         }
         RangeOverlappedResult::Outside => {
           to_remove.push((start, end));
+          // for left non-overlap part
+          to_insert.push(((range.start, start), value.clone()));
+          // for right non-overlap part
+          to_insert.push(((range.end, end), value.clone()));
         }
         RangeOverlappedResult::Left => {
           to_remove.push((start, end));
