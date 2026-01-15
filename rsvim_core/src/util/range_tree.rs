@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use std::ops::Range;
 
+#[derive(Debug)]
 pub enum RangeOverlappedResult {
   Not,
   Left,
@@ -123,10 +124,10 @@ where
 
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(&range, &Range { start, end }) {
-        RangeOverlappedResult::Inside {
+        RangeOverlappedResult::Inside => {
           to_remove.push((start, end));
         }
-        RangeOverlappedResult::Inside | RangeOverlappedResult::Outside => {
+        RangeOverlappedResult::Outside => {
           to_remove.push((start, end));
         }
         RangeOverlappedResult::Left => {
