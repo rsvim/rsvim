@@ -167,8 +167,8 @@ where
     }
 
     // insert split
-    for (key, val) in to_insert {
-      self.map.insert(key, val.clone());
+    for (key, value) in to_insert {
+      self.map.insert(key, value);
     }
 
     if to_remove.is_empty() {
