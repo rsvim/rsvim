@@ -13,13 +13,9 @@ fn assert_hit(
   }
 }
 
-fn assert_miss(
-  tree: &RangeTreeMap<usize, i32>,
-  range: Range<usize>,
-  value: i32,
-) {
+fn assert_miss(tree: &RangeTreeMap<usize, i32>, range: Range<usize>) {
   for i in range {
-    assert_ne!(tree.query(i), Some(&value));
+    assert_eq!(tree.query(i), None);
   }
 }
 
@@ -178,7 +174,14 @@ fn remove1() {
   info!("tree-4:{:?}", tree);
   assert_hit(&tree, 15..20, 1);
   assert_hit(&tree, 20..22, 3);
-  assert_miss(&tree, 22..28, 3);
+  assert_miss(&tree, 22..28);
   assert_hit(&tree, 28..30, 3);
+  assert_hit(&tree, 30..35, 2);
+
+  // [15--17]   {33--35}
+  tree.remove(17..33);
+  info!("tree-5:{:?}", tree);
+  assert_hit(&tree, 15..17, 1);
+  assert_miss(&tree, 17..33);
   assert_hit(&tree, 30..35, 2);
 }
