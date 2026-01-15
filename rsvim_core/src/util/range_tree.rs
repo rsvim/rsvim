@@ -86,7 +86,7 @@ where
   }
 
   #[allow(clippy::type_complexity)]
-  fn _update(
+  fn _diff(
     &mut self,
     range: &Range<K>,
   ) -> (Vec<((K, K), V)>, Vec<((K, K), V)>) {
@@ -136,7 +136,7 @@ where
   /// If this range overlaps with existing range, the value of overlapped part
   /// will be override.
   pub fn insert(&mut self, range: Range<K>, value: V) {
-    let (to_remove, to_insert) = self._update(&range);
+    let (to_remove, to_insert) = self._diff(&range);
 
     // remove
     for key in to_remove {
@@ -157,7 +157,7 @@ where
   /// If this range overlaps with existing range, the value of overlapped part
   /// will also be removed.
   pub fn remove(&mut self, range: &Range<K>) -> Option<Vec<((K, K), V)>> {
-    let (to_remove, to_insert) = self._update(range);
+    let (to_remove, to_insert) = self._diff(range);
 
     // remove
     for key in to_remove.iter() {
