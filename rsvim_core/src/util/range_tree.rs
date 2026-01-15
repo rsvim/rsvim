@@ -176,6 +176,10 @@ where
     }
   }
 
+  pub fn clear(&mut self) {
+    self.map.clear();
+  }
+
   /// Query value by positiion.
   ///
   /// # Time Complexity
