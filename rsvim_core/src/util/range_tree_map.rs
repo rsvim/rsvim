@@ -159,7 +159,7 @@ where
   /// If this range overlaps with existing range, the value of overlapped part
   /// will also be removed.
   pub fn remove(&mut self, range: Range<K>) -> Option<Vec<((K, K), V)>> {
-    let (to_remove, to_insert) = self._diff(range);
+    let (to_remove, to_insert) = self._diff(&range);
 
     // remove
     for key in to_remove.iter() {
