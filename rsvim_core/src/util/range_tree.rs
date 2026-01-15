@@ -3,6 +3,13 @@
 use crate::prelude::*;
 use std::ops::Range;
 
+pub enum RangeOverlappedResult {
+  Non,
+  Left,
+  Right,
+  Inside,
+}
+
 #[derive(Clone, Default, Debug)]
 /// RangeTree is a specialized BTreeMap, which uses [`Range`] as its key. A
 /// range can be split into two or three new ranges if any insertion overlaps,
@@ -53,27 +60,32 @@ where
   }
 
   #[inline]
-  // Case-2:  [b----{a--b]------a}
+  // Case-2:  [a----{b--a]------b}
   fn _case2<T>(a: &Range<T>, b: &Range<T>) -> bool
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
-    a.start >= b.start && a.start < b.end
+    b.start >= a.start && b.start < a.end
   }
 
   #[inline]
   /// Whether two ranges `a` and `b` is overlapped.
-  pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> bool
+  pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> RangeOverlappedResult
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
     Self::_check_static(a);
     Self::_check_static(b);
 
-    Self::_case1(a, b)
-      || Self::_case1(b, a)
-      || Self::_case2(a, b)
-      || Self::_case2(b, a)
+    if Self::_case1(a, b) || Self::_case1(b, a) {
+      RangeOverlappedResult::Inside
+    } else if Self::_case2(a, b) {
+      RangeOverlappedResult::Left
+    } else if Self::_case2(b, a) {
+      RangeOverlappedResult::Right
+    } else {
+      RangeOverlappedResult::Non
+    }
   }
 
   /// Insert new range and value.
