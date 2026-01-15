@@ -56,7 +56,7 @@ where
     // find all `start < range.end` range
     let candidate_range = self.map.range(..(range.end, K::MAX));
 
-    for (&(start, end), &old_value) in candidate_range {
+    for (&(start, end), old_value) in candidate_range {
       // check if overlap: `range.start < end && start < range.end`
       // since we already limit `start < range.end`, here only need to check
       // `range.start < end`
