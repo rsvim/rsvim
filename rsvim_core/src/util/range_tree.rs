@@ -8,7 +8,7 @@ pub enum RangeOverlappedResult {
   Left,
   Right,
   Inside,
-  Outside
+  Outside,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -124,30 +124,20 @@ where
       // since we already limit `start < range.end`, here only need to check
       // `range.start < end`
       match Self::is_overlapped(&range, &Range { start, end }) {
-        RangeOverlappedResult::Inside => {
-        to_remove.push((start, end));
+        RangeOverlappedResult::Inside | RangeOverlappedResult::Outside => {
+          to_remove.push((start, end));
         }
         RangeOverlappedResult::Left => {
-        to_remove.push((start, end));
-        // for left non-overlap part
+          to_remove.push((start, end));
+          // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
         }
         RangeOverlappedResult::Right => {
-        to_remove.push((start, end));
-        // for right non-overlap part
+          to_remove.push((start, end));
+          // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
         RangeOverlappedResult::Not => {}
-
-        // for overlap range
-        // left non-overlap part
-        if start < range.start {
-          to_insert.push(((start, range.start), value.clone()));
-        }
-        // right non-overlap part
-        if range.end < end {
-          to_insert.push(((range.end, end), value.clone()));
-        }
       }
     }
 
