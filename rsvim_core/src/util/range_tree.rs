@@ -1,4 +1,4 @@
-//! Range tree.
+//! Range tree map.
 
 use crate::prelude::*;
 use std::ops::Range;
@@ -17,7 +17,7 @@ pub enum IsOverlappedResult {
 /// range can be split into two or three new ranges if any insertion overlaps,
 /// new value will override old value on the same range. A position only
 /// belongs to one range.
-pub struct RangeTree<K, V>
+pub struct RangeMap<K, V>
 where
   K: geo::CoordNum + min_max_traits::Max + Ord,
   V: Clone,
@@ -25,7 +25,7 @@ where
   map: BTreeMap<(K, K), V>,
 }
 
-impl<K, V> RangeTree<K, V>
+impl<K, V> RangeMap<K, V>
 where
   K: geo::CoordNum + min_max_traits::Max + Ord,
   V: Clone,
