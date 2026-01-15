@@ -37,22 +37,6 @@ where
   }
 
   #[inline]
-  fn _check_static<T>(r: &Range<T>)
-  where
-    T: geo::CoordNum + min_max_traits::Max + Ord,
-  {
-    debug_assert!(r.start < r.end);
-  }
-
-  #[inline]
-  fn _check<T>(&self, r: &Range<T>)
-  where
-    T: geo::CoordNum + min_max_traits::Max + Ord,
-  {
-    debug_assert!(r.start < r.end);
-  }
-
-  #[inline]
   // Case-1:  [b-----{a-a}------b]
   fn _case1<T>(a: &Range<T>, b: &Range<T>) -> bool
   where
@@ -85,8 +69,8 @@ where
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
-    Self::_check_static(a);
-    Self::_check_static(b);
+    debug_assert!(a.start < a.end);
+    debug_assert!(b.start < b.end);
 
     if Self::_case1(a, b) {
       RangeOverlappedResult::Inside
