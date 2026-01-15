@@ -138,7 +138,7 @@ where
 
     // remove
     for key in to_remove {
-      self.map.remove(&key.0);
+      self.map.remove(&key);
     }
 
     // insert split
@@ -159,8 +159,8 @@ where
     let (to_remove, to_insert) = self._diff(&range);
 
     // remove
-    for key in to_remove.iter() {
-      self.map.remove(&key.0);
+    for key in to_remove {
+      self.map.remove(&key);
     }
 
     // insert split
