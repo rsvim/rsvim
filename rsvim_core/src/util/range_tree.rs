@@ -85,6 +85,7 @@ where
     }
   }
 
+  #[allow(clippy::type_complexity)]
   fn _update(
     &mut self,
     range: &Range<K>,
