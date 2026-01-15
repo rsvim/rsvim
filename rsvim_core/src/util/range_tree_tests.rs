@@ -1,8 +1,7 @@
 use super::range_tree::*;
-// use crate::util::range_tree::RangeTree;
 
 #[test]
-fn main() {
+fn test1() {
   let mut tree: RangeTree<usize, i32> = RangeTree::new();
 
   // 测试用例 1

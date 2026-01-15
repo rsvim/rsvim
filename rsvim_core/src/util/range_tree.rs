@@ -45,10 +45,10 @@ where
     // only query ranges that can overlap.
     // i.e. `start < range.end && end > range.start`.
 
-    // find all `start < range.end` range
-    let candidate_range = self.map.range(..(range.end, K::MAX));
+    let candidate_range =
+      self.map.range((range.start, K::MAX)..(range.end, K::MAX));
 
-    for (&(start, end), old_value) in candidate_range {
+    for (&(start, end), value) in candidate_range {
       // check if overlap: `range.start < end && start < range.end`
       // since we already limit `start < range.end`, here only need to check
       // `range.start < end`
@@ -58,11 +58,11 @@ where
         // for overlap range
         // left non-overlap part
         if start < range.start {
-          to_insert.push(((start, range.start), old_value.clone()));
+          to_insert.push(((start, range.start), value.clone()));
         }
         // right non-overlap part
         if range.end < end {
-          to_insert.push(((range.end, end), old_value.clone()));
+          to_insert.push(((range.end, end), value.clone()));
         }
       }
     }
