@@ -4,7 +4,7 @@ use crate::prelude::*;
 use std::ops::Range;
 
 #[derive(Debug)]
-pub enum RangeOverlappedResult {
+pub enum IsOverlappedResult {
   Not,
   Left,
   Right,
@@ -65,7 +65,7 @@ where
   ///   [a----{b--a]------b}
   /// - Right: overlapped, `a` has right non-overlapped part:
   ///   [b----{a--b]------a}
-  pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> RangeOverlappedResult
+  pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> IsOverlappedResult
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
@@ -73,15 +73,15 @@ where
     debug_assert!(b.start < b.end);
 
     if Self::_case1(a, b) {
-      RangeOverlappedResult::Inside
+      IsOverlappedResult::Inside
     } else if Self::_case1(b, a) {
-      RangeOverlappedResult::Outside
+      IsOverlappedResult::Outside
     } else if Self::_case2(a, b) {
-      RangeOverlappedResult::Left
+      IsOverlappedResult::Left
     } else if Self::_case2(b, a) {
-      RangeOverlappedResult::Right
+      IsOverlappedResult::Right
     } else {
-      RangeOverlappedResult::Not
+      IsOverlappedResult::Not
     }
   }
 
@@ -108,27 +108,27 @@ where
 
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(&range, &Range { start, end }) {
-        RangeOverlappedResult::Inside => {
+        IsOverlappedResult::Inside => {
           to_remove.push((start, end));
         }
-        RangeOverlappedResult::Outside => {
+        IsOverlappedResult::Outside => {
           to_remove.push((start, end));
           // for left non-overlap part
           to_insert.push(((range.start, start), value.clone()));
           // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
-        RangeOverlappedResult::Left => {
+        IsOverlappedResult::Left => {
           to_remove.push((start, end));
           // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
         }
-        RangeOverlappedResult::Right => {
+        IsOverlappedResult::Right => {
           to_remove.push((start, end));
           // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
-        RangeOverlappedResult::Not => {}
+        IsOverlappedResult::Not => {}
       }
     }
 
