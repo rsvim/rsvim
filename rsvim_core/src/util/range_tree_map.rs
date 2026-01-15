@@ -19,7 +19,7 @@ pub enum IsOverlappedResult {
 /// belongs to one range.
 pub struct RangeTreeMap<K, V>
 where
-  K: geo::CoordNum + min_max_traits::Max + Ord,
+  K: geo::CoordNum + min_max_traits::Max + min_max_traits::Min + Ord,
   V: Clone,
 {
   map: BTreeMap<(K, K), V>,
@@ -27,7 +27,7 @@ where
 
 impl<K, V> RangeTreeMap<K, V>
 where
-  K: geo::CoordNum + min_max_traits::Max + Ord,
+  K: geo::CoordNum + min_max_traits::Max + min_max_traits::Min + Ord,
   V: Clone,
 {
   pub fn new() -> Self {
@@ -182,10 +182,9 @@ where
 
   /// Query value by positiion.
   pub fn query(&self, pos: K) -> Option<&V> {
-    // Since existing ranges are not overlapped, we only need to check the
-    // range in `start <= pos`. i.e. we only need to find out the first range
-    // that `start <= pos < end`.
-    for (&(start, end), value) in self.map.range(..=(pos, K::MAX)).rev() {
+    for (&(start, end), value) in
+      self.map.range((K::MIN, pos)..=(pos, K::MAX)).rev()
+    {
       if start <= pos && pos < end {
         return Some(value);
       }
