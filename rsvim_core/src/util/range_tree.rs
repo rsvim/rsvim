@@ -4,7 +4,8 @@ use crate::prelude::*;
 use std::ops::Range;
 
 /// RangeTree is a specialized BTreeMap, it uses [`Range`] as its key. And the
-/// range can be split if new insertion overlaps.
+/// range can be split into two ranges if new insertion overlaps, new value
+/// will override old value on the same range.
 pub struct RangeTree {
   // 使用 BTreeMap 存储，key 是 (start, end) 元组，value 是 i32
   // 使用元组而不是 Range 以便自定义排序
