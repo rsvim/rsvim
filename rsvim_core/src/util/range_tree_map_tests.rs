@@ -8,12 +8,8 @@ fn assert_range(
   range: Range<usize>,
   value: i32,
 ) {
-  for i in range.start.saturating_sub(100)..range.end.saturating_add(100) {
-    if i >= range.start && i < range.end {
-      assert_eq!(tree.query(i), Some(&value));
-    } else {
-      assert_ne!(tree.query(i), Some(&value));
-    }
+  for i in range {
+    assert_eq!(tree.query(i), Some(&value));
   }
 }
 

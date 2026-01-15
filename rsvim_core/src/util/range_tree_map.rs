@@ -102,7 +102,7 @@ where
     // i.e. `start < range.end && end > range.start`.
 
     let candidate_range =
-      self.map.range((range.start, K::MIN)..(range.end, K::MAX));
+      self.map.range(..(range.end, K::MAX));
 
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(range, &Range { start, end }) {
