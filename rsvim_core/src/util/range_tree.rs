@@ -95,11 +95,11 @@ where
   ///
   /// Average time complexity: `O(k)`, where k is the count of `start <= pos`.
   /// Worst time complexity: `O(n)`, where n is the count of total ranges.
-  pub fn get(&self, pos: K) -> Option<V> {
+  pub fn get(&self, pos: K) -> Option<&V> {
     // Since existing ranges are not overlapped, we only need to check the
     // range in `start <= pos`. i.e. we only need to find out the first range
     // that `start <= pos < end`.
-    for (&(start, end), &value) in self.map.range(..=(pos, K::MAX)).rev() {
+    for (&(start, end), value) in self.map.range(..=(pos, K::MAX)).rev() {
       if start <= pos && pos < end {
         return Some(value);
       }
