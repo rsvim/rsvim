@@ -101,7 +101,7 @@ where
       // check if overlap: `range.start < end && start < range.end`
       // since we already limit `start < range.end`, here only need to check
       // `range.start < end`
-      if range.start < end {
+      if Self::is_overlapped(&range, &Range { start, end }) {
         to_remove.push((start, end));
 
         // for overlap range
