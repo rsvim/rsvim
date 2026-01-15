@@ -8,14 +8,12 @@ fn assert_range(
   range: Range<usize>,
   value: i32,
 ) {
-  for i in range.start.saturating_sub(100)..range.start {
-    assert_eq!(tree.query(i), None);
-  }
-  for i in range.start..range.end {
-    assert_eq!(tree.query(i), Some(&value));
-  }
-  for i in range.end..range.end.saturating_add(100) {
-    assert_eq!(tree.query(i), None);
+  for i in range.start.saturating_sub(100)..range.end.saturating_add(100) {
+    if i >= range.start && i < range.end {
+      assert_eq!(tree.query(i), Some(&value));
+    } else {
+      assert_ne!(tree.query(i), Some(&value));
+    }
   }
 }
 
@@ -26,7 +24,6 @@ fn test1() {
   let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
   tree.insert(10..20, 1);
   info!("tree:{:?}", tree);
-
   assert_range(&tree, 10..20, 1);
 }
 
@@ -37,11 +34,18 @@ fn test2() {
   let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
   tree.insert(15..25, 1);
   info!("tree-1:{:?}", tree);
+  assert_range(&tree, 15..25, 1);
 
   tree.insert(10..20, 2);
   info!("tree-2:{:?}", tree);
+  assert_range(&tree, 10..20, 2);
+  assert_range(&tree, 20..25, 1);
+
   tree.insert(15..25, 3);
   info!("tree-3:{:?}", tree);
+  assert_range(&tree, 10..15, 2);
+  assert_range(&tree, 20..25, 1);
+
   tree.insert(11..13, 4);
   info!("tree-4:{:?}", tree);
 }
