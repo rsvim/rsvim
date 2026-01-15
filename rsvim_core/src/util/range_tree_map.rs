@@ -181,11 +181,6 @@ where
   }
 
   /// Query value by positiion.
-  ///
-  /// # Time Complexity
-  ///
-  /// - Average: `O(k)`, where `k` is the count of `start <= pos`.
-  /// - Worst: `O(n)`, where `n` is the count of total ranges.
   pub fn query(&self, pos: K) -> Option<&V> {
     // Since existing ranges are not overlapped, we only need to check the
     // range in `start <= pos`. i.e. we only need to find out the first range
