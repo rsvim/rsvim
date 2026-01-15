@@ -173,10 +173,12 @@ fn remove1() {
   assert_hit(&tree, 20..30, 3);
   assert_hit(&tree, 30..35, 2);
 
-  // [15----(20--------30)------35}
+  // [15----(20--22)   (28--30)------35}
   tree.remove(22..28);
-  info!("tree-3:{:?}", tree);
+  info!("tree-4:{:?}", tree);
   assert_hit(&tree, 15..20, 1);
-  assert_hit(&tree, 20..30, 3);
+  assert_hit(&tree, 20..22, 3);
+  assert_miss(&tree, 22..28, 3);
+  assert_hit(&tree, 28..30, 3);
   assert_hit(&tree, 30..35, 2);
 }
