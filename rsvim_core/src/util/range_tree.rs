@@ -38,7 +38,7 @@ where
   pub fn insert(&mut self, range: Range<K>, value: V) {
     debug_assert!(range.start < range.end);
 
-    // collect all ranges (include overlap and neighbor)
+    // collect all ranges, include overlap and neighbor.
     let mut to_remove = Vec::new();
     let mut to_insert = Vec::new();
 
