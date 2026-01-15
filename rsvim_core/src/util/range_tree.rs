@@ -146,7 +146,7 @@ where
       self.map.remove(&key.0);
     }
 
-    // insert newly split
+    // insert split
     for (key, val) in to_insert {
       self.map.insert(key, val.clone());
     }
@@ -171,7 +171,7 @@ where
       self.map.remove(&key.0);
     }
 
-    // insert newly split
+    // insert split
     for (key, val) in to_insert {
       self.map.insert(key, val.clone());
     }
