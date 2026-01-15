@@ -60,8 +60,8 @@ where
   ///
   /// It returns:
   /// - Not: not overlapped
-  /// - Inside: overlapped, `a` is inside of `b`: `[b-----{a-a}------b]`
-  /// - Outside: overlapped, `a` is outside of `b`: `[a-----{b-b}------a]`
+  /// - Inside: overlapped, `a` is inside `b`: `[b-----{a-a}------b]`
+  /// - Outside: overlapped, `a` is outside `b`: `[a-----{b-b}------a]`
   /// - Left: overlapped, `a` has left non-overlapped part:
   ///   `[a----{b--a]------b}`
   /// - Right: overlapped, `a` has right non-overlapped part:
@@ -117,7 +117,7 @@ where
           to_remove.push(((start, end), value.clone()));
         }
         IsOverlappedResult::Left => {
-          to_remove.push(((start, end), value.clone()));
+          to_remove.push(((range.end, end), value.clone()));
           // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
         }
