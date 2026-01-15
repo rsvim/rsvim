@@ -27,12 +27,27 @@ where
     }
   }
 
+  fn _check_static<T>(r: &Range<T>)
+  where
+    T: geo::CoordNum + min_max_traits::Max + Ord,
+  {
+    debug_assert!(r.start < r.end);
+  }
+
+  fn _check<T>(&self, r: &Range<T>)
+  where
+    T: geo::CoordNum + min_max_traits::Max + Ord,
+  {
+    debug_assert!(r.start < r.end);
+  }
+
   /// Whether two ranges `a` and `b` is overlapped.
   pub fn is_overlapped<T>(a: Range<T>, b: Range<T>) -> bool
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
-    true
+    Self::_check_static(&a);
+    Self::_check_static(&b);
   }
 
   /// Insert new range and value.
