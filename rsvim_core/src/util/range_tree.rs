@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use std::ops::Range;
 
+#[derive(Clone, Default, Debug)]
 /// RangeTree is a specialized BTreeMap, which uses [`Range`] as its key. A
 /// range can be split into two or three new ranges if any insertion overlaps,
 /// new value will override old value on the same range. A position only
@@ -13,16 +14,6 @@ where
   V: Clone,
 {
   map: BTreeMap<(K, K), V>,
-}
-
-impl<K, V> Default for RangeTree<K, V>
-where
-  K: geo::CoordNum + min_max_traits::Max + Ord + PartialOrd,
-  V: Clone,
-{
-  fn default() -> Self {
-    Self::new()
-  }
 }
 
 impl<K, V> RangeTree<K, V>
@@ -121,13 +112,4 @@ where
       .iter()
       .map(|((start, end), value)| (start..end, value))
   }
-
-  // pub fn print_all(&self) {
-  //   for (range, value) in self.iter() {
-  //     println!(
-  //       "key(start:{}, end:{}) = value({})",
-  //       range.start, range.end, value
-  //     );
-  //   }
-  // }
 }
