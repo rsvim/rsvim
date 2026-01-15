@@ -92,7 +92,7 @@ where
     debug_assert!(range.start < range.end);
 
     // collect all ranges, include overlap and neighbor.
-    let mut to_remove: Vec<(K, K)> = Vec::new();
+    let mut to_remove: Vec<((K, K), V)> = Vec::new();
     let mut to_insert: Vec<((K, K), V)> = Vec::new();
 
     // only query ranges that can overlap.
@@ -102,24 +102,24 @@ where
       self.map.range((range.start, K::MAX)..(range.end, K::MAX));
 
     for (&(start, end), value) in candidate_range {
-      match Self::is_overlapped(&range, &Range { start, end }) {
+      match Self::is_overlapped(range, &Range { start, end }) {
         IsOverlappedResult::Inside => {
-          to_remove.push((start, end));
+          to_remove.push(((start, end), value.clone()));
           // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
           // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Outside => {
-          to_remove.push((start, end));
+          to_remove.push(((start, end), value.clone()));
         }
         IsOverlappedResult::Left => {
-          to_remove.push((start, end));
+          to_remove.push(((start, end), value.clone()));
           // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
         }
         IsOverlappedResult::Right => {
-          to_remove.push((start, end));
+          to_remove.push(((start, end), value.clone()));
           // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
@@ -134,10 +134,6 @@ where
   ///
   /// If this range overlaps with existing range, the value of overlapped part
   /// will be override.
-  ///
-  /// # Time Complexity
-  ///
-  /// `O(k log n)`, `k` is the count of overlap, `n` is total count of ranges.
   pub fn insert(&mut self, range: Range<K>, value: V) {
     let (to_remove, to_insert) = self._update(&range);
 
@@ -159,10 +155,6 @@ where
   ///
   /// If this range overlaps with existing range, the value of overlapped part
   /// will also be removed.
-  ///
-  /// # Time Complexity
-  ///
-  /// `O(k log n)`, `k` is the count of overlap, `n` is total count of ranges.
   pub fn remove(&mut self, range: &Range<K>) -> Option<Vec<((K, K), V)>> {
     let (to_remove, to_insert) = self._update(range);
 
