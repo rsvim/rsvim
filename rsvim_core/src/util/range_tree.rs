@@ -74,8 +74,8 @@ where
   ///
   /// It returns:
   /// - Not: not overlapped
-  /// - Left: overlapped, `a` has left non-overlapped part
-  /// - Right: overlapped, `a` has right non-overlapped part
+  /// - Left: overlapped, `a` has a left non-overlapped part
+  /// - Right: overlapped, `a` has a right non-overlapped part
   /// - Inside: overlapped, `a` is inside of `b`, `a` has no non-overlapped
   ///   part
   /// - Outside: overlapped, `a` is outside of `b`, `a` has 2 non-overlapped
