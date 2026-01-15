@@ -98,3 +98,44 @@ fn test3() {
   assert_range(&tree, 25..27, 3);
   assert_range(&tree, 27..60, 4);
 }
+
+#[test]
+fn test4() {
+  test_log_init();
+
+  let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
+  // [15----------25]
+  tree.insert(15..25, 1);
+  info!("tree-1:{:?}", tree);
+  assert_range(&tree, 15..25, 1);
+
+  // [15--------25]{25----------35}
+  tree.insert(25..35, 2);
+  info!("tree-2:{:?}", tree);
+  assert_range(&tree, 15..25, 1);
+  assert_range(&tree, 25..35, 2);
+
+  // [15----(20--------30)------35}
+  tree.insert(20..30, 3);
+  info!("tree-3:{:?}", tree);
+  assert_range(&tree, 15..20, 1);
+  assert_range(&tree, 20..30, 3);
+  assert_range(&tree, 30..35, 2);
+
+  // {10-----17}---(20----25]{25----30)------35}
+  tree.insert(10..17, 4);
+  info!("tree-4:{:?}", tree);
+  assert_range(&tree, 10..17, 4);
+  assert_range(&tree, 17..20, 1);
+  assert_range(&tree, 20..30, 3);
+  assert_range(&tree, 30..35, 2);
+
+  // {10-----17}---(20----25]{25----30)---{33----40}
+  tree.insert(33..40, 5);
+  info!("tree-5:{:?}", tree);
+  assert_range(&tree, 10..17, 4);
+  assert_range(&tree, 17..20, 1);
+  assert_range(&tree, 20..30, 3);
+  assert_range(&tree, 30..33, 2);
+  assert_range(&tree, 33..40, 5);
+}
