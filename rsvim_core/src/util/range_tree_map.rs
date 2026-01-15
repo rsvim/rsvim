@@ -134,7 +134,7 @@ where
   }
 
   #[inline]
-  /// Insert new range and value.
+  /// Insert/set range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
   /// will be override.
@@ -156,7 +156,7 @@ where
   }
 
   #[inline]
-  /// Remove a range and value.
+  /// Remove/unset range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
   /// will also be removed.
