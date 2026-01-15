@@ -59,12 +59,12 @@ where
   ///
   /// It returns:
   /// - Not: not overlapped
-  /// - Inside: overlapped, `a` is inside of `b`: [b-----{a-a}------b]
-  /// - Outside: overlapped, `a` is outside of `b`: [a-----{b-b}------a]
+  /// - Inside: overlapped, `a` is inside of `b`: `[b-----{a-a}------b]`
+  /// - Outside: overlapped, `a` is outside of `b`: `[a-----{b-b}------a]`
   /// - Left: overlapped, `a` has left non-overlapped part:
-  ///   [a----{b--a]------b}
+  ///   `[a----{b--a]------b}`
   /// - Right: overlapped, `a` has right non-overlapped part:
-  ///   [b----{a--b]------a}
+  ///   `[b----{a--b]------a}`
   pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> IsOverlappedResult
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
