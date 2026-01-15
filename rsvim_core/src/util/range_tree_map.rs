@@ -91,14 +91,11 @@ where
 
   #[inline]
   #[allow(clippy::type_complexity)]
-  fn _diff(
-    &mut self,
-    range: &Range<K>,
-  ) -> (Vec<((K, K), V)>, Vec<((K, K), V)>) {
+  fn _diff(&mut self, range: &Range<K>) -> (Vec<(K, K)>, Vec<((K, K), V)>) {
     debug_assert!(range.start < range.end);
 
     // collect all ranges, include overlap and neighbor.
-    let mut to_remove: Vec<((K, K), V)> = Vec::new();
+    let mut to_remove: Vec<(K, K)> = Vec::new();
     let mut to_insert: Vec<((K, K), V)> = Vec::new();
 
     // only query ranges that can overlap.
@@ -109,19 +106,19 @@ where
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(range, &Range { start, end }) {
         IsOverlappedResult::Inside => {
-          to_remove.push(((start, end), value.clone()));
+          to_remove.push((start, end));
           to_insert.push(((start, range.start), value.clone()));
           to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Outside | IsOverlappedResult::Same => {
-          to_remove.push(((start, end), value.clone()));
+          to_remove.push((start, end));
         }
         IsOverlappedResult::Left => {
-          to_remove.push(((start, end), value.clone()));
+          to_remove.push((start, end));
           to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Right => {
-          to_remove.push(((start, end), value.clone()));
+          to_remove.push((start, end));
           to_insert.push(((start, range.start), value.clone()));
         }
         IsOverlappedResult::Not => {}
@@ -158,7 +155,7 @@ where
   ///
   /// If this range overlaps with existing range, the value of overlapped part
   /// will also be removed.
-  pub fn remove(&mut self, range: Range<K>) -> Option<Vec<((K, K), V)>> {
+  pub fn remove(&mut self, range: Range<K>) {
     let (to_remove, to_insert) = self._diff(&range);
 
     // remove
@@ -169,12 +166,6 @@ where
     // insert split
     for (key, value) in to_insert {
       self.map.insert(key, value);
-    }
-
-    if to_remove.is_empty() {
-      None
-    } else {
-      Some(to_remove)
     }
   }
 
