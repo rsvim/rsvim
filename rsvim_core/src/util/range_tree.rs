@@ -36,11 +36,14 @@ where
     }
   }
 
-  /// Insert new range and value. If this range overlaps with existing range,
-  /// the value of overlapped part will be override.
+  /// Insert new range and value.
   ///
-  /// Time complexity is `O(k log n)`, k is the count of overlap, n is total
-  /// count of ranges.
+  /// If this range overlaps with existing range, the value of overlapped part
+  /// will be override.
+  ///
+  /// # Time Complexity
+  ///
+  /// `O(k log n)`, `k` is the count of overlap, `n` is total count of ranges.
   pub fn insert(&mut self, range: Range<K>, value: V) {
     // invalid range
     if range.start >= range.end {
