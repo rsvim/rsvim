@@ -4,10 +4,11 @@ use crate::prelude::*;
 use std::ops::Range;
 
 pub enum RangeOverlappedResult {
-  Non,
+  Not,
   Left,
   Right,
   Inside,
+  Outside
 }
 
 #[derive(Clone, Default, Debug)]
@@ -70,6 +71,13 @@ where
 
   #[inline]
   /// Whether two ranges `a` and `b` is overlapped.
+  ///
+  /// It returns:
+  /// - Not: `a` and `b` is not overlapped
+  /// - Left: `a` and `b` is overlapped, `a` has left non-overlapped part
+  /// - Right: `a` and `b` is overlapped, `a` has right non-overlapped part
+  /// - Inside: `a` and `b` is overlapped, `a` is inside of `b`
+  /// - Outside: `a` and `b` is overlapped, `a` is outside of `b`
   pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> RangeOverlappedResult
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
@@ -77,14 +85,16 @@ where
     Self::_check_static(a);
     Self::_check_static(b);
 
-    if Self::_case1(a, b) || Self::_case1(b, a) {
+    if Self::_case1(a, b) {
       RangeOverlappedResult::Inside
+    } else if Self::_case1(b, a) {
+      RangeOverlappedResult::Outside
     } else if Self::_case2(a, b) {
       RangeOverlappedResult::Left
     } else if Self::_case2(b, a) {
       RangeOverlappedResult::Right
     } else {
-      RangeOverlappedResult::Non
+      RangeOverlappedResult::Not
     }
   }
 
@@ -113,8 +123,21 @@ where
       // check if overlap: `range.start < end && start < range.end`
       // since we already limit `start < range.end`, here only need to check
       // `range.start < end`
-      if Self::is_overlapped(&range, &Range { start, end }) {
+      match Self::is_overlapped(&range, &Range { start, end }) {
+        RangeOverlappedResult::Inside => {
         to_remove.push((start, end));
+        }
+        RangeOverlappedResult::Left => {
+        to_remove.push((start, end));
+        // for left non-overlap part
+          to_insert.push(((start, range.start), value.clone()));
+        }
+        RangeOverlappedResult::Right => {
+        to_remove.push((start, end));
+        // for right non-overlap part
+          to_insert.push(((range.end, end), value.clone()));
+        }
+        RangeOverlappedResult::Not => {}
 
         // for overlap range
         // left non-overlap part
