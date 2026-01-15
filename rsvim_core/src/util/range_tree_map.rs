@@ -13,7 +13,7 @@ pub enum IsOverlappedResult {
 }
 
 #[derive(Clone, Default, Debug)]
-/// RangeTree is a specialized BTreeMap, which uses [`Range`] as its key. A
+/// RangeTreeMap is a specialized BTreeMap, which uses [`Range`] as its key. A
 /// range can be split into two or three new ranges if any insertion overlaps,
 /// new value will override old value on the same range. A position only
 /// belongs to one range.
