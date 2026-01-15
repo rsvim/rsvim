@@ -93,12 +93,12 @@ where
     self.map.insert((range.start, range.end), value);
   }
 
-  /// Get value by positiion.
-  /// Since our insertion logic will split overlap range, so one center
-  /// position will only belong to one range.
+  /// Query value by positiion.
   ///
-  /// Average time complexity: `O(k)`, where k is the count of `start <= pos`.
-  /// Worst time complexity: `O(n)`, where n is the count of total ranges.
+  /// # Time Complexity
+  ///
+  /// - Average: `O(k)`, where `k` is the count of `start <= pos`.
+  /// - Worst: `O(n)`, where `n` is the count of total ranges.
   pub fn get(&self, pos: K) -> Option<&V> {
     // Since existing ranges are not overlapped, we only need to check the
     // range in `start <= pos`. i.e. we only need to find out the first range
