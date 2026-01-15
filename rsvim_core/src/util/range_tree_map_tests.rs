@@ -183,5 +183,5 @@ fn remove1() {
   info!("tree-5:{:?}", tree);
   assert_hit(&tree, 15..17, 1);
   assert_miss(&tree, 17..33);
-  assert_hit(&tree, 30..35, 2);
+  assert_hit(&tree, 33..35, 2);
 }
