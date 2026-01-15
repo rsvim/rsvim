@@ -137,7 +137,7 @@ where
   /// Insert/set range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
-  /// will be override.
+  /// will be overridden.
   pub fn insert(&mut self, range: Range<K>, value: V) {
     let (to_remove, to_insert) = self._diff(&range);
 
