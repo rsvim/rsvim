@@ -27,6 +27,7 @@ where
     }
   }
 
+  #[inline]
   fn _check_static<T>(r: &Range<T>)
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
@@ -34,6 +35,7 @@ where
     debug_assert!(r.start < r.end);
   }
 
+  #[inline]
   fn _check<T>(&self, r: &Range<T>)
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
