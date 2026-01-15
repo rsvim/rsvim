@@ -36,10 +36,7 @@ where
   ///
   /// `O(k log n)`, `k` is the count of overlap, `n` is total count of ranges.
   pub fn insert(&mut self, range: Range<K>, value: V) {
-    // invalid range
-    if range.start >= range.end {
-      return;
-    }
+    debug_assert!(range.start < range.end);
 
     // collect all ranges (include overlap and neighbor)
     let mut to_remove = Vec::new();
