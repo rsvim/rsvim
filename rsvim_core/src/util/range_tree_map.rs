@@ -13,7 +13,7 @@ pub enum IsOverlappedResult {
   Outside,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 /// RangeTreeMap is a specialized BTreeMap, which uses [`Range`] as its key. A
 /// range can be split into two or three new ranges if any insertion overlaps,
 /// new value will override old value on the same range. A position only
@@ -24,16 +24,6 @@ where
   V: Clone,
 {
   map: BTreeMap<(K, K), V>,
-}
-
-impl<K, V> Debug for RangeTreeMap<K, V>
-where
-  K: geo::CoordNum + min_max_traits::Max + min_max_traits::Min + Ord,
-  V: Clone,
-{
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_fmt(format_args!("{:?}", self.map))
-  }
 }
 
 impl<K, V> RangeTreeMap<K, V>
