@@ -65,8 +65,8 @@ where
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
-    Self::_check_static(&a);
-    Self::_check_static(&b);
+    Self::_check_static(a);
+    Self::_check_static(b);
 
     Self::_case1(a, b)
       || Self::_case1(b, a)
