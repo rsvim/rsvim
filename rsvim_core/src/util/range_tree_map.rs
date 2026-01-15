@@ -86,6 +86,7 @@ where
     }
   }
 
+  #[inline]
   #[allow(clippy::type_complexity)]
   fn _diff(
     &mut self,
@@ -132,6 +133,7 @@ where
     (to_remove, to_insert)
   }
 
+  #[inline]
   /// Insert new range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
@@ -153,6 +155,7 @@ where
     self.map.insert((range.start, range.end), value);
   }
 
+  #[inline]
   /// Remove a range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
@@ -177,10 +180,12 @@ where
     }
   }
 
+  #[inline]
   pub fn clear(&mut self) {
     self.map.clear();
   }
 
+  #[inline]
   /// Query value by positiion.
   pub fn query(&self, pos: K) -> Option<&V> {
     for (&(start, end), value) in
@@ -197,6 +202,7 @@ where
     None
   }
 
+  #[inline]
   pub fn iter(&self) -> impl Iterator<Item = (Range<&K>, &V)> + '_ {
     self
       .map
