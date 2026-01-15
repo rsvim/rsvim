@@ -19,7 +19,7 @@ fn assert_miss(
   value: i32,
 ) {
   for i in range {
-    assert_eq!(tree.query(i), Some(&value));
+    assert_ne!(tree.query(i), Some(&value));
   }
 }
 
