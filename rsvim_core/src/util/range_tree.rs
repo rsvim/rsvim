@@ -163,8 +163,8 @@ where
   /// # Time Complexity
   ///
   /// `O(k log n)`, `k` is the count of overlap, `n` is total count of ranges.
-  pub fn remove(&mut self, range: Range<K>) -> Option<Vec<((K, K), V)>> {
-    let (to_remove, to_insert) = self._update(&range);
+  pub fn remove(&mut self, range: &Range<K>) -> Option<Vec<((K, K), V)>> {
+    let (to_remove, to_insert) = self._update(range);
 
     // remove
     for key in to_remove.iter() {
