@@ -27,6 +27,14 @@ where
     }
   }
 
+  /// Whether two ranges `a` and `b` is overlapped.
+  pub fn is_overlapped<T>(a: Range<T>, b: Range<T>) -> bool
+  where
+    T: geo::CoordNum + min_max_traits::Max + Ord,
+  {
+    true
+  }
+
   /// Insert new range and value.
   ///
   /// If this range overlaps with existing range, the value of overlapped part
