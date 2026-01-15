@@ -7,6 +7,7 @@ use std::ops::Range;
 #[derive(Debug)]
 pub enum IsOverlappedResult {
   Not,
+  Same,
   Left,
   Right,
   Inside,
@@ -73,7 +74,9 @@ where
     debug_assert!(a.start < a.end);
     debug_assert!(b.start < b.end);
 
-    if Self::_case1(a, b) {
+    if a == b {
+      IsOverlappedResult::Same
+    } else if Self::_case1(a, b) {
       IsOverlappedResult::Inside
     } else if Self::_case1(b, a) {
       IsOverlappedResult::Outside
@@ -101,19 +104,16 @@ where
     // only query ranges that can overlap.
     // i.e. `start < range.end && end > range.start`.
 
-    let candidate_range =
-      self.map.range(..(range.end, K::MAX));
+    let candidate_range = self.map.range(..(range.end, K::MAX));
 
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(range, &Range { start, end }) {
         IsOverlappedResult::Inside => {
           to_remove.push(((start, end), value.clone()));
-          // for left non-overlap part
           to_insert.push(((start, range.start), value.clone()));
-          // for right non-overlap part
           to_insert.push(((range.end, end), value.clone()));
         }
-        IsOverlappedResult::Outside => {
+        IsOverlappedResult::Outside | IsOverlappedResult::Same => {
           to_remove.push(((start, end), value.clone()));
         }
         IsOverlappedResult::Left => {
