@@ -111,11 +111,11 @@ where
     None
   }
 
-  pub fn iter(&self) -> impl Iterator<Item = (Range<K>, V)> + '_ {
+  pub fn iter(&self) -> impl Iterator<Item = (Range<&K>, &V)> + '_ {
     self
       .map
       .iter()
-      .map(|(&(start, end), &value)| (start..end, value))
+      .map(|((start, end), value)| (start..end, value))
   }
 
   // pub fn print_all(&self) {
