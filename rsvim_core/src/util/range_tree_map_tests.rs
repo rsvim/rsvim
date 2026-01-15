@@ -32,20 +32,28 @@ fn test2() {
   test_log_init();
 
   let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
+  // [15----------25]
   tree.insert(15..25, 1);
   info!("tree-1:{:?}", tree);
   assert_range(&tree, 15..25, 1);
 
+  // {10----[15----20}-----25]
   tree.insert(10..20, 2);
   info!("tree-2:{:?}", tree);
   assert_range(&tree, 10..20, 2);
   assert_range(&tree, 20..25, 1);
 
+  // {10----[15----20}-----25]
   tree.insert(15..25, 3);
   info!("tree-3:{:?}", tree);
   assert_range(&tree, 10..15, 2);
-  assert_range(&tree, 20..25, 1);
+  assert_range(&tree, 15..25, 3);
 
+  // {10-(11-13)--[15----20}-----25]
   tree.insert(11..13, 4);
   info!("tree-4:{:?}", tree);
+  assert_range(&tree, 10..11, 2);
+  assert_range(&tree, 11..13, 4);
+  assert_range(&tree, 13..15, 2);
+  assert_range(&tree, 15..25, 3);
 }
