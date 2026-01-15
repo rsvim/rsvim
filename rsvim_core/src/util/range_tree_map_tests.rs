@@ -2,7 +2,7 @@ use super::range_tree_map::*;
 
 #[test]
 fn test1() {
-  let mut tree: RangeMap<usize, i32> = RangeMap::new();
+  let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
 
   // 测试用例 1
   println!("=== 测试用例 1 ===");
@@ -18,7 +18,7 @@ fn test1() {
 
   // 重置并测试用例 2
   println!("=== 测试用例 2 ===");
-  let mut tree2 = RangeMap::new();
+  let mut tree2 = RangeTreeMap::new();
   tree2.insert(10..20, 1);
   tree2.insert(15..25, 2);
   tree2.insert(11..13, 3);
