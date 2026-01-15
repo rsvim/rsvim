@@ -132,17 +132,17 @@ where
       }
     }
 
-    // remove been split range
+    // remove
     for key in to_remove {
       self.map.remove(&key);
     }
 
-    // insert newly split range
+    // insert newly split
     for (key, val) in to_insert {
       self.map.insert(key, val.clone());
     }
 
-    // insert new range
+    // insert newly inserted
     self.map.insert((range.start, range.end), value);
   }
 
