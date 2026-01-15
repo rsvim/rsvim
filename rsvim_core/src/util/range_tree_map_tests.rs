@@ -185,3 +185,54 @@ fn remove1() {
   assert_miss(&tree, 17..33);
   assert_hit(&tree, 33..35, 2);
 }
+
+#[test]
+fn remove2() {
+  test_log_init();
+
+  let mut tree: RangeTreeMap<usize, i32> = RangeTreeMap::new();
+  // [15----------25]
+  tree.insert(15..25, 1);
+  info!("tree-1:{:?}", tree);
+  assert_hit(&tree, 15..25, 1);
+
+  // [15--------25]{25----------35}
+  tree.insert(25..35, 2);
+  info!("tree-2:{:?}", tree);
+  assert_hit(&tree, 15..25, 1);
+  assert_hit(&tree, 25..35, 2);
+
+  // [15----(20--------30)------35}
+  tree.insert(20..30, 3);
+  info!("tree-3:{:?}", tree);
+  assert_hit(&tree, 15..20, 1);
+  assert_hit(&tree, 20..30, 3);
+  assert_hit(&tree, 30..35, 2);
+
+  // [15----(20--22)   (28--30)------35}
+  tree.remove(22..28);
+  info!("tree-4:{:?}", tree);
+  assert_hit(&tree, 15..20, 1);
+  assert_hit(&tree, 20..22, 3);
+  assert_miss(&tree, 22..28);
+  assert_hit(&tree, 28..30, 3);
+  assert_hit(&tree, 30..35, 2);
+
+  // (21-22)   (28--30)------35}
+  tree.remove(13..21);
+  info!("tree-5:{:?}", tree);
+  assert_miss(&tree, 15..21);
+  assert_hit(&tree, 21..22, 3);
+  assert_miss(&tree, 22..28);
+  assert_hit(&tree, 28..30, 3);
+  assert_hit(&tree, 30..35, 2);
+
+  // (21-22)   (28-29)
+  tree.remove(29..40);
+  info!("tree-6:{:?}", tree);
+  assert_miss(&tree, 15..21);
+  assert_hit(&tree, 21..22, 3);
+  assert_miss(&tree, 22..28);
+  assert_hit(&tree, 28..29, 3);
+  assert_miss(&tree, 29..35);
+}
