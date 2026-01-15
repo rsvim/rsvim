@@ -110,8 +110,8 @@ where
     debug_assert!(range.start < range.end);
 
     // collect all ranges, include overlap and neighbor.
-    let mut to_remove = Vec::new();
-    let mut to_insert = Vec::new();
+    let mut to_remove: Vec<(K, K)> = Vec::new();
+    let mut to_insert: Vec<((K, K), V)> = Vec::new();
 
     // only query ranges that can overlap.
     // i.e. `start < range.end && end > range.start`.
