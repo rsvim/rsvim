@@ -102,7 +102,7 @@ where
     // i.e. `start < range.end && end > range.start`.
 
     let candidate_range =
-      self.map.range((range.start, K::MAX)..(range.end, K::MAX));
+      self.map.range((range.start, K::MIN)..(range.end, K::MAX));
 
     for (&(start, end), value) in candidate_range {
       match Self::is_overlapped(range, &Range { start, end }) {
@@ -117,14 +117,12 @@ where
           to_remove.push(((start, end), value.clone()));
         }
         IsOverlappedResult::Left => {
-          to_remove.push(((range.end, end), value.clone()));
-          // for left non-overlap part
-          to_insert.push(((start, range.start), value.clone()));
+          to_remove.push(((start, end), value.clone()));
+          to_insert.push(((range.end, end), value.clone()));
         }
         IsOverlappedResult::Right => {
           to_remove.push(((start, end), value.clone()));
-          // for right non-overlap part
-          to_insert.push(((range.end, end), value.clone()));
+          to_insert.push(((start, range.start), value.clone()));
         }
         IsOverlappedResult::Not => {}
       }
@@ -147,8 +145,8 @@ where
     }
 
     // insert split
-    for (key, val) in to_insert {
-      self.map.insert(key, val.clone());
+    for (key, value) in to_insert {
+      self.map.insert(key, value);
     }
 
     // insert newly inserted
@@ -186,7 +184,7 @@ where
   }
 
   #[inline]
-  /// Query value by positiion.
+  /// Query value by position.
   pub fn query(&self, pos: K) -> Option<&V> {
     for (&(start, end), value) in
       self.map.range((K::MIN, pos)..=(pos, K::MAX)).rev()
