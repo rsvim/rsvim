@@ -41,13 +41,37 @@ where
     debug_assert!(r.start < r.end);
   }
 
+  #[inline]
+  // Case-1:  [b-----{a-a}------b]
+  fn _case1<T>(a: &Range<T>, b: &Range<T>) -> bool
+  where
+    T: geo::CoordNum + min_max_traits::Max + Ord,
+  {
+    a.start >= b.start && a.end <= b.end
+  }
+
+  #[inline]
+  // Case-2:  [b----{a--b]------a}
+  fn _case2<T>(a: &Range<T>, b: &Range<T>) -> bool
+  where
+    T: geo::CoordNum + min_max_traits::Max + Ord,
+  {
+    a.start >= b.start && a.start < b.end
+  }
+
+  #[inline]
   /// Whether two ranges `a` and `b` is overlapped.
-  pub fn is_overlapped<T>(a: Range<T>, b: Range<T>) -> bool
+  pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> bool
   where
     T: geo::CoordNum + min_max_traits::Max + Ord,
   {
     Self::_check_static(&a);
     Self::_check_static(&b);
+
+    Self::_case1(a, b)
+      || Self::_case1(b, a)
+      || Self::_case2(a, b)
+      || Self::_case2(b, a)
   }
 
   /// Insert new range and value.
