@@ -1,4 +1,4 @@
-use super::range_map::*;
+use super::range_tree_map::*;
 
 #[test]
 fn test1() {
