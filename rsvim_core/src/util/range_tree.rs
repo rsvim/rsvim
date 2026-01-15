@@ -76,9 +76,9 @@ where
   /// - Not: not overlapped
   /// - Left: overlapped, `a` has left non-overlapped part
   /// - Right: overlapped, `a` has right non-overlapped part
-  /// - Inside: overlapped, `a` is inside of `b`, `a` has no non-overlapped 
+  /// - Inside: overlapped, `a` is inside of `b`, `a` has no non-overlapped
   ///   part
-  /// - Outside: overlapped, `a` is outside of `b`, `a` has 2 non-overlapped 
+  /// - Outside: overlapped, `a` is outside of `b`, `a` has 2 non-overlapped
   ///   parts
   pub fn is_overlapped<T>(a: &Range<T>, b: &Range<T>) -> RangeOverlappedResult
   where
