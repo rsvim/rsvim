@@ -21,11 +21,6 @@ pub struct Delete {
   count: usize,
 }
 
-pub struct Replace {
-  delete: Delete,
-  insert: Insert,
-}
-
-pub struct BufferChange {
+pub struct ChangeOperation {
   text: Text,
 }
