@@ -18,7 +18,7 @@ pub struct Insert {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   char_idx: usize,
-  count: usize,
+  n: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -47,5 +47,9 @@ pub struct Changes {
 impl Changes {
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
+  }
+
+  pub fn delete(&mut self, char_idx: usize, n: usize) {
+    self.ops.push(Operation::Delete(Delete { char_idx, n }));
   }
 }
