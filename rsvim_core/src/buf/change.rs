@@ -9,18 +9,24 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Instant;
 
-pub struct Retain {
-  char_idx: usize,
-}
-
 pub struct Insert {
+  char_idx: usize,
   payload: CompactString,
 }
 
 pub struct Delete {
+  char_idx: usize,
   count: usize,
 }
 
-pub struct ChangeOperation {
-  text: Text,
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// A basic unit of change operation:
+/// - Insert payload at an absolute char index.
+/// - Delete `n` characters at an absolute char index.
+///
+/// NOTE: Ropey provide two types of coordinate system:
+/// 1. 2-Dimension on line number and char index per line.
+/// 2. 1-Dimension on absolute char index per whole buffer.
+pub enum ChangeOperation {
+  Retain(usize),
 }
