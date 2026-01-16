@@ -50,7 +50,10 @@ impl Changes {
   }
 
   pub fn delete(&mut self, char_idx: usize, n: usize) {
-    debug_assert!(n > 0);
+    if n == 0 {
+      return;
+    }
+
     if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx == char_idx
     {
@@ -66,5 +69,15 @@ impl Changes {
     } else {
       self.ops.push(Operation::Delete(Delete { char_idx, n }));
     }
+  }
+
+  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
+    if payload.is_empty() {
+      return;
+    }
+
+    self
+      .ops
+      .push(Operation::Insert(Insert { char_idx, payload }));
   }
 }
