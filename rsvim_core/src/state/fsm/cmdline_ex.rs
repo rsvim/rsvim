@@ -140,7 +140,7 @@ impl CmdlineEx {
       let cursor_parent = tree.node(cursor_parent_id);
       debug_assert!(cursor_parent.is_some());
       let cursor_parent = cursor_parent.unwrap();
-      debug_assert!(matches!(cursor_parent, TreeNode::CmdlineInput(_)));
+      debug_assert!(matches!(cursor_parent, Node::CmdlineInput(_)));
     }
 
     // Show message/hide input, and update layouts/shapes.
@@ -160,7 +160,7 @@ impl CmdlineEx {
       let cursor_parent = tree.node(cursor_parent_id);
       debug_assert!(cursor_parent.is_some());
       let cursor_parent = cursor_parent.unwrap();
-      debug_assert!(matches!(cursor_parent, TreeNode::WindowContent(_)));
+      debug_assert!(matches!(cursor_parent, Node::WindowContent(_)));
     }
 
     let cursor_viewport = tree.editable_cursor_viewport(current_window_id);

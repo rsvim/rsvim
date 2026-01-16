@@ -50,7 +50,7 @@ pub fn make_wrap_linebreak() -> WindowOptions {
 pub fn update_viewport(
   buf: BufferArc,
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   start_line: usize,
   start_column: usize,
 ) -> ViewportArc {
@@ -69,7 +69,7 @@ pub fn update_viewport(
 fn search_viewport(
   direction: ViewportSearchDirection,
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -112,7 +112,7 @@ fn search_viewport(
 
 pub fn search_down_viewport(
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -133,7 +133,7 @@ pub fn search_down_viewport(
 
 pub fn search_up_viewport(
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -154,7 +154,7 @@ pub fn search_up_viewport(
 
 pub fn search_left_viewport(
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -175,7 +175,7 @@ pub fn search_left_viewport(
 
 pub fn search_right_viewport(
   tree: &mut Tree,
-  window_id: TreeNodeId,
+  window_id: NodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,

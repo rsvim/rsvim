@@ -21,7 +21,7 @@ inodify_impl!(CmdlineMessage);
 
 impl CmdlineMessage {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     text_contents: TextContentsWk,
     viewport: ViewportWk,

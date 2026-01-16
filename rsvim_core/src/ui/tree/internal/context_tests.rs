@@ -1,7 +1,7 @@
 use super::context::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::NodeId;
 use itertools::Itertools;
 use taffy::Style;
 
@@ -98,7 +98,7 @@ fn new_child1() {
   assert_eq!(ctx.children(nid5).unwrap().len(), 0);
   assert_eq!(ctx.children(nid6).unwrap().len(), 0);
 
-  let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+  let contains_child = |parent_id: NodeId, child_id: NodeId| -> bool {
     ctx
       .children(parent_id)
       .unwrap()
@@ -199,7 +199,7 @@ fn new_child2() {
   assert_eq!(ctx.children(nid8).unwrap().len(), 0);
   assert_eq!(ctx.children(nid9).unwrap().len(), 0);
 
-  let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+  let contains_child = |parent_id: NodeId, child_id: NodeId| -> bool {
     let result = ctx
       .children(parent_id)
       .unwrap()
@@ -627,7 +627,7 @@ fn children1() {
   }
 }
 
-fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
+fn make_tree(n: usize) -> (Vec<NodeId>, TreeContext) {
   let style = Style {
     size: taffy::Size {
       width: taffy::prelude::length(10_u16),
@@ -639,7 +639,7 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
   let mut ctx = TreeContext::new();
   let root_id = ctx.new_leaf_default(style.clone(), "root").unwrap();
 
-  let mut nids: Vec<TreeNodeId> = vec![];
+  let mut nids: Vec<NodeId> = vec![];
   nids.push(root_id);
 
   for _ in 1..n {

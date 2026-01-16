@@ -11,7 +11,7 @@ struct TestValue {
 }
 
 impl TestValue {
-  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+  pub fn new(id: NodeId, ctx: TreeContextWk) -> Self {
     Self {
       __node: InodeBase::new(id, ctx),
     }

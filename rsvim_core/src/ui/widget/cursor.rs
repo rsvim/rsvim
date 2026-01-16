@@ -27,7 +27,7 @@ inodify_impl!(Cursor);
 
 impl Cursor {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     blinking: bool,
     hidden: bool,
@@ -41,7 +41,7 @@ impl Cursor {
     }
   }
 
-  pub fn default(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+  pub fn default(id: NodeId, ctx: TreeContextWk) -> Self {
     Self::new(id, ctx, BLINKING, HIDDEN, CURSOR_STYLE)
   }
 

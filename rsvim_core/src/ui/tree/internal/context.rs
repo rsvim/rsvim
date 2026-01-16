@@ -1,7 +1,7 @@
 //! Internal tree context.
 
 use crate::prelude::*;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::NodeId;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
@@ -17,7 +17,7 @@ use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
 
-pub const INVALID_ROOT_ID: TreeNodeId = TreeNodeId::negative_one();
+pub const INVALID_ROOT_ID: NodeId = NodeId::negative_one();
 pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 pub static DEFAULT_SHAPE: Lazy<IRect> = Lazy::new(|| rect!(0, 0, 0, 0));
@@ -27,17 +27,17 @@ pub static DEFAULT_ACTUAL_SHAPE: Lazy<U16Rect> =
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> TreeNodeId {
+pub fn next_node_id() -> NodeId {
   static VALUE: AtomicI32 = AtomicI32::new(100001);
-  TreeNodeId::from(VALUE.fetch_add(1, Ordering::Relaxed))
+  NodeId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 #[derive(Debug, Clone)]
 pub struct Ta {
   ta: TaffyTree,
-  // Maps TreeNodeId <==> taffy::NodeId.
-  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
-  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
+  // Maps NodeId <==> taffy::NodeId.
+  id2taid: FoldMap<NodeId, taffy::NodeId>,
+  taid2id: FoldMap<taffy::NodeId, NodeId>,
 }
 
 impl Default for Ta {
@@ -57,7 +57,7 @@ impl Ta {
     }
   }
 
-  pub fn raw_taffy_node_id(&self, id: TreeNodeId) -> Option<taffy::NodeId> {
+  pub fn raw_taffy_node_id(&self, id: NodeId) -> Option<taffy::NodeId> {
     self.id2taid.get(&id).copied()
   }
 
@@ -97,7 +97,7 @@ impl Ta {
     }
   }
 
-  pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
+  pub fn new_leaf(&mut self, style: Style) -> TaffyResult<NodeId> {
     self._internal_check();
     let taid = self.ta.new_leaf(style)?;
     let id = next_node_id();
@@ -109,7 +109,7 @@ impl Ta {
 
   pub fn compute_layout(
     &mut self,
-    id: TreeNodeId,
+    id: NodeId,
     available_size: taffy::Size<AvailableSpace>,
   ) -> TaffyResult<()> {
     self._internal_check();
@@ -119,36 +119,36 @@ impl Ta {
     result
   }
 
-  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+  pub fn layout(&self, id: NodeId) -> TaffyResult<&Layout> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     self.ta.layout(*taid)
   }
 
-  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+  pub fn style(&self, id: NodeId) -> TaffyResult<&Style> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     self.ta.style(*taid)
   }
 
-  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+  pub fn set_style(&mut self, id: NodeId, style: Style) -> TaffyResult<()> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     self.ta.set_style(*taid, style)
   }
 
-  pub fn contains(&self, id: TreeNodeId) -> bool {
+  pub fn contains(&self, id: NodeId) -> bool {
     self.id2taid.contains_key(&id)
   }
 
-  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent(&self, id: NodeId) -> Option<NodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
     let parent_taid = self.ta.parent(*taid)?;
     self.taid2id.get(&parent_taid).copied()
   }
 
-  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn children(&self, id: NodeId) -> TaffyResult<Vec<NodeId>> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     let children_taids = self.ta.children(*taid)?;
@@ -162,8 +162,8 @@ impl Ta {
 
   pub fn add_child(
     &mut self,
-    parent_id: TreeNodeId,
-    id: TreeNodeId,
+    parent_id: NodeId,
+    id: NodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
@@ -173,9 +173,9 @@ impl Ta {
 
   pub fn remove_child(
     &mut self,
-    parent_id: TreeNodeId,
-    id: TreeNodeId,
-  ) -> TaffyResult<TreeNodeId> {
+    parent_id: NodeId,
+    id: NodeId,
+  ) -> TaffyResult<NodeId> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let taid = self.id2taid.get(&id).unwrap();
@@ -188,8 +188,8 @@ impl Ta {
 
   pub fn set_children(
     &mut self,
-    parent_id: TreeNodeId,
-    children: &[TreeNodeId],
+    parent_id: NodeId,
+    children: &[NodeId],
   ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
@@ -203,8 +203,8 @@ impl Ta {
   pub fn new_with_parent(
     &mut self,
     style: Style,
-    parent_id: TreeNodeId,
-  ) -> TaffyResult<TreeNodeId> {
+    parent_id: NodeId,
+  ) -> TaffyResult<NodeId> {
     let id = self.new_leaf(style)?;
     self.add_child(parent_id, id)?;
     Ok(id)
@@ -213,8 +213,8 @@ impl Ta {
   pub fn new_with_children(
     &mut self,
     style: Style,
-    children: &[TreeNodeId],
-  ) -> TaffyResult<TreeNodeId> {
+    children: &[NodeId],
+  ) -> TaffyResult<NodeId> {
     self._internal_check();
     let children_taids = children
       .iter()
@@ -228,7 +228,7 @@ impl Ta {
     Ok(id)
   }
 
-  pub fn remove(&mut self, id: TreeNodeId) -> TaffyResult<TreeNodeId> {
+  pub fn remove(&mut self, id: NodeId) -> TaffyResult<NodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id).copied().unwrap();
     let removed_taid = self.ta.remove(taid)?;
@@ -335,17 +335,17 @@ pub struct TreeContext {
   ta: Ta,
 
   // Properties
-  shapes: FoldMap<TreeNodeId, IRect>,
-  actual_shapes: FoldMap<TreeNodeId, U16Rect>,
-  zindexes: FoldMap<TreeNodeId, usize>,
-  truncate_policies: FoldMap<TreeNodeId, TruncatePolicy>,
+  shapes: FoldMap<NodeId, IRect>,
+  actual_shapes: FoldMap<NodeId, U16Rect>,
+  zindexes: FoldMap<NodeId, usize>,
+  truncate_policies: FoldMap<NodeId, TruncatePolicy>,
 
   // Root
-  root: TreeNodeId,
+  root: NodeId,
 
   // For debugging
   root_changes: usize,
-  names: FoldMap<TreeNodeId, &'static str>,
+  names: FoldMap<NodeId, &'static str>,
 }
 
 rc_refcell_ptr!(TreeContext);
@@ -354,10 +354,10 @@ impl Debug for TreeContext {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.root != INVALID_ROOT_ID {
       f.write_str(format!("\nTreeContext({}):", self.ta.len()).as_str())?;
-      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      let mut q: VecDeque<NodeId> = VecDeque::new();
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
-        let name = |i: TreeNodeId| {
+        let name = |i: NodeId| {
           format!(
             "{}({})",
             i,
@@ -412,7 +412,7 @@ impl Debug for TreeContext {
           "\n{}{},parent:{},{},{},{}",
           enabled,
           name(id),
-          name(self.ta.parent(id).unwrap_or(TreeNodeId::negative_one())),
+          name(self.ta.parent(id).unwrap_or(NodeId::negative_one())),
           attributes,
           layout,
           shape
@@ -452,7 +452,7 @@ impl TreeContext {
     }
   }
 
-  pub fn raw_taffy_node_id(&self, id: TreeNodeId) -> Option<taffy::NodeId> {
+  pub fn raw_taffy_node_id(&self, id: NodeId) -> Option<taffy::NodeId> {
     self.ta.raw_taffy_node_id(id)
   }
 
@@ -464,11 +464,11 @@ impl TreeContext {
     self.ta.len()
   }
 
-  pub fn contains(&self, id: TreeNodeId) -> bool {
+  pub fn contains(&self, id: NodeId) -> bool {
     self.ta.contains(id)
   }
 
-  fn _set_root(&mut self, id: TreeNodeId) {
+  fn _set_root(&mut self, id: NodeId) {
     debug_assert_ne!(id, INVALID_ROOT_ID);
     debug_assert!(self.root_changes <= 1);
     if self.root == INVALID_ROOT_ID {
@@ -479,65 +479,65 @@ impl TreeContext {
     }
   }
 
-  fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
+  fn _set_name(&mut self, id: NodeId, name: &'static str) {
     self.names.insert(id, name);
   }
 
-  fn _unset_name(&mut self, id: TreeNodeId) {
+  fn _unset_name(&mut self, id: NodeId) {
     debug_assert!(self.names.contains_key(&id));
     self.names.remove(&id);
   }
 
   /// The first created node will be the root node.
-  pub fn root(&self) -> TreeNodeId {
+  pub fn root(&self) -> NodeId {
     self.root
   }
 
-  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent(&self, id: NodeId) -> Option<NodeId> {
     self.ta.parent(id)
   }
 
-  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn children(&self, id: NodeId) -> TaffyResult<Vec<NodeId>> {
     self.ta.children(id)
   }
 
-  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+  pub fn style(&self, id: NodeId) -> TaffyResult<&Style> {
     self.ta.style(id)
   }
 
-  pub fn set_style(&mut self, id: TreeNodeId, value: Style) -> TaffyResult<()> {
+  pub fn set_style(&mut self, id: NodeId, value: Style) -> TaffyResult<()> {
     self.ta.set_style(id, value)
   }
 
-  pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
+  pub fn shape(&self, id: NodeId) -> Option<&IRect> {
     self.shapes.get(&id)
   }
 
-  pub fn actual_shape(&self, id: TreeNodeId) -> Option<&U16Rect> {
+  pub fn actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
     self.actual_shapes.get(&id)
   }
 
-  pub fn zindex(&self, id: TreeNodeId) -> Option<usize> {
+  pub fn zindex(&self, id: NodeId) -> Option<usize> {
     self.zindexes.get(&id).copied()
   }
 
-  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+  pub fn set_zindex(&mut self, id: NodeId, value: usize) -> Option<usize> {
     self.zindexes.insert(id, value)
   }
 
-  pub fn truncate_policy(&self, id: TreeNodeId) -> Option<TruncatePolicy> {
+  pub fn truncate_policy(&self, id: NodeId) -> Option<TruncatePolicy> {
     self.truncate_policies.get(&id).copied()
   }
 
   pub fn set_truncate_policy(
     &mut self,
-    id: TreeNodeId,
+    id: NodeId,
     value: TruncatePolicy,
   ) -> Option<TruncatePolicy> {
     self.truncate_policies.insert(id, value)
   }
 
-  pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn disabled(&self, id: NodeId) -> TaffyResult<bool> {
     let zero_size = self
       .actual_shape(id)
       .map(|s| s.size().is_zero())
@@ -548,7 +548,7 @@ impl TreeContext {
       .map(|s| s.display == taffy::Display::None || zero_size)
   }
 
-  pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn enabled(&self, id: NodeId) -> TaffyResult<bool> {
     self.disabled(id).map(|v| !v)
   }
 }
@@ -563,13 +563,13 @@ impl TreeContext {
   /// ancestor nodes layout will not change. In such case, we only need to
   /// update shapes for this leaf node, this will reduce unnecessary iteration
   /// on the other tree nodes.
-  pub fn compute_layout(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
+  pub fn compute_layout(&mut self, start_id: NodeId) -> TaffyResult<()> {
     if self.root != INVALID_ROOT_ID {
       self
         .ta
         .compute_layout(self.root, taffy::Size::MAX_CONTENT)?;
 
-      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      let mut q: VecDeque<NodeId> = VecDeque::new();
 
       debug_assert!(self.ta.contains(start_id));
       // q.push_back(self.root);
@@ -625,7 +625,7 @@ impl TreeContext {
   /// follows.
   fn _truncate_shape(
     &self,
-    id: TreeNodeId,
+    id: NodeId,
     shape: &IRect,
     policy: TruncatePolicy,
   ) -> IRect {
@@ -648,11 +648,7 @@ impl TreeContext {
 
   /// Calculate the actual_shape of a node, by its adjusted shape and its
   /// parent's actual_shape.
-  pub fn _calculate_actual_shape(
-    &self,
-    id: TreeNodeId,
-    shape: &IRect,
-  ) -> U16Rect {
+  pub fn _calculate_actual_shape(&self, id: NodeId, shape: &IRect) -> U16Rect {
     match self.ta.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape =
@@ -674,7 +670,7 @@ impl TreeContext {
     shape: IRect,
     actual_shape: U16Rect,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     let id = self.ta.new_leaf(style)?;
 
     self._set_root(id);
@@ -691,7 +687,7 @@ impl TreeContext {
     &mut self,
     style: Style,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     let id = self.ta.new_leaf(style)?;
 
     self._set_root(id);
@@ -706,14 +702,14 @@ impl TreeContext {
 
   pub fn new_with_parent(
     &mut self,
-    parent_id: TreeNodeId,
+    parent_id: NodeId,
     style: Style,
     zindex: usize,
     truncate_policy: TruncatePolicy,
     shape: IRect,
     actual_shape: U16Rect,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     debug_assert!(self.ta.contains(parent_id));
 
     let id = self.ta.new_with_parent(style, parent_id)?;
@@ -729,10 +725,10 @@ impl TreeContext {
 
   pub fn new_with_parent_default(
     &mut self,
-    parent_id: TreeNodeId,
+    parent_id: NodeId,
     style: Style,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     self.new_with_parent(
       parent_id,
       style,
@@ -746,8 +742,8 @@ impl TreeContext {
 
   pub fn add_child(
     &mut self,
-    parent_id: TreeNodeId,
-    id: TreeNodeId,
+    parent_id: NodeId,
+    id: NodeId,
   ) -> TaffyResult<()> {
     debug_assert_ne!(id, self.root);
     debug_assert!(self.ta.contains(id));
@@ -759,9 +755,9 @@ impl TreeContext {
 
   pub fn remove_child(
     &mut self,
-    parent_id: TreeNodeId,
-    id: TreeNodeId,
-  ) -> TaffyResult<TreeNodeId> {
+    parent_id: NodeId,
+    id: NodeId,
+  ) -> TaffyResult<NodeId> {
     debug_assert_ne!(id, self.root);
     debug_assert!(self.ta.contains(id));
     debug_assert!(self.ta.contains(parent_id));

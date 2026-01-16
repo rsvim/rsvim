@@ -21,7 +21,7 @@ inodify_impl!(CmdlineInput);
 
 impl CmdlineInput {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     text_contents: TextContentsWk,
     viewport: ViewportWk,

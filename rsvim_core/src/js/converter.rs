@@ -1,8 +1,8 @@
 //! Converters between rust and v8 values.
 
 use crate::buf::BufferId;
-use crate::js::JsTimerId;
-use crate::ui::tree::TreeNodeId;
+use crate::js::TimerId;
+use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
@@ -71,14 +71,14 @@ impl I32FromV8 for i32 {
   }
 }
 
-pub trait TreeNodeIdToV8 {
+pub trait NodeIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer>;
 }
 
-impl TreeNodeIdToV8 for TreeNodeId {
+impl NodeIdToV8 for NodeId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
@@ -87,19 +87,19 @@ impl TreeNodeIdToV8 for TreeNodeId {
   }
 }
 
-pub trait TreeNodeIdFromV8 {
+pub trait NodeIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self;
 }
 
-impl TreeNodeIdFromV8 for TreeNodeId {
+impl NodeIdFromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
-    TreeNodeId::from(value.int32_value(scope).unwrap())
+    NodeId::from(value.int32_value(scope).unwrap())
   }
 }
 
@@ -135,14 +135,14 @@ impl BufferIdFromV8 for BufferId {
   }
 }
 
-pub trait JsTimerIdToV8 {
+pub trait TimerIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer>;
 }
 
-impl JsTimerIdToV8 for JsTimerId {
+impl TimerIdToV8 for TimerId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
@@ -151,19 +151,19 @@ impl JsTimerIdToV8 for JsTimerId {
   }
 }
 
-pub trait JsTimerIdFromV8 {
+pub trait TimerIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self;
 }
 
-impl JsTimerIdFromV8 for JsTimerId {
+impl TimerIdFromV8 for TimerId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
-    JsTimerId::from(value.int32_value(scope).unwrap())
+    TimerId::from(value.int32_value(scope).unwrap())
   }
 }
 

@@ -242,7 +242,7 @@ pub fn normalize_to_window_scroll_to(
 // editing, while the ladder doesn't.
 fn _update_viewport(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   text: &Text,
   start_line: usize,
   start_column: usize,
@@ -265,7 +265,7 @@ fn _update_viewport(
 // editing, while the ladder doesn't.
 fn _update_cursor_viewport(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   viewport: &Viewport,
   text: &Text,
   cursor_line: usize,
@@ -297,7 +297,7 @@ fn _update_cursor_viewport(
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
 pub fn raw_cursor_viewport_move_to(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   viewport: &Viewport,
   text: &Text,
   cursor_move_to_op: Operation,
@@ -351,7 +351,7 @@ pub fn raw_cursor_viewport_move_to(
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_viewport_scroll_to(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   viewport: &Viewport,
   text: &Text,
   window_scroll_to_op: Operation,
@@ -428,7 +428,7 @@ fn _max_len_chars_since_line(
 
 fn _update_viewport_after_text_changed(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   text: &Text,
 ) {
   let viewport = tree.editable_viewport(id);
@@ -470,7 +470,7 @@ fn _update_viewport_after_text_changed(
 /// `jk` to go up/down to view a very large file).
 pub fn cursor_move(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   text: &Text,
   op: Operation,
   include_eol: bool,
@@ -556,7 +556,7 @@ pub fn cursor_move(
 /// - It returns `None` if failed.
 pub fn cursor_insert(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   text: &mut Text,
   payload: CompactString,
 ) -> (usize, usize) {
@@ -604,7 +604,7 @@ pub fn cursor_insert(
 /// - It returns `None` if delete nothing.
 pub fn cursor_delete(
   tree: &mut Tree,
-  id: TreeNodeId,
+  id: NodeId,
   text: &mut Text,
   n: isize,
 ) -> Option<(usize, usize)> {
@@ -651,15 +651,12 @@ pub fn cursor_delete(
 /// changes its parent widget only.
 ///
 /// The `parent_id` must be either valid window ID or command-line ID.
-pub fn cursor_jump(
-  tree: &mut Tree,
-  parent_id: TreeNodeId,
-) -> Option<TreeNodeId> {
+pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
   let cursor_id = tree.cursor_id().unwrap();
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
 
   let removed_id = match tree.node(old_parent_id).unwrap() {
-    TreeNode::WindowContent(_content) => {
+    Node::WindowContent(_content) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
       debug_assert!(tree.current_window_id().is_some());
       let old_window_id = tree.parent_id(old_parent_id).unwrap();
@@ -669,7 +666,7 @@ pub fn cursor_jump(
       }
       old_window_id
     }
-    TreeNode::CmdlineInput(_input) => {
+    Node::CmdlineInput(_input) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
       let old_input_panel_id = tree.parent_id(old_parent_id).unwrap();
       debug_assert!(tree.parent_id(old_input_panel_id).is_some());
@@ -689,7 +686,7 @@ pub fn cursor_jump(
     .unwrap();
 
   match tree.node_mut(parent_id).unwrap() {
-    TreeNode::Window(window) => {
+    Node::Window(window) => {
       let content_id = window.content_id();
       tree
         .context()
@@ -697,7 +694,7 @@ pub fn cursor_jump(
         .add_child(content_id, cursor_id)
         .unwrap();
     }
-    TreeNode::Cmdline(cmdline) => {
+    Node::Cmdline(cmdline) => {
       let input_id = cmdline.input_id();
       tree
         .context()
