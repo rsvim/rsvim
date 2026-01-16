@@ -24,6 +24,9 @@ pub struct Delete {
 /// - Insert payload at an absolute char index.
 /// - Delete `n` characters at an absolute char index.
 ///
+/// The change operation doesn't use current cursor's position, so the text
+/// buffer can change without involving cursor.
+///
 /// NOTE: Ropey provide two types of coordinate system:
 /// 1. 2-Dimension on line number and char index per line.
 /// 2. 1-Dimension on absolute char index per whole buffer.
