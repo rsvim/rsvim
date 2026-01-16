@@ -1976,12 +1976,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "min_max_traits"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ad269bd6e7a39d200bd8efbef2ff6e4fa7b99fc5468d70b8649203b680627c3"
-
-[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2609,7 +2603,6 @@ dependencies = [
  "litemap 0.8.1",
  "log",
  "lru",
- "min_max_traits",
  "normpath",
  "num-traits",
  "once_cell",
