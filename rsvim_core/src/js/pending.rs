@@ -2,7 +2,7 @@
 
 use crate::js::JsRuntimeState;
 use crate::js::JsTaskId;
-use crate::js::JsTimerId;
+use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -14,7 +14,7 @@ pub type TaskCallback = Box<dyn FnMut(Option<TheResult<Vec<u8>>>) + 'static>;
 
 pub fn create_timer(
   state: &mut JsRuntimeState,
-  timer_id: JsTimerId,
+  timer_id: TimerId,
   delay: u32,
   repeated: bool,
   cb: TimerCallback,
@@ -34,8 +34,8 @@ pub fn create_timer(
 
 pub fn remove_timer(
   state: &mut JsRuntimeState,
-  timer_id: JsTimerId,
-) -> Option<JsTimerId> {
+  timer_id: TimerId,
+) -> Option<TimerId> {
   state.pending_timers.remove(&timer_id).map(|_| timer_id)
 }
 

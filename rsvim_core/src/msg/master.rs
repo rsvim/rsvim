@@ -2,7 +2,7 @@
 //! call it "master".
 
 use crate::js::JsTaskId;
-use crate::js::JsTimerId;
+use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use std::path::PathBuf;
 use tokio::sync::mpsc::UnboundedSender;
@@ -40,7 +40,7 @@ pub struct ExitReq {
 
 #[derive(Debug)]
 pub struct TimeoutReq {
-  pub timer_id: JsTimerId,
+  pub timer_id: TimerId,
   pub start_at: Instant,
   pub delay: u32,
   pub repeated: bool,

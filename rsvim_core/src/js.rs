@@ -77,7 +77,7 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-struct_id_impl!(JsTimerId, i32);
+struct_id_impl!(TimerId, i32);
 struct_id_impl!(JsTaskId, usize);
 
 /// Next task ID. It starts form 1.
@@ -87,9 +87,9 @@ pub fn next_task_id() -> JsTaskId {
 }
 
 /// Next timer ID. It starts form 1.
-pub fn next_timer_id() -> JsTimerId {
+pub fn next_timer_id() -> TimerId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
-  JsTimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
+  TimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 /// Snapshot data.
@@ -354,7 +354,7 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending timers.
-    pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
+    pub pending_timers: FoldMap<TimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
     /// Pending tasks.

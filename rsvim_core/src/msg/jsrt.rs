@@ -2,7 +2,7 @@
 
 use crate::buf::BufferId;
 use crate::js::JsTaskId;
-use crate::js::JsTimerId;
+use crate::js::TimerId;
 use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
@@ -36,7 +36,7 @@ pub enum JsMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub timer_id: JsTimerId,
+  pub timer_id: TimerId,
   pub expire_at: Instant,
   pub delay: u32,
   pub repeated: bool,
