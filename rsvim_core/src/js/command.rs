@@ -12,7 +12,7 @@ mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::JsTaskId;
+use crate::js::TaskId;
 use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::converter::*;
@@ -30,7 +30,7 @@ const JS_COMMAND_NAME: &str = "js";
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
 pub struct CommandFuture {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub name: CompactString,
   pub context: CommandContext,
   pub is_builtin_js: bool,

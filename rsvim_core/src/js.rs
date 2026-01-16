@@ -77,19 +77,19 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-struct_id_impl!(JsTimerId, i32);
-struct_id_impl!(JsTaskId, usize);
+struct_id_impl!(TimerId, i32);
+struct_id_impl!(TaskId, usize);
 
 /// Next task ID. It starts form 1.
-pub fn next_task_id() -> JsTaskId {
+pub fn next_task_id() -> TaskId {
   static VALUE: AtomicUsize = AtomicUsize::new(1);
-  JsTaskId::from(VALUE.fetch_add(1, Ordering::Relaxed))
+  TaskId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 /// Next timer ID. It starts form 1.
-pub fn next_timer_id() -> JsTimerId {
+pub fn next_timer_id() -> TimerId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
-  JsTimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
+  TimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
 }
 
 /// Snapshot data.
@@ -354,11 +354,11 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending timers.
-    pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
+    pub pending_timers: FoldMap<TimerId, TimerCallback>,
     /// Pending load import tasks.
-    pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
+    pub pending_import_loaders: FoldMap<TaskId, TaskCallback>,
     /// Pending tasks.
-    pub pending_tasks: FoldMap<JsTaskId, TaskCallback>,
+    pub pending_tasks: FoldMap<TaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.

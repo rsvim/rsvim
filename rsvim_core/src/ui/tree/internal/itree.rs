@@ -17,7 +17,7 @@ where
   context: TreeContextRc,
 
   // Node collections.
-  nodes: FoldMap<TreeNodeId, T>,
+  nodes: FoldMap<NodeId, T>,
 }
 
 impl<T> Debug for Itree<T>
@@ -63,25 +63,25 @@ where
     self.context.clone()
   }
 
-  pub fn root_id(&self) -> TreeNodeId {
+  pub fn root_id(&self) -> NodeId {
     self.context.borrow().root()
   }
 
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent_id(&self, id: NodeId) -> Option<NodeId> {
     self.context.borrow().parent(id)
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn children_ids(&self, id: NodeId) -> TaffyResult<Vec<NodeId>> {
     self.context.borrow().children(id)
   }
 
   /// Get nodes.
-  pub fn nodes(&self) -> &FoldMap<TreeNodeId, T> {
+  pub fn nodes(&self) -> &FoldMap<NodeId, T> {
     &self.nodes
   }
 
   /// Get mutable nodes.
-  pub fn nodes_mut(&mut self) -> &mut FoldMap<TreeNodeId, T> {
+  pub fn nodes_mut(&mut self) -> &mut FoldMap<NodeId, T> {
     &mut self.nodes
   }
 
@@ -97,7 +97,7 @@ where
   pub fn raw_move_position_by(
     &self,
     context: &TreeContext,
-    id: TreeNodeId,
+    id: NodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
@@ -109,7 +109,7 @@ where
   pub fn raw_move_position_to(
     &self,
     context: &TreeContext,
-    id: TreeNodeId,
+    id: NodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
@@ -134,7 +134,7 @@ where
   pub fn move_position_by(
     &self,
     context: &TreeContext,
-    id: TreeNodeId,
+    id: NodeId,
     x: isize,
     y: isize,
     truncate_policy: TruncatePolicy,
@@ -169,7 +169,7 @@ where
   pub fn move_position_to(
     &self,
     context: &TreeContext,
-    id: TreeNodeId,
+    id: NodeId,
     x: isize,
     y: isize,
     truncate_policy: TruncatePolicy,
@@ -204,7 +204,7 @@ where
   T: Inodify,
 {
   tree: &'a Itree<T>,
-  que: VecDeque<TreeNodeId>,
+  que: VecDeque<NodeId>,
 }
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
@@ -245,7 +245,7 @@ impl<'a, T> ItreeIter<'a, T>
 where
   T: Inodify,
 {
-  pub fn new(tree: &'a Itree<T>, start_id: Option<TreeNodeId>) -> Self {
+  pub fn new(tree: &'a Itree<T>, start_id: Option<NodeId>) -> Self {
     let mut que = VecDeque::new();
     if let Some(id) = start_id {
       que.push_back(id);

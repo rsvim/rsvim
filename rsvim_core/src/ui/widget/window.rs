@@ -24,7 +24,7 @@ pub struct Window {
   __node: InodeBase,
   options: WindowOptions,
 
-  content_id: TreeNodeId,
+  content_id: NodeId,
 
   buffer: BufferWk,
   viewport: ViewportArc,
@@ -35,11 +35,11 @@ inodify_impl!(Window);
 
 impl Window {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     options: WindowOptions,
     buffer: BufferWk,
-    content_id: TreeNodeId,
+    content_id: NodeId,
     content_size: &U16Size,
   ) -> Self {
     let (viewport, cursor_viewport) = {
@@ -66,7 +66,7 @@ impl Window {
   }
 
   /// This is only for setting window content id after constructor.
-  pub fn __post_initialize_content_id(&mut self, value: TreeNodeId) {
+  pub fn __post_initialize_content_id(&mut self, value: NodeId) {
     self.content_id = value;
   }
 }
@@ -91,7 +91,7 @@ impl Window {
   }
 
   /// Content widget ID.
-  pub fn content_id(&self) -> TreeNodeId {
+  pub fn content_id(&self) -> NodeId {
     self.content_id
   }
 }

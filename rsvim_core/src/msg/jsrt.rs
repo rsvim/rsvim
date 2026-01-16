@@ -1,10 +1,10 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::buf::BufferId;
-use crate::js::JsTaskId;
-use crate::js::JsTimerId;
+use crate::js::TaskId;
+use crate::js::TimerId;
 use crate::prelude::*;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -36,7 +36,7 @@ pub enum JsMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub timer_id: JsTimerId,
+  pub timer_id: TimerId,
   pub expire_at: Instant,
   pub delay: u32,
   pub repeated: bool,
@@ -46,30 +46,30 @@ pub struct TimeoutResp {
 pub struct ExCommandReq {
   pub payload: CompactString,
   pub current_buf_id: BufferId,
-  pub current_win_id: TreeNodeId,
+  pub current_win_id: NodeId,
 }
 
 #[derive(Debug)]
 pub struct LoadImportResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsOpenResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsReadResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsWriteResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

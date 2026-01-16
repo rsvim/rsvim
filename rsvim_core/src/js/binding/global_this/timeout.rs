@@ -5,7 +5,7 @@ use crate::is_v8_int;
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::JsTimerId;
+use crate::js::TimerId;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
@@ -125,7 +125,7 @@ pub fn clear_timer<'s>(
   // Get timer ID, and remove it.
   debug_assert!(is_v8_int!(args.get(0)));
   let timer_id =
-    JsTimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+    TimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();

@@ -1,8 +1,8 @@
 //! Pending async tasks.
 
 use crate::js::JsRuntimeState;
-use crate::js::JsTaskId;
-use crate::js::JsTimerId;
+use crate::js::TaskId;
+use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -14,7 +14,7 @@ pub type TaskCallback = Box<dyn FnMut(Option<TheResult<Vec<u8>>>) + 'static>;
 
 pub fn create_timer(
   state: &mut JsRuntimeState,
-  timer_id: JsTimerId,
+  timer_id: TimerId,
   delay: u32,
   repeated: bool,
   cb: TimerCallback,
@@ -34,14 +34,14 @@ pub fn create_timer(
 
 pub fn remove_timer(
   state: &mut JsRuntimeState,
-  timer_id: JsTimerId,
-) -> Option<JsTimerId> {
+  timer_id: TimerId,
+) -> Option<TimerId> {
   state.pending_timers.remove(&timer_id).map(|_| timer_id)
 }
 
 pub fn create_import_loader(
   state: &mut JsRuntimeState,
-  task_id: JsTaskId,
+  task_id: TaskId,
   specifier: &str,
   cb: TaskCallback,
 ) {
@@ -57,7 +57,7 @@ pub fn create_import_loader(
 
 pub fn create_fs_open(
   state: &mut JsRuntimeState,
-  task_id: JsTaskId,
+  task_id: TaskId,
   path: &Path,
   options: FsOpenOptions,
   cb: TaskCallback,
@@ -76,7 +76,7 @@ pub fn create_fs_open(
 
 pub fn create_fs_read(
   state: &mut JsRuntimeState,
-  task_id: JsTaskId,
+  task_id: TaskId,
   fd: usize,
   bufsize: usize,
   cb: TaskCallback,
@@ -94,7 +94,7 @@ pub fn create_fs_read(
 
 pub fn create_fs_write(
   state: &mut JsRuntimeState,
-  task_id: JsTaskId,
+  task_id: TaskId,
   fd: usize,
   buf: Vec<u8>,
   cb: TaskCallback,

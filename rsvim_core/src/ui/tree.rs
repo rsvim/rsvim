@@ -36,7 +36,7 @@ use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
-pub enum TreeNode {
+pub enum Node {
   Panel(Panel),
   Cursor(Cursor),
   Window(Window),
@@ -48,7 +48,7 @@ pub enum TreeNode {
 }
 
 inodify_enum_impl!(
-  TreeNode,
+  Node,
   Panel,
   Cursor,
   Window,
@@ -60,7 +60,7 @@ inodify_enum_impl!(
 );
 
 widgetable_enum_impl!(
-  TreeNode,
+  Node,
   Panel,
   Cursor,
   Window,
@@ -118,16 +118,16 @@ widgetable_enum_impl!(
 /// priority by set a bigger value to its Z-index, or mark it as disabled to
 /// not render it.
 pub struct Tree {
-  base: Itree<TreeNode>,
+  base: Itree<Node>,
 
   // Cursor node ID.
-  cursor_id: Option<TreeNodeId>,
+  cursor_id: Option<NodeId>,
 
   // Command-line node ID.
-  cmdline_id: Option<TreeNodeId>,
+  cmdline_id: Option<NodeId>,
 
   // Window ID collection.
-  window_ids: BTreeSet<TreeNodeId>,
+  window_ids: BTreeSet<NodeId>,
 
   // *Current* window ID.
   //
@@ -137,7 +137,7 @@ pub struct Tree {
   // But when user starts typing commands in the command-line, cursor actually
   // moves to command-line widget. But we still saves the *current* window, now
   // it is more like a *previous* window.
-  current_window_id: Option<TreeNodeId>,
+  current_window_id: Option<NodeId>,
 
   // Global options for windows.
   global_options: WindowGlobalOptions,
@@ -146,7 +146,7 @@ pub struct Tree {
   global_local_options: WindowOptions,
 }
 
-pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+pub type TreeIter<'a> = ItreeIter<'a, Node>;
 
 arc_mutex_ptr!(Tree);
 
@@ -173,7 +173,7 @@ impl Tree {
     };
 
     let root = Panel::new(id, Rc::downgrade(&base.context()));
-    let root = TreeNode::Panel(root);
+    let root = Node::Panel(root);
     base.nodes_mut().insert(id, root);
 
     Ok(Tree {
@@ -202,27 +202,27 @@ impl Tree {
   }
 
   /// Root node ID.
-  pub fn root_id(&self) -> TreeNodeId {
+  pub fn root_id(&self) -> NodeId {
     self.base.root_id()
   }
 
   /// Get the parent ID by a node `id`.
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent_id(&self, id: NodeId) -> Option<NodeId> {
     self.base.parent_id(id)
   }
 
   /// Get the children IDs by a node `id`.
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+  pub fn children_ids(&self, id: NodeId) -> Vec<NodeId> {
     self.base.children_ids(id).unwrap_or_default()
   }
 
   /// Get the node struct by its `id`.
-  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
+  pub fn node(&self, id: NodeId) -> Option<&Node> {
     self.base.nodes().get(&id)
   }
 
   /// Get mutable node struct by its `id`.
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
+  pub fn node_mut(&mut self, id: NodeId) -> Option<&mut Node> {
     self.base.nodes_mut().get_mut(&id)
   }
 
@@ -231,17 +231,17 @@ impl Tree {
   }
 
   /// Get cursor ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+  pub fn cursor_id(&self) -> Option<NodeId> {
     self.cursor_id
   }
 
   /// Get command-line ID.
-  pub fn cmdline_id(&self) -> Option<TreeNodeId> {
+  pub fn cmdline_id(&self) -> Option<NodeId> {
     self.cmdline_id
   }
 
   /// Get current window ID.
-  pub fn current_window_id(&self) -> Option<TreeNodeId> {
+  pub fn current_window_id(&self) -> Option<NodeId> {
     self.current_window_id
   }
 
@@ -249,14 +249,14 @@ impl Tree {
   /// NOTE: It must be a valid window node.
   pub fn set_current_window_id(
     &mut self,
-    id: Option<TreeNodeId>,
-  ) -> Option<TreeNodeId> {
+    id: Option<NodeId>,
+  ) -> Option<NodeId> {
     if cfg!(debug_assertions)
       && let Some(id) = id
     {
       debug_assert!(self.node(id).is_some());
       debug_assert!(self.window_ids.contains(&id));
-      debug_assert!(matches!(self.node(id).unwrap(), TreeNode::Window(_)));
+      debug_assert!(matches!(self.node(id).unwrap(), Node::Window(_)));
     }
     let old = self.current_window_id;
     self.current_window_id = id;
@@ -264,7 +264,7 @@ impl Tree {
   }
 
   /// Get all window IDs.
-  pub fn window_ids(&self) -> &BTreeSet<TreeNodeId> {
+  pub fn window_ids(&self) -> &BTreeSet<NodeId> {
     &self.window_ids
   }
 }
@@ -276,7 +276,7 @@ impl Tree {
   pub fn cursor(&self) -> Option<&Cursor> {
     let cursor_id = self.cursor_id?;
     match self.node(cursor_id)? {
-      TreeNode::Cursor(cursor) => {
+      Node::Cursor(cursor) => {
         debug_assert_eq!(cursor.id(), cursor_id);
         Some(cursor)
       }
@@ -288,7 +288,7 @@ impl Tree {
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
     let cursor_id = self.cursor_id?;
     match self.node_mut(cursor_id)? {
-      TreeNode::Cursor(cursor) => {
+      Node::Cursor(cursor) => {
         debug_assert_eq!(cursor.id(), cursor_id);
         Some(cursor)
       }
@@ -297,9 +297,9 @@ impl Tree {
   }
 
   /// Window widget.
-  pub fn window(&self, id: TreeNodeId) -> Option<&Window> {
+  pub fn window(&self, id: NodeId) -> Option<&Window> {
     match self.node(id)? {
-      TreeNode::Window(window) => {
+      Node::Window(window) => {
         debug_assert_eq!(window.id(), id);
         Some(window)
       }
@@ -308,9 +308,9 @@ impl Tree {
   }
 
   /// Mutable window widget.
-  pub fn window_mut(&mut self, id: TreeNodeId) -> Option<&mut Window> {
+  pub fn window_mut(&mut self, id: NodeId) -> Option<&mut Window> {
     match self.node_mut(id)? {
-      TreeNode::Window(window) => {
+      Node::Window(window) => {
         debug_assert_eq!(window.id(), id);
         Some(window)
       }
@@ -334,7 +334,7 @@ impl Tree {
   pub fn cmdline(&self) -> Option<&Cmdline> {
     let cmdline_id = self.cmdline_id?;
     match self.node(cmdline_id)? {
-      TreeNode::Cmdline(cursor) => {
+      Node::Cmdline(cursor) => {
         debug_assert_eq!(cursor.id(), cmdline_id);
         Some(cursor)
       }
@@ -346,11 +346,11 @@ impl Tree {
   pub fn cmdline_input(&self) -> Option<&CmdlineInput> {
     let cmdline_id = self.cmdline_id?;
     match self.node(cmdline_id)? {
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         debug_assert_eq!(cmdline.id(), cmdline_id);
         let input_id = cmdline.input_id();
         match self.node(input_id)? {
-          TreeNode::CmdlineInput(input) => Some(input),
+          Node::CmdlineInput(input) => Some(input),
           _ => unreachable!(),
         }
       }
@@ -362,11 +362,11 @@ impl Tree {
   pub fn cmdline_message(&self) -> Option<&CmdlineMessage> {
     let cmdline_id = self.cmdline_id?;
     match self.node(cmdline_id)? {
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         debug_assert_eq!(cmdline.id(), cmdline_id);
         let message_id = cmdline.message_id();
         match self.node(message_id)? {
-          TreeNode::CmdlineMessage(message) => Some(message),
+          Node::CmdlineMessage(message) => Some(message),
           _ => unreachable!(),
         }
       }
@@ -378,7 +378,7 @@ impl Tree {
   pub fn cmdline_mut(&mut self) -> Option<&mut Cmdline> {
     let cmdline_id = self.cmdline_id?;
     match self.node_mut(cmdline_id)? {
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         debug_assert_eq!(cmdline.id(), cmdline_id);
         Some(cmdline)
       }
@@ -390,15 +390,15 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  fn _insert_node(&mut self, id: TreeNodeId, node: TreeNode) {
+  fn _insert_node(&mut self, id: NodeId, node: Node) {
     match &node {
-      TreeNode::Cursor(c) => {
+      Node::Cursor(c) => {
         self.cursor_id = Some(c.id());
       }
-      TreeNode::Cmdline(c) => {
+      Node::Cmdline(c) => {
         self.cmdline_id = Some(c.id());
       }
-      TreeNode::Window(w) => {
+      Node::Window(w) => {
         self.window_ids.insert(w.id());
       }
       _ => {}
@@ -409,11 +409,11 @@ impl Tree {
   /// Create a window widget.
   pub fn new_window_with_parent(
     &mut self,
-    parent_id: TreeNodeId,
+    parent_id: NodeId,
     style: Style,
     opts: WindowOptions,
     buffer: BufferWk,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     let (id, content_id, content_actual_shape) = {
       let context = self.base.context();
       let mut context = context.borrow_mut();
@@ -450,7 +450,7 @@ impl Tree {
       &content_actual_shape.size(),
     );
     let viewport = window.viewport();
-    let window = TreeNode::Window(window);
+    let window = Node::Window(window);
     self._insert_node(id, window);
 
     // window content node
@@ -460,7 +460,7 @@ impl Tree {
       buffer.clone(),
       Arc::downgrade(&viewport),
     );
-    let content = TreeNode::WindowContent(content);
+    let content = Node::WindowContent(content);
     self._insert_node(content_id, content);
 
     Ok(id)
@@ -469,11 +469,11 @@ impl Tree {
   /// Create a cursor widget.
   pub fn new_cursor_with_parent(
     &mut self,
-    parent_id: TreeNodeId,
+    parent_id: NodeId,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     let id = {
       let context = self.base.context();
       let mut context = context.borrow_mut();
@@ -510,7 +510,7 @@ impl Tree {
 
     let cursor =
       Cursor::new(id, Rc::downgrade(&self.context()), blinking, hidden, style);
-    let cursor = TreeNode::Cursor(cursor);
+    let cursor = Node::Cursor(cursor);
     self._insert_node(id, cursor);
 
     Ok(id)
@@ -519,11 +519,11 @@ impl Tree {
   /// Create a command-line widget.
   pub fn new_cmdline_with_parent(
     &mut self,
-    parent_id: TreeNodeId,
+    parent_id: NodeId,
     style: Style,
     indicator_symbol: CmdlineIndicatorSymbol,
     text_contents: TextContentsWk,
-  ) -> TaffyResult<TreeNodeId> {
+  ) -> TaffyResult<NodeId> {
     let (
       id,
       input_panel_id,
@@ -599,12 +599,12 @@ impl Tree {
     );
     let input_viewport = cmdline.input_viewport();
     let message_viewport = cmdline.message_viewport();
-    let cmdline = TreeNode::Cmdline(cmdline);
+    let cmdline = Node::Cmdline(cmdline);
     self._insert_node(id, cmdline);
 
     let input_panel =
       Panel::new(input_panel_id, Rc::downgrade(&self.context()));
-    let input_panel = TreeNode::Panel(input_panel);
+    let input_panel = Node::Panel(input_panel);
     self._insert_node(input_panel_id, input_panel);
 
     let indicator = CmdlineIndicator::new(
@@ -612,7 +612,7 @@ impl Tree {
       Rc::downgrade(&self.context()),
       indicator_symbol,
     );
-    let indicator = TreeNode::CmdlineIndicator(indicator);
+    let indicator = Node::CmdlineIndicator(indicator);
     self._insert_node(indicator_id, indicator);
 
     let input = CmdlineInput::new(
@@ -621,7 +621,7 @@ impl Tree {
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
     );
-    let input = TreeNode::CmdlineInput(input);
+    let input = Node::CmdlineInput(input);
     self._insert_node(input_id, input);
 
     let message = CmdlineMessage::new(
@@ -630,7 +630,7 @@ impl Tree {
       text_contents,
       Arc::downgrade(&message_viewport),
     );
-    let message = TreeNode::CmdlineMessage(message);
+    let message = Node::CmdlineMessage(message);
     self._insert_node(message_id, message);
 
     Ok(id)
@@ -716,7 +716,7 @@ impl Tree {
     self._cmdline_toggle_input(true)
   }
 
-  fn _remove_node(&mut self, id: TreeNodeId) {
+  fn _remove_node(&mut self, id: NodeId) {
     if self.cmdline_id == Some(id) {
       self.cmdline_id = None;
     }
@@ -794,11 +794,11 @@ impl Tree {
   pub fn set_cmdline_message_viewport(&mut self, viewport: ViewportArc) {
     let cmdline_id = self.cmdline_id().unwrap();
     match self.node_mut(cmdline_id).unwrap() {
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         cmdline.set_message_viewport(viewport.clone());
         let message_id = cmdline.message_id();
         match self.node_mut(message_id).unwrap() {
-          TreeNode::CmdlineMessage(message) => {
+          Node::CmdlineMessage(message) => {
             message.set_viewport(Arc::downgrade(&viewport))
           }
           _ => unreachable!(),
@@ -814,7 +814,7 @@ impl Tree {
   ) -> CmdlineIndicatorSymbol {
     let cmdline_indicator_id = self.cmdline().unwrap().indicator_id();
     match self.node_mut(cmdline_indicator_id).unwrap() {
-      TreeNode::CmdlineIndicator(indicator) => {
+      Node::CmdlineIndicator(indicator) => {
         let old = indicator.symbol();
         indicator.set_symbol(symbol);
         old
@@ -829,35 +829,31 @@ impl Tree {
 impl Tree {
   /// Get viewport from editable widget.
   /// NOTE: Only window and cmdline input component are *editable* widgets.
-  pub fn editable_viewport(&self, id: TreeNodeId) -> ViewportArc {
+  pub fn editable_viewport(&self, id: NodeId) -> ViewportArc {
     match self.node(id).unwrap() {
-      TreeNode::Window(window) => window.viewport(),
-      TreeNode::Cmdline(cmdline) => cmdline.input_viewport(),
+      Node::Window(window) => window.viewport(),
+      Node::Cmdline(cmdline) => cmdline.input_viewport(),
       _ => unreachable!(),
     }
   }
 
-  pub fn set_editable_viewport(
-    &mut self,
-    id: TreeNodeId,
-    viewport: ViewportArc,
-  ) {
+  pub fn set_editable_viewport(&mut self, id: NodeId, viewport: ViewportArc) {
     match self.node_mut(id).unwrap() {
-      TreeNode::Window(window) => {
+      Node::Window(window) => {
         window.set_viewport(viewport.clone());
         let content_id = window.content_id();
         match self.node_mut(content_id).unwrap() {
-          TreeNode::WindowContent(content) => {
+          Node::WindowContent(content) => {
             content.set_viewport(Arc::downgrade(&viewport))
           }
           _ => unreachable!(),
         }
       }
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         cmdline.set_input_viewport(viewport.clone());
         let input_id = cmdline.input_id();
         match self.node_mut(input_id).unwrap() {
-          TreeNode::CmdlineInput(input) => {
+          Node::CmdlineInput(input) => {
             input.set_viewport(Arc::downgrade(&viewport))
           }
           _ => unreachable!(),
@@ -867,42 +863,42 @@ impl Tree {
     }
   }
 
-  pub fn editable_cursor_viewport(&self, id: TreeNodeId) -> CursorViewportArc {
+  pub fn editable_cursor_viewport(&self, id: NodeId) -> CursorViewportArc {
     match self.node(id).unwrap() {
-      TreeNode::Window(window) => window.cursor_viewport(),
-      TreeNode::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
+      Node::Window(window) => window.cursor_viewport(),
+      Node::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
       _ => unreachable!(),
     }
   }
 
   pub fn set_editable_cursor_viewport(
     &mut self,
-    id: TreeNodeId,
+    id: NodeId,
     cursor_viewport: CursorViewportArc,
   ) {
     match self.node_mut(id).unwrap() {
-      TreeNode::Window(window) => {
+      Node::Window(window) => {
         window.set_cursor_viewport(cursor_viewport.clone())
       }
-      TreeNode::Cmdline(cmdline) => {
+      Node::Cmdline(cmdline) => {
         cmdline.set_input_cursor_viewport(cursor_viewport)
       }
       _ => unreachable!(),
     }
   }
 
-  pub fn editable_options(&self, id: TreeNodeId) -> &WindowOptions {
+  pub fn editable_options(&self, id: NodeId) -> &WindowOptions {
     match self.node(id).unwrap() {
-      TreeNode::Window(window) => window.options(),
-      TreeNode::Cmdline(cmdline) => cmdline.options(),
+      Node::Window(window) => window.options(),
+      Node::Cmdline(cmdline) => cmdline.options(),
       _ => unreachable!(),
     }
   }
 
-  pub fn editable_actual_shape(&self, id: TreeNodeId) -> U16Rect {
+  pub fn editable_actual_shape(&self, id: NodeId) -> U16Rect {
     let editable_id = match self.node(id).unwrap() {
-      TreeNode::Window(window) => window.content_id(),
-      TreeNode::Cmdline(cmdline) => cmdline.input_id(),
+      Node::Window(window) => window.content_id(),
+      Node::Cmdline(cmdline) => cmdline.input_id(),
       _ => unreachable!(),
     };
     self.node(editable_id).unwrap().actual_shape()
