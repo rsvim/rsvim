@@ -177,7 +177,7 @@ impl Insert {
       let parent_id = tree.parent_id(cursor_id).unwrap();
       debug_assert!(matches!(
         tree.node(parent_id).unwrap(),
-        TreeNode::WindowContent(_)
+        Node::WindowContent(_)
       ));
       debug_assert!(
         tree.parent_id(tree.parent_id(cursor_id).unwrap()).is_some()

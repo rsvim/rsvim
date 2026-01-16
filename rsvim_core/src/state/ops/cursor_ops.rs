@@ -656,7 +656,7 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
 
   let removed_id = match tree.node(old_parent_id).unwrap() {
-    TreeNode::WindowContent(_content) => {
+    Node::WindowContent(_content) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
       debug_assert!(tree.current_window_id().is_some());
       let old_window_id = tree.parent_id(old_parent_id).unwrap();
@@ -666,7 +666,7 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
       }
       old_window_id
     }
-    TreeNode::CmdlineInput(_input) => {
+    Node::CmdlineInput(_input) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
       let old_input_panel_id = tree.parent_id(old_parent_id).unwrap();
       debug_assert!(tree.parent_id(old_input_panel_id).is_some());
@@ -686,7 +686,7 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
     .unwrap();
 
   match tree.node_mut(parent_id).unwrap() {
-    TreeNode::Window(window) => {
+    Node::Window(window) => {
       let content_id = window.content_id();
       tree
         .context()
@@ -694,7 +694,7 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
         .add_child(content_id, cursor_id)
         .unwrap();
     }
-    TreeNode::Cmdline(cmdline) => {
+    Node::Cmdline(cmdline) => {
       let input_id = cmdline.input_id();
       tree
         .context()
