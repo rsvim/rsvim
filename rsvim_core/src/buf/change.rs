@@ -50,6 +50,13 @@ impl Changes {
   }
 
   pub fn delete(&mut self, char_idx: usize, n: usize) {
-    self.ops.push(Operation::Delete(Delete { char_idx, n }));
+    if let Some(Operation::Delete(delete)) = self.ops.last_mut()
+      && delete.char_idx == char_idx
+    {
+      // Merge two deletion
+      delete.n += n;
+    } else {
+      self.ops.push(Operation::Delete(Delete { char_idx, n }));
+    }
   }
 }
