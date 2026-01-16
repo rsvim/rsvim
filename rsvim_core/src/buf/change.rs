@@ -38,3 +38,7 @@ pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
+
+pub struct Changes {
+  operations: Vec<Operation>,
+}
