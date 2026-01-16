@@ -1,7 +1,7 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
-use crate::js::JsTaskId;
+use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use std::path::PathBuf;
@@ -48,27 +48,27 @@ pub struct TimeoutReq {
 
 #[derive(Debug)]
 pub struct LoadImportReq {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub specifier: String,
 }
 
 #[derive(Debug)]
 pub struct FsOpenReq {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub path: PathBuf,
   pub options: FsOpenOptions,
 }
 
 #[derive(Debug)]
 pub struct FsReadReq {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub fd: usize,
   pub bufsize: usize,
 }
 
 #[derive(Debug)]
 pub struct FsWriteReq {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub fd: usize,
   pub buf: Vec<u8>,
 }

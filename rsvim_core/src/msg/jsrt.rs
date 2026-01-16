@@ -1,7 +1,7 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::buf::BufferId;
-use crate::js::JsTaskId;
+use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::prelude::*;
 use crate::ui::tree::NodeId;
@@ -51,25 +51,25 @@ pub struct ExCommandReq {
 
 #[derive(Debug)]
 pub struct LoadImportResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsOpenResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsReadResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsWriteResp {
-  pub task_id: JsTaskId,
+  pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
