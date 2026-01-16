@@ -31,5 +31,6 @@ pub struct Delete {
 /// 1. 2-Dimension on line number and char index per line.
 /// 2. 1-Dimension on absolute char index per whole buffer.
 pub enum ChangeOperation {
-  Retain(usize),
+  Insert(Insert),
+  Delete(Delete),
 }
