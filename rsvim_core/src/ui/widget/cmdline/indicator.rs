@@ -39,7 +39,7 @@ inodify_impl!(CmdlineIndicator);
 
 impl CmdlineIndicator {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     symbol: CmdlineIndicatorSymbol,
   ) -> Self {

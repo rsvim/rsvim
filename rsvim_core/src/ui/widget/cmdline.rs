@@ -25,10 +25,10 @@ pub struct Cmdline {
   __node: InodeBase,
   options: WindowOptions,
 
-  input_panel_id: TreeNodeId,
-  indicator_id: TreeNodeId,
-  input_id: TreeNodeId,
-  message_id: TreeNodeId,
+  input_panel_id: NodeId,
+  indicator_id: NodeId,
+  input_id: NodeId,
+  message_id: NodeId,
 
   input_viewport: ViewportArc,
   input_cursor_viewport: CursorViewportArc,
@@ -39,14 +39,14 @@ inodify_impl!(Cmdline);
 
 impl Cmdline {
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     text_contents: TextContentsWk,
-    input_panel_id: TreeNodeId,
-    indicator_id: TreeNodeId,
-    input_id: TreeNodeId,
+    input_panel_id: NodeId,
+    indicator_id: NodeId,
+    input_id: NodeId,
     input_size: &U16Size,
-    message_id: TreeNodeId,
+    message_id: NodeId,
     message_size: &U16Size,
   ) -> Self {
     // Force cmdline window options.
@@ -114,22 +114,22 @@ impl Cmdline {
   }
 
   /// Command-line input panel widget ID.
-  pub fn input_panel_id(&self) -> TreeNodeId {
+  pub fn input_panel_id(&self) -> NodeId {
     self.input_panel_id
   }
 
   /// Command-line indicator widget ID.
-  pub fn indicator_id(&self) -> TreeNodeId {
+  pub fn indicator_id(&self) -> NodeId {
     self.indicator_id
   }
 
   /// Command-line input widget ID.
-  pub fn input_id(&self) -> TreeNodeId {
+  pub fn input_id(&self) -> NodeId {
     self.input_id
   }
 
   /// Command-line message widget ID.
-  pub fn message_id(&self) -> TreeNodeId {
+  pub fn message_id(&self) -> NodeId {
     self.message_id
   }
 }

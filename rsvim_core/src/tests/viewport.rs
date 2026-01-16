@@ -5,10 +5,10 @@ use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::tree::NodeId;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeArc;
 use crate::ui::tree::TreeNode;
-use crate::ui::tree::TreeNodeId;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -24,7 +24,7 @@ pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
   window_options: WindowOptions,
-) -> (Tree, TreeNodeId) {
+) -> (Tree, NodeId) {
   let tree_style = Style {
     size: taffy::Size {
       width: taffy::prelude::length(terminal_size.width()),

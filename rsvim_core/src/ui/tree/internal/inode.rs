@@ -6,10 +6,10 @@ use crate::ui::tree::internal::context::TreeContextWk;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
-struct_id_impl!(TreeNodeId, i32, negative);
+struct_id_impl!(NodeId, i32, negative);
 
 pub trait Inodify: Sized + Clone + Debug {
-  fn id(&self) -> TreeNodeId;
+  fn id(&self) -> NodeId;
 
   fn shape(&self) -> IRect;
 
@@ -27,7 +27,7 @@ pub trait Inodify: Sized + Clone + Debug {
 macro_rules! inodify_impl {
   ($name:ty) => {
     impl Inodify for $name {
-      fn id(&self) -> TreeNodeId {
+      fn id(&self) -> NodeId {
         self.__node.id()
       }
 
@@ -59,7 +59,7 @@ macro_rules! inodify_impl {
 macro_rules! inodify_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodify for $enum {
-      fn id(&self) -> TreeNodeId {
+      fn id(&self) -> NodeId {
         match self {
           $(
             $enum::$variant(e) => e.id(),
@@ -112,12 +112,12 @@ macro_rules! inodify_enum_impl {
 
 #[derive(Debug, Clone)]
 pub struct InodeBase {
-  id: TreeNodeId,
+  id: NodeId,
   ctx: TreeContextWk,
 }
 
 impl InodeBase {
-  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+  pub fn new(id: NodeId, ctx: TreeContextWk) -> Self {
     Self { id, ctx }
   }
 
@@ -127,7 +127,7 @@ impl InodeBase {
 }
 
 impl Inodify for InodeBase {
-  fn id(&self) -> TreeNodeId {
+  fn id(&self) -> NodeId {
     self.id
   }
 

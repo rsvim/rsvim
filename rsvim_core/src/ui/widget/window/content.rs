@@ -21,7 +21,7 @@ inodify_impl!(WindowContent);
 impl WindowContent {
   /// Make window content.
   pub fn new(
-    id: TreeNodeId,
+    id: NodeId,
     ctx: TreeContextWk,
     buffer: BufferWk,
     viewport: ViewportWk,

@@ -4,7 +4,7 @@ use crate::buf::BufferId;
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
 use crate::prelude::*;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -46,7 +46,7 @@ pub struct TimeoutResp {
 pub struct ExCommandReq {
   pub payload: CompactString,
   pub current_buf_id: BufferId,
-  pub current_win_id: TreeNodeId,
+  pub current_win_id: NodeId,
 }
 
 #[derive(Debug)]

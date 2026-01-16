@@ -2,7 +2,7 @@
 
 use crate::buf::BufferId;
 use crate::js::JsTimerId;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
@@ -71,14 +71,14 @@ impl I32FromV8 for i32 {
   }
 }
 
-pub trait TreeNodeIdToV8 {
+pub trait NodeIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer>;
 }
 
-impl TreeNodeIdToV8 for TreeNodeId {
+impl NodeIdToV8 for NodeId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
@@ -87,19 +87,19 @@ impl TreeNodeIdToV8 for TreeNodeId {
   }
 }
 
-pub trait TreeNodeIdFromV8 {
+pub trait NodeIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self;
 }
 
-impl TreeNodeIdFromV8 for TreeNodeId {
+impl NodeIdFromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Integer>,
   ) -> Self {
-    TreeNodeId::from(value.int32_value(scope).unwrap())
+    NodeId::from(value.int32_value(scope).unwrap())
   }
 }
 
