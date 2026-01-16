@@ -41,5 +41,5 @@ pub enum Operation {
 
 #[derive(Debug, Clone)]
 pub struct Changes {
-  operations: Vec<Operation>,
+  ops: Vec<Operation>,
 }
