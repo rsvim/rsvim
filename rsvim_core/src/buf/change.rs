@@ -26,8 +26,7 @@ pub struct Delete {
 /// - Insert payload at an absolute char index.
 /// - Delete `n` characters at an absolute char index.
 ///
-/// The "Replace" change operation can be converted into delete+insert
-/// operations.
+/// The "Replace" operation can be converted into delete+insert operations.
 /// The change operation doesn't maintain current cursor's position, so a
 /// buffer can change without need to know where the cursor is.
 ///
