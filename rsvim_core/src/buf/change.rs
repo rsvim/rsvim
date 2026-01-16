@@ -9,11 +9,13 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Instant;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   char_idx: usize,
   payload: CompactString,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   char_idx: usize,
   count: usize,
