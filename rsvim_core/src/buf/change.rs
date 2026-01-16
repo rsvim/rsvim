@@ -9,20 +9,21 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Instant;
 
-pub struct Insert {
+pub struct Retain {
   char_idx: usize,
+}
+
+pub struct Insert {
   payload: CompactString,
 }
 
 pub struct Delete {
-  char_idx: usize,
   count: usize,
 }
 
 pub struct Replace {
-  start_char_idx: usize,
-  end_char_idx: usize,
-  payload: CompactString,
+  delete: Delete,
+  insert: Insert,
 }
 
 pub struct BufferChange {
