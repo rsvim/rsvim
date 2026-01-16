@@ -25,7 +25,7 @@ pub struct Delete {
 /// - Delete `n` characters at an absolute char index.
 ///
 /// The change operation doesn't maintain current cursor's position, so a
-/// buffer can change without involving cursor.
+/// buffer can change without need to know where the cursor is.
 ///
 /// NOTE: Ropey provide two types of coordinate system:
 /// 1. 2-Dimension on line number and char index per line.
