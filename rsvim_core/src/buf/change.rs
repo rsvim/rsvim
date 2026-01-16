@@ -34,7 +34,7 @@ pub struct Delete {
 /// NOTE: Ropey provide two types of coordinate system:
 /// 1. 2-Dimension on line number and char index per line.
 /// 2. 1-Dimension on absolute char index per whole buffer.
-pub enum ChangeOperation {
+pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
