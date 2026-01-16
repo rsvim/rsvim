@@ -43,3 +43,9 @@ pub enum Operation {
 pub struct Changes {
   ops: Vec<Operation>,
 }
+
+impl Changes {
+  pub fn operations(&self) -> &Vec<Operation> {
+    &self.ops
+  }
+}
