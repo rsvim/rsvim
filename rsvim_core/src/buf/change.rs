@@ -1,4 +1,4 @@
-//! Buffer snapshot.
+//! Buffer changes.
 
 use crate::buf::text::Text;
 use crate::prelude::*;
@@ -8,6 +8,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Instant;
 
-pub struct BufferSnapshot {
+pub struct BufferChange {
   text: Text,
 }
