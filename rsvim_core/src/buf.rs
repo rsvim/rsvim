@@ -1,6 +1,7 @@
 //! Vim buffers.
 
 pub mod opt;
+pub mod snapshot;
 pub mod text;
 pub mod unicode;
 
