@@ -89,8 +89,6 @@ jobs:
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
