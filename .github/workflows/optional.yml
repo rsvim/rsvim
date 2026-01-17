@@ -41,8 +41,6 @@ jobs:
     if: ${{ github.event.pull_request }}
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add rust-src clippy
