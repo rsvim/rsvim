@@ -76,8 +76,13 @@ impl Changes {
       return;
     }
 
-    self
-      .ops
-      .push(Operation::Insert(Insert { char_idx, payload }));
+    if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+      && (char_idx >= insert.char_idx || char_idx < insert.char_idx)
+    {
+    } else {
+      self
+        .ops
+        .push(Operation::Insert(Insert { char_idx, payload }));
+    }
   }
 }
