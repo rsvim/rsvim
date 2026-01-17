@@ -77,8 +77,10 @@ impl Changes {
     }
 
     if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && (char_idx >= insert.char_idx || char_idx < insert.char_idx)
+      && char_idx == insert.char_idx
     {
+      // Merge two insertion
+      insert.payload.insert_str(0, &payload);
     } else {
       self
         .ops
