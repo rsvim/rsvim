@@ -19,7 +19,7 @@ env:
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
   # RUSTC_LOG: "rustc_codegen_ssa::back::link=info"
-  SCCACHE_DIR: ${{ format('{0}/.sccache-cache', github.workspace) }}
+  # SCCACHE_DIR: ${{ format('{0}/.sccache-cache', github.workspace) }}
 jobs:
   check:
     name: Check
@@ -85,7 +85,7 @@ jobs:
           ]
     runs-on: ${{ matrix.os }}
     env:
-      RUSTC_WRAPPER: "sccache"
+      # RUSTC_WRAPPER: "sccache"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
@@ -93,9 +93,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
+      # - uses: mozilla-actions/sccache-action@v0.0.9
+      #   with:
+      #     version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
@@ -118,7 +118,7 @@ jobs:
           ]
     runs-on: ${{ matrix.os }}
     env:
-      RUSTC_WRAPPER: "sccache"
+      # RUSTC_WRAPPER: "sccache"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
@@ -126,9 +126,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
+      # - uses: mozilla-actions/sccache-action@v0.0.9
+      #   with:
+      #     version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
@@ -149,15 +149,15 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
-    env:
-      RUSTC_WRAPPER: "sccache"
+    # env:
+    #   RUSTC_WRAPPER: "sccache"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
+      # - uses: mozilla-actions/sccache-action@v0.0.9
+      #   with:
+      #     version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add clippy
