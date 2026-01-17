@@ -41,6 +41,12 @@ macro_rules! struct_id_impl {
         value.0
       }
     }
+
+    impl $name {
+      pub const fn zero() -> Self {
+        Self(0)
+      }
+    }
   };
 
   ($name:ident,$ty:ty,negative) => {

@@ -13,6 +13,7 @@ pub mod log;
 pub mod msg;
 pub mod prelude;
 pub mod state;
+pub mod syntax;
 pub mod ui;
 pub mod util;
 
