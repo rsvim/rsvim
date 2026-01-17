@@ -61,7 +61,7 @@ impl Changes {
       delete.n += n;
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
-      && delete.char_idx - char_idx == n
+      && delete.char_idx - char_idx <= n
     {
       // Merge two deletion
       delete.char_idx = char_idx;
