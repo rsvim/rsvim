@@ -17,7 +17,6 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
-  # SCCACHE_DIR: ${{ format('{0}/.sccache-cache', github.workspace) }}
 jobs:
   check:
     name: Check
@@ -40,15 +39,10 @@ jobs:
     name: Bloaty
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request }}
-    # env:
-    #   RUSTC_WRAPPER: "sccache"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
-      # - uses: mozilla-actions/sccache-action@v0.0.9
-      #   with:
-      #     version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add rust-src clippy
