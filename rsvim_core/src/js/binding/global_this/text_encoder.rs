@@ -24,17 +24,12 @@ fn encode_impl<'s>(
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   let mut read: usize = 0;
 
-  // FIXME: Update to `write_utf8_v2` API.
-  // This implementation follows deno's "op_encoding_encode_into" API:
-  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
-  #[allow(deprecated)]
-  let written = payload.write_utf8_uninit(
+  let written = payload.write_utf8_uninit_v2(
     scope,
     // Step-1: Get uninit buffer inside vec
     buf.spare_capacity_mut(),
+    v8::WriteFlags::kReplaceInvalidUtf8,
     Some(&mut read),
-    v8::WriteOptions::NO_NULL_TERMINATION
-      | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
   unsafe {
     // Step-2: Set length for the buffer, because it doesn't know memory
