@@ -19,7 +19,6 @@ env:
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
   # RUSTC_LOG: "rustc_codegen_ssa::back::link=info"
-  SCCACHE_DIR: ${{ format('{0}/.sccache-cache', github.workspace) }}
 jobs:
   check:
     name: Check
@@ -74,20 +73,22 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+            windows-11-arm,
+          ]
     runs-on: ${{ matrix.os }}
     env:
-      RUSTC_WRAPPER: "sccache"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
@@ -99,32 +100,41 @@ jobs:
     name: Test Coverage
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+            windows-11-arm,
+          ]
     runs-on: ${{ matrix.os }}
     env:
-      RUSTC_WRAPPER: "sccache"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
         if: ${{ contains(matrix.os, 'ubuntu') }}
       - name: Install Rust
         run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
+        if: ${{ matrix.os != 'windows-11-arm' }}
       - uses: taiki-e/install-action@nextest
       - name: Nextest with code coverage
+        if: ${{ matrix.os != 'windows-11-arm' }}
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
+      - name: Nextest with code coverage (Windows-Arm)
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        run: |
+          cargo nextest run --workspace --color=never --no-capture
       - uses: codecov/codecov-action@v5
+        if: ${{ matrix.os != 'windows-11-arm' }}
         with:
           fail_ci_if_error: true
           files: lcov.info
@@ -133,15 +143,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
-    env:
-      RUSTC_WRAPPER: "sccache"
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
-      - uses: mozilla-actions/sccache-action@v0.0.9
-        with:
-          version: "v0.12.0"
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add clippy
