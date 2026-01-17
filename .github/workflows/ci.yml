@@ -74,7 +74,15 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+            windows-11-arm,
+          ]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
@@ -99,7 +107,15 @@ jobs:
     name: Test Coverage
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+            windows-11-arm,
+          ]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
