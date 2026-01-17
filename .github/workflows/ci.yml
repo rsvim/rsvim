@@ -122,12 +122,19 @@ jobs:
         run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
+        if: ${{ matrix.os != 'windows-11-arm' }}
       - uses: taiki-e/install-action@nextest
       - name: Nextest with code coverage
+        if: ${{ matrix.os != 'windows-11-arm' }}
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
+      - name: Nextest with code coverage (Windows-Arm)
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        run: |
+          cargo nextest run --workspace --color=never --no-capture
       - uses: codecov/codecov-action@v5
+        if: ${{ matrix.os != 'windows-11-arm' }}
         with:
           fail_ci_if_error: true
           files: lcov.info
@@ -138,8 +145,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add clippy
