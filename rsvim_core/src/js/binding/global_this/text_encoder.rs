@@ -83,7 +83,7 @@ pub fn encode_into<'s>(
 
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  let buf_size = buf.byte_length();
+  let buf_size = std::cmp::min(buf.byte_length(), payload.utf8_length(scope));
   let buf_store = buf.get_backing_store();
 
   let (data, read, written) = encode_impl(scope, payload, buf_size);
