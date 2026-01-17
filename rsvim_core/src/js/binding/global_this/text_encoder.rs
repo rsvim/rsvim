@@ -28,9 +28,8 @@ fn encode_impl<'s>(
     scope,
     // Step-1: Get uninit buffer inside vec
     buf.spare_capacity_mut(),
+    v8::WriteFlags::kNullTerminate | v8::WriteFlags::kReplaceInvalidUtf8,
     Some(&mut read),
-    v8::WriteOptions::NO_NULL_TERMINATION
-      | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
   unsafe {
     // Step-2: Set length for the buffer, because it doesn't know memory
