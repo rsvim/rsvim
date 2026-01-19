@@ -132,7 +132,7 @@ impl Default for ChangeHistory {
 impl ChangeHistory {
   pub fn new() -> Self {
     Self {
-      changes: HeapRb::new(500),
+      changes: HeapRb::new(100),
       version: 0,
     }
   }
