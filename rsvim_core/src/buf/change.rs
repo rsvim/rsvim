@@ -75,6 +75,12 @@ impl Changes {
       // Merge two deletion
       delete.char_idx = char_idx;
       delete.n += n;
+    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+      && insert.char_idx == char_idx
+      && insert.payload.len() == n
+    {
+      // Cancel both insertion and deletion
+      self.ops.pop();
     } else {
       self.ops.push(Operation::Delete(Delete { char_idx, n }));
     }
