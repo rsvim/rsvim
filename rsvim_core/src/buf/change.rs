@@ -54,6 +54,10 @@ impl Changes {
     &self.timestamp
   }
 
+  pub fn update_timestamp(&mut self) {
+    self.timestamp = Instant::now();
+  }
+
   pub fn delete(&mut self, char_idx: usize, n: usize) {
     if n == 0 {
       return;
