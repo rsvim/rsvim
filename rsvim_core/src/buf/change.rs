@@ -1,5 +1,7 @@
 //! Undo history.
 
+use std::fmt::Debug;
+
 // use crate::buf::text::Text;
 // use crate::prelude::*;
 use compact_str::CompactString;
@@ -8,7 +10,7 @@ use compact_str::CompactString;
 // use std::path::Path;
 // use std::path::PathBuf;
 use ringbuf::HeapRb;
-use ringbuf::traits::RingBuffer;
+use ringbuf::traits::{Observer, RingBuffer};
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -140,6 +142,19 @@ pub struct ChangeManager {
 impl Default for ChangeManager {
   fn default() -> Self {
     Self::new()
+  }
+}
+
+impl Debug for ChangeManager {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("ChangeManager")
+      .field(
+        "change_history.occupied_len",
+        &self.change_history.occupied_len(),
+      )
+      .field("current_change", &self.current_change)
+      .field("next_version", &self.next_version)
+      .finish()
   }
 }
 
