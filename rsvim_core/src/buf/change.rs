@@ -65,6 +65,10 @@ impl Change {
     &self.timestamp
   }
 
+  pub fn version(&self) -> usize {
+    self.version
+  }
+
   fn update_timestamp(&mut self) {
     self.timestamp = Instant::now();
   }
@@ -148,7 +152,10 @@ impl UndoManager {
     }
   }
 
-  pub fn append(&mut self, change: Change) {
-    self.history.push_overwrite(change);
+  pub fn commit(&mut self) {
+    let saved = self.current.clone();
+    self.current = Change::new(self.next_version);
+    self.next_version += 1;
+    self.history.push_overwrite(saved);
   }
 }
