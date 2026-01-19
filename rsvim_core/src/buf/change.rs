@@ -132,8 +132,8 @@ impl Change {
 }
 
 pub struct UndoManager {
-  history: HeapRb<Change>,
-  current: Change,
+  change_history: HeapRb<Change>,
+  current_change: Change,
   next_version: usize,
 }
 
@@ -146,15 +146,17 @@ impl Default for UndoManager {
 impl UndoManager {
   pub fn new() -> Self {
     Self {
-      history: HeapRb::new(100),
-      current: Change::new(0),
+      change_history: HeapRb::new(100),
+      current_change: Change::new(0),
       next_version: 1,
     }
   }
 
   pub fn commit(&mut self) {
-    self.history.push_overwrite(self.current.clone());
-    self.current = Change::new(self.next_version);
+    self
+      .change_history
+      .push_overwrite(self.current_change.clone());
+    self.current_change = Change::new(self.next_version);
     self.next_version += 1;
   }
 }
