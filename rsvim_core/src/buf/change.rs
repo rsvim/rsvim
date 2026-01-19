@@ -7,7 +7,7 @@ use path_absolutize::Absolutize;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
-use std::time::Instant;
+use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
@@ -42,11 +42,16 @@ pub enum Operation {
 #[derive(Debug, Clone)]
 pub struct Changes {
   ops: Vec<Operation>,
+  timestamp: Instant,
 }
 
 impl Changes {
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
+  }
+
+  pub fn timestamp(&self) -> &Instant {
+    &self.timestamp
   }
 
   pub fn delete(&mut self, char_idx: usize, n: usize) {

@@ -25,8 +25,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
-use std::time::Instant;
 use text::Text;
+use tokio::time::Instant;
 
 struct_id_impl!(BufferId, i32, negative);
 

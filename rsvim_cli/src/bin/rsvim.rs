@@ -29,9 +29,9 @@ use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
-use std::time::Instant;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
+use tokio::time::Instant;
 
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";

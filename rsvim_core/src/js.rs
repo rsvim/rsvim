@@ -59,9 +59,9 @@ use std::sync::Once;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
-use std::time::Instant;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
+use tokio::time::Instant;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING

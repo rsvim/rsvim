@@ -6,7 +6,7 @@ use path_absolutize::Absolutize;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
-use std::time::Instant;
+use tokio::time::Instant;
 
 pub struct BufferSnapshot {
   text: Text,
