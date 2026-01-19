@@ -119,26 +119,27 @@ impl Change {
   }
 }
 
-pub struct UndoHistory {
-  changes: HeapRb<Change>,
+pub struct UndoManager {
+  history: HeapRb<Change>,
+  current: Change,
   next_version: usize,
 }
 
-impl Default for UndoHistory {
+impl Default for UndoManager {
   fn default() -> Self {
     Self::new()
   }
 }
 
-impl UndoHistory {
+impl UndoManager {
   pub fn new() -> Self {
     Self {
-      changes: HeapRb::new(100),
+      history: HeapRb::new(100),
       next_version: 0,
     }
   }
 
   pub fn append(&mut self, change: Change) {
-    self.changes.push_overwrite(change);
+    self.history.push_overwrite(change);
   }
 }
