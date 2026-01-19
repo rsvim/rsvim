@@ -153,9 +153,8 @@ impl UndoManager {
   }
 
   pub fn commit(&mut self) {
-    let saved = self.current.clone();
+    self.history.push_overwrite(self.current.clone());
     self.current = Change::new(self.next_version);
     self.next_version += 1;
-    self.history.push_overwrite(saved);
   }
 }
