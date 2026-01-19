@@ -131,19 +131,19 @@ impl Change {
   }
 }
 
-pub struct UndoManager {
+pub struct ChangeManager {
   change_history: HeapRb<Change>,
   current_change: Change,
   next_version: usize,
 }
 
-impl Default for UndoManager {
+impl Default for ChangeManager {
   fn default() -> Self {
     Self::new()
   }
 }
 
-impl UndoManager {
+impl ChangeManager {
   pub fn new() -> Self {
     Self {
       change_history: HeapRb::new(100),
