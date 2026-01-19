@@ -14,6 +14,7 @@ mod unicode_tests;
 
 use crate::prelude::*;
 use crate::struct_id_impl;
+use change::ChangeManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -51,10 +52,15 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   text: Text,
+
+  // file
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
+
+  // change history
+  change: ChangeManager,
 }
 
 arc_mutex_ptr!(Buffer);
