@@ -84,6 +84,11 @@ impl Changes {
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
+    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+      && (char_idx == insert.char_idx + insert.payload.len())
+    {
+      // Merge two insertion
+      insert.payload.push_str(&payload);
     } else {
       self
         .ops
