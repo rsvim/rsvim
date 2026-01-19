@@ -40,12 +40,12 @@ pub enum Operation {
 }
 
 #[derive(Debug, Clone)]
-pub struct Changes {
+pub struct Change {
   ops: Vec<Operation>,
   timestamp: Instant,
 }
 
-impl Changes {
+impl Change {
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
   }
