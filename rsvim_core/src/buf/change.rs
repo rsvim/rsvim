@@ -54,7 +54,7 @@ impl Change {
     &self.timestamp
   }
 
-  pub fn update_timestamp(&mut self) {
+  fn update_timestamp(&mut self) {
     self.timestamp = Instant::now();
   }
 
@@ -84,6 +84,8 @@ impl Change {
     } else {
       self.ops.push(Operation::Delete(Delete { char_idx, n }));
     }
+
+    self.update_timestamp();
   }
 
   pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
@@ -109,5 +111,7 @@ impl Change {
         .ops
         .push(Operation::Insert(Insert { char_idx, payload }));
     }
+
+    self.update_timestamp();
   }
 }
