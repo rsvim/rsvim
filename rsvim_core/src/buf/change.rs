@@ -49,6 +49,14 @@ pub struct Change {
 }
 
 impl Change {
+  pub fn new(version: usize) -> Self {
+    Self {
+      ops: vec![],
+      timestamp: Instant::now(),
+      version,
+    }
+  }
+
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
   }
@@ -135,7 +143,8 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: HeapRb::new(100),
-      next_version: 0,
+      current: Change::new(0),
+      next_version: 1,
     }
   }
 
