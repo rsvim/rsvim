@@ -1,4 +1,4 @@
-//! Buffer changes.
+//! Undo history.
 
 // use crate::buf::text::Text;
 // use crate::prelude::*;
@@ -119,18 +119,18 @@ impl Change {
   }
 }
 
-pub struct ChangeHistory {
+pub struct UndoHistory {
   changes: HeapRb<Change>,
   next_version: usize,
 }
 
-impl Default for ChangeHistory {
+impl Default for UndoHistory {
   fn default() -> Self {
     Self::new()
   }
 }
 
-impl ChangeHistory {
+impl UndoHistory {
   pub fn new() -> Self {
     Self {
       changes: HeapRb::new(100),
