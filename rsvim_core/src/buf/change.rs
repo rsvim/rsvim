@@ -1,7 +1,6 @@
 //! Undo history.
 
 use std::fmt::Debug;
-
 // use crate::buf::text::Text;
 // use crate::prelude::*;
 use compact_str::CompactString;
