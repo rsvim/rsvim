@@ -7,6 +7,7 @@ use compact_str::CompactString;
 // use std::fs::Metadata;
 // use std::path::Path;
 // use std::path::PathBuf;
+use ringbuf::HeapRb;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -114,4 +115,9 @@ impl Change {
 
     self.update_timestamp();
   }
+}
+
+pub struct ChangeHistory {
+  changes: HeapRb<Change>,
+  version: usize,
 }
