@@ -152,6 +152,14 @@ impl ChangeManager {
     }
   }
 
+  pub fn current_change(&self) -> &Change {
+    &self.current_change
+  }
+
+  pub fn current_change_mut(&mut self) -> &mut Change {
+    &mut self.current_change
+  }
+
   pub fn commit(&mut self) {
     self
       .change_history
