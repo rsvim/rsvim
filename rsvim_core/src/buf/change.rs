@@ -1,12 +1,12 @@
 //! Buffer changes.
 
-use crate::buf::text::Text;
-use crate::prelude::*;
+// use crate::buf::text::Text;
+// use crate::prelude::*;
 use compact_str::CompactString;
-use path_absolutize::Absolutize;
-use std::fs::Metadata;
-use std::path::Path;
-use std::path::PathBuf;
+// use path_absolutize::Absolutize;
+// use std::fs::Metadata;
+// use std::path::Path;
+// use std::path::PathBuf;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
