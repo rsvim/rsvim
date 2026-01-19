@@ -2,7 +2,6 @@
 
 pub mod change;
 pub mod opt;
-pub mod snapshot;
 pub mod text;
 pub mod unicode;
 
