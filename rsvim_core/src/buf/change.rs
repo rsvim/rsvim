@@ -44,6 +44,7 @@ pub enum Operation {
 pub struct Change {
   ops: Vec<Operation>,
   timestamp: Instant,
+  version: usize,
 }
 
 impl Change {
@@ -120,4 +121,13 @@ impl Change {
 pub struct ChangeHistory {
   changes: HeapRb<Change>,
   version: usize,
+}
+
+impl ChangeHistory {
+  pub fn new() -> Self {
+    Self {
+      changes: HeapRb::new(500),
+      version: 0,
+    }
+  }
 }
