@@ -239,18 +239,11 @@ impl CmdlineEx {
       _ => unreachable!(),
     };
 
-    let (cursor_line_idx, cursor_char_idx) = cursor_ops::cursor_insert(
+    cursor_ops::cursor_insert(
       &mut tree,
       cmdline_id,
       contents.cmdline_input_mut(),
       payload,
-    );
-    cursor_ops::cursor_move(
-      &mut tree,
-      cmdline_id,
-      contents.cmdline_input_mut(),
-      Operation::CursorMoveTo((cursor_char_idx, cursor_line_idx)),
-      true,
     );
 
     State::CmdlineEx(CmdlineEx::default())

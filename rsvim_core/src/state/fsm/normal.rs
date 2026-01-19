@@ -231,18 +231,11 @@ impl Normal {
         );
         let eol =
           CompactString::new(format!("{}", buffer.options().end_of_line()));
-        let (cursor_line_idx, cursor_char_idx) = cursor_ops::cursor_insert(
+        cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,
           buffer.text_mut(),
           eol,
-        );
-        cursor_ops::cursor_move(
-          &mut tree,
-          current_window_id,
-          buffer.text_mut(),
-          Operation::CursorMoveTo((cursor_char_idx, cursor_line_idx)),
-          true,
         );
       }
     };
