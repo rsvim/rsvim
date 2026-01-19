@@ -8,6 +8,7 @@ use compact_str::CompactString;
 // use std::path::Path;
 // use std::path::PathBuf;
 use ringbuf::HeapRb;
+use ringbuf::traits::RingBuffer;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -135,5 +136,9 @@ impl ChangeHistory {
       changes: HeapRb::new(100),
       version: 0,
     }
+  }
+
+  pub fn append(&mut self, change: Change) {
+    self.changes.push_overwrite(change);
   }
 }
