@@ -245,12 +245,11 @@ impl CmdlineEx {
       contents.cmdline_input_mut(),
       payload,
     );
-    let op = Operation::CursorMoveTo((cursor_char_idx, cursor_line_idx));
     cursor_ops::cursor_move(
       &mut tree,
       cmdline_id,
       contents.cmdline_input_mut(),
-      op,
+      Operation::CursorMoveTo((cursor_char_idx, cursor_line_idx)),
       true,
     );
 
