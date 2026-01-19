@@ -544,10 +544,10 @@ pub fn cursor_move(
     .unwrap();
 }
 
-/// High-level cursor insert operation.
+/// Cursor insert operation (but without cursor motion).
 ///
-/// This API will insert text at the cursor (and possibly scroll the
-/// window/cmdline), as if user is typing in insert mode.
+/// This API will insert text at the cursor, but not moving cursor nor
+/// scrolling window/cmdline.
 ///
 /// # Returns
 ///
@@ -579,11 +579,11 @@ pub fn cursor_insert(
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
   );
-  let op = Operation::CursorMoveTo((
-    cursor_char_idx_after_inserted,
-    cursor_line_idx_after_inserted,
-  ));
-  cursor_move(tree, id, text, op, true);
+  // let op = Operation::CursorMoveTo((
+  //   cursor_char_idx_after_inserted,
+  //   cursor_line_idx_after_inserted,
+  // ));
+  // cursor_move(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
