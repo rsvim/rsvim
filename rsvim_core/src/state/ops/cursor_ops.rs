@@ -579,11 +579,11 @@ pub fn cursor_insert(
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
   );
-  // let op = Operation::CursorMoveTo((
-  //   cursor_char_idx_after_inserted,
-  //   cursor_line_idx_after_inserted,
-  // ));
-  // cursor_move(tree, id, text, op, true);
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_inserted,
+    cursor_line_idx_after_inserted,
+  ));
+  cursor_move(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
