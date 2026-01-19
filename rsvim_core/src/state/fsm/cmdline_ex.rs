@@ -128,9 +128,9 @@ impl CmdlineEx {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.cmdline_id().is_some());
-    debug_assert!(tree.current_window_id().is_some());
     if cfg!(debug_assertions) {
+      debug_assert!(tree.cmdline_id().is_some());
+      debug_assert!(tree.current_window_id().is_some());
       let cursor_id = tree.cursor_id();
       debug_assert!(cursor_id.is_some());
       let cursor_id = cursor_id.unwrap();
