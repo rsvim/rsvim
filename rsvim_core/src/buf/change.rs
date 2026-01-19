@@ -121,7 +121,7 @@ impl Change {
 
 pub struct ChangeHistory {
   changes: HeapRb<Change>,
-  version: usize,
+  next_version: usize,
 }
 
 impl Default for ChangeHistory {
@@ -134,7 +134,7 @@ impl ChangeHistory {
   pub fn new() -> Self {
     Self {
       changes: HeapRb::new(100),
-      version: 0,
+      next_version: 0,
     }
   }
 
