@@ -85,6 +85,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
+      change: ChangeManager::new(),
     }
   }
 
