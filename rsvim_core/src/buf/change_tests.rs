@@ -17,13 +17,17 @@ fn insert1() {
   let actual = &actual.operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, payload);
-      assert_eq!(insert_actual.char_idx, 0);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, payload);
+      assert_eq!(insert.char_idx, 0);
     }
     _ => unreachable!(),
   }
   change_manager.commit();
+
+  let actual = change_manager.current_change();
+  assert!(actual.operations().is_empty());
+  assert_eq!(actual.version(), 2);
 }
 
 #[test]
@@ -42,9 +46,9 @@ fn insert2() {
   let actual = &actual.operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, payload1);
-      assert_eq!(insert_actual.char_idx, 0);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, payload1);
+      assert_eq!(insert.char_idx, 0);
     }
     _ => unreachable!(),
   }
@@ -62,9 +66,9 @@ fn insert2() {
   let actual = &actual.operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, "HelWorld!lo, ");
-      assert_eq!(insert_actual.char_idx, 0);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "HelWorld!lo, ");
+      assert_eq!(insert.char_idx, 0);
     }
     _ => unreachable!(),
   }
@@ -82,9 +86,9 @@ fn insert2() {
   let actual = &actual.operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, "HelWorld!lo, 汤姆(Tom)?");
-      assert_eq!(insert_actual.char_idx, 0);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "HelWorld!lo, 汤姆(Tom)?");
+      assert_eq!(insert.char_idx, 0);
     }
     _ => unreachable!(),
   }
@@ -103,24 +107,151 @@ fn insert2() {
   let actual = &change_manager.current_change().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, "HelWorld!lo, 汤姆(Tom)?");
-      assert_eq!(insert_actual.char_idx, 0);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "HelWorld!lo, 汤姆(Tom)?");
+      assert_eq!(insert.char_idx, 0);
     }
     _ => unreachable!(),
   }
   let actual = &change_manager.current_change().operations()[1];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, "no, it's jerry");
-      assert_eq!(insert_actual.char_idx, 100);
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "no, it's jerry");
+      assert_eq!(insert.char_idx, 100);
     }
     _ => unreachable!(),
   }
 
   change_manager.commit();
+
+  let actual = change_manager.current_change();
+  assert!(actual.operations().is_empty());
+  assert_eq!(actual.version(), 2);
 }
 
 #[test]
-fn delete1() {}
+fn delete1() {
+  let mut change_manager = ChangeManager::new();
+  let payload1 = "Hello, World!";
+  for (i, c) in payload1.chars().enumerate() {
+    change_manager.save(Operation::Insert(Insert {
+      char_idx: i,
+      payload: c.to_string().to_compact_string(),
+    }));
+  }
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 1);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.save(Operation::Delete(Delete {
+    char_idx: payload1.chars().count() - 1,
+    n: 1,
+  }));
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 2);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Delete(_)));
+  match actual {
+    Operation::Delete(delete) => {
+      assert_eq!(delete.char_idx, 12);
+      assert_eq!(delete.n, 1);
+    }
+    _ => unreachable!(),
+  }
+
+  let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
+  change_manager.save(Operation::Insert(Insert {
+    char_idx: 12,
+    payload: payload2.to_compact_string(),
+  }));
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 3);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Delete(_)));
+  match actual {
+    Operation::Delete(delete) => {
+      assert_eq!(delete.char_idx, 12);
+      assert_eq!(delete.n, 1);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[2];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.char_idx, 12);
+      assert_eq!(insert.payload, payload2);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.save(Operation::Delete(Delete {
+    char_idx: 12,
+    n: payload2.chars().count(),
+  }));
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 2);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Delete(_)));
+  match actual {
+    Operation::Delete(delete) => {
+      assert_eq!(delete.char_idx, 12);
+      assert_eq!(delete.n, 1);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.commit();
+
+  let actual = change_manager.current_change();
+  assert!(actual.operations().is_empty());
+  assert_eq!(actual.version(), 2);
+}
