@@ -1,7 +1,5 @@
 //! Cursor operations.
 
-use crate::buf::Buffer;
-use crate::buf::change;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::ops::Operation;
