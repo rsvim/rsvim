@@ -255,3 +255,87 @@ fn delete1() {
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
+
+#[test]
+fn delete2() {
+  let mut change_manager = ChangeManager::new();
+  let payload1 = "Hello, World!";
+  for (i, c) in payload1.chars().enumerate() {
+    change_manager.save(Operation::Insert(Insert {
+      char_idx: i,
+      payload: c.to_string().to_compact_string(),
+    }));
+  }
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 1);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.save(Operation::Delete(Delete { char_idx: 12, n: 1 }));
+  change_manager.save(Operation::Delete(Delete { char_idx: 11, n: 1 }));
+  change_manager.save(Operation::Delete(Delete { char_idx: 10, n: 1 }));
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 2);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Delete(_)));
+  match actual {
+    Operation::Delete(delete) => {
+      assert_eq!(delete.char_idx, 10);
+      assert_eq!(delete.n, 3);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.save(Operation::Delete(Delete { char_idx: 8, n: 2 }));
+
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 2);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert) => {
+      assert_eq!(insert.payload, "Hello, World!");
+      assert_eq!(insert.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Delete(_)));
+  match actual {
+    Operation::Delete(delete) => {
+      assert_eq!(delete.char_idx, 8);
+      assert_eq!(delete.n, 5);
+    }
+    _ => unreachable!(),
+  }
+
+  change_manager.commit();
+
+  let actual = change_manager.current_change();
+  assert!(actual.operations().is_empty());
+  assert_eq!(actual.version(), 2);
+}
