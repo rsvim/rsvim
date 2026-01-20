@@ -174,8 +174,15 @@ impl ChangeManager {
     &self.current_change
   }
 
-  pub fn current_change_mut(&mut self) -> &mut Change {
-    &mut self.current_change
+  pub fn save(&mut self, op: Operation) {
+    match op {
+      Operation::Delete(delete) => {
+        self.current_change.delete(delete.char_idx, delete.n)
+      }
+      Operation::Insert(insert) => {
+        self.current_change.insert(insert.char_idx, insert.payload)
+      }
+    }
   }
 
   pub fn commit(&mut self) {
