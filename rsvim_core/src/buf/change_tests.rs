@@ -121,3 +121,6 @@ fn insert2() {
 
   change_manager.commit();
 }
+
+#[test]
+fn delete1() {}
