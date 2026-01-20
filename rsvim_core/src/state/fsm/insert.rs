@@ -99,7 +99,7 @@ impl Insert {
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    /// Save editing change
+    // Save editing change
     let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
       &tree,
       current_window_id,
