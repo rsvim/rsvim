@@ -232,6 +232,7 @@ impl Normal {
         let eol =
           CompactString::new(format!("{}", buffer.options().end_of_line()));
 
+        // Save editing change
         let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
         let cursor_line_idx = cursor_viewport.line_idx();
         let cursor_char_idx = cursor_viewport.char_idx();
