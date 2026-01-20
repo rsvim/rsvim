@@ -1,4 +1,4 @@
-//! Undo history.
+//! Editing/change history, useful for undo/redo.
 
 use std::fmt::Debug;
 // use crate::buf::text::Text;
