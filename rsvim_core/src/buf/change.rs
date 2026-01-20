@@ -85,18 +85,21 @@ impl Change {
       && delete.char_idx == char_idx
     {
       // Merge two deletion
+      trace!("self.ops.last-1, char_idx:{:?},n:{:?}", delete.char_idx, delete.n);
       delete.n += n;
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
       && delete.char_idx - char_idx <= n
     {
+      trace!("self.ops.last-2, char_idx:{:?},n:{:?}", delete.char_idx, delete.n);
       // Merge two deletion
       delete.char_idx = char_idx;
       delete.n += n;
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
-      && insert.payload.len() == n
+      && insert.payload.chars().count() == n
     {
+      trace!("self.ops.last-3, char_idx:{:?},payload.count:{:?}", insert.char_idx, insert.payload.chars().count());
       // Cancel both insertion and deletion
       self.ops.pop();
     } else {
@@ -111,18 +114,19 @@ impl Change {
       return;
     }
 
-    trace!("self.ops.last:{:?}", self.ops.last());
     if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && char_idx >= insert.char_idx
-      && char_idx < insert.char_idx + insert.payload.len()
+      && char_idx < insert.char_idx + insert.payload.chars().count()
     {
+      trace!("self.ops.last-1, char_idx:{:?},payload.count:{:?}", insert.char_idx, insert.payload.chars().count());
       // Merge two insertion
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && (char_idx == insert.char_idx + insert.payload.len())
+      && (char_idx == insert.char_idx + insert.payload.chars().count())
     {
+      trace!("self.ops.last-2, char_idx:{:?},payload.count:{:?}", insert.char_idx, insert.payload.chars().count());
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
