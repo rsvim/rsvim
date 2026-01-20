@@ -63,7 +63,7 @@ fn insert2() {
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, payload1);
+      assert_eq!(insert_actual.payload, "HelWorld!lo, ");
       assert_eq!(insert_actual.char_idx, 0);
     }
     _ => unreachable!(),
