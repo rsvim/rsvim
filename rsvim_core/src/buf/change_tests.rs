@@ -1,5 +1,4 @@
 use super::change::*;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 #[test]
