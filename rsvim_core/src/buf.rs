@@ -60,7 +60,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // change history
-  change: ChangeManager,
+  change_manager: ChangeManager,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -85,7 +85,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      change: ChangeManager::new(),
+      change_manager: ChangeManager::new(),
     }
   }
 
