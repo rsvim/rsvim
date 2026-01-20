@@ -6,6 +6,8 @@ pub mod text;
 pub mod unicode;
 
 #[cfg(test)]
+mod change_tests;
+#[cfg(test)]
 mod opt_tests;
 #[cfg(test)]
 mod text_tests;
