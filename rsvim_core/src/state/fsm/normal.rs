@@ -239,7 +239,6 @@ impl Normal {
           &mut buffer,
           eol.clone(),
         );
-
         cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,
