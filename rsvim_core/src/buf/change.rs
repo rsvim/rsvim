@@ -10,8 +10,8 @@ use compact_str::CompactString;
 // use std::path::Path;
 // use std::path::PathBuf;
 use ringbuf::HeapRb;
-use ringbuf::traits::{Observer};
-use ringbuf::traits::{RingBuffer};
+use ringbuf::traits::Observer;
+use ringbuf::traits::RingBuffer;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -114,7 +114,7 @@ impl Change {
     trace!("self.ops.last:{:?}", self.ops.last());
     if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && char_idx >= insert.char_idx
-        && char_idx < insert.char_idx + insert.payload.len()
+      && char_idx < insert.char_idx + insert.payload.len()
     {
       // Merge two insertion
       insert
