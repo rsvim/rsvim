@@ -69,7 +69,7 @@ fn insert2() {
     _ => unreachable!(),
   }
 
-  let payload3 = "汤姆(Tom)!";
+  let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
     change_manager.save(Operation::Insert(Insert {
       char_idx: i + payload1.chars().count() + payload2.chars().count(),
@@ -83,7 +83,7 @@ fn insert2() {
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert_actual) => {
-      assert_eq!(insert_actual.payload, "HelWorld!lo, ");
+      assert_eq!(insert_actual.payload, "HelWorld!lo, 汤姆(Tom)?");
       assert_eq!(insert_actual.char_idx, 0);
     }
     _ => unreachable!(),
