@@ -19,6 +19,7 @@ fn insert1() {
   match actual {
     Operation::Insert(insert_actual) => {
       assert_eq!(insert_actual.payload, payload);
+      assert_eq!(insert_actual.char_idx, 0);
     }
     _ => unreachable!(),
   }
