@@ -141,6 +141,17 @@ impl Insert {
       }
     };
 
+    // Save editing change
+    let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
+    let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
+    let cursor_absolute_char_idx =
+      buffer.text().rope().line_to_char(cursor_line_idx) + cursor_char_idx;
+    buffer
+      .change_manager_mut()
+      .current_change_mut()
+      .insert(cursor_absolute_char_idx, payload.clone());
+
     cursor_ops::cursor_insert(
       &mut tree,
       current_window_id,
