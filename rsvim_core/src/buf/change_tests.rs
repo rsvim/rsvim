@@ -89,5 +89,35 @@ fn insert2() {
     _ => unreachable!(),
   }
 
+  let payload4 = "no, it's jerry";
+  for (i, c) in payload4.chars().enumerate() {
+    change_manager.save(Operation::Insert(Insert {
+      char_idx: i + 100,
+      payload: c.to_string().to_compact_string(),
+    }));
+  }
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 2);
+  assert_eq!(actual.version(), 1);
+
+  let actual = &change_manager.current_change().operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert_actual) => {
+      assert_eq!(insert_actual.payload, "HelWorld!lo, 汤姆(Tom)?");
+      assert_eq!(insert_actual.char_idx, 0);
+    }
+    _ => unreachable!(),
+  }
+  let actual = &change_manager.current_change().operations()[1];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert_actual) => {
+      assert_eq!(insert_actual.payload, "no, it's jerry");
+      assert_eq!(insert_actual.char_idx, 100);
+    }
+    _ => unreachable!(),
+  }
+
   change_manager.commit();
 }
