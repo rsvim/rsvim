@@ -59,7 +59,7 @@ pub struct Buffer {
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
 
-  // change history
+  // change manager
   change_manager: ChangeManager,
 }
 
