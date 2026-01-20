@@ -1,5 +1,6 @@
 //! Cursor operations.
 
+use crate::buf::change::ChangeManager;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::ops::Operation;
@@ -706,4 +707,23 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
   }
 
   Some(removed_id)
+}
+
+/// Save editing change, this should be done just before calling
+/// [`cursor_insert`] api.
+pub fn save_editing_change(
+  tree: &mut Tree,
+  id: NodeId,
+  text: &mut Text,
+  change_manager: &mut ChangeManager,
+  payload: CompactString,
+) {
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  let cursor_absolute_char_idx =
+    text.rope().line_to_char(cursor_line_idx) + cursor_char_idx;
+  change_manager
+    .current_change_mut()
+    .insert(cursor_absolute_char_idx, payload);
 }
