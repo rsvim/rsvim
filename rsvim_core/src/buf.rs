@@ -140,6 +140,14 @@ impl Buffer {
   pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
     self.last_sync_time = last_sync_time;
   }
+
+  pub fn change_manager(&self) -> &ChangeManager {
+    &self.change_manager
+  }
+
+  pub fn change_manager_mut(&mut self) -> &mut ChangeManager {
+    &mut self.change_manager
+  }
 }
 
 impl Buffer {
