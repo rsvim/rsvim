@@ -148,8 +148,12 @@ impl Debug for ChangeManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("ChangeManager")
       .field(
-        "change_history.occupied_len",
+        "change_history_occupied_len",
         &self.change_history.occupied_len(),
+      )
+      .field(
+        "change_history_vacant_len",
+        &self.change_history.vacant_len(),
       )
       .field("current_change", &self.current_change)
       .field("next_version", &self.next_version)
