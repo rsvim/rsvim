@@ -163,10 +163,11 @@ impl Debug for ChangeManager {
 
 impl ChangeManager {
   pub fn new() -> Self {
+    let version = 1;
     Self {
       change_history: HeapRb::new(100),
-      current_change: Change::new(0),
-      next_version: 1,
+      current_change: Change::new(version),
+      next_version: version + 1,
     }
   }
 

@@ -11,4 +11,8 @@ fn insert1() {
       payload: c.to_string().to_compact_string(),
     }));
   }
+  let actual = change_manager.current_change();
+  assert_eq!(actual.operations().len(), 1);
+  assert_eq!(actual.operations().len(), 1);
+  change_manager.commit();
 }
