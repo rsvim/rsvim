@@ -1,6 +1,7 @@
 //! Cursor operations.
 
 use crate::buf::Buffer;
+use crate::buf::change;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::ops::Operation;
@@ -709,21 +710,10 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
   Some(removed_id)
 }
 
-/// Save editing change, this should be done just before calling
-/// [`cursor_insert`] api.
-pub fn save_editing_change(
-  tree: &mut Tree,
-  id: NodeId,
-  buffer: &mut Buffer,
-  payload: CompactString,
-) {
+/// Get cursor absolute char index in current editable viewport.
+pub fn cursor_absolute_char_pos(tree: &Tree, id: NodeId, text: &Text) -> usize {
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  let cursor_absolute_char_idx =
-    buffer.text().rope().line_to_char(cursor_line_idx) + cursor_char_idx;
-  buffer
-    .change_manager_mut()
-    .current_change_mut()
-    .insert(cursor_absolute_char_idx, payload);
+  text.rope().line_to_char(cursor_line_idx) + cursor_char_idx
 }
