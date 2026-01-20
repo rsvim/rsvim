@@ -14,14 +14,14 @@ use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
-  char_idx: usize,
-  payload: CompactString,
+  pub char_idx: usize,
+  pub payload: CompactString,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
-  char_idx: usize,
-  n: usize,
+  pub char_idx: usize,
+  pub n: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

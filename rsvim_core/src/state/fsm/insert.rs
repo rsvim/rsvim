@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::change;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -98,6 +99,26 @@ impl Insert {
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
+      &tree,
+      current_window_id,
+      buffer.text(),
+    );
+    if n > 0 {
+      buffer.change_manager_mut().save(change::Operation::Delete(
+        change::Delete {
+          char_idx: cursor_absolute_char_idx,
+          n: n as usize,
+        },
+      ));
+    } else if n < 0 {
+      buffer.change_manager_mut().save(change::Operation::Delete(
+        change::Delete {
+          char_idx: (cursor_absolute_char_idx as isize + n) as usize,
+          n: (-n) as usize,
+        },
+      ));
+    }
     cursor_ops::cursor_delete(
       &mut tree,
       current_window_id,
@@ -142,12 +163,17 @@ impl Insert {
     };
 
     // Save editing change
-    cursor_ops::save_editing_change(
-      &mut tree,
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
+      &tree,
       current_window_id,
-      &mut buffer,
-      payload.clone(),
+      buffer.text(),
     );
+    buffer.change_manager_mut().save(change::Operation::Insert(
+      change::Insert {
+        char_idx: cursor_absolute_char_idx,
+        payload: payload.clone(),
+      },
+    ));
     cursor_ops::cursor_insert(
       &mut tree,
       current_window_id,

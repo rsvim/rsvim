@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::change;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -233,12 +234,17 @@ impl Normal {
           CompactString::new(format!("{}", buffer.options().end_of_line()));
 
         // Save editing change
-        cursor_ops::save_editing_change(
-          &mut tree,
+        let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
+          &tree,
           current_window_id,
-          &mut buffer,
-          eol.clone(),
+          buffer.text(),
         );
+        buffer.change_manager_mut().save(change::Operation::Insert(
+          change::Insert {
+            char_idx: cursor_absolute_char_idx,
+            payload: eol.clone(),
+          },
+        ));
         cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,
