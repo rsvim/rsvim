@@ -13,6 +13,14 @@ fn insert1() {
   }
   let actual = change_manager.current_change();
   assert_eq!(actual.operations().len(), 1);
-  assert_eq!(actual.operations().len(), 1);
+  assert_eq!(actual.version(), 1);
+  let actual = &actual.operations()[0];
+  assert!(matches!(actual, Operation::Insert(_)));
+  match actual {
+    Operation::Insert(insert_actual) => {
+      assert_eq!(insert_actual.payload, payload);
+    }
+    _ => unreachable!(),
+  }
   change_manager.commit();
 }
