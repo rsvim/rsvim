@@ -1,5 +1,7 @@
 //! Editing/change history, useful for undo/redo.
 
+use crate::buf::BufferId;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use std::fmt::Debug;
 // use crate::buf::text::Text;
@@ -220,9 +222,14 @@ impl UndoManager {
   /// Returns `Ok` and modifies the passed `buffer` if revert successfully,
   /// returns `Err` and not change the `buffer` if `N` is out of max saved
   /// history.
-  pub fn revert(&mut self, n: usize, buffer: &mut Buffer) -> TheResult<()> {
+  pub fn revert(
+    &mut self,
+    n: usize,
+    id: BufferId,
+    text: &mut Text,
+  ) -> TheResult<()> {
     if n >= self.history.occupied_len() {
-      return Err(TheErr::UndoCommitNotExist(n, buffer.id()));
+      return Err(TheErr::UndoCommitNotExist(n, id));
     }
 
     Ok(())
