@@ -165,8 +165,8 @@ impl Change {
 }
 
 pub struct UndoManager {
-  change_history: HeapRb<Change>,
-  current_change: Change,
+  history: HeapRb<Change>,
+  current: Change,
   next_version: usize,
 }
 
@@ -179,15 +179,9 @@ impl Default for UndoManager {
 impl Debug for UndoManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("ChangeManager")
-      .field(
-        "change_history_occupied_len",
-        &self.change_history.occupied_len(),
-      )
-      .field(
-        "change_history_vacant_len",
-        &self.change_history.vacant_len(),
-      )
-      .field("current_change", &self.current_change)
+      .field("change_history_occupied_len", &self.history.occupied_len())
+      .field("change_history_vacant_len", &self.history.vacant_len())
+      .field("current_change", &self.current)
       .field("next_version", &self.next_version)
       .finish()
   }
@@ -197,25 +191,23 @@ impl UndoManager {
   pub fn new() -> Self {
     let version = 1;
     Self {
-      change_history: HeapRb::new(100),
-      current_change: Change::new(version),
+      history: HeapRb::new(100),
+      current: Change::new(version),
       next_version: version + 1,
     }
   }
 
-  pub fn current_change(&self) -> &Change {
-    &self.current_change
+  pub fn current(&self) -> &Change {
+    &self.current
   }
 
   pub fn save(&mut self, op: Operation) {
-    self.current_change.save(op);
+    self.current.save(op);
   }
 
   pub fn commit(&mut self) {
-    self
-      .change_history
-      .push_overwrite(self.current_change.clone());
-    self.current_change = Change::new(self.next_version);
+    self.history.push_overwrite(self.current.clone());
+    self.current = Change::new(self.next_version);
     self.next_version += 1;
   }
 }
