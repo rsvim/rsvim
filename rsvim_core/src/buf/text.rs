@@ -21,6 +21,7 @@ use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
+use std::ops::Range;
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -544,7 +545,7 @@ impl Text {
 
   #[cfg(test)]
   fn dbg_print_textline(
-    &mut self,
+    &self,
     line_idx: usize,
     char_idx: usize,
     msg: &str,
@@ -750,6 +751,39 @@ impl Text {
       acc += 1;
     }
     i
+  }
+
+  /// Calculate the absolute char index range that will be deleted, by line
+  /// index and its char index on the line.
+  pub fn absolute_delete_char_index_range(
+    &self,
+    line_idx: usize,
+    char_idx: usize,
+    n: isize,
+  ) -> Range<usize> {
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
+
+    let cursor_char_absolute_pos_before_delete =
+      self.rope.line_to_char(line_idx) + char_idx;
+
+    self.dbg_print_textline(line_idx, char_idx, "Before delete");
+
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
+    let to_be_deleted_range = if n > 0 {
+      // Delete to right side, on range `[cursor..cursor+n)`.
+      let upper = self
+        .n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      debug_assert!(upper <= self.rope.len_chars());
+      cursor_char_absolute_pos_before_delete..upper
+    } else {
+      // Delete to left side, on range `[cursor-n,cursor)`.
+      let lower = self
+        .n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
+      lower..cursor_char_absolute_pos_before_delete
+    };
+
+    to_be_deleted_range
   }
 
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
