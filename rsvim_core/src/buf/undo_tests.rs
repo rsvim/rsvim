@@ -157,7 +157,7 @@ fn delete1() {
 
   undo_manager.save(Operation::Delete(Delete {
     char_idx: payload1.chars().count() - 1,
-    n: 1,
+    payload: "!".to_compact_string(),
   }));
 
   let actual = undo_manager.current();
