@@ -101,7 +101,7 @@ impl Change {
       delete.n += n;
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
-      && insert.payload.chars().count() == n
+      && insert.payload == payload
     {
       trace!("self.ops.last-3:{:?}", delete);
       // Cancel both insertion and deletion
