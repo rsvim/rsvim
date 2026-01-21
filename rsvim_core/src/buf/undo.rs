@@ -4,6 +4,7 @@ use crate::prelude::*;
 use std::fmt::Debug;
 // use crate::buf::text::Text;
 // use crate::prelude::*;
+use crate::buf::Buffer;
 use compact_str::CompactString;
 // use path_absolutize::Absolutize;
 // use std::fs::Metadata;
@@ -12,7 +13,6 @@ use compact_str::CompactString;
 use ringbuf::HeapRb;
 use ringbuf::traits::Observer;
 use ringbuf::traits::RingBuffer;
-use ropey::Rope;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -217,12 +217,12 @@ impl UndoManager {
   /// It reverts to previous N commit, `0` is current commit, `1` is the
   /// previous 1 commit, `N` is previous N commits.
   ///
-  /// Returns `Ok` and modifies the passed `text` rope if revert successfully,
-  /// returns `Err` and not change the `text` rope If `N` is out of max saved
+  /// Returns `Ok` and modifies the passed `buffer` if revert successfully,
+  /// returns `Err` and not change the `buffer` if `N` is out of max saved
   /// history.
-  pub fn revert(&mut self, n: usize, text: &mut Rope) -> TheResult<()> {
+  pub fn revert(&mut self, n: usize, buffer: &mut Buffer) -> TheResult<()> {
     if n >= self.history.occupied_len() {
-      return Err(TheErr::UndoCommitNotExist(n));
+      return Err(TheErr::UndoCommitNotExist(n, buffer.id()));
     }
 
     Ok(())
