@@ -1,6 +1,6 @@
 //! The insert mode.
 
-use crate::buf::change;
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -106,19 +106,19 @@ impl Insert {
       buffer.text(),
     );
     if n > 0 {
-      buffer.change_manager_mut().save(change::Operation::Delete(
-        change::Delete {
+      buffer
+        .change_manager_mut()
+        .save(undo::Operation::Delete(undo::Delete {
           char_idx: cursor_absolute_char_idx,
           n: n as usize,
-        },
-      ));
+        }));
     } else if n < 0 {
-      buffer.change_manager_mut().save(change::Operation::Delete(
-        change::Delete {
+      buffer
+        .change_manager_mut()
+        .save(undo::Operation::Delete(undo::Delete {
           char_idx: (cursor_absolute_char_idx as isize + n) as usize,
           n: (-n) as usize,
-        },
-      ));
+        }));
     }
     cursor_ops::cursor_delete(
       &mut tree,
@@ -169,12 +169,12 @@ impl Insert {
       current_window_id,
       buffer.text(),
     );
-    buffer.change_manager_mut().save(change::Operation::Insert(
-      change::Insert {
+    buffer
+      .change_manager_mut()
+      .save(undo::Operation::Insert(undo::Insert {
         char_idx: cursor_absolute_char_idx,
         payload: payload.clone(),
-      },
-    ));
+      }));
     cursor_ops::cursor_insert(
       &mut tree,
       current_window_id,

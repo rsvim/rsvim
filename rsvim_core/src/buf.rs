@@ -1,22 +1,21 @@
 //! Vim buffers.
 
-pub mod change;
 pub mod opt;
 pub mod text;
+pub mod undo;
 pub mod unicode;
 
-#[cfg(test)]
-mod change_tests;
 #[cfg(test)]
 mod opt_tests;
 #[cfg(test)]
 mod text_tests;
 #[cfg(test)]
+mod undo_tests;
+#[cfg(test)]
 mod unicode_tests;
 
 use crate::prelude::*;
 use crate::struct_id_impl;
-use change::UndoManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -29,6 +28,7 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use text::Text;
 use tokio::time::Instant;
+use undo::UndoManager;
 
 struct_id_impl!(BufferId, i32, negative);
 
