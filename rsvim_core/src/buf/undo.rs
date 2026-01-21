@@ -178,7 +178,7 @@ impl Default for UndoManager {
 
 impl Debug for UndoManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("ChangeManager")
+    f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
       .field("current", &self.current)
