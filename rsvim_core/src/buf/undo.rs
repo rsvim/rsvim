@@ -81,7 +81,7 @@ impl Change {
   }
 
   pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
-    if n == 0 {
+    if payload.chars().count() == 0 {
       return;
     }
 
@@ -90,15 +90,15 @@ impl Change {
     {
       // Merge two deletion
       trace!("self.ops.last-1:{:?}", delete);
-      delete.payload.insert_str(0, &payload);
+      delete.payload.push_str(&payload);
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
-      && delete.char_idx - char_idx <= n
+      && delete.char_idx - char_idx == payload.chars().count()
     {
       trace!("self.ops.last-2:{:?}", delete);
       // Merge two deletion
       delete.char_idx = char_idx;
-      delete.n += n;
+      delete.payload.insert_str(0, &payload);
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
       && insert.payload == payload
