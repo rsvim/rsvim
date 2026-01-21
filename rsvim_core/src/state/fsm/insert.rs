@@ -10,6 +10,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -106,19 +107,29 @@ impl Insert {
       buffer.text(),
     );
     if n > 0 {
+      let payload = buffer
+        .text()
+        .rope()
+        .chars_at(cursor_absolute_char_idx)
+        .take(n as usize)
+        .collect::<CompactString>();
       buffer
         .undo_manager_mut()
         .save(undo::Operation::Delete(undo::Delete {
           char_idx: cursor_absolute_char_idx,
-          n: n as usize,
+          payload,
         }));
     } else if n < 0 {
+      let char_idx = (cursor_absolute_char_idx as isize + n) as usize;
+      let payload = buffer
+        .text()
+        .rope()
+        .chars_at(char_idx)
+        .take((-n) as usize)
+        .collect::<CompactString>();
       buffer
         .undo_manager_mut()
-        .save(undo::Operation::Delete(undo::Delete {
-          char_idx: (cursor_absolute_char_idx as isize + n) as usize,
-          n: (-n) as usize,
-        }));
+        .save(undo::Operation::Delete(undo::Delete { char_idx, payload }));
     }
     cursor_ops::cursor_delete(
       &mut tree,
