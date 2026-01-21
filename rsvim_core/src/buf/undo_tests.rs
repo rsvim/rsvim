@@ -207,7 +207,7 @@ fn delete1() {
   match actual {
     Operation::Delete(delete) => {
       assert_eq!(delete.char_idx, 12);
-      assert_eq!(delete.n, 1);
+      assert_eq!(delete.payload, "!");
     }
     _ => unreachable!(),
   }
@@ -223,7 +223,7 @@ fn delete1() {
 
   undo_manager.save(Operation::Delete(Delete {
     char_idx: 12,
-    n: payload2.chars().count(),
+    payload: payload2.to_compact_string(),
   }));
 
   let actual = undo_manager.current();
@@ -244,7 +244,7 @@ fn delete1() {
   match actual {
     Operation::Delete(delete) => {
       assert_eq!(delete.char_idx, 12);
-      assert_eq!(delete.n, 1);
+      assert_eq!(delete.payload, payload2);
     }
     _ => unreachable!(),
   }
