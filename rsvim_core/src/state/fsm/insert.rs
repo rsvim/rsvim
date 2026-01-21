@@ -193,7 +193,10 @@ impl Insert {
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
-    let buffer = lock!(buffer);
+    let mut buffer = lock!(buffer);
+
+    // Commit editing changes
+    buffer.undo_manager_mut().commit();
 
     let op = Operation::CursorMoveBy((0, 0));
     cursor_ops::cursor_move(
