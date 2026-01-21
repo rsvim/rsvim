@@ -12,6 +12,7 @@ use compact_str::CompactString;
 use ringbuf::HeapRb;
 use ringbuf::traits::Observer;
 use ringbuf::traits::RingBuffer;
+use ropey::Rope;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -216,8 +217,12 @@ impl UndoManager {
   /// It reverts to previous N commit, `0` is current commit, `1` is the
   /// previous 1 commit, `N` is previous N commits.
   ///
-  /// If `N` is greater than the max saved history, just
-  pub fn revert(&mut self, n: usize) {}
+  /// Returns `Ok` and modifies the passed `text` rope if revert successfully,
+  /// returns `Err` and not change the `text` rope If `N` is out of max saved
+  /// history.
+  pub fn revert(&mut self, n: usize, text: &mut Rope) -> TheResult<()> {
+    Ok(())
+  }
 
   pub fn max_commit(&self) -> usize {
     self.history.occupied_len()
