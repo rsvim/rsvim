@@ -216,12 +216,10 @@ impl UndoManager {
 
   /// This is similar to `git revert` a specific git commit ID.
   ///
-  /// It reverts to previous N commit, `0` is current commit, `1` is the
-  /// previous 1 commit, `N` is previous N commits.
+  /// It reverts to the previous `I` commit, based on history index.
   ///
-  /// Returns `Ok` and modifies the passed `buffer` if revert successfully,
-  /// returns `Err` and not change the `buffer` if `N` is out of max saved
-  /// history.
+  /// Returns `Ok` and modifies the passed `text` if revert successfully,
+  /// returns `Err` and not change the `text` if `I` is not exist in history.
   pub fn revert(
     &mut self,
     n: usize,
