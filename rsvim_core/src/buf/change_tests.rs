@@ -11,7 +11,7 @@ fn insert1() {
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -25,7 +25,7 @@ fn insert1() {
   }
   change_manager.commit();
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
@@ -40,7 +40,7 @@ fn insert2() {
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -60,7 +60,7 @@ fn insert2() {
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -80,7 +80,7 @@ fn insert2() {
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -100,11 +100,11 @@ fn insert2() {
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -113,7 +113,7 @@ fn insert2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -125,7 +125,7 @@ fn insert2() {
 
   change_manager.commit();
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
@@ -141,11 +141,11 @@ fn delete1() {
     }));
   }
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -160,11 +160,11 @@ fn delete1() {
     n: 1,
   }));
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -173,7 +173,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -189,11 +189,11 @@ fn delete1() {
     payload: payload2.to_compact_string(),
   }));
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 3);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -202,7 +202,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -211,7 +211,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[2];
+  let actual = &change_manager.current().operations()[2];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -226,11 +226,11 @@ fn delete1() {
     n: payload2.chars().count(),
   }));
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -239,7 +239,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -251,7 +251,7 @@ fn delete1() {
 
   change_manager.commit();
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
@@ -267,11 +267,11 @@ fn delete2() {
     }));
   }
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -285,11 +285,11 @@ fn delete2() {
   change_manager.save(Operation::Delete(Delete { char_idx: 11, n: 1 }));
   change_manager.save(Operation::Delete(Delete { char_idx: 10, n: 1 }));
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -298,7 +298,7 @@ fn delete2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -310,11 +310,11 @@ fn delete2() {
 
   change_manager.save(Operation::Delete(Delete { char_idx: 8, n: 2 }));
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current_change().operations()[0];
+  let actual = &change_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -323,7 +323,7 @@ fn delete2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current_change().operations()[1];
+  let actual = &change_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -335,7 +335,7 @@ fn delete2() {
 
   change_manager.commit();
 
-  let actual = change_manager.current_change();
+  let actual = change_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
