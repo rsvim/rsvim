@@ -218,7 +218,7 @@ impl UndoManager {
     &mut self,
     commit: usize,
     buf_id: BufferId,
-    text: &mut Text,
+    _text: &mut Text,
   ) -> TheResult<()> {
     if commit >= self.history.occupied_len() {
       return Err(TheErr::UndoCommitNotExist(commit, buf_id));
