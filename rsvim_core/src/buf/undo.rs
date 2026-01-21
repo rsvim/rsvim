@@ -90,10 +90,10 @@ impl Change {
     {
       // Merge two deletion
       trace!(
-        "self.ops.last-1, char_idx:{:?},n:{:?}",
-        delete.char_idx, delete.n
+        "self.ops.last-1, char_idx:{:?},payload:{:?}",
+        delete.char_idx, delete.payload
       );
-      delete.n += n;
+      delete.payload.insert_str(0, &payload);
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
       && delete.char_idx - char_idx <= n
@@ -117,7 +117,9 @@ impl Change {
       // Cancel both insertion and deletion
       self.ops.pop();
     } else {
-      self.ops.push(Operation::Delete(Delete { char_idx, n }));
+      self
+        .ops
+        .push(Operation::Delete(Delete { char_idx, payload }));
     }
 
     self.update_timestamp();
