@@ -178,7 +178,7 @@ fn delete1() {
   match actual {
     Operation::Delete(delete) => {
       assert_eq!(delete.char_idx, 12);
-      assert_eq!(delete.n, 1);
+      assert_eq!(delete.payload, "!");
     }
     _ => unreachable!(),
   }
