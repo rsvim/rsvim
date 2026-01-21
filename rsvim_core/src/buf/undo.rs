@@ -211,9 +211,15 @@ impl UndoManager {
     self.next_version += 1;
   }
 
-  /// Revert to previous text content, this is similar to `git revert` a
-  /// specific git commit ID.
-  /// Revert to previous N commit, `0` is current commit, `1` is the previous 1
-  /// commit, `N` is previous N commits.
+  /// This is similar to `git revert` a specific git commit ID.
+  ///
+  /// It reverts to previous N commit, `0` is current commit, `1` is the
+  /// previous 1 commit, `N` is previous N commits.
+  ///
+  /// If `N` is greater than the max saved history, just
   pub fn revert(&mut self, n: usize) {}
+
+  pub fn max_commit(&self) -> usize {
+    self.history.occupied_len()
+  }
 }
