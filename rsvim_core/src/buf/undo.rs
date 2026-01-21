@@ -210,4 +210,10 @@ impl UndoManager {
     self.current = Change::new(self.next_version);
     self.next_version += 1;
   }
+
+  /// Revert to previous text content, this is similar to `git revert` a
+  /// specific git commit ID.
+  /// Revert to previous N commit, `0` is current commit, `1` is the previous 1
+  /// commit, `N` is previous N commits.
+  pub fn revert(&mut self, n: usize) {}
 }
