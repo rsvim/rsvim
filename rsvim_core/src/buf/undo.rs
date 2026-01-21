@@ -89,13 +89,19 @@ impl Change {
       && delete.char_idx == char_idx
     {
       // Merge two deletion
-      trace!("self.ops.last-1:{:?}", delete);
+      trace!(
+        "self.ops.last-1, char_idx:{:?}, payload:{:?}",
+        char_idx, payload
+      );
       delete.payload.push_str(&payload);
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
       && delete.char_idx - char_idx == payload.chars().count()
     {
-      trace!("self.ops.last-2:{:?}", delete);
+      trace!(
+        "self.ops.last-2, char_idx:{:?}, payload:{:?}",
+        char_idx, payload
+      );
       // Merge two deletion
       delete.char_idx = char_idx;
       delete.payload.insert_str(0, &payload);
@@ -103,7 +109,10 @@ impl Change {
       && insert.char_idx == char_idx
       && insert.payload == payload
     {
-      trace!("self.ops.last-3:{:?}", delete);
+      trace!(
+        "self.ops.last-3, char_idx:{:?}, payload:{:?}",
+        char_idx, payload
+      );
       // Cancel both insertion and deletion
       self.ops.pop();
     } else {
