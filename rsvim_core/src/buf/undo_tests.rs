@@ -3,15 +3,15 @@ use compact_str::ToCompactString;
 
 #[test]
 fn insert1() {
-  let mut change_manager = UndoManager::new();
+  let mut undo_manager = UndoManager::new();
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -23,24 +23,24 @@ fn insert1() {
     }
     _ => unreachable!(),
   }
-  change_manager.commit();
+  undo_manager.commit();
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
 
 #[test]
 fn insert2() {
-  let mut change_manager = UndoManager::new();
+  let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, ";
   for (i, c) in payload1.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -55,12 +55,12 @@ fn insert2() {
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i + 3,
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -75,12 +75,12 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i + payload1.chars().count() + payload2.chars().count(),
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
   let actual = &actual.operations()[0];
@@ -95,16 +95,16 @@ fn insert2() {
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i + 100,
       payload: c.to_string().to_compact_string(),
     }));
   }
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -113,7 +113,7 @@ fn insert2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -123,29 +123,29 @@ fn insert2() {
     _ => unreachable!(),
   }
 
-  change_manager.commit();
+  undo_manager.commit();
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
 
 #[test]
 fn delete1() {
-  let mut change_manager = UndoManager::new();
+  let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
   }
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -155,16 +155,16 @@ fn delete1() {
     _ => unreachable!(),
   }
 
-  change_manager.save(Operation::Delete(Delete {
+  undo_manager.save(Operation::Delete(Delete {
     char_idx: payload1.chars().count() - 1,
     n: 1,
   }));
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -173,7 +173,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -184,16 +184,16 @@ fn delete1() {
   }
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  change_manager.save(Operation::Insert(Insert {
+  undo_manager.save(Operation::Insert(Insert {
     char_idx: 12,
     payload: payload2.to_compact_string(),
   }));
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 3);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -202,7 +202,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -211,7 +211,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[2];
+  let actual = &undo_manager.current().operations()[2];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -221,16 +221,16 @@ fn delete1() {
     _ => unreachable!(),
   }
 
-  change_manager.save(Operation::Delete(Delete {
+  undo_manager.save(Operation::Delete(Delete {
     char_idx: 12,
     n: payload2.chars().count(),
   }));
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -239,7 +239,7 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -249,29 +249,29 @@ fn delete1() {
     _ => unreachable!(),
   }
 
-  change_manager.commit();
+  undo_manager.commit();
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
 
 #[test]
 fn delete2() {
-  let mut change_manager = UndoManager::new();
+  let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    change_manager.save(Operation::Insert(Insert {
+    undo_manager.save(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
   }
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -281,15 +281,15 @@ fn delete2() {
     _ => unreachable!(),
   }
 
-  change_manager.save(Operation::Delete(Delete { char_idx: 12, n: 1 }));
-  change_manager.save(Operation::Delete(Delete { char_idx: 11, n: 1 }));
-  change_manager.save(Operation::Delete(Delete { char_idx: 10, n: 1 }));
+  undo_manager.save(Operation::Delete(Delete { char_idx: 12, n: 1 }));
+  undo_manager.save(Operation::Delete(Delete { char_idx: 11, n: 1 }));
+  undo_manager.save(Operation::Delete(Delete { char_idx: 10, n: 1 }));
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -298,7 +298,7 @@ fn delete2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -308,13 +308,13 @@ fn delete2() {
     _ => unreachable!(),
   }
 
-  change_manager.save(Operation::Delete(Delete { char_idx: 8, n: 2 }));
+  undo_manager.save(Operation::Delete(Delete { char_idx: 8, n: 2 }));
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &change_manager.current().operations()[0];
+  let actual = &undo_manager.current().operations()[0];
   assert!(matches!(actual, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
@@ -323,7 +323,7 @@ fn delete2() {
     }
     _ => unreachable!(),
   }
-  let actual = &change_manager.current().operations()[1];
+  let actual = &undo_manager.current().operations()[1];
   assert!(matches!(actual, Operation::Delete(_)));
   match actual {
     Operation::Delete(delete) => {
@@ -333,9 +333,9 @@ fn delete2() {
     _ => unreachable!(),
   }
 
-  change_manager.commit();
+  undo_manager.commit();
 
-  let actual = change_manager.current();
+  let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
