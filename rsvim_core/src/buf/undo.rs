@@ -76,11 +76,11 @@ impl Change {
   pub fn save(&mut self, op: Operation) {
     match op {
       Operation::Insert(insert) => self.insert(insert.char_idx, insert.payload),
-      Operation::Delete(delete) => self.delete(delete.char_idx, delete.n),
+      Operation::Delete(delete) => self.delete(delete.char_idx, delete.payload),
     }
   }
 
-  pub fn delete(&mut self, char_idx: usize, n: usize) {
+  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
     if n == 0 {
       return;
     }
