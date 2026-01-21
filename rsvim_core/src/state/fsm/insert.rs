@@ -107,14 +107,14 @@ impl Insert {
     );
     if n > 0 {
       buffer
-        .change_manager_mut()
+        .undo_manager_mut()
         .save(undo::Operation::Delete(undo::Delete {
           char_idx: cursor_absolute_char_idx,
           n: n as usize,
         }));
     } else if n < 0 {
       buffer
-        .change_manager_mut()
+        .undo_manager_mut()
         .save(undo::Operation::Delete(undo::Delete {
           char_idx: (cursor_absolute_char_idx as isize + n) as usize,
           n: (-n) as usize,
@@ -170,7 +170,7 @@ impl Insert {
       buffer.text(),
     );
     buffer
-      .change_manager_mut()
+      .undo_manager_mut()
       .save(undo::Operation::Insert(undo::Insert {
         char_idx: cursor_absolute_char_idx,
         payload: payload.clone(),

@@ -61,8 +61,8 @@ pub struct Buffer {
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
 
-  // change manager
-  change_manager: UndoManager,
+  // undo manager
+  undo_manager: UndoManager,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -87,7 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      change_manager: UndoManager::new(),
+      undo_manager: UndoManager::new(),
     }
   }
 
@@ -143,12 +143,12 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn change_manager(&self) -> &UndoManager {
-    &self.change_manager
+  pub fn undo_manager(&self) -> &UndoManager {
+    &self.undo_manager
   }
 
-  pub fn change_manager_mut(&mut self) -> &mut UndoManager {
-    &mut self.change_manager
+  pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
+    &mut self.undo_manager
   }
 }
 
