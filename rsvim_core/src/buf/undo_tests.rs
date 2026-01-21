@@ -281,9 +281,18 @@ fn delete2() {
     _ => unreachable!(),
   }
 
-  undo_manager.save(Operation::Delete(Delete { char_idx: 12, n: 1 }));
-  undo_manager.save(Operation::Delete(Delete { char_idx: 11, n: 1 }));
-  undo_manager.save(Operation::Delete(Delete { char_idx: 10, n: 1 }));
+  undo_manager.save(Operation::Delete(Delete {
+    char_idx: 12,
+    payload: "!".to_compact_string(),
+  }));
+  undo_manager.save(Operation::Delete(Delete {
+    char_idx: 11,
+    payload: "d".to_compact_string(),
+  }));
+  undo_manager.save(Operation::Delete(Delete {
+    char_idx: 10,
+    payload: "l".to_compact_string(),
+  }));
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
@@ -303,12 +312,15 @@ fn delete2() {
   match actual {
     Operation::Delete(delete) => {
       assert_eq!(delete.char_idx, 10);
-      assert_eq!(delete.n, 3);
+      assert_eq!(delete.payload, "ld!");
     }
     _ => unreachable!(),
   }
 
-  undo_manager.save(Operation::Delete(Delete { char_idx: 8, n: 2 }));
+  undo_manager.save(Operation::Delete(Delete {
+    char_idx: 8,
+    payload: "or".to_compact_string(),
+  }));
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
@@ -328,7 +340,7 @@ fn delete2() {
   match actual {
     Operation::Delete(delete) => {
       assert_eq!(delete.char_idx, 8);
-      assert_eq!(delete.n, 5);
+      assert_eq!(delete.payload, "orld!");
     }
     _ => unreachable!(),
   }
