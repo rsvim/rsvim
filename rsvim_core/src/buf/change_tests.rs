@@ -3,7 +3,7 @@ use compact_str::ToCompactString;
 
 #[test]
 fn insert1() {
-  let mut change_manager = ChangeManager::new();
+  let mut change_manager = UndoManager::new();
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
     change_manager.save(Operation::Insert(Insert {
@@ -32,7 +32,7 @@ fn insert1() {
 
 #[test]
 fn insert2() {
-  let mut change_manager = ChangeManager::new();
+  let mut change_manager = UndoManager::new();
   let payload1 = "Hello, ";
   for (i, c) in payload1.chars().enumerate() {
     change_manager.save(Operation::Insert(Insert {
@@ -132,7 +132,7 @@ fn insert2() {
 
 #[test]
 fn delete1() {
-  let mut change_manager = ChangeManager::new();
+  let mut change_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
     change_manager.save(Operation::Insert(Insert {
@@ -258,7 +258,7 @@ fn delete1() {
 
 #[test]
 fn delete2() {
-  let mut change_manager = ChangeManager::new();
+  let mut change_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
     change_manager.save(Operation::Insert(Insert {

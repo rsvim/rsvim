@@ -16,7 +16,7 @@ mod unicode_tests;
 
 use crate::prelude::*;
 use crate::struct_id_impl;
-use change::ChangeManager;
+use change::UndoManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -62,7 +62,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // change manager
-  change_manager: ChangeManager,
+  change_manager: UndoManager,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -87,7 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      change_manager: ChangeManager::new(),
+      change_manager: UndoManager::new(),
     }
   }
 
@@ -143,11 +143,11 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn change_manager(&self) -> &ChangeManager {
+  pub fn change_manager(&self) -> &UndoManager {
     &self.change_manager
   }
 
-  pub fn change_manager_mut(&mut self) -> &mut ChangeManager {
+  pub fn change_manager_mut(&mut self) -> &mut UndoManager {
     &mut self.change_manager
   }
 }

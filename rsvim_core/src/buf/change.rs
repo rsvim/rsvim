@@ -76,6 +76,13 @@ impl Change {
     self.timestamp = Instant::now();
   }
 
+  pub fn save(&mut self, op: Operation) {
+    match op {
+      Operation::Insert(insert) => self.insert(insert.char_idx, insert.payload),
+      Operation::Delete(delete) => self.delete(delete.char_idx, delete.n),
+    }
+  }
+
   pub fn delete(&mut self, char_idx: usize, n: usize) {
     if n == 0 {
       return;
@@ -157,19 +164,19 @@ impl Change {
   }
 }
 
-pub struct ChangeManager {
+pub struct UndoManager {
   change_history: HeapRb<Change>,
   current_change: Change,
   next_version: usize,
 }
 
-impl Default for ChangeManager {
+impl Default for UndoManager {
   fn default() -> Self {
     Self::new()
   }
 }
 
-impl Debug for ChangeManager {
+impl Debug for UndoManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("ChangeManager")
       .field(
@@ -186,7 +193,7 @@ impl Debug for ChangeManager {
   }
 }
 
-impl ChangeManager {
+impl UndoManager {
   pub fn new() -> Self {
     let version = 1;
     Self {
@@ -201,14 +208,7 @@ impl ChangeManager {
   }
 
   pub fn save(&mut self, op: Operation) {
-    match op {
-      Operation::Delete(delete) => {
-        self.current_change.delete(delete.char_idx, delete.n)
-      }
-      Operation::Insert(insert) => {
-        self.current_change.insert(insert.char_idx, insert.payload)
-      }
-    }
+    self.current_change.save(op);
   }
 
   pub fn commit(&mut self) {
