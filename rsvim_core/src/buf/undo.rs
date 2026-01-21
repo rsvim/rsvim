@@ -20,7 +20,7 @@ pub struct Insert {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   pub char_idx: usize,
-  pub n: usize,
+  pub payload: CompactString,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
