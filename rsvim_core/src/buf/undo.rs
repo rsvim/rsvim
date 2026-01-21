@@ -12,7 +12,8 @@ use compact_str::CompactString;
 // use std::fs::Metadata;
 // use std::path::Path;
 // use std::path::PathBuf;
-use ringbuf::HeapRb;
+use ringbuf::LocalRb;
+use ringbuf::storage::Heap;
 use ringbuf::traits::Observer;
 use ringbuf::traits::RingBuffer;
 use tokio::time::Instant;
@@ -168,7 +169,7 @@ impl Change {
 }
 
 pub struct UndoManager {
-  history: HeapRb<Change>,
+  history: LocalRb<Heap<Change>>,
   current: Change,
   next_version: usize,
 }
@@ -194,7 +195,7 @@ impl UndoManager {
   pub fn new() -> Self {
     let version = 1;
     Self {
-      history: HeapRb::new(100),
+      history: LocalRb::new(100),
       current: Change::new(version),
       next_version: version + 1,
     }
