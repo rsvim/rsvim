@@ -100,7 +100,7 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
       &tree,
       current_window_id,
       buffer.text(),
@@ -164,7 +164,7 @@ impl Insert {
     };
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_pos(
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
       &tree,
       current_window_id,
       buffer.text(),
