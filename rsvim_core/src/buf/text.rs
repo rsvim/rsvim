@@ -544,12 +544,7 @@ impl Text {
   }
 
   #[cfg(test)]
-  fn dbg_print_textline(
-    &self,
-    line_idx: usize,
-    char_idx: usize,
-    msg: &str,
-  ) {
+  fn dbg_print_textline(&self, line_idx: usize, char_idx: usize, msg: &str) {
     trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
 
     match self.rope().get_line(line_idx) {
