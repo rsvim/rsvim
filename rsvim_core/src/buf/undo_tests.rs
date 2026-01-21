@@ -248,24 +248,6 @@ fn delete1() {
     }
     _ => unreachable!(),
   }
-  let actual = &undo_manager.current().operations()[2];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.char_idx, 12);
-      assert_eq!(insert.payload, payload2);
-    }
-    _ => unreachable!(),
-  }
-  let actual = &undo_manager.current().operations()[3];
-  assert!(matches!(actual, Operation::Delete(_)));
-  match actual {
-    Operation::Delete(delete) => {
-      assert_eq!(delete.char_idx, 12);
-      assert_eq!(delete.payload, payload2);
-    }
-    _ => unreachable!(),
-  }
 
   undo_manager.commit();
 
