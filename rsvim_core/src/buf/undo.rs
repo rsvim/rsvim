@@ -221,6 +221,10 @@ impl UndoManager {
   /// returns `Err` and not change the `text` rope If `N` is out of max saved
   /// history.
   pub fn revert(&mut self, n: usize, text: &mut Rope) -> TheResult<()> {
+    if n >= self.history.occupied_len() {
+      return Err(TheErr::UndoCommitNotExist(n));
+    }
+
     Ok(())
   }
 
