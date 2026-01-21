@@ -216,18 +216,18 @@ impl UndoManager {
 
   /// This is similar to `git revert` a specific git commit ID.
   ///
-  /// It reverts to the previous `I` commit, based on history index.
+  /// It reverts to the previous `commit`.
   ///
   /// Returns `Ok` and modifies the passed `text` if revert successfully,
   /// returns `Err` and not change the `text` if `I` is not exist in history.
   pub fn revert(
     &mut self,
-    n: usize,
-    id: BufferId,
+    commit: usize,
+    buf_id: BufferId,
     text: &mut Text,
   ) -> TheResult<()> {
-    if n >= self.history.occupied_len() {
-      return Err(TheErr::UndoCommitNotExist(n, id));
+    if commit >= self.history.occupied_len() {
+      return Err(TheErr::UndoCommitNotExist(commit, buf_id));
     }
 
     Ok(())
