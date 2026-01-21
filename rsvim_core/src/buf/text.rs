@@ -619,6 +619,21 @@ impl Text {
     }
   }
 
+  /// Calculate the absolute char_index of the rope, by the line index and its
+  /// char index on the line.
+  pub fn absolute_insert_char_index(
+    &self,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> usize {
+    // debug_assert!(!payload.is_empty());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
+
+    let absolute_line_idx = self.rope.line_to_char(line_idx);
+    absolute_line_idx + char_idx
+  }
+
   /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
   /// empty.
   ///
@@ -635,11 +650,11 @@ impl Text {
     payload: CompactString,
   ) -> (usize, usize) {
     // debug_assert!(!payload.is_empty());
-    debug_assert!(self.rope.get_line(line_idx).is_some());
-    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
+    // debug_assert!(self.rope.get_line(line_idx).is_some());
+    // debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
-    let absolute_line_idx = self.rope.line_to_char(line_idx);
-    let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
+    let absolute_char_idx_before_insert =
+      self.absolute_insert_char_index(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
