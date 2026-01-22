@@ -82,11 +82,6 @@ impl Change {
 
   pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
     let payload_chars_count = payload.chars().count();
-    let last_payload_chars_count = self.ops.last().map(|l| match l {
-      Operation::Insert(insert) => insert.payload.chars().count(),
-      Operation::Delete(delete) => delete.payload.chars().count(),
-    });
-
     if payload_chars_count == 0 {
       return;
     }
