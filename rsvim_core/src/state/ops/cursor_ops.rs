@@ -728,9 +728,16 @@ pub fn cursor_absolute_delete_chars_range(
   id: NodeId,
   text: &Text,
   n: isize,
-) -> Range<usize> {
+) -> Option<Range<usize>> {
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  text.absolute_delete_chars_range(cursor_line_idx, cursor_char_idx, n)
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+
+  // If line is empty, cursor cannot delete any text content.
+  if cursor_char_idx >= text.rope().line(cursor_line_idx).len_chars() {
+    return None;
+  }
+
+  Some(text.absolute_delete_chars_range(cursor_line_idx, cursor_char_idx, n))
 }

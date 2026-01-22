@@ -108,17 +108,19 @@ impl Insert {
         buffer.text(),
         n,
       );
-    if !absolute_delete_chars_range.is_empty() {
+    if let Some(absolute_chars_range) = absolute_delete_chars_range
+      && !absolute_chars_range.is_empty()
+    {
       let payload = buffer
         .text()
         .rope()
-        .chars_at(absolute_delete_chars_range.start)
-        .take(absolute_delete_chars_range.len())
+        .chars_at(absolute_chars_range.start)
+        .take(absolute_chars_range.len())
         .collect::<CompactString>();
       buffer
         .undo_manager_mut()
         .save(undo::Operation::Delete(undo::Delete {
-          char_idx: absolute_delete_chars_range.start,
+          char_idx: absolute_chars_range.start,
           payload,
         }));
     }
