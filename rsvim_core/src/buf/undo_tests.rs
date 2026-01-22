@@ -46,7 +46,6 @@ fn insert1() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
-  assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, payload);
   undo_manager.commit();
 

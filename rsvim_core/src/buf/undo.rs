@@ -44,7 +44,7 @@ pub enum Operation {
   Delete(Delete),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Change {
   ops: Vec<Operation>,
 }
