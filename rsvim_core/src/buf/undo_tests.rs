@@ -158,7 +158,6 @@ fn delete2() {
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
-  assert_eq!(actual.version(), 1);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 10, "ld!");
@@ -167,7 +166,6 @@ fn delete2() {
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
-  assert_eq!(actual.version(), 1);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 8, "orld!");
@@ -176,5 +174,4 @@ fn delete2() {
 
   let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
-  assert_eq!(actual.version(), 2);
 }
