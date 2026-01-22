@@ -74,10 +74,10 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    undo_manager.insert(Operation::Insert(Insert {
-      char_idx: i + payload1.chars().count() + payload2.chars().count(),
-      payload: c.to_string().to_compact_string(),
-    }));
+    undo_manager.insert(
+      i + payload1.chars().count() + payload2.chars().count(),
+      c.to_compact_string(),
+    );
   }
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
