@@ -58,17 +58,6 @@ impl Change {
     &self.ops
   }
 
-  pub fn save(&mut self, op: Operation, version: usize) {
-    match op {
-      Operation::Insert(insert) => {
-        self.insert(insert.char_idx, insert.payload, version)
-      }
-      Operation::Delete(delete) => {
-        self.delete(delete.char_idx, delete.payload, version)
-      }
-    }
-  }
-
   fn delete(
     &mut self,
     char_idx: usize,
