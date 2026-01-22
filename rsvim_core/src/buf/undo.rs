@@ -58,6 +58,10 @@ impl Changes {
     &self.ops
   }
 
+  pub fn operations_mut(&mut self) -> &mut Vec<Operation> {
+    &mut self.ops
+  }
+
   pub fn delete(
     &mut self,
     char_idx: usize,
@@ -222,7 +226,9 @@ impl UndoManager {
   }
 
   pub fn commit(&mut self) {
-    self.history.push_overwrite(self.changes.clone());
+    for change in self.changes.operations_mut().drain(..) {
+      self.history.push_overwrite(change);
+    }
     self.changes = Changes::new();
   }
 
