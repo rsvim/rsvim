@@ -131,44 +131,18 @@ fn delete1() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
-
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "Hello, World!");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
 
   undo_manager.save(Operation::Delete(Delete {
-    char_idx: payload1.chars().count() - 1,
+    char_idx: 12,
     payload: "!".to_compact_string(),
   }));
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
-
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "Hello, World!");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
-  let actual = &undo_manager.current().operations()[1];
-  assert!(matches!(actual, Operation::Delete(_)));
-  match actual {
-    Operation::Delete(delete) => {
-      assert_eq!(delete.char_idx, 12);
-      assert_eq!(delete.payload, "!");
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_insert(&undo_manager, 1, 12, "!");
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
   undo_manager.save(Operation::Insert(Insert {
