@@ -187,7 +187,7 @@ impl Debug for UndoManager {
     f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
-      .field("current", &self.changes)
+      .field("changes", &self.changes)
       .field("__next_version", &self.__next_version)
       .finish()
   }
@@ -207,7 +207,7 @@ impl UndoManager {
     self.__next_version
   }
 
-  pub fn current(&self) -> &Changes {
+  pub fn changes(&self) -> &Changes {
     &self.changes
   }
 
