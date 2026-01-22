@@ -51,27 +51,11 @@ pub struct Change {
 
 impl Change {
   pub fn new(version: usize) -> Self {
-    Self {
-      ops: vec![],
-      timestamp: Instant::now(),
-      version,
-    }
+    Self { ops: vec![] }
   }
 
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
-  }
-
-  pub fn timestamp(&self) -> &Instant {
-    &self.timestamp
-  }
-
-  pub fn version(&self) -> usize {
-    self.version
-  }
-
-  fn update_timestamp(&mut self) {
-    self.timestamp = Instant::now();
   }
 
   pub fn save(&mut self, op: Operation) {
