@@ -612,7 +612,7 @@ impl Text {
 
   /// Calculate the absolute char_index of the rope, by the line index and its
   /// char index on the line.
-  pub fn absolute_insert_char_position(
+  pub fn absolute_char_position(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -645,7 +645,7 @@ impl Text {
     // debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
     let absolute_char_idx_before_insert =
-      self.absolute_insert_char_position(line_idx, char_idx);
+      self.absolute_char_position(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -751,11 +751,8 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Range<usize> {
-    debug_assert!(self.rope.get_line(line_idx).is_some());
-    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
-
     let cursor_char_absolute_pos_before_delete =
-      self.rope.line_to_char(line_idx) + char_idx;
+      self.absolute_char_position(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
@@ -792,28 +789,8 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    debug_assert!(self.rope.get_line(line_idx).is_some());
-    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
-
-    let cursor_char_absolute_pos_before_delete =
-      self.rope.line_to_char(line_idx) + char_idx;
-
-    self.dbg_print_textline(line_idx, char_idx, "Before delete");
-
-    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
-    let to_be_deleted_range = if n > 0 {
-      // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self
-        .n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
-      debug_assert!(upper <= self.rope.len_chars());
-      cursor_char_absolute_pos_before_delete..upper
-    } else {
-      // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self
-        .n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
-      lower..cursor_char_absolute_pos_before_delete
-    };
-
+    let to_be_deleted_range =
+      self.absolute_delete_chars_range(line_idx, char_idx, n);
     if to_be_deleted_range.is_empty() {
       return None;
     }
