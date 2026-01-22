@@ -122,14 +122,13 @@ impl Insert {
           char_idx: absolute_delete_range.start,
           payload,
         }));
+      cursor_ops::cursor_delete(
+        &mut tree,
+        current_window_id,
+        buffer.text_mut(),
+        n,
+      );
     }
-
-    cursor_ops::cursor_delete(
-      &mut tree,
-      current_window_id,
-      buffer.text_mut(),
-      n,
-    );
 
     State::Insert(Insert::default())
   }
