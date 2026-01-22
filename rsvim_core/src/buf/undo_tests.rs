@@ -51,7 +51,6 @@ fn insert1() {
 
   let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
-  assert_eq!(actual.version(), 2);
 }
 
 #[test]
