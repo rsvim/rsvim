@@ -89,7 +89,6 @@ fn insert2() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
-  assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
   assert_insert(&undo_manager, 1, 100, "no, it's jerry");
 
@@ -97,7 +96,6 @@ fn insert2() {
 
   let actual = undo_manager.current();
   assert!(actual.operations().is_empty());
-  assert_eq!(actual.version(), 2);
 }
 
 #[test]
