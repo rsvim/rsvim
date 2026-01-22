@@ -71,15 +71,7 @@ fn insert2() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
-  let actual = &actual.operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, payload1);
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
@@ -91,15 +83,7 @@ fn insert2() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
-  let actual = &actual.operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "HelWorld!lo, ");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, "HelWorld!lo, ");
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
@@ -111,15 +95,7 @@ fn insert2() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
-  let actual = &actual.operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "HelWorld!lo, 汤姆(Tom)?");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
@@ -131,25 +107,8 @@ fn insert2() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
-
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "HelWorld!lo, 汤姆(Tom)?");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
-  let actual = &undo_manager.current().operations()[1];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "no, it's jerry");
-      assert_eq!(insert.char_idx, 100);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
+  assert_insert(&undo_manager, 0, 1, "no, it's jerry");
 
   undo_manager.commit();
 
