@@ -1,6 +1,5 @@
 //! The insert mode.
 
-use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
