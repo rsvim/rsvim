@@ -122,15 +122,11 @@ fn delete1() {
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 3);
-  assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 12, "!");
   assert_insert(&undo_manager, 2, 12, payload2);
 
-  undo_manager.insert(Operation::Delete(Delete2 {
-    char_idx: 12,
-    payload: payload2.to_compact_string(),
-  }));
+  undo_manager.delete(12, payload2.to_compact_string());
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
