@@ -545,10 +545,10 @@ pub fn cursor_move(
     .unwrap();
 }
 
-/// Cursor insert operation (but without cursor motion).
+/// High-level cursor insert operation.
 ///
-/// This API will insert text at the cursor, but not moving cursor nor
-/// scrolling window/cmdline.
+/// This API will insert text at the cursor (and possibly scroll the
+/// window/cmdline), as if user is typing in insert mode.
 ///
 /// # Returns
 ///
