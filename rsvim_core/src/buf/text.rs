@@ -535,12 +535,7 @@ impl Text {
   }
 
   #[cfg(not(test))]
-  fn dbg_print_textline(
-    &mut self,
-    _line_idx: usize,
-    _char_idx: usize,
-    _msg: &str,
-  ) {
+  fn dbg_print_textline(&self, _line_idx: usize, _char_idx: usize, _msg: &str) {
   }
 
   #[cfg(test)]
@@ -617,7 +612,7 @@ impl Text {
 
   /// Calculate the absolute char_index of the rope, by the line index and its
   /// char index on the line.
-  pub fn absolute_insert_char_index(
+  pub fn absolute_insert_char_position(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -650,7 +645,7 @@ impl Text {
     // debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
     let absolute_char_idx_before_insert =
-      self.absolute_insert_char_index(line_idx, char_idx);
+      self.absolute_insert_char_position(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -750,7 +745,7 @@ impl Text {
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
-  pub fn absolute_delete_char_index_range(
+  pub fn absolute_delete_chars_range(
     &self,
     line_idx: usize,
     char_idx: usize,
