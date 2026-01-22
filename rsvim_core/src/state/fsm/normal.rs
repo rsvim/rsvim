@@ -234,12 +234,11 @@ impl Normal {
           CompactString::new(format!("{}", buffer.options().end_of_line()));
 
         // Save editing change
-        let cursor_absolute_char_idx =
-          cursor_ops::cursor_absolute_char_position(
-            &tree,
-            current_window_id,
-            buffer.text(),
-          );
+        let cursor_absolute_char_idx = cursor_ops::cursor_absolute_position(
+          &tree,
+          current_window_id,
+          buffer.text(),
+        );
         buffer
           .undo_manager_mut()
           .save(undo::Operation::Insert(undo::Insert {

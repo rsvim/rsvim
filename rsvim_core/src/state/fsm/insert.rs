@@ -168,7 +168,7 @@ impl Insert {
     };
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_position(
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_position(
       &tree,
       current_window_id,
       buffer.text(),
