@@ -45,11 +45,11 @@ pub enum Operation {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Change {
+pub struct Changes {
   ops: Vec<Operation>,
 }
 
-impl Change {
+impl Changes {
   pub fn new() -> Self {
     Self { ops: vec![] }
   }
@@ -171,8 +171,8 @@ impl Change {
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Change>>,
-  current: Change,
+  history: LocalRb<Heap<Operation>>,
+  changes: Changes,
   __next_version: usize,
 }
 
@@ -187,7 +187,7 @@ impl Debug for UndoManager {
     f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
-      .field("current", &self.current)
+      .field("current", &self.changes)
       .field("__next_version", &self.__next_version)
       .finish()
   }
@@ -197,7 +197,7 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: LocalRb::new(100),
-      current: Change::new(),
+      changes: Changes::new(),
       __next_version: 0,
     }
   }
@@ -207,23 +207,23 @@ impl UndoManager {
     self.__next_version
   }
 
-  pub fn current(&self) -> &Change {
-    &self.current
+  pub fn current(&self) -> &Changes {
+    &self.changes
   }
 
   pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
     let version = self.next_version();
-    self.current.insert(char_idx, payload, version);
+    self.changes.insert(char_idx, payload, version);
   }
 
   pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
     let version = self.next_version();
-    self.current.delete(char_idx, payload, version);
+    self.changes.delete(char_idx, payload, version);
   }
 
   pub fn commit(&mut self) {
-    self.history.push_overwrite(self.current.clone());
-    self.current = Change::new();
+    self.history.push_overwrite(self.changes.clone());
+    self.changes = Changes::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
