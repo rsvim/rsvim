@@ -190,16 +190,7 @@ fn delete2() {
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
   assert_eq!(actual.version(), 1);
-
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "Hello, World!");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
 
   undo_manager.save(Operation::Delete(Delete {
     char_idx: 12,
@@ -218,24 +209,8 @@ fn delete2() {
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "Hello, World!");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
-  let actual = &undo_manager.current().operations()[1];
-  assert!(matches!(actual, Operation::Delete(_)));
-  match actual {
-    Operation::Delete(delete) => {
-      assert_eq!(delete.char_idx, 10);
-      assert_eq!(delete.payload, "ld!");
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_delete(&undo_manager, 1, 10, "ld!");
 
   undo_manager.save(Operation::Delete(Delete {
     char_idx: 8,
@@ -246,24 +221,8 @@ fn delete2() {
   assert_eq!(actual.operations().len(), 2);
   assert_eq!(actual.version(), 1);
 
-  let actual = &undo_manager.current().operations()[0];
-  assert!(matches!(actual, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, "Hello, World!");
-      assert_eq!(insert.char_idx, 0);
-    }
-    _ => unreachable!(),
-  }
-  let actual = &undo_manager.current().operations()[1];
-  assert!(matches!(actual, Operation::Delete(_)));
-  match actual {
-    Operation::Delete(delete) => {
-      assert_eq!(delete.char_idx, 8);
-      assert_eq!(delete.payload, "orld!");
-    }
-    _ => unreachable!(),
-  }
+  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_delete(&undo_manager, 1, 10, "orld!");
 
   undo_manager.commit();
 
