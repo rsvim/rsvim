@@ -81,15 +81,11 @@ fn insert2() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 1);
-  assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    undo_manager.insert(Operation::Insert(Insert {
-      char_idx: i + 100,
-      payload: c.to_string().to_compact_string(),
-    }));
+    undo_manager.insert(i + 100, c.to_compact_string());
   }
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 2);
