@@ -101,7 +101,7 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_range = cursor_ops::cursor_delete_absolute_range(
+    let absolute_delete_range = cursor_ops::cursor_delete_absolute_chars_range(
       &tree,
       current_window_id,
       buffer.text(),
