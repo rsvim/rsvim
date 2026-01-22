@@ -12,7 +12,7 @@ use std::fmt::Debug;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Insert2 {
+struct Insert {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -20,7 +20,7 @@ struct Insert2 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Delete2 {
+struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -40,8 +40,8 @@ struct Delete2 {
 /// NOTE: The `char_idx` in operation is absolute char index in the buffer
 /// text.
 enum Operation {
-  Insert(Insert2),
-  Delete(Delete2),
+  Insert(Insert),
+  Delete(Delete),
 }
 
 #[derive(Debug, Clone)]
@@ -126,7 +126,7 @@ impl Change {
     } else {
       self
         .ops
-        .push(Operation::Delete(Delete2 { char_idx, payload }));
+        .push(Operation::Delete(Delete { char_idx, payload }));
     }
   }
 
@@ -170,7 +170,7 @@ impl Change {
     } else {
       self
         .ops
-        .push(Operation::Insert(Insert2 { char_idx, payload }));
+        .push(Operation::Insert(Insert { char_idx, payload }));
     }
 
     self.update_timestamp();
