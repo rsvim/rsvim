@@ -201,7 +201,7 @@ impl Insert {
     // Commit editing changes
     buffer.undo_manager_mut().commit();
 
-    let op = Operation::CursorMoveBy((0, 0));
+    let op = Operation::CursorMoveBy((-1, 0));
     cursor_ops::cursor_move(
       &mut tree,
       current_window_id,
