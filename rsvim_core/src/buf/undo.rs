@@ -33,9 +33,8 @@ pub struct Delete {
 /// Operations don't maintain the cursor's position, so a buffer can change
 /// without the need to know where the cursor is.
 ///
-/// NOTE: Ropey provide two types of coordinate system:
-/// 1. 2-Dimension on line number and char index per line.
-/// 2. 1-Dimension on absolute char index per whole buffer.
+/// NOTE: The `char_idx` in operation is absolute char index in the buffer
+/// text.
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
