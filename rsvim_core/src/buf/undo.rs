@@ -237,7 +237,8 @@ impl UndoManager {
   }
 
   pub fn save(&mut self, op: Operation) {
-    self.current.save(op, self.next_version());
+    let version = self.next_version();
+    self.current.save(op, version);
   }
 
   pub fn commit(&mut self) {
