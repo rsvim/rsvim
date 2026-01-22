@@ -15,12 +15,14 @@ use tokio::time::Instant;
 pub struct Insert {
   pub char_idx: usize,
   pub payload: CompactString,
+  pub timestamp: Instant,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
+  pub timestamp: Instant,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,7 +45,6 @@ pub enum Operation {
 #[derive(Debug, Clone)]
 pub struct Change {
   ops: Vec<Operation>,
-  timestamp: Instant,
   version: usize,
 }
 
