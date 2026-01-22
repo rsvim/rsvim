@@ -124,9 +124,12 @@ impl Change {
       // Cancel both insertion and deletion
       self.ops.pop();
     } else {
-      self
-        .ops
-        .push(Operation::Delete(Delete { char_idx, payload }));
+      self.ops.push(Operation::Delete(Delete {
+        char_idx,
+        payload,
+        timestamp: Instant::now(),
+        version,
+      }));
     }
   }
 
@@ -168,9 +171,12 @@ impl Change {
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
-      self
-        .ops
-        .push(Operation::Insert(Insert { char_idx, payload }));
+      self.ops.push(Operation::Insert(Insert {
+        char_idx,
+        payload,
+        timestamp: Instant::now(),
+        version,
+      }));
     }
 
     self.update_timestamp();
