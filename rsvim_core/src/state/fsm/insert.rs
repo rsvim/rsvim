@@ -118,7 +118,7 @@ impl Insert {
         .collect::<CompactString>();
       buffer
         .undo_manager_mut()
-        .save(undo::Operation::Delete(undo::Delete {
+        .save(undo::ChangeOp2::Delete(undo::Delete2 {
           char_idx: absolute_delete_range.start,
           payload,
         }));
@@ -174,7 +174,7 @@ impl Insert {
     );
     buffer
       .undo_manager_mut()
-      .save(undo::Operation::Insert(undo::Insert {
+      .save(undo::ChangeOp2::Insert(undo::Insert2 {
         char_idx: cursor_absolute_char_idx,
         payload: payload.clone(),
       }));

@@ -12,7 +12,7 @@ use std::fmt::Debug;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Insert {
+pub struct Insert2 {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -20,7 +20,7 @@ pub struct Insert {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Delete {
+pub struct Delete2 {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -39,6 +39,21 @@ pub struct Delete {
 ///
 /// NOTE: The `char_idx` in operation is absolute char index in the buffer
 /// text.
+pub enum ChangeOp2 {
+  Insert(Insert2),
+  Delete(Delete2),
+}
+
+pub struct Insert {
+  pub char_idx: usize,
+  pub payload: CompactString,
+}
+
+pub struct Delete {
+  pub char_idx: usize,
+  pub payload: CompactString,
+}
+
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
@@ -46,7 +61,7 @@ pub enum Operation {
 
 #[derive(Debug, Clone)]
 pub struct Change {
-  ops: Vec<Operation>,
+  ops: Vec<ChangeOp2>,
 }
 
 impl Change {
@@ -54,24 +69,33 @@ impl Change {
     Self { ops: vec![] }
   }
 
-  pub fn operations(&self) -> &Vec<Operation> {
+  pub fn operations(&self) -> &Vec<ChangeOp2> {
     &self.ops
   }
 
-  pub fn save(&mut self, op: Operation) {
+  pub fn save(&mut self, op: Operation, version: usize) {
     match op {
-      Operation::Insert(insert) => self.insert(insert.char_idx, insert.payload),
-      Operation::Delete(delete) => self.delete(delete.char_idx, delete.payload),
+      Operation::Insert(insert) => {
+        self.insert(insert.char_idx, insert.payload, version)
+      }
+      Operation::Delete(delete) => {
+        self.delete(delete.char_idx, delete.payload, version)
+      }
     }
   }
 
-  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
+  fn delete(
+    &mut self,
+    char_idx: usize,
+    payload: CompactString,
+    version: usize,
+  ) {
     let payload_chars_count = payload.chars().count();
     if payload_chars_count == 0 {
       return;
     }
 
-    if let Some(Operation::Delete(delete)) = self.ops.last_mut()
+    if let Some(ChangeOp2::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx == char_idx
     {
       // Merge two deletion
@@ -80,7 +104,7 @@ impl Change {
         char_idx, payload
       );
       delete.payload.push_str(&payload);
-    } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
+    } else if let Some(ChangeOp2::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
       && delete.char_idx - char_idx <= payload_chars_count
     {
@@ -104,7 +128,7 @@ impl Change {
       if second.chars().count() > 0 {
         delete.payload.push_str(&second);
       }
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+    } else if let Some(ChangeOp2::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
       && insert.payload == payload
     {
@@ -117,24 +141,27 @@ impl Change {
     } else {
       self
         .ops
-        .push(Operation::Delete(Delete { char_idx, payload }));
+        .push(ChangeOp2::Delete(Delete2 { char_idx, payload }));
     }
-
-    self.update_timestamp();
   }
 
-  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
+  fn insert(
+    &mut self,
+    char_idx: usize,
+    payload: CompactString,
+    version: usize,
+  ) {
     let payload_chars_count = payload.chars().count();
     let last_payload_chars_count = self.ops.last().map(|l| match l {
-      Operation::Insert(insert) => insert.payload.chars().count(),
-      Operation::Delete(delete) => delete.payload.chars().count(),
+      ChangeOp2::Insert(insert) => insert.payload.chars().count(),
+      ChangeOp2::Delete(delete) => delete.payload.chars().count(),
     });
 
     if payload_chars_count == 0 {
       return;
     }
 
-    if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+    if let Some(ChangeOp2::Insert(insert)) = self.ops.last_mut()
       && char_idx >= insert.char_idx
       && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
     {
@@ -146,7 +173,7 @@ impl Change {
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+    } else if let Some(ChangeOp2::Insert(insert)) = self.ops.last_mut()
       && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
@@ -158,7 +185,7 @@ impl Change {
     } else {
       self
         .ops
-        .push(Operation::Insert(Insert { char_idx, payload }));
+        .push(ChangeOp2::Insert(Insert2 { char_idx, payload }));
     }
 
     self.update_timestamp();
@@ -206,7 +233,7 @@ impl UndoManager {
     &self.current
   }
 
-  pub fn save(&mut self, op: Operation) {
+  pub fn save(&mut self, op: ChangeOp2) {
     self.current.save(op);
   }
 
