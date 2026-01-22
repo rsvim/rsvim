@@ -183,7 +183,7 @@ impl Debug for UndoManager {
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
       .field("current", &self.current)
-      .field("next_version", &self.__next_version)
+      .field("__next_version", &self.__next_version)
       .finish()
   }
 }
