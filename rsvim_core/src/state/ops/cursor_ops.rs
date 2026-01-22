@@ -717,5 +717,5 @@ pub fn cursor_absolute_char_index(
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  text.rope().line_to_char(cursor_line_idx) + cursor_char_idx
+  text.absolute_char_position(cursor_line_idx, cursor_char_idx)
 }

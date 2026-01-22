@@ -101,36 +101,36 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
-      &tree,
-      current_window_id,
-      buffer.text(),
-    );
-    if n > 0 {
-      let payload = buffer
-        .text()
-        .rope()
-        .chars_at(cursor_absolute_char_idx)
-        .take(n as usize)
-        .collect::<CompactString>();
-      buffer
-        .undo_manager_mut()
-        .save(undo::Operation::Delete(undo::Delete {
-          char_idx: cursor_absolute_char_idx,
-          payload,
-        }));
-    } else if n < 0 {
-      let char_idx = (cursor_absolute_char_idx as isize + n) as usize;
-      let payload = buffer
-        .text()
-        .rope()
-        .chars_at(char_idx)
-        .take((-n) as usize)
-        .collect::<CompactString>();
-      buffer
-        .undo_manager_mut()
-        .save(undo::Operation::Delete(undo::Delete { char_idx, payload }));
-    }
+    // let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
+    //   &tree,
+    //   current_window_id,
+    //   buffer.text(),
+    // );
+    // if n > 0 {
+    //   let payload = buffer
+    //     .text()
+    //     .rope()
+    //     .chars_at(cursor_absolute_char_idx)
+    //     .take(n as usize)
+    //     .collect::<CompactString>();
+    //   buffer
+    //     .undo_manager_mut()
+    //     .save(undo::Operation::Delete(undo::Delete {
+    //       char_idx: cursor_absolute_char_idx,
+    //       payload,
+    //     }));
+    // } else if n < 0 {
+    //   let char_idx = (cursor_absolute_char_idx as isize + n) as usize;
+    //   let payload = buffer
+    //     .text()
+    //     .rope()
+    //     .chars_at(char_idx)
+    //     .take((-n) as usize)
+    //     .collect::<CompactString>();
+    //   buffer
+    //     .undo_manager_mut()
+    //     .save(undo::Operation::Delete(undo::Delete { char_idx, payload }));
+    // }
     cursor_ops::cursor_delete(
       &mut tree,
       current_window_id,

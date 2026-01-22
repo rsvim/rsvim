@@ -751,6 +751,8 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Range<usize> {
+    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
+
     let cursor_char_absolute_pos_before_delete =
       self.absolute_char_position(line_idx, char_idx);
 
