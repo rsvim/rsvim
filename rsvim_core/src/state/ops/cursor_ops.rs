@@ -10,6 +10,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use compact_str::CompactString;
+use std::ops::Range;
 
 #[derive(Debug, Copy, Clone)]
 /// Cursor move direction.
@@ -706,4 +707,42 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
   }
 
   Some(removed_id)
+}
+
+/// Get cursor absolute char index in current editable viewport.
+pub fn cursor_absolute_char_position(
+  tree: &Tree,
+  id: NodeId,
+  text: &Text,
+) -> usize {
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  text.absolute_char_position(cursor_line_idx, cursor_char_idx)
+}
+
+/// Get cursor absolute chars range that to be deleted in current editable
+/// viewport.
+///
+/// It returns:
+/// - `None` if current buffer is empty.
+/// - Empty range if there's nothing to be deleted at cursor position.
+/// - A safe range that can be deleted at cursor position.
+pub fn cursor_delete_absolute_chars_range(
+  tree: &Tree,
+  id: NodeId,
+  text: &Text,
+  n: isize,
+) -> Option<Range<usize>> {
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+
+  // If line is empty, cursor cannot delete any text content.
+  if cursor_char_idx >= text.rope().line(cursor_line_idx).len_chars() {
+    return None;
+  }
+
+  Some(text.absolute_delete_chars_range(cursor_line_idx, cursor_char_idx, n))
 }

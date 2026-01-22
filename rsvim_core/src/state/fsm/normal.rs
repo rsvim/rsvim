@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -112,9 +113,9 @@ impl Normal {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.cmdline_id().is_some());
-    debug_assert!(tree.current_window_id().is_some());
     if cfg!(debug_assertions) {
+      debug_assert!(tree.cmdline_id().is_some());
+      debug_assert!(tree.current_window_id().is_some());
       let cursor_id = tree.cursor_id();
       debug_assert!(cursor_id.is_some());
       let cursor_id = cursor_id.unwrap();
@@ -231,6 +232,20 @@ impl Normal {
         );
         let eol =
           CompactString::new(format!("{}", buffer.options().end_of_line()));
+
+        // Save editing change
+        let cursor_absolute_char_idx =
+          cursor_ops::cursor_absolute_char_position(
+            &tree,
+            current_window_id,
+            buffer.text(),
+          );
+        buffer
+          .undo_manager_mut()
+          .save(undo::Operation::Insert(undo::Insert {
+            char_idx: cursor_absolute_char_idx,
+            payload: eol.clone(),
+          }));
         cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,

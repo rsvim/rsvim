@@ -2,12 +2,15 @@
 
 pub mod opt;
 pub mod text;
+pub mod undo;
 pub mod unicode;
 
 #[cfg(test)]
 mod opt_tests;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
@@ -23,8 +26,9 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
-use std::time::Instant;
 use text::Text;
+use tokio::time::Instant;
+use undo::UndoManager;
 
 struct_id_impl!(BufferId, i32, negative);
 
@@ -50,10 +54,15 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   text: Text,
+
+  // file
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
+
+  // undo manager
+  undo_manager: UndoManager,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -78,6 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
+      undo_manager: UndoManager::new(),
     }
   }
 
@@ -131,6 +141,14 @@ impl Buffer {
 
   pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
     self.last_sync_time = last_sync_time;
+  }
+
+  pub fn undo_manager(&self) -> &UndoManager {
+    &self.undo_manager
+  }
+
+  pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
+    &mut self.undo_manager
   }
 }
 

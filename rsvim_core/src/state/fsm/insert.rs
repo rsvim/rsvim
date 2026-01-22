@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -9,6 +10,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -98,12 +100,35 @@ impl Insert {
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    cursor_ops::cursor_delete(
-      &mut tree,
+    // Save editing change
+    let absolute_delete_range = cursor_ops::cursor_delete_absolute_chars_range(
+      &tree,
       current_window_id,
-      buffer.text_mut(),
+      buffer.text(),
       n,
     );
+    if let Some(absolute_delete_range) = absolute_delete_range
+      && !absolute_delete_range.is_empty()
+    {
+      let payload = buffer
+        .text()
+        .rope()
+        .chars_at(absolute_delete_range.start)
+        .take(absolute_delete_range.len())
+        .collect::<CompactString>();
+      buffer
+        .undo_manager_mut()
+        .save(undo::Operation::Delete(undo::Delete {
+          char_idx: absolute_delete_range.start,
+          payload,
+        }));
+      cursor_ops::cursor_delete(
+        &mut tree,
+        current_window_id,
+        buffer.text_mut(),
+        n,
+      );
+    }
 
     State::Insert(Insert::default())
   }
@@ -141,6 +166,18 @@ impl Insert {
       }
     };
 
+    // Save editing change
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_position(
+      &tree,
+      current_window_id,
+      buffer.text(),
+    );
+    buffer
+      .undo_manager_mut()
+      .save(undo::Operation::Insert(undo::Insert {
+        char_idx: cursor_absolute_char_idx,
+        payload: payload.clone(),
+      }));
     cursor_ops::cursor_insert(
       &mut tree,
       current_window_id,
@@ -159,9 +196,12 @@ impl Insert {
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
-    let buffer = lock!(buffer);
+    let mut buffer = lock!(buffer);
 
-    let op = Operation::CursorMoveBy((0, 0));
+    // Commit editing changes
+    buffer.undo_manager_mut().commit();
+
+    let op = Operation::CursorMoveBy((-1, 0));
     cursor_ops::cursor_move(
       &mut tree,
       current_window_id,

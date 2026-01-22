@@ -21,6 +21,7 @@ use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
+use std::ops::Range;
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -534,21 +535,11 @@ impl Text {
   }
 
   #[cfg(not(test))]
-  fn dbg_print_textline(
-    &mut self,
-    _line_idx: usize,
-    _char_idx: usize,
-    _msg: &str,
-  ) {
+  fn dbg_print_textline(&self, _line_idx: usize, _char_idx: usize, _msg: &str) {
   }
 
   #[cfg(test)]
-  fn dbg_print_textline(
-    &mut self,
-    line_idx: usize,
-    char_idx: usize,
-    msg: &str,
-  ) {
+  fn dbg_print_textline(&self, line_idx: usize, char_idx: usize, msg: &str) {
     trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
 
     match self.rope().get_line(line_idx) {
@@ -619,6 +610,21 @@ impl Text {
     }
   }
 
+  /// Calculate the absolute char_index of the rope, by the line index and its
+  /// char index on the line.
+  pub fn absolute_char_position(
+    &self,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> usize {
+    // debug_assert!(!payload.is_empty());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
+
+    let absolute_line_idx = self.rope.line_to_char(line_idx);
+    absolute_line_idx + char_idx
+  }
+
   /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
   /// empty.
   ///
@@ -634,12 +640,8 @@ impl Text {
     char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    // debug_assert!(!payload.is_empty());
-    debug_assert!(self.rope.get_line(line_idx).is_some());
-    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
-
-    let absolute_line_idx = self.rope.line_to_char(line_idx);
-    let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
+    let absolute_char_idx_before_insert =
+      self.absolute_char_position(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -687,7 +689,7 @@ impl Text {
     (line_idx_after_inserted, char_idx_after_inserted)
   }
 
-  fn _n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
+  fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
     debug_assert!(n > 0);
     let mut i = absolute_char_idx as isize;
     let mut acc = 0;
@@ -713,7 +715,7 @@ impl Text {
     std::cmp::max(i, 0) as usize
   }
 
-  fn _n_chars_to_right(&self, absolute_char_idx: usize, n: usize) -> usize {
+  fn n_chars_to_right(&self, absolute_char_idx: usize, n: usize) -> usize {
     debug_assert!(n > 0);
 
     let len_chars = self.rope.len_chars();
@@ -737,6 +739,36 @@ impl Text {
     i
   }
 
+  /// Calculate the absolute char index range that will be deleted, by line
+  /// index and its char index on the line.
+  pub fn absolute_delete_chars_range(
+    &self,
+    line_idx: usize,
+    char_idx: usize,
+    n: isize,
+  ) -> Range<usize> {
+    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
+
+    let cursor_char_absolute_pos_before_delete =
+      self.absolute_char_position(line_idx, char_idx);
+
+    self.dbg_print_textline(line_idx, char_idx, "Before delete");
+
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
+    if n > 0 {
+      // Delete to right side, on range `[cursor..cursor+n)`.
+      let upper = self
+        .n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      debug_assert!(upper <= self.rope.len_chars());
+      cursor_char_absolute_pos_before_delete..upper
+    } else {
+      // Delete to left side, on range `[cursor-n,cursor)`.
+      let lower = self
+        .n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
+      lower..cursor_char_absolute_pos_before_delete
+    }
+  }
+
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
   ///
   /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
@@ -755,30 +787,8 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    debug_assert!(self.rope.get_line(line_idx).is_some());
-    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
-
-    let cursor_char_absolute_pos_before_delete =
-      self.rope.line_to_char(line_idx) + char_idx;
-
-    self.dbg_print_textline(line_idx, char_idx, "Before delete");
-
-    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
-    let to_be_deleted_range = if n > 0 {
-      // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self
-        ._n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
-      debug_assert!(upper <= self.rope.len_chars());
-      cursor_char_absolute_pos_before_delete..upper
-    } else {
-      // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self._n_chars_to_left(
-        cursor_char_absolute_pos_before_delete,
-        (-n) as usize,
-      );
-      lower..cursor_char_absolute_pos_before_delete
-    };
-
+    let to_be_deleted_range =
+      self.absolute_delete_chars_range(line_idx, char_idx, n);
     if to_be_deleted_range.is_empty() {
       return None;
     }

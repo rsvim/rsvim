@@ -194,7 +194,7 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
-        cmd = "cargo nextest list"
+        cmd = "cargo nextest list --no-pager"
         run(cmd)
 
 

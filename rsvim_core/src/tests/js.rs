@@ -6,11 +6,11 @@ use crate::js::JsRuntimeOptions;
 use crate::js::command::CommandsManager;
 use crate::prelude::*;
 use crate::ui::tree::Tree;
-use std::time::Instant;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use taffy::Style;
 use tokio::sync::mpsc::unbounded_channel;
+use tokio::time::Instant;
 
 pub fn make_js_runtime() -> JsRuntime {
   let canvas_size = size!(10, 10);
