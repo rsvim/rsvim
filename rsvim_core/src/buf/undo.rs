@@ -44,16 +44,19 @@ pub enum ChangeOp2 {
   Delete(Delete2),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   pub char_idx: usize,
   pub payload: CompactString,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
