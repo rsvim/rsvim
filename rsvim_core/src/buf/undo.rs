@@ -96,15 +96,24 @@ impl Change {
       delete.payload.push_str(&payload);
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
-      && delete.char_idx - char_idx == payload.chars().count()
+      && delete.char_idx - char_idx <= payload.chars().count()
     {
       trace!(
         "self.ops.last-2, char_idx:{:?}, payload:{:?}",
         char_idx, payload
       );
+      let first = payload
+        .chars()
+        .take(delete.char_idx - char_idx)
+        .collect::<CompactString>();
+      let second = payload
+        .chars()
+        .skip(delete.char_idx - char_idx)
+        .collect::<CompactString>();
       // Merge two deletion
       delete.char_idx = char_idx;
-      delete.payload.insert_str(0, &payload);
+      delete.payload.insert_str(0, &first);
+      delete.payload.push_str(&second);
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
       && insert.payload == payload
