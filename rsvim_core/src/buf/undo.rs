@@ -81,7 +81,13 @@ impl Change {
   }
 
   pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
-    if payload.chars().count() == 0 {
+    let payload_chars_count = payload.chars().count();
+    let last_payload_chars_count = self.ops.last().map(|l| match l {
+      Operation::Insert(insert) => insert.payload.chars().count(),
+      Operation::Delete(delete) => delete.payload.chars().count(),
+    });
+
+    if payload_chars_count == 0 {
       return;
     }
 
@@ -96,7 +102,7 @@ impl Change {
       delete.payload.push_str(&payload);
     } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
       && delete.char_idx > char_idx
-      && delete.char_idx - char_idx <= payload.chars().count()
+      && delete.char_idx - char_idx <= payload_chars_count
     {
       trace!(
         "self.ops.last-2, char_idx:{:?}, payload:{:?}",
@@ -128,6 +134,24 @@ impl Change {
       );
       // Cancel both insertion and deletion
       self.ops.pop();
+    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+      && insert.char_idx <= char_idx
+      && char_idx + payload_chars_count
+        <= insert.char_idx + last_payload_chars_count.unwrap()
+      && insert
+        .payload
+        .chars()
+        .skip(char_idx - insert.char_idx)
+        .take(payload_chars_count)
+        .collect::<CompactString>()
+        == payload
+    {
+      trace!(
+        "self.ops.last-3, char_idx:{:?}, payload:{:?}",
+        char_idx, payload
+      );
+      // Cancel deletion and reduce previous insertion
+      self.ops.pop();
     } else {
       self
         .ops
@@ -138,30 +162,34 @@ impl Change {
   }
 
   pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
-    if payload.is_empty() {
+    let payload_chars_count = payload.chars().count();
+    let last_payload_chars_count = self.ops.last().map(|l| match l {
+      Operation::Insert(insert) => insert.payload.chars().count(),
+      Operation::Delete(delete) => delete.payload.chars().count(),
+    });
+
+    if payload_chars_count == 0 {
       return;
     }
 
     if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && char_idx >= insert.char_idx
-      && char_idx < insert.char_idx + insert.payload.chars().count()
+      && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
         "self.ops.last-1, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx,
-        insert.payload.chars().count()
+        insert.char_idx, last_payload_chars_count
       );
       // Merge two insertion
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && (char_idx == insert.char_idx + insert.payload.chars().count())
+      && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
         "self.ops.last-2, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx,
-        insert.payload.chars().count()
+        insert.char_idx, last_payload_chars_count
       );
       // Merge two insertion
       insert.payload.push_str(&payload);
