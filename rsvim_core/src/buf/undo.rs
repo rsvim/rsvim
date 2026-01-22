@@ -58,7 +58,7 @@ impl Change {
     &self.ops
   }
 
-  fn delete(
+  pub fn delete(
     &mut self,
     char_idx: usize,
     payload: CompactString,
@@ -122,7 +122,7 @@ impl Change {
     }
   }
 
-  fn insert(
+  pub fn insert(
     &mut self,
     char_idx: usize,
     payload: CompactString,
