@@ -34,7 +34,7 @@ RSVIM is an open source terminal based text editor, built from scratch with [Rus
 
 ## Installation
 
-Please download pre-built executables in [releases](https://github.com/rsvim/rsvim/releases) page, or build with cargo:
+Please download prebuilt executables in [releases](https://github.com/rsvim/rsvim/releases) page, or build with cargo:
 
 ```bash
 cargo install --locked rsvim
@@ -48,17 +48,17 @@ cargo install --locked rsvim --git https://github.com/rsvim/rsvim.git --branch m
 
 ## Get Started
 
-Please checkout [Documentation](https://rsvim.github.io/) for more details!
+Please check out [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
 Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
 
-Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
+Road map and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
 ## Credits
 
-Source code and technical solutions are studied from following projects for implementing initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
+Some source code and technology are studied from following projects for implementing initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
 
 - **[dune](https://github.com/aalykiot/dune)**: A hobby runtime for JavaScript and TypeScript 🚀.
 - **[deno](https://github.com/denoland/deno)**: A modern runtime for JavaScript and TypeScript.
