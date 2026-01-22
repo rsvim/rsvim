@@ -42,7 +42,7 @@ fn insert1() {
   let mut undo_manager = UndoManager::new();
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
@@ -63,7 +63,7 @@ fn insert2() {
   let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, ";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
@@ -75,7 +75,7 @@ fn insert2() {
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i + 3,
       payload: c.to_string().to_compact_string(),
     }));
@@ -87,7 +87,7 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i + payload1.chars().count() + payload2.chars().count(),
       payload: c.to_string().to_compact_string(),
     }));
@@ -99,7 +99,7 @@ fn insert2() {
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i + 100,
       payload: c.to_string().to_compact_string(),
     }));
@@ -122,7 +122,7 @@ fn delete1() {
   let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
@@ -133,7 +133,7 @@ fn delete1() {
   assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 12,
     payload: "!".to_compact_string(),
   }));
@@ -145,7 +145,7 @@ fn delete1() {
   assert_delete(&undo_manager, 1, 12, "!");
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  undo_manager.save(Operation::Insert(Insert {
+  undo_manager.insert(Operation::Insert(Insert {
     char_idx: 12,
     payload: payload2.to_compact_string(),
   }));
@@ -157,7 +157,7 @@ fn delete1() {
   assert_delete(&undo_manager, 1, 12, "!");
   assert_insert(&undo_manager, 2, 12, payload2);
 
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 12,
     payload: payload2.to_compact_string(),
   }));
@@ -181,7 +181,7 @@ fn delete2() {
   let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.save(Operation::Insert(Insert {
+    undo_manager.insert(Operation::Insert(Insert {
       char_idx: i,
       payload: c.to_string().to_compact_string(),
     }));
@@ -192,15 +192,15 @@ fn delete2() {
   assert_eq!(actual.version(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 12,
     payload: "!".to_compact_string(),
   }));
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 11,
     payload: "d".to_compact_string(),
   }));
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 10,
     payload: "l".to_compact_string(),
   }));
@@ -212,7 +212,7 @@ fn delete2() {
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 10, "ld!");
 
-  undo_manager.save(Operation::Delete(Delete2 {
+  undo_manager.insert(Operation::Delete(Delete2 {
     char_idx: 8,
     payload: "or".to_compact_string(),
   }));
