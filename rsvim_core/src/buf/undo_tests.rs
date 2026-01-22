@@ -230,4 +230,3 @@ fn delete2() {
   assert!(actual.operations().is_empty());
   assert_eq!(actual.version(), 2);
 }
-
