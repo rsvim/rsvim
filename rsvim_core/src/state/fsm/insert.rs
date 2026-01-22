@@ -101,13 +101,12 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_chars_range =
-      cursor_ops::cursor_absolute_delete_chars_range(
-        &tree,
-        current_window_id,
-        buffer.text(),
-        n,
-      );
+    let absolute_delete_chars_range = cursor_ops::cursor_delete_absolute_range(
+      &tree,
+      current_window_id,
+      buffer.text(),
+      n,
+    );
     if let Some(absolute_chars_range) = absolute_delete_chars_range
       && !absolute_chars_range.is_empty()
     {

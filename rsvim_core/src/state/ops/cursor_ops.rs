@@ -721,9 +721,14 @@ pub fn cursor_absolute_char_position(
   text.absolute_char_position(cursor_line_idx, cursor_char_idx)
 }
 
-/// Get cursor absolute char index range that to be deleted in current editable
+/// Get cursor absolute chars range that to be deleted in current editable
 /// viewport.
-pub fn cursor_absolute_delete_chars_range(
+///
+/// It returns:
+/// - `None` if current buffer is empty.
+/// - Empty range if there's nothing to be deleted at cursor position.
+/// - A safe range that can be deleted at cursor position.
+pub fn cursor_delete_absolute_range(
   tree: &Tree,
   id: NodeId,
   text: &Text,
