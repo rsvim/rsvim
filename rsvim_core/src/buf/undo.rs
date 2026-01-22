@@ -1,4 +1,4 @@
-//! Editing/change history, useful for undo/redo.
+//! Undo history.
 
 use crate::buf::BufferId;
 use crate::buf::text::Text;
