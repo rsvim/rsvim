@@ -50,7 +50,7 @@ pub struct Change {
 }
 
 impl Change {
-  pub fn new(version: usize) -> Self {
+  pub fn new() -> Self {
     Self { ops: vec![] }
   }
 
@@ -190,11 +190,10 @@ impl Debug for UndoManager {
 
 impl UndoManager {
   pub fn new() -> Self {
-    let version = 1;
     Self {
       history: LocalRb::new(100),
-      current: Change::new(version),
-      next_version: version + 1,
+      current: Change::new(),
+      next_version: 0,
     }
   }
 
@@ -206,10 +205,14 @@ impl UndoManager {
     self.current.save(op);
   }
 
+  pub fn next_version(&mut self) -> usize {
+    self.next_version += 1;
+    self.next_version
+  }
+
   pub fn commit(&mut self) {
     self.history.push_overwrite(self.current.clone());
-    self.current = Change::new(self.next_version);
-    self.next_version += 1;
+    self.current = Change::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
