@@ -134,24 +134,6 @@ impl Change {
       );
       // Cancel both insertion and deletion
       self.ops.pop();
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && insert.char_idx <= char_idx
-      && char_idx + payload_chars_count
-        <= insert.char_idx + last_payload_chars_count.unwrap()
-      && insert
-        .payload
-        .chars()
-        .skip(char_idx - insert.char_idx)
-        .take(payload_chars_count)
-        .collect::<CompactString>()
-        == payload
-    {
-      trace!(
-        "self.ops.last-3, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      // Cancel deletion and reduce previous insertion
-      self.ops.pop();
     } else {
       self
         .ops
