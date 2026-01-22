@@ -10,7 +10,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-// use compact_str::CompactString;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -101,36 +101,28 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    // let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
-    //   &tree,
-    //   current_window_id,
-    //   buffer.text(),
-    // );
-    // if n > 0 {
-    //   let payload = buffer
-    //     .text()
-    //     .rope()
-    //     .chars_at(cursor_absolute_char_idx)
-    //     .take(n as usize)
-    //     .collect::<CompactString>();
-    //   buffer
-    //     .undo_manager_mut()
-    //     .save(undo::Operation::Delete(undo::Delete {
-    //       char_idx: cursor_absolute_char_idx,
-    //       payload,
-    //     }));
-    // } else if n < 0 {
-    //   let char_idx = (cursor_absolute_char_idx as isize + n) as usize;
-    //   let payload = buffer
-    //     .text()
-    //     .rope()
-    //     .chars_at(char_idx)
-    //     .take((-n) as usize)
-    //     .collect::<CompactString>();
-    //   buffer
-    //     .undo_manager_mut()
-    //     .save(undo::Operation::Delete(undo::Delete { char_idx, payload }));
-    // }
+    let absolute_delete_chars_range =
+      cursor_ops::cursor_absolute_delete_chars_range(
+        &tree,
+        current_window_id,
+        buffer.text(),
+        n,
+      );
+    if !absolute_delete_chars_range.is_empty() {
+      let payload = buffer
+        .text()
+        .rope()
+        .chars_at(absolute_delete_chars_range.start)
+        .take(absolute_delete_chars_range.len())
+        .collect::<CompactString>();
+      buffer
+        .undo_manager_mut()
+        .save(undo::Operation::Delete(undo::Delete {
+          char_idx: absolute_delete_chars_range.start,
+          payload,
+        }));
+    }
+
     cursor_ops::cursor_delete(
       &mut tree,
       current_window_id,
@@ -175,7 +167,7 @@ impl Insert {
     };
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_index(
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_position(
       &tree,
       current_window_id,
       buffer.text(),
