@@ -178,8 +178,6 @@ impl Change {
         version,
       }));
     }
-
-    self.update_timestamp();
   }
 }
 
