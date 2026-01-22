@@ -118,10 +118,7 @@ fn delete1() {
   assert_delete(&undo_manager, 1, 12, "!");
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  undo_manager.insert(Operation::Insert(Insert {
-    char_idx: 12,
-    payload: payload2.to_compact_string(),
-  }));
+  undo_manager.insert(12, payload2.to_compact_string());
 
   let actual = undo_manager.current();
   assert_eq!(actual.operations().len(), 3);
