@@ -112,8 +112,12 @@ impl Change {
         .collect::<CompactString>();
       // Merge two deletion
       delete.char_idx = char_idx;
-      delete.payload.insert_str(0, &first);
-      delete.payload.push_str(&second);
+      if first.chars().count() > 0 {
+        delete.payload.insert_str(0, &first);
+      }
+      if second.chars().count() > 0 {
+        delete.payload.push_str(&second);
+      }
     } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
       && insert.char_idx == char_idx
       && insert.payload == payload
