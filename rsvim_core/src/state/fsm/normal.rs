@@ -240,12 +240,9 @@ impl Normal {
             current_window_id,
             buffer.text(),
           );
-        buffer.undo_manager_mut().insert(undo::Operation::Insert(
-          undo::Insert {
-            char_idx: cursor_absolute_char_idx,
-            payload: eol.clone(),
-          },
-        ));
+        buffer
+          .undo_manager_mut()
+          .insert(cursor_absolute_char_idx, eol.clone());
         cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,
