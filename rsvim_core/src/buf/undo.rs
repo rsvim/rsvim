@@ -12,7 +12,7 @@ use std::fmt::Debug;
 use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Insert2 {
+struct Insert2 {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -20,7 +20,7 @@ pub struct Insert2 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Delete2 {
+struct Delete2 {
   pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
@@ -39,7 +39,7 @@ pub struct Delete2 {
 ///
 /// NOTE: The `char_idx` in operation is absolute char index in the buffer
 /// text.
-pub enum ChangeOp2 {
+enum ChangeOp2 {
   Insert(Insert2),
   Delete(Delete2),
 }
@@ -236,8 +236,8 @@ impl UndoManager {
     &self.current
   }
 
-  pub fn save(&mut self, op: ChangeOp2) {
-    self.current.save(op);
+  pub fn save(&mut self, op: Operation) {
+    self.current.save(op, self.next_version());
   }
 
   pub fn commit(&mut self) {
