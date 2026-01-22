@@ -25,8 +25,8 @@ pub struct Delete {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Basic unit of a change operation:
-/// - Insert payload at an absolute char index.
-/// - Delete `n` characters at an absolute char index.
+/// - Insert
+/// - Delete
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
