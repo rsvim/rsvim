@@ -168,7 +168,7 @@ impl Change {
 pub struct UndoManager {
   history: LocalRb<Heap<Change>>,
   current: Change,
-  next_version: usize,
+  __next_version: usize,
 }
 
 impl Default for UndoManager {
@@ -183,7 +183,7 @@ impl Debug for UndoManager {
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
       .field("current", &self.current)
-      .field("next_version", &self.next_version)
+      .field("next_version", &self.__next_version)
       .finish()
   }
 }
@@ -193,8 +193,13 @@ impl UndoManager {
     Self {
       history: LocalRb::new(100),
       current: Change::new(),
-      next_version: 0,
+      __next_version: 0,
     }
+  }
+
+  fn next_version(&mut self) -> usize {
+    self.__next_version += 1;
+    self.__next_version
   }
 
   pub fn current(&self) -> &Change {
@@ -203,11 +208,6 @@ impl UndoManager {
 
   pub fn save(&mut self, op: Operation) {
     self.current.save(op);
-  }
-
-  pub fn next_version(&mut self) -> usize {
-    self.next_version += 1;
-    self.next_version
   }
 
   pub fn commit(&mut self) {
