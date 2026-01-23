@@ -75,9 +75,6 @@ impl FindDeleteDirection for Delete {
 ///    then insert it back. Such kind of changes can be deduplicated.
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
-///
-/// NOTE: The `char_idx` in operation is absolute char index in the buffer
-/// text.
 pub enum Change {
   Insert(Insert),
   Delete(Delete),
