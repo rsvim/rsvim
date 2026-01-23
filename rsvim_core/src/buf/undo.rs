@@ -80,13 +80,16 @@ impl Changes {
       return;
     }
 
-    if let Some(Operation::Delete(delete)) = self.ops.last_mut() {
+    if let Some(Operation::Delete(last)) = self.ops.last_mut() {
       // Merge two deletion
-      trace!(
-        "self.ops.last-1, delete:{:?}, payload:{:?}",
-        delete, payload
-      );
-      delete.payload.push_str(&payload);
+      trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
+      last.payload.push_str(&payload);
+    } else if let Some(Operation::Insert(last)) = self.ops.last_mut()
+      && last.payload == payload
+    {
+      // Remove last insertion
+      trace!("self.ops.last-2, last:{:?}, payload:{:?}", last, payload);
+      self.ops.pop();
     } else {
       self.ops.push(Operation::Delete(Delete {
         payload,
