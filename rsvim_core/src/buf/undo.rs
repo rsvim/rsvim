@@ -94,10 +94,8 @@ pub struct ChangeRecord {
 ///    a undo/redo, the user is operate on a change.
 /// 2. For committed history, changes will not be merged.
 /// 3. For uncommitted changes, even they can be merged, there still can have
-///    more than 1 uncommitted changes. When we commit them, we will commit
-///    multiple `ChangeRecord` to undo manager. Then when user is trying to
-///    undo some editings, the user will also have to perform multiple undo
-///    operartions for these committed changes.
+///    more than 1 uncommitted changes. When we commit them, we will commit all
+///    of them to undo manager.
 pub struct Commit {
   changes: Vec<ChangeRecord>,
 }
