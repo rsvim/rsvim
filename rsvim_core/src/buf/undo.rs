@@ -36,7 +36,7 @@ pub struct Retain {
 /// Basic unit of a change operation:
 /// - Insert
 /// - Delete
-/// - Retain: Cursor moves to a specific char position
+/// - Retain: Cursor moves to an absolute char position
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
