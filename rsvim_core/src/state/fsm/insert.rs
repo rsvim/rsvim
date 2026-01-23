@@ -1,6 +1,5 @@
 //! The insert mode.
 
-use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -118,10 +117,7 @@ impl Insert {
         .collect::<CompactString>();
       buffer
         .undo_manager_mut()
-        .save(undo::Operation::Delete(undo::Delete {
-          char_idx: absolute_delete_range.start,
-          payload,
-        }));
+        .delete(absolute_delete_range.start, payload);
       cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
@@ -174,10 +170,7 @@ impl Insert {
     );
     buffer
       .undo_manager_mut()
-      .save(undo::Operation::Insert(undo::Insert {
-        char_idx: cursor_absolute_char_idx,
-        payload: payload.clone(),
-      }));
+      .insert(cursor_absolute_char_idx, payload.clone());
     cursor_ops::cursor_insert(
       &mut tree,
       current_window_id,

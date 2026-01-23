@@ -1,4 +1,4 @@
-//! Editing/change history, useful for undo/redo.
+//! Undo history.
 
 use crate::buf::BufferId;
 use crate::buf::text::Text;
@@ -15,72 +15,59 @@ use tokio::time::Instant;
 pub struct Insert {
   pub char_idx: usize,
   pub payload: CompactString,
+  pub timestamp: Instant,
+  pub version: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
+  pub timestamp: Instant,
+  pub version: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Basic unit of a change operation:
-/// - Insert payload at an absolute char index.
-/// - Delete `n` characters at an absolute char index.
+/// - Insert
+/// - Delete
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
-/// The change operation doesn't maintain current cursor's position, so a
-/// buffer can change without need to know where the cursor is.
+/// Operations don't maintain the cursor's position, so a buffer can change
+/// without the need to know where the cursor is.
 ///
-/// NOTE: Ropey provide two types of coordinate system:
-/// 1. 2-Dimension on line number and char index per line.
-/// 2. 1-Dimension on absolute char index per whole buffer.
+/// NOTE: The `char_idx` in operation is absolute char index in the buffer
+/// text.
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
 
-#[derive(Debug, Clone)]
-pub struct Change {
+#[derive(Debug, Default, Clone)]
+pub struct Changes {
   ops: Vec<Operation>,
-  timestamp: Instant,
-  version: usize,
 }
 
-impl Change {
-  pub fn new(version: usize) -> Self {
-    Self {
-      ops: vec![],
-      timestamp: Instant::now(),
-      version,
-    }
+impl Changes {
+  pub fn new() -> Self {
+    Self { ops: vec![] }
   }
 
   pub fn operations(&self) -> &Vec<Operation> {
     &self.ops
   }
 
-  pub fn timestamp(&self) -> &Instant {
-    &self.timestamp
+  pub fn operations_mut(&mut self) -> &mut Vec<Operation> {
+    &mut self.ops
   }
 
-  pub fn version(&self) -> usize {
-    self.version
-  }
-
-  fn update_timestamp(&mut self) {
-    self.timestamp = Instant::now();
-  }
-
-  pub fn save(&mut self, op: Operation) {
-    match op {
-      Operation::Insert(insert) => self.insert(insert.char_idx, insert.payload),
-      Operation::Delete(delete) => self.delete(delete.char_idx, delete.payload),
-    }
-  }
-
-  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
+  pub fn delete(
+    &mut self,
+    char_idx: usize,
+    payload: CompactString,
+    version: usize,
+  ) {
     let payload_chars_count = payload.chars().count();
     if payload_chars_count == 0 {
       return;
@@ -130,15 +117,21 @@ impl Change {
       // Cancel both insertion and deletion
       self.ops.pop();
     } else {
-      self
-        .ops
-        .push(Operation::Delete(Delete { char_idx, payload }));
+      self.ops.push(Operation::Delete(Delete {
+        char_idx,
+        payload,
+        timestamp: Instant::now(),
+        version,
+      }));
     }
-
-    self.update_timestamp();
   }
 
-  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
+  pub fn insert(
+    &mut self,
+    char_idx: usize,
+    payload: CompactString,
+    version: usize,
+  ) {
     let payload_chars_count = payload.chars().count();
     let last_payload_chars_count = self.ops.last().map(|l| match l {
       Operation::Insert(insert) => insert.payload.chars().count(),
@@ -171,19 +164,20 @@ impl Change {
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
-      self
-        .ops
-        .push(Operation::Insert(Insert { char_idx, payload }));
+      self.ops.push(Operation::Insert(Insert {
+        char_idx,
+        payload,
+        timestamp: Instant::now(),
+        version,
+      }));
     }
-
-    self.update_timestamp();
   }
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Change>>,
-  current: Change,
-  next_version: usize,
+  history: LocalRb<Heap<Operation>>,
+  changes: Changes,
+  __next_version: usize,
 }
 
 impl Default for UndoManager {
@@ -197,34 +191,45 @@ impl Debug for UndoManager {
     f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
-      .field("current", &self.current)
-      .field("next_version", &self.next_version)
+      .field("changes", &self.changes)
+      .field("__next_version", &self.__next_version)
       .finish()
   }
 }
 
 impl UndoManager {
   pub fn new() -> Self {
-    let version = 1;
     Self {
       history: LocalRb::new(100),
-      current: Change::new(version),
-      next_version: version + 1,
+      changes: Changes::new(),
+      __next_version: 0,
     }
   }
 
-  pub fn current(&self) -> &Change {
-    &self.current
+  fn next_version(&mut self) -> usize {
+    self.__next_version += 1;
+    self.__next_version
   }
 
-  pub fn save(&mut self, op: Operation) {
-    self.current.save(op);
+  pub fn changes(&self) -> &Changes {
+    &self.changes
+  }
+
+  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
+    let version = self.next_version();
+    self.changes.insert(char_idx, payload, version);
+  }
+
+  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
+    let version = self.next_version();
+    self.changes.delete(char_idx, payload, version);
   }
 
   pub fn commit(&mut self) {
-    self.history.push_overwrite(self.current.clone());
-    self.current = Change::new(self.next_version);
-    self.next_version += 1;
+    for change in self.changes.operations_mut().drain(..) {
+      self.history.push_overwrite(change);
+    }
+    self.changes = Changes::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
