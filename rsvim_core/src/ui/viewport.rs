@@ -113,10 +113,11 @@ impl LineViewport {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// The cursor viewport to maintain the positions.
 ///
-/// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
-/// cells when displayed in terminal, thus when cursor moves on the window/buffer, it needs to
-/// always stay on the left most cell of a unicode char. Thus this viewport maintains the cursor
-/// positions by taking consideration of both terminal cell position and buffer unicode char
+/// As explained in [`Viewport`], ASCII control codes and other unicode chars
+/// can use 0 or more cells when displayed in terminal, thus when cursor moves
+/// on the window/buffer, it needs to always stay on the left most cell of a
+/// unicode char. Thus this viewport maintains the cursor positions by taking
+/// consideration of both terminal cell position and buffer unicode char
 /// position.
 ///
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
