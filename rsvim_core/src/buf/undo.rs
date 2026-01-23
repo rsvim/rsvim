@@ -80,52 +80,15 @@ impl Changes {
       return;
     }
 
-    if let Some(Operation::Delete(delete)) = self.ops.last_mut()
-      && delete.char_idx == char_idx
-    {
+    if let Some(Operation::Delete(delete)) = self.ops.last_mut() {
       // Merge two deletion
       trace!(
-        "self.ops.last-1, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
+        "self.ops.last-1, delete:{:?}, payload:{:?}",
+        delete, payload
       );
       delete.payload.push_str(&payload);
-    } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
-      && delete.char_idx > char_idx
-      && delete.char_idx - char_idx <= payload_chars_count
-    {
-      trace!(
-        "self.ops.last-2, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      let first = payload
-        .chars()
-        .take(delete.char_idx - char_idx)
-        .collect::<CompactString>();
-      let second = payload
-        .chars()
-        .skip(delete.char_idx - char_idx)
-        .collect::<CompactString>();
-      // Merge two deletion
-      delete.char_idx = char_idx;
-      if first.chars().count() > 0 {
-        delete.payload.insert_str(0, &first);
-      }
-      if second.chars().count() > 0 {
-        delete.payload.push_str(&second);
-      }
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && insert.char_idx == char_idx
-      && insert.payload == payload
-    {
-      trace!(
-        "self.ops.last-3, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      // Cancel both insertion and deletion
-      self.ops.pop();
     } else {
       self.ops.push(Operation::Delete(Delete {
-        char_idx,
         payload,
         timestamp: Instant::now(),
         version,
