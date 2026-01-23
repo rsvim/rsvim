@@ -105,11 +105,11 @@ impl Commit {
     Self { records: vec![] }
   }
 
-  pub fn changes(&self) -> &Vec<Record> {
+  pub fn records(&self) -> &Vec<Record> {
     &self.records
   }
 
-  pub fn changes_mut(&mut self) -> &mut Vec<Record> {
+  pub fn records_mut(&mut self) -> &mut Vec<Record> {
     &mut self.records
   }
 
@@ -251,7 +251,7 @@ impl UndoManager {
   }
 
   pub fn commit(&mut self) {
-    for change in self.current.changes_mut().drain(..) {
+    for change in self.current.records_mut().drain(..) {
       self.history.push_overwrite(change);
     }
     self.current = Commit::new();

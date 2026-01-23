@@ -7,11 +7,11 @@ fn assert_insert(
   char_idx: usize,
   payload: &str,
 ) {
-  assert!(undo_manager.changes().changes().len() > op_idx);
-  let actual = &undo_manager.changes().changes()[op_idx];
-  assert!(matches!(actual, Change::Insert(_)));
+  assert!(undo_manager.changes().records().len() > op_idx);
+  let actual = &undo_manager.changes().records()[op_idx];
+  assert!(matches!(actual, Operation::Insert(_)));
   match actual {
-    Change::Insert(insert) => {
+    Operation::Insert(insert) => {
       assert_eq!(insert.payload, payload);
       assert_eq!(insert.char_idx, char_idx);
     }
@@ -25,11 +25,11 @@ fn assert_delete(
   char_idx: usize,
   payload: &str,
 ) {
-  assert!(undo_manager.changes().changes().len() > op_idx);
-  let actual = &undo_manager.changes().changes()[op_idx];
-  assert!(matches!(actual, Change::Delete(_)));
+  assert!(undo_manager.changes().records().len() > op_idx);
+  let actual = &undo_manager.changes().records()[op_idx];
+  assert!(matches!(actual, Operation::Delete(_)));
   match actual {
-    Change::Delete(delete) => {
+    Operation::Delete(delete) => {
       assert_eq!(delete.payload, payload);
       assert_eq!(delete.char_idx, char_idx);
     }
@@ -45,12 +45,12 @@ fn insert1() {
     undo_manager.insert(i, c.to_compact_string());
   }
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, payload);
   undo_manager.commit();
 
   let actual = undo_manager.changes();
-  assert!(actual.changes().is_empty());
+  assert!(actual.records().is_empty());
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn insert2() {
     undo_manager.insert(i, c.to_compact_string());
   }
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
   let payload2 = "World!";
@@ -69,7 +69,7 @@ fn insert2() {
     undo_manager.insert(i + 3, c.to_compact_string());
   }
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, "HelWorld!lo, ");
 
   let payload3 = "汤姆(Tom)?";
@@ -80,7 +80,7 @@ fn insert2() {
     );
   }
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
 
   let payload4 = "no, it's jerry";
@@ -88,14 +88,14 @@ fn insert2() {
     undo_manager.insert(i + 100, c.to_compact_string());
   }
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
   assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
   assert_insert(&undo_manager, 1, 100, "no, it's jerry");
 
   undo_manager.commit();
 
   let actual = undo_manager.changes();
-  assert!(actual.changes().is_empty());
+  assert!(actual.records().is_empty());
 }
 
 #[test]
@@ -107,13 +107,13 @@ fn delete1() {
   }
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
   undo_manager.delete(12, "!".to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 12, "!");
 
@@ -121,7 +121,7 @@ fn delete1() {
   undo_manager.insert(12, payload2.to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 3);
+  assert_eq!(actual.records().len(), 3);
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 12, "!");
   assert_insert(&undo_manager, 2, 12, payload2);
@@ -129,7 +129,7 @@ fn delete1() {
   undo_manager.delete(12, payload2.to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 12, "!");
@@ -137,7 +137,7 @@ fn delete1() {
   undo_manager.commit();
 
   let actual = undo_manager.changes();
-  assert!(actual.changes().is_empty());
+  assert!(actual.records().is_empty());
 }
 
 #[test]
@@ -149,7 +149,7 @@ fn delete2() {
   }
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
   undo_manager.delete(12, "!".to_compact_string());
@@ -157,7 +157,7 @@ fn delete2() {
   undo_manager.delete(10, "l".to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 10, "ld!");
@@ -165,7 +165,7 @@ fn delete2() {
   undo_manager.delete(8, "or".to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 8, "orld!");
@@ -173,7 +173,7 @@ fn delete2() {
   undo_manager.commit();
 
   let actual = undo_manager.changes();
-  assert!(actual.changes().is_empty());
+  assert!(actual.records().is_empty());
 }
 
 #[test]
@@ -183,13 +183,13 @@ fn delete3() {
   undo_manager.insert(0, payload1.to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 1);
+  assert_eq!(actual.records().len(), 1);
   assert_insert(&undo_manager, 0, 0, payload1);
 
   undo_manager.delete(5, ", ".to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 5, ", ");
@@ -197,7 +197,7 @@ fn delete3() {
   undo_manager.delete(3, "loWo".to_compact_string());
 
   let actual = undo_manager.changes();
-  assert_eq!(actual.changes().len(), 2);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(&undo_manager, 0, 0, payload1);
   assert_delete(&undo_manager, 1, 3, "lo, Wo");
