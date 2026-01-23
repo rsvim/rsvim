@@ -26,7 +26,7 @@ pub struct Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Move {
+pub struct Retain {
   pub char_idx: usize,
   pub timestamp: Instant,
   pub version: usize,
@@ -36,7 +36,7 @@ pub struct Move {
 /// Basic unit of a change operation:
 /// - Insert
 /// - Delete
-/// - Move: Cursor move to an absolute char index
+/// - Retain: Cursor moves to a specific char position
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
@@ -45,7 +45,7 @@ pub struct Move {
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
-  Move(Move),
+  Retain(Retain),
 }
 
 #[derive(Debug, Default, Clone)]
@@ -67,7 +67,7 @@ impl Changes {
   }
 
   pub fn retain(&mut self, char_idx: usize, version: usize) {
-    self.ops.push(Operation::Move(Move {
+    self.ops.push(Operation::Retain(Retain {
       char_idx,
       timestamp: Instant::now(),
       version,
