@@ -60,10 +60,7 @@ impl FindDeleteDirection for Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// A change is:
-/// - Insert
-/// - Delete
-///
+/// A change is either a [`Insert`] or a [`Delete`].
 /// The "Replace" operation can be converted into delete+insert operations.
 pub enum Change {
   Insert(Insert),
