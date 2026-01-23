@@ -718,7 +718,17 @@ pub fn cursor_absolute_char_position(
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  text.absolute_char_idx(cursor_line_idx, cursor_char_idx)
+  let absolute_char_idx =
+    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
+  debug_assert_eq!(
+    text.relative_line_idx_and_char_idx(absolute_char_idx).0,
+    cursor_line_idx
+  );
+  debug_assert_eq!(
+    text.relative_line_idx_and_char_idx(absolute_char_idx).1,
+    cursor_char_idx
+  );
+  absolute_char_idx
 }
 
 /// Get cursor absolute chars range that to be deleted in current editable
