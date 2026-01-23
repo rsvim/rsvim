@@ -198,7 +198,7 @@ impl Commit {
 
 pub struct UndoManager {
   history: LocalRb<Heap<Change>>,
-  changes: Commit,
+  commit: Commit,
   __next_version: usize,
 }
 
@@ -213,7 +213,7 @@ impl Debug for UndoManager {
     f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
-      .field("changes", &self.changes)
+      .field("changes", &self.commit)
       .field("__next_version", &self.__next_version)
       .finish()
   }
@@ -223,7 +223,7 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: LocalRb::new(100),
-      changes: Commit::new(),
+      commit: Commit::new(),
       __next_version: START_VERSION,
     }
   }
@@ -235,24 +235,24 @@ impl UndoManager {
   }
 
   pub fn changes(&self) -> &Commit {
-    &self.changes
+    &self.commit
   }
 
   pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
     let version = self.next_version();
-    self.changes.insert(char_idx, payload, version);
+    self.commit.insert(char_idx, payload, version);
   }
 
   pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
     let version = self.next_version();
-    self.changes.delete(char_idx, payload, version);
+    self.commit.delete(char_idx, payload, version);
   }
 
   pub fn commit(&mut self) {
-    for change in self.changes.changes_mut().drain(..) {
+    for change in self.commit.changes_mut().drain(..) {
       self.history.push_overwrite(change);
     }
-    self.changes = Commit::new();
+    self.commit = Commit::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
