@@ -11,9 +11,6 @@ use ringbuf::traits::RingBuffer;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
-pub const INVALID_VERSION: usize = 0;
-pub const START_VERSION: usize = 1;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   pub payload: CompactString,
@@ -113,7 +110,7 @@ impl Current {
     &mut self.records
   }
 
-  pub fn delete(&mut self, op: Delete) {
+  pub fn delete(&mut self, op: Delete, version: usize) {
     debug_assert!(
       op.char_idx_after + op.payload.chars().count() == op.char_idx_before
         || op.char_idx_before + op.payload.chars().count() == op.char_idx_after
@@ -124,7 +121,7 @@ impl Current {
     }
 
     if let Some(last_record) = self.records.last_mut()
-      && let Operation::Delete(last) = last_record.op
+      && let Operation::Delete(ref mut last) = &last_record.op
       && last.direction() == DeleteDirection::ToLeft
       && op.direction() == DeleteDirection::ToLeft
       && op.char_idx_before == last.char_idx_after
@@ -133,18 +130,12 @@ impl Current {
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
-    } else if let Some(Operation::Insert(last)) = self.records.last_mut()
-      && last.payload == payload
-    {
-      // Remove last insertion
-      trace!("self.ops.last-2, last:{:?}, payload:{:?}", last, payload);
-      self.records.pop();
     } else {
-      self.records.push(Operation::Delete(Delete {
-        payload,
+      self.records.push(Record {
+        op: Operation::Delete(op),
         timestamp: Instant::now(),
         version,
-      }));
+      });
     }
   }
 
@@ -228,7 +219,7 @@ impl UndoManager {
     Self {
       history: LocalRb::new(100),
       current: Current::new(),
-      __next_version: START_VERSION,
+      __next_version: 0,
     }
   }
 
