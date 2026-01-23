@@ -75,8 +75,7 @@ impl Changes {
   }
 
   pub fn delete(&mut self, payload: CompactString, version: usize) {
-    let payload_chars_count = payload.chars().count();
-    if payload_chars_count == 0 {
+    if payload.is_empty() {
       return;
     }
 
