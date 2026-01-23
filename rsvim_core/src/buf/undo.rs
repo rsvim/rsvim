@@ -11,6 +11,8 @@ use ringbuf::traits::RingBuffer;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
+pub const INVALID_VERSION: usize = 0;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   /// Absolute char idx on insertion.
