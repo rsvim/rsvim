@@ -22,8 +22,18 @@ pub struct Insert {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DeleteDirection {
+  Left,
+  Right,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
+  pub char_idx: usize,
   pub payload: CompactString,
+  pub direction: DeleteDirection,
+  pub cursor_line_idx: usize, // Cursor line idx when doing this operation.
+  pub cursor_char_idx: usize, // Cursor char idx when doing this operation.
   pub timestamp: Instant,
   pub version: usize,
 }
