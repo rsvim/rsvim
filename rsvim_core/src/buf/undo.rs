@@ -45,6 +45,7 @@ pub struct Retain {
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
+  Retain(Retain),
 }
 
 #[derive(Debug, Default, Clone)]
@@ -63,6 +64,14 @@ impl Changes {
 
   pub fn operations_mut(&mut self) -> &mut Vec<Operation> {
     &mut self.ops
+  }
+
+  pub fn retain(&mut self, char_idx: usize, version: usize) {
+    self.ops.push(Operation::Retain(Retain {
+      char_idx,
+      timestamp: Instant::now(),
+      version,
+    }));
   }
 
   pub fn delete(
