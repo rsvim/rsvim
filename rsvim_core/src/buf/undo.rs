@@ -13,10 +13,12 @@ use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
+  /// Absolute char idx on insertion.
   pub char_idx: usize,
   pub payload: CompactString,
-  pub cursor_line_idx: usize, // Cursor line idx when doing this operation.
-  pub cursor_char_idx: usize, // Cursor char idx when doing this operation.
+
+  /// Cursor's absolute char idx when doing insertion.
+  pub cursor_char_idx: usize,
   pub timestamp: Instant,
   pub version: usize,
 }
@@ -29,11 +31,13 @@ pub enum DeleteDirection {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
+  /// Absolute char idx on deletion.
   pub char_idx: usize,
   pub payload: CompactString,
   pub direction: DeleteDirection,
-  pub cursor_line_idx: usize, // Cursor line idx when doing this operation.
-  pub cursor_char_idx: usize, // Cursor char idx when doing this operation.
+
+  /// Cursor's absolute char idx when doing insertion.
+  pub cursor_char_idx: usize,
   pub timestamp: Instant,
   pub version: usize,
 }
@@ -55,6 +59,15 @@ pub enum Operation {
 #[derive(Debug, Default, Clone)]
 pub struct Changes {
   ops: Vec<Operation>,
+}
+
+pub struct InsertOp {}
+
+pub struct DeleteOp {
+  pub char_idx: usize,
+  pub payload: CompactString,
+  pub direction: DeleteDirection,
+  pub cursor_char_idx: usize,
 }
 
 impl Changes {
