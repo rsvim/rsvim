@@ -60,10 +60,20 @@ impl FindDeleteDirection for Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// Basic unit of a change:
+/// A change is:
 ///
 /// - Insert
 /// - Delete
+///
+///
+/// The "Replace" operation can be converted into delete+insert operations.
+pub enum Change {
+  Insert(Insert),
+  Delete(Delete),
+}
+
+#[derive(Debug, Default, Clone)]
+/// A commit is a basic unit of undo/redo. It can contains one or more changes.
 ///
 /// Multiple insertions/deletions can be merged into one change. For some use
 /// cases, this can reduce the changes length inside one commit:
@@ -73,14 +83,6 @@ impl FindDeleteDirection for Delete {
 ///    We can merge these insertions into 1 change `Hello, World`.
 /// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
 ///    then insert it back. Such kind of changes can be deduplicated.
-///
-/// The "Replace" operation can be converted into delete+insert operations.
-pub enum Change {
-  Insert(Insert),
-  Delete(Delete),
-}
-
-#[derive(Debug, Default, Clone)]
 pub struct Commit {
   changes: Vec<Change>,
 }
