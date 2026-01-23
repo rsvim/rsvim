@@ -78,31 +78,6 @@ pub struct Changes {
   ops: Vec<Operation>,
 }
 
-pub struct InsertOp {
-  pub char_idx: usize,
-  pub payload: CompactString,
-  pub cursor_char_idx_before: usize,
-  pub cursor_char_idx_after: usize,
-}
-
-pub struct DeleteOp {
-  pub char_idx: usize,
-  pub payload: CompactString,
-  pub cursor_char_idx_before: usize,
-  pub cursor_char_idx_after: usize,
-}
-
-impl FindDeleteDirection for DeleteOp {
-  fn direction(&self) -> DeleteDirection {
-    debug_assert_ne!(self.cursor_char_idx_before, self.cursor_char_idx_after);
-    if self.cursor_char_idx_after > self.cursor_char_idx_before {
-      DeleteDirection::ToRight
-    } else {
-      DeleteDirection::ToLeft
-    }
-  }
-}
-
 impl Changes {
   pub fn new() -> Self {
     Self { ops: vec![] }
@@ -116,7 +91,7 @@ impl Changes {
     &mut self.ops
   }
 
-  pub fn delete(&mut self, op: DeleteOp) {
+  pub fn delete(&mut self, op: Delete) {
     debug_assert!(
       op.cursor_char_idx_after + op.payload.chars().count()
         == op.cursor_char_idx_before
@@ -147,7 +122,7 @@ impl Changes {
     }
   }
 
-  pub fn insert(&mut self, op: InsertOp) {
+  pub fn insert(&mut self, op: Insert) {
     debug_assert_eq!(
       op.cursor_char_idx_before + op.payload.chars().count(),
       op.cursor_char_idx_after
