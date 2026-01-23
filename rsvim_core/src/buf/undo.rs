@@ -89,6 +89,14 @@ pub struct ChangeRecord {
 ///    other modes (normal, visual, etc) from insert mode, we will commit the
 ///    uncommitted changes to committed history.
 ///
+/// NOTE:
+/// 1. For committed history, changes will not be merged.
+/// 2. For uncommitted changes, even they can be merged, there still can have
+///    more than 1 uncommitted changes. When we commit them, we will commit
+///    multiple `ChangeRecord` to undo manager. Then when user is trying to
+///    undo some editings, the user will also have to perform multiple undo
+///    operartions for these committed changes.
+///
 /// A commit is a basic unit of undo/redo. It can contains one or more changes.
 ///
 /// When user switches between insert and other modes (normal, visual, etc),
