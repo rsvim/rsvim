@@ -26,7 +26,7 @@ pub struct Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Retain {
+pub struct Move {
   pub char_idx: usize,
   pub timestamp: Instant,
   pub version: usize,
@@ -36,7 +36,7 @@ pub struct Retain {
 /// Basic unit of a change operation:
 /// - Insert
 /// - Delete
-/// - Retain: Cursor moves to a specific char position
+/// - Move: Cursor move to an absolute char index
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
@@ -45,7 +45,7 @@ pub struct Retain {
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
-  Retain(Retain),
+  Move(Move),
 }
 
 #[derive(Debug, Default, Clone)]
@@ -67,19 +67,14 @@ impl Changes {
   }
 
   pub fn retain(&mut self, char_idx: usize, version: usize) {
-    self.ops.push(Operation::Retain(Retain {
+    self.ops.push(Operation::Move(Move {
       char_idx,
       timestamp: Instant::now(),
       version,
     }));
   }
 
-  pub fn delete(
-    &mut self,
-    char_idx: usize,
-    payload: CompactString,
-    version: usize,
-  ) {
+  pub fn delete(&mut self, payload: CompactString, version: usize) {
     let payload_chars_count = payload.chars().count();
     if payload_chars_count == 0 {
       return;
