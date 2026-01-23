@@ -82,8 +82,13 @@ pub struct ChangeRecord {
 
 #[derive(Debug, Default, Clone)]
 /// Undo manager maintains two parts:
-/// 1. Uncommitted changes.
-/// 2. Committed changes history.
+/// 1. Uncommitted changes: When user starts insert mode, we will create a new
+///    `Commit` struct to store all the uncommitted changes the user is going
+///    to do.
+/// 2. Committed history: When user finishes typing and switches to
+///    other modes (normal, visual, etc) from insert mode, we will commit the
+///    uncommitted changes to committed history.
+///
 /// A commit is a basic unit of undo/redo. It can contains one or more changes.
 ///
 /// When user switches between insert and other modes (normal, visual, etc),
