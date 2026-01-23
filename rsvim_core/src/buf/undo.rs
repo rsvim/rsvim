@@ -128,8 +128,8 @@ impl Current {
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(last) = last_record.op
     {
-      // Merge two deletion
-      trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
+      // Merge 2 deletions to left
+      trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.push_str(&payload);
     } else if let Some(Operation::Insert(last)) = self.records.last_mut()
       && last.payload == payload
