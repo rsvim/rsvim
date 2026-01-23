@@ -96,6 +96,7 @@ once_cell = { version = "1.21.3", features = ["parking_lot"] }
 # deno_core: https://github.com/denoland/deno_core/blob/0.362.0/Cargo.toml
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.50.3/Cargo.toml
 
+swc_core = "=55.0.2"
 swc_atoms = "=9.0.0"
 swc_common = "=18.0.1"
 swc_config = "=3.1.2"
