@@ -105,7 +105,6 @@ fn version() {
 
 fn snapshot() {
   let js_runtime = JsRuntimeForSnapshot::new();
-  println!("{LOG} Build snapshot for rsvim cli...");
   let snapshot = js_runtime.create_snapshot();
   let snapshot = Box::from(&snapshot);
   let mut vec = Vec::with_capacity(snapshot.len());
