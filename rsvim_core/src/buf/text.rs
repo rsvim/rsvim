@@ -651,6 +651,18 @@ impl Text {
   ) -> (usize, usize) {
     let absolute_char_idx_before_insert =
       self.absolute_char_idx(line_idx, char_idx);
+    debug_assert_eq!(
+      self
+        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
+        .0,
+      line_idx
+    );
+    debug_assert_eq!(
+      self
+        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
+        .1,
+      char_idx
+    );
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -760,6 +772,18 @@ impl Text {
 
     let cursor_char_absolute_pos_before_delete =
       self.absolute_char_idx(line_idx, char_idx);
+    debug_assert_eq!(
+      self
+        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
+        .0,
+      line_idx
+    );
+    debug_assert_eq!(
+      self
+        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
+        .1,
+      char_idx
+    );
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
