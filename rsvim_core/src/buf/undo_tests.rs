@@ -175,3 +175,30 @@ fn delete2() {
   let actual = undo_manager.changes();
   assert!(actual.operations().is_empty());
 }
+
+#[test]
+fn delete3() {
+  let mut undo_manager = UndoManager::new();
+  let payload1 = "Hello, World!";
+  undo_manager.insert(0, payload1.to_compact_string());
+
+  let actual = undo_manager.changes();
+  assert_eq!(actual.operations().len(), 1);
+  assert_insert(&undo_manager, 0, 0, payload1);
+
+  undo_manager.delete(5, ", ".to_compact_string());
+
+  let actual = undo_manager.changes();
+  assert_eq!(actual.operations().len(), 2);
+
+  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_delete(&undo_manager, 1, 5, ", ");
+
+  undo_manager.delete(3, "loWo".to_compact_string());
+
+  let actual = undo_manager.changes();
+  assert_eq!(actual.operations().len(), 2);
+
+  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_delete(&undo_manager, 1, 3, "lo, Wo");
+}
