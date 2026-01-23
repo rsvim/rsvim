@@ -58,7 +58,7 @@ Road map and high-level design can be found in [RFC](https://github.com/rsvim/rf
 
 ## Credits
 
-Some source code are studied from following projects for implementing initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
+Some source code are studied from following projects to implement the initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
 
 - **[dune](https://github.com/aalykiot/dune)**: A hobby runtime for JavaScript and TypeScript 🚀.
 - **[deno](https://github.com/denoland/deno)**: A modern runtime for JavaScript and TypeScript.
