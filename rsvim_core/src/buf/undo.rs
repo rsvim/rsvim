@@ -130,6 +130,29 @@ impl Current {
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
+    } else if let Some(last_record) = self.records.last_mut()
+      && let Operation::Delete(ref mut last) = last_record.op
+      && last.direction() == DeleteDirection::ToRight
+      && op.direction() == DeleteDirection::ToRight
+      && op.char_idx_before == last.char_idx_after
+    {
+      // Merge 2 deletions to right
+      trace!("last-2:{:?}, op:{:?}", last, op);
+      last.payload.push_str(&op.payload);
+      last.char_idx_after = op.char_idx_after;
+    } else if let Some(last_record) = self.records.last_mut()
+      && let Operation::Insert(ref mut last) = last_record.op
+      && last.payload == op.payload
+      && ((last.char_idx_before == op.char_idx_after
+        && last.char_idx_after == op.char_idx_before
+        && op.direction() == DeleteDirection::ToLeft)
+        || (last.char_idx_before == op.char_idx_before
+          && last.char_idx_after == op.char_idx_after
+          && op.direction() == DeleteDirection::ToRight))
+    {
+      // Offset the effect of 1 insertion and 1 deletion
+      trace!("last-3:{:?}, op:{:?}", last, op);
+      self.records.pop();
     } else {
       self.records.push(Record {
         op: Operation::Delete(op),
