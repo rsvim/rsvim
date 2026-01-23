@@ -634,7 +634,7 @@ impl Text {
     (line_idx, char_idx)
   }
 
-  pub fn insert_at(
+  pub fn insert_at_absolute_char_idx(
     &mut self,
     absolute_char_idx: usize,
     payload: CompactString,
