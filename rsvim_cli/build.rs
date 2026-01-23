@@ -7,30 +7,32 @@ use std::path::Path;
 pub const LOG: &str = "cargo:warning=[RSVIM]";
 
 fn version() {
-  let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
-  let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
-  let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
+  let profile_env = std::env::var("PROFILE").unwrap_or("debug".to_string());
+  let opt_level_env = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
+  let debug_env = std::env::var("DEBUG").unwrap_or("0".to_string());
   let host = std::env::var("HOST").unwrap_or("unknown".to_string());
   println!(
-    "{LOG} Raw profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
-    profile, opt_level, debug, host
+    "{LOG} Env profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    profile_env, opt_level_env, debug_env, host
   );
 
   let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-  let version_info = env!("CARGO_PKG_VERSION").to_string();
+  let version = env!("CARGO_PKG_VERSION").to_string();
 
-  let is_release_profile = profile == "release"
-    && (opt_level == "s" || opt_level == "z")
-    && debug != "true";
-  let profile_info = if is_release_profile {
+  // profile
+  let is_release_profile = profile_env == "release"
+    && (opt_level_env == "s" || opt_level_env == "z")
+    && debug_env != "true";
+  let profile = if is_release_profile {
     "release".to_string()
-  } else if profile == "release" {
+  } else if profile_env == "release" {
     "nightly".to_string()
   } else {
-    profile.clone()
+    profile_env.clone()
   };
 
-  let git_commit_info = match Repository::open(&workspace_dir) {
+  // git commit
+  let git_commit = match Repository::open(&workspace_dir) {
     Ok(repo) => {
       let head = repo.head().unwrap();
       let oid = head.target().unwrap();
@@ -46,37 +48,6 @@ fn version() {
     }
   };
 
-  if is_release_profile {
-    println!("{LOG} Resolved profile:release");
-  } else {
-    let profile = if profile == "release" {
-      "nightly".to_string()
-    } else {
-      profile
-    };
-    println!("{LOG} Resolved profile:{:?}", profile);
-    let maybe_git_commit = match Repository::open(&workspace_dir) {
-      Ok(repo) => {
-        let head = repo.head().unwrap();
-        let oid = head.target().unwrap();
-        let commit = repo.find_commit(oid).unwrap();
-        let id = commit.id();
-        let id = id.to_string();
-        println!("{LOG} Git id:{:?}", id);
-        format!("+{}", &id[0..8])
-      }
-      Err(e) => {
-        println!("{LOG} Git error:{:?}", e);
-        "".to_string()
-      }
-    };
-    println!(
-      "{LOG} Resolved version:{:?}, profile:{:?}, git_commit:{:?}",
-      version, profile, maybe_git_commit
-    );
-    version = format!("{}+{}{}", version, profile, maybe_git_commit)
-  }
-
   // swc version
   let swc = match std::fs::read_to_string(workspace_dir.join("Cargo.toml")) {
     Ok(manifest) => match manifest.parse::<toml::Table>() {
@@ -89,33 +60,47 @@ fn version() {
           "{LOG} Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
           parser, transforms_base
         );
-        format!(
-          ", swc_ecma_parser {}, swc_ecma_transforms_base {}",
+        Some(format!(
+          "swc_ecma_parser {}, swc_ecma_transforms_base {}",
           parser.unwrap().trim_start_matches("="),
           transforms_base.unwrap().trim_start_matches("="),
-        )
+        ))
       }
       Err(e) => {
         println!("{LOG} Parse Cargo.toml error:{:?}", e);
-        "".to_string()
+        None
       }
     },
     Err(e) => {
       println!("{LOG} Read Cargo.toml error:{:?}", e);
-      "".to_string()
+      None
     }
   };
 
-  // v8 version
-  let v8 = format!("v8 {}", v8_version());
+  println!(
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc:{:?}",
+    version, profile, host, git_commit, v8, swc
+  );
 
-  version = format!("{} ({}{})", version, v8, swc);
+  let git_commit = match git_commit {
+    Some(git_commit) => format!("{}, ", git_commit),
+    None => "".to_string(),
+  };
+  let v8 = format!("\nv8 {}", v8_version());
+  let swc = match swc {
+    Some(swc) => format!("\n{}", swc),
+    None => "".to_string(),
+  };
+  let resolved = format!(
+    "{} ({}{}, {}){}{}",
+    version, git_commit, profile, host, v8, swc
+  );
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
   println!("{LOG} Writing version into {:?}...", output_path.as_path());
 
-  std::fs::write(output_path.as_path(), version.as_bytes()).unwrap();
+  std::fs::write(output_path.as_path(), resolved.as_bytes()).unwrap();
 }
 
 fn snapshot() {
