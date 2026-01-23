@@ -20,8 +20,10 @@ pub struct Insert {
   pub char_idx: usize,
   pub payload: CompactString,
 
-  /// Cursor's absolute char idx when doing insertion.
-  pub cursor_char_idx: usize,
+  /// Cursor's absolute char idx before doing insertion.
+  pub cursor_char_idx_before: usize,
+  /// Cursor's absolute char idx after doing insertion.
+  pub cursor_char_idx_after: usize,
 
   pub timestamp: Instant,
   pub version: usize,
@@ -39,11 +41,14 @@ pub struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
 
-  /// Delete direction: to left (smaller index), or to right (bigger index).
+  /// Delete direction: to the left (smaller char index), or to the right
+  /// (bigger char index).
   pub direction: DeleteDirection,
 
-  /// Cursor's absolute char idx when doing insertion.
-  pub cursor_char_idx: usize,
+  /// Cursor's absolute char idx before doing insertion.
+  pub cursor_char_idx_before: usize,
+  /// Cursor's absolute char idx after doing insertion.
+  pub cursor_char_idx_after: usize,
 
   pub timestamp: Instant,
   pub version: usize,
