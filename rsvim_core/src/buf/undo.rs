@@ -13,7 +13,10 @@ use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
+  pub char_idx: usize,
   pub payload: CompactString,
+  pub cursor_line_idx: usize,
+  pub cursor_char_idx: usize,
   pub timestamp: Instant,
   pub version: usize,
 }
