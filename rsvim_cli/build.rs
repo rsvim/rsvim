@@ -48,22 +48,17 @@ fn version() {
     }
   };
 
-  // swc version
-  let swc = match std::fs::read_to_string(workspace_dir.join("Cargo.toml")) {
+  // swc core
+  let swc_core = match std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
+  {
     Ok(manifest) => match manifest.parse::<toml::Table>() {
       Ok(parsed_manifest) => {
         let deps = &parsed_manifest["workspace"]["dependencies"];
-        let parser = deps["swc_ecma_parser"].as_str();
-        let transforms_base =
-          deps["swc_ecma_transforms_base"]["version"].as_str();
-        println!(
-          "{LOG} Swc swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
-          parser, transforms_base
-        );
+        let core = deps["swc_core"].as_str();
+        println!("{LOG} Swc swc_core:{:?}", core);
         Some(format!(
-          "swc_ecma_parser {}, swc_ecma_transforms_base {}",
-          parser.unwrap().trim_start_matches("="),
-          transforms_base.unwrap().trim_start_matches("="),
+          "swc_core {}",
+          core.unwrap().trim_start_matches("=")
         ))
       }
       Err(e) => {
@@ -78,8 +73,8 @@ fn version() {
   };
 
   println!(
-    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, swc:{:?}",
-    version, profile, host, git_commit, swc
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, swc_core:{:?}",
+    version, profile, host, git_commit, swc_core
   );
 
   let git_commit = match git_commit {
@@ -87,13 +82,13 @@ fn version() {
     None => "".to_string(),
   };
   let v8 = format!("\nv8 {}", v8_version());
-  let swc = match swc {
+  let swc_core = match swc_core {
     Some(swc) => format!("\n{}", swc),
     None => "".to_string(),
   };
   let resolved = format!(
     "{} ({}{}, {}){}{}",
-    version, git_commit, profile, host, v8, swc
+    version, git_commit, profile, host, v8, swc_core
   );
 
   let output_path =
