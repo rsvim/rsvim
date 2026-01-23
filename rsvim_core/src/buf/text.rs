@@ -634,12 +634,14 @@ impl Text {
     (line_idx, char_idx)
   }
 
-  pub fn insert_at_absolute_char_idx(
+  pub fn insert_at_absolute(
     &mut self,
     absolute_char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
     let absolute_char_idx_before_insert = absolute_char_idx;
+    let (line_idx, char_idx) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
