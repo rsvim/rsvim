@@ -82,6 +82,9 @@ pub struct ChangeRecord {
 
 #[derive(Debug, Default, Clone)]
 /// A commit is a basic unit of undo/redo. It can contains one or more changes.
+///
+/// When user switches between insert and other modes (normal, visual, etc),
+/// we will commit all the changes to undo history.
 pub struct Commit {
   changes: Vec<ChangeRecord>,
 }
