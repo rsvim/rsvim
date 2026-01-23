@@ -16,26 +16,26 @@ pub const START_VERSION: usize = 1;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
-  /// Absolute char idx on insertion.
-  pub char_idx: usize,
   pub payload: CompactString,
 
   /// Cursor's absolute char idx before doing insertion.
-  pub cursor_char_idx_before: usize,
+  /// This is also the absolute insertion char index.
+  pub char_idx_before: usize,
+
   /// Cursor's absolute char idx after doing insertion.
-  pub cursor_char_idx_after: usize,
+  pub char_idx_after: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
-  /// Absolute char idx on deletion.
-  pub char_idx: usize,
   pub payload: CompactString,
 
-  /// Cursor's absolute char idx before doing insertion.
-  pub cursor_char_idx_before: usize,
-  /// Cursor's absolute char idx after doing insertion.
-  pub cursor_char_idx_after: usize,
+  /// Cursor's absolute char idx before doing deletion.
+  /// This is also the absolute deletion char index.
+  pub char_idx_before: usize,
+
+  /// Cursor's absolute char idx after doing deletion.
+  pub char_idx_after: usize,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -46,8 +46,8 @@ pub enum DeleteDirection {
 
 impl Delete {
   fn direction(&self) -> DeleteDirection {
-    debug_assert_ne!(self.cursor_char_idx_before, self.cursor_char_idx_after);
-    if self.cursor_char_idx_after > self.cursor_char_idx_before {
+    debug_assert_ne!(self.char_idx_before, self.char_idx_after);
+    if self.char_idx_after > self.char_idx_before {
       DeleteDirection::ToRight
     } else {
       DeleteDirection::ToLeft
@@ -115,10 +115,8 @@ impl Current {
 
   pub fn delete(&mut self, op: Delete) {
     debug_assert!(
-      op.cursor_char_idx_after + op.payload.chars().count()
-        == op.cursor_char_idx_before
-        || op.cursor_char_idx_before + op.payload.chars().count()
-          == op.cursor_char_idx_after
+      op.char_idx_after + op.payload.chars().count() == op.char_idx_before
+        || op.char_idx_before + op.payload.chars().count() == op.char_idx_after
     );
 
     if op.payload.is_empty() {
@@ -127,10 +125,14 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(last) = last_record.op
+      && last.direction() == DeleteDirection::ToLeft
+      && op.direction() == DeleteDirection::ToLeft
+      && op.char_idx_before == last.char_idx_after
     {
       // Merge 2 deletions to left
       trace!("last-1:{:?}, op:{:?}", last, op);
-      last.payload.push_str(&payload);
+      last.payload.insert_str(0, &op.payload);
+      last.char_idx = op.char_idx;
     } else if let Some(Operation::Insert(last)) = self.records.last_mut()
       && last.payload == payload
     {
@@ -148,8 +150,8 @@ impl Current {
 
   pub fn insert(&mut self, op: Insert) {
     debug_assert_eq!(
-      op.cursor_char_idx_before + op.payload.chars().count(),
-      op.cursor_char_idx_after
+      op.char_idx_before + op.payload.chars().count(),
+      op.char_idx_after
     );
 
     if op.payload.is_empty() {
