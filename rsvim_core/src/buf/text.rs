@@ -610,19 +610,81 @@ impl Text {
     }
   }
 
-  /// Calculate the absolute char_index of the rope, by the line index and its
-  /// char index on the line.
-  pub fn absolute_char_position(
-    &self,
-    line_idx: usize,
-    char_idx: usize,
-  ) -> usize {
+  /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute `char_idx`.
+  pub fn absolute_char_idx(&self, line_idx: usize, char_idx: usize) -> usize {
     // debug_assert!(!payload.is_empty());
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
     let absolute_line_idx = self.rope.line_to_char(line_idx);
     absolute_line_idx + char_idx
+  }
+
+  /// Convert 1-dimensional absolute `char_idx` into 2-dimensional `(line_idx, char_idx)`.
+  pub fn relative_line_idx_and_char_idx(
+    &self,
+    absolute_char_idx: usize,
+  ) -> (/* line_idx */ usize, /* char_idx*/ usize) {
+    // debug_assert!(!payload.is_empty());
+    debug_assert!(absolute_char_idx <= self.rope.len_chars());
+
+    let line_idx = self.rope.char_to_line(absolute_char_idx);
+    let line_absolute_char_idx = self.rope.line_to_char(line_idx);
+    let char_idx = absolute_char_idx - line_absolute_char_idx;
+    (line_idx, char_idx)
+  }
+
+  pub fn insert_at(
+    &mut self,
+    absolute_char_idx: usize,
+    payload: CompactString,
+  ) -> (usize, usize) {
+    let absolute_char_idx_before_insert = absolute_char_idx;
+
+    self.dbg_print_textline(line_idx, char_idx, "Before insert");
+
+    self
+      .rope_mut()
+      .insert(absolute_char_idx_before_insert, payload.as_str());
+
+    // The `text` may contains line break '\n', which can interrupts the `line_idx` and we need to
+    // recalculate it.
+    let absolute_char_idx_after_inserted =
+      absolute_char_idx_before_insert + payload.chars().count();
+    let line_idx_after_inserted =
+      self.rope.char_to_line(absolute_char_idx_after_inserted);
+    let absolute_line_idx_after_inserted =
+      self.rope.line_to_char(line_idx_after_inserted);
+    let char_idx_after_inserted =
+      absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
+
+    if line_idx == line_idx_after_inserted {
+      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
+      // Thus only need to truncate chars after insert position on the same line.
+      debug_assert!(char_idx_after_inserted >= char_idx);
+      let min_cursor_char_idx =
+        std::cmp::min(char_idx_after_inserted, char_idx);
+      self.truncate_cached_line_since_char(
+        line_idx,
+        min_cursor_char_idx.saturating_sub(1),
+      );
+    } else {
+      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
+      let min_cursor_line_idx =
+        std::cmp::min(line_idx_after_inserted, line_idx);
+      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
+    }
+
+    // Append eol at file end if it doesn't exist.
+    self.append_eol_at_end_if_not_exist();
+
+    self.dbg_print_textline(
+      line_idx_after_inserted,
+      char_idx_after_inserted,
+      "After inserted",
+    );
+
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 
   /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
@@ -641,7 +703,7 @@ impl Text {
     payload: CompactString,
   ) -> (usize, usize) {
     let absolute_char_idx_before_insert =
-      self.absolute_char_position(line_idx, char_idx);
+      self.absolute_char_idx(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -750,7 +812,7 @@ impl Text {
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
     let cursor_char_absolute_pos_before_delete =
-      self.absolute_char_position(line_idx, char_idx);
+      self.absolute_char_idx(line_idx, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
