@@ -121,7 +121,7 @@ impl Current {
     }
 
     if let Some(last_record) = self.records.last_mut()
-      && let Operation::Delete(ref mut last) = &last_record.op
+      && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToLeft
       && op.direction() == DeleteDirection::ToLeft
       && op.char_idx_before == last.char_idx_after
