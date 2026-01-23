@@ -65,8 +65,8 @@ impl FindDeleteDirection for Delete {
 /// - Insert
 /// - Delete
 ///
-/// Because multiple insertions/deletions can be merged into one change. For
-/// some use cases, this can reduce the changes length inside one commit:
+/// Multiple insertions/deletions can be merged into one change. For some use
+/// cases, this can reduce the changes length inside one commit:
 ///
 /// 1. Insert continuously chars `Hello, World`, actually we create 12
 ///    insertions: `H`, `e`, `l`, `l`, `o`, `,`, ` `, `W`, `o`, `r`, `l`, `d`.
