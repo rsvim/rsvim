@@ -78,8 +78,8 @@ fn version() {
   };
 
   println!(
-    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc:{:?}",
-    version, profile, host, git_commit, v8, swc
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, swc:{:?}",
+    version, profile, host, git_commit, swc
   );
 
   let git_commit = match git_commit {
