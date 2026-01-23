@@ -55,7 +55,7 @@ fn version() {
       Ok(parsed_manifest) => {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let core = deps["swc_core"].as_str();
-        println!("{LOG} Swc swc_core:{:?}", core);
+        println!("{LOG} Swc core:{:?}", core);
         Some(format!(
           "swc_core {}",
           core.unwrap().trim_start_matches("=")
