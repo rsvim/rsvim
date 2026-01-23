@@ -96,11 +96,11 @@ pub struct Record {
 /// 3. For uncommitted changes, even they can be merged, there still can have
 ///    more than 1 operations. When we commit them, we will commit all of them
 ///    to undo manager.
-pub struct CurrentRecords {
+pub struct Current {
   records: Vec<Record>,
 }
 
-impl CurrentRecords {
+impl Current {
   pub fn new() -> Self {
     Self { records: vec![] }
   }
@@ -200,7 +200,7 @@ impl CurrentRecords {
 
 pub struct UndoManager {
   history: LocalRb<Heap<Operation>>,
-  current: CurrentRecords,
+  current: Current,
   __next_version: usize,
 }
 
@@ -225,7 +225,7 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: LocalRb::new(100),
-      current: CurrentRecords::new(),
+      current: Current::new(),
       __next_version: START_VERSION,
     }
   }
@@ -236,7 +236,7 @@ impl UndoManager {
     result
   }
 
-  pub fn changes(&self) -> &CurrentRecords {
+  pub fn changes(&self) -> &Current {
     &self.current
   }
 
@@ -254,7 +254,7 @@ impl UndoManager {
     for change in self.current.records_mut().drain(..) {
       self.history.push_overwrite(change);
     }
-    self.current = CurrentRecords::new();
+    self.current = Current::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
