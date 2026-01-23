@@ -63,6 +63,23 @@ pub enum Change {
   Delete(Delete),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// Change record.
+///
+/// Multiple changes can be merged into one change. This can reduce the changes
+/// length inside one commit:
+///
+/// 1. Insert continuously chars `Hello, World`, actually we create 12
+///    insertions: `H`, `e`, `l`, `l`, `o`, `,`, ` `, `W`, `o`, `r`, `l`, `d`.
+///    We can merge these insertions into 1 change `Hello, World`.
+/// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
+///    then insert it back. Such kind of changes can be deduplicated.
+pub struct ChangeRecord {
+  pub change: Change,
+  pub timestamp: Instant,
+  pub version: usize,
+}
+
 #[derive(Debug, Default, Clone)]
 /// A commit is a basic unit of undo/redo. It can contains one or more changes.
 ///
