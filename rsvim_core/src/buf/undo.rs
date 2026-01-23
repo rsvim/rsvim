@@ -60,34 +60,39 @@ impl FindDeleteDirection for Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// Basic unit of a change operation:
+/// Basic unit of a change:
 /// - Insert
 /// - Delete
+///
+/// Because multiple insertions/deletions can be merged into one change. For
+/// example inserting continuously chars "Hello", we actually create 5 Insert
+/// struct with 'H' 'e' 'l' 'l' 'o', then once go back to normal mode, we will
+/// commit these multiple insertions into one change.
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
 /// NOTE: The `char_idx` in operation is absolute char index in the buffer
 /// text.
-pub enum Operation {
+pub enum Change {
   Insert(Insert),
   Delete(Delete),
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Changes {
-  ops: Vec<Operation>,
+pub struct Commit {
+  ops: Vec<Change>,
 }
 
-impl Changes {
+impl Commit {
   pub fn new() -> Self {
     Self { ops: vec![] }
   }
 
-  pub fn operations(&self) -> &Vec<Operation> {
+  pub fn operations(&self) -> &Vec<Change> {
     &self.ops
   }
 
-  pub fn operations_mut(&mut self) -> &mut Vec<Operation> {
+  pub fn operations_mut(&mut self) -> &mut Vec<Change> {
     &mut self.ops
   }
 
@@ -103,18 +108,18 @@ impl Changes {
       return;
     }
 
-    if let Some(Operation::Delete(last)) = self.ops.last_mut() {
+    if let Some(Change::Delete(last)) = self.ops.last_mut() {
       // Merge two deletion
       trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
       last.payload.push_str(&payload);
-    } else if let Some(Operation::Insert(last)) = self.ops.last_mut()
+    } else if let Some(Change::Insert(last)) = self.ops.last_mut()
       && last.payload == payload
     {
       // Remove last insertion
       trace!("self.ops.last-2, last:{:?}, payload:{:?}", last, payload);
       self.ops.pop();
     } else {
-      self.ops.push(Operation::Delete(Delete {
+      self.ops.push(Change::Delete(Delete {
         payload,
         timestamp: Instant::now(),
         version,
@@ -134,15 +139,15 @@ impl Changes {
 
     let payload_chars_count = payload.chars().count();
     let last_payload_chars_count = self.ops.last().map(|l| match l {
-      Operation::Insert(insert) => insert.payload.chars().count(),
-      Operation::Delete(delete) => delete.payload.chars().count(),
+      Change::Insert(insert) => insert.payload.chars().count(),
+      Change::Delete(delete) => delete.payload.chars().count(),
     });
 
     if payload_chars_count == 0 {
       return;
     }
 
-    if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+    if let Some(Change::Insert(insert)) = self.ops.last_mut()
       && char_idx >= insert.char_idx
       && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
     {
@@ -154,7 +159,7 @@ impl Changes {
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
+    } else if let Some(Change::Insert(insert)) = self.ops.last_mut()
       && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
@@ -164,7 +169,7 @@ impl Changes {
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
-      self.ops.push(Operation::Insert(Insert {
+      self.ops.push(Change::Insert(Insert {
         char_idx,
         payload,
         timestamp: Instant::now(),
@@ -175,8 +180,8 @@ impl Changes {
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Operation>>,
-  changes: Changes,
+  history: LocalRb<Heap<Change>>,
+  changes: Commit,
   __next_version: usize,
 }
 
@@ -201,7 +206,7 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: LocalRb::new(100),
-      changes: Changes::new(),
+      changes: Commit::new(),
       __next_version: START_VERSION,
     }
   }
@@ -212,7 +217,7 @@ impl UndoManager {
     result
   }
 
-  pub fn changes(&self) -> &Changes {
+  pub fn changes(&self) -> &Commit {
     &self.changes
   }
 
@@ -230,7 +235,7 @@ impl UndoManager {
     for change in self.changes.operations_mut().drain(..) {
       self.history.push_overwrite(change);
     }
-    self.changes = Changes::new();
+    self.changes = Commit::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.

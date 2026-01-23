@@ -9,9 +9,9 @@ fn assert_insert(
 ) {
   assert!(undo_manager.changes().operations().len() > op_idx);
   let actual = &undo_manager.changes().operations()[op_idx];
-  assert!(matches!(actual, Operation::Insert(_)));
+  assert!(matches!(actual, Change::Insert(_)));
   match actual {
-    Operation::Insert(insert) => {
+    Change::Insert(insert) => {
       assert_eq!(insert.payload, payload);
       assert_eq!(insert.char_idx, char_idx);
     }
@@ -27,9 +27,9 @@ fn assert_delete(
 ) {
   assert!(undo_manager.changes().operations().len() > op_idx);
   let actual = &undo_manager.changes().operations()[op_idx];
-  assert!(matches!(actual, Operation::Delete(_)));
+  assert!(matches!(actual, Change::Delete(_)));
   match actual {
-    Operation::Delete(delete) => {
+    Change::Delete(delete) => {
       assert_eq!(delete.payload, payload);
       assert_eq!(delete.char_idx, char_idx);
     }
