@@ -61,13 +61,18 @@ impl FindDeleteDirection for Delete {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Basic unit of a change:
+///
 /// - Insert
 /// - Delete
 ///
 /// Because multiple insertions/deletions can be merged into one change. For
-/// example inserting continuously chars "Hello", we actually create 5 Insert
-/// struct with 'H' 'e' 'l' 'l' 'o', then once go back to normal mode, we will
-/// commit these multiple insertions into one change.
+/// some use cases, this can reduce the changes length inside one commit:
+///
+/// 1. Insert continuously chars `Hello, World`, actually we create 12
+///    insertions: `H`, `e`, `l`, `l`, `o`, `,`, ` `, `W`, `o`, `r`, `l`, `d`.
+///    We can merge these insertions into 1 change `Hello, World`.
+/// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
+///    then insert it back. Such kind of changes can be deduplicated.
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
@@ -80,20 +85,20 @@ pub enum Change {
 
 #[derive(Debug, Default, Clone)]
 pub struct Commit {
-  ops: Vec<Change>,
+  changes: Vec<Change>,
 }
 
 impl Commit {
   pub fn new() -> Self {
-    Self { ops: vec![] }
+    Self { changes: vec![] }
   }
 
   pub fn operations(&self) -> &Vec<Change> {
-    &self.ops
+    &self.changes
   }
 
   pub fn operations_mut(&mut self) -> &mut Vec<Change> {
-    &mut self.ops
+    &mut self.changes
   }
 
   pub fn delete(&mut self, op: Delete) {
@@ -108,18 +113,18 @@ impl Commit {
       return;
     }
 
-    if let Some(Change::Delete(last)) = self.ops.last_mut() {
+    if let Some(Change::Delete(last)) = self.changes.last_mut() {
       // Merge two deletion
       trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
       last.payload.push_str(&payload);
-    } else if let Some(Change::Insert(last)) = self.ops.last_mut()
+    } else if let Some(Change::Insert(last)) = self.changes.last_mut()
       && last.payload == payload
     {
       // Remove last insertion
       trace!("self.ops.last-2, last:{:?}, payload:{:?}", last, payload);
-      self.ops.pop();
+      self.changes.pop();
     } else {
-      self.ops.push(Change::Delete(Delete {
+      self.changes.push(Change::Delete(Delete {
         payload,
         timestamp: Instant::now(),
         version,
@@ -138,7 +143,7 @@ impl Commit {
     }
 
     let payload_chars_count = payload.chars().count();
-    let last_payload_chars_count = self.ops.last().map(|l| match l {
+    let last_payload_chars_count = self.changes.last().map(|l| match l {
       Change::Insert(insert) => insert.payload.chars().count(),
       Change::Delete(delete) => delete.payload.chars().count(),
     });
@@ -147,7 +152,7 @@ impl Commit {
       return;
     }
 
-    if let Some(Change::Insert(insert)) = self.ops.last_mut()
+    if let Some(Change::Insert(insert)) = self.changes.last_mut()
       && char_idx >= insert.char_idx
       && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
     {
@@ -159,7 +164,7 @@ impl Commit {
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Change::Insert(insert)) = self.ops.last_mut()
+    } else if let Some(Change::Insert(insert)) = self.changes.last_mut()
       && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
@@ -169,7 +174,7 @@ impl Commit {
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
-      self.ops.push(Change::Insert(Insert {
+      self.changes.push(Change::Insert(Insert {
         char_idx,
         payload,
         timestamp: Instant::now(),
