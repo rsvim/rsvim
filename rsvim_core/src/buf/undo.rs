@@ -142,6 +142,8 @@ impl Current {
       trace!("last-2:{:?}, op:{:?}", last, op);
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
+      last_record.version = version;
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
