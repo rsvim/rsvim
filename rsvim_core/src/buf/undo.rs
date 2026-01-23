@@ -14,16 +14,6 @@ use tokio::time::Instant;
 pub const INVALID_VERSION: usize = 0;
 pub const START_VERSION: usize = 1;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DeleteDirection {
-  ToLeft,
-  ToRight,
-}
-
-pub trait FindDeleteDirection {
-  fn direction(&self) -> DeleteDirection;
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   /// Absolute char idx on insertion.
@@ -48,7 +38,13 @@ pub struct Delete {
   pub cursor_char_idx_after: usize,
 }
 
-impl FindDeleteDirection for Delete {
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum DeleteDirection {
+  ToLeft,
+  ToRight,
+}
+
+impl Delete {
   fn direction(&self) -> DeleteDirection {
     debug_assert_ne!(self.cursor_char_idx_before, self.cursor_char_idx_after);
     if self.cursor_char_idx_after > self.cursor_char_idx_before {
