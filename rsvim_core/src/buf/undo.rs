@@ -56,26 +56,26 @@ impl Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// A change is either a [`Insert`] or a [`Delete`].
+/// An operation is either a [`Insert`] or a [`Delete`].
 /// The "Replace" operation can be converted into "Delete"+"Insert" operations.
 ///
-/// Multiple changes can be merged into one change. This can reduce unnecessary
-/// changes inside one commit:
+/// Multiple operations can be merged into one operation. This can reduce
+/// unnecessary operations inside one commit:
 ///
 /// 1. Insert continuously chars `Hello, World`, actually we create 12
 ///    insertions: `H`, `e`, `l`, `l`, `o`, `,`, ` `, `W`, `o`, `r`, `l`, `d`.
-///    We can merge these insertions into 1 change `Hello, World`.
+///    We can merge these insertions into one `Hello, World`.
 /// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
-///    then insert it back. Such kind of changes can be deduplicated.
+///    then insert it back. Such kind of deletions can be deduplicated.
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// A record for change with timestamp and version.
-pub struct ChangeRecord {
-  pub change: Operation,
+/// A record for operation with timestamp and version.
+pub struct Record {
+  pub op: Operation,
   pub timestamp: Instant,
   pub version: usize,
 }
@@ -90,14 +90,14 @@ pub struct ChangeRecord {
 ///    uncommitted changes to committed history.
 ///
 /// NOTE:
-/// 1. A change is a basic unit of undo/redo operation. Each time user performs
-///    a undo/redo, the user is operate on a change.
-/// 2. For committed history, changes will not be merged.
+/// 1. A operation record is a basic unit of undo/redo operation. Each time
+///    user performs a undo/redo, the user operates on a operation record.
+/// 2. For committed history, operation records will not be merged.
 /// 3. For uncommitted changes, even they can be merged, there still can have
-///    more than 1 uncommitted changes. When we commit them, we will commit all
-///    of them to undo manager.
+///    more than 1 operations. When we commit them, we will commit all of them
+///    to undo manager.
 pub struct Commit {
-  changes: Vec<ChangeRecord>,
+  changes: Vec<Record>,
 }
 
 impl Commit {
@@ -105,11 +105,11 @@ impl Commit {
     Self { changes: vec![] }
   }
 
-  pub fn changes(&self) -> &Vec<ChangeRecord> {
+  pub fn changes(&self) -> &Vec<Record> {
     &self.changes
   }
 
-  pub fn changes_mut(&mut self) -> &mut Vec<ChangeRecord> {
+  pub fn changes_mut(&mut self) -> &mut Vec<Record> {
     &mut self.changes
   }
 
@@ -126,7 +126,7 @@ impl Commit {
     }
 
     if let Some(last_record) = self.changes.last_mut()
-      && let Operation::Delete(last) = last_record.change
+      && let Operation::Delete(last) = last_record.op
     {
       // Merge two deletion
       trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
