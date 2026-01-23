@@ -70,11 +70,10 @@ pub enum Operation {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// A record for operation with timestamp and version.
+/// A record for operation with timestamp.
 pub struct Record {
   pub op: Operation,
   pub timestamp: Instant,
-  pub version: usize,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -110,7 +109,7 @@ impl Current {
     &mut self.records
   }
 
-  pub fn delete(&mut self, op: Delete, version: usize) {
+  pub fn delete(&mut self, op: Delete) {
     debug_assert!(
       op.char_idx_after + op.payload.chars().count() == op.char_idx_before
         || op.char_idx_before + op.payload.chars().count() == op.char_idx_after
@@ -131,7 +130,6 @@ impl Current {
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
       last_record.timestamp = Instant::now();
-      last_record.version = version;
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
@@ -143,7 +141,6 @@ impl Current {
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
       last_record.timestamp = Instant::now();
-      last_record.version = version;
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
@@ -162,7 +159,6 @@ impl Current {
       self.records.push(Record {
         op: Operation::Delete(op),
         timestamp: Instant::now(),
-        version,
       });
     }
   }
