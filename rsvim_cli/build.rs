@@ -3,25 +3,49 @@ use rsvim_core::js::JsRuntimeForSnapshot;
 use rsvim_core::js::v8_version;
 use std::path::Path;
 
-pub const LOG: &str = "[RSVIM]";
-// pub const LOG: &str = "cargo:warning=[RSVIM]";
+// pub const LOG: &str = "[RSVIM]";
+pub const LOG: &str = "cargo:warning=[RSVIM]";
 
 fn version() {
   let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
   let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
+  let host = std::env::var("HOST").unwrap_or("unknown".to_string());
   println!(
-    "{LOG} Raw profile:{:?}, opt_level:{:?}, debug:{:?}",
-    profile, opt_level, debug
+    "{LOG} Raw profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    profile, opt_level, debug, host
   );
 
   let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-  let mut version = env!("CARGO_PKG_VERSION").to_string();
+  let version_info = env!("CARGO_PKG_VERSION").to_string();
 
-  // profile and git commit
   let is_release_profile = profile == "release"
     && (opt_level == "s" || opt_level == "z")
     && debug != "true";
+  let profile_info = if is_release_profile {
+    "release".to_string()
+  } else if profile == "release" {
+    "nightly".to_string()
+  } else {
+    profile.clone()
+  };
+
+  let git_commit_info = match Repository::open(&workspace_dir) {
+    Ok(repo) => {
+      let head = repo.head().unwrap();
+      let oid = head.target().unwrap();
+      let commit = repo.find_commit(oid).unwrap();
+      let id = commit.id();
+      let id = id.to_string();
+      println!("{LOG} Git id:{:?}", id);
+      Some(id[0..8].to_string())
+    }
+    Err(e) => {
+      println!("{LOG} Git error:{:?}", e);
+      None
+    }
+  };
+
   if is_release_profile {
     println!("{LOG} Resolved profile:release");
   } else {
