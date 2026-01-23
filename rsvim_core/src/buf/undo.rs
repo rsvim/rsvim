@@ -105,11 +105,11 @@ impl Commit {
     Self { changes: vec![] }
   }
 
-  pub fn operations(&self) -> &Vec<Change> {
+  pub fn operations(&self) -> &Vec<ChangeRecord> {
     &self.changes
   }
 
-  pub fn operations_mut(&mut self) -> &mut Vec<Change> {
+  pub fn operations_mut(&mut self) -> &mut Vec<ChangeRecord> {
     &mut self.changes
   }
 
