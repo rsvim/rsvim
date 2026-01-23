@@ -19,6 +19,7 @@ pub struct Insert {
 
   /// Cursor's absolute char idx when doing insertion.
   pub cursor_char_idx: usize,
+
   pub timestamp: Instant,
   pub version: usize,
 }
@@ -40,6 +41,7 @@ pub struct Delete {
 
   /// Cursor's absolute char idx when doing insertion.
   pub cursor_char_idx: usize,
+
   pub timestamp: Instant,
   pub version: usize,
 }
