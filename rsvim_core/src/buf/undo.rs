@@ -41,10 +41,6 @@ pub struct Delete {
   pub char_idx: usize,
   pub payload: CompactString,
 
-  /// Delete direction: to the left (smaller char index), or to the right
-  /// (bigger char index).
-  pub direction: DeleteDirection,
-
   /// Cursor's absolute char idx before doing insertion.
   pub cursor_char_idx_before: usize,
   /// Cursor's absolute char idx after doing insertion.
@@ -83,7 +79,6 @@ pub struct InsertOp {
 pub struct DeleteOp {
   pub char_idx: usize,
   pub payload: CompactString,
-  pub direction: DeleteDirection,
   pub cursor_char_idx_before: usize,
   pub cursor_char_idx_after: usize,
 }
@@ -102,22 +97,12 @@ impl Changes {
   }
 
   pub fn delete(&mut self, op: DeleteOp) {
-    if cfg!(debug_assertions) {
-      match op.direction {
-        DeleteDirection::Left => {
-          debug_assert_eq!(
-            op.cursor_char_idx_after + op.payload.chars().count(),
-            op.cursor_char_idx_before
-          );
-        }
-        DeleteDirection::Right => {
-          debug_assert_eq!(
-            op.cursor_char_idx_before + op.payload.chars().count(),
-            op.cursor_char_idx_after
-          );
-        }
-      }
-    }
+    debug_assert!(
+      op.cursor_char_idx_after + op.payload.chars().count()
+        == op.cursor_char_idx_before
+        || op.cursor_char_idx_before + op.payload.chars().count()
+          == op.cursor_char_idx_after
+    );
 
     if op.payload.is_empty() {
       return;
