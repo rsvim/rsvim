@@ -13,7 +13,6 @@ use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
-  pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
   pub version: usize,
@@ -21,7 +20,6 @@ pub struct Insert {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
-  pub char_idx: usize,
   pub payload: CompactString,
   pub timestamp: Instant,
   pub version: usize,
@@ -41,9 +39,6 @@ pub struct Retain {
 /// - Retain: Cursor moves to a specific char position
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
-///
-/// Operations don't maintain the cursor's position, so a buffer can change
-/// without the need to know where the cursor is.
 ///
 /// NOTE: The `char_idx` in operation is absolute char index in the buffer
 /// text.
