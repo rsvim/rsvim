@@ -14,6 +14,16 @@ use tokio::time::Instant;
 pub const INVALID_VERSION: usize = 0;
 pub const START_VERSION: usize = 1;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum DeleteDirection {
+  ToLeft,
+  ToRight,
+}
+
+pub trait FindDeleteDirection {
+  fn direction(&self) -> DeleteDirection;
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   /// Absolute char idx on insertion.
@@ -30,12 +40,6 @@ pub struct Insert {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum DeleteDirection {
-  Left,
-  Right,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   /// Absolute char idx on deletion.
   pub char_idx: usize,
@@ -48,6 +52,17 @@ pub struct Delete {
 
   pub timestamp: Instant,
   pub version: usize,
+}
+
+impl FindDeleteDirection for Delete {
+  fn direction(&self) -> DeleteDirection {
+    debug_assert_ne!(self.cursor_char_idx_before, self.cursor_char_idx_after);
+    if self.cursor_char_idx_after > self.cursor_char_idx_before {
+      DeleteDirection::ToRight
+    } else {
+      DeleteDirection::ToLeft
+    }
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -81,6 +96,17 @@ pub struct DeleteOp {
   pub payload: CompactString,
   pub cursor_char_idx_before: usize,
   pub cursor_char_idx_after: usize,
+}
+
+impl FindDeleteDirection for DeleteOp {
+  fn direction(&self) -> DeleteDirection {
+    debug_assert_ne!(self.cursor_char_idx_before, self.cursor_char_idx_after);
+    if self.cursor_char_idx_after > self.cursor_char_idx_before {
+      DeleteDirection::ToRight
+    } else {
+      DeleteDirection::ToLeft
+    }
+  }
 }
 
 impl Changes {
