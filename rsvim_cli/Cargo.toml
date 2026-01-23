@@ -36,6 +36,7 @@ mimalloc-safe = { workspace = true, optional = true }
 tikv-jemallocator = { workspace = true, optional = true }
 
 [build-dependencies]
+swc_core = { workspace = true }
 rsvim_core = { workspace = true }
 git2 = { workspace = true }
 toml = { workspace = true }
