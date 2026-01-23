@@ -34,6 +34,8 @@ pub struct Delete {
   /// Absolute char idx on deletion.
   pub char_idx: usize,
   pub payload: CompactString,
+
+  /// Delete direction: to left (smaller index), or to right (bigger index).
   pub direction: DeleteDirection,
 
   /// Cursor's absolute char idx when doing insertion.
