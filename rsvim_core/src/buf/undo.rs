@@ -67,7 +67,7 @@ impl Delete {
 ///    We can merge these insertions into 1 change `Hello, World`.
 /// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
 ///    then insert it back. Such kind of changes can be deduplicated.
-pub enum Change {
+pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
@@ -75,7 +75,7 @@ pub enum Change {
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A record for change with timestamp and version.
 pub struct ChangeRecord {
-  pub change: Change,
+  pub change: Operation,
   pub timestamp: Instant,
   pub version: usize,
 }
@@ -125,18 +125,20 @@ impl Commit {
       return;
     }
 
-    if let Some(Change::Delete(last)) = self.changes.last_mut() {
+    if let Some(last_record) = self.changes.last_mut()
+      && let Operation::Delete(last) = last_record.change
+    {
       // Merge two deletion
       trace!("self.ops.last-1, last:{:?}, payload:{:?}", last, payload);
       last.payload.push_str(&payload);
-    } else if let Some(Change::Insert(last)) = self.changes.last_mut()
+    } else if let Some(Operation::Insert(last)) = self.changes.last_mut()
       && last.payload == payload
     {
       // Remove last insertion
       trace!("self.ops.last-2, last:{:?}, payload:{:?}", last, payload);
       self.changes.pop();
     } else {
-      self.changes.push(Change::Delete(Delete {
+      self.changes.push(Operation::Delete(Delete {
         payload,
         timestamp: Instant::now(),
         version,
@@ -156,15 +158,15 @@ impl Commit {
 
     let payload_chars_count = payload.chars().count();
     let last_payload_chars_count = self.changes.last().map(|l| match l {
-      Change::Insert(insert) => insert.payload.chars().count(),
-      Change::Delete(delete) => delete.payload.chars().count(),
+      Operation::Insert(insert) => insert.payload.chars().count(),
+      Operation::Delete(delete) => delete.payload.chars().count(),
     });
 
     if payload_chars_count == 0 {
       return;
     }
 
-    if let Some(Change::Insert(insert)) = self.changes.last_mut()
+    if let Some(Operation::Insert(insert)) = self.changes.last_mut()
       && char_idx >= insert.char_idx
       && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
     {
@@ -176,7 +178,7 @@ impl Commit {
       insert
         .payload
         .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Change::Insert(insert)) = self.changes.last_mut()
+    } else if let Some(Operation::Insert(insert)) = self.changes.last_mut()
       && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
     {
       trace!(
@@ -186,7 +188,7 @@ impl Commit {
       // Merge two insertion
       insert.payload.push_str(&payload);
     } else {
-      self.changes.push(Change::Insert(Insert {
+      self.changes.push(Operation::Insert(Insert {
         char_idx,
         payload,
         timestamp: Instant::now(),
@@ -197,7 +199,7 @@ impl Commit {
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Change>>,
+  history: LocalRb<Heap<Operation>>,
   current: Commit,
   __next_version: usize,
 }
