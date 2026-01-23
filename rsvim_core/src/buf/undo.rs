@@ -73,13 +73,19 @@ pub struct Changes {
   ops: Vec<Operation>,
 }
 
-pub struct InsertOp {}
+pub struct InsertOp {
+  pub char_idx: usize,
+  pub payload: CompactString,
+  pub cursor_char_idx_before: usize,
+  pub cursor_char_idx_after: usize,
+}
 
 pub struct DeleteOp {
   pub char_idx: usize,
   pub payload: CompactString,
   pub direction: DeleteDirection,
-  pub cursor_char_idx: usize,
+  pub cursor_char_idx_before: usize,
+  pub cursor_char_idx_after: usize,
 }
 
 impl Changes {
@@ -95,8 +101,25 @@ impl Changes {
     &mut self.ops
   }
 
-  pub fn delete(&mut self, payload: CompactString, version: usize) {
-    if payload.is_empty() {
+  pub fn delete(&mut self, op: DeleteOp) {
+    if cfg!(debug_assertions) {
+      match op.direction {
+        DeleteDirection::Left => {
+          debug_assert_eq!(
+            op.cursor_char_idx_after + op.payload.chars().count(),
+            op.cursor_char_idx_before
+          );
+        }
+        DeleteDirection::Right => {
+          debug_assert_eq!(
+            op.cursor_char_idx_before + op.payload.chars().count(),
+            op.cursor_char_idx_after
+          );
+        }
+      }
+    }
+
+    if op.payload.is_empty() {
       return;
     }
 
@@ -119,12 +142,16 @@ impl Changes {
     }
   }
 
-  pub fn insert(
-    &mut self,
-    char_idx: usize,
-    payload: CompactString,
-    version: usize,
-  ) {
+  pub fn insert(&mut self, op: InsertOp) {
+    debug_assert_eq!(
+      op.cursor_char_idx_before + op.payload.chars().count(),
+      op.cursor_char_idx_after
+    );
+
+    if op.payload.is_empty() {
+      return;
+    }
+
     let payload_chars_count = payload.chars().count();
     let last_payload_chars_count = self.ops.last().map(|l| match l {
       Operation::Insert(insert) => insert.payload.chars().count(),
