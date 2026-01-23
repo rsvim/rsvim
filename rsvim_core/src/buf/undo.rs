@@ -39,17 +39,9 @@ pub struct Delete {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Retain {
-  pub char_idx: usize,
-  pub timestamp: Instant,
-  pub version: usize,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 /// Basic unit of a change operation:
 /// - Insert
 /// - Delete
-/// - Retain: Cursor moves to an absolute char position
 ///
 /// The "Replace" operation can be converted into delete+insert operations.
 ///
@@ -58,7 +50,6 @@ pub struct Retain {
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
-  Retain(Retain),
 }
 
 #[derive(Debug, Default, Clone)]
