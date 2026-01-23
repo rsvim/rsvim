@@ -57,7 +57,7 @@ fn version() {
         let transforms_base =
           deps["swc_ecma_transforms_base"]["version"].as_str();
         println!(
-          "{LOG} Swc version, swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
+          "{LOG} Swc swc_ecma_parser:{:?}, swc_ecma_transforms_base:{:?}",
           parser, transforms_base
         );
         Some(format!(
