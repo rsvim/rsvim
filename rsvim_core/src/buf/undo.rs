@@ -190,13 +190,14 @@ impl UndoManager {
     Self {
       history: LocalRb::new(100),
       changes: Changes::new(),
-      __next_version: 0,
+      __next_version: START_VERSION,
     }
   }
 
   fn next_version(&mut self) -> usize {
+    let result = self.__next_version;
     self.__next_version += 1;
-    self.__next_version
+    result
   }
 
   pub fn changes(&self) -> &Changes {
