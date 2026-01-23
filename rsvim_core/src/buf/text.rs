@@ -650,7 +650,7 @@ impl Text {
       .insert(absolute_char_idx_before_insert, payload.as_str());
 
     // The `text` may contains line break '\n', which can interrupts the `line_idx` and we need to
-    // re-calculate it.
+    // recalculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx_before_insert + payload.chars().count();
     let line_idx_after_inserted =
