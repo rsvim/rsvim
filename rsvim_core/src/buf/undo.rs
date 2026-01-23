@@ -130,6 +130,8 @@ impl Current {
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
+      last_record.version = version;
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
