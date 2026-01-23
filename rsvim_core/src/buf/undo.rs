@@ -67,11 +67,19 @@ impl Changes {
   }
 
   pub fn retain(&mut self, char_idx: usize, version: usize) {
-    self.ops.push(Operation::Retain(Retain {
-      char_idx,
-      timestamp: Instant::now(),
-      version,
-    }));
+    if let Some(Operation::Retain(last)) = self.ops.last_mut() {
+      if last.char_idx != char_idx {
+        last.char_idx = char_idx;
+        last.timestamp = Instant::now();
+        last.version = version;
+      }
+    } else {
+      self.ops.push(Operation::Retain(Retain {
+        char_idx,
+        timestamp: Instant::now(),
+        version,
+      }));
+    }
   }
 
   pub fn delete(&mut self, payload: CompactString, version: usize) {
