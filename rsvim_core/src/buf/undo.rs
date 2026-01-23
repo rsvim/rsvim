@@ -34,9 +34,6 @@ pub struct Insert {
   pub cursor_char_idx_before: usize,
   /// Cursor's absolute char idx after doing insertion.
   pub cursor_char_idx_after: usize,
-
-  pub timestamp: Instant,
-  pub version: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,9 +46,6 @@ pub struct Delete {
   pub cursor_char_idx_before: usize,
   /// Cursor's absolute char idx after doing insertion.
   pub cursor_char_idx_after: usize,
-
-  pub timestamp: Instant,
-  pub version: usize,
 }
 
 impl FindDeleteDirection for Delete {
