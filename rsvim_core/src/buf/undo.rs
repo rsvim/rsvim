@@ -154,6 +154,7 @@ impl Current {
       trace!("last-3:{:?}, op:{:?}", last, op);
       self.records.pop();
     } else {
+      trace!("last-4, op:{:?}", op);
       self.records.push(Record {
         op: Operation::Delete(op),
         timestamp: Instant::now(),
