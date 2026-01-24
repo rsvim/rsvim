@@ -231,7 +231,15 @@ fn delete1() {
       char_idx_after: 11,
     },
   );
-  assert_insert(&undo_manager, 2, 12, payload2);
+  assert_insert(
+    &undo_manager,
+    2,
+    Insert {
+      payload: payload2.to_compact_string(),
+      char_idx_before: 12,
+      char_idx_after: 12 + payload2.chars().count(),
+    },
+  );
 
   undo_manager.delete(12, payload2.to_compact_string());
 
