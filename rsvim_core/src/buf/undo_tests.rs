@@ -9,7 +9,7 @@ fn assert_insert(
 ) {
   assert!(undo_manager.current().records().len() > op_idx);
   let actual = &undo_manager.current().records()[op_idx];
-  assert!(matches!(actual, Operation::Insert(_)));
+  assert!(matches!(actual.op, Operation::Insert(_)));
   match actual {
     Operation::Insert(insert) => {
       assert_eq!(insert.payload, payload);
