@@ -57,7 +57,7 @@ fn insert2() {
     undo_manager.insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
-      char_idx_after: i + c.to_compact_string().chars().count(),
+      char_idx_after: i + 1,
     });
   }
   let actual = undo_manager.current();
@@ -74,7 +74,11 @@ fn insert2() {
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
-    undo_manager.insert(i + 3, c.to_compact_string());
+    undo_manager.insert(Insert {
+      char_idx_before: i + 3,
+      char_idx_after: i + 4,
+      payload: c.to_compact_string(),
+    });
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 1);
