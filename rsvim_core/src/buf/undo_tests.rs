@@ -355,7 +355,15 @@ fn delete2() {
       char_idx_after: payload1.chars().count(),
     },
   );
-  assert_delete(&undo_manager, 1, 8, "orld!");
+  assert_delete(
+    &undo_manager,
+    1,
+    Delete {
+      payload: "orld!".to_compact_string(),
+      char_idx_before: 12,
+      char_idx_after: 6,
+    },
+  );
 
   undo_manager.commit();
 
