@@ -115,6 +115,35 @@ impl Insert {
         .chars_at(absolute_delete_range.start)
         .take(absolute_delete_range.len())
         .collect::<CompactString>();
+
+      debug_assert_ne!(n, 0);
+      if n < 0 {
+        if cfg!(debug_assertions) {
+          let cursor_viewport =
+            tree.editable_cursor_viewport(current_window_id);
+          let cursor_line_idx = cursor_viewport.line_idx();
+          let cursor_char_idx = cursor_viewport.char_idx();
+          debug_assert_eq!(
+            absolute_delete_range.end + 1,
+            buffer
+              .text()
+              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+          );
+        }
+      } else {
+        if cfg!(debug_assertions) {
+          let cursor_viewport =
+            tree.editable_cursor_viewport(current_window_id);
+          let cursor_line_idx = cursor_viewport.line_idx();
+          let cursor_char_idx = cursor_viewport.char_idx();
+          debug_assert_eq!(
+            absolute_delete_range.start,
+            buffer
+              .text()
+              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+          );
+        }
+      }
       buffer
         .undo_manager_mut()
         .delete(absolute_delete_range.start, payload);
