@@ -1,10 +1,24 @@
 use super::undo::*;
 use compact_str::ToCompactString;
 
-fn assert_op(undo_manager: &UndoManager, op_idx: usize, op: Operation) {
+fn assert_insert(undo_manager: &UndoManager, op_idx: usize, op: Insert) {
   assert!(undo_manager.current().records().len() > op_idx);
-  let actual = &undo_manager.current().records()[op_idx];
-  assert_eq!(actual.op, op);
+  let actual = undo_manager.current().records()[op_idx].clone();
+  assert!(matches!(actual.op, Operation::Insert(_)));
+  match actual.op {
+    Operation::Insert(insert) => assert_eq!(insert, op),
+    _ => unreachable!(),
+  }
+}
+
+fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Operation) {
+  assert!(undo_manager.current().records().len() > op_idx);
+  let actual = undo_manager.current().records()[op_idx].clone();
+  assert!(matches!(actual.op, Operation::Delete(_)));
+  match actual.op {
+    Operation::Delete(delete) => assert_eq!(delete, op),
+    _ => unreachable!(),
+  }
 }
 
 #[test]
@@ -20,7 +34,15 @@ fn insert1() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 1);
-  assert_insert(&undo_manager, 0, 0, payload);
+  assert_op(
+    &undo_manager,
+    0,
+    Insert {
+      payload: payload.to_compact_string(),
+      char_idx_before: 0,
+      char_idx_after: payload.to_compact_string().chars().count(),
+    },
+  );
   undo_manager.commit();
 
   let actual = undo_manager.current();
