@@ -173,44 +173,21 @@ impl Current {
       return;
     }
 
-    let payload_chars_count = payload.chars().count();
-    let last_payload_chars_count = self.records.last().map(|l| match l {
-      Operation::Insert(insert) => insert.payload.chars().count(),
-      Operation::Delete(delete) => delete.payload.chars().count(),
-    });
-
-    if payload_chars_count == 0 {
-      return;
-    }
-
-    if let Some(Operation::Insert(insert)) = self.records.last_mut()
-      && char_idx >= insert.char_idx
-      && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
+    if let Some(last_record) = self.records.last_mut()
+      && let Operation::Insert(ref mut last) = last_record.op
+      && last.char_idx_after == op.char_idx_before
     {
-      trace!(
-        "self.ops.last-1, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx, last_payload_chars_count
-      );
-      // Merge two insertion
-      insert
-        .payload
-        .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Operation::Insert(insert)) = self.records.last_mut()
-      && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
-    {
-      trace!(
-        "self.ops.last-2, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx, last_payload_chars_count
-      );
-      // Merge two insertion
-      insert.payload.push_str(&payload);
+      trace!("last-1:{:?}, op:{:?}", last, op);
+      // Append to last insertion
+      last.payload.push_str(&op.payload);
+      last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
     } else {
-      self.records.push(Operation::Insert(Insert {
-        char_idx,
-        payload,
+      trace!("last-2, op:{:?}", op);
+      self.records.push(Record {
+        op: Operation::Insert(op),
         timestamp: Instant::now(),
-        version,
-      }));
+      });
     }
   }
 }
