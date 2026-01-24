@@ -177,7 +177,11 @@ fn delete1() {
     },
   );
 
-  undo_manager.delete(12, "!".to_compact_string());
+  undo_manager.delete(Delete {
+    payload: "!".to_compact_string(),
+    char_idx_before: 12,
+    char_idx_after: 11,
+  });
 
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
