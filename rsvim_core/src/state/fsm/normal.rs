@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -238,9 +239,11 @@ impl Normal {
           current_window_id,
           buffer.text(),
         );
-        buffer
-          .undo_manager_mut()
-          .insert(cursor_absolute_char_idx, eol.clone());
+        buffer.undo_manager_mut().insert(undo::Insert {
+          payload: eol.clone(),
+          char_idx_before: cursor_absolute_char_idx,
+          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+        });
         cursor_ops::cursor_insert(
           &mut tree,
           current_window_id,
