@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -130,6 +131,11 @@ impl Insert {
               .absolute_char_idx(cursor_line_idx, cursor_char_idx)
           );
         }
+        buffer.undo_manager_mut().delete(undo::Delete {
+          payload: payload.clone(),
+          char_idx_before: absolute_delete_range.start,
+          char_idx_before: absolute_delete_range.start,
+        });
       } else {
         if cfg!(debug_assertions) {
           let cursor_viewport =
@@ -144,9 +150,6 @@ impl Insert {
           );
         }
       }
-      buffer
-        .undo_manager_mut()
-        .delete(absolute_delete_range.start, payload);
       cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
