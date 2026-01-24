@@ -11,7 +11,7 @@ fn assert_insert(undo_manager: &UndoManager, op_idx: usize, op: Insert) {
   }
 }
 
-fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Operation) {
+fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
   assert!(undo_manager.current().records().len() > op_idx);
   let actual = undo_manager.current().records()[op_idx].clone();
   assert!(matches!(actual.op, Operation::Delete(_)));
@@ -34,7 +34,7 @@ fn insert1() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 1);
-  assert_op(
+  assert_insert(
     &undo_manager,
     0,
     Insert {
