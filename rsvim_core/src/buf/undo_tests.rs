@@ -12,7 +12,11 @@ fn insert1() {
   let mut undo_manager = UndoManager::new();
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
-    undo_manager.insert(i, c.to_compact_string());
+    undo_manager.insert(Insert {
+      payload: c.to_compact_string(),
+      char_idx_before: i,
+      char_idx_after: i + c.to_compact_string().chars().count(),
+    });
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 1);
