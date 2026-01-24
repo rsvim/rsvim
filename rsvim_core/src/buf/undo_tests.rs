@@ -327,9 +327,21 @@ fn delete2() {
       char_idx_after: payload1.chars().count(),
     },
   );
-  assert_delete(&undo_manager, 1, 10, "ld!");
+  assert_delete(
+    &undo_manager,
+    1,
+    Delete {
+      payload: "ld!".to_compact_string(),
+      char_idx_before: 12,
+      char_idx_after: 9,
+    },
+  );
 
-  undo_manager.delete(8, "or".to_compact_string());
+  undo_manager.delete(Delete {
+    payload: "or".to_compact_string(),
+    char_idx_before: 8,
+    char_idx_after: 6,
+  });
 
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
