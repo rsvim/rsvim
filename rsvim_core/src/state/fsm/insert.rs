@@ -205,14 +205,35 @@ impl Insert {
       current_window_id,
       buffer.text(),
     );
-    buffer
-      .undo_manager_mut()
-      .insert(cursor_absolute_char_idx, payload.clone());
-    cursor_ops::cursor_insert(
-      &mut tree,
-      current_window_id,
-      buffer.text_mut(),
-      payload,
+    buffer.undo_manager_mut().insert(undo::Insert {
+      payload: payload.clone(),
+      char_idx_before: cursor_absolute_char_idx,
+      char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
+    });
+    let (_cursor_line_idx_after, _cursor_char_idx_after) =
+      cursor_ops::cursor_insert(
+        &mut tree,
+        current_window_id,
+        buffer.text_mut(),
+        payload,
+      );
+    debug_assert_eq!(
+      buffer
+        .text()
+        .absolute_char_idx(_cursor_line_idx_after, _cursor_char_idx_after),
+      cursor_ops::cursor_absolute_char_idx(
+        &tree,
+        current_window_id,
+        buffer.text(),
+      )
+    );
+    debug_assert_eq!(
+      cursor_absolute_char_idx + eol.chars().count(),
+      cursor_ops::cursor_absolute_char_idx(
+        &tree,
+        current_window_id,
+        buffer.text(),
+      )
     );
 
     State::Insert(Insert::default())
