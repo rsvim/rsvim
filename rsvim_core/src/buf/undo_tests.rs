@@ -194,10 +194,22 @@ fn delete1() {
       char_idx_after: payload1.chars().count(),
     },
   );
-  assert_delete(&undo_manager, 1, 12, "!");
+  assert_delete(
+    &undo_manager,
+    1,
+    Delete {
+      payload: "!".to_compact_string(),
+      char_idx_before: 12,
+      char_idx_after: 11,
+    },
+  );
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  undo_manager.insert(12, payload2.to_compact_string());
+  undo_manager.insert(Insert {
+    payload: payload2.to_compact_string(),
+    char_idx_before: 12,
+    char_idx_after: 12 + payload2.chars().count(),
+  });
 
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 3);
