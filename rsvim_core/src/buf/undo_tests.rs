@@ -280,7 +280,11 @@ fn delete2() {
   let mut undo_manager = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.insert(i, c.to_compact_string());
+    undo_manager.insert(Insert {
+      payload: c.to_compact_string(),
+      char_idx_before: i,
+      char_idx_after: i + 1,
+    });
   }
 
   let actual = undo_manager.current();
