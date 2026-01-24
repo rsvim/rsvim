@@ -117,7 +117,11 @@ fn insert2() {
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    undo_manager.insert(i + 100, c.to_compact_string());
+    undo_manager.insert(Insert {
+      payload: c.to_compact_string(),
+      char_idx_before: i + 100,
+      char_idx_after: i + 100 + 1,
+    });
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
