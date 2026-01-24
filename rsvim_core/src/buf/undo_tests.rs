@@ -185,7 +185,15 @@ fn delete1() {
 
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
-  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_insert(
+    &undo_manager,
+    0,
+    Insert {
+      payload: payload1.to_compact_string(),
+      char_idx_before: 0,
+      char_idx_after: payload1.chars().count(),
+    },
+  );
   assert_delete(&undo_manager, 1, 12, "!");
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
