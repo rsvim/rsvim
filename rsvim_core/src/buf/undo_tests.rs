@@ -299,8 +299,16 @@ fn delete2() {
     },
   );
 
-  undo_manager.delete(12, "!".to_compact_string());
-  undo_manager.delete(11, "d".to_compact_string());
+  undo_manager.delete(Delete {
+    payload: "!".to_compact_string(),
+    char_idx_before: 12,
+    char_idx_after: 11,
+  });
+  undo_manager.delete(Delete {
+    payload: "d".to_compact_string(),
+    char_idx_before: 11,
+    char_idx_after: 10,
+  });
   undo_manager.delete(10, "l".to_compact_string());
 
   let actual = undo_manager.current();
