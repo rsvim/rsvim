@@ -309,12 +309,24 @@ fn delete2() {
     char_idx_before: 11,
     char_idx_after: 10,
   });
-  undo_manager.delete(10, "l".to_compact_string());
+  undo_manager.delete(Delete {
+    payload: "l".to_compact_string(),
+    char_idx_before: 10,
+    char_idx_after: 9,
+  });
 
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
 
-  assert_insert(&undo_manager, 0, 0, payload1);
+  assert_insert(
+    &undo_manager,
+    0,
+    Insert {
+      payload: payload1.to_compact_string(),
+      char_idx_before: 0,
+      char_idx_after: payload1.chars().count(),
+    },
+  );
   assert_delete(&undo_manager, 1, 10, "ld!");
 
   undo_manager.delete(8, "or".to_compact_string());
