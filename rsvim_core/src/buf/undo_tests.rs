@@ -94,10 +94,14 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    undo_manager.insert(
-      i + payload1.chars().count() + payload2.chars().count(),
-      c.to_compact_string(),
-    );
+    undo_manager.insert(Insert {
+      char_idx_before: i + payload1.chars().count() + payload2.chars().count(),
+      char_idx_after: i
+        + payload1.chars().count()
+        + payload2.chars().count()
+        + c.to_compact_string().chars().count(),
+      payload: c.to_compact_string(),
+    });
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 1);
