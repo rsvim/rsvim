@@ -219,7 +219,7 @@ fn delete1() {
     Insert {
       payload: payload1.to_compact_string(),
       char_idx_before: 0,
-      char_idx_after: 0 + payload1.chars().count(),
+      char_idx_after: payload1.chars().count(),
     },
   );
   assert_delete(
