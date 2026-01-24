@@ -234,16 +234,15 @@ impl Normal {
           CompactString::new(format!("{}", buffer.options().end_of_line()));
 
         // Save editing change
-        let cursor_absolute_char_idx_before =
-          cursor_ops::cursor_absolute_char_idx(
-            &tree,
-            current_window_id,
-            buffer.text(),
-          );
+        let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_idx(
+          &tree,
+          current_window_id,
+          buffer.text(),
+        );
         buffer.undo_manager_mut().insert(undo::Insert {
           payload: eol.clone(),
-          char_idx_before: cursor_absolute_char_idx_before,
-          char_idx_after: cursor_absolute_char_idx_before + eol.chars().count(),
+          char_idx_before: cursor_absolute_char_idx,
+          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
         });
         let (_cursor_line_idx_after, _cursor_char_idx_after) =
           cursor_ops::cursor_insert(
@@ -263,7 +262,7 @@ impl Normal {
           )
         );
         debug_assert_eq!(
-          cursor_absolute_char_idx_before + eol.chars().count(),
+          cursor_absolute_char_idx + eol.chars().count(),
           cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,
