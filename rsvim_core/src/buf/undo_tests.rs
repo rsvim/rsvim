@@ -1,40 +1,10 @@
 use super::undo::*;
 use compact_str::ToCompactString;
 
-fn assert_insert(
-  undo_manager: &UndoManager,
-  op_idx: usize,
-  char_idx: usize,
-  payload: &str,
-) {
+fn assert_op(undo_manager: &UndoManager, op_idx: usize, op: Operation) {
   assert!(undo_manager.current().records().len() > op_idx);
   let actual = &undo_manager.current().records()[op_idx];
-  assert!(matches!(actual.op, Operation::Insert(_)));
-  match actual {
-    Operation::Insert(insert) => {
-      assert_eq!(insert.payload, payload);
-      assert_eq!(insert.char_idx, char_idx);
-    }
-    _ => unreachable!(),
-  }
-}
-
-fn assert_delete(
-  undo_manager: &UndoManager,
-  op_idx: usize,
-  char_idx: usize,
-  payload: &str,
-) {
-  assert!(undo_manager.current().records().len() > op_idx);
-  let actual = &undo_manager.current().records()[op_idx];
-  assert!(matches!(actual, Operation::Delete(_)));
-  match actual {
-    Operation::Delete(delete) => {
-      assert_eq!(delete.payload, payload);
-      assert_eq!(delete.char_idx, char_idx);
-    }
-    _ => unreachable!(),
-  }
+  assert_eq!(actual.op, op);
 }
 
 #[test]
