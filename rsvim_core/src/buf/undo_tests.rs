@@ -430,6 +430,22 @@ fn delete3() {
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
 
-  assert_insert(&undo_manager, 0, 0, payload1);
-  assert_delete(&undo_manager, 1, 3, "lo, Wo");
+  assert_insert(
+    &undo_manager,
+    0,
+    Insert {
+      payload: payload1.to_compact_string(),
+      char_idx_before: 0,
+      char_idx_after: payload1.chars().count(),
+    },
+  );
+  assert_delete(
+    &undo_manager,
+    1,
+    Delete {
+      payload: "lo, Wo".to_compact_string(),
+      char_idx_before: 3,
+      char_idx_after: 3,
+    },
+  );
 }
