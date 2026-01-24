@@ -199,7 +199,7 @@ impl Current {
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Operation>>,
+  history: LocalRb<Heap<Record>>,
   current: Current,
   __next_version: usize,
 }
@@ -245,12 +245,13 @@ impl UndoManager {
   }
 
   pub fn delete(&mut self, op: Delete) {
-    let version = self.next_version();
-    self.current.delete(char_idx, payload, version);
+    self.current.delete(op);
   }
 
   pub fn commit(&mut self) {
-    for change in self.current.records_mut().drain(..) {
+    let version = self.next_version();
+    for mut change in self.current.records_mut().drain(..) {
+      change.version = version;
       self.history.push_overwrite(change);
     }
     self.current = Current::new();
