@@ -11,6 +11,9 @@ use ringbuf::traits::RingBuffer;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
+pub const INVALID_VERSION: usize = 0;
+pub const START_VERSION: usize = 1;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
   pub payload: CompactString,
@@ -74,6 +77,7 @@ pub enum Operation {
 pub struct Record {
   pub op: Operation,
   pub timestamp: Instant,
+  pub version: usize,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -159,6 +163,7 @@ impl Current {
       self.records.push(Record {
         op: Operation::Delete(op),
         timestamp: Instant::now(),
+        version: INVALID_VERSION,
       });
     }
   }
@@ -187,6 +192,7 @@ impl Current {
       self.records.push(Record {
         op: Operation::Insert(op),
         timestamp: Instant::now(),
+        version: INVALID_VERSION,
       });
     }
   }
@@ -220,7 +226,7 @@ impl UndoManager {
     Self {
       history: LocalRb::new(100),
       current: Current::new(),
-      __next_version: 0,
+      __next_version: START_VERSION,
     }
   }
 
@@ -230,16 +236,15 @@ impl UndoManager {
     result
   }
 
-  pub fn changes(&self) -> &Current {
+  pub fn current(&self) -> &Current {
     &self.current
   }
 
-  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
-    let version = self.next_version();
-    self.current.insert(char_idx, payload, version);
+  pub fn insert(&mut self, op: Insert) {
+    self.current.insert(op);
   }
 
-  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
+  pub fn delete(&mut self, op: Delete) {
     let version = self.next_version();
     self.current.delete(char_idx, payload, version);
   }
