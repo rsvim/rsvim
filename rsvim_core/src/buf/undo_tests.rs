@@ -125,8 +125,27 @@ fn insert2() {
   }
   let actual = undo_manager.current();
   assert_eq!(actual.records().len(), 2);
-  assert_insert(&undo_manager, 0, 0, "HelWorld!lo, 汤姆(Tom)?");
-  assert_insert(&undo_manager, 1, 100, "no, it's jerry");
+  assert_insert(
+    &undo_manager,
+    0,
+    Insert {
+      payload: "HelWorld!lo, 汤姆(Tom)?".to_compact_string(),
+      char_idx_before: 0,
+      char_idx_after: "HelWorld!lo, 汤姆(Tom)?"
+        .to_compact_string()
+        .chars()
+        .count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    1,
+    Insert {
+      payload: "no, it's jerry".to_compact_string(),
+      char_idx_before: 100,
+      char_idx_after: 100 + "no, it's jerry".chars().count(),
+    },
+  );
 
   undo_manager.commit();
 
