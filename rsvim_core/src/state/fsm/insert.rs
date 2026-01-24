@@ -215,7 +215,7 @@ impl Insert {
         &mut tree,
         current_window_id,
         buffer.text_mut(),
-        payload,
+        payload.clone(),
       );
     debug_assert_eq!(
       buffer
@@ -228,7 +228,7 @@ impl Insert {
       )
     );
     debug_assert_eq!(
-      cursor_absolute_char_idx + eol.chars().count(),
+      cursor_absolute_char_idx + payload.chars().count(),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
