@@ -20,7 +20,6 @@ impl<T> FixedDeque<T> {
     while self.dq.len() > self.max_size && !self.dq.is_empty() {
       self.dq.pop_front();
     }
-
     self.dq.push_back(value)
   }
 
