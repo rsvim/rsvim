@@ -133,7 +133,7 @@ impl Insert {
         }
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.end - 1,
+          char_idx_before: absolute_delete_range.end,
           char_idx_after: absolute_delete_range.start,
         });
       } else {
