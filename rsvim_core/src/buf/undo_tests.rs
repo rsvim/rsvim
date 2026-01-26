@@ -244,7 +244,7 @@ fn delete1() {
   undo_manager.delete(Delete {
     payload: payload2.to_compact_string(),
     char_idx_before: 12,
-    char_idx_after: 12 + payload2.chars().count(),
+    char_idx_after: 12,
   });
 
   let actual = undo_manager.current();
