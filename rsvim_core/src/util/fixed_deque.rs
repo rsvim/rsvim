@@ -21,6 +21,10 @@ impl<T> FixedDeque<T> {
       self.dq.pop_front();
     }
 
-    self.dq.push_back(value);
+    self.dq.push_back(value)
+  }
+
+  pub fn pop_front(&mut self) -> Option<T> {
+    self.dq.pop_front()
   }
 }
