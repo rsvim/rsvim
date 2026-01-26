@@ -130,7 +130,6 @@ impl Current {
       // Merge 2 deletions to left
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
-      last.char_idx = op.char_idx;
       last.char_idx_after = op.char_idx_after;
       last_record.timestamp = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
