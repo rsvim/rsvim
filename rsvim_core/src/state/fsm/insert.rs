@@ -125,7 +125,7 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.end + 1,
+            absolute_delete_range.end - 1,
             buffer
               .text()
               .absolute_char_idx(cursor_line_idx, cursor_char_idx)
@@ -133,8 +133,8 @@ impl Insert {
         }
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.end + 1,
-          char_idx_after: absolute_delete_range.start,
+          cursor_char_idx_before: absolute_delete_range.end - 1,
+          cursor_char_idx_after: absolute_delete_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -151,8 +151,8 @@ impl Insert {
         }
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.start,
-          char_idx_after: absolute_delete_range.start,
+          cursor_char_idx_before: absolute_delete_range.start,
+          cursor_char_idx_after: absolute_delete_range.start,
         });
       };
       let _absolute_cursor_char_idx_after = absolute_delete_range.start;
@@ -216,8 +216,8 @@ impl Insert {
     );
     buffer.undo_manager_mut().insert(undo::Insert {
       payload: payload.clone(),
-      char_idx_before: cursor_absolute_char_idx,
-      char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
+      cursor_char_idx_before: cursor_absolute_char_idx,
+      cursor_char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
     });
     let (_cursor_line_idx_after, _cursor_char_idx_after) =
       cursor_ops::cursor_insert(
