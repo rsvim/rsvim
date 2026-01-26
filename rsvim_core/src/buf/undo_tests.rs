@@ -229,8 +229,8 @@ fn delete1() {
 
   undo_manager.delete(Delete {
     payload: "!".to_compact_string(),
-    cursor_char_idx_before: 12,
-    cursor_char_idx_after: 11,
+    char_idx_before: 12,
+    char_idx_after: 11,
   });
 
   let actual = undo_manager.current();
@@ -249,8 +249,8 @@ fn delete1() {
     1,
     Delete {
       payload: "!".to_compact_string(),
-      cursor_char_idx_before: 12,
-      cursor_char_idx_after: 11,
+      char_idx_before: 12,
+      char_idx_after: 11,
     },
   );
 
@@ -277,8 +277,8 @@ fn delete1() {
     1,
     Delete {
       payload: "!".to_compact_string(),
-      cursor_char_idx_before: 12,
-      cursor_char_idx_after: 11,
+      char_idx_before: 12,
+      char_idx_after: 11,
     },
   );
   assert_insert(
@@ -293,8 +293,8 @@ fn delete1() {
 
   undo_manager.delete(Delete {
     payload: payload2.to_compact_string(),
-    cursor_char_idx_before: 12,
-    cursor_char_idx_after: 12,
+    char_idx_before: 12,
+    char_idx_after: 12,
   });
 
   let actual = undo_manager.current();
@@ -314,8 +314,8 @@ fn delete1() {
     1,
     Delete {
       payload: "!".to_compact_string(),
-      cursor_char_idx_before: 12,
-      cursor_char_idx_after: 11,
+      char_idx_before: 12,
+      char_idx_after: 11,
     },
   );
 
@@ -351,18 +351,18 @@ fn delete2() {
 
   undo_manager.delete(Delete {
     payload: "!".to_compact_string(),
-    cursor_char_idx_before: 12,
-    cursor_char_idx_after: 11,
+    char_idx_before: 12,
+    char_idx_after: 11,
   });
   undo_manager.delete(Delete {
     payload: "d".to_compact_string(),
-    cursor_char_idx_before: 11,
-    cursor_char_idx_after: 10,
+    char_idx_before: 11,
+    char_idx_after: 10,
   });
   undo_manager.delete(Delete {
     payload: "l".to_compact_string(),
-    cursor_char_idx_before: 10,
-    cursor_char_idx_after: 9,
+    char_idx_before: 10,
+    char_idx_after: 9,
   });
 
   let actual = undo_manager.current();
@@ -382,15 +382,15 @@ fn delete2() {
     1,
     Delete {
       payload: "ld!".to_compact_string(),
-      cursor_char_idx_before: 12,
-      cursor_char_idx_after: 9,
+      char_idx_before: 12,
+      char_idx_after: 9,
     },
   );
 
   undo_manager.delete(Delete {
     payload: "or".to_compact_string(),
-    cursor_char_idx_before: 9,
-    cursor_char_idx_after: 7,
+    char_idx_before: 9,
+    char_idx_after: 7,
   });
 
   let actual = undo_manager.current();
@@ -410,8 +410,8 @@ fn delete2() {
     1,
     Delete {
       payload: "orld!".to_compact_string(),
-      cursor_char_idx_before: 12,
-      cursor_char_idx_after: 7,
+      char_idx_before: 12,
+      char_idx_after: 7,
     },
   );
 
@@ -445,8 +445,8 @@ fn delete3() {
 
   undo_manager.delete(Delete {
     payload: ", ".to_compact_string(),
-    cursor_char_idx_before: 5,
-    cursor_char_idx_after: 5,
+    char_idx_before: 5,
+    char_idx_after: 5,
   });
 
   let actual = undo_manager.current();
@@ -466,15 +466,15 @@ fn delete3() {
     1,
     Delete {
       payload: ", ".to_compact_string(),
-      cursor_char_idx_before: 5,
-      cursor_char_idx_after: 5,
+      char_idx_before: 5,
+      char_idx_after: 5,
     },
   );
 
   undo_manager.delete(Delete {
     payload: "loWo".to_compact_string(),
-    cursor_char_idx_before: 3,
-    cursor_char_idx_after: 3,
+    char_idx_before: 3,
+    char_idx_after: 3,
   });
 
   let actual = undo_manager.current();
@@ -494,8 +494,8 @@ fn delete3() {
     1,
     Delete {
       payload: ", ".to_compact_string(),
-      cursor_char_idx_before: 5,
-      cursor_char_idx_after: 5,
+      char_idx_before: 5,
+      char_idx_after: 5,
     },
   );
   assert_delete(
@@ -503,8 +503,8 @@ fn delete3() {
     2,
     Delete {
       payload: "loWo".to_compact_string(),
-      cursor_char_idx_before: 3,
-      cursor_char_idx_after: 3,
+      char_idx_before: 3,
+      char_idx_after: 3,
     },
   );
 }

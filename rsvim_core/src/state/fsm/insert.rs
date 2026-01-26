@@ -133,8 +133,8 @@ impl Insert {
         }
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
-          cursor_char_idx_before: absolute_delete_range.end - 1,
-          cursor_char_idx_after: absolute_delete_range.start,
+          char_idx_before: absolute_delete_range.end - 1,
+          char_idx_after: absolute_delete_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -151,8 +151,8 @@ impl Insert {
         }
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
-          cursor_char_idx_before: absolute_delete_range.start,
-          cursor_char_idx_after: absolute_delete_range.start,
+          char_idx_before: absolute_delete_range.start,
+          char_idx_after: absolute_delete_range.start,
         });
       };
       let _absolute_cursor_char_idx_after = absolute_delete_range.start;
