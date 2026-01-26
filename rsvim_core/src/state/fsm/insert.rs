@@ -152,14 +152,23 @@ impl Insert {
         buffer.undo_manager_mut().delete(undo::Delete {
           payload: payload.clone(),
           char_idx_before: absolute_delete_range.start,
-          char_idx_after: absolute_delete_range.end + 1,
+          char_idx_after: absolute_delete_range.start,
         });
-      }
-      cursor_ops::cursor_delete(
+      };
+      let _absolute_cursor_char_idx_after = absolute_delete_range.start;
+      let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
         buffer.text_mut(),
         n,
+      );
+      debug_assert!(_cursor_position_after.is_some());
+      debug_assert_eq!(
+        buffer.text().absolute_char_idx(
+          _cursor_position_after.unwrap().0,
+          _cursor_position_after.unwrap().1
+        ),
+        _absolute_cursor_char_idx_after
       );
     }
 
