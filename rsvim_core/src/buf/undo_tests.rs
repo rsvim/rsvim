@@ -81,14 +81,23 @@ fn insert2() {
     });
   }
   let actual = undo_manager.current();
-  assert_eq!(actual.records().len(), 1);
+  assert_eq!(actual.records().len(), 2);
   assert_insert(
     &undo_manager,
     0,
     Insert {
-      payload: "HelWorld!lo, ".to_compact_string(),
+      payload: "Hello, ".to_compact_string(),
       char_idx_before: 0,
-      char_idx_after: "HelWorld!lo, ".chars().count(),
+      char_idx_after: "Hello, ".chars().count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    1,
+    Insert {
+      payload: payload2.to_compact_string(),
+      char_idx_before: 3,
+      char_idx_after: 3+ "World!".chars().count(),
     },
   );
 
@@ -104,14 +113,32 @@ fn insert2() {
     });
   }
   let actual = undo_manager.current();
-  assert_eq!(actual.records().len(), 1);
+  assert_eq!(actual.records().len(), 3);
   assert_insert(
     &undo_manager,
     0,
     Insert {
-      payload: "HelWorld!lo, 汤姆(Tom)?".to_compact_string(),
+      payload: payload1.to_compact_string(),
       char_idx_before: 0,
-      char_idx_after: "HelWorld!lo, 汤姆(Tom)?".chars().count(),
+      char_idx_after: payload1.chars().count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    1,
+    Insert {
+      payload: payload2.to_compact_string(),
+      char_idx_before: 3,
+      char_idx_after: 3 + payload2.chars().count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    2,
+    Insert {
+      payload: payload3.to_compact_string(),
+      char_idx_before: payload1.chars().count()+payload2.chars().count(),
+      char_idx_after: payload1.chars().count()+payload2.chars().count()+payload3.chars().count(),
     },
   );
 
@@ -124,26 +151,41 @@ fn insert2() {
     });
   }
   let actual = undo_manager.current();
-  assert_eq!(actual.records().len(), 2);
+  assert_eq!(actual.records().len(), 4);
   assert_insert(
     &undo_manager,
     0,
     Insert {
-      payload: "HelWorld!lo, 汤姆(Tom)?".to_compact_string(),
+      payload: payload1.to_compact_string(),
       char_idx_before: 0,
-      char_idx_after: "HelWorld!lo, 汤姆(Tom)?"
-        .to_compact_string()
-        .chars()
-        .count(),
+      char_idx_after: payload1.chars().count(),
     },
   );
   assert_insert(
     &undo_manager,
     1,
     Insert {
-      payload: "no, it's jerry".to_compact_string(),
+      payload: payload2.to_compact_string(),
+      char_idx_before: 3,
+      char_idx_after: 3 + payload2.chars().count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    2,
+    Insert {
+      payload: payload3.to_compact_string(),
+      char_idx_before: payload1.chars().count()+payload2.chars().count(),
+      char_idx_after: payload1.chars().count()+payload2.chars().count()+payload3.chars().count(),
+    },
+  );
+  assert_insert(
+    &undo_manager,
+    3,
+    Insert {
+      payload: payload4.to_compact_string(),
       char_idx_before: 100,
-      char_idx_after: 100 + "no, it's jerry".chars().count(),
+      char_idx_after: 100+payload4.chars().count()
     },
   );
 
