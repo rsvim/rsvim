@@ -115,7 +115,7 @@ impl Current {
 
   pub fn delete(&mut self, op: Delete) {
     debug_assert!(
-      op.char_idx_after + op.payload.chars().count() == op.char_idx_before
+      op.char_idx_after == op.char_idx_before
         || op.char_idx_before + op.payload.chars().count() == op.char_idx_after
     );
 
