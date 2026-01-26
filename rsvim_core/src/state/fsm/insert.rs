@@ -125,7 +125,7 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.end - 1,
+            absolute_delete_range.end,
             buffer
               .text()
               .absolute_char_idx(cursor_line_idx, cursor_char_idx)
