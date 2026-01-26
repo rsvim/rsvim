@@ -24,12 +24,12 @@ impl<T> FixedDeque<T> {
     self.dq.push_back(value)
   }
 
-  pub fn try_push_back(&mut self, value: T) -> Result<(), usize> {
+  pub fn try_push_back(&mut self, value: T) -> Result<(), T> {
     if self.dq.len() < self.max_size {
       self.dq.push_back(value);
       Ok(())
     } else {
-      Err(self.dq.len())
+      Err(value)
     }
   }
 
