@@ -97,7 +97,7 @@ fn insert2() {
     Insert {
       payload: payload2.to_compact_string(),
       char_idx_before: 3,
-      char_idx_after: 3+ "World!".chars().count(),
+      char_idx_after: 3 + "World!".chars().count(),
     },
   );
 
@@ -137,8 +137,10 @@ fn insert2() {
     2,
     Insert {
       payload: payload3.to_compact_string(),
-      char_idx_before: payload1.chars().count()+payload2.chars().count(),
-      char_idx_after: payload1.chars().count()+payload2.chars().count()+payload3.chars().count(),
+      char_idx_before: payload1.chars().count() + payload2.chars().count(),
+      char_idx_after: payload1.chars().count()
+        + payload2.chars().count()
+        + payload3.chars().count(),
     },
   );
 
@@ -175,8 +177,10 @@ fn insert2() {
     2,
     Insert {
       payload: payload3.to_compact_string(),
-      char_idx_before: payload1.chars().count()+payload2.chars().count(),
-      char_idx_after: payload1.chars().count()+payload2.chars().count()+payload3.chars().count(),
+      char_idx_before: payload1.chars().count() + payload2.chars().count(),
+      char_idx_after: payload1.chars().count()
+        + payload2.chars().count()
+        + payload3.chars().count(),
     },
   );
   assert_insert(
@@ -185,7 +189,7 @@ fn insert2() {
     Insert {
       payload: payload4.to_compact_string(),
       char_idx_before: 100,
-      char_idx_after: 100+payload4.chars().count()
+      char_idx_after: 100 + payload4.chars().count(),
     },
   );
 
