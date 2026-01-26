@@ -46,11 +46,11 @@ pub enum DeleteDirection {
 
 impl Delete {
   fn direction(&self) -> DeleteDirection {
-    debug_assert_ne!(self.char_idx_before, self.char_idx_after);
-    if self.char_idx_after > self.char_idx_before {
-      DeleteDirection::ToRight
-    } else {
+    debug_assert!(self.char_idx_after <= self.char_idx_before);
+    if self.char_idx_after < self.char_idx_before {
       DeleteDirection::ToLeft
+    } else {
+      DeleteDirection::ToRight
     }
   }
 }

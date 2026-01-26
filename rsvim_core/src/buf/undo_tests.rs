@@ -403,8 +403,8 @@ fn delete2() {
 
   undo_manager.delete(Delete {
     payload: "or".to_compact_string(),
-    char_idx_before: 8,
-    char_idx_after: 6,
+    char_idx_before: 9,
+    char_idx_after: 7,
   });
 
   let actual = undo_manager.current();
@@ -425,7 +425,7 @@ fn delete2() {
     Delete {
       payload: "orld!".to_compact_string(),
       char_idx_before: 12,
-      char_idx_after: 6,
+      char_idx_after: 7,
     },
   );
 
