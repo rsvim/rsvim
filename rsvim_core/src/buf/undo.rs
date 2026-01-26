@@ -16,15 +16,13 @@ pub const START_VERSION: usize = 1;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
-  /// Absolute insertion char index.
-  pub char_idx: usize,
   pub payload: CompactString,
 
   /// Cursor's absolute char idx before doing insertion.
-  pub cursor_char_idx_before: usize,
+  pub char_idx_before: usize,
 
   /// Cursor's absolute char idx after doing insertion.
-  pub cursor_char_idx_after: usize,
+  pub char_idx_after: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,7 +33,6 @@ pub struct Delete {
   pub char_idx_before: usize,
 
   /// Cursor's absolute char idx after doing deletion.
-  /// This is also the cursor absolute char idx after deletion.
   pub char_idx_after: usize,
 }
 
@@ -150,11 +147,11 @@ impl Current {
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
-      && ((last.cursor_char_idx_before == op.char_idx_after
-        && last.cursor_char_idx_after == op.char_idx_before
+      && ((last.char_idx_before == op.char_idx_after
+        && last.char_idx_after == op.char_idx_before
         && op.direction() == DeleteDirection::ToLeft)
-        || (last.cursor_char_idx_before == op.char_idx_before
-          && last.cursor_char_idx_before == op.char_idx_after
+        || (last.char_idx_before == op.char_idx_before
+          && last.char_idx_before == op.char_idx_after
           && op.direction() == DeleteDirection::ToRight))
     {
       // Offset the effect of 1 insertion and 1 deletion
@@ -172,8 +169,8 @@ impl Current {
 
   pub fn insert(&mut self, op: Insert) {
     debug_assert_eq!(
-      op.cursor_char_idx_before + op.payload.chars().count(),
-      op.cursor_char_idx_after
+      op.char_idx_before + op.payload.chars().count(),
+      op.char_idx_after
     );
 
     if op.payload.is_empty() {
@@ -182,12 +179,12 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
-      && last.cursor_char_idx_after == op.cursor_char_idx_before
+      && last.char_idx_after == op.char_idx_before
     {
       trace!("last-1:{:?}, op:{:?}", last, op);
       // Append to last insertion
       last.payload.push_str(&op.payload);
-      last.cursor_char_idx_after = op.cursor_char_idx_after;
+      last.char_idx_after = op.char_idx_after;
       last_record.timestamp = Instant::now();
     } else {
       trace!("last-2, op:{:?}", op);

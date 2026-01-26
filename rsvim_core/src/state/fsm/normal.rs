@@ -241,8 +241,8 @@ impl Normal {
         );
         buffer.undo_manager_mut().insert(undo::Insert {
           payload: eol.clone(),
-          cursor_char_idx_before: cursor_absolute_char_idx,
-          cursor_char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+          char_idx_before: cursor_absolute_char_idx,
+          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
         });
         let (_cursor_line_idx_after, _cursor_char_idx_after) =
           cursor_ops::cursor_insert(
