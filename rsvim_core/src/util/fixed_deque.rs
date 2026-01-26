@@ -9,10 +9,10 @@ pub struct FixedDeque<T> {
 }
 
 impl<T> FixedDeque<T> {
-  pub fn new(size: usize) -> Self {
+  pub fn new(max_size: usize) -> Self {
     Self {
-      dq: VecDeque::with_capacity(size),
-      max_size: size,
+      dq: VecDeque::with_capacity(max_size),
+      max_size,
     }
   }
 
