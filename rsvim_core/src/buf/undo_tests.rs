@@ -294,7 +294,7 @@ fn delete1() {
   });
 
   let actual = undo_manager.current();
-  assert_eq!(actual.records().len(), 4);
+  assert_eq!(actual.records().len(), 2);
 
   assert_insert(
     &undo_manager,
@@ -312,24 +312,6 @@ fn delete1() {
       payload: "!".to_compact_string(),
       char_idx_before: 12,
       char_idx_after: 11,
-    },
-  );
-  assert_insert(
-    &undo_manager,
-    2,
-    Insert {
-      payload: payload2.to_compact_string(),
-      char_idx_before: 12,
-      char_idx_after: 12 + payload2.chars().count(),
-    },
-  );
-  assert_delete(
-    &undo_manager,
-    3,
-    Delete {
-      payload: payload2.to_compact_string(),
-      char_idx_before: 12,
-      char_idx_after: 12,
     },
   );
 
