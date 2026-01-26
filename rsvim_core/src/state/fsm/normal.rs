@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -233,20 +234,40 @@ impl Normal {
           CompactString::new(format!("{}", buffer.options().end_of_line()));
 
         // Save editing change
-        let cursor_absolute_char_idx =
-          cursor_ops::cursor_absolute_char_position(
+        let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_idx(
+          &tree,
+          current_window_id,
+          buffer.text(),
+        );
+        buffer.undo_manager_mut().insert(undo::Insert {
+          payload: eol.clone(),
+          char_idx_before: cursor_absolute_char_idx,
+          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+        });
+        let (_cursor_line_idx_after, _cursor_char_idx_after) =
+          cursor_ops::cursor_insert(
+            &mut tree,
+            current_window_id,
+            buffer.text_mut(),
+            eol.clone(),
+          );
+        debug_assert_eq!(
+          buffer
+            .text()
+            .absolute_char_idx(_cursor_line_idx_after, _cursor_char_idx_after),
+          cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,
             buffer.text(),
-          );
-        buffer
-          .undo_manager_mut()
-          .insert(cursor_absolute_char_idx, eol.clone());
-        cursor_ops::cursor_insert(
-          &mut tree,
-          current_window_id,
-          buffer.text_mut(),
-          eol,
+          )
+        );
+        debug_assert_eq!(
+          cursor_absolute_char_idx + eol.chars().count(),
+          cursor_ops::cursor_absolute_char_idx(
+            &tree,
+            current_window_id,
+            buffer.text(),
+          )
         );
       }
     };

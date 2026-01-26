@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::undo;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -100,7 +101,7 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_range = cursor_ops::cursor_delete_absolute_chars_range(
+    let absolute_delete_range = cursor_ops::cursor_absolute_delete_chars_range(
       &tree,
       current_window_id,
       buffer.text(),
@@ -115,14 +116,59 @@ impl Insert {
         .chars_at(absolute_delete_range.start)
         .take(absolute_delete_range.len())
         .collect::<CompactString>();
-      buffer
-        .undo_manager_mut()
-        .delete(absolute_delete_range.start, payload);
-      cursor_ops::cursor_delete(
+
+      debug_assert_ne!(n, 0);
+      if n < 0 {
+        if cfg!(debug_assertions) {
+          let cursor_viewport =
+            tree.editable_cursor_viewport(current_window_id);
+          let cursor_line_idx = cursor_viewport.line_idx();
+          let cursor_char_idx = cursor_viewport.char_idx();
+          debug_assert_eq!(
+            absolute_delete_range.end,
+            buffer
+              .text()
+              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+          );
+        }
+        buffer.undo_manager_mut().delete(undo::Delete {
+          payload: payload.clone(),
+          char_idx_before: absolute_delete_range.end,
+          char_idx_after: absolute_delete_range.start,
+        });
+      } else {
+        if cfg!(debug_assertions) {
+          let cursor_viewport =
+            tree.editable_cursor_viewport(current_window_id);
+          let cursor_line_idx = cursor_viewport.line_idx();
+          let cursor_char_idx = cursor_viewport.char_idx();
+          debug_assert_eq!(
+            absolute_delete_range.start,
+            buffer
+              .text()
+              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+          );
+        }
+        buffer.undo_manager_mut().delete(undo::Delete {
+          payload: payload.clone(),
+          char_idx_before: absolute_delete_range.start,
+          char_idx_after: absolute_delete_range.start,
+        });
+      };
+      let _absolute_cursor_char_idx_after = absolute_delete_range.start;
+      let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
         buffer.text_mut(),
         n,
+      );
+      debug_assert!(_cursor_position_after.is_some());
+      debug_assert_eq!(
+        buffer.text().absolute_char_idx(
+          _cursor_position_after.unwrap().0,
+          _cursor_position_after.unwrap().1
+        ),
+        _absolute_cursor_char_idx_after
       );
     }
 
@@ -163,19 +209,40 @@ impl Insert {
     };
 
     // Save editing change
-    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_position(
+    let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_idx(
       &tree,
       current_window_id,
       buffer.text(),
     );
-    buffer
-      .undo_manager_mut()
-      .insert(cursor_absolute_char_idx, payload.clone());
-    cursor_ops::cursor_insert(
-      &mut tree,
-      current_window_id,
-      buffer.text_mut(),
-      payload,
+    buffer.undo_manager_mut().insert(undo::Insert {
+      payload: payload.clone(),
+      char_idx_before: cursor_absolute_char_idx,
+      char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
+    });
+    let (_cursor_line_idx_after, _cursor_char_idx_after) =
+      cursor_ops::cursor_insert(
+        &mut tree,
+        current_window_id,
+        buffer.text_mut(),
+        payload.clone(),
+      );
+    debug_assert_eq!(
+      buffer
+        .text()
+        .absolute_char_idx(_cursor_line_idx_after, _cursor_char_idx_after),
+      cursor_ops::cursor_absolute_char_idx(
+        &tree,
+        current_window_id,
+        buffer.text(),
+      )
+    );
+    debug_assert_eq!(
+      cursor_absolute_char_idx + payload.chars().count(),
+      cursor_ops::cursor_absolute_char_idx(
+        &tree,
+        current_window_id,
+        buffer.text(),
+      )
     );
 
     State::Insert(Insert::default())

@@ -710,15 +710,21 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: NodeId) -> Option<NodeId> {
 }
 
 /// Get cursor absolute char index in current editable viewport.
-pub fn cursor_absolute_char_position(
-  tree: &Tree,
-  id: NodeId,
-  text: &Text,
-) -> usize {
+pub fn cursor_absolute_char_idx(tree: &Tree, id: NodeId, text: &Text) -> usize {
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  text.absolute_char_position(cursor_line_idx, cursor_char_idx)
+  let absolute_char_idx =
+    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
+  debug_assert_eq!(
+    text.relative_line_idx_and_char_idx(absolute_char_idx).0,
+    cursor_line_idx
+  );
+  debug_assert_eq!(
+    text.relative_line_idx_and_char_idx(absolute_char_idx).1,
+    cursor_char_idx
+  );
+  absolute_char_idx
 }
 
 /// Get cursor absolute chars range that to be deleted in current editable
@@ -728,7 +734,7 @@ pub fn cursor_absolute_char_position(
 /// - `None` if current buffer is empty.
 /// - Empty range if there's nothing to be deleted at cursor position.
 /// - A safe range that can be deleted at cursor position.
-pub fn cursor_delete_absolute_chars_range(
+pub fn cursor_absolute_delete_chars_range(
   tree: &Tree,
   id: NodeId,
   text: &Text,

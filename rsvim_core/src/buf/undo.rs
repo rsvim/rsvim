@@ -11,172 +11,194 @@ use ringbuf::traits::RingBuffer;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
+pub const INVALID_VERSION: usize = 0;
+pub const START_VERSION: usize = 1;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Insert {
-  pub char_idx: usize,
   pub payload: CompactString,
-  pub timestamp: Instant,
-  pub version: usize,
+
+  /// Cursor's absolute char idx before doing insertion.
+  pub char_idx_before: usize,
+
+  /// Cursor's absolute char idx after doing insertion.
+  pub char_idx_after: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
-  pub char_idx: usize,
   pub payload: CompactString,
-  pub timestamp: Instant,
-  pub version: usize,
+
+  /// Cursor's absolute char idx before doing deletion.
+  pub char_idx_before: usize,
+
+  /// Cursor's absolute char idx after doing deletion.
+  pub char_idx_after: usize,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum DeleteDirection {
+  ToLeft,
+  ToRight,
+}
+
+impl Delete {
+  fn direction(&self) -> DeleteDirection {
+    debug_assert!(self.char_idx_after <= self.char_idx_before);
+    if self.char_idx_after < self.char_idx_before {
+      DeleteDirection::ToLeft
+    } else {
+      DeleteDirection::ToRight
+    }
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// Basic unit of a change operation:
-/// - Insert
-/// - Delete
+/// An operation is either a [`Insert`] or a [`Delete`].
+/// The "Replace" operation can be converted into "Delete"+"Insert" operations.
 ///
-/// The "Replace" operation can be converted into delete+insert operations.
+/// Multiple operations can be merged into one operation. This can reduce
+/// unnecessary operations inside one commit:
 ///
-/// Operations don't maintain the cursor's position, so a buffer can change
-/// without the need to know where the cursor is.
-///
-/// NOTE: The `char_idx` in operation is absolute char index in the buffer
-/// text.
+/// 1. Insert continuously chars `Hello, World`, actually we create 12
+///    insertions: `H`, `e`, `l`, `l`, `o`, `,`, ` `, `W`, `o`, `r`, `l`, `d`.
+///    We can merge these insertions into one `Hello, World`.
+/// 2. First insert a char `a`, then delete it. Or first delete a char `b`,
+///    then insert it back. Such kind of deletions can be deduplicated.
 pub enum Operation {
   Insert(Insert),
   Delete(Delete),
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct Changes {
-  ops: Vec<Operation>,
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// A record for operation with timestamp.
+pub struct Record {
+  pub op: Operation,
+  pub timestamp: Instant,
+  pub version: usize,
 }
 
-impl Changes {
+#[derive(Debug, Default, Clone)]
+/// Undo manager maintains two parts:
+/// 1. Uncommitted changes: When user starts insert mode, we will create a new
+///    `Commit` struct to store all the uncommitted changes the user is going
+///    to do.
+/// 2. Committed history: When user finishes typing and switches to
+///    other modes (normal, visual, etc) from insert mode, we will commit the
+///    uncommitted changes to committed history.
+///
+/// NOTE:
+/// 1. A operation record is a basic unit of undo/redo operation. Each time
+///    user performs a undo/redo, the user operates on a operation record.
+/// 2. For committed history, operation records will not be merged.
+/// 3. For uncommitted changes, even they can be merged, there still can have
+///    more than 1 operations. When we commit them, we will commit all of them
+///    to undo manager.
+pub struct Current {
+  records: Vec<Record>,
+}
+
+impl Current {
   pub fn new() -> Self {
-    Self { ops: vec![] }
+    Self { records: vec![] }
   }
 
-  pub fn operations(&self) -> &Vec<Operation> {
-    &self.ops
+  pub fn records(&self) -> &Vec<Record> {
+    &self.records
   }
 
-  pub fn operations_mut(&mut self) -> &mut Vec<Operation> {
-    &mut self.ops
+  pub fn records_mut(&mut self) -> &mut Vec<Record> {
+    &mut self.records
   }
 
-  pub fn delete(
-    &mut self,
-    char_idx: usize,
-    payload: CompactString,
-    version: usize,
-  ) {
-    let payload_chars_count = payload.chars().count();
-    if payload_chars_count == 0 {
+  pub fn delete(&mut self, op: Delete) {
+    debug_assert!(
+      op.char_idx_after == op.char_idx_before
+        || op.char_idx_before == op.char_idx_after + op.payload.chars().count()
+    );
+
+    if op.payload.is_empty() {
       return;
     }
 
-    if let Some(Operation::Delete(delete)) = self.ops.last_mut()
-      && delete.char_idx == char_idx
+    if let Some(last_record) = self.records.last_mut()
+      && let Operation::Delete(ref mut last) = last_record.op
+      && last.direction() == DeleteDirection::ToLeft
+      && op.direction() == DeleteDirection::ToLeft
+      && op.char_idx_before == last.char_idx_after
     {
-      // Merge two deletion
-      trace!(
-        "self.ops.last-1, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      delete.payload.push_str(&payload);
-    } else if let Some(Operation::Delete(delete)) = self.ops.last_mut()
-      && delete.char_idx > char_idx
-      && delete.char_idx - char_idx <= payload_chars_count
+      // Merge 2 deletions to left
+      trace!("last-1:{:?}, op:{:?}", last, op);
+      last.payload.insert_str(0, &op.payload);
+      last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
+    } else if let Some(last_record) = self.records.last_mut()
+      && let Operation::Delete(ref mut last) = last_record.op
+      && last.direction() == DeleteDirection::ToRight
+      && op.direction() == DeleteDirection::ToRight
+      && op.char_idx_before == last.char_idx_after
     {
-      trace!(
-        "self.ops.last-2, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      let first = payload
-        .chars()
-        .take(delete.char_idx - char_idx)
-        .collect::<CompactString>();
-      let second = payload
-        .chars()
-        .skip(delete.char_idx - char_idx)
-        .collect::<CompactString>();
-      // Merge two deletion
-      delete.char_idx = char_idx;
-      if first.chars().count() > 0 {
-        delete.payload.insert_str(0, &first);
-      }
-      if second.chars().count() > 0 {
-        delete.payload.push_str(&second);
-      }
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && insert.char_idx == char_idx
-      && insert.payload == payload
+      // Merge 2 deletions to right
+      trace!("last-2:{:?}, op:{:?}", last, op);
+      last.payload.push_str(&op.payload);
+      last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
+    } else if let Some(last_record) = self.records.last_mut()
+      && let Operation::Insert(ref mut last) = last_record.op
+      && last.payload == op.payload
+      && ((last.char_idx_before == op.char_idx_after
+        && last.char_idx_after == op.char_idx_before
+        && op.direction() == DeleteDirection::ToLeft)
+        || (last.char_idx_before == op.char_idx_before
+          && last.char_idx_before == op.char_idx_after
+          && op.direction() == DeleteDirection::ToRight))
     {
-      trace!(
-        "self.ops.last-3, char_idx:{:?}, payload:{:?}",
-        char_idx, payload
-      );
-      // Cancel both insertion and deletion
-      self.ops.pop();
+      // Offset the effect of 1 insertion and 1 deletion
+      trace!("last-3:{:?}, op:{:?}", last, op);
+      self.records.pop();
     } else {
-      self.ops.push(Operation::Delete(Delete {
-        char_idx,
-        payload,
+      trace!("last-4, op:{:?}", op);
+      self.records.push(Record {
+        op: Operation::Delete(op),
         timestamp: Instant::now(),
-        version,
-      }));
+        version: INVALID_VERSION,
+      });
     }
   }
 
-  pub fn insert(
-    &mut self,
-    char_idx: usize,
-    payload: CompactString,
-    version: usize,
-  ) {
-    let payload_chars_count = payload.chars().count();
-    let last_payload_chars_count = self.ops.last().map(|l| match l {
-      Operation::Insert(insert) => insert.payload.chars().count(),
-      Operation::Delete(delete) => delete.payload.chars().count(),
-    });
+  pub fn insert(&mut self, op: Insert) {
+    debug_assert_eq!(
+      op.char_idx_before + op.payload.chars().count(),
+      op.char_idx_after
+    );
 
-    if payload_chars_count == 0 {
+    if op.payload.is_empty() {
       return;
     }
 
-    if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && char_idx >= insert.char_idx
-      && char_idx < insert.char_idx + last_payload_chars_count.unwrap()
+    if let Some(last_record) = self.records.last_mut()
+      && let Operation::Insert(ref mut last) = last_record.op
+      && last.char_idx_after == op.char_idx_before
     {
-      trace!(
-        "self.ops.last-1, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx, last_payload_chars_count
-      );
-      // Merge two insertion
-      insert
-        .payload
-        .insert_str(char_idx - insert.char_idx, &payload);
-    } else if let Some(Operation::Insert(insert)) = self.ops.last_mut()
-      && char_idx == insert.char_idx + last_payload_chars_count.unwrap()
-    {
-      trace!(
-        "self.ops.last-2, char_idx:{:?},payload.count:{:?}",
-        insert.char_idx, last_payload_chars_count
-      );
-      // Merge two insertion
-      insert.payload.push_str(&payload);
+      trace!("last-1:{:?}, op:{:?}", last, op);
+      // Append to last insertion
+      last.payload.push_str(&op.payload);
+      last.char_idx_after = op.char_idx_after;
+      last_record.timestamp = Instant::now();
     } else {
-      self.ops.push(Operation::Insert(Insert {
-        char_idx,
-        payload,
+      trace!("last-2, op:{:?}", op);
+      self.records.push(Record {
+        op: Operation::Insert(op),
         timestamp: Instant::now(),
-        version,
-      }));
+        version: INVALID_VERSION,
+      });
     }
   }
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Operation>>,
-  changes: Changes,
+  history: LocalRb<Heap<Record>>,
+  current: Current,
   __next_version: usize,
 }
 
@@ -191,7 +213,7 @@ impl Debug for UndoManager {
     f.debug_struct("UndoManager")
       .field("history_occupied_len", &self.history.occupied_len())
       .field("history_vacant_len", &self.history.vacant_len())
-      .field("changes", &self.changes)
+      .field("changes", &self.current)
       .field("__next_version", &self.__next_version)
       .finish()
   }
@@ -201,35 +223,36 @@ impl UndoManager {
   pub fn new() -> Self {
     Self {
       history: LocalRb::new(100),
-      changes: Changes::new(),
-      __next_version: 0,
+      current: Current::new(),
+      __next_version: START_VERSION,
     }
   }
 
   fn next_version(&mut self) -> usize {
+    let result = self.__next_version;
     self.__next_version += 1;
-    self.__next_version
+    result
   }
 
-  pub fn changes(&self) -> &Changes {
-    &self.changes
+  pub fn current(&self) -> &Current {
+    &self.current
   }
 
-  pub fn insert(&mut self, char_idx: usize, payload: CompactString) {
-    let version = self.next_version();
-    self.changes.insert(char_idx, payload, version);
+  pub fn insert(&mut self, op: Insert) {
+    self.current.insert(op);
   }
 
-  pub fn delete(&mut self, char_idx: usize, payload: CompactString) {
-    let version = self.next_version();
-    self.changes.delete(char_idx, payload, version);
+  pub fn delete(&mut self, op: Delete) {
+    self.current.delete(op);
   }
 
   pub fn commit(&mut self) {
-    for change in self.changes.operations_mut().drain(..) {
+    let version = self.next_version();
+    for mut change in self.current.records_mut().drain(..) {
+      change.version = version;
       self.history.push_overwrite(change);
     }
-    self.changes = Changes::new();
+    self.current = Current::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
