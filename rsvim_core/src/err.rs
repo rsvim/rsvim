@@ -36,6 +36,9 @@ pub enum TheErr {
   #[error("Undo commit `{0}` not exist on buffer `{1}`.")]
   UndoCommitNotExist(usize, BufferId),
 
+  #[error("FixedDeque try_push_back failed.")]
+  FixedDequeTryPushFailed,
+
   #[error("Failed to normalize path `{0}`: {1}.")]
   NormalizePathFailed(CompactString, IoErr),
 

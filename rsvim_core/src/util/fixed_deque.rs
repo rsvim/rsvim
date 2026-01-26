@@ -1,6 +1,7 @@
 //! VecDeque based fixed-size ringbuf, it provides more Vec APIs than the
 //! `ringbuf` crate.
 
+use crate::prelude::*;
 use std::collections::VecDeque;
 
 pub struct FixedDeque<T> {
@@ -16,11 +17,21 @@ impl<T> FixedDeque<T> {
     }
   }
 
+  /// Push back
   pub fn push_back_overwrite(&mut self, value: T) {
-    while self.dq.len() > self.max_size && !self.dq.is_empty() {
+    while self.dq.len() >= self.max_size && !self.dq.is_empty() {
       self.dq.pop_front();
     }
     self.dq.push_back(value)
+  }
+
+  pub fn try_push_back(&mut self, value: T) -> TheResult<()> {
+    if self.dq.len() < self.max_size {
+      self.dq.push_back(value);
+      Ok(())
+    } else {
+      Err(TheErr::FixedDequeTryPushFailed)
+    }
   }
 
   pub fn pop_front(&mut self) -> Option<T> {
