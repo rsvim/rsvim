@@ -152,7 +152,7 @@ impl Current {
         && last.char_idx_after == op.char_idx_before
         && op.direction() == DeleteDirection::ToLeft)
         || (last.char_idx_before == op.char_idx_before
-          && last.char_idx_after == op.char_idx_after
+          && last.char_idx_before == op.char_idx_after
           && op.direction() == DeleteDirection::ToRight))
     {
       // Offset the effect of 1 insertion and 1 deletion
