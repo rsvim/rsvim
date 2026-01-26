@@ -474,7 +474,7 @@ fn delete3() {
   });
 
   let actual = undo_manager.current();
-  assert_eq!(actual.records().len(), 2);
+  assert_eq!(actual.records().len(), 3);
 
   assert_insert(
     &undo_manager,
@@ -489,7 +489,16 @@ fn delete3() {
     &undo_manager,
     1,
     Delete {
-      payload: "lo, Wo".to_compact_string(),
+      payload: ", ".to_compact_string(),
+      char_idx_before: 5,
+      char_idx_after: 5,
+    },
+  );
+  assert_delete(
+    &undo_manager,
+    2,
+    Delete {
+      payload: "loWo".to_compact_string(),
       char_idx_before: 3,
       char_idx_after: 3,
     },
