@@ -546,6 +546,6 @@ fn revert1() {
   undo_mgr.commit();
   info!("undo_mgr:{:?}", undo_mgr);
 
-  let mut text2 = text1.clone();
+  // let mut text2 = text1.clone();
   // let result = undo_mgr.revert(commit_idx, buf_id, rope)
 }

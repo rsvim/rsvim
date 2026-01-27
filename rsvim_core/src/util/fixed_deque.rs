@@ -2,7 +2,6 @@
 //! `ringbuf` crate.
 
 use std::collections::VecDeque;
-use std::ops::Range;
 
 #[derive(Debug, Clone)]
 pub struct FixedDeque<T> {
