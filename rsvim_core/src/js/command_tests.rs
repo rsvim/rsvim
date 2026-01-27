@@ -9,7 +9,6 @@ use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
