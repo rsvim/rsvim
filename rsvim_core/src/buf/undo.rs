@@ -261,7 +261,12 @@ impl UndoManager {
       return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
     }
 
-    for record in self.history.drain(commit_idx..).rev() {}
+    for record in self.history.drain(commit_idx..).rev() {
+      match record.op {
+        Operation::Insert(insert) => {}
+        Operation::Delete(delete) => {}
+      }
+    }
 
     Ok(())
   }
