@@ -1,41 +1,42 @@
 //! VecDeque based fixed-size ringbuf.
 
 use std::collections::VecDeque;
+use std::ops::Index;
 
 #[derive(Debug, Clone)]
 pub struct RingBuffer<T> {
-  dq: VecDeque<T>,
+  data: VecDeque<T>,
   max_size: usize,
 }
 
 impl<T> RingBuffer<T> {
   pub fn new(max_size: usize) -> Self {
     Self {
-      dq: VecDeque::with_capacity(max_size),
+      data: VecDeque::with_capacity(max_size),
       max_size,
     }
   }
 
   pub fn is_empty(&self) -> bool {
-    self.dq.is_empty()
+    self.data.is_empty()
   }
 
   pub fn len(&self) -> usize {
-    self.dq.len()
+    self.data.len()
   }
 
   /// Force push back, remove front items if deque is full.
   pub fn push_back_overwrite(&mut self, value: T) {
-    while self.dq.len() >= self.max_size && !self.dq.is_empty() {
-      self.dq.pop_front();
+    while self.data.len() >= self.max_size && !self.data.is_empty() {
+      self.data.pop_front();
     }
-    self.dq.push_back(value)
+    self.data.push_back(value)
   }
 
   /// Try push back, fail and don't remove front items if deque is full.
   pub fn try_push_back(&mut self, value: T) -> Result<(), T> {
-    if self.dq.len() < self.max_size {
-      self.dq.push_back(value);
+    if self.data.len() < self.max_size {
+      self.data.push_back(value);
       Ok(())
     } else {
       Err(value)
@@ -43,15 +44,15 @@ impl<T> RingBuffer<T> {
   }
 
   pub fn pop_front(&mut self) -> Option<T> {
-    self.dq.pop_front()
+    self.data.pop_front()
   }
 
   pub fn pop_back(&mut self) -> Option<T> {
-    self.dq.pop_back()
+    self.data.pop_back()
   }
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
-    self.dq.iter()
+    self.data.iter()
   }
 
   pub fn drain<R>(
@@ -61,6 +62,14 @@ impl<T> RingBuffer<T> {
   where
     R: std::ops::RangeBounds<usize>,
   {
-    self.dq.drain(range)
+    self.data.drain(range)
+  }
+}
+
+impl<T> Index<usize> for RingBuffer<T> {
+  type Output = usize;
+
+  fn index(&self, index: usize) -> &Self::Output {
+    self.data.index(index)
   }
 }

@@ -258,8 +258,8 @@ impl UndoManager {
       return Err(TheErr::UndoCommitNotExist(commit_idx));
     }
 
-    let mut i: isize = commit_idx;
-    while i as usize >= commit_idx {
+    let mut i: isize = commit_idx as isize;
+    while i >= commit_idx as isize {
       let record = self.undo_stack[i];
       // Revert all editing operations on the passed `rope`.
       match &record.op {
