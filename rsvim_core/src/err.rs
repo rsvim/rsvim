@@ -36,9 +36,6 @@ pub enum TheErr {
   #[error("Undo commit `{0}` not exist.")]
   UndoCommitNotExist(usize),
 
-  #[error("Undo revert to commit `{0}` failed.")]
-  UndoRevertFailed(usize),
-
   #[error("Failed to normalize path `{0}`: {1}.")]
   NormalizePathFailed(CompactString, IoErr),
 

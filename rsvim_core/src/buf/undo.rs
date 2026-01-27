@@ -249,8 +249,10 @@ impl UndoManager {
 
   /// This is similar to `git revert` a specific git commit ID.
   /// It reverts to the previous `commit`.
-  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) {
-    debug_assert!(commit_idx < self.undo_stack.len());
+  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) -> TheResult<()> {
+    if commit_idx >= self.undo_stack.len() {
+      return Err(TheErr::UndoCommitNotExist(commit_idx));
+    }
 
     let mut i: isize = commit_idx as isize;
     while i >= commit_idx as isize {
@@ -258,15 +260,16 @@ impl UndoManager {
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
-          if rope.len_chars() < insert.char_idx_after {
-            return Err(TheErr::UndoRevertFailed(commit_idx));
-          }
-          let chars = rope.chars_at(insert.char_idx_before);
-          let actual = chars
-            .take(insert.char_idx_after - insert.char_idx_before)
-            .collect::<CompactString>();
-          if actual != insert.payload {
-            return Err(TheErr::UndoRevertFailed(commit_idx));
+          debug_assert!(rope.len_chars() >= insert.char_idx_after);
+          if cfg!(debug_assertions) {
+            let chars = rope.chars_at(insert.char_idx_before);
+            debug_assert!(
+              chars.len() >= insert.char_idx_after - insert.char_idx_before
+            );
+            let actual = chars
+              .take(insert.char_idx_after - insert.char_idx_before)
+              .collect::<CompactString>();
+            debug_assert_eq!(actual, insert.payload);
           }
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
