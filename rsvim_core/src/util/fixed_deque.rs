@@ -2,6 +2,7 @@
 //! `ringbuf` crate.
 
 use std::collections::VecDeque;
+use std::ops::Range;
 
 #[derive(Debug, Clone)]
 pub struct FixedDeque<T> {
@@ -49,5 +50,15 @@ impl<T> FixedDeque<T> {
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
     self.dq.iter()
+  }
+
+  pub fn drain<R>(
+    &mut self,
+    range: R,
+  ) -> std::collections::vec_deque::Drain<'_, T>
+  where
+    R: std::ops::RangeBounds<usize>,
+  {
+    self.dq.drain(range)
   }
 }
