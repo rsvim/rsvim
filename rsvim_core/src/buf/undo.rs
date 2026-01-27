@@ -279,24 +279,10 @@ impl UndoManager {
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
         Operation::Delete(delete) => {
-          if delete.direction() == DeleteDirection::ToLeft {
-            if rope.len_chars() > delete.char_idx_after {
-              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
-            }
-            rope.insert(delete.char_idx_after, &delete.payload);
-          } else if delete.direction() == DeleteDirection::ToRight {
-            if rope.len_chars() < insert.char_idx_after {
-              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
-            }
-            let chars = rope.chars_at(insert.char_idx_before);
-            let actual = chars
-              .take(insert.char_idx_after - insert.char_idx_before)
-              .collect::<CompactString>();
-            if actual != insert.payload {
-              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
-            }
-            rope.remove(insert.char_idx_before..insert.char_idx_after);
+          if rope.len_chars() > delete.char_idx_after {
+            return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
           }
+          rope.insert(delete.char_idx_after, &delete.payload);
         }
       }
 
