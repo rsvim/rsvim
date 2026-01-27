@@ -536,4 +536,6 @@ fn revert1() {
     char_idx_after: payload1.len() + payload2.len() + payload3.len(),
     payload: payload3.to_compact_string(),
   });
+
+  undo.commit();
 }
