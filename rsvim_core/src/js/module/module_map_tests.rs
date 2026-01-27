@@ -1061,11 +1061,11 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      let n = contents.cmdline_message_history().occupied_len();
+      let n = contents.cmdline_message_history().len();
       info!("home_dir5 n:{:?}", n);
       assert_eq!(2, n);
       for i in 0..n {
-        let actual = contents.cmdline_message_history_mut().try_pop();
+        let actual = contents.cmdline_message_history_mut().pop_front();
         info!("home_dir5 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
         let actual = actual.unwrap();
@@ -1154,8 +1154,8 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      assert_eq!(1, contents.cmdline_message_history().len());
+      let actual = contents.cmdline_message_history_mut().pop_front();
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
@@ -1248,9 +1248,9 @@ export function echoMain(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(5, contents.cmdline_message_history().occupied_len());
+      assert_eq!(5, contents.cmdline_message_history().len());
 
-      let url = contents.cmdline_message_history_mut().try_pop();
+      let url = contents.cmdline_message_history_mut().pop_front();
       assert!(url.is_some());
       let actual = url.unwrap();
       info!("url:{:?}", actual);
@@ -1281,7 +1281,7 @@ export function echoMain(value) {
           == 2
       );
 
-      let filename = contents.cmdline_message_history_mut().try_pop();
+      let filename = contents.cmdline_message_history_mut().pop_front();
       assert!(filename.is_some());
       let actual = filename.unwrap();
       info!("filename:{:?}", actual);
@@ -1302,7 +1302,7 @@ export function echoMain(value) {
         )
       );
 
-      let dirname = contents.cmdline_message_history_mut().try_pop();
+      let dirname = contents.cmdline_message_history_mut().pop_front();
       assert!(dirname.is_some());
       let actual = dirname.unwrap();
       info!("dirname:{:?}", actual);
@@ -1318,14 +1318,14 @@ export function echoMain(value) {
           )
       );
 
-      let is_main = contents.cmdline_message_history_mut().try_pop();
+      let is_main = contents.cmdline_message_history_mut().pop_front();
       assert!(is_main.is_some());
       let actual = is_main.unwrap();
       info!("main:{:?}", actual);
       assert_eq!(actual, "false:true");
 
       let resolved_module_path =
-        contents.cmdline_message_history_mut().try_pop();
+        contents.cmdline_message_history_mut().pop_front();
       assert!(resolved_module_path.is_some());
       let actual = resolved_module_path.unwrap();
       info!("resolve:{:?}", actual);
@@ -1402,21 +1402,21 @@ setTimeout(() => {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(3, contents.cmdline_message_history().occupied_len());
+      assert_eq!(3, contents.cmdline_message_history().len());
 
-      let url1 = contents.cmdline_message_history_mut().try_pop();
+      let url1 = contents.cmdline_message_history_mut().pop_front();
       assert!(url1.is_some());
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(actual.contains("TypeError: Module `undefined` not found"));
 
-      let url2 = contents.cmdline_message_history_mut().try_pop();
+      let url2 = contents.cmdline_message_history_mut().pop_front);
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
       assert!(actual.contains("TypeError: Module `null` not found"));
 
-      let url3 = contents.cmdline_message_history_mut().try_pop();
+      let url3 = contents.cmdline_message_history_mut().pop_front();
       assert!(url3.is_some());
       let actual = url3.unwrap();
       info!("url3:{:?}", actual);
@@ -1483,10 +1483,10 @@ mod test_dynamic_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("1".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
