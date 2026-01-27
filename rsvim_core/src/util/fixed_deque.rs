@@ -24,7 +24,7 @@ impl<T> FixedDeque<T> {
     self.dq.len()
   }
 
-  /// Push back, remove front items if deque is full.
+  /// Force push back, remove front items if deque is full.
   pub fn push_back_overwrite(&mut self, value: T) {
     while self.dq.len() >= self.max_size && !self.dq.is_empty() {
       self.dq.pop_front();
