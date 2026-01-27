@@ -585,6 +585,7 @@ fn revert2() {
   }
 
   let payload2 = ", ";
+  assert_rope(&text1, 5..7, payload2);
   text1.remove(5..7);
   undo_mgr.current_mut().delete(Delete {
     char_idx_before: 7,
@@ -602,11 +603,12 @@ fn revert2() {
   });
 
   let payload4 = "!";
+  assert_rope(&text1, 11..12, payload4);
   text1.remove(11..12);
-  undo_mgr.current_mut().insert(Insert {
-    char_idx_before: 5,
-    char_idx_after: 5 + payload3.len(),
-    payload: payload3.to_compact_string(),
+  undo_mgr.current_mut().delete(Delete {
+    char_idx_before: 12,
+    char_idx_after: 11,
+    payload: payload4.to_compact_string(),
   });
 
   undo_mgr.commit();
