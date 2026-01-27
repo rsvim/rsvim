@@ -248,15 +248,9 @@ impl UndoManager {
   }
 
   /// This is similar to `git revert` a specific git commit ID.
-  ///
   /// It reverts to the previous `commit`.
-  ///
-  /// Returns `Ok` and modifies the passed `rope` if revert successfully,
-  /// returns `Err` and not change the `rope` if `I` is not exist in history.
-  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) -> TheResult<()> {
-    if commit_idx >= self.undo_stack.len() {
-      return Err(TheErr::UndoCommitNotExist(commit_idx));
-    }
+  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) {
+    debug_assert!(commit_idx < self.undo_stack.len());
 
     let mut i: isize = commit_idx as isize;
     while i >= commit_idx as isize {
@@ -285,6 +279,7 @@ impl UndoManager {
       }
       i += 1;
     }
+
     for (i, record) in self.undo_stack.iter().rev().enumerate() {
       if i == commit_idx {
         break;
