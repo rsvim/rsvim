@@ -32,7 +32,7 @@ impl<T> FixedDeque<T> {
     self.dq.push_back(value)
   }
 
-  /// Push back, fail and don't remove front items if deque is full.
+  /// Try push back, fail and don't remove front items if deque is full.
   pub fn try_push_back(&mut self, value: T) -> Result<(), T> {
     if self.dq.len() < self.max_size {
       self.dq.push_back(value);
