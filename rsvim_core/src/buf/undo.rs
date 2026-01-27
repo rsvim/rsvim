@@ -268,20 +268,20 @@ impl UndoManager {
       match &record.op {
         Operation::Insert(insert) => {
           if rope.len_chars() < insert.char_idx_after {
-            return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            return Err(TheErr::UndoRevertFailed(commit_idx));
           }
           let chars = rope.chars_at(insert.char_idx_before);
           let actual = chars
             .take(insert.char_idx_after - insert.char_idx_before)
             .collect::<CompactString>();
           if actual != insert.payload {
-            return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            return Err(TheErr::UndoRevertFailed(commit_idx));
           }
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
         Operation::Delete(delete) => {
           if rope.len_chars() > delete.char_idx_after {
-            return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            return Err(TheErr::UndoRevertFailed(commit_idx));
           }
           rope.insert(delete.char_idx_after, &delete.payload);
         }
