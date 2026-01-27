@@ -6,6 +6,7 @@ use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
 use ropey::Rope;
 use std::fmt::Debug;
+use std::ops::Deref;
 use tokio::time::Instant;
 
 pub const INVALID_VERSION: usize = 0;
@@ -262,7 +263,7 @@ impl UndoManager {
     }
 
     for (i, record) in self.history.iter().rev().enumerate() {
-      // Revert all previous editing operations on the passed `rope`.
+      // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
           if rope.len_chars() < insert.char_idx_after {
@@ -277,7 +278,33 @@ impl UndoManager {
           }
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
-        Operation::Delete(delete) => {}
+        Operation::Delete(delete) => {
+          if delete.direction() == DeleteDirection::ToLeft {
+            if rope.len_chars() < insert.char_idx_after {
+              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            }
+            let chars = rope.chars_at(insert.char_idx_before);
+            let actual = chars
+              .take(insert.char_idx_after - insert.char_idx_before)
+              .collect::<CompactString>();
+            if actual != insert.payload {
+              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            }
+            rope.remove(insert.char_idx_before..insert.char_idx_after);
+          } else if delete.direction() == DeleteDirection::ToRight {
+            if rope.len_chars() < insert.char_idx_after {
+              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            }
+            let chars = rope.chars_at(insert.char_idx_before);
+            let actual = chars
+              .take(insert.char_idx_after - insert.char_idx_before)
+              .collect::<CompactString>();
+            if actual != insert.payload {
+              return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+            }
+            rope.remove(insert.char_idx_before..insert.char_idx_after);
+          }
+        }
       }
 
       if i == commit_idx {
