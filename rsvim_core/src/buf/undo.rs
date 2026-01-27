@@ -234,12 +234,8 @@ impl UndoManager {
     &self.current
   }
 
-  pub fn insert(&mut self, op: Insert) {
-    self.current.insert(op);
-  }
-
-  pub fn delete(&mut self, op: Delete) {
-    self.current.delete(op);
+  pub fn current_mut(&mut self) -> &mut Current {
+    &mut self.current
   }
 
   pub fn commit(&mut self) {

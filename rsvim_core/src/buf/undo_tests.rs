@@ -508,9 +508,16 @@ fn delete3() {
 
 #[test]
 fn revert1() {
+  let mut undo = UndoManager::new();
   let mut text = RopeBuilder::new().finish();
+
   let payload1 = "Hello";
   for (i, c) in payload1.chars().enumerate() {
     text.insert_char(i, c);
+    undo.current_mut().insert(Insert {
+      char_idx_before: i,
+      char_idx_after: i + 1,
+      payload: c.to_compact_string(),
+    });
   }
 }
