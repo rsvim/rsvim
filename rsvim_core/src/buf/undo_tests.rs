@@ -75,7 +75,7 @@ fn insert2() {
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
-    undo.insert(Insert {
+    undo.current_mut().insert(Insert {
       char_idx_before: i + 3,
       char_idx_after: i + 4,
       payload: c.to_compact_string(),
@@ -104,7 +104,7 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    undo.insert(Insert {
+    undo.current_mut().insert(Insert {
       char_idx_before: i + payload1.chars().count() + payload2.chars().count(),
       char_idx_after: i
         + payload1.chars().count()
@@ -147,7 +147,7 @@ fn insert2() {
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    undo.insert(Insert {
+    undo.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i + 100,
       char_idx_after: i + 100 + 1,
@@ -202,20 +202,20 @@ fn insert2() {
 
 #[test]
 fn delete1() {
-  let mut undo_manager = UndoManager::new();
+  let mut undo = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.insert(Insert {
+    undo.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
     });
   }
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -224,16 +224,16 @@ fn delete1() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: "!".to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 11,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 2);
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -242,7 +242,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -252,16 +252,16 @@ fn delete1() {
   );
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  undo_manager.insert(Insert {
+  undo.current_mut().insert(Insert {
     payload: payload2.to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 12 + payload2.chars().count(),
   });
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 3);
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -270,7 +270,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -279,7 +279,7 @@ fn delete1() {
     },
   );
   assert_insert(
-    &undo_manager,
+    &undo,
     2,
     Insert {
       payload: payload2.to_compact_string(),
@@ -288,17 +288,17 @@ fn delete1() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: payload2.to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 12,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -307,7 +307,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -316,28 +316,28 @@ fn delete1() {
     },
   );
 
-  undo_manager.commit();
+  undo.commit();
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert!(actual.records().is_empty());
 }
 
 #[test]
 fn delete2() {
-  let mut undo_manager = UndoManager::new();
+  let mut undo = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo_manager.insert(Insert {
+    undo.insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
     });
   }
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -346,27 +346,27 @@ fn delete2() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo.delete(Delete {
     payload: "!".to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 11,
   });
-  undo_manager.delete(Delete {
+  undo.delete(Delete {
     payload: "d".to_compact_string(),
     char_idx_before: 11,
     char_idx_after: 10,
   });
-  undo_manager.delete(Delete {
+  undo.delete(Delete {
     payload: "l".to_compact_string(),
     char_idx_before: 10,
     char_idx_after: 9,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -375,7 +375,7 @@ fn delete2() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo,
     1,
     Delete {
       payload: "ld!".to_compact_string(),
@@ -384,17 +384,17 @@ fn delete2() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo.delete(Delete {
     payload: "or".to_compact_string(),
     char_idx_before: 9,
     char_idx_after: 7,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo_manager,
+    &undo,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -403,7 +403,7 @@ fn delete2() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo,
     1,
     Delete {
       payload: "orld!".to_compact_string(),
@@ -412,9 +412,9 @@ fn delete2() {
     },
   );
 
-  undo_manager.commit();
+  undo.commit();
 
-  let actual = undo_manager.current();
+  let actual = undo.current();
   assert!(actual.records().is_empty());
 }
 
