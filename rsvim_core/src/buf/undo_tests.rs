@@ -1,4 +1,5 @@
 use super::undo::*;
+use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use ropey::RopeBuilder;
 
@@ -508,6 +509,8 @@ fn delete3() {
 
 #[test]
 fn revert1() {
+  test_log_init();
+
   let mut undo_mgr = UndoManager::new();
   let mut text = RopeBuilder::new().finish();
 
@@ -538,4 +541,5 @@ fn revert1() {
   });
 
   undo_mgr.commit();
+  info!("undo_mgr:{:?}", undo_mgr);
 }

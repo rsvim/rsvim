@@ -193,32 +193,27 @@ impl Current {
   }
 }
 
+#[derive(Debug, Clone)]
 pub struct UndoManager {
   history: FixedDeque<Record>,
   current: Current,
   __next_version: usize,
 }
 
-impl Default for UndoManager {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
-impl Debug for UndoManager {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("UndoManager")
-      .field("history.len", &self.history.len())
-      .field("current", &self.current)
-      .field("__next_version", &self.__next_version)
-      .finish()
-  }
-}
+// impl Debug for UndoManager {
+//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//     f.debug_struct("UndoManager")
+//       .field("history.len", &self.history.len())
+//       .field("current", &self.current)
+//       .field("__next_version", &self.__next_version)
+//       .finish()
+//   }
+// }
 
 impl UndoManager {
-  pub fn new() -> Self {
+  pub fn new(max_size: usize) -> Self {
     Self {
-      history: FixedDeque::new(100),
+      history: FixedDeque::new(max_size),
       current: Current::new(),
       __next_version: START_VERSION,
     }

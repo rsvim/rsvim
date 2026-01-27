@@ -3,6 +3,7 @@
 
 use std::collections::VecDeque;
 
+#[derive(Debug, Clone)]
 pub struct FixedDeque<T> {
   dq: VecDeque<T>,
   max_size: usize,
