@@ -3,7 +3,6 @@ use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use ringbuf::traits::*;
 use std::path::Path;
 use std::time::Duration;
 
@@ -60,10 +59,10 @@ mod test_static_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("1".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
