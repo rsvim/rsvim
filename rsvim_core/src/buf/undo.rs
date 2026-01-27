@@ -1,13 +1,10 @@
 //! Undo history.
 
-use crate::buf::BufferId;
-use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::util::ringbuf::RingBuffer;
 use compact_str::CompactString;
-use ringbuf::LocalRb;
-use ringbuf::storage::Heap;
-use ringbuf::traits::Observer;
-use ringbuf::traits::RingBuffer;
+use ropey::Rope;
+use std::collections::VecDeque;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
@@ -74,7 +71,8 @@ pub enum Operation {
 /// A record for operation with timestamp.
 pub struct Record {
   pub op: Operation,
-  pub timestamp: Instant,
+  pub moment: Instant,
+  pub timestamp: jiff::Zoned,
   pub version: usize,
 }
 
@@ -131,7 +129,7 @@ impl Current {
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
@@ -142,7 +140,7 @@ impl Current {
       trace!("last-2:{:?}, op:{:?}", last, op);
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
@@ -160,7 +158,8 @@ impl Current {
       trace!("last-4, op:{:?}", op);
       self.records.push(Record {
         op: Operation::Delete(op),
-        timestamp: Instant::now(),
+        moment: Instant::now(),
+        timestamp: jiff::Zoned::now(),
         version: INVALID_VERSION,
       });
     }
@@ -184,45 +183,42 @@ impl Current {
       // Append to last insertion
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else {
       trace!("last-2, op:{:?}", op);
       self.records.push(Record {
         op: Operation::Insert(op),
-        timestamp: Instant::now(),
+        moment: Instant::now(),
+        timestamp: jiff::Zoned::now(),
         version: INVALID_VERSION,
       });
     }
   }
 }
 
+#[derive(Debug, Clone)]
 pub struct UndoManager {
-  history: LocalRb<Heap<Record>>,
+  undo_stack: RingBuffer<Record>,
+  redo_stack: VecDeque<Record>,
   current: Current,
   __next_version: usize,
 }
 
-impl Default for UndoManager {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
-impl Debug for UndoManager {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("UndoManager")
-      .field("history_occupied_len", &self.history.occupied_len())
-      .field("history_vacant_len", &self.history.vacant_len())
-      .field("changes", &self.current)
-      .field("__next_version", &self.__next_version)
-      .finish()
-  }
-}
+// impl Debug for UndoManager {
+//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//     f.debug_struct("UndoManager")
+//       .field("history.len", &self.history.len())
+//       .field("current", &self.current)
+//       .field("__next_version", &self.__next_version)
+//       .finish()
+//   }
+// }
 
 impl UndoManager {
-  pub fn new() -> Self {
+  pub fn new(max_size: usize) -> Self {
     Self {
-      history: LocalRb::new(100),
+      undo_stack: RingBuffer::new(max_size),
+      redo_stack: VecDeque::new(),
       current: Current::new(),
       __next_version: START_VERSION,
     }
@@ -238,43 +234,67 @@ impl UndoManager {
     &self.current
   }
 
-  pub fn insert(&mut self, op: Insert) {
-    self.current.insert(op);
-  }
-
-  pub fn delete(&mut self, op: Delete) {
-    self.current.delete(op);
+  pub fn current_mut(&mut self) -> &mut Current {
+    &mut self.current
   }
 
   pub fn commit(&mut self) {
     let version = self.next_version();
     for mut change in self.current.records_mut().drain(..) {
       change.version = version;
-      self.history.push_overwrite(change);
+      self.undo_stack.push_back_overwrite(change);
     }
     self.current = Current::new();
   }
 
   /// This is similar to `git revert` a specific git commit ID.
-  ///
   /// It reverts to the previous `commit`.
-  ///
-  /// Returns `Ok` and modifies the passed `text` if revert successfully,
-  /// returns `Err` and not change the `text` if `I` is not exist in history.
-  pub fn revert(
-    &mut self,
-    commit: usize,
-    buf_id: BufferId,
-    _text: &mut Text,
-  ) -> TheResult<()> {
-    if commit >= self.history.occupied_len() {
-      return Err(TheErr::UndoCommitNotExist(commit, buf_id));
+  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) -> TheResult<()> {
+    if commit_idx >= self.undo_stack.len() {
+      return Err(TheErr::UndoCommitNotExist(commit_idx));
+    }
+
+    let mut i: isize = commit_idx as isize;
+    while i >= commit_idx as isize {
+      let record = &self.undo_stack[i as usize];
+      // Revert all editing operations on the passed `rope`.
+      match &record.op {
+        Operation::Insert(insert) => {
+          debug_assert!(rope.len_chars() >= insert.char_idx_after);
+          if cfg!(debug_assertions) {
+            let range: std::ops::Range<usize> =
+              insert.char_idx_before..insert.char_idx_after;
+            let chars = rope.chars_at(range.start);
+            debug_assert!(
+              chars.len() >= insert.char_idx_after - insert.char_idx_before
+            );
+            let actual = chars
+              .take(range.end - range.start)
+              .collect::<CompactString>();
+            debug_assert_eq!(actual, insert.payload);
+          }
+          rope.remove(insert.char_idx_before..insert.char_idx_after);
+        }
+        Operation::Delete(delete) => {
+          debug_assert!(rope.len_chars() <= delete.char_idx_after);
+          rope.insert(delete.char_idx_after, &delete.payload);
+        }
+      }
+      i -= 1;
+    }
+
+    for record in self.undo_stack.drain(commit_idx..).rev() {
+      self.redo_stack.push_back(record);
     }
 
     Ok(())
   }
 
-  pub fn max_commit(&self) -> usize {
-    self.history.occupied_len()
+  pub fn undo_stack(&self) -> &RingBuffer<Record> {
+    &self.undo_stack
+  }
+
+  pub fn redo_stack(&self) -> &VecDeque<Record> {
+    &self.redo_stack
   }
 }

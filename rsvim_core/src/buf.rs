@@ -87,7 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      undo_manager: UndoManager::new(),
+      undo_manager: UndoManager::new(100),
     }
   }
 
