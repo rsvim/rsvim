@@ -262,12 +262,14 @@ impl UndoManager {
         Operation::Insert(insert) => {
           debug_assert!(rope.len_chars() >= insert.char_idx_after);
           if cfg!(debug_assertions) {
-            let chars = rope.chars_at(insert.char_idx_before);
+            let range: std::ops::Range<usize> =
+              insert.char_idx_before..insert.char_idx_after;
+            let chars = rope.chars_at(range.start);
             debug_assert!(
               chars.len() >= insert.char_idx_after - insert.char_idx_before
             );
             let actual = chars
-              .take(insert.char_idx_after - insert.char_idx_before)
+              .take(range.end - range.start)
               .collect::<CompactString>();
             debug_assert_eq!(actual, insert.payload);
           }
