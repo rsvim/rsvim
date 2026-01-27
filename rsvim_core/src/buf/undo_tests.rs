@@ -520,4 +520,20 @@ fn revert1() {
       payload: c.to_compact_string(),
     });
   }
+
+  let payload2 = ", ";
+  text.insert(payload1.len(), payload2);
+  undo.current_mut().insert(Insert {
+    char_idx_before: payload1.len(),
+    char_idx_after: payload1.len() + payload2.len(),
+    payload: payload2.to_compact_string(),
+  });
+
+  let payload3 = "World!";
+  text.insert(payload1.len() + payload2.len(), payload3);
+  undo.current_mut().insert(Insert {
+    char_idx_before: payload1.len() + payload2.len(),
+    char_idx_after: payload1.len() + payload2.len() + payload3.len(),
+    payload: payload3.to_compact_string(),
+  });
 }
