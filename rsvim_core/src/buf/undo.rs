@@ -278,13 +278,7 @@ impl UndoManager {
           rope.insert(delete.char_idx_after, &delete.payload);
         }
       }
-      i += 1;
-    }
-
-    for (i, record) in self.undo_stack.iter().rev().enumerate() {
-      if i == commit_idx {
-        break;
-      }
+      i -= 1;
     }
 
     for record in self.undo_stack.drain(commit_idx..).rev() {
