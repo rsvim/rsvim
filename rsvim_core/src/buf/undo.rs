@@ -1,13 +1,10 @@
 //! Undo history.
 
 use crate::buf::BufferId;
-use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
-use ringbuf::storage::Heap;
-use ringbuf::traits::Observer;
-use ringbuf::traits::RingBuffer;
+use ropey::Rope;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
@@ -264,7 +261,7 @@ impl UndoManager {
     &mut self,
     commit_id: usize,
     buf_id: BufferId,
-    _text: &mut Text,
+    _rope: &mut Rope,
   ) -> TheResult<()> {
     if commit_id >= self.history.len() {
       return Err(TheErr::UndoCommitNotExist(commit_id, buf_id));
