@@ -2,6 +2,7 @@
 
 use std::collections::VecDeque;
 use std::ops::Index;
+use std::ops::IndexMut;
 
 #[derive(Debug, Clone)]
 pub struct RingBuffer<T> {
@@ -67,9 +68,15 @@ impl<T> RingBuffer<T> {
 }
 
 impl<T> Index<usize> for RingBuffer<T> {
-  type Output = usize;
+  type Output = T;
 
   fn index(&self, index: usize) -> &Self::Output {
     self.data.index(index)
+  }
+}
+
+impl<T> IndexMut<usize> for RingBuffer<T> {
+  fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+    self.data.index_mut(index)
   }
 }
