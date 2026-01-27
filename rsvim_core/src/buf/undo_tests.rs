@@ -614,11 +614,38 @@ fn revert2() {
   undo_mgr.commit();
   info!("undo_mgr:{:?}", undo_mgr);
 
-  // let mut text2 = text1.clone();
-  // let result1 = undo_mgr.undo(0, &mut text2);
-  // assert!(result1.is_ok());
-  // assert_eq!(text2.len_chars(), 0);
-  //
-  // assert!(undo_mgr.undo_stack().is_empty());
-  // assert_eq!(undo_mgr.redo_stack().len(), 1);
+  let mut text2 = text1.clone();
+
+  assert_eq!(text1.to_compact_string(), "HelloWorld");
+  assert_eq!(text2.to_compact_string(), "HelloWorld");
+  assert_eq!(undo_mgr.undo_stack().len(), 4);
+  assert_eq!(undo_mgr.redo_stack().len(), 0);
+
+  let result1 = undo_mgr.undo(3, &mut text2);
+  assert!(result1.is_ok());
+  assert_eq!(text2.len_chars(), 11);
+  assert_eq!(text2.to_compact_string(), "HelloWorld!");
+  assert_eq!(undo_mgr.undo_stack().len(), 3);
+  assert_eq!(undo_mgr.redo_stack().len(), 1);
+
+  let result2 = undo_mgr.undo(2, &mut text2);
+  assert!(result2.is_ok());
+  assert_eq!(text2.len_chars(), 5);
+  assert_eq!(text2.to_compact_string(), "Hello");
+  assert_eq!(undo_mgr.undo_stack().len(), 2);
+  assert_eq!(undo_mgr.redo_stack().len(), 2);
+
+  let result3 = undo_mgr.undo(1, &mut text2);
+  assert!(result3.is_ok());
+  assert_eq!(text2.len_chars(), 7);
+  assert_eq!(text2.to_compact_string(), "Hello, ");
+  assert_eq!(undo_mgr.undo_stack().len(), 1);
+  assert_eq!(undo_mgr.redo_stack().len(), 3);
+
+  let result4 = undo_mgr.undo(0, &mut text2);
+  assert!(result4.is_ok());
+  assert_eq!(text2.len_chars(), 0);
+  assert_eq!(text2.to_compact_string(), "");
+  assert_eq!(undo_mgr.undo_stack().len(), 0);
+  assert_eq!(undo_mgr.redo_stack().len(), 4);
 }
