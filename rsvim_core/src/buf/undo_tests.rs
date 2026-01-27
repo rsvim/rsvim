@@ -5,7 +5,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;
-use std::ops::RangeBounds;
+use std::ops::Range;
 
 const MAX_SIZE: usize = 100;
 
@@ -29,11 +29,11 @@ fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
   }
 }
 
-fn assert_rope<R: RangeBounds<usize>>(rope: &Rope, range: R, expect: &str) {
-  let chars = rope.chars_at(range.start_bound());
-  assert!(chars.len() >= range.end_bound() - range.start_bound());
+fn assert_rope(rope: &Rope, range: Range<usize>, expect: &str) {
+  let chars = rope.chars_at(range.start);
+  assert!(chars.len() >= range.end - range.start);
   let actual = chars
-    .take(range.end_bound() - range.start_bound())
+    .take(range.end - range.start)
     .collect::<CompactString>();
   assert_eq!(actual, expect.to_compact_string());
 }
