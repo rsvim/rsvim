@@ -239,11 +239,14 @@ impl Normal {
           current_window_id,
           buffer.text(),
         );
-        buffer.undo_manager_mut().insert(undo::Insert {
-          payload: eol.clone(),
-          char_idx_before: cursor_absolute_char_idx,
-          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
-        });
+        buffer
+          .undo_manager_mut()
+          .current_mut()
+          .insert(undo::Insert {
+            payload: eol.clone(),
+            char_idx_before: cursor_absolute_char_idx,
+            char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+          });
         let (_cursor_line_idx_after, _cursor_char_idx_after) =
           cursor_ops::cursor_insert(
             &mut tree,
