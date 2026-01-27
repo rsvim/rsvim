@@ -3,7 +3,6 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::widget::window::opt::*;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
@@ -153,8 +152,8 @@ async fn test_timeout3() -> IoResult<()> {
     assert!(global_local_options.line_break());
 
     let mut contents = lock!(event_loop.contents);
-    assert_eq!(3, contents.cmdline_message_history().occupied_len());
-    let actual1 = contents.cmdline_message_history_mut().try_pop();
+    assert_eq!(3, contents.cmdline_message_history().len());
+    let actual1 = contents.cmdline_message_history_mut().pop_front();
     assert!(actual1.is_some());
     let actual1 = actual1.unwrap();
     assert_eq!(actual1, "Hello");
