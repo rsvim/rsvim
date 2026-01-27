@@ -603,11 +603,11 @@ fn revert2() {
   });
 
   let payload4 = "!";
-  assert_rope(&text1, 11..12, payload4);
-  text1.remove(11..12);
+  assert_rope(&text1, 10..11, payload4);
+  text1.remove(10..11);
   undo_mgr.current_mut().delete(Delete {
-    char_idx_before: 12,
-    char_idx_after: 11,
+    char_idx_before: 11,
+    char_idx_after: 10,
     payload: payload4.to_compact_string(),
   });
 
