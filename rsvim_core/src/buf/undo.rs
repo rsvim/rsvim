@@ -1,6 +1,5 @@
 //! Undo history.
 
-use crate::buf::BufferId;
 use crate::prelude::*;
 use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
