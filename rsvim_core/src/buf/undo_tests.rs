@@ -327,7 +327,7 @@ fn delete2() {
   let mut undo = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo.insert(Insert {
+    undo.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
@@ -346,17 +346,17 @@ fn delete2() {
     },
   );
 
-  undo.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: "!".to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 11,
   });
-  undo.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: "d".to_compact_string(),
     char_idx_before: 11,
     char_idx_after: 10,
   });
-  undo.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: "l".to_compact_string(),
     char_idx_before: 10,
     char_idx_after: 9,
@@ -384,7 +384,7 @@ fn delete2() {
     },
   );
 
-  undo.delete(Delete {
+  undo.current_mut().delete(Delete {
     payload: "or".to_compact_string(),
     char_idx_before: 9,
     char_idx_after: 7,
