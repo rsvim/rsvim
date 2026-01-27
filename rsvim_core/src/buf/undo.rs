@@ -257,11 +257,10 @@ impl UndoManager {
   pub fn revert(
     &mut self,
     commit_idx: usize,
-    buf_id: BufferId,
     rope: &mut Rope,
   ) -> TheResult<()> {
     if commit_idx >= self.undo_stack.len() {
-      return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
+      return Err(TheErr::UndoCommitNotExist(commit_idx));
     }
 
     for (i, record) in self.undo_stack.iter().rev().enumerate() {

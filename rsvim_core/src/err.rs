@@ -33,11 +33,11 @@ pub enum TheErr {
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, CompactString, IoErr),
 
-  #[error("Undo commit `{0}` not exist on buffer `{1}`.")]
-  UndoCommitNotExist(usize, BufferId),
+  #[error("Undo commit `{0}` not exist.")]
+  UndoCommitNotExist(usize),
 
-  #[error("Undo revert to commit `{0}` failed on buffer `{1}`.")]
-  UndoRevertFailed(usize, BufferId),
+  #[error("Undo revert to commit `{0}` failed.")]
+  UndoRevertFailed(usize),
 
   #[error("Failed to normalize path `{0}`: {1}.")]
   NormalizePathFailed(CompactString, IoErr),
