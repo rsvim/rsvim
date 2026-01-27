@@ -268,6 +268,7 @@ impl UndoManager {
           if rope.len_chars() < insert.char_idx_after {
             return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
           }
+          rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
         Operation::Delete(delete) => {}
       }
