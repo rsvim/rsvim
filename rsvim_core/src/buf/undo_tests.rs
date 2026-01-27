@@ -29,7 +29,7 @@ fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
   }
 }
 
-fn assert_rope(rope: &Rope, range: RangeBounds<usize>, expect: &str) {
+fn assert_rope<R: RangeBounds<usize>>(rope: &Rope, range: R, expect: &str) {
   let chars = rope.chars_at(range.start_bound());
   assert!(chars.len() >= range.end_bound() - range.start_bound());
   let actual = chars
