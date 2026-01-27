@@ -1,5 +1,6 @@
 use super::undo::*;
 use compact_str::ToCompactString;
+use ropey::RopeBuilder;
 
 fn assert_insert(undo_manager: &UndoManager, op_idx: usize, op: Insert) {
   assert!(undo_manager.current().records().len() > op_idx);
@@ -503,4 +504,13 @@ fn delete3() {
       char_idx_after: 3,
     },
   );
+}
+
+#[test]
+fn revert1() {
+  let mut text = RopeBuilder::new().finish();
+  let payload1 = "Hello";
+  for (i, c) in payload1.chars().enumerate() {
+    text.insert_char(i, c);
+  }
 }
