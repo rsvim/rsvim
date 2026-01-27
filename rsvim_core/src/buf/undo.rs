@@ -259,12 +259,12 @@ impl UndoManager {
   /// returns `Err` and not change the `text` if `I` is not exist in history.
   pub fn revert(
     &mut self,
-    commit_id: usize,
+    commit_idx: usize,
     buf_id: BufferId,
     _rope: &mut Rope,
   ) -> TheResult<()> {
-    if commit_id >= self.history.len() {
-      return Err(TheErr::UndoCommitNotExist(commit_id, buf_id));
+    if commit_idx >= self.history.len() {
+      return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
     }
 
     Ok(())
