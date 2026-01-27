@@ -16,6 +16,14 @@ impl<T> FixedDeque<T> {
     }
   }
 
+  pub fn is_empty(&self) -> bool {
+    self.dq.is_empty()
+  }
+
+  pub fn len(&self) -> usize {
+    self.dq.len()
+  }
+
   /// Push back
   pub fn push_back_overwrite(&mut self, value: T) {
     while self.dq.len() >= self.max_size && !self.dq.is_empty() {

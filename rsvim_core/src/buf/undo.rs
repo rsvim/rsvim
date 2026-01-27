@@ -3,8 +3,8 @@
 use crate::buf::BufferId;
 use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
-use ringbuf::LocalRb;
 use ringbuf::storage::Heap;
 use ringbuf::traits::Observer;
 use ringbuf::traits::RingBuffer;
@@ -197,7 +197,7 @@ impl Current {
 }
 
 pub struct UndoManager {
-  history: LocalRb<Heap<Record>>,
+  history: FixedDeque<Record>,
   current: Current,
   __next_version: usize,
 }
@@ -211,8 +211,7 @@ impl Default for UndoManager {
 impl Debug for UndoManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("UndoManager")
-      .field("history_occupied_len", &self.history.occupied_len())
-      .field("history_vacant_len", &self.history.vacant_len())
+      .field("history.len", &self.history.len())
       .field("changes", &self.current)
       .field("__next_version", &self.__next_version)
       .finish()
@@ -222,7 +221,7 @@ impl Debug for UndoManager {
 impl UndoManager {
   pub fn new() -> Self {
     Self {
-      history: LocalRb::new(100),
+      history: FixedDeque::new(100),
       current: Current::new(),
       __next_version: START_VERSION,
     }
