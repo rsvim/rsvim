@@ -547,5 +547,7 @@ fn revert1() {
   info!("undo_mgr:{:?}", undo_mgr);
 
   let mut text2 = text1.clone();
-  let result = undo_mgr.revert(0, buf_id, rope)
+  let result = undo_mgr.revert(0, &mut text2);
+  assert!(result.is_ok());
+  assert_eq!(text2.len_chars(), 0);
 }
