@@ -47,6 +47,10 @@ impl<T> FixedDeque<T> {
     self.dq.pop_front()
   }
 
+  pub fn pop_back(&mut self) -> Option<T> {
+    self.dq.pop_back()
+  }
+
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
     self.dq.iter()
   }
