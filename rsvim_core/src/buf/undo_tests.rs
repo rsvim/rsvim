@@ -1,8 +1,11 @@
 use super::undo::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
+use ropey::Rope;
 use ropey::RopeBuilder;
+use std::ops::RangeBound;
 
 const MAX_SIZE: usize = 100;
 
@@ -24,6 +27,15 @@ fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
     Operation::Delete(delete) => assert_eq!(delete, op),
     _ => unreachable!(),
   }
+}
+
+fn assert_rope(rope: &Rope, range: RangeBound<usize>, expect: &str) {
+  let chars = rope.chars_at(range.start_bound());
+  assert!(chars.len() >= range.end_bound() - range.start_bound());
+  let actual = chars
+    .take(range.end_bound() - range.start_bound())
+    .collect::<CompactString>();
+  assert_eq!(actual, expect.to_compact_string());
 }
 
 #[test]
@@ -540,6 +552,60 @@ fn revert1() {
   undo_mgr.current_mut().insert(Insert {
     char_idx_before: payload1.len() + payload2.len(),
     char_idx_after: payload1.len() + payload2.len() + payload3.len(),
+    payload: payload3.to_compact_string(),
+  });
+
+  undo_mgr.commit();
+  info!("undo_mgr:{:?}", undo_mgr);
+
+  let mut text2 = text1.clone();
+  let result = undo_mgr.undo(0, &mut text2);
+  assert!(result.is_ok());
+  assert_eq!(text2.len_chars(), 0);
+
+  assert!(undo_mgr.undo_stack().is_empty());
+  assert_eq!(undo_mgr.redo_stack().len(), 1);
+}
+
+#[test]
+fn revert2() {
+  test_log_init();
+
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
+  let mut text1 = RopeBuilder::new().finish();
+
+  let payload1 = "Hello, ";
+  for (i, c) in payload1.chars().enumerate() {
+    text1.insert_char(i, c);
+    undo_mgr.current_mut().insert(Insert {
+      char_idx_before: i,
+      char_idx_after: i + 1,
+      payload: c.to_compact_string(),
+    });
+  }
+
+  let payload2 = ", ";
+  text1.remove(5..7);
+  undo_mgr.current_mut().delete(Delete {
+    char_idx_before: 7,
+    char_idx_after: 5,
+    payload: payload2.to_compact_string(),
+  });
+
+  let payload3 = "World!";
+  assert_eq!(payload1.len() - payload2.len(), 5);
+  text1.insert(5, payload3);
+  undo_mgr.current_mut().insert(Insert {
+    char_idx_before: 5,
+    char_idx_after: 5 + payload3.len(),
+    payload: payload3.to_compact_string(),
+  });
+
+  let payload4 = "!";
+  text1.remove(11..12);
+  undo_mgr.current_mut().insert(Insert {
+    char_idx_before: 5,
+    char_idx_after: 5 + payload3.len(),
     payload: payload3.to_compact_string(),
   });
 
