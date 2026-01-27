@@ -515,11 +515,11 @@ fn revert1() {
   test_log_init();
 
   let mut undo_mgr = UndoManager::new(MAX_SIZE);
-  let mut text = RopeBuilder::new().finish();
+  let mut text1 = RopeBuilder::new().finish();
 
   let payload1 = "Hello";
   for (i, c) in payload1.chars().enumerate() {
-    text.insert_char(i, c);
+    text1.insert_char(i, c);
     undo_mgr.current_mut().insert(Insert {
       char_idx_before: i,
       char_idx_after: i + 1,
@@ -528,7 +528,7 @@ fn revert1() {
   }
 
   let payload2 = ", ";
-  text.insert(payload1.len(), payload2);
+  text1.insert(payload1.len(), payload2);
   undo_mgr.current_mut().insert(Insert {
     char_idx_before: payload1.len(),
     char_idx_after: payload1.len() + payload2.len(),
@@ -536,7 +536,7 @@ fn revert1() {
   });
 
   let payload3 = "World!";
-  text.insert(payload1.len() + payload2.len(), payload3);
+  text1.insert(payload1.len() + payload2.len(), payload3);
   undo_mgr.current_mut().insert(Insert {
     char_idx_before: payload1.len() + payload2.len(),
     char_idx_after: payload1.len() + payload2.len() + payload3.len(),
@@ -545,4 +545,7 @@ fn revert1() {
 
   undo_mgr.commit();
   info!("undo_mgr:{:?}", undo_mgr);
+
+  let mut text2 = text1.clone();
+  // let result = undo_mgr.revert(commit_idx, buf_id, rope)
 }

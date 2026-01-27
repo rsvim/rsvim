@@ -6,7 +6,6 @@ use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
 use ropey::Rope;
 use std::fmt::Debug;
-use std::ops::Deref;
 use tokio::time::Instant;
 
 pub const INVALID_VERSION: usize = 0;
