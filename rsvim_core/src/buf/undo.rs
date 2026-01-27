@@ -271,6 +271,10 @@ impl UndoManager {
         }
         Operation::Delete(delete) => {}
       }
+
+      if i == commit_idx {
+        break;
+      }
     }
 
     let records = self.history.drain(commit_idx..);
