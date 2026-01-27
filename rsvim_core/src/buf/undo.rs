@@ -293,7 +293,9 @@ impl UndoManager {
       }
     }
 
-    let _records = self.undo_stack.drain(commit_idx..);
+    for record in self.undo_stack.drain(commit_idx..) {
+      self.redo_stack.push_back(record);
+    }
 
     Ok(())
   }
