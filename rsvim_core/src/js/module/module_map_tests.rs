@@ -1410,7 +1410,7 @@ setTimeout(() => {
       info!("url1:{:?}", actual);
       assert!(actual.contains("TypeError: Module `undefined` not found"));
 
-      let url2 = contents.cmdline_message_history_mut().pop_front);
+      let url2 = contents.cmdline_message_history_mut().pop_front();
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
