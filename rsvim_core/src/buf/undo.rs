@@ -71,7 +71,8 @@ pub enum Operation {
 /// A record for operation with timestamp.
 pub struct Record {
   pub op: Operation,
-  pub timestamp: Instant,
+  pub moment: Instant,
+  pub timestamp: jiff::Zoned,
   pub version: usize,
 }
 
@@ -128,7 +129,7 @@ impl Current {
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
@@ -139,7 +140,7 @@ impl Current {
       trace!("last-2:{:?}, op:{:?}", last, op);
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
@@ -157,7 +158,8 @@ impl Current {
       trace!("last-4, op:{:?}", op);
       self.records.push(Record {
         op: Operation::Delete(op),
-        timestamp: Instant::now(),
+        moment: Instant::now(),
+        timestamp: jiff::Zoned::now(),
         version: INVALID_VERSION,
       });
     }
@@ -181,12 +183,13 @@ impl Current {
       // Append to last insertion
       last.payload.push_str(&op.payload);
       last.char_idx_after = op.char_idx_after;
-      last_record.timestamp = Instant::now();
+      last_record.moment = Instant::now();
     } else {
       trace!("last-2, op:{:?}", op);
       self.records.push(Record {
         op: Operation::Insert(op),
-        timestamp: Instant::now(),
+        moment: Instant::now(),
+        timestamp: jiff::Zoned::now(),
         version: INVALID_VERSION,
       });
     }
