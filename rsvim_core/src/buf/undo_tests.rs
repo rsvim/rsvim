@@ -1,4 +1,5 @@
 use super::undo::*;
+use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use ropey::RopeBuilder;
@@ -205,7 +206,7 @@ fn insert2() {
 
 #[test]
 fn delete1() {
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
     undo_mgr.current_mut().insert(Insert {
@@ -327,7 +328,7 @@ fn delete1() {
 
 #[test]
 fn delete2() {
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
     undo_mgr.current_mut().insert(Insert {
@@ -423,7 +424,7 @@ fn delete2() {
 
 #[test]
 fn delete3() {
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let payload1 = "Hello, World!";
   undo_mgr.current_mut().insert(Insert {
     payload: payload1.to_compact_string(),
@@ -513,7 +514,7 @@ fn delete3() {
 fn revert1() {
   test_log_init();
 
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let mut text = RopeBuilder::new().finish();
 
   let payload1 = "Hello";
