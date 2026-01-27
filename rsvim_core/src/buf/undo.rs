@@ -293,7 +293,7 @@ impl UndoManager {
       }
     }
 
-    for record in self.undo_stack.drain(commit_idx..) {
+    for record in self.undo_stack.drain(commit_idx..).rev() {
       self.redo_stack.push_back(record);
     }
 
