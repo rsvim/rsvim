@@ -42,7 +42,7 @@ async fn test_js_echo1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let actual = contents.cmdline_message_history_mut().try_pop();
