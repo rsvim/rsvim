@@ -304,7 +304,7 @@ impl UndoManager {
     &self.undo_stack
   }
 
-  pub fn redo_stack(&self) -> &FixedDeque<Record> {
+  pub fn redo_stack(&self) -> &VecDeque<Record> {
     &self.redo_stack
   }
 }
