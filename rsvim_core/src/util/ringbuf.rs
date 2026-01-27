@@ -26,6 +26,10 @@ impl<T> RingBuffer<T> {
     self.data.len()
   }
 
+  pub fn max_size(&self) -> usize {
+    self.max_size
+  }
+
   /// Force push back, remove front items if deque is full.
   pub fn push_back_overwrite(&mut self, value: T) {
     while self.data.len() >= self.max_size && !self.data.is_empty() {
