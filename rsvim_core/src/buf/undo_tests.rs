@@ -3,6 +3,8 @@ use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use ropey::RopeBuilder;
 
+const MAX_SIZE: usize = 100;
+
 fn assert_insert(undo_manager: &UndoManager, op_idx: usize, op: Insert) {
   assert!(undo_manager.current().records().len() > op_idx);
   let actual = undo_manager.current().records()[op_idx].clone();
@@ -25,7 +27,7 @@ fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
 
 #[test]
 fn insert1() {
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
     undo_mgr.current_mut().insert(Insert {
