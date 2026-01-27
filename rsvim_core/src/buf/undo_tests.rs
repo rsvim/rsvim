@@ -24,19 +24,19 @@ fn assert_delete(undo_manager: &UndoManager, op_idx: usize, op: Delete) {
 
 #[test]
 fn insert1() {
-  let mut undo = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let payload = "Hello, World!";
   for (i, c) in payload.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + c.to_compact_string().chars().count(),
     });
   }
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload.to_compact_string(),
@@ -44,27 +44,27 @@ fn insert1() {
       char_idx_after: payload.to_compact_string().chars().count(),
     },
   );
-  undo.commit();
+  undo_mgr.commit();
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert!(actual.records().is_empty());
 }
 
 #[test]
 fn insert2() {
-  let mut undo = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let payload1 = "Hello, ";
   for (i, c) in payload1.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
     });
   }
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -75,16 +75,16 @@ fn insert2() {
 
   let payload2 = "World!";
   for (i, c) in payload2.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       char_idx_before: i + 3,
       char_idx_after: i + 4,
       payload: c.to_compact_string(),
     });
   }
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: "Hello, ".to_compact_string(),
@@ -93,7 +93,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     1,
     Insert {
       payload: payload2.to_compact_string(),
@@ -104,7 +104,7 @@ fn insert2() {
 
   let payload3 = "汤姆(Tom)?";
   for (i, c) in payload3.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       char_idx_before: i + payload1.chars().count() + payload2.chars().count(),
       char_idx_after: i
         + payload1.chars().count()
@@ -113,10 +113,10 @@ fn insert2() {
       payload: c.to_compact_string(),
     });
   }
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 3);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -125,7 +125,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     1,
     Insert {
       payload: payload2.to_compact_string(),
@@ -134,7 +134,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     2,
     Insert {
       payload: payload3.to_compact_string(),
@@ -147,16 +147,16 @@ fn insert2() {
 
   let payload4 = "no, it's jerry";
   for (i, c) in payload4.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i + 100,
       char_idx_after: i + 100 + 1,
     });
   }
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 4);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -165,7 +165,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     1,
     Insert {
       payload: payload2.to_compact_string(),
@@ -174,7 +174,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     2,
     Insert {
       payload: payload3.to_compact_string(),
@@ -185,7 +185,7 @@ fn insert2() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     3,
     Insert {
       payload: payload4.to_compact_string(),
@@ -194,28 +194,28 @@ fn insert2() {
     },
   );
 
-  undo.commit();
+  undo_mgr.commit();
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert!(actual.records().is_empty());
 }
 
 #[test]
 fn delete1() {
-  let mut undo = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
     });
   }
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -224,16 +224,16 @@ fn delete1() {
     },
   );
 
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "!".to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 11,
   });
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -242,7 +242,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo,
+    &undo_mgr,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -252,16 +252,16 @@ fn delete1() {
   );
 
   let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
-  undo.current_mut().insert(Insert {
+  undo_mgr.current_mut().insert(Insert {
     payload: payload2.to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 12 + payload2.chars().count(),
   });
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 3);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -270,7 +270,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo,
+    &undo_mgr,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -279,7 +279,7 @@ fn delete1() {
     },
   );
   assert_insert(
-    &undo,
+    &undo_mgr,
     2,
     Insert {
       payload: payload2.to_compact_string(),
@@ -288,17 +288,17 @@ fn delete1() {
     },
   );
 
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: payload2.to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 12,
   });
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -307,7 +307,7 @@ fn delete1() {
     },
   );
   assert_delete(
-    &undo,
+    &undo_mgr,
     1,
     Delete {
       payload: "!".to_compact_string(),
@@ -316,28 +316,28 @@ fn delete1() {
     },
   );
 
-  undo.commit();
+  undo_mgr.commit();
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert!(actual.records().is_empty());
 }
 
 #[test]
 fn delete2() {
-  let mut undo = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let payload1 = "Hello, World!";
   for (i, c) in payload1.chars().enumerate() {
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       payload: c.to_compact_string(),
       char_idx_before: i,
       char_idx_after: i + 1,
     });
   }
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -346,27 +346,27 @@ fn delete2() {
     },
   );
 
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "!".to_compact_string(),
     char_idx_before: 12,
     char_idx_after: 11,
   });
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "d".to_compact_string(),
     char_idx_before: 11,
     char_idx_after: 10,
   });
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "l".to_compact_string(),
     char_idx_before: 10,
     char_idx_after: 9,
   });
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -375,7 +375,7 @@ fn delete2() {
     },
   );
   assert_delete(
-    &undo,
+    &undo_mgr,
     1,
     Delete {
       payload: "ld!".to_compact_string(),
@@ -384,17 +384,17 @@ fn delete2() {
     },
   );
 
-  undo.current_mut().delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "or".to_compact_string(),
     char_idx_before: 9,
     char_idx_after: 7,
   });
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -403,7 +403,7 @@ fn delete2() {
     },
   );
   assert_delete(
-    &undo,
+    &undo_mgr,
     1,
     Delete {
       payload: "orld!".to_compact_string(),
@@ -412,26 +412,26 @@ fn delete2() {
     },
   );
 
-  undo.commit();
+  undo_mgr.commit();
 
-  let actual = undo.current();
+  let actual = undo_mgr.current();
   assert!(actual.records().is_empty());
 }
 
 #[test]
 fn delete3() {
-  let mut undo_manager = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let payload1 = "Hello, World!";
-  undo_manager.insert(Insert {
+  undo_mgr.current_mut().insert(Insert {
     payload: payload1.to_compact_string(),
     char_idx_before: 0,
     char_idx_after: payload1.chars().count(),
   });
 
-  let actual = undo_manager.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 1);
   assert_insert(
-    &undo_manager,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -440,17 +440,17 @@ fn delete3() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: ", ".to_compact_string(),
     char_idx_before: 5,
     char_idx_after: 5,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 2);
 
   assert_insert(
-    &undo_manager,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -459,7 +459,7 @@ fn delete3() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo_mgr,
     1,
     Delete {
       payload: ", ".to_compact_string(),
@@ -468,17 +468,17 @@ fn delete3() {
     },
   );
 
-  undo_manager.delete(Delete {
+  undo_mgr.current_mut().delete(Delete {
     payload: "loWo".to_compact_string(),
     char_idx_before: 3,
     char_idx_after: 3,
   });
 
-  let actual = undo_manager.current();
+  let actual = undo_mgr.current();
   assert_eq!(actual.records().len(), 3);
 
   assert_insert(
-    &undo_manager,
+    &undo_mgr,
     0,
     Insert {
       payload: payload1.to_compact_string(),
@@ -487,7 +487,7 @@ fn delete3() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo_mgr,
     1,
     Delete {
       payload: ", ".to_compact_string(),
@@ -496,7 +496,7 @@ fn delete3() {
     },
   );
   assert_delete(
-    &undo_manager,
+    &undo_mgr,
     2,
     Delete {
       payload: "loWo".to_compact_string(),
@@ -508,13 +508,13 @@ fn delete3() {
 
 #[test]
 fn revert1() {
-  let mut undo = UndoManager::new();
+  let mut undo_mgr = UndoManager::new();
   let mut text = RopeBuilder::new().finish();
 
   let payload1 = "Hello";
   for (i, c) in payload1.chars().enumerate() {
     text.insert_char(i, c);
-    undo.current_mut().insert(Insert {
+    undo_mgr.current_mut().insert(Insert {
       char_idx_before: i,
       char_idx_after: i + 1,
       payload: c.to_compact_string(),
@@ -523,7 +523,7 @@ fn revert1() {
 
   let payload2 = ", ";
   text.insert(payload1.len(), payload2);
-  undo.current_mut().insert(Insert {
+  undo_mgr.current_mut().insert(Insert {
     char_idx_before: payload1.len(),
     char_idx_after: payload1.len() + payload2.len(),
     payload: payload2.to_compact_string(),
@@ -531,11 +531,11 @@ fn revert1() {
 
   let payload3 = "World!";
   text.insert(payload1.len() + payload2.len(), payload3);
-  undo.current_mut().insert(Insert {
+  undo_mgr.current_mut().insert(Insert {
     char_idx_before: payload1.len() + payload2.len(),
     char_idx_after: payload1.len() + payload2.len() + payload3.len(),
     payload: payload3.to_compact_string(),
   });
 
-  undo.commit();
+  undo_mgr.commit();
 }
