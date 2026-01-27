@@ -1548,13 +1548,13 @@ Rsvim.rt.exit(0);
       let mut contents = lock!(event_loop.contents);
       info!(
         "command_line_message_history occupied_len:{}, vacant_len: {}",
-        contents.cmdline_message_history().occupied_len(),
-        contents.cmdline_message_history().vacant_len()
+        contents.cmdline_message_history().len(),
+        contents.cmdline_message_history().max_size()
       );
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("1".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
