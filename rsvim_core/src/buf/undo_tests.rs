@@ -55,7 +55,7 @@ fn insert1() {
 
 #[test]
 fn insert2() {
-  let mut undo_mgr = UndoManager::new();
+  let mut undo_mgr = UndoManager::new(MAX_SIZE);
   let payload1 = "Hello, ";
   for (i, c) in payload1.chars().enumerate() {
     undo_mgr.current_mut().insert(Insert {
