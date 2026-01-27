@@ -249,24 +249,31 @@ impl UndoManager {
   ///
   /// It reverts to the previous `commit`.
   ///
-  /// Returns `Ok` and modifies the passed `text` if revert successfully,
-  /// returns `Err` and not change the `text` if `I` is not exist in history.
+  /// Returns `Ok` and modifies the passed `rope` if revert successfully,
+  /// returns `Err` and not change the `rope` if `I` is not exist in history.
   pub fn revert(
     &mut self,
     commit_idx: usize,
     buf_id: BufferId,
-    _rope: &mut Rope,
+    rope: &mut Rope,
   ) -> TheResult<()> {
     if commit_idx >= self.history.len() {
       return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
     }
 
-    for record in self.history.drain(commit_idx..).rev() {
-      match record.op {
-        Operation::Insert(insert) => {}
+    for (i, record) in self.history.iter().rev().enumerate() {
+      // Revert all previous editing operations on the passed `rope`.
+      match &record.op {
+        Operation::Insert(insert) => {
+          if rope.len_chars() < insert.char_idx_after {
+            return Err(TheErr::UndoRevertFailed(commit_idx, buf_id));
+          }
+        }
         Operation::Delete(delete) => {}
       }
     }
+
+    let records = self.history.drain(commit_idx..);
 
     Ok(())
   }
