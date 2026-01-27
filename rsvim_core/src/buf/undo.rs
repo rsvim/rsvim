@@ -261,11 +261,7 @@ impl UndoManager {
       return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
     }
 
-    for (i, record) in self.history.iter().rev().enumerate() {
-      if i == commit_idx {
-        break;
-      }
-    }
+    for record in self.history.drain(commit_idx..).rev() {}
 
     Ok(())
   }
