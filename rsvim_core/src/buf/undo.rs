@@ -1,7 +1,7 @@
 //! Undo history.
 
 use crate::prelude::*;
-use crate::util::fixed_deque::FixedDeque;
+use crate::util::ringbuf::RingBuffer;
 use compact_str::CompactString;
 use ropey::Rope;
 use std::collections::VecDeque;
@@ -198,7 +198,7 @@ impl Current {
 
 #[derive(Debug, Clone)]
 pub struct UndoManager {
-  undo_stack: FixedDeque<Record>,
+  undo_stack: RingBuffer<Record>,
   redo_stack: VecDeque<Record>,
   current: Current,
   __next_version: usize,
@@ -217,7 +217,7 @@ pub struct UndoManager {
 impl UndoManager {
   pub fn new(max_size: usize) -> Self {
     Self {
-      undo_stack: FixedDeque::new(max_size),
+      undo_stack: RingBuffer::new(max_size),
       redo_stack: VecDeque::new(),
       current: Current::new(),
       __next_version: START_VERSION,
@@ -258,7 +258,9 @@ impl UndoManager {
       return Err(TheErr::UndoCommitNotExist(commit_idx));
     }
 
-    for (i, record) in self.undo_stack.iter().rev().enumerate() {
+    let mut i: isize = commit_idx;
+    while i as usize >= commit_idx {
+      let record = self.undo_stack[i];
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
@@ -281,7 +283,9 @@ impl UndoManager {
           rope.insert(delete.char_idx_after, &delete.payload);
         }
       }
-
+      i += 1;
+    }
+    for (i, record) in self.undo_stack.iter().rev().enumerate() {
       if i == commit_idx {
         break;
       }
@@ -294,7 +298,7 @@ impl UndoManager {
     Ok(())
   }
 
-  pub fn undo_stack(&self) -> &FixedDeque<Record> {
+  pub fn undo_stack(&self) -> &RingBuffer<Record> {
     &self.undo_stack
   }
 

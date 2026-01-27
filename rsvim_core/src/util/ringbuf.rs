@@ -1,15 +1,14 @@
-//! VecDeque based fixed-size ringbuf, it provides more Vec APIs than the
-//! `ringbuf` crate.
+//! VecDeque based fixed-size ringbuf.
 
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
-pub struct FixedDeque<T> {
+pub struct RingBuffer<T> {
   dq: VecDeque<T>,
   max_size: usize,
 }
 
-impl<T> FixedDeque<T> {
+impl<T> RingBuffer<T> {
   pub fn new(max_size: usize) -> Self {
     Self {
       dq: VecDeque::with_capacity(max_size),
