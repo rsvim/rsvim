@@ -249,7 +249,7 @@ impl UndoManager {
     let version = self.next_version();
     for mut change in self.current.records_mut().drain(..) {
       change.version = version;
-      self.history.push_overwrite(change);
+      self.history.push_back_overwrite(change);
     }
     self.current = Current::new();
   }
@@ -266,14 +266,14 @@ impl UndoManager {
     buf_id: BufferId,
     _text: &mut Text,
   ) -> TheResult<()> {
-    if commit >= self.history.occupied_len() {
+    if commit >= self.history.len() {
       return Err(TheErr::UndoCommitNotExist(commit, buf_id));
     }
 
     Ok(())
   }
 
-  pub fn max_commit(&self) -> usize {
-    self.history.occupied_len()
+  pub fn history(&self) -> &FixedDeque<Record> {
+    &self.history
   }
 }
