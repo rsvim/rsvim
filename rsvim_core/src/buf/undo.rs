@@ -253,11 +253,7 @@ impl UndoManager {
   ///
   /// Returns `Ok` and modifies the passed `rope` if revert successfully,
   /// returns `Err` and not change the `rope` if `I` is not exist in history.
-  pub fn revert(
-    &mut self,
-    commit_idx: usize,
-    rope: &mut Rope,
-  ) -> TheResult<()> {
+  pub fn undo(&mut self, commit_idx: usize, rope: &mut Rope) -> TheResult<()> {
     if commit_idx >= self.undo_stack.len() {
       return Err(TheErr::UndoCommitNotExist(commit_idx));
     }
