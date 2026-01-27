@@ -5,6 +5,7 @@ use crate::prelude::*;
 use crate::util::fixed_deque::FixedDeque;
 use compact_str::CompactString;
 use ropey::Rope;
+use std::collections::VecDeque;
 use std::fmt::Debug;
 use tokio::time::Instant;
 
@@ -198,7 +199,8 @@ impl Current {
 
 #[derive(Debug, Clone)]
 pub struct UndoManager {
-  history: FixedDeque<Record>,
+  undo_stack: FixedDeque<Record>,
+  redo_stack: VecDeque<Record>,
   current: Current,
   __next_version: usize,
 }
@@ -216,7 +218,8 @@ pub struct UndoManager {
 impl UndoManager {
   pub fn new(max_size: usize) -> Self {
     Self {
-      history: FixedDeque::new(max_size),
+      undo_stack: FixedDeque::new(max_size),
+      redo_stack: VecDeque::new(),
       current: Current::new(),
       __next_version: START_VERSION,
     }
@@ -240,7 +243,7 @@ impl UndoManager {
     let version = self.next_version();
     for mut change in self.current.records_mut().drain(..) {
       change.version = version;
-      self.history.push_back_overwrite(change);
+      self.undo_stack.push_back_overwrite(change);
     }
     self.current = Current::new();
   }
@@ -257,11 +260,11 @@ impl UndoManager {
     buf_id: BufferId,
     rope: &mut Rope,
   ) -> TheResult<()> {
-    if commit_idx >= self.history.len() {
+    if commit_idx >= self.undo_stack.len() {
       return Err(TheErr::UndoCommitNotExist(commit_idx, buf_id));
     }
 
-    for (i, record) in self.history.iter().rev().enumerate() {
+    for (i, record) in self.undo_stack.iter().rev().enumerate() {
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
@@ -290,12 +293,16 @@ impl UndoManager {
       }
     }
 
-    let _records = self.history.drain(commit_idx..);
+    let _records = self.undo_stack.drain(commit_idx..);
 
     Ok(())
   }
 
-  pub fn history(&self) -> &FixedDeque<Record> {
-    &self.history
+  pub fn undo_stack(&self) -> &FixedDeque<Record> {
+    &self.undo_stack
+  }
+
+  pub fn redo_stack(&self) -> &FixedDeque<Record> {
+    &self.redo_stack
   }
 }
