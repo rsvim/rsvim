@@ -290,7 +290,7 @@ impl UndoManager {
       }
     }
 
-    let records = self.history.drain(commit_idx..);
+    let _records = self.history.drain(commit_idx..);
 
     Ok(())
   }
