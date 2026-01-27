@@ -550,4 +550,7 @@ fn revert1() {
   let result = undo_mgr.revert(0, &mut text2);
   assert!(result.is_ok());
   assert_eq!(text2.len_chars(), 0);
+
+  assert!(undo_mgr.undo_stack().is_empty());
+  assert_eq!(undo_mgr.redo_stack().len(), 1);
 }
