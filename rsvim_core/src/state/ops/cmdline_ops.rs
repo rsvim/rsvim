@@ -7,8 +7,6 @@ use crate::ui::tree::Tree;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::Viewport;
 use compact_str::ToCompactString;
-use ringbuf::traits::Consumer;
-use ringbuf::traits::RingBuffer;
 
 fn _set_message_impl(
   tree: &mut Tree,
@@ -38,7 +36,7 @@ pub fn cmdline_set_last_pending_message_on_initialize(
 ) {
   // If message history contains some payload. This means before we actually
   // running the event loop, there's already some messages wait for print.
-  let last_msg = text_contents.cmdline_message_history().last().cloned();
+  let last_msg = text_contents.cmdline_message_history().back().cloned();
   trace!("|cmdline_flush_pending_message| last_msg:{:?}", last_msg);
   if let Some(last_msg) = last_msg {
     // Current "command-line-message" widget can only print 1 single-line

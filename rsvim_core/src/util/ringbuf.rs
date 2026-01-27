@@ -60,6 +60,14 @@ impl<T> RingBuffer<T> {
     self.data.iter()
   }
 
+  pub fn back(&self) -> Option<&T> {
+    self.data.back()
+  }
+
+  pub fn back_mut(&self) -> Option<&mut T> {
+    self.data.back_mut()
+  }
+
   pub fn drain<R>(
     &mut self,
     range: R,
