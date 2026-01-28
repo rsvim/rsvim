@@ -5,7 +5,7 @@ use crate::tests::log::init as test_log_init;
 use std::sync::atomic::AtomicU8;
 
 struct_id_impl!(TestId, u8);
-next_incremental_id_impl!(next_test_id, TestId, AtomicU8, u8);
+next_incremental_id_impl!(next_test_id, TestId, AtomicU8, u8, 1);
 
 #[test]
 fn next_test_id1() {

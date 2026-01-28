@@ -66,14 +66,20 @@ macro_rules! struct_id_impl {
 
 #[macro_export]
 macro_rules! next_incremental_id_impl {
-  ($func_name:ident,$struct_name:ident,$atomic_int:tt,$plain_int:tt) => {
+  ($func_name:ident,$struct_name:ident,$atomic_int:tt,$plain_int:tt,$initial:expr) => {
     pub fn $func_name() -> $struct_name {
-      static VALUE: $atomic_int = $atomic_int::new(1);
+      static VALUE: $atomic_int = $atomic_int::new($initial);
       let v = VALUE
         .fetch_update(
           std::sync::atomic::Ordering::Relaxed,
           std::sync::atomic::Ordering::Relaxed,
-          |x| Some(if x == $plain_int::MAX { 1 } else { x + 1 }),
+          |x| {
+            Some(if x == $plain_int::MAX {
+              $initial
+            } else {
+              x + 1
+            })
+          },
         )
         .unwrap();
       $struct_name::from(v)
