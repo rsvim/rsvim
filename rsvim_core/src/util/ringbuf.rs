@@ -49,23 +49,23 @@ impl<T> RingBuffer<T> {
     }
   }
 
-  pub fn pop_front(&mut self) -> Option<T> {
-    self.data.pop_front()
-  }
-
-  pub fn pop_back(&mut self) -> Option<T> {
-    self.data.pop_back()
-  }
-
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
     self.data.iter()
   }
 
-  pub fn back(&self) -> Option<&T> {
+  pub fn first(&mut self) -> Option<T> {
+    self.data.pop_front()
+  }
+
+  pub fn first_mut(&mut self) -> Option<T> {
+    self.data.pop_front()
+  }
+
+  pub fn last(&self) -> Option<&T> {
     self.data.back()
   }
 
-  pub fn back_mut(&mut self) -> Option<&mut T> {
+  pub fn last_mut(&mut self) -> Option<&mut T> {
     self.data.back_mut()
   }
 
