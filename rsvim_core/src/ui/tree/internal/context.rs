@@ -1,5 +1,6 @@
 //! Internal tree context.
 
+use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use crate::ui::tree::internal::shapes;
@@ -9,7 +10,6 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 use std::sync::atomic::AtomicI32;
-use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
@@ -24,13 +24,8 @@ pub static DEFAULT_SHAPE: Lazy<IRect> = Lazy::new(|| rect!(0, 0, 0, 0));
 pub static DEFAULT_ACTUAL_SHAPE: Lazy<U16Rect> =
   Lazy::new(|| rect!(0, 0, 0, 0));
 
-/// Next unique UI widget ID.
-///
-/// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> NodeId {
-  static VALUE: AtomicI32 = AtomicI32::new(100001);
-  NodeId::from(VALUE.fetch_add(1, Ordering::Relaxed))
-}
+// NodeId starts from 100001
+next_incremental_id_impl!(next_node_id, NodeId, AtomicI32, i32, 100001);
 
 #[derive(Debug, Clone)]
 pub struct Ta {

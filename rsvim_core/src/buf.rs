@@ -14,6 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
+use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::struct_id_impl;
 use compact_str::ToCompactString;
@@ -25,20 +26,14 @@ use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
-use std::sync::atomic::Ordering;
 use text::Text;
 use tokio::time::Instant;
 use undo::UndoManager;
 
 struct_id_impl!(BufferId, i32, negative);
 
-/// Next unique buffer ID.
-///
-/// NOTE: Start form 1.
-pub fn next_buffer_id() -> BufferId {
-  static VALUE: AtomicI32 = AtomicI32::new(1);
-  BufferId::from(VALUE.fetch_add(1, Ordering::Relaxed))
-}
+// BufferId starts from 1.
+next_incremental_id_impl!(next_buffer_id, BufferId, AtomicI32, i32, 1);
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
