@@ -31,7 +31,6 @@ use crate::ui::tree::*;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
-use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use taffy::Style;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -523,7 +522,7 @@ impl EventLoop {
             let mut contents = lock!(self.contents);
             contents
               .cmdline_message_history_mut()
-              .push_overwrite(e.to_string());
+              .push_back_overwrite(e.to_string());
           }
         }
       }
