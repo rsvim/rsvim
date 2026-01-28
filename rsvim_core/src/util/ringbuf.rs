@@ -31,7 +31,7 @@ impl<T> RingBuffer<T> {
     self.max_size
   }
 
-  /// Force push back, remove front items if deque is full.
+  /// Force push, remove front items if ring buffer is full.
   pub fn push_overwrite(&mut self, value: T) {
     while self.data.len() >= self.max_size && !self.data.is_empty() {
       self.data.pop_front();
@@ -39,7 +39,7 @@ impl<T> RingBuffer<T> {
     self.data.push_back(value)
   }
 
-  /// Try push back, fail and don't remove front items if deque is full.
+  /// Try push, fail and don't remove front items if ring buffer is full.
   pub fn try_push(&mut self, value: T) -> Result<(), T> {
     if self.data.len() < self.max_size {
       self.data.push_back(value);
