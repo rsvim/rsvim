@@ -1648,10 +1648,10 @@ Rsvim.rt.exit(0);
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("7".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
@@ -1726,10 +1726,10 @@ try {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("9".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
@@ -1825,10 +1825,10 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("D:C:B:A:5".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
@@ -1920,10 +1920,10 @@ export default {};
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("9".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
@@ -2015,10 +2015,10 @@ export default {};
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
+      assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
         Some("9".to_string()),
-        contents.cmdline_message_history_mut().try_pop()
+        contents.cmdline_message_history_mut().pop_front()
       );
     }
 
@@ -2073,8 +2073,8 @@ mod test_require {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.cmdline_message_history().occupied_len());
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      assert_eq!(1, contents.cmdline_message_history().len());
+      let actual = contents.cmdline_message_history_mut().pop_front();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(
