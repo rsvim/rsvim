@@ -808,8 +808,8 @@ impl Text {
   /// 3. If `n=0`, delete nothing.
   ///
   /// # Returns
-  /// It returns the new position `(line_idx,char_idx)` after deleted, it returns `None` if delete
-  /// nothing.
+  /// 1. It returns the new absolute position `char_idx` after deleted.
+  /// 2. It returns `None` if delete nothing.
   ///
   /// # Panics
   /// It panics if the position doesn't exist.
