@@ -642,7 +642,7 @@ impl Text {
   /// 2. It returns `None` if `payload` is empty.
   ///
   /// # Panics
-  /// It panics if the insert absolute position doesn't exist.
+  /// It panics if the insert absolute position doesn't exist on text rope.
   pub fn insert_at(
     &mut self,
     absolute_char_idx: usize,
@@ -812,7 +812,7 @@ impl Text {
   /// 2. It returns `None` if delete nothing.
   ///
   /// # Panics
-  /// It panics if the position doesn't exist.
+  /// It panics if the absolute position doesn't exist on text rope.
   pub fn delete_at(
     &mut self,
     absolute_char_idx: usize,
