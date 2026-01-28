@@ -659,12 +659,8 @@ impl Text {
     // recalculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx + payload.chars().count();
-    let line_idx_after_inserted =
-      self.rope.char_to_line(absolute_char_idx_after_inserted);
-    let absolute_line_idx_after_inserted =
-      self.rope.line_to_char(line_idx_after_inserted);
-    let char_idx_after_inserted =
-      absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
+    let (line_idx_after_inserted, char_idx_after_inserted) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx_after_inserted);
 
     if line_idx == line_idx_after_inserted {
       // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
