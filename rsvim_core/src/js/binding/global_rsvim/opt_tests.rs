@@ -193,7 +193,7 @@ mod tests_tab_stop {
       let mut contents = lock!(event_loop.contents);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       info!("actual:{:?}", actual);
@@ -660,7 +660,7 @@ mod tests_shift_width {
       let mut contents = lock!(event_loop.contents);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(actual.contains(

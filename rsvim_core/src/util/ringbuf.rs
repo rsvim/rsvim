@@ -49,15 +49,15 @@ impl<T> RingBuffer<T> {
     }
   }
 
-  /// Try pop.
-  pub fn try_pop(&mut self) -> Option<T> {
+  /// Pop eldest item and remove it.
+  pub fn pop(&mut self) -> Option<T> {
     self.data.pop_front()
   }
 
-  /// Try peek, get eldest item without removing it.
+  /// Peek, get eldest item without removing it.
   ///
   /// Equivalent to [`Self::first`].
-  pub fn try_peek(&self) -> Option<&T> {
+  pub fn peek(&self) -> Option<&T> {
     self.data.front()
   }
 
