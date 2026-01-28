@@ -54,11 +54,11 @@ impl<T> RingBuffer<T> {
   }
 
   pub fn first(&mut self) -> Option<T> {
-    self.data.pop_front()
+    self.data.front()
   }
 
-  pub fn first_mut(&mut self) -> Option<T> {
-    self.data.pop_front()
+  pub fn first_mut(&mut self) -> Option<&mut T> {
+    self.data.front_mut()
   }
 
   pub fn last(&self) -> Option<&T> {
