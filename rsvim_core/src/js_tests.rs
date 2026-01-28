@@ -16,7 +16,10 @@ fn next_task_id1() {
   for _i in 0..100 {
     let id = next_task_id();
     if let Some(last_id) = last_id {
-      assert_eq!(last_id.value() + 1, id.value());
+      assert_eq!(
+        std::convert::Into::<usize>::into(last_id) + 1,
+        std::convert::Into::<usize>::into(id)
+      );
     }
     last_id = Some(id);
   }
