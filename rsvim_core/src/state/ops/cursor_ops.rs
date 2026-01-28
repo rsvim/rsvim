@@ -634,15 +634,17 @@ pub fn cursor_delete(
   debug_assert!(
     cursor_char_idx < text.rope().line(cursor_line_idx).len_chars()
   );
-  let maybe_new_cursor_position =
-    text.delete_at(cursor_line_idx, cursor_char_idx, n);
+  let cursor_absolute_char_idx =
+    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
+  let maybe_new_cursor_position = text.delete_at(cursor_absolute_char_idx, n);
 
   maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
   _update_viewport_after_text_changed(tree, id, text);
+  let new_cursor_absolute_position = maybe_new_cursor_position.unwrap();
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
-    maybe_new_cursor_position.unwrap();
+    text.relative_line_idx_and_char_idx(new_cursor_absolute_position);
 
   trace!(
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
