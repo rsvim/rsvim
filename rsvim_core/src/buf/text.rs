@@ -645,35 +645,20 @@ impl Text {
   /// It panics if the insert absolute position doesn't exist.
   pub fn insert_at(
     &mut self,
-    line_idx: usize,
-    char_idx: usize,
+    absolute_char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    let absolute_char_idx_before_insert =
-      self.absolute_char_idx(line_idx, char_idx);
-    debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
-        .0,
-      line_idx
-    );
-    debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
-        .1,
-      char_idx
-    );
+    let (line_idx, _char_idx) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx);
 
-    self.dbg_print_textline(line_idx, char_idx, "Before insert");
+    self.dbg_print_textline(line_idx, absolute_char_idx, "Before insert");
 
-    self
-      .rope_mut()
-      .insert(absolute_char_idx_before_insert, payload.as_str());
+    self.rope_mut().insert(absolute_char_idx, payload.as_str());
 
     // The `text` may contains line break '\n', which can interrupts the `line_idx` and we need to
     // recalculate it.
     let absolute_char_idx_after_inserted =
-      absolute_char_idx_before_insert + payload.chars().count();
+      absolute_char_idx + payload.chars().count();
     let line_idx_after_inserted =
       self.rope.char_to_line(absolute_char_idx_after_inserted);
     let absolute_line_idx_after_inserted =
@@ -684,9 +669,9 @@ impl Text {
     if line_idx == line_idx_after_inserted {
       // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
       // Thus only need to truncate chars after insert position on the same line.
-      debug_assert!(char_idx_after_inserted >= char_idx);
+      debug_assert!(char_idx_after_inserted >= absolute_char_idx);
       let min_cursor_char_idx =
-        std::cmp::min(char_idx_after_inserted, char_idx);
+        std::cmp::min(char_idx_after_inserted, absolute_char_idx);
       self.truncate_cached_line_since_char(
         line_idx,
         min_cursor_char_idx.saturating_sub(1),
