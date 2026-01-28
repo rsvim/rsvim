@@ -36,8 +36,6 @@ impl<T> RingBuffer<T> {
     while self.data.len() >= self.max_size && !self.data.is_empty() {
       self.data.pop_front();
     }
-
-    // Push back
     self.data.push_back(value)
   }
 
