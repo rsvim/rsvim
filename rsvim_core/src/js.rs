@@ -34,6 +34,7 @@ use crate::content::TextContentsArc;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
+use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::struct_id_impl;
 use crate::ui::tree::TreeArc;
@@ -80,23 +81,8 @@ pub trait JsFuture {
 struct_id_impl!(TimerId, i32);
 struct_id_impl!(TaskId, usize);
 
-/// Next task ID. It starts form 1.
-pub fn next_task_id() -> TaskId {
-  static VALUE: AtomicUsize = AtomicUsize::new(1);
-  TaskId::from(
-    VALUE
-      .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
-        Some((x + 1) % usize::MAX)
-      })
-      .unwrap(),
-  )
-}
-
-/// Next timer ID. It starts form 1.
-pub fn next_timer_id() -> TimerId {
-  static VALUE: AtomicI32 = AtomicI32::new(1);
-  TimerId::from(VALUE.fetch_add(1, Ordering::Relaxed))
-}
+next_incremental_id_impl!(next_timer_id, TimerId, AtomicI32, i32);
+next_incremental_id_impl!(next_task_id, TaskId, AtomicUsize, usize);
 
 /// Snapshot data.
 pub struct SnapshotData {

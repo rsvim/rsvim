@@ -10,6 +10,18 @@ use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use std::time::Duration;
 
+#[test]
+fn next_task_id1() {
+  let mut last_id: Option<TaskId> = None;
+  for _i in 0..100 {
+    let id = next_task_id();
+    if let Some(last_id) = last_id {
+      assert_eq!(last_id.value() + 1, id.value());
+    }
+    last_id = Some(id);
+  }
+}
+
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
 async fn create_snapshot1() -> IoResult<()> {

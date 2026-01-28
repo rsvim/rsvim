@@ -46,6 +46,10 @@ macro_rules! struct_id_impl {
       pub const fn zero() -> Self {
         Self(0)
       }
+
+      pub fn value(&self) -> $ty {
+        self.0
+      }
     }
   };
 
@@ -56,6 +60,21 @@ macro_rules! struct_id_impl {
       pub const fn negative_one() -> Self {
         Self(-1)
       }
+    }
+  };
+}
+
+#[macro_export]
+macro_rules! next_incremental_id_impl {
+  ($func_name:ident,$struct_name:ident,$atomic_int:tt,$plain_int:tt) => {
+    pub fn $func_name() -> $struct_name {
+      static VALUE: $atomic_int = $atomic_int::new(1);
+      let v = VALUE
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
+          Some(if x == $plain_int::MAX { 1 } else { x + 1 })
+        })
+        .unwrap();
+      $struct_name::from(v)
     }
   };
 }
