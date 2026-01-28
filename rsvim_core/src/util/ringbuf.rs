@@ -153,29 +153,27 @@ impl<T> DeRingBuffer<T> {
     }
   }
 
-  pub fn try_pop_front(&mut self) -> Option<T> {
+  pub fn pop_front(&mut self) -> Option<T> {
     self.data.pop_front()
   }
 
-  pub fn try_pop_back(&mut self) -> Option<T> {
+  pub fn pop_back(&mut self) -> Option<T> {
     self.data.pop_back()
   }
 
-  /// Get eldest item.
-  pub fn first(&self) -> Option<&T> {
+  pub fn front(&self) -> Option<&T> {
     self.data.front()
   }
 
-  pub fn first_mut(&mut self) -> Option<&mut T> {
+  pub fn front_mut(&mut self) -> Option<&mut T> {
     self.data.front_mut()
   }
 
-  /// Get latest item.
-  pub fn last(&self) -> Option<&T> {
+  pub fn back(&self) -> Option<&T> {
     self.data.back()
   }
 
-  pub fn last_mut(&mut self) -> Option<&mut T> {
+  pub fn back_mut(&mut self) -> Option<&mut T> {
     self.data.back_mut()
   }
 
