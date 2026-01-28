@@ -83,7 +83,13 @@ struct_id_impl!(TaskId, usize);
 /// Next task ID. It starts form 1.
 pub fn next_task_id() -> TaskId {
   static VALUE: AtomicUsize = AtomicUsize::new(1);
-  TaskId::from(VALUE.fetch_add(1, Ordering::Relaxed))
+  TaskId::from(
+    VALUE
+      .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
+        Some((v + 1) % usize::MAX)
+      })
+      .unwrap(),
+  )
 }
 
 /// Next timer ID. It starts form 1.
