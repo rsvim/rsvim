@@ -60,10 +60,6 @@ impl<T> RingBuffer<T> {
     self.data.front()
   }
 
-  pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
-    self.data.iter()
-  }
-
   /// Get eldest item.
   pub fn first(&self) -> Option<&T> {
     self.data.front()
@@ -80,6 +76,10 @@ impl<T> RingBuffer<T> {
 
   pub fn last_mut(&mut self) -> Option<&mut T> {
     self.data.back_mut()
+  }
+
+  pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
+    self.data.iter()
   }
 
   pub fn drain<R>(
