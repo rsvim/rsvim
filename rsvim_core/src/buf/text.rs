@@ -674,7 +674,11 @@ impl Text {
     &mut self,
     absolute_char_idx: usize,
     payload: CompactString,
-  ) -> (usize, usize) {
+  ) -> Option<usize> {
+    if payload.is_empty() {
+      return None;
+    }
+
     let (line_idx, char_idx) =
       self.relative_line_idx_and_char_idx(absolute_char_idx);
 
@@ -705,7 +709,7 @@ impl Text {
       "After inserted",
     );
 
-    (line_idx_after_inserted, char_idx_after_inserted)
+    Some(absolute_char_idx_after_inserted)
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
@@ -829,8 +833,11 @@ impl Text {
     absolute_char_idx: usize,
     n: isize,
   ) -> Option<usize> {
+    if n == 0 {
+      return None;
+    }
     let to_be_deleted_range =
-      self.absolute_delete_chars_range2(line_idx, char_idx, n);
+      self.absolute_delete_chars_range1(absolute_char_idx, n);
     if to_be_deleted_range.is_empty() {
       return None;
     }
