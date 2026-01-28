@@ -666,9 +666,9 @@ impl Text {
       // If the cursor line doesn't change, it means the inserted text doesn't
       // contain a line break '\n', i.e. it is still in the same line. Thus
       // only need to truncate chars after insert position on the same line.
-      debug_assert!(absolute_char_idx_after_inserted >= absolute_char_idx);
+      debug_assert!(char_idx_after_inserted >= char_idx);
       let min_cursor_char_idx =
-        std::cmp::min(char_idx_after_inserted, absolute_char_idx);
+        std::cmp::min(char_idx_after_inserted, char_idx);
       self.truncate_cached_line_since_char(
         line_idx,
         min_cursor_char_idx.saturating_sub(1),
