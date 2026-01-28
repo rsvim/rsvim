@@ -795,20 +795,7 @@ impl Text {
       char_idx
     );
 
-    self.dbg_print_textline(line_idx, char_idx, "Before delete");
-
-    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e.
-    // we treat `\r\n` as 1 single char when deleting it.
-    if n > 0 {
-      // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
-      debug_assert!(upper <= self.rope.len_chars());
-      absolute_char_idx..upper
-    } else {
-      // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self.n_chars_to_left(absolute_char_idx, (-n) as usize);
-      lower..absolute_char_idx
-    }
+    self.absolute_delete_chars_range1(absolute_char_idx, n)
   }
 
   /// Delete `n` text chars at absolute position `char_idx`, to either left or
