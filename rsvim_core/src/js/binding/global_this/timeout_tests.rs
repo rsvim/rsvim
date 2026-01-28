@@ -3,7 +3,6 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::widget::window::opt::*;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]

@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::widget::window::opt::*;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -525,8 +524,6 @@ mod tests_expand_tab {
 
 #[cfg(test)]
 mod tests_shift_width {
-  use ringbuf::traits::Observer;
-
   use super::*;
 
   #[tokio::test]

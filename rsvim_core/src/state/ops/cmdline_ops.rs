@@ -7,8 +7,6 @@ use crate::ui::tree::Tree;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::Viewport;
 use compact_str::ToCompactString;
-use ringbuf::traits::Consumer;
-use ringbuf::traits::RingBuffer;
 
 fn _set_message_impl(
   tree: &mut Tree,
