@@ -638,16 +638,16 @@ impl Text {
     &mut self,
     line_idx: usize,
     char_idx: usize,
-    line_idx_after_inserted: usize,
-    char_idx_after_inserted: usize,
+    line_idx_after_edit: usize,
+    char_idx_after_edit: usize,
   ) {
-    if line_idx == line_idx_after_inserted {
+    if line_idx == line_idx_after_edit {
       // If before/after insert, the cursor line doesn't change, it means the
       // inserted text doesn't contain line break, i.e. it is still the same
       // line. Thus only need to truncate chars after insert position on the
       // same line.
-      debug_assert!(char_idx_after_inserted >= char_idx);
-      let min_char_idx = std::cmp::min(char_idx_after_inserted, char_idx);
+      debug_assert!(char_idx_after_edit >= char_idx);
+      let min_char_idx = std::cmp::min(char_idx_after_edit, char_idx);
       self.truncate_cached_line_since_char(
         line_idx,
         min_char_idx.saturating_sub(1),
@@ -656,7 +656,7 @@ impl Text {
       // Otherwise the inserted text contains line breaks, and we have to
       // truncate all the cached lines below the cursor line, because we have
       // new lines.
-      let min_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
+      let min_line_idx = std::cmp::min(line_idx_after_edit, line_idx);
       self.retain_cached_lines(|line_idx| *line_idx < min_line_idx);
     }
   }
@@ -842,45 +842,35 @@ impl Text {
       return None;
     }
 
+    let (line_idx, char_idx) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx);
+
     self.rope_mut().remove(to_be_deleted_range.clone());
 
-    let cursor_char_absolute_pos_after_deleted = to_be_deleted_range.start;
+    let absolute_char_idx_after_deleted = to_be_deleted_range.start;
+    let absolute_char_idx_after_deleted =
+      std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
 
-    let cursor_char_absolute_pos_after_deleted = std::cmp::min(
-      cursor_char_absolute_pos_after_deleted,
-      self.rope.len_chars(),
+    let (line_idx_after_deleted, char_idx_after_deleted) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx_after_deleted);
+
+    self.reset_cache_on_edit(
+      line_idx,
+      char_idx,
+      line_idx_after_deleted,
+      char_idx_after_deleted,
     );
-    let cursor_line_idx_after_deleted = self
-      .rope
-      .char_to_line(cursor_char_absolute_pos_after_deleted);
-    let cursor_line_absolute_pos_after_deleted =
-      self.rope.line_to_char(cursor_line_idx_after_deleted);
-    let cursor_char_idx_after_deleted = cursor_char_absolute_pos_after_deleted
-      - cursor_line_absolute_pos_after_deleted;
-
-    if line_idx == cursor_line_idx_after_deleted {
-      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-      // Thus only need to truncate chars after insert position on the same line.
-      let min_cursor_char_idx =
-        std::cmp::min(cursor_char_idx_after_deleted, char_idx);
-      self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx);
-    } else {
-      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx =
-        std::cmp::min(cursor_line_idx_after_deleted, line_idx);
-      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
-    }
 
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
-      cursor_line_idx_after_deleted,
-      cursor_char_idx_after_deleted,
+      line_idx_after_deleted,
+      char_idx_after_deleted,
       "After deleted",
     );
 
-    Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
+    Some(absolute_char_idx_after_deleted)
   }
 
   /// Clear all text payload in current content.
