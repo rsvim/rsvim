@@ -1,7 +1,7 @@
 //! Undo history.
 
 use crate::prelude::*;
-use crate::util::ringbuf::RingBuffer;
+use crate::util::ringbuf::DeRingBuffer;
 use compact_str::CompactString;
 use ropey::Rope;
 use std::collections::VecDeque;
@@ -198,7 +198,7 @@ impl Current {
 
 #[derive(Debug, Clone)]
 pub struct UndoManager {
-  undo_stack: RingBuffer<Record>,
+  undo_stack: DeRingBuffer<Record>,
   redo_stack: VecDeque<Record>,
   current: Current,
   __next_version: usize,
@@ -217,7 +217,7 @@ pub struct UndoManager {
 impl UndoManager {
   pub fn new(max_size: usize) -> Self {
     Self {
-      undo_stack: RingBuffer::new(max_size),
+      undo_stack: DeRingBuffer::new(max_size),
       redo_stack: VecDeque::new(),
       current: Current::new(),
       __next_version: START_VERSION,
@@ -290,7 +290,7 @@ impl UndoManager {
     Ok(())
   }
 
-  pub fn undo_stack(&self) -> &RingBuffer<Record> {
+  pub fn undo_stack(&self) -> &DeRingBuffer<Record> {
     &self.undo_stack
   }
 
