@@ -57,7 +57,7 @@ pub fn cmdline_set_message(
 
   // Also append message history:
   let cmdline_hist = text_contents.cmdline_message_history_mut();
-  cmdline_hist.push_overwrite(payload);
+  cmdline_hist.push_back_overwrite(payload);
 }
 
 pub fn cmdline_clear_message(
