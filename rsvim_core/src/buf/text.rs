@@ -817,7 +817,7 @@ impl Text {
     &mut self,
     absolute_char_idx: usize,
     n: isize,
-  ) -> Option<(usize, usize)> {
+  ) -> Option<usize> {
     if n == 0 {
       return None;
     }
@@ -862,7 +862,7 @@ impl Text {
       "After deleted",
     );
 
-    Some((line_idx_after_deleted, char_idx_after_deleted))
+    Some(absolute_char_idx_after_deleted)
   }
 
   /// Clear all text payload in current content.
