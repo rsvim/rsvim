@@ -18,7 +18,7 @@ fn _set_message_impl(
   let message_text = text_contents.cmdline_message_mut();
   message_text.clear();
   if let Some(payload) = payload {
-    message_text.insert_at(0, 0, payload.to_compact_string());
+    message_text.insert_at(0, payload.to_compact_string());
   }
 
   let opts = *tree.cmdline().unwrap().options();
