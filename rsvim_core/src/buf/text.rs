@@ -699,9 +699,9 @@ impl Text {
     // `line_idx` and we need to recalculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx + payload.chars().count();
-
     let (line_idx_after_inserted, char_idx_after_inserted) =
       self.relative_line_idx_and_char_idx(absolute_char_idx_after_inserted);
+
     self.reset_cache_after_edit(
       line_idx,
       char_idx,
@@ -842,9 +842,9 @@ impl Text {
     let absolute_char_idx_after_deleted = to_delete_range.start;
     let absolute_char_idx_after_deleted =
       std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
-
     let (line_idx_after_deleted, char_idx_after_deleted) =
       self.relative_line_idx_and_char_idx(absolute_char_idx_after_deleted);
+
     self.reset_cache_after_edit(
       line_idx,
       char_idx,
