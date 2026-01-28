@@ -642,7 +642,7 @@ impl Text {
   /// 2. It returns the same absolute position if `payload` is empty.
   ///
   /// # Panics
-  /// If the position doesn't exist, or the text payload is empty.
+  /// It panics if the insert absolute position doesn't exist.
   pub fn insert_at(
     &mut self,
     line_idx: usize,
