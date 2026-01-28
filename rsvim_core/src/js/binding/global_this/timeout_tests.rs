@@ -152,7 +152,7 @@ async fn test_timeout3() -> IoResult<()> {
     assert!(global_local_options.line_break());
 
     let mut contents = lock!(event_loop.contents);
-    assert_eq!(3, contents.cmdline_message_history().occupied_len());
+    assert_eq!(3, contents.cmdline_message_history().len());
     let actual1 = contents.cmdline_message_history_mut().try_pop();
     assert!(actual1.is_some());
     let actual1 = actual1.unwrap();
@@ -223,7 +223,7 @@ async fn test_timeout4() -> IoResult<()> {
     assert_eq!(global_local_options.line_break(), LINE_BREAK);
 
     let contents = lock!(event_loop.contents);
-    assert_eq!(0, contents.cmdline_message_history().occupied_len());
+    assert_eq!(0, contents.cmdline_message_history().len());
   }
 
   Ok(())
@@ -313,7 +313,7 @@ async fn test_interval1() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    assert_eq!(3, contents.cmdline_message_history().occupied_len());
+    assert_eq!(3, contents.cmdline_message_history().len());
     for i in 0..3 {
       let actual = contents.cmdline_message_history_mut().try_pop();
       assert!(actual.is_some());
@@ -362,7 +362,7 @@ async fn test_interval2() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {
@@ -418,7 +418,7 @@ async fn test_interval3() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {

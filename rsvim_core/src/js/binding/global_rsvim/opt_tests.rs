@@ -145,7 +145,7 @@ mod tests_tab_stop {
       assert_eq!(global_local_options.tab_stop(), 1);
 
       let contents = lock!(event_loop.contents);
-      let n = contents.cmdline_message_history().occupied_len();
+      let n = contents.cmdline_message_history().len();
       assert_eq!(n, 0);
     }
 
@@ -191,7 +191,7 @@ mod tests_tab_stop {
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
       let mut contents = lock!(event_loop.contents);
-      let n = contents.cmdline_message_history().occupied_len();
+      let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
       let actual = contents.cmdline_message_history_mut().try_pop();
       assert!(actual.is_some());
@@ -612,7 +612,7 @@ mod tests_shift_width {
       assert_eq!(global_local_options.shift_width(), 255);
 
       let contents = lock!(event_loop.contents);
-      let n = contents.cmdline_message_history().occupied_len();
+      let n = contents.cmdline_message_history().len();
       assert_eq!(n, 0);
     }
 
@@ -658,7 +658,7 @@ mod tests_shift_width {
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
 
       let mut contents = lock!(event_loop.contents);
-      let n = contents.cmdline_message_history().occupied_len();
+      let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
       let actual = contents.cmdline_message_history_mut().try_pop();
       assert!(actual.is_some());

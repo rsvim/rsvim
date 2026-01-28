@@ -239,7 +239,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     assert!(actual.is_some());
@@ -297,7 +297,7 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 3);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
@@ -368,7 +368,7 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
@@ -436,7 +436,7 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
@@ -505,7 +505,7 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
@@ -568,7 +568,7 @@ Rsvim.cmd.list().forEach((name) => {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let expects = ["name:write"];
@@ -629,7 +629,7 @@ Rsvim.cmd.echo(`name:${def.name}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let expects = ["name:write"];
@@ -690,7 +690,7 @@ Rsvim.cmd.echo(`name:${def}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let expects = ["name:undefined"];
@@ -751,7 +751,7 @@ Rsvim.cmd.echo(prev.name);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let actual = contents.cmdline_message_history_mut().try_pop();
@@ -799,7 +799,7 @@ Rsvim.cmd.echo(`${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let actual = contents.cmdline_message_history_mut().try_pop();
@@ -855,7 +855,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -903,7 +903,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -951,7 +951,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -999,7 +999,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1047,7 +1047,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1095,7 +1095,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1143,7 +1143,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1191,7 +1191,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1239,7 +1239,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
@@ -1287,7 +1287,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);

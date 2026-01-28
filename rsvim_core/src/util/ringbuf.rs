@@ -23,7 +23,7 @@ impl<T> RingBuffer<T> {
     self.data.is_empty()
   }
 
-  pub fn occupied_len(&self) -> usize {
+  pub fn len(&self) -> usize {
     self.data.len()
   }
 
