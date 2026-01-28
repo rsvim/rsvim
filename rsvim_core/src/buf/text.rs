@@ -647,7 +647,7 @@ impl Text {
     &mut self,
     absolute_char_idx: usize,
     payload: CompactString,
-  ) -> (usize, usize) {
+  ) -> usize {
     let (line_idx, char_idx) =
       self.relative_line_idx_and_char_idx(absolute_char_idx);
 
@@ -689,7 +689,7 @@ impl Text {
       "After inserted",
     );
 
-    (line_idx_after_inserted, char_idx_after_inserted)
+    absolute_char_idx_after_inserted
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
