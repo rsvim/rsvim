@@ -648,10 +648,10 @@ impl Text {
     absolute_char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    let (line_idx, _char_idx) =
+    let (line_idx, char_idx) =
       self.relative_line_idx_and_char_idx(absolute_char_idx);
 
-    self.dbg_print_textline(line_idx, absolute_char_idx, "Before insert");
+    self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
     self.rope_mut().insert(absolute_char_idx, payload.as_str());
 
