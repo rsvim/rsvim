@@ -777,7 +777,7 @@ impl Text {
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
-  pub fn absolute_delete_chars_range(
+  pub fn absolute_delete_chars_range2(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -838,7 +838,7 @@ impl Text {
     n: isize,
   ) -> Option<(usize, usize)> {
     let to_be_deleted_range =
-      self.absolute_delete_chars_range(line_idx, char_idx, n);
+      self.absolute_delete_chars_range2(line_idx, char_idx, n);
     if to_be_deleted_range.is_empty() {
       return None;
     }
