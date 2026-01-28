@@ -53,7 +53,7 @@ impl<T> RingBuffer<T> {
     self.data.iter()
   }
 
-  pub fn first(&self) -> Option<T> {
+  pub fn first(&self) -> Option<&T> {
     self.data.front()
   }
 
