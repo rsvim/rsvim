@@ -667,17 +667,15 @@ impl Text {
       // contain a line break '\n', i.e. it is still in the same line. Thus
       // only need to truncate chars after insert position on the same line.
       debug_assert!(char_idx_after_inserted >= char_idx);
-      let min_cursor_char_idx =
-        std::cmp::min(char_idx_after_inserted, char_idx);
+      let cursor_char_idx = std::cmp::min(char_idx_after_inserted, char_idx);
       self.truncate_cached_line_since_char(
         line_idx,
-        min_cursor_char_idx.saturating_sub(1),
+        cursor_char_idx.saturating_sub(1),
       );
     } else {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx =
-        std::cmp::min(line_idx_after_inserted, line_idx);
-      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
+      let cursor_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
+      self.retain_cached_lines(|line_idx| *line_idx < cursor_line_idx);
     }
 
     // Append eol at file end if it doesn't exist.
