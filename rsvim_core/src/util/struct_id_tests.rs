@@ -21,10 +21,13 @@ fn test_next_test1_id() {
     );
     if let Some(last_id) = last_id {
       assert!(std::convert::Into::<u8>::into(last_id) >= 1);
-      if last_id.value() == u8::MAX {
-        assert_eq!(id.value(), 1);
+      if std::convert::Into::<u8>::into(last_id) == u8::MAX {
+        assert_eq!(std::convert::Into::<u8>::into(id), 1);
       } else {
-        assert_eq!(last_id.value() + 1, id.value());
+        assert_eq!(
+          std::convert::Into::<u8>::into(last_id) + 1,
+          std::convert::Into::<u8>::into(id)
+        );
       }
     } else {
       miss_count += 1;
