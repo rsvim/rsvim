@@ -60,10 +60,22 @@ impl<T> RingBuffer<T> {
     self.data.front()
   }
 
-  /// Try peek, get eldest item without removing it.
-  /// Equivalent to [`Self::first`].
-  pub fn try_peek_mut(&mut self) -> Option<&mut T> {
+  /// Get eldest item.
+  pub fn first(&self) -> Option<&T> {
+    self.data.front()
+  }
+
+  pub fn first_mut(&mut self) -> Option<&mut T> {
     self.data.front_mut()
+  }
+
+  /// Get latest item.
+  pub fn last(&self) -> Option<&T> {
+    self.data.back()
+  }
+
+  pub fn last_mut(&mut self) -> Option<&mut T> {
+    self.data.back_mut()
   }
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
