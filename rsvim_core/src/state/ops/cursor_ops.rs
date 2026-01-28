@@ -571,6 +571,7 @@ pub fn cursor_insert(
   debug_assert!(
     cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars()
   );
+
   if let Some((
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
