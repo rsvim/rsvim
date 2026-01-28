@@ -571,25 +571,30 @@ pub fn cursor_insert(
   debug_assert!(
     cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars()
   );
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
-
-  // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
-
-  trace!(
-    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-  );
-  let op = Operation::CursorMoveTo((
-    cursor_char_idx_after_inserted,
-    cursor_line_idx_after_inserted,
-  ));
-  cursor_move(tree, id, text, op, true);
-
-  (
+  if let Some((
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
-  )
+  )) = text.insert_at(cursor_line_idx, cursor_char_idx, payload)
+  {
+    // Update viewport since the buffer doesn't match the viewport.
+    _update_viewport_after_text_changed(tree, id, text);
+
+    trace!(
+      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+    );
+    let op = Operation::CursorMoveTo((
+      cursor_char_idx_after_inserted,
+      cursor_line_idx_after_inserted,
+    ));
+    cursor_move(tree, id, text, op, true);
+
+    (
+      cursor_line_idx_after_inserted,
+      cursor_char_idx_after_inserted,
+    )
+  } else {
+    (cursor_line_idx, cursor_char_idx)
+  }
 }
 
 /// High-level cursor delete operation.
