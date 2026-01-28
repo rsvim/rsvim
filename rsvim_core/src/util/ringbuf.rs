@@ -31,7 +31,7 @@ impl<T> RingBuffer<T> {
     self.max_size
   }
 
-  /// Force push, remove early pushed items if full.
+  /// Force push, remove eldest items if full.
   pub fn push_overwrite(&mut self, value: T) {
     while self.data.len() >= self.max_size && !self.data.is_empty() {
       self.data.pop_front();
@@ -39,7 +39,7 @@ impl<T> RingBuffer<T> {
     self.data.push_back(value)
   }
 
-  /// Try push, don't remove early pushed items if full and fail.
+  /// Try push, don't remove eldest items if full and fail.
   pub fn try_push(&mut self, value: T) -> Result<(), T> {
     if self.data.len() < self.max_size {
       self.data.push_back(value);
@@ -54,7 +54,7 @@ impl<T> RingBuffer<T> {
     self.data.pop_front()
   }
 
-  /// Try peek, get top item without removing it.
+  /// Try peek, get eldest item without removing it.
   /// Equivalent to [`Self::first`].
   pub fn try_peek(&self) -> Option<&T> {
     self.data.front()
@@ -64,6 +64,7 @@ impl<T> RingBuffer<T> {
     self.data.iter()
   }
 
+  /// Get eldest item.
   pub fn first(&self) -> Option<&T> {
     self.data.front()
   }
@@ -72,6 +73,7 @@ impl<T> RingBuffer<T> {
     self.data.front_mut()
   }
 
+  /// Get latest item.
   pub fn last(&self) -> Option<&T> {
     self.data.back()
   }
