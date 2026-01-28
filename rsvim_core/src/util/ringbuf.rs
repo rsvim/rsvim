@@ -55,6 +55,7 @@ impl<T> RingBuffer<T> {
   }
 
   /// Try peek, get eldest item without removing it.
+  ///
   /// Equivalent to [`Self::first`].
   pub fn try_peek(&self) -> Option<&T> {
     self.data.front()
