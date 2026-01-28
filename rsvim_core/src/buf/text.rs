@@ -645,8 +645,7 @@ impl Text {
   /// If the absolute position doesn't exist on text rope.
   pub fn insert_at(
     &mut self,
-    line_idx: usize,
-    char_idx: usize,
+    absolute_char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
     let absolute_char_idx_before_insert =
