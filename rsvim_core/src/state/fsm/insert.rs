@@ -162,7 +162,6 @@ impl Insert {
             char_idx_after: absolute_delete_range.start,
           });
       };
-      let _absolute_cursor_char_idx_after = absolute_delete_range.start;
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
@@ -175,7 +174,7 @@ impl Insert {
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        _absolute_cursor_char_idx_after
+        absolute_delete_range.start
       );
     }
 
