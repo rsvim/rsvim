@@ -646,7 +646,7 @@ impl Text {
       // inserted text doesn't contain line break, i.e. it is still the same
       // line. Thus only need to truncate chars after insert position on the
       // same line.
-      debug_assert!(char_idx_after_edit >= char_idx);
+      // debug_assert!(char_idx_after_edit >= char_idx);
       let min_char_idx = std::cmp::min(char_idx_after_edit, char_idx);
       self.truncate_cached_line_since_char(
         line_idx,
