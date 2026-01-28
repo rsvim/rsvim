@@ -4,8 +4,6 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
-use ringbuf::traits::Consumer;
-use ringbuf::traits::Observer;
 use std::time::Duration;
 
 #[tokio::test]
@@ -245,9 +243,9 @@ try {{
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().pop_front();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -296,9 +294,9 @@ try {{
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().pop_front();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -352,11 +350,11 @@ async fn test_read_write1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n1:13");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n2:0");
   }
 
@@ -405,11 +403,11 @@ async fn test_read_write2() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n1:0");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n2:13");
   }
 
@@ -456,11 +454,11 @@ async fn test_read_write3() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n1:11");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n2:0");
     assert_eq!(
       std::fs::read_to_string(tmpfile.path()).unwrap(),
@@ -511,11 +509,11 @@ async fn test_read_write4() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n1:11");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop_front().unwrap();
     assert_eq!(actual, "n2:0");
     assert_eq!(
       std::fs::read_to_string(tmpfile.path()).unwrap(),
