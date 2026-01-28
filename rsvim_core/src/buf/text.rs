@@ -639,7 +639,7 @@ impl Text {
   ///
   /// # Returns
   /// 1. It returns a new absolute position `char_idx` after text inserted.
-  /// 2. It returns the same absolute position if `payload` is empty.
+  /// 2. It returns `None` if `payload` is empty.
   ///
   /// # Panics
   /// It panics if the insert absolute position doesn't exist.
@@ -647,7 +647,11 @@ impl Text {
     &mut self,
     absolute_char_idx: usize,
     payload: CompactString,
-  ) -> usize {
+  ) -> Option<usize> {
+    if payload.is_empty() {
+      return None;
+    }
+
     let (line_idx, char_idx) =
       self.relative_line_idx_and_char_idx(absolute_char_idx);
 
@@ -689,7 +693,7 @@ impl Text {
       "After inserted",
     );
 
-    absolute_char_idx_after_inserted
+    Some(absolute_char_idx_after_inserted)
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
@@ -784,10 +788,13 @@ impl Text {
     }
   }
 
-  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
+  /// Delete `n` text chars at absolute position `char_idx`, to either left or
+  /// right direction.
   ///
-  /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
-  /// 2. If `n>0`, delete to the right direction, i.e. delete the range `[char_idx, char_idx+n)`.
+  /// 1. If `n<0`, delete to the left direction, i.e. delete the range
+  ///    `[char_idx-n, char_idx)`.
+  /// 2. If `n>0`, delete to the right direction, i.e. delete the range
+  ///    `[char_idx, char_idx+n)`.
   /// 3. If `n=0`, delete nothing.
   ///
   /// # Returns
@@ -798,8 +805,7 @@ impl Text {
   /// It panics if the position doesn't exist.
   pub fn delete_at(
     &mut self,
-    line_idx: usize,
-    char_idx: usize,
+    absolute_char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
     let to_be_deleted_range =

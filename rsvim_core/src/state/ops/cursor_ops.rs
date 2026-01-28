@@ -573,27 +573,32 @@ pub fn cursor_insert(
   );
   let cursor_absolute_char_idx =
     text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
-  let cursor_absolute_char_idx_after_inserted =
-    text.insert_at(cursor_absolute_char_idx, payload);
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = text
-    .relative_line_idx_and_char_idx(cursor_absolute_char_idx_after_inserted);
 
-  // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
+  if let Some(cursor_absolute_char_idx_after_inserted) =
+    text.insert_at(cursor_absolute_char_idx, payload)
+  {
+    let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = text
+      .relative_line_idx_and_char_idx(cursor_absolute_char_idx_after_inserted);
 
-  trace!(
-    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-  );
-  let op = Operation::CursorMoveTo((
-    cursor_char_idx_after_inserted,
-    cursor_line_idx_after_inserted,
-  ));
-  cursor_move(tree, id, text, op, true);
+    // Update viewport since the buffer doesn't match the viewport.
+    _update_viewport_after_text_changed(tree, id, text);
 
-  (
-    cursor_line_idx_after_inserted,
-    cursor_char_idx_after_inserted,
-  )
+    trace!(
+      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+    );
+    let op = Operation::CursorMoveTo((
+      cursor_char_idx_after_inserted,
+      cursor_line_idx_after_inserted,
+    ));
+    cursor_move(tree, id, text, op, true);
+
+    (
+      cursor_line_idx_after_inserted,
+      cursor_char_idx_after_inserted,
+    )
+  } else {
+    (cursor_line_idx, cursor_char_idx)
+  }
 }
 
 /// High-level cursor delete operation.
