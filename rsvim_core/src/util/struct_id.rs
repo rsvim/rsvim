@@ -46,10 +46,6 @@ macro_rules! struct_id_impl {
       pub const fn zero() -> Self {
         Self(0)
       }
-
-      pub fn value(&self) -> $ty {
-        self.0
-      }
     }
   };
 

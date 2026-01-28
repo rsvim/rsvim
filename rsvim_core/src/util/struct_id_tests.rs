@@ -20,7 +20,7 @@ fn test_next_test1_id() {
       i, id, last_id, miss_count
     );
     if let Some(last_id) = last_id {
-      assert!(last_id.value() >= 1);
+      assert!(std::convert::Into::<u8>::into(last_id) >= 1);
       if last_id.value() == u8::MAX {
         assert_eq!(id.value(), 1);
       } else {
