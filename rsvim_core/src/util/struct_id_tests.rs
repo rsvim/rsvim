@@ -53,11 +53,14 @@ fn test_next_test2_id() {
       i, id, last_id, miss_count
     );
     if let Some(last_id) = last_id {
-      assert!(last_id.value() >= 100);
-      if last_id.value() == u8::MAX {
-        assert_eq!(id.value(), 100);
+      assert!(std::convert::Into::<u8>::into(last_id) >= 100);
+      if std::convert::Into::<u8>::into(last_id) == u8::MAX {
+        assert_eq!(std::convert::Into::<u8>::into(id), 100);
       } else {
-        assert_eq!(last_id.value() + 1, id.value());
+        assert_eq!(
+          std::convert::Into::<u8>::into(last_id) + 1,
+          std::convert::Into::<u8>::into(id)
+        );
       }
     } else {
       miss_count += 1;
