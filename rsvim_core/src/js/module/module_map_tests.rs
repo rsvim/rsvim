@@ -1549,7 +1549,7 @@ Rsvim.rt.exit(0);
       info!(
         "command_line_message_history occupied_len:{}, vacant_len: {}",
         contents.cmdline_message_history().len(),
-        contents.cmdline_message_history().vacant_len()
+        contents.cmdline_message_history().max_size()
       );
       assert_eq!(1, contents.cmdline_message_history().len());
       assert_eq!(
