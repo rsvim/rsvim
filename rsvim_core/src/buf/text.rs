@@ -634,15 +634,15 @@ impl Text {
     (line_idx, char_idx)
   }
 
-  /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
-  /// empty.
+  /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if
+  /// text payload is empty.
   ///
   /// # Returns
-  /// It returns the new position `(line_idx,char_idx)` after text inserted, it returns `None` if
-  /// the text payload is empty.
+  /// 1. It returns the new position `(line_idx,char_idx)` after text inserted.
+  /// 2. It returns `None` if the text payload is empty.
   ///
   /// # Panics
-  /// If the position doesn't exist, or the text payload is empty.
+  /// If the position doesn't exist on text rope.
   pub fn insert_at(
     &mut self,
     line_idx: usize,
