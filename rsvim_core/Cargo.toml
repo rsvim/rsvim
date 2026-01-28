@@ -96,10 +96,10 @@ swc_ecma_visit = { workspace = true }
 swc_eq_ignore_macros = { workspace = true }
 # swc_bundler = { workspace = true }
 # swc_graph_analyzer = { workspace = true }
-# swc_macros_common = { workspace = true }
+swc_macros_common = { workspace = true }
 # swc_sourcemap = { workspace = true }
-# swc_trace_macro = { workspace = true }
-# swc_visit = { workspace = true }
+swc_trace_macro = { workspace = true }
+swc_visit = { workspace = true }
 
 v8 = { workspace = true, default-features = false, features = [
   "use_custom_libcxx",
