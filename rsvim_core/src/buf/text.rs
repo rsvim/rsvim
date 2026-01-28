@@ -648,7 +648,7 @@ impl Text {
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> Option<(usize, usize)> {
+  ) -> (usize, usize) {
     let absolute_char_idx_before_insert =
       self.absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
@@ -707,7 +707,7 @@ impl Text {
       "After inserted",
     );
 
-    Some((line_idx_after_inserted, char_idx_after_inserted))
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
