@@ -785,35 +785,29 @@ impl Text {
   ) -> Range<usize> {
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let cursor_char_absolute_pos_before_delete =
-      self.absolute_char_idx(line_idx, char_idx);
+    let absolute_char_idx = self.absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
-        .0,
+      self.relative_line_idx_and_char_idx(absolute_char_idx).0,
       line_idx
     );
     debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
-        .1,
+      self.relative_line_idx_and_char_idx(absolute_char_idx).1,
       char_idx
     );
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
-    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e.
+    // we treat `\r\n` as 1 single char when deleting it.
     if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self
-        .n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
       debug_assert!(upper <= self.rope.len_chars());
-      cursor_char_absolute_pos_before_delete..upper
+      absolute_char_idx..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self
-        .n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
-      lower..cursor_char_absolute_pos_before_delete
+      let lower = self.n_chars_to_left(absolute_char_idx, (-n) as usize);
+      lower..absolute_char_idx
     }
   }
 
