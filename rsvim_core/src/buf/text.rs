@@ -746,6 +746,35 @@ impl Text {
     i
   }
 
+  /// Calculate the absolute char index range that will be deleted, by absolute
+  /// char index on the line.
+  pub fn absolute_delete_chars_range1(
+    &self,
+    absolute_char_idx: usize,
+    n: isize,
+  ) -> Range<usize> {
+    debug_assert!(absolute_char_idx < self.rope.len_chars());
+
+    if cfg!(debug_assertions) {
+      let (line_idx, char_idx) =
+        self.relative_line_idx_and_char_idx(absolute_char_idx);
+      self.dbg_print_textline(line_idx, char_idx, "Before delete");
+    }
+
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e.
+    // we treat `\r\n` as 1 single char when deleting it.
+    if n > 0 {
+      // Delete to right side, on range `[cursor..cursor+n)`.
+      let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
+      debug_assert!(upper <= self.rope.len_chars());
+      absolute_char_idx..upper
+    } else {
+      // Delete to left side, on range `[cursor-n,cursor)`.
+      let lower = self.n_chars_to_left(absolute_char_idx, (-n) as usize);
+      lower..absolute_char_idx
+    }
+  }
+
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
   pub fn absolute_delete_chars_range(
