@@ -5,7 +5,7 @@ use std::ops::Index;
 use std::ops::IndexMut;
 
 #[derive(Debug, Clone)]
-/// Ring buffer.
+/// Single-ended Ring buffer.
 pub struct RingBuffer<T> {
   data: VecDeque<T>,
   max_size: usize,
@@ -40,7 +40,7 @@ impl<T> RingBuffer<T> {
   }
 
   /// Try push back, fail and don't remove front items if deque is full.
-  pub fn try_push_back(&mut self, value: T) -> Result<(), T> {
+  pub fn try_push(&mut self, value: T) -> Result<(), T> {
     if self.data.len() < self.max_size {
       self.data.push_back(value);
       Ok(())
