@@ -673,7 +673,9 @@ impl Text {
         cursor_char_idx.saturating_sub(1),
       );
     } else {
-      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
+      // Otherwise the inserted text contains line breaks, and we have to
+      // truncate all the cached lines below the cursor line, because we have
+      // new lines.
       let cursor_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
       self.retain_cached_lines(|line_idx| *line_idx < cursor_line_idx);
     }
