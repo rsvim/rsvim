@@ -824,9 +824,6 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    if n == 0 {
-      return None;
-    }
     let to_be_deleted_range =
       self.absolute_delete_chars_range(line_idx, char_idx, n);
     if to_be_deleted_range.is_empty() {
