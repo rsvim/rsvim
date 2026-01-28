@@ -85,8 +85,8 @@ pub fn next_task_id() -> TaskId {
   static VALUE: AtomicUsize = AtomicUsize::new(1);
   TaskId::from(
     VALUE
-      .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| {
-        Some((v + 1) % usize::MAX)
+      .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
+        Some((x + 1) % usize::MAX)
       })
       .unwrap(),
   )
