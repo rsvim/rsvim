@@ -49,9 +49,14 @@ impl<T> RingBuffer<T> {
     }
   }
 
-  /// Try pop,
+  /// Try pop.
   pub fn try_pop(&mut self) -> Option<T> {
     self.data.pop_front()
+  }
+
+  /// Try peek, get top item without removing it.
+  pub fn try_peek(&self) -> Option<&T> {
+    self.data.front()
   }
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
