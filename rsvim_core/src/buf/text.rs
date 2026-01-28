@@ -639,7 +639,7 @@ impl Text {
   ///
   /// # Returns
   /// 1. It returns the new position `(line_idx,char_idx)` after text inserted.
-  /// 2. It returns `None` if the text payload is empty.
+  /// 2. It returns the same `line_idx`/`char_idx` if the text payload is empty.
   ///
   /// # Panics
   /// If the position doesn't exist on text rope.
@@ -649,10 +649,6 @@ impl Text {
     char_idx: usize,
     payload: CompactString,
   ) -> Option<(usize, usize)> {
-    if payload.is_empty() {
-      return None;
-    }
-
     let absolute_char_idx_before_insert =
       self.absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
