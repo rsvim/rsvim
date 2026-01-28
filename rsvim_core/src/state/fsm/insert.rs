@@ -101,13 +101,14 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_range = cursor_ops::cursor_absolute_delete_chars_range(
-      &tree,
-      current_window_id,
-      buffer.text(),
-      n,
-    );
-    if let Some(absolute_delete_range) = absolute_delete_range
+    let absolute_delete_chars_range =
+      cursor_ops::cursor_absolute_delete_chars_range(
+        &tree,
+        current_window_id,
+        buffer.text(),
+        n,
+      );
+    if let Some(absolute_delete_range) = absolute_delete_chars_range
       && !absolute_delete_range.is_empty()
     {
       let payload = buffer
@@ -161,7 +162,6 @@ impl Insert {
             char_idx_after: absolute_delete_range.start,
           });
       };
-      let _absolute_cursor_char_idx_after = absolute_delete_range.start;
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
@@ -174,7 +174,7 @@ impl Insert {
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        _absolute_cursor_char_idx_after
+        absolute_delete_range.start
       );
     }
 

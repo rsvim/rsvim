@@ -634,69 +634,80 @@ impl Text {
     (line_idx, char_idx)
   }
 
-  /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
-  /// empty.
+  fn reset_cache_after_edit(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    line_idx_after_edit: usize,
+    char_idx_after_edit: usize,
+  ) {
+    if line_idx == line_idx_after_edit {
+      // If before/after insert, the cursor line doesn't change, it means the
+      // inserted text doesn't contain line break, i.e. it is still the same
+      // line. Thus only need to truncate chars after insert position on the
+      // same line.
+
+      // debug_assert!(char_idx_after_edit >= char_idx);
+      let truncate_char_idx = std::cmp::min(char_idx_after_edit, char_idx);
+      self.truncate_cached_line_since_char(
+        line_idx,
+        truncate_char_idx.saturating_sub(1),
+      );
+    } else {
+      // Otherwise the inserted text contains line breaks, and we have to
+      // truncate all the cached lines below the cursor line, because we have
+      // new lines.
+      let truncate_line_idx = std::cmp::min(line_idx_after_edit, line_idx);
+      self.retain_cached_lines(|line_idx| *line_idx < truncate_line_idx);
+    }
+  }
+
+  /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if
+  /// text payload is empty.
   ///
   /// # Returns
-  /// It returns the new position `(line_idx,char_idx)` after text inserted, it returns `None` if
-  /// the text payload is empty.
+  /// 1. It returns the new position `(line_idx,char_idx)` after text inserted.
+  /// 2. It returns the same `line_idx`/`char_idx` if the text payload is empty.
   ///
   /// # Panics
-  /// If the position doesn't exist, or the text payload is empty.
+  /// If the position doesn't exist on text rope.
   pub fn insert_at(
     &mut self,
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> (usize, usize) {
-    let absolute_char_idx_before_insert =
-      self.absolute_char_idx(line_idx, char_idx);
+  ) -> Option<(usize, usize)> {
+    if payload.is_empty() {
+      return None;
+    }
+
+    let absolute_char_idx = self.absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
-        .0,
+      self.relative_line_idx_and_char_idx(absolute_char_idx).0,
       line_idx
     );
     debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(absolute_char_idx_before_insert)
-        .1,
+      self.relative_line_idx_and_char_idx(absolute_char_idx).1,
       char_idx
     );
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
-    self
-      .rope_mut()
-      .insert(absolute_char_idx_before_insert, payload.as_str());
+    self.rope_mut().insert(absolute_char_idx, payload.as_str());
 
-    // The `text` may contains line break '\n', which can interrupts the `line_idx` and we need to
-    // recalculate it.
+    // The `text` may contains line break '\n', which can interrupts the
+    // `line_idx` and we need to recalculate it.
     let absolute_char_idx_after_inserted =
-      absolute_char_idx_before_insert + payload.chars().count();
-    let line_idx_after_inserted =
-      self.rope.char_to_line(absolute_char_idx_after_inserted);
-    let absolute_line_idx_after_inserted =
-      self.rope.line_to_char(line_idx_after_inserted);
-    let char_idx_after_inserted =
-      absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
+      absolute_char_idx + payload.chars().count();
+    let (line_idx_after_inserted, char_idx_after_inserted) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx_after_inserted);
 
-    if line_idx == line_idx_after_inserted {
-      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-      // Thus only need to truncate chars after insert position on the same line.
-      debug_assert!(char_idx_after_inserted >= char_idx);
-      let min_cursor_char_idx =
-        std::cmp::min(char_idx_after_inserted, char_idx);
-      self.truncate_cached_line_since_char(
-        line_idx,
-        min_cursor_char_idx.saturating_sub(1),
-      );
-    } else {
-      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx =
-        std::cmp::min(line_idx_after_inserted, line_idx);
-      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
-    }
+    self.reset_cache_after_edit(
+      line_idx,
+      char_idx,
+      line_idx_after_inserted,
+      char_idx_after_inserted,
+    );
 
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
@@ -707,7 +718,7 @@ impl Text {
       "After inserted",
     );
 
-    (line_idx_after_inserted, char_idx_after_inserted)
+    Some((line_idx_after_inserted, char_idx_after_inserted))
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
@@ -820,51 +831,37 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    let to_be_deleted_range =
+    let to_delete_range =
       self.absolute_delete_chars_range(line_idx, char_idx, n);
-    if to_be_deleted_range.is_empty() {
+    if to_delete_range.is_empty() {
       return None;
     }
 
-    self.rope_mut().remove(to_be_deleted_range.clone());
+    self.rope_mut().remove(to_delete_range.clone());
 
-    let cursor_char_absolute_pos_after_deleted = to_be_deleted_range.start;
+    let absolute_char_idx_after_deleted = to_delete_range.start;
+    let absolute_char_idx_after_deleted =
+      std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
+    let (line_idx_after_deleted, char_idx_after_deleted) =
+      self.relative_line_idx_and_char_idx(absolute_char_idx_after_deleted);
 
-    let cursor_char_absolute_pos_after_deleted = std::cmp::min(
-      cursor_char_absolute_pos_after_deleted,
-      self.rope.len_chars(),
+    self.reset_cache_after_edit(
+      line_idx,
+      char_idx,
+      line_idx_after_deleted,
+      char_idx_after_deleted,
     );
-    let cursor_line_idx_after_deleted = self
-      .rope
-      .char_to_line(cursor_char_absolute_pos_after_deleted);
-    let cursor_line_absolute_pos_after_deleted =
-      self.rope.line_to_char(cursor_line_idx_after_deleted);
-    let cursor_char_idx_after_deleted = cursor_char_absolute_pos_after_deleted
-      - cursor_line_absolute_pos_after_deleted;
-
-    if line_idx == cursor_line_idx_after_deleted {
-      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-      // Thus only need to truncate chars after insert position on the same line.
-      let min_cursor_char_idx =
-        std::cmp::min(cursor_char_idx_after_deleted, char_idx);
-      self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx);
-    } else {
-      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx =
-        std::cmp::min(cursor_line_idx_after_deleted, line_idx);
-      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
-    }
 
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
-      cursor_line_idx_after_deleted,
-      cursor_char_idx_after_deleted,
+      line_idx_after_deleted,
+      char_idx_after_deleted,
       "After deleted",
     );
 
-    Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
+    Some((line_idx_after_deleted, char_idx_after_deleted))
   }
 
   /// Clear all text payload in current content.
