@@ -60,22 +60,10 @@ impl<T> RingBuffer<T> {
     self.data.front()
   }
 
-  /// Get eldest item.
-  pub fn first(&self) -> Option<&T> {
-    self.data.front()
-  }
-
-  pub fn first_mut(&mut self) -> Option<&mut T> {
+  /// Try peek, get eldest item without removing it.
+  /// Equivalent to [`Self::first`].
+  pub fn try_peek_mut(&mut self) -> Option<&mut T> {
     self.data.front_mut()
-  }
-
-  /// Get latest item.
-  pub fn last(&self) -> Option<&T> {
-    self.data.back()
-  }
-
-  pub fn last_mut(&mut self) -> Option<&mut T> {
-    self.data.back_mut()
   }
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
@@ -160,16 +148,26 @@ impl<T> DeRingBuffer<T> {
     self.data.pop_back()
   }
 
-  pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
-    self.data.iter()
+  /// Get eldest item.
+  pub fn first(&self) -> Option<&T> {
+    self.data.front()
   }
 
-  pub fn back(&self) -> Option<&T> {
+  pub fn first_mut(&mut self) -> Option<&mut T> {
+    self.data.front_mut()
+  }
+
+  /// Get latest item.
+  pub fn last(&self) -> Option<&T> {
     self.data.back()
   }
 
-  pub fn back_mut(&mut self) -> Option<&mut T> {
+  pub fn last_mut(&mut self) -> Option<&mut T> {
     self.data.back_mut()
+  }
+
+  pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
+    self.data.iter()
   }
 
   pub fn drain<R>(
