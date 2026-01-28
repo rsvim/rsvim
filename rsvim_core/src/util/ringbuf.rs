@@ -152,11 +152,11 @@ impl<T> DeRingBuffer<T> {
     }
   }
 
-  pub fn pop_front(&mut self) -> Option<T> {
+  pub fn try_pop_front(&mut self) -> Option<T> {
     self.data.pop_front()
   }
 
-  pub fn pop_back(&mut self) -> Option<T> {
+  pub fn try_pop_back(&mut self) -> Option<T> {
     self.data.pop_back()
   }
 
