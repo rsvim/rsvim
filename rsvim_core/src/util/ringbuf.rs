@@ -31,15 +31,17 @@ impl<T> RingBuffer<T> {
     self.max_size
   }
 
-  /// Force push, remove front items if ring buffer is full.
+  /// Force push, remove early pushed items if full.
   pub fn push_overwrite(&mut self, value: T) {
     while self.data.len() >= self.max_size && !self.data.is_empty() {
       self.data.pop_front();
     }
+
+    // Push back
     self.data.push_back(value)
   }
 
-  /// Try push, fail and don't remove front items if ring buffer is full.
+  /// Try push, don't remove early pushed items if full and fail.
   pub fn try_push(&mut self, value: T) -> Result<(), T> {
     if self.data.len() < self.max_size {
       self.data.push_back(value);
@@ -47,6 +49,11 @@ impl<T> RingBuffer<T> {
     } else {
       Err(value)
     }
+  }
+
+  /// Try pop,
+  pub fn try_pop(&mut self) -> Option<T> {
+    self.data.pop_front()
   }
 
   pub fn iter(&'_ self) -> std::collections::vec_deque::Iter<'_, T> {
