@@ -633,8 +633,9 @@ pub fn cursor_delete(
   debug_assert!(
     cursor_char_idx < text.rope().line(cursor_line_idx).len_chars()
   );
-  let maybe_new_cursor_position =
-    text.delete_at(cursor_line_idx, cursor_char_idx, n);
+  let cursor_absolute_char_idx =
+    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
+  let maybe_new_cursor_position = text.delete_at(cursor_absolute_char_idx, n);
 
   maybe_new_cursor_position?;
 
@@ -759,5 +760,5 @@ pub fn cursor_absolute_delete_chars_range(
     return None;
   }
 
-  Some(text.absolute_delete_chars_range(cursor_line_idx, cursor_char_idx, n))
+  Some(text.absolute_delete_chars_range2(cursor_line_idx, cursor_char_idx, n))
 }
