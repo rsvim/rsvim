@@ -64,7 +64,7 @@ impl<T> RingBuffer<T> {
     self.data.back()
   }
 
-  pub fn back_mut(&self) -> Option<&mut T> {
+  pub fn back_mut(&mut self) -> Option<&mut T> {
     self.data.back_mut()
   }
 
