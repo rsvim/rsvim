@@ -3,8 +3,6 @@
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
-use ringbuf::LocalRb;
-use ringbuf::storage::Heap;
 use ropey::Rope;
 use std::fmt::Debug;
 
@@ -12,7 +10,7 @@ use std::fmt::Debug;
 pub struct TextContents {
   cmdline_input: Text,
   cmdline_message: Text,
-  cmdline_message_history: LocalRb<Heap<String>>,
+  cmdline_message_history: RingBuffer<String>,
 }
 
 arc_mutex_ptr!(TextContents);
@@ -23,7 +21,7 @@ impl TextContents {
     Self {
       cmdline_input: Text::new(cmdline_opts, canvas_size, Rope::new()),
       cmdline_message: Text::new(cmdline_opts, canvas_size, Rope::new()),
-      cmdline_message_history: LocalRb::new(500),
+      cmdline_message_history: RingBuffer::new(500),
     }
   }
 
@@ -48,12 +46,12 @@ impl TextContents {
   }
 
   /// Command-line message history
-  pub fn cmdline_message_history(&self) -> &LocalRb<Heap<String>> {
+  pub fn cmdline_message_history(&self) -> &RingBuffer<String> {
     &self.cmdline_message_history
   }
 
   /// Mutable command-line message history
-  pub fn cmdline_message_history_mut(&mut self) -> &mut LocalRb<Heap<String>> {
+  pub fn cmdline_message_history_mut(&mut self) -> &mut RingBuffer<String> {
     &mut self.cmdline_message_history
   }
 }

@@ -2,7 +2,6 @@ use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
@@ -47,9 +46,9 @@ async fn test_encode1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "encoding:utf-8");
   }
 
@@ -206,13 +205,13 @@ async fn test_decode1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 3);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "utf-8");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "false");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "false");
   }
 
@@ -271,13 +270,13 @@ async fn test_decode2() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 3);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "utf-8");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "true");
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     assert_eq!(actual, "false");
   }
 
@@ -447,9 +446,9 @@ async fn test_decode_failed1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().try_pop().unwrap();
+    let actual = contents.cmdline_message_history_mut().pop().unwrap();
     info!("actual:{:?}", actual);
     assert!(actual.contains("encoding is unknown: FooEncoding"));
   }

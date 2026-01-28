@@ -8,7 +8,6 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
-use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
@@ -67,10 +66,10 @@ async fn create_snapshot1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();

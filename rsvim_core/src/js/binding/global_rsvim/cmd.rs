@@ -10,7 +10,6 @@ use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use ringbuf::traits::RingBuffer;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);

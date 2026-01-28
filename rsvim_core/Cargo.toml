@@ -60,7 +60,6 @@ litemap = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
 async-trait = { workspace = true }
-ringbuf = { workspace = true }
 # serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
 normpath = { workspace = true }
