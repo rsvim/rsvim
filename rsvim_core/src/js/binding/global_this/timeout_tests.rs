@@ -158,12 +158,12 @@ async fn test_timeout3() -> IoResult<()> {
     let actual1 = actual1.unwrap();
     assert_eq!(actual1, "Hello");
 
-    let actual2 = contents.cmdline_message_history_mut().try_pop();
+    let actual2 = contents.cmdline_message_history_mut().pop_front();
     assert!(actual2.is_some());
     let actual2 = actual2.unwrap();
     assert_eq!(actual2, "World");
 
-    let actual3 = contents.cmdline_message_history_mut().try_pop();
+    let actual3 = contents.cmdline_message_history_mut().pop_front();
     assert!(actual3.is_some());
     let actual3 = actual3.unwrap();
     assert_eq!(actual3, "true");
@@ -223,7 +223,7 @@ async fn test_timeout4() -> IoResult<()> {
     assert_eq!(global_local_options.line_break(), LINE_BREAK);
 
     let contents = lock!(event_loop.contents);
-    assert_eq!(0, contents.cmdline_message_history().occupied_len());
+    assert_eq!(0, contents.cmdline_message_history().len());
   }
 
   Ok(())
@@ -313,9 +313,9 @@ async fn test_interval1() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    assert_eq!(3, contents.cmdline_message_history().occupied_len());
+    assert_eq!(3, contents.cmdline_message_history().len());
     for i in 0..3 {
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().pop_front();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert_eq!(actual, (i + 1).to_string());
@@ -362,11 +362,11 @@ async fn test_interval2() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().pop_front();
       info!("actual-{}:{:?}", i, actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
@@ -418,11 +418,11 @@ async fn test_interval3() -> IoResult<()> {
   // After timeout
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.cmdline_message_history().occupied_len();
+    let n = contents.cmdline_message_history().len();
     info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {
-      let actual = contents.cmdline_message_history_mut().try_pop();
+      let actual = contents.cmdline_message_history_mut().pop_front();
       info!("actual-{}:{:?}", i, actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
