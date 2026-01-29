@@ -55,6 +55,6 @@ impl SyntaxManager {
     }
     let mut parser = Parser::new();
     parser.set_language(self.languages.get(&lang).unwrap());
-    Syntax { parser }
+    Syntax::new(parser)
   }
 }
