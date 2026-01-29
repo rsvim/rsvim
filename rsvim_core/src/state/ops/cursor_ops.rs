@@ -626,7 +626,7 @@ pub fn cursor_delete(
     cursor_char_idx < text.rope().line(cursor_line_idx).len_chars()
   );
   let maybe_new_cursor_position =
-    text.delete_at(cursor_line_idx, cursor_char_idx, n);
+    text.remove(cursor_line_idx, cursor_char_idx, n);
 
   maybe_new_cursor_position?;
 

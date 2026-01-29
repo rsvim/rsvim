@@ -817,7 +817,7 @@ impl Text {
   ///
   /// # Panics
   /// It panics if the position doesn't exist.
-  pub fn delete_at(
+  pub fn remove(
     &mut self,
     line_idx: usize,
     char_idx: usize,
