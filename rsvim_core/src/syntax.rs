@@ -58,12 +58,15 @@ impl SyntaxManager {
   }
 
   pub fn new_syntax(&mut self, lang: LanguageName) -> Syntax {
-    self
-      .languages
-      .entry(lang)
-      .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
     let mut syn = Syntax::new();
-    syn.set_language(self.languages.get(&lang).unwrap())
+    syn
+      .set_language(
+        self
+          .languages
+          .entry(lang)
+          .or_insert_with(|| tree_sitter_rust::LANGUAGE.into()),
+      )
+      .unwrap();
     syn
   }
 }
