@@ -26,3 +26,17 @@ pub enum LanguageName {
 pub struct SyntaxManager {
   languages: FoldMap<LanguageName, Language>,
 }
+
+impl Default for SyntaxManager {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+impl SyntaxManager {
+  pub fn new() -> Self {
+    Self {
+      languages: FoldMap::new(),
+    }
+  }
+}
