@@ -53,7 +53,9 @@ impl SyntaxManager {
       ts_language
     });
     let mut parser = Parser::new();
-    let _ = parser.set_language(self.languages.get(&lang).unwrap());
+    parser
+      .set_language(self.languages.get(&lang).unwrap())
+      .unwrap();
     Syntax::new(parser)
   }
 }
