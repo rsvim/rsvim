@@ -62,10 +62,8 @@ impl SyntaxManager {
       .languages
       .entry(lang)
       .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
-    let mut parser = Parser::new();
-    parser
-      .set_language(self.languages.get(&lang).unwrap())
-      .unwrap();
-    Syntax::new(parser)
+    let mut syn = Syntax::new();
+    syn.set_language(self.languages.get(&lang).unwrap())
+    syn
   }
 }
