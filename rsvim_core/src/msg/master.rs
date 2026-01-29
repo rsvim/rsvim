@@ -1,9 +1,11 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
+use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use ropey::Rope;
 use std::path::PathBuf;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -31,6 +33,10 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to write file.
   FsWriteReq(FsWriteReq),
+
+  BufferFullParseReq(BufferFullParseReq),
+
+  BufferIncrParseReq(BufferIncrParseReq),
 }
 
 #[derive(Debug)]
@@ -71,6 +77,18 @@ pub struct FsWriteReq {
   pub task_id: TaskId,
   pub fd: usize,
   pub buf: Vec<u8>,
+}
+
+#[derive(Debug)]
+pub struct BufferFullParseReq {
+  pub buf_id: BufferId,
+  pub payload: Rope,
+}
+
+#[derive(Debug)]
+pub struct BufferIncrParseReq {
+  pub buf_id: BufferId,
+  pub payload: Rope,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
