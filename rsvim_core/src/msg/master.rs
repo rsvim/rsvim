@@ -34,8 +34,10 @@ pub enum MasterMessage {
   /// Js runtime ask master to write file.
   FsWriteReq(FsWriteReq),
 
+  /// Master ask worker to full parse the buffer text when newly created.
   BufferFullParseReq(BufferFullParseReq),
 
+  /// Master ask worker to incremtnal parse the buffer text when user edited.
   BufferIncrParseReq(BufferIncrParseReq),
 }
 
