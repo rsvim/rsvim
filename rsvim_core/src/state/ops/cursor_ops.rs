@@ -716,7 +716,7 @@ pub fn cursor_absolute_char_idx(tree: &Tree, id: NodeId, text: &Text) -> usize {
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   let absolute_char_idx =
-    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
+    text.get_char_idx_1d(cursor_line_idx, cursor_char_idx);
   debug_assert_eq!(
     text.relative_line_idx_and_char_idx(absolute_char_idx).0,
     cursor_line_idx

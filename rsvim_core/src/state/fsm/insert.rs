@@ -129,7 +129,7 @@ impl Insert {
             absolute_delete_range.end,
             buffer
               .text()
-              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer
@@ -150,7 +150,7 @@ impl Insert {
             absolute_delete_range.start,
             buffer
               .text()
-              .absolute_char_idx(cursor_line_idx, cursor_char_idx)
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer
@@ -170,7 +170,7 @@ impl Insert {
       );
       debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
-        buffer.text().absolute_char_idx(
+        buffer.text().get_char_idx_1d(
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
@@ -238,7 +238,7 @@ impl Insert {
     debug_assert_eq!(
       buffer
         .text()
-        .absolute_char_idx(_cursor_line_idx_after, _cursor_char_idx_after),
+        .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
