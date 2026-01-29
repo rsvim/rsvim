@@ -1,14 +1,26 @@
 //! Tree-sitter based syntax engine.
 
-pub mod lang;
-
 use crate::prelude::*;
-pub use lang::*;
 use tree_sitter::Language;
 use tree_sitter::Parser;
 
 pub struct Syntax {
   parser: Parser,
+}
+
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  Hash,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
+pub enum LanguageName {
+  #[strum(serialize = "rust")]
+  Rust,
 }
 
 pub struct SyntaxManager {
