@@ -610,8 +610,9 @@ impl Text {
     }
   }
 
-  /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute `char_idx`.
-  pub fn absolute_char_idx(&self, line_idx: usize, char_idx: usize) -> usize {
+  /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute
+  /// `char_idx`.
+  pub fn get_char_1d(&self, line_idx: usize, char_idx: usize) -> usize {
     // debug_assert!(!payload.is_empty());
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
@@ -620,8 +621,9 @@ impl Text {
     absolute_line_idx + char_idx
   }
 
-  /// Convert 1-dimensional absolute `char_idx` into 2-dimensional `(line_idx, char_idx)`.
-  pub fn relative_line_idx_and_char_idx(
+  /// Convert 1-dimensional absolute `char_idx` into 2-dimensional
+  /// `(line_idx, char_idx)`.
+  pub fn get_line_char_2d(
     &self,
     absolute_char_idx: usize,
   ) -> (/* line_idx */ usize, /* char_idx*/ usize) {
@@ -671,25 +673,15 @@ impl Text {
   ///
   /// # Panics
   /// If the position doesn't exist on text rope.
-  pub fn insert_at(
+  pub fn insert(
     &mut self,
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> Option<(usize, usize)> {
-    if payload.is_empty() {
-      return None;
-    }
-
-    let absolute_char_idx = self.absolute_char_idx(line_idx, char_idx);
-    debug_assert_eq!(
-      self.relative_line_idx_and_char_idx(absolute_char_idx).0,
-      line_idx
-    );
-    debug_assert_eq!(
-      self.relative_line_idx_and_char_idx(absolute_char_idx).1,
-      char_idx
-    );
+  ) -> (usize, usize) {
+    let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
+    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).0, line_idx);
+    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).1, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -700,7 +692,7 @@ impl Text {
     let absolute_char_idx_after_inserted =
       absolute_char_idx + payload.chars().count();
     let (line_idx_after_inserted, char_idx_after_inserted) =
-      self.relative_line_idx_and_char_idx(absolute_char_idx_after_inserted);
+      self.get_line_char_2d(absolute_char_idx_after_inserted);
 
     self.reset_cache_after_edit(
       line_idx,
@@ -718,7 +710,7 @@ impl Text {
       "After inserted",
     );
 
-    Some((line_idx_after_inserted, char_idx_after_inserted))
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
@@ -773,7 +765,7 @@ impl Text {
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
-  pub fn absolute_delete_chars_range(
+  pub fn get_removable_char_range(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -781,58 +773,53 @@ impl Text {
   ) -> Range<usize> {
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let cursor_char_absolute_pos_before_delete =
-      self.absolute_char_idx(line_idx, char_idx);
-    debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
-        .0,
-      line_idx
-    );
-    debug_assert_eq!(
-      self
-        .relative_line_idx_and_char_idx(cursor_char_absolute_pos_before_delete)
-        .1,
-      char_idx
-    );
+    let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
+    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).0, line_idx);
+    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).1, char_idx);
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
-    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e.
+    // we treat `\r\n` as 1 single char when deleting it.
     if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self
-        .n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
       debug_assert!(upper <= self.rope.len_chars());
-      cursor_char_absolute_pos_before_delete..upper
+      absolute_char_idx..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self
-        .n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
-      lower..cursor_char_absolute_pos_before_delete
+      let lower = self.n_chars_to_left(absolute_char_idx, (-n) as usize);
+      lower..absolute_char_idx
     }
   }
 
-  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
+  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left
+  /// or right direction.
   ///
-  /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
-  /// 2. If `n>0`, delete to the right direction, i.e. delete the range `[char_idx, char_idx+n)`.
+  /// 1. If `n<0`, delete to the left direction, i.e. delete the range
+  ///    `[char_idx-n, char_idx)`.
+  /// 2. If `n>0`, delete to the right direction, i.e. delete the range
+  ///    `[char_idx, char_idx+n)`.
   /// 3. If `n=0`, delete nothing.
   ///
   /// # Returns
-  /// It returns the new position `(line_idx,char_idx)` after deleted, it returns `None` if delete
-  /// nothing.
+  /// 1. It returns the new position `(line_idx,char_idx)` after deleted.
+  /// 2. It returns `None` if delete nothing.
   ///
   /// # Panics
-  /// It panics if the position doesn't exist.
-  pub fn delete_at(
+  /// It panics if the position doesn't exist on text rope.
+  pub fn remove(
     &mut self,
     line_idx: usize,
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    let to_delete_range =
-      self.absolute_delete_chars_range(line_idx, char_idx, n);
+    if line_idx >= self.rope.len_lines()
+      || char_idx >= self.rope.line(line_idx).len_chars()
+    {
+      return None;
+    }
+    let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
     if to_delete_range.is_empty() {
       return None;
     }
@@ -843,7 +830,7 @@ impl Text {
     let absolute_char_idx_after_deleted =
       std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
     let (line_idx_after_deleted, char_idx_after_deleted) =
-      self.relative_line_idx_and_char_idx(absolute_char_idx_after_deleted);
+      self.get_line_char_2d(absolute_char_idx_after_deleted);
 
     self.reset_cache_after_edit(
       line_idx,

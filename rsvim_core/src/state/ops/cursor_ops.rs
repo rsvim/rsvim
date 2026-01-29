@@ -572,30 +572,25 @@ pub fn cursor_insert(
     cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars()
   );
 
-  if let Some((
+  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
+    text.insert(cursor_line_idx, cursor_char_idx, payload);
+
+  // Update viewport since the buffer doesn't match the viewport.
+  _update_viewport_after_text_changed(tree, id, text);
+
+  trace!(
+    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+  );
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_inserted,
+    cursor_line_idx_after_inserted,
+  ));
+  cursor_move(tree, id, text, op, true);
+
+  (
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
-  )) = text.insert_at(cursor_line_idx, cursor_char_idx, payload)
-  {
-    // Update viewport since the buffer doesn't match the viewport.
-    _update_viewport_after_text_changed(tree, id, text);
-
-    trace!(
-      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-    );
-    let op = Operation::CursorMoveTo((
-      cursor_char_idx_after_inserted,
-      cursor_line_idx_after_inserted,
-    ));
-    cursor_move(tree, id, text, op, true);
-
-    (
-      cursor_line_idx_after_inserted,
-      cursor_char_idx_after_inserted,
-    )
-  } else {
-    (cursor_line_idx, cursor_char_idx)
-  }
+  )
 }
 
 /// High-level cursor delete operation.
@@ -622,16 +617,8 @@ pub fn cursor_delete(
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
 
-  // If line is empty, cursor cannot delete any text content.
-  if cursor_char_idx >= text.rope().line(cursor_line_idx).len_chars() {
-    return None;
-  }
-
-  debug_assert!(
-    cursor_char_idx < text.rope().line(cursor_line_idx).len_chars()
-  );
   let maybe_new_cursor_position =
-    text.delete_at(cursor_line_idx, cursor_char_idx, n);
+    text.remove(cursor_line_idx, cursor_char_idx, n);
 
   maybe_new_cursor_position?;
 
@@ -720,16 +707,9 @@ pub fn cursor_absolute_char_idx(tree: &Tree, id: NodeId, text: &Text) -> usize {
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  let absolute_char_idx =
-    text.absolute_char_idx(cursor_line_idx, cursor_char_idx);
-  debug_assert_eq!(
-    text.relative_line_idx_and_char_idx(absolute_char_idx).0,
-    cursor_line_idx
-  );
-  debug_assert_eq!(
-    text.relative_line_idx_and_char_idx(absolute_char_idx).1,
-    cursor_char_idx
-  );
+  let absolute_char_idx = text.get_char_1d(cursor_line_idx, cursor_char_idx);
+  debug_assert_eq!(text.get_line_char_2d(absolute_char_idx).0, cursor_line_idx);
+  debug_assert_eq!(text.get_line_char_2d(absolute_char_idx).1, cursor_char_idx);
   absolute_char_idx
 }
 
@@ -756,5 +736,5 @@ pub fn cursor_absolute_delete_chars_range(
     return None;
   }
 
-  Some(text.absolute_delete_chars_range(cursor_line_idx, cursor_char_idx, n))
+  Some(text.get_removable_char_range(cursor_line_idx, cursor_char_idx, n))
 }
