@@ -9,6 +9,7 @@ use ropey::Rope;
 use std::path::PathBuf;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
+use tree_sitter::InputEdit;
 
 #[derive(Debug)]
 /// Message sent to [`EventLoop`](crate::evloop::EventLoop).
@@ -91,6 +92,7 @@ pub struct BufferFullParseReq {
 pub struct BufferIncrParseReq {
   pub buf_id: BufferId,
   pub payload: Rope,
+  pub edit: InputEdit,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
