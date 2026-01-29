@@ -671,16 +671,12 @@ impl Text {
   ///
   /// # Panics
   /// If the position doesn't exist on text rope.
-  pub fn insert_at(
+  pub fn insert(
     &mut self,
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> Option<(usize, usize)> {
-    if payload.is_empty() {
-      return None;
-    }
-
+  ) -> (usize, usize) {
     let absolute_char_idx = self.absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
       self.relative_line_idx_and_char_idx(absolute_char_idx).0,
@@ -718,7 +714,7 @@ impl Text {
       "After inserted",
     );
 
-    Some((line_idx_after_inserted, char_idx_after_inserted))
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 
   fn n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
