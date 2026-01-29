@@ -9,6 +9,12 @@ pub struct Syntax {
   parser: Parser,
 }
 
+impl Syntax {
+  pub fn new(parser: Parser) -> Self {
+    Self { parser }
+  }
+}
+
 #[derive(
   Debug,
   Copy,
