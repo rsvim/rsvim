@@ -4,6 +4,7 @@ use crate::prelude::*;
 use tree_sitter::Language;
 use tree_sitter::Parser;
 
+#[derive(Debug)]
 pub struct Syntax {
   parser: Parser,
 }
@@ -23,6 +24,7 @@ pub enum LanguageName {
   Rust,
 }
 
+#[derive(Debug)]
 pub struct SyntaxManager {
   languages: FoldMap<LanguageName, Language>,
 }
@@ -39,4 +41,6 @@ impl SyntaxManager {
       languages: FoldMap::new(),
     }
   }
+
+  pub fn new_syntax(&mut self, lang: LanguageName) -> Syntax {}
 }
