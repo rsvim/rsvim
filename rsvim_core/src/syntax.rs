@@ -2,15 +2,25 @@
 
 use crate::prelude::*;
 use tree_sitter::Language;
+use tree_sitter::LanguageError;
 use tree_sitter::Parser;
+use tree_sitter::Tree;
 
 pub struct Syntax {
   parser: Parser,
+  tree: Option<Tree>,
 }
 
 impl Syntax {
-  pub fn new(parser: Parser) -> Self {
-    Self { parser }
+  pub fn new() -> Self {
+    Self {
+      parser: Parser::new(),
+      tree: None,
+    }
+  }
+
+  pub fn set_language(&mut self, lang: &Language) -> Result<(), LanguageError> {
+    self.parser.set_language(lang)
   }
 }
 
