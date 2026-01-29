@@ -4,7 +4,6 @@ use crate::prelude::*;
 use tree_sitter::Language;
 use tree_sitter::Parser;
 
-#[derive(Debug)]
 pub struct Syntax {
   parser: Parser,
 }
