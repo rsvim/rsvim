@@ -755,6 +755,12 @@ impl EventLoop {
               .unwrap();
           });
         }
+        MasterMessage::BufferFullParseReq(req) => {
+          trace!("Recv BufferFullParseReq:{:?}", req);
+        }
+        MasterMessage::BufferIncrParseReq(req) => {
+          trace!("Recv BufferIncrParseReq:{:?}", req);
+        }
       }
     }
   }
