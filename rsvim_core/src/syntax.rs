@@ -3,7 +3,6 @@
 use crate::prelude::*;
 use tree_sitter::Language;
 use tree_sitter::Parser;
-use tree_sitter_rust::LANGUAGE;
 
 #[derive(Debug)]
 pub struct Syntax {
@@ -45,7 +44,7 @@ impl SyntaxManager {
 
   pub fn new_syntax(&mut self, lang: LanguageName) -> Syntax {
     if !self.languages.contains_key(&lang) {
-      let ts_language = LANGUAGE.into();
+      let ts_language = tree_sitter_rust::LANGUAGE.into();
       self.languages.insert(lang, ts_language);
     }
     let mut parser = Parser::new();
