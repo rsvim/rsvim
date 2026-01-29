@@ -48,12 +48,12 @@ impl SyntaxManager {
   }
 
   pub fn new_syntax(&mut self, lang: LanguageName) -> Syntax {
-    if !self.languages.contains_key(&lang) {
+    self.languages.entry(lang).or_insert_with(|| {
       let ts_language = tree_sitter_rust::LANGUAGE.into();
-      self.languages.insert(lang, ts_language);
-    }
+      ts_language
+    });
     let mut parser = Parser::new();
-    parser.set_language(self.languages.get(&lang).unwrap());
+    let _ = parser.set_language(self.languages.get(&lang).unwrap());
     Syntax::new(parser)
   }
 }
