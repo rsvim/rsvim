@@ -765,7 +765,7 @@ impl Text {
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
-  pub fn get_removable_char_idx_range(
+  pub fn get_removable_char_range(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -811,8 +811,7 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    let to_delete_range =
-      self.get_removable_char_idx_range(line_idx, char_idx, n);
+    let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
     if to_delete_range.is_empty() {
       return None;
     }

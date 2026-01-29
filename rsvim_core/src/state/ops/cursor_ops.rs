@@ -744,5 +744,5 @@ pub fn cursor_absolute_delete_chars_range(
     return None;
   }
 
-  Some(text.get_removable_char_idx_range(cursor_line_idx, cursor_char_idx, n))
+  Some(text.get_removable_char_range(cursor_line_idx, cursor_char_idx, n))
 }
