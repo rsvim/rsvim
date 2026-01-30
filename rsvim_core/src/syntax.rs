@@ -64,14 +64,14 @@ impl Syntax {
   strum_macros::Display,
   strum_macros::EnumString,
 )]
-pub enum LanguageName {
+pub enum LanguageId {
   #[strum(serialize = "rust")]
   Rust,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SyntaxManager {
-  languages: FoldMap<LanguageName, Language>,
+  languages: FoldMap<LanguageId, Language>,
 }
 
 impl Default for SyntaxManager {
@@ -87,15 +87,11 @@ impl SyntaxManager {
     }
   }
 
-  pub fn new_syntax(&mut self, lang: LanguageName) -> Syntax {
+  pub fn get_language(&mut self, lang: LanguageId) -> Option<&Language> {
     self
       .languages
       .entry(lang)
       .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
-    let mut syn = Syntax::new();
-    syn
-      .set_language(self.languages.get(&lang).unwrap())
-      .unwrap();
-    syn
+    self.languages.get(&lang)
   }
 }
