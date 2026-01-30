@@ -1,8 +1,7 @@
 //! Tree-sitter based syntax engine.
 
-use std::fmt::Debug;
-
 use crate::prelude::*;
+use std::fmt::Debug;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
