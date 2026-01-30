@@ -87,6 +87,7 @@ toml = "0.9.11"
 once_cell = { version = "1.21.3", features = ["parking_lot"] }
 tree-sitter = "0.26.3"
 tree-sitter-loader = "0.26.3"
+tree-sitter-highlight = "0.26.3"
 tree-sitter-rust = "0.24.0"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {

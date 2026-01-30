@@ -69,6 +69,7 @@ encoding_rs = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 tree-sitter = { workspace = true }
 tree-sitter-loader = { workspace = true }
+tree-sitter-highlight = { workspace = true }
 tree-sitter-rust = { workspace = true }
 
 # NOTE: Javascript dependencies {
