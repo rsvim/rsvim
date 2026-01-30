@@ -612,7 +612,19 @@ export class RsvimFs {
     RsvimFs.File = File;
 })(RsvimFs || (RsvimFs = {}));
 /**
- * The `Rsvim.opt` global object for global editor options.
+ * The `Rsvim.opt` global object for global editor options. These options will change the editor's behavior
+ * and suit user's personal habits.
+ *
+ * There are 3 kinds of editor option:
+ * - Global options: Options that are global that you use one value for all Rsvim component instances such
+ *   as buffer, window, statusline, etc. When you change the option, it will take effect immediately and
+ *   affect all existing instances.
+ * - Local options: Options that only apply to one component instance, each instance has its own copy of
+ *   this option, thus each can have its own value. This allow you to set an option in one instance, without
+ *   modifying other instances.
+ * - Global local options: Options that are global, and will be copy to a newly created Rsvim component
+ *   instance. A global-local-option always has its corresponding local-option. When you change the option,
+ *   it only will apply to the newly created instances, but cannot modify existing instances.
  *
  * @example
  * ```javascript
@@ -625,7 +637,7 @@ export class RsvimFs {
  */
 export class RsvimOpt {
     /**
-     * Get the _expand-tab_ option. Local to buffer.
+     * Get the _expand-tab_ option. Global local to buffer.
      *
      * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
      * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
@@ -664,7 +676,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_expand_tab(value);
     }
     /**
-     * Get the _file-encoding_ option. Local to buffer.
+     * Get the _file-encoding_ option. Global local to buffer.
      *
      * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
      * This will determine which character encoding is used when RSVIM read/write a file from file system.
@@ -705,7 +717,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
     }
     /**
-     * Get the _file-format_ option. Local to buffer.
+     * Get the _file-format_ option. Global local to buffer.
      *
      * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the buffer. There are 3 kinds of line end:
      * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
@@ -759,7 +771,7 @@ export class RsvimOpt {
     }
     /**
      * Get the _line-break_ option. This options is also known as
-     * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
+     * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Global local to window.
      *
      * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
      * It only affects the way the file is displayed, not its contents.
@@ -798,7 +810,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
     /**
-     * Get the _shift-width_ option. Local to buffer.
+     * Get the _shift-width_ option. Global local to buffer.
      *
      * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
      * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
@@ -842,7 +854,7 @@ export class RsvimOpt {
     /**
      * Get the _tab-stop_ option. This option is also known as
      * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
-     * Local to buffer.
+     * Global local to buffer.
      *
      * This option changes how text is displayed.
      *
@@ -884,7 +896,7 @@ export class RsvimOpt {
     }
     /**
      * Get the _wrap_ option. This option is also known as
-     * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
+     * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Global local to window.
      *
      * This option changes how text is displayed.
      *
