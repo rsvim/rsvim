@@ -11,7 +11,9 @@ use tree_sitter::Tree;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SyntaxStatus {
-  NotMatched,
+  Init,
+  Parsing,
+  NotMatch,
 }
 
 pub struct Syntax {
@@ -54,7 +56,16 @@ impl Syntax {
     Self {
       parser: Parser::new(),
       tree: None,
+      status: SyntaxStatus::Init,
     }
+  }
+
+  pub fn status(&self) -> SyntaxStatus {
+    self.status
+  }
+
+  pub fn set_status(&mut self, status: SyntaxStatus) {
+    self.status = status;
   }
 
   pub fn set_language(&mut self, lang: &Language) -> Result<(), LanguageError> {
