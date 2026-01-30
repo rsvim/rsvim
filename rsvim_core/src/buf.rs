@@ -279,7 +279,7 @@ impl BuffersManager {
         .syntax_manager
         .get_language_by_ext(&ext.to_string_lossy())
     {
-      buf.syntax.set_language(lang).unwrap();
+      buf.syntax_mut().set_language(lang).unwrap();
     }
 
     let buf_id = buf.id();
