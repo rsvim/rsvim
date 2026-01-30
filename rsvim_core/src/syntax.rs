@@ -91,7 +91,7 @@ pub enum LanguageId {
 }
 
 pub struct SyntaxManager {
-  // Dynamic library loader
+  // Grammar dynamic library loader
   loader: Loader,
 
   languages: FoldMap<LanguageId, Language>,
