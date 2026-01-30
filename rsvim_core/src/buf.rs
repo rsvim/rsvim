@@ -30,7 +30,7 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
-use undo::UndoManager;
+use undo::Undo;
 
 struct_id_impl!(BufferId, i32, negative);
 
@@ -59,7 +59,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // undo manager
-  undo_manager: UndoManager,
+  undo_manager: Undo,
 
   // syntax parser
   syntax: Syntax,
@@ -87,7 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      undo_manager: UndoManager::new(100),
+      undo_manager: Undo::new(100),
       syntax: Syntax::new(),
     }
   }
@@ -144,11 +144,11 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn undo_manager(&self) -> &UndoManager {
+  pub fn undo_manager(&self) -> &Undo {
     &self.undo_manager
   }
 
-  pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
+  pub fn undo_manager_mut(&mut self) -> &mut Undo {
     &mut self.undo_manager
   }
 
