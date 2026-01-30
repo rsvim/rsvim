@@ -96,6 +96,11 @@ impl SyntaxManager {
   }
 
   /// Associate a language ID with a file extension.
+  ///
+  /// For example, a 'C++' language ID can be associate with below file
+  /// extensions:
+  /// - Feader files: h, hh, h++, hpp
+  /// - Source files: cpp, cc, c++
   pub fn set_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
     self
       .id2ext
