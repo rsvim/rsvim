@@ -8,6 +8,7 @@ use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
+use tree_sitter_loader::Loader;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SyntaxStatus {
@@ -88,13 +89,25 @@ pub enum LanguageId {
   Rust,
 }
 
-#[derive(Debug, Clone)]
 pub struct SyntaxManager {
+  // Dynamic library loader
+  loader: Loader,
+
   languages: FoldMap<LanguageId, Language>,
   // Maps language ID to file extensions
   id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
   // Maps file extension to language ID
   ext2id: FoldMap<CompactString, LanguageId>,
+}
+
+impl Debug for SyntaxManager {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxManager")
+      .field("languages", &self.languages)
+      .field("id2ext", &self.id2ext)
+      .field("ext2id", &self.ext2id)
+      .finish()
+  }
 }
 
 impl Default for SyntaxManager {
