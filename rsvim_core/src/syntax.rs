@@ -119,7 +119,7 @@ impl SyntaxManager {
     self.ext2id.remove(ext);
   }
 
-  pub fn get_language(&mut self, lang_id: LanguageId) -> Option<&Language> {
+  pub fn get_lang(&mut self, lang_id: LanguageId) -> Option<&Language> {
     self
       .languages
       .entry(lang_id)
@@ -127,9 +127,9 @@ impl SyntaxManager {
     self.languages.get(&lang_id)
   }
 
-  pub fn get_language_by_ext(&mut self, ext: &str) -> Option<&Language> {
+  pub fn get_lang_by_ext(&mut self, ext: &str) -> Option<&Language> {
     match self.ext2id.get(ext) {
-      Some(lang_id) => self.get_language(*lang_id),
+      Some(lang_id) => self.get_lang(*lang_id),
       None => None,
     }
   }
