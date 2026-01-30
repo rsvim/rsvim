@@ -144,11 +144,11 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn undo_manager(&self) -> &Undo {
+  pub fn undo(&self) -> &Undo {
     &self.undo
   }
 
-  pub fn undo_manager_mut(&mut self) -> &mut Undo {
+  pub fn undo_mut(&mut self) -> &mut Undo {
     &mut self.undo
   }
 

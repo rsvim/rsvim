@@ -130,14 +130,11 @@ impl Insert {
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
-        buffer
-          .undo_manager_mut()
-          .current_mut()
-          .delete(undo::Delete {
-            payload: payload.clone(),
-            char_idx_before: absolute_delete_range.end,
-            char_idx_after: absolute_delete_range.start,
-          });
+        buffer.undo_mut().current_mut().delete(undo::Delete {
+          payload: payload.clone(),
+          char_idx_before: absolute_delete_range.end,
+          char_idx_after: absolute_delete_range.start,
+        });
       } else {
         if cfg!(debug_assertions) {
           let cursor_viewport =
@@ -149,14 +146,11 @@ impl Insert {
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
-        buffer
-          .undo_manager_mut()
-          .current_mut()
-          .delete(undo::Delete {
-            payload: payload.clone(),
-            char_idx_before: absolute_delete_range.start,
-            char_idx_after: absolute_delete_range.start,
-          });
+        buffer.undo_mut().current_mut().delete(undo::Delete {
+          payload: payload.clone(),
+          char_idx_before: absolute_delete_range.start,
+          char_idx_after: absolute_delete_range.start,
+        });
       };
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
@@ -216,14 +210,11 @@ impl Insert {
       current_window_id,
       buffer.text(),
     );
-    buffer
-      .undo_manager_mut()
-      .current_mut()
-      .insert(undo::Insert {
-        payload: payload.clone(),
-        char_idx_before: cursor_absolute_char_idx,
-        char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
-      });
+    buffer.undo_mut().current_mut().insert(undo::Insert {
+      payload: payload.clone(),
+      char_idx_before: cursor_absolute_char_idx,
+      char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
+    });
     let (_cursor_line_idx_after, _cursor_char_idx_after) =
       cursor_ops::cursor_insert(
         &mut tree,
@@ -264,7 +255,7 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Commit editing changes
-    buffer.undo_manager_mut().commit();
+    buffer.undo_mut().commit();
 
     let op = Operation::CursorMoveBy((-1, 0));
     cursor_ops::cursor_move(
