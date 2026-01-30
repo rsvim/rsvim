@@ -866,7 +866,7 @@ export namespace RsvimOpt {
  * The `Rsvim.opt` global object for global editor options. These options will change the editor's behavior
  * and suit user's personal usage habits.
  *
- * There are 3 kind of editor options:
+ * There are 3 kinds of editor option:
  * - Global options: Options that are global that you use one value for all Rsvim component instances such
  *   as buffer, window, statusline, etc. When you change the option, it will take effect immediately and
  *   affect all existing instances.
