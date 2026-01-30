@@ -18,6 +18,7 @@ use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::struct_id_impl;
 use crate::syntax::Syntax;
+use crate::syntax::SyntaxManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -172,6 +173,9 @@ pub struct BuffersManager {
 
   // Global-local options for buffers.
   global_local_options: BufferOptions,
+
+  // Syntax manager
+  syntax_manager: SyntaxManager,
 }
 
 arc_mutex_ptr!(BuffersManager);
@@ -189,6 +193,7 @@ impl BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
+      syntax_manager: SyntaxManager::new(),
     }
   }
 
