@@ -59,7 +59,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // undo manager
-  undo_manager: Undo,
+  undo: Undo,
 
   // syntax parser
   syntax: Syntax,
@@ -87,7 +87,7 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      undo_manager: Undo::new(100),
+      undo: Undo::new(100),
       syntax: Syntax::new(),
     }
   }
@@ -145,11 +145,11 @@ impl Buffer {
   }
 
   pub fn undo_manager(&self) -> &Undo {
-    &self.undo_manager
+    &self.undo
   }
 
   pub fn undo_manager_mut(&mut self) -> &mut Undo {
-    &mut self.undo_manager
+    &mut self.undo
   }
 
   pub fn syntax(&self) -> &Syntax {
