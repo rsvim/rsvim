@@ -35,6 +35,12 @@ impl Debug for Syntax {
   }
 }
 
+impl Default for Syntax {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl Syntax {
   pub fn new() -> Self {
     Self {
