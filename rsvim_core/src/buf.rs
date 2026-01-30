@@ -17,6 +17,7 @@ mod unicode_tests;
 use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::struct_id_impl;
+use crate::syntax::Syntax;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -58,6 +59,9 @@ pub struct Buffer {
 
   // undo manager
   undo_manager: UndoManager,
+
+  // syntax parser
+  syntax: Syntax,
 }
 
 arc_mutex_ptr!(Buffer);
