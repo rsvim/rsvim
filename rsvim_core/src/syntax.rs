@@ -9,9 +9,15 @@ use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum SyntaxStatus {
+  NotMatched,
+}
+
 pub struct Syntax {
   parser: Parser,
   tree: Option<Tree>,
+  status: SyntaxStatus,
 }
 
 impl Debug for Syntax {
