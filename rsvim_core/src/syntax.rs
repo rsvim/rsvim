@@ -95,6 +95,7 @@ impl SyntaxManager {
     }
   }
 
+  /// Associate a language ID with a file extension.
   pub fn set_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
     self
       .id2ext
@@ -107,6 +108,7 @@ impl SyntaxManager {
       .or_insert(lang_id);
   }
 
+  /// Un-associate a language ID with a file extension.
   pub fn unset_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
     self.id2ext.entry(lang_id).or_default().remove(ext);
     self.ext2id.remove(ext);
