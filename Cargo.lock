@@ -2675,6 +2675,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tree-sitter",
+ "tree-sitter-highlight",
  "tree-sitter-loader",
  "tree-sitter-rust",
  "unicode-width",
