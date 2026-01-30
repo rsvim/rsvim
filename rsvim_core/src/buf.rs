@@ -87,6 +87,7 @@ impl Buffer {
       metadata,
       last_sync_time,
       undo_manager: UndoManager::new(100),
+      syntax: Syntax::new(),
     }
   }
 
