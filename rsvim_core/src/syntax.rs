@@ -119,6 +119,7 @@ impl Default for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     Self {
+      loader: Loader::new().unwrap(),
       languages: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
