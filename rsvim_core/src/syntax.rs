@@ -95,7 +95,7 @@ impl SyntaxManager {
     }
   }
 
-  pub fn set_language_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
+  pub fn set_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
     self
       .id2ext
       .entry(lang_id)
@@ -105,6 +105,11 @@ impl SyntaxManager {
       .ext2id
       .entry(ext.to_compact_string())
       .or_insert(lang_id);
+  }
+
+  pub fn unset_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
+    self.id2ext.entry(lang_id).or_default().remove(ext);
+    self.ext2id.remove(ext);
   }
 
   pub fn get_language(&mut self, lang_id: LanguageId) -> Option<&Language> {
