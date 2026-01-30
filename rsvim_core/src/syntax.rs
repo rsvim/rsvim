@@ -96,11 +96,10 @@ impl SyntaxManager {
   }
 
   pub fn set_language_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
-    self.id2ext.entry(lang_id).or_default();
     self
       .id2ext
-      .get_mut(&lang_id)
-      .unwrap()
+      .entry(lang_id)
+      .or_default()
       .insert(ext.to_compact_string());
     if !self.ext2id.contains_key(ext) {
       self.ext2id.insert(ext.to_compact_string(), lang_id);
