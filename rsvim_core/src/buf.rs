@@ -275,9 +275,8 @@ impl BuffersManager {
     };
 
     if let Some(ext) = filename.extension()
-      && let Some(lang) = self
-        .syntax_manager
-        .get_language_by_ext(&ext.to_string_lossy())
+      && let Some(lang) =
+        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
     {
       buf.syntax_mut().set_language(lang).unwrap();
     }
