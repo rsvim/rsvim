@@ -1,6 +1,8 @@
 //! Tree-sitter based syntax engine.
 
 use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::fmt::Debug;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -72,6 +74,10 @@ pub enum LanguageId {
 #[derive(Debug, Clone)]
 pub struct SyntaxManager {
   languages: FoldMap<LanguageId, Language>,
+  // Maps language ID to file extensions
+  id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
+  // Maps file extension to language ID
+  ext2id: FoldMap<CompactString, LanguageId>,
 }
 
 impl Default for SyntaxManager {
@@ -84,14 +90,38 @@ impl SyntaxManager {
   pub fn new() -> Self {
     Self {
       languages: FoldMap::new(),
+      id2ext: FoldMap::new(),
+      ext2id: FoldMap::new(),
     }
   }
 
-  pub fn get_language(&mut self, lang: LanguageId) -> Option<&Language> {
+  pub fn set_language_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
+    if !self.id2ext.contains_key(&lang_id) {
+      self.id2ext.insert(lang_id, FoldSet::new());
+    }
+    self
+      .id2ext
+      .get_mut(&lang_id)
+      .unwrap()
+      .insert(ext.to_compact_string());
+    if !self.ext2id.contains_key(ext) {
+      self.ext2id.insert(ext.to_compact_string(), lang_id);
+    }
+  }
+
+  pub fn get_language(&mut self, lang_id: LanguageId) -> Option<&Language> {
     self
       .languages
-      .entry(lang)
+      .entry(lang_id)
       .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
-    self.languages.get(&lang)
+    self.languages.get(&lang_id)
+  }
+
+  pub fn get_language_by_ext(&mut self, ext: &str) -> Option<&Language> {
+    self
+      .languages
+      .entry(lang_id)
+      .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
+    self.languages.get(&lang_id)
   }
 }
