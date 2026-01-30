@@ -101,9 +101,10 @@ impl SyntaxManager {
       .entry(lang_id)
       .or_default()
       .insert(ext.to_compact_string());
-    if !self.ext2id.contains_key(ext) {
-      self.ext2id.insert(ext.to_compact_string(), lang_id);
-    }
+    self
+      .ext2id
+      .entry(ext.to_compact_string())
+      .or_insert(lang_id);
   }
 
   pub fn get_language(&mut self, lang_id: LanguageId) -> Option<&Language> {
