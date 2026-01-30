@@ -96,9 +96,7 @@ impl SyntaxManager {
   }
 
   pub fn set_language_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
-    if !self.id2ext.contains_key(&lang_id) {
-      self.id2ext.insert(lang_id, FoldSet::new());
-    }
+    self.id2ext.entry(lang_id).or_default();
     self
       .id2ext
       .get_mut(&lang_id)
@@ -118,10 +116,9 @@ impl SyntaxManager {
   }
 
   pub fn get_language_by_ext(&mut self, ext: &str) -> Option<&Language> {
-    self
-      .languages
-      .entry(lang_id)
-      .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
-    self.languages.get(&lang_id)
+    match self.ext2id.get(ext) {
+      Some(lang_id) => self.get_language(*lang_id),
+      None => None,
+    }
   }
 }
