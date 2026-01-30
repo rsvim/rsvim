@@ -266,6 +266,14 @@ impl BuffersManager {
       )
     };
 
+    if let Some(ext) = filename.extension()
+      && let Some(lang) = self
+        .syntax_manager
+        .get_language_by_ext(&ext.to_string_lossy())
+    {
+      buf.syntax.set_language(lang).unwrap();
+    }
+
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
