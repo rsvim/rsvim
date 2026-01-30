@@ -151,6 +151,14 @@ impl Buffer {
   pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
     &mut self.undo_manager
   }
+
+  pub fn syntax(&self) -> &Syntax {
+    &self.syntax
+  }
+
+  pub fn syntax_mut(&mut self) -> &mut Syntax {
+    &mut self.syntax
+  }
 }
 
 impl Buffer {
