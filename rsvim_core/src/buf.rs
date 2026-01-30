@@ -168,7 +168,7 @@ impl Buffer {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
 /// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
