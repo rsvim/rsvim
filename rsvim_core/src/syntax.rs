@@ -1,5 +1,7 @@
 //! Tree-sitter based syntax engine.
 
+use std::fmt::Debug;
+
 use crate::prelude::*;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -9,6 +11,29 @@ use tree_sitter::Tree;
 pub struct Syntax {
   parser: Parser,
   tree: Option<Tree>,
+}
+
+impl Debug for Syntax {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Syntax")
+      .field(
+        "parser",
+        &self
+          .parser
+          .language()
+          .map(|l| l.name().unwrap_or("unknown"))
+          .unwrap_or("unknown"),
+      )
+      .field(
+        "tree",
+        if self.tree.is_some() {
+          &"some"
+        } else {
+          &"none"
+        },
+      )
+      .finish()
+  }
 }
 
 impl Syntax {
