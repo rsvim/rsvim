@@ -8,8 +8,6 @@ use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
-use tree_sitter_loader::Loader;
-use tree_sitter_loader::LoaderError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SyntaxStatus {
@@ -91,9 +89,6 @@ pub enum LanguageId {
 }
 
 pub struct SyntaxManager {
-  // Grammar dynamic library loader
-  loader: Loader,
-
   languages: FoldMap<LanguageId, Language>,
   // Maps language ID to file extensions
   id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
@@ -112,14 +107,12 @@ impl Debug for SyntaxManager {
 }
 
 impl SyntaxManager {
-  pub fn new() -> Result<Self, LoaderError> {
-    let loader = Loader::new()?;
-    Ok(Self {
-      loader,
+  pub fn new() -> Self {
+    Self {
       languages: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
-    })
+    }
   }
 
   /// Associate a language ID with a file extension.
