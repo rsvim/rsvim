@@ -9,12 +9,16 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      swc: # For SWC monorepo
+      swc:
         patterns:
           - "swc*"
-      tokio: # For tokio monorepo
+      tokio:
         patterns:
           - "tokio*"
+      tree_sitter:
+        patterns:
+          - "tree_sitter*"
+          - "tree-sitter*"
     ignore:
       - dependency-name: "bincode"
   - package-ecosystem: "github-actions"

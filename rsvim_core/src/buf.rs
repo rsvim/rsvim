@@ -17,6 +17,8 @@ mod unicode_tests;
 use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::struct_id_impl;
+use crate::syntax::Syntax;
+use crate::syntax::SyntaxManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -28,7 +30,7 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
-use undo::UndoManager;
+use undo::Undo;
 
 struct_id_impl!(BufferId, i32, negative);
 
@@ -57,7 +59,10 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // undo manager
-  undo_manager: UndoManager,
+  undo: Undo,
+
+  // syntax parser
+  syntax: Syntax,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -82,7 +87,8 @@ impl Buffer {
       absolute_filename,
       metadata,
       last_sync_time,
-      undo_manager: UndoManager::new(100),
+      undo: Undo::new(100),
+      syntax: Syntax::new(),
     }
   }
 
@@ -138,12 +144,20 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn undo_manager(&self) -> &UndoManager {
-    &self.undo_manager
+  pub fn undo(&self) -> &Undo {
+    &self.undo
   }
 
-  pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
-    &mut self.undo_manager
+  pub fn undo_mut(&mut self) -> &mut Undo {
+    &mut self.undo
+  }
+
+  pub fn syntax(&self) -> &Syntax {
+    &self.syntax
+  }
+
+  pub fn syntax_mut(&mut self) -> &mut Syntax {
+    &mut self.syntax
   }
 }
 
@@ -154,7 +168,7 @@ impl Buffer {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
 /// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
@@ -167,6 +181,9 @@ pub struct BuffersManager {
 
   // Global-local options for buffers.
   global_local_options: BufferOptions,
+
+  // Syntax manager
+  syntax_manager: SyntaxManager,
 }
 
 arc_mutex_ptr!(BuffersManager);
@@ -184,6 +201,7 @@ impl BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
+      syntax_manager: SyntaxManager::new(),
     }
   }
 
@@ -237,7 +255,7 @@ impl BuffersManager {
       }
     };
 
-    let buf = if existed {
+    let mut buf = if existed {
       match self.read_file(canvas_size, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
@@ -255,6 +273,13 @@ impl BuffersManager {
         None,
       )
     };
+
+    if let Some(ext) = filename.extension()
+      && let Some(lang) =
+        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+    {
+      buf.syntax_mut().set_language(lang).unwrap();
+    }
 
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
