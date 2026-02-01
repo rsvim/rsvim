@@ -154,3 +154,9 @@ impl SyntaxManager {
     }
   }
 }
+
+impl Default for SyntaxManager {
+  fn default() -> Self {
+    Self::new()
+  }
+}
