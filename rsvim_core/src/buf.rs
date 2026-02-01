@@ -201,7 +201,7 @@ impl BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
-      syntax_manager: SyntaxManager::new().unwrap(),
+      syntax_manager: SyntaxManager::new(),
     }
   }
 
