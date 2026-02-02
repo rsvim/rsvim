@@ -34,7 +34,7 @@ pub enum TheErr {
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, CompactString, IoErr),
 
-  #[error("Failed to load language syntax for filetype `{0}`: {1}.")]
+  #[error("Failed to load language syntax `{0}`: {1}.")]
   LoadLanguageSyntaxFailed(CompactString, LanguageError),
 
   #[error("Undo commit `{0}` not exist.")]
