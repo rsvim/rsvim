@@ -89,12 +89,13 @@ macro_rules! structural_id_impl {
     #[derive(Clone, PartialEq, Eq, Hash)]
     pub struct $name(CompactString);
 
-    structural_id_impl!(@eq $name, $ty);
-    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@eq $name, CompactString);
+    structural_id_impl!(@display $name, CompactString);
 
     impl From<String> for $name {
       fn from(value: String) -> Self {
-        Self(value)
+        use compact_str::ToCompactString;
+        Self(value.to_compact_string())
       }
     }
 
@@ -106,7 +107,7 @@ macro_rules! structural_id_impl {
 
     impl From<$name> for String {
       fn from(value: $name) -> Self {
-        value.0
+        value.0.to_string()
       }
     }
 
