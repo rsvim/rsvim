@@ -108,13 +108,11 @@ impl Debug for SyntaxManager {
 
 impl SyntaxManager {
   pub fn new() -> Self {
-    let mut it = Self {
+    Self {
       languages: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
-    };
-    it.insert_file_ext(LanguageId::Rust, "rs");
-    it
+    }
   }
 
   /// Associate a language ID with a file extension.
@@ -142,10 +140,6 @@ impl SyntaxManager {
   }
 
   pub fn get_lang(&mut self, lang_id: LanguageId) -> Option<&Language> {
-    self
-      .languages
-      .entry(lang_id)
-      .or_insert_with(|| tree_sitter_rust::LANGUAGE.into());
     self.languages.get(&lang_id)
   }
 
