@@ -1,6 +1,5 @@
 //! Internal tree context.
 
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use crate::ui::tree::internal::shapes;
@@ -9,7 +8,6 @@ use once_cell::sync::Lazy;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use std::sync::atomic::AtomicI32;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
