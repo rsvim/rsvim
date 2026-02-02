@@ -1,15 +1,12 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
-use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
-use ropey::Rope;
 use std::path::PathBuf;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
-use tree_sitter::InputEdit;
 
 #[derive(Debug)]
 /// Message sent to [`EventLoop`](crate::evloop::EventLoop).
