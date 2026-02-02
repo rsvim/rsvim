@@ -62,7 +62,7 @@ pub struct Buffer {
   undo: Undo,
 
   // syntax parser
-  syntax: Syntax,
+  syntax: Option<Syntax>,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -88,7 +88,7 @@ impl Buffer {
       metadata,
       last_sync_time,
       undo: Undo::new(100),
-      syntax: Syntax::new(),
+      syntax: None,
     }
   }
 
@@ -152,12 +152,16 @@ impl Buffer {
     &mut self.undo
   }
 
-  pub fn syntax(&self) -> &Syntax {
+  pub fn syntax(&self) -> &Option<Syntax> {
     &self.syntax
   }
 
-  pub fn syntax_mut(&mut self) -> &mut Syntax {
+  pub fn syntax_mut(&mut self) -> &mut Option<Syntax> {
     &mut self.syntax
+  }
+
+  pub fn set_syntax(&mut self, value: Option<Syntax>) {
+    self.syntax = value;
   }
 }
 
