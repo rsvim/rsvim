@@ -279,7 +279,7 @@ impl BuffersManager {
         self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
     {
       trace!(
-        "buf load syntax by file ext:{:?} lang:{:?}",
+        "Load syntax by file ext:{:?} lang:{:?}",
         filename.extension(),
         lang.name()
       );
