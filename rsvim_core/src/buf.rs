@@ -260,7 +260,7 @@ impl BuffersManager {
       }
     };
 
-    let mut buf = if existed {
+    let buf = if existed {
       match self.read_file(canvas_size, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
