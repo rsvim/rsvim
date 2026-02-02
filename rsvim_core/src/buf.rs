@@ -171,6 +171,30 @@ impl Buffer {
   pub fn set_syntax(&mut self, value: Option<Syntax>) {
     self.syntax = value;
   }
+
+  pub fn editing_version(&self) -> usize {
+    self.editing_version
+  }
+
+  pub fn increase_editing_version(&mut self) {
+    self.editing_version = if self.editing_version == usize::MAX {
+      0
+    } else {
+      self.editing_version + 1
+    };
+  }
+
+  pub fn parsing_version(&self) -> usize {
+    self.parsing_version
+  }
+
+  pub fn increase_parsing_version(&mut self) {
+    self.parsing_version = if self.parsing_version == usize::MAX {
+      0
+    } else {
+      self.parsing_version + 1
+    };
+  }
 }
 
 impl Buffer {
