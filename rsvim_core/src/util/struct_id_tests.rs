@@ -1,9 +1,6 @@
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::tests::log::init as test_log_init;
-use std::sync::atomic::AtomicI8;
-use std::sync::atomic::AtomicU8;
 
 structural_id_impl!(u8, Test1Id, 1);
 
