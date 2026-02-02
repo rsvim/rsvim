@@ -32,7 +32,7 @@ use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
 
-structural_id_impl!(BufferId, i32, negative);
+structural_id_impl!(signed, BufferId, i32);
 
 // BufferId starts from 1.
 next_incremental_id_impl!(next_buffer_id, BufferId, AtomicI32, i32, 1);

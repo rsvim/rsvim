@@ -85,6 +85,14 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@negative_one $name, $ty);
   };
 
+  (identity, $name:tt,$ty:tt) => {
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
+    pub struct $name($ty);
+
+    structural_id_impl!(@eq $name, $ty);
+    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@convert $name, $ty);
+  };
 }
 
 #[macro_export]
