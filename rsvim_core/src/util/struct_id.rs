@@ -85,13 +85,36 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@negative_one $name, $ty);
   };
 
-  (stringify,$name:tt,$ty:tt) => {
+  (stringify,$name:tt) => {
     #[derive(Clone, PartialEq, Eq, Hash)]
-    pub struct $name($ty);
+    pub struct $name(CompactString);
 
     structural_id_impl!(@eq $name, $ty);
     structural_id_impl!(@display $name, $ty);
-    structural_id_impl!(@convert $name, $ty);
+
+    impl From<String> for $name {
+      fn from(value: String) -> Self {
+        Self(value)
+      }
+    }
+
+    impl From<compact_str::CompactString> for $name {
+      fn from(value: CompactString) -> Self {
+        Self(value)
+      }
+    }
+
+    impl From<$name> for String {
+      fn from(value: $name) -> Self {
+        value.0
+      }
+    }
+
+    impl From<$name> for compact_str::CompactString {
+      fn from(value: $name) -> Self {
+        value.0
+      }
+    }
   };
 }
 

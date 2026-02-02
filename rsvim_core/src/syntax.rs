@@ -74,7 +74,7 @@ impl Syntax {
   }
 }
 
-structural_id_impl!(stringify, LanguageId, CompactString);
+structural_id_impl!(stringify, LanguageId);
 
 pub struct SyntaxManager {
   languages: FoldMap<LanguageId, Language>,
