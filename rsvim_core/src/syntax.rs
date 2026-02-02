@@ -155,7 +155,7 @@ impl SyntaxManager {
 
   pub fn get_lang_by_ext(&mut self, ext: &str) -> Option<&Language> {
     match self.ext2id.get(ext) {
-      Some(lang_id) => self.get_lang(*lang_id),
+      Some(lang_id) => self.get_lang(lang_id.clone()),
       None => None,
     }
   }
