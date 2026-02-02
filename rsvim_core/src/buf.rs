@@ -64,6 +64,10 @@ pub struct Buffer {
 
   // syntax parser
   syntax: Option<Syntax>,
+
+  // Versioning for text editing and syntax parsing.
+  editing_version: usize,
+  parsing_version: usize,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -91,6 +95,8 @@ impl Buffer {
       last_sync_time,
       undo: Undo::new(100),
       syntax,
+      editing_version: 0,
+      parsing_version: 0,
     }
   }
 
