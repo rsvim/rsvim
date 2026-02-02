@@ -96,11 +96,13 @@ impl Debug for SyntaxManager {
 
 impl SyntaxManager {
   pub fn new() -> Self {
-    Self {
+    let mut it = Self {
       languages: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
-    }
+    };
+    it.insert_lang_id_and_file_ext(LanguageId::from("rust"), "rs");
+    it
   }
 
   /// Associate a language ID with a file extension.
