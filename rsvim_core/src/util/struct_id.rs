@@ -120,29 +120,51 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (usize,$name:tt,$initial:expr) => {
+  (@unsigned $ty:tt,$name:tt,$initial:expr) => {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name(usize);
+    pub struct $name($ty);
 
-    structural_id_impl!(@ord $name, usize);
-    structural_id_impl!(@eq $name, usize);
-    structural_id_impl!(@display $name, usize);
-    structural_id_impl!(@from_int $name, usize);
-    structural_id_impl!(@zero $name, usize);
-    structural_id_impl!(@incremental $name, AtomicUsize, usize, $initial);
+    structural_id_impl!(@ord $name, $ty);
+    structural_id_impl!(@eq $name, $ty);
+    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@from_int $name, $ty);
+    structural_id_impl!(@zero $name, $ty);
+
+    paste::paste! {
+      structural_id_impl!(@incremental $name, [< Atomic $ty:camel>], $ty, $initial);
+    }
+  };
+
+  (@signed $ty:tt,$name:tt,$initial:expr) => {
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct $name($ty);
+
+    structural_id_impl!(@ord $name, $ty);
+    structural_id_impl!(@eq $name, $ty);
+    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@from_int $name, $ty);
+    structural_id_impl!(@zero $name, $ty);
+    structural_id_impl!(@negative_one $name, $ty);
+
+    paste::paste! {
+      structural_id_impl!(@incremental $name, [< Atomic $ty:camel>], $ty, $initial);
+    }
+  };
+
+  (usize,$name:tt,$initial:expr) => {
+    structural_id_impl!(@unsigned usize,$name,$initial);
+  };
+
+  (u8,$name:tt,$initial:expr) => {
+    structural_id_impl!(@unsigned u8,$name,$initial);
   };
 
   (i32,$name:tt,$initial:expr) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name(i32);
+    structural_id_impl!(@signed usize,$name,$initial);
+  };
 
-    structural_id_impl!(@ord $name, i32);
-    structural_id_impl!(@eq $name, i32);
-    structural_id_impl!(@display $name, i32);
-    structural_id_impl!(@from_int $name, i32);
-    structural_id_impl!(@zero $name, i32);
-    structural_id_impl!(@negative_one $name, i32);
-    structural_id_impl!(@incremental $name, AtomicI32, i32, $initial);
+  (i8,$name:tt,$initial:expr) => {
+    structural_id_impl!(@signed i8,$name,$initial);
   };
 
   (str,$name:tt) => {

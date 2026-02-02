@@ -5,26 +5,7 @@ use crate::tests::log::init as test_log_init;
 use std::sync::atomic::AtomicI8;
 use std::sync::atomic::AtomicU8;
 
-structural_id_impl!(unsigned, Test1Id, u8);
-next_incremental_id_impl!(next_test1_id, Test1Id, AtomicU8, u8, 1);
-
-pub fn next_test1_id() -> Test1Id {
-      static VALUE: AtomicU8 = AtomicU8::new(1);
-      let v = VALUE
-        .fetch_update(
-          std::sync::atomic::Ordering::Relaxed,
-          std::sync::atomic::Ordering::Relaxed,
-          |x| {
-            Some(if x == $plain_int::MAX {
-              $initial
-            } else {
-              x + 1
-            })
-          },
-        )
-        .unwrap();
-      $struct_name::from(v)
-}
+structural_id_impl!(u8, Test1Id, 1);
 
 #[test]
 fn test_next_test1_id() {
@@ -33,7 +14,7 @@ fn test_next_test1_id() {
   let mut miss_count = 0;
   let mut last_id: Option<Test1Id> = None;
   for i in 0..1000 {
-    let id = next_test1_id();
+    let id = Test1Id::next();
     info!(
       "i:{:?},id:{:?},last_id:{:?},miss_count:{:?}",
       i, id, last_id, miss_count
@@ -56,8 +37,7 @@ fn test_next_test1_id() {
   }
 }
 
-structural_id_impl!(signed, Test2Id, i8);
-next_incremental_id_impl!(next_test2_id, Test2Id, AtomicI8, i8, 100);
+structural_id_impl!(i8, Test2Id, 100);
 
 #[test]
 fn test_next_test2_id() {
@@ -66,7 +46,7 @@ fn test_next_test2_id() {
   let mut miss_count = 0;
   let mut last_id: Option<Test2Id> = None;
   for i in 0..1000 {
-    let id = next_test2_id();
+    let id = Test2Id::next();
     info!(
       "i:{:?},id:{:?},last_id:{:?},miss_count:{:?}",
       i, id, last_id, miss_count
