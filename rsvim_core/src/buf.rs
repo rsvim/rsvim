@@ -31,6 +31,7 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
+use tree_sitter::LanguageError;
 use undo::Undo;
 
 structural_id_impl!(signed, BufferId, i32);
@@ -269,7 +270,8 @@ impl BuffersManager {
         }
       }
     } else {
-      let maybe_syntax = self.load_syntax_by_file_ext(filename.extension());
+      let maybe_syntax =
+        self.load_syntax_by_file_ext(filename.extension()).unwrap();
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -354,7 +356,7 @@ impl BuffersManager {
   fn load_syntax_by_file_ext(
     &self,
     file_extension: Option<&OsStr>,
-  ) -> Option<Syntax> {
+  ) -> Result<Option<Syntax>, LanguageError> {
     if let Some(ext) = file_extension
       && let Some(lang) =
         self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
@@ -364,9 +366,9 @@ impl BuffersManager {
         file_extension,
         lang.name()
       );
-      Some(Syntax::new(lang).unwrap())
+      Syntax::new(lang).map(Some)
     } else {
-      None
+      Ok(None)
     }
   }
 }
@@ -392,7 +394,8 @@ impl BuffersManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
-          let maybe_syntax = self.load_syntax_by_file_ext(filename.extension());
+          let maybe_syntax =
+            self.load_syntax_by_file_ext(filename.extension()).unwrap();
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
