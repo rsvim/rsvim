@@ -6,7 +6,7 @@ use crate::ui::tree::internal::context::TreeContextWk;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
-structural_id_impl!(NodeId, i32, negative);
+structural_id_impl!(signed, NodeId, i32);
 
 pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> NodeId;
