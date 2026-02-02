@@ -1,12 +1,12 @@
 //! The node structure of the internal tree.
 
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
 use crate::ui::tree::internal::context::TreeContextWk;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
-struct_id_impl!(NodeId, i32, negative);
+structural_id_impl!(NodeId, i32, negative);
 
 pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> NodeId;

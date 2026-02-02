@@ -36,7 +36,7 @@ use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::next_incremental_id_impl;
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
@@ -77,8 +77,8 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-struct_id_impl!(TimerId, i32);
-struct_id_impl!(TaskId, usize);
+structural_id_impl!(TimerId, i32);
+structural_id_impl!(TaskId, usize);
 
 // TimerId start from 1.
 next_incremental_id_impl!(next_timer_id, TimerId, AtomicI32, i32, 1);

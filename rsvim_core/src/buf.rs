@@ -16,7 +16,7 @@ mod unicode_tests;
 
 use crate::next_incremental_id_impl;
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxManager;
 use compact_str::ToCompactString;
@@ -32,7 +32,7 @@ use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
 
-struct_id_impl!(BufferId, i32, negative);
+structural_id_impl!(BufferId, i32, negative);
 
 // BufferId starts from 1.
 next_incremental_id_impl!(next_buffer_id, BufferId, AtomicI32, i32, 1);

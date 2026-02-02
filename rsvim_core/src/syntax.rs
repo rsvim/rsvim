@@ -1,6 +1,7 @@
 //! Tree-sitter based syntax engine.
 
 use crate::prelude::*;
+use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
@@ -73,14 +74,14 @@ impl Syntax {
   }
 }
 
-pub type LanguageId = CompactString;
+structural_id_impl!(LanguageId, CompactString);
 
 pub struct SyntaxManager {
-  languages: FoldMap<CompactString, Language>,
+  languages: FoldMap<LanguageId, Language>,
   // Maps language ID to file extensions
-  id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
+  id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
   // Maps file extension to language ID
-  ext2id: FoldMap<CompactString, CompactString>,
+  ext2id: FoldMap<CompactString, LanguageId>,
 }
 
 impl Debug for SyntaxManager {

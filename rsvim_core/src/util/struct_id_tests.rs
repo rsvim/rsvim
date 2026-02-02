@@ -1,11 +1,11 @@
 use crate::next_incremental_id_impl;
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
 use crate::tests::log::init as test_log_init;
 use std::sync::atomic::AtomicI8;
 use std::sync::atomic::AtomicU8;
 
-struct_id_impl!(Test1Id, u8);
+structural_id_impl!(Test1Id, u8);
 next_incremental_id_impl!(next_test1_id, Test1Id, AtomicU8, u8, 1);
 
 #[test]
@@ -38,7 +38,7 @@ fn test_next_test1_id() {
   }
 }
 
-struct_id_impl!(Test2Id, i8);
+structural_id_impl!(Test2Id, i8);
 next_incremental_id_impl!(next_test2_id, Test2Id, AtomicI8, i8, 100);
 
 #[test]
