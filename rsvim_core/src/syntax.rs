@@ -73,20 +73,7 @@ impl Syntax {
   }
 }
 
-#[derive(
-  Debug,
-  Copy,
-  Clone,
-  PartialEq,
-  Eq,
-  Hash,
-  strum_macros::Display,
-  strum_macros::EnumString,
-)]
-pub enum LanguageId {
-  #[strum(serialize = "rust")]
-  Rust,
-}
+pub type LanguageId = CompactString;
 
 pub struct SyntaxManager {
   languages: FoldMap<CompactString, Language>,
