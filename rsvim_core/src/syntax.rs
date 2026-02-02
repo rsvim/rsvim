@@ -107,8 +107,8 @@ impl SyntaxManager {
   ///
   /// For example, a 'C++' language ID can be associate with below file
   /// extensions:
-  /// - Feader files: h, hh, h++, hpp
-  /// - Source files: cpp, cc, c++
+  /// - Feader files: hh, h++, hpp
+  /// - Source files: cc, c++, cpp
   pub fn insert_lang_id_and_file_ext(
     &mut self,
     lang_id: LanguageId,
