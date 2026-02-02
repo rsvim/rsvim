@@ -512,15 +512,6 @@ impl EventLoop {
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
-            self
-              .master_tx
-              .send(MasterMessage::BufferFullParseReq(msg::TimeoutResp {
-                timer_id: req.timer_id,
-                expire_at,
-                delay: req.delay,
-                repeated: req.repeated,
-              }))
-              .unwrap();
           }
           Err(e) => {
             // Send error message to command-line
