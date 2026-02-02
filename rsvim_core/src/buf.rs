@@ -356,7 +356,7 @@ impl BuffersManager {
   fn load_syntax_by_file_ext(
     &self,
     file_extension: Option<&OsStr>,
-  ) -> Result<Option<Syntax>, LanguageError> {
+  ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
       && let Some(lang) =
         self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
@@ -366,7 +366,13 @@ impl BuffersManager {
         file_extension,
         lang.name()
       );
-      Syntax::new(lang).map(Some)
+      match Syntax::new(lang) {
+        Ok(syntax) => Ok(Some(syntax)),
+        Err(e) => Err(TheErr::LoadSyntaxByFiletypeFailed(
+          ext.to_string_lossy().to_compact_string(),
+          e,
+        )),
+      }
     } else {
       Ok(None)
     }

@@ -5,6 +5,7 @@ use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
 use std::borrow::Cow;
+use tree_sitter::LanguageError;
 
 // std::io {
 
@@ -32,6 +33,9 @@ pub enum TheErr {
 
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, CompactString, IoErr),
+
+  #[error("Failed to load language syntax for filetype `{0}`: {1}.")]
+  LoadSyntaxByFiletypeFailed(CompactString, LanguageError),
 
   #[error("Undo commit `{0}` not exist.")]
   UndoCommitNotExist(usize),
