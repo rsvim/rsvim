@@ -265,6 +265,7 @@ impl BuffersManager {
     let buf = if existed {
       self.read_file(canvas_size, filename, &abs_filename)?
     } else {
+      let syntax = self.load_syntax_by_file_ext(filename.extension())?;
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -273,7 +274,7 @@ impl BuffersManager {
         Some(abs_filename.clone()),
         None,
         None,
-        self.load_syntax_by_file_ext(filename.extension())?,
+        syntax,
       )
     };
 
@@ -393,6 +394,8 @@ impl BuffersManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
+          let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
@@ -401,7 +404,7 @@ impl BuffersManager {
             Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),
-            self.load_syntax_by_file_ext(filename.extension())?,
+            syntax,
           ))
         }
         Err(e) => Err(TheErr::OpenFileFailed(
