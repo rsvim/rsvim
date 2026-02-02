@@ -263,12 +263,7 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.read_file(canvas_size, filename, &abs_filename) {
-        Ok(buf) => buf,
-        Err(e) => {
-          return Err(e);
-        }
-      }
+      self.read_file(canvas_size, filename, &abs_filename)?
     } else {
       let maybe_syntax =
         self.load_syntax_by_file_ext(filename.extension()).unwrap();
@@ -401,7 +396,7 @@ impl BuffersManager {
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
           let maybe_syntax =
-            self.load_syntax_by_file_ext(filename.extension()).unwrap();
+            self.load_syntax_by_file_ext(filename.extension())?;
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
