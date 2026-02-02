@@ -101,7 +101,10 @@ impl SyntaxManager {
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
     };
-    it.insert_lang_id_and_file_ext(LanguageId::from("rust"), "rs");
+    let rust_id = LanguageId::from("rust");
+    it.languages
+      .insert(rust_id.clone(), tree_sitter_rust::LANGUAGE.into());
+    it.insert_lang_id_and_file_ext(rust_id, "rs");
     it
   }
 
