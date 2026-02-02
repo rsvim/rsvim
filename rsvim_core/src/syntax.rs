@@ -104,7 +104,7 @@ impl SyntaxManager {
     let rust_id = LanguageId::from("rust");
     it.languages
       .insert(rust_id.clone(), tree_sitter_rust::LANGUAGE.into());
-    it.insert_lang_id_and_file_ext(rust_id, "rs");
+    it.insert_file_ext(rust_id, "rs");
     it
   }
 
@@ -114,50 +114,44 @@ impl SyntaxManager {
   /// extensions:
   /// - Feader files: hh, h++, hpp
   /// - Source files: cc, c++, cpp
-  pub fn insert_lang_id_and_file_ext(
-    &mut self,
-    lang_id: LanguageId,
-    ext: &str,
-  ) {
+  pub fn insert_file_ext(&mut self, id: LanguageId, ext: &str) {
     self
       .id2ext
-      .entry(lang_id.clone())
+      .entry(id.clone())
       .or_default()
       .insert(ext.to_compact_string());
-    self
-      .ext2id
-      .entry(ext.to_compact_string())
-      .or_insert(lang_id);
+    self.ext2id.entry(ext.to_compact_string()).or_insert(id);
   }
 
   /// Un-associate a language ID with a file extension.
-  pub fn remove_lang_id_and_file_ext(
-    &mut self,
-    lang_id: LanguageId,
-    ext: &str,
-  ) {
-    self.id2ext.entry(lang_id).or_default().remove(ext);
+  pub fn remove_file_ext(&mut self, id: LanguageId, ext: &str) {
+    self.id2ext.entry(id).or_default().remove(ext);
     self.ext2id.remove(ext);
   }
 
-  pub fn get_file_ext_by_lang_id(
+  pub fn get_file_ext_by_id(
     &self,
-    lang_id: &LanguageId,
+    id: &LanguageId,
   ) -> Option<&FoldSet<CompactString>> {
-    self.id2ext.get(lang_id)
+    self.id2ext.get(id)
   }
 
-  pub fn get_lang_id_by_file_ext(&self, ext: &str) -> Option<&LanguageId> {
+  pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&LanguageId> {
     self.ext2id.get(ext)
   }
 
-  pub fn get_lang(&mut self, lang_id: LanguageId) -> Option<&Language> {
-    self.languages.get(&lang_id)
+  pub fn insert_lang(&mut self, id: LanguageId, lang: Language) {
+    self.languages.insert(id, lang);
+    self.id2ext.entry(id.clone()).or_default();
+  }
+
+  pub fn get_lang(&mut self, id: LanguageId) -> Option<&Language> {
+    self.languages.get(&id)
   }
 
   pub fn get_lang_by_ext(&mut self, ext: &str) -> Option<&Language> {
     match self.ext2id.get(ext) {
-      Some(lang_id) => self.get_lang(lang_id.clone()),
+      Some(id) => self.get_lang(id.clone()),
       None => None,
     }
   }
