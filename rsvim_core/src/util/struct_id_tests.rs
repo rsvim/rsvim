@@ -8,6 +8,24 @@ use std::sync::atomic::AtomicU8;
 structural_id_impl!(unsigned, Test1Id, u8);
 next_incremental_id_impl!(next_test1_id, Test1Id, AtomicU8, u8, 1);
 
+pub fn next_test1_id() -> Test1Id {
+      static VALUE: AtomicU8 = AtomicU8::new(1);
+      let v = VALUE
+        .fetch_update(
+          std::sync::atomic::Ordering::Relaxed,
+          std::sync::atomic::Ordering::Relaxed,
+          |x| {
+            Some(if x == $plain_int::MAX {
+              $initial
+            } else {
+              x + 1
+            })
+          },
+        )
+        .unwrap();
+      $struct_name::from(v)
+}
+
 #[test]
 fn test_next_test1_id() {
   test_log_init();

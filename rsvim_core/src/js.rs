@@ -77,14 +77,11 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-structural_id_impl!(signed, TimerId, i32);
-structural_id_impl!(unsigned, TaskId, usize);
-
 // TimerId start from 1.
-next_incremental_id_impl!(next_timer_id, TimerId, AtomicI32, i32, 1);
+structural_id_impl!(i32, TimerId, 1);
 
 // TaskId start from 1.
-next_incremental_id_impl!(next_task_id, TaskId, AtomicUsize, usize, 1);
+structural_id_impl!(usize, TaskId, 1);
 
 /// Snapshot data.
 pub struct SnapshotData {

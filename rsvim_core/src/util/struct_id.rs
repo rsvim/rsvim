@@ -96,27 +96,54 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (unsigned,$name:tt,$ty:tt) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name($ty);
+  (@incremental $name:tt,$atomic_int:tt,$plain_int:tt,$initial_value:expr) => {
+    impl $name {
+      pub fn next() -> Self {
+        use std::sync::atomic::$atomic_int;
 
-    structural_id_impl!(@ord $name, $ty);
-    structural_id_impl!(@eq $name, $ty);
-    structural_id_impl!(@display $name, $ty);
-    structural_id_impl!(@from_int $name, $ty);
-    structural_id_impl!(@zero $name, $ty);
+        static VALUE: $atomic_int = $atomic_int::new($initial_value);
+        let v = VALUE
+          .fetch_update(
+            std::sync::atomic::Ordering::Relaxed,
+            std::sync::atomic::Ordering::Relaxed,
+            |x| {
+              Some(if x == $plain_int::MAX {
+                $initial_value
+              } else {
+                x + 1
+              })
+            },
+          )
+          .unwrap();
+        Self::from(v)
+      }
+    }
   };
 
-  (signed,$name:tt,$ty:tt) => {
+  (usize,$name:tt,$initial:expr) => {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name($ty);
+    pub struct $name(usize);
 
-    structural_id_impl!(@ord $name, $ty);
-    structural_id_impl!(@eq $name, $ty);
-    structural_id_impl!(@display $name, $ty);
-    structural_id_impl!(@from_int $name, $ty);
-    structural_id_impl!(@zero $name, $ty);
-    structural_id_impl!(@negative_one $name, $ty);
+    structural_id_impl!(@ord $name, usize);
+    structural_id_impl!(@eq $name, usize);
+    structural_id_impl!(@display $name, usize);
+    structural_id_impl!(@from_int $name, usize);
+    structural_id_impl!(@zero $name, usize);
+    structural_id_impl!(@incremental $name, AtomicUsize, usize, $initial);
+  };
+
+
+  (i32,$name:tt,$initial:expr) => {
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct $name(i32);
+
+    structural_id_impl!(@ord $name, i32);
+    structural_id_impl!(@eq $name, i32);
+    structural_id_impl!(@display $name, i32);
+    structural_id_impl!(@from_int $name, i32);
+    structural_id_impl!(@zero $name, i32);
+    structural_id_impl!(@negative_one $name, i32);
+    structural_id_impl!(@incremental $name, AtomicI32, i32, $initial);
   };
 
   (stringify,$name:tt) => {
@@ -126,28 +153,5 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@eq $name, CompactString);
     structural_id_impl!(@display $name, CompactString);
     structural_id_impl!(@from_str $name, CompactString);
-  };
-}
-
-#[macro_export]
-macro_rules! next_incremental_id_impl {
-  ($func_name:ident,$struct_name:ident,$atomic_int:tt,$plain_int:tt,$initial:expr) => {
-    pub fn $func_name() -> $struct_name {
-      static VALUE: $atomic_int = $atomic_int::new($initial);
-      let v = VALUE
-        .fetch_update(
-          std::sync::atomic::Ordering::Relaxed,
-          std::sync::atomic::Ordering::Relaxed,
-          |x| {
-            Some(if x == $plain_int::MAX {
-              $initial
-            } else {
-              x + 1
-            })
-          },
-        )
-        .unwrap();
-      $struct_name::from(v)
-    }
   };
 }

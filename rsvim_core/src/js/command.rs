@@ -17,7 +17,6 @@ use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::converter::*;
 use crate::js::execute_module;
-use crate::js::next_task_id;
 use crate::msg::ExCommandReq;
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -205,7 +204,7 @@ impl CommandsManager {
     }
 
     let is_builtin_js = name == JS_COMMAND_NAME;
-    let task_id = next_task_id();
+    let task_id = TaskId::next();
 
     if is_builtin_js {
       // For builtin js command, it:

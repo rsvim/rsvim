@@ -302,7 +302,7 @@ impl JsFuture for EsModuleFuture {
             state.pending_futures.push(Box::new(fut));
           }
         };
-        let task_id = js::next_task_id();
+        let task_id = js::TaskId::next();
         pending::create_import_loader(
           &mut state,
           task_id,
