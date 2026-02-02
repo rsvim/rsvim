@@ -137,11 +137,11 @@ impl SyntaxManager {
     self.id2ext.entry(id.clone()).or_default();
   }
 
-  pub fn get_lang(&mut self, id: LanguageId) -> Option<&Language> {
+  pub fn get_lang(&self, id: LanguageId) -> Option<&Language> {
     self.languages.get(&id)
   }
 
-  pub fn get_lang_by_ext(&mut self, ext: &str) -> Option<&Language> {
+  pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
     match self.ext2id.get(ext) {
       Some(id) => self.get_lang(id.clone()),
       None => None,

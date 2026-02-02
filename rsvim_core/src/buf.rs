@@ -24,6 +24,7 @@ use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
+use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
@@ -268,20 +269,7 @@ impl BuffersManager {
         }
       }
     } else {
-      let maybe_syntax = if let Some(ext) = filename.extension()
-        && let Some(lang) =
-          self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
-      {
-        trace!(
-          "Load syntax by file ext:{:?} lang:{:?}",
-          filename.extension(),
-          lang.name()
-        );
-        Some(Syntax::new(lang).unwrap())
-      } else {
-        None
-      };
-
+      let maybe_syntax = self.load_syntax_by_file_ext(filename.extension());
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -325,6 +313,7 @@ impl BuffersManager {
       None,
       None,
       None,
+      None,
     );
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
@@ -361,6 +350,25 @@ impl BuffersManager {
     self.buffers_by_path.insert(abs_filepath, buf);
     buf_id
   }
+
+  fn load_syntax_by_file_ext(
+    &self,
+    file_extension: Option<&OsStr>,
+  ) -> Option<Syntax> {
+    if let Some(ext) = file_extension
+      && let Some(lang) =
+        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+    {
+      trace!(
+        "Load syntax by file ext:{:?} lang:{:?}",
+        file_extension,
+        lang.name()
+      );
+      Some(Syntax::new(lang).unwrap())
+    } else {
+      None
+    }
+  }
 }
 
 // Primitive APIs {
@@ -384,6 +392,7 @@ impl BuffersManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
+          let maybe_syntax = self.load_syntax_by_file_ext(filename.extension());
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
@@ -392,6 +401,7 @@ impl BuffersManager {
             Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),
+            maybe_syntax,
           ))
         }
         Err(e) => Err(TheErr::OpenFileFailed(
