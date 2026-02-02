@@ -57,7 +57,7 @@ pub fn open<'s>(
   };
 
   let mut state = state_rc.borrow_mut();
-  let task_id = js::next_task_id();
+  let task_id = js::TaskId::next();
   let filename = Path::new(&filename);
   pending::create_fs_open(
     &mut state,
@@ -141,7 +141,7 @@ pub fn read<'s>(
 
   let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   let mut state = state_rc.borrow_mut();
-  let task_id = js::next_task_id();
+  let task_id = js::TaskId::next();
   pending::create_fs_read(
     &mut state,
     task_id,
@@ -216,7 +216,7 @@ pub fn write<'s>(
 
   let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   let mut state = state_rc.borrow_mut();
-  let task_id = js::next_task_id();
+  let task_id = js::TaskId::next();
   pending::create_fs_write(&mut state, task_id, fd, buf, Box::new(write_cb));
 
   rv.set(promise.into());

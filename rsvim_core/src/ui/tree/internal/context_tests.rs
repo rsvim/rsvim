@@ -7,7 +7,7 @@ use taffy::Style;
 
 #[test]
 fn next_node_id1() {
-  assert!(next_node_id() > 0);
+  assert!(NodeId::next() > 0);
 }
 
 #[test]

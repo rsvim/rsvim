@@ -1,6 +1,5 @@
 //! Internal tree context.
 
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use crate::ui::tree::internal::shapes;
@@ -9,7 +8,6 @@ use once_cell::sync::Lazy;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use std::sync::atomic::AtomicI32;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
@@ -23,9 +21,6 @@ pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 pub static DEFAULT_SHAPE: Lazy<IRect> = Lazy::new(|| rect!(0, 0, 0, 0));
 pub static DEFAULT_ACTUAL_SHAPE: Lazy<U16Rect> =
   Lazy::new(|| rect!(0, 0, 0, 0));
-
-// NodeId starts from 100001
-next_incremental_id_impl!(next_node_id, NodeId, AtomicI32, i32, 100001);
 
 #[derive(Debug, Clone)]
 pub struct Ta {
@@ -95,7 +90,7 @@ impl Ta {
   pub fn new_leaf(&mut self, style: Style) -> TaffyResult<NodeId> {
     self._internal_check();
     let taid = self.ta.new_leaf(style)?;
-    let id = next_node_id();
+    let id = NodeId::next();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
     self._internal_check();
@@ -216,7 +211,7 @@ impl Ta {
       .map(|i| *self.id2taid.get(i).unwrap())
       .collect_vec();
     let taid = self.ta.new_with_children(style, &children_taids)?;
-    let id = next_node_id();
+    let id = NodeId::next();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
     self._internal_check();

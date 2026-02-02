@@ -100,7 +100,7 @@ pub fn create_timer<'s>(
   };
 
   let mut state = state_rc.borrow_mut();
-  let timer_id = js::next_timer_id();
+  let timer_id = js::TimerId::next();
   pending::create_timer(
     &mut state,
     timer_id,

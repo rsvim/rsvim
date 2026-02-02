@@ -197,7 +197,7 @@ impl Current {
 }
 
 #[derive(Debug, Clone)]
-pub struct UndoManager {
+pub struct Undo {
   undo_stack: DeRingBuffer<Record>,
   redo_stack: VecDeque<Record>,
   current: Current,
@@ -214,7 +214,7 @@ pub struct UndoManager {
 //   }
 // }
 
-impl UndoManager {
+impl Undo {
   pub fn new(max_size: usize) -> Self {
     Self {
       undo_stack: DeRingBuffer::new(max_size),

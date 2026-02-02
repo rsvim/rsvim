@@ -34,9 +34,8 @@ use crate::content::TextContentsArc;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
@@ -57,8 +56,6 @@ use pending::TaskCallback;
 use pending::TimerCallback;
 use std::rc::Rc;
 use std::sync::Once;
-use std::sync::atomic::AtomicI32;
-use std::sync::atomic::AtomicUsize;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -77,14 +74,11 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-struct_id_impl!(TimerId, i32);
-struct_id_impl!(TaskId, usize);
-
 // TimerId start from 1.
-next_incremental_id_impl!(next_timer_id, TimerId, AtomicI32, i32, 1);
+structural_id_impl!(i32, TimerId, 1);
 
 // TaskId start from 1.
-next_incremental_id_impl!(next_task_id, TaskId, AtomicUsize, usize, 1);
+structural_id_impl!(usize, TaskId, 1);
 
 /// Snapshot data.
 pub struct SnapshotData {

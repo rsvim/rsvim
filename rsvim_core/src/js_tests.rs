@@ -14,7 +14,7 @@ use std::time::Duration;
 fn next_task_id1() {
   let mut last_id: Option<TaskId> = None;
   for _i in 0..100 {
-    let id = next_task_id();
+    let id = TaskId::next();
     if let Some(last_id) = last_id {
       assert_eq!(
         std::convert::Into::<usize>::into(last_id) + 1,

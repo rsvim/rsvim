@@ -14,26 +14,25 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
-use crate::struct_id_impl;
+use crate::structural_id_impl;
+use crate::syntax::Syntax;
+use crate::syntax::SyntaxManager;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
+use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
-use undo::UndoManager;
-
-struct_id_impl!(BufferId, i32, negative);
+use undo::Undo;
 
 // BufferId starts from 1.
-next_incremental_id_impl!(next_buffer_id, BufferId, AtomicI32, i32, 1);
+structural_id_impl!(i32, BufferId, 1);
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
@@ -57,7 +56,14 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 
   // undo manager
-  undo_manager: UndoManager,
+  undo: Undo,
+
+  // syntax parser
+  syntax: Option<Syntax>,
+
+  // Versioning for text editing and syntax parsing.
+  editing_version: usize,
+  parsing_version: usize,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -73,16 +79,20 @@ impl Buffer {
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
+    syntax: Option<Syntax>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
-      id: next_buffer_id(),
+      id: BufferId::next(),
       text,
       filename,
       absolute_filename,
       metadata,
       last_sync_time,
-      undo_manager: UndoManager::new(100),
+      undo: Undo::new(100),
+      syntax,
+      editing_version: 0,
+      parsing_version: 0,
     }
   }
 
@@ -138,12 +148,48 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn undo_manager(&self) -> &UndoManager {
-    &self.undo_manager
+  pub fn undo(&self) -> &Undo {
+    &self.undo
   }
 
-  pub fn undo_manager_mut(&mut self) -> &mut UndoManager {
-    &mut self.undo_manager
+  pub fn undo_mut(&mut self) -> &mut Undo {
+    &mut self.undo
+  }
+
+  pub fn syntax(&self) -> &Option<Syntax> {
+    &self.syntax
+  }
+
+  pub fn syntax_mut(&mut self) -> &mut Option<Syntax> {
+    &mut self.syntax
+  }
+
+  pub fn set_syntax(&mut self, value: Option<Syntax>) {
+    self.syntax = value;
+  }
+
+  pub fn editing_version(&self) -> usize {
+    self.editing_version
+  }
+
+  pub fn increase_editing_version(&mut self) {
+    self.editing_version = if self.editing_version == usize::MAX {
+      0
+    } else {
+      self.editing_version + 1
+    };
+  }
+
+  pub fn parsing_version(&self) -> usize {
+    self.parsing_version
+  }
+
+  pub fn increase_parsing_version(&mut self) {
+    self.parsing_version = if self.parsing_version == usize::MAX {
+      0
+    } else {
+      self.parsing_version + 1
+    };
   }
 }
 
@@ -154,7 +200,7 @@ impl Buffer {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
 /// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
@@ -167,6 +213,9 @@ pub struct BuffersManager {
 
   // Global-local options for buffers.
   global_local_options: BufferOptions,
+
+  // Syntax manager
+  syntax_manager: SyntaxManager,
 }
 
 arc_mutex_ptr!(BuffersManager);
@@ -184,6 +233,7 @@ impl BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
+      syntax_manager: SyntaxManager::new(),
     }
   }
 
@@ -238,13 +288,9 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.read_file(canvas_size, filename, &abs_filename) {
-        Ok(buf) => buf,
-        Err(e) => {
-          return Err(e);
-        }
-      }
+      self.read_file(canvas_size, filename, &abs_filename)?
     } else {
+      let syntax = self.load_syntax_by_file_ext(filename.extension())?;
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -253,6 +299,7 @@ impl BuffersManager {
         Some(abs_filename.clone()),
         None,
         None,
+        syntax,
       )
     };
 
@@ -283,6 +330,7 @@ impl BuffersManager {
       *self.global_local_options(),
       canvas_size,
       Rope::new(),
+      None,
       None,
       None,
       None,
@@ -323,6 +371,31 @@ impl BuffersManager {
     self.buffers_by_path.insert(abs_filepath, buf);
     buf_id
   }
+
+  fn load_syntax_by_file_ext(
+    &self,
+    file_extension: Option<&OsStr>,
+  ) -> TheResult<Option<Syntax>> {
+    if let Some(ext) = file_extension
+      && let Some(lang) =
+        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+    {
+      trace!(
+        "Load syntax by file ext:{:?} lang:{:?}",
+        file_extension,
+        lang.name()
+      );
+      match Syntax::new(lang) {
+        Ok(syntax) => Ok(Some(syntax)),
+        Err(e) => Err(TheErr::LoadLanguageSyntaxFailed(
+          ext.to_string_lossy().to_compact_string(),
+          e,
+        )),
+      }
+    } else {
+      Ok(None)
+    }
+  }
 }
 
 // Primitive APIs {
@@ -346,6 +419,8 @@ impl BuffersManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
+          let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
@@ -354,6 +429,7 @@ impl BuffersManager {
             Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),
+            syntax,
           ))
         }
         Err(e) => Err(TheErr::OpenFileFailed(
