@@ -46,19 +46,15 @@ impl Debug for Syntax {
   }
 }
 
-impl Default for Syntax {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
 impl Syntax {
-  pub fn new() -> Self {
-    Self {
-      parser: Parser::new(),
+  pub fn new(lang: &Language) -> Result<Self, LanguageError> {
+    let mut parser = Parser::new();
+    parser.set_language(lang)?;
+    Ok(Self {
+      parser,
       tree: None,
       status: SyntaxStatus::Init,
-    }
+    })
   }
 
   pub fn status(&self) -> SyntaxStatus {
@@ -67,10 +63,6 @@ impl Syntax {
 
   pub fn set_status(&mut self, status: SyntaxStatus) {
     self.status = status;
-  }
-
-  pub fn set_language(&mut self, lang: &Language) -> Result<(), LanguageError> {
-    self.parser.set_language(lang)
   }
 }
 

@@ -78,6 +78,7 @@ impl Buffer {
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
+    syntax: Option<Syntax>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -88,7 +89,7 @@ impl Buffer {
       metadata,
       last_sync_time,
       undo: Undo::new(100),
-      syntax: None,
+      syntax,
     }
   }
 
@@ -267,6 +268,20 @@ impl BuffersManager {
         }
       }
     } else {
+      let maybe_syntax = if let Some(ext) = filename.extension()
+        && let Some(lang) =
+          self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+      {
+        trace!(
+          "Load syntax by file ext:{:?} lang:{:?}",
+          filename.extension(),
+          lang.name()
+        );
+        Some(Syntax::new(lang).unwrap())
+      } else {
+        None
+      };
+
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -275,20 +290,9 @@ impl BuffersManager {
         Some(abs_filename.clone()),
         None,
         None,
+        maybe_syntax,
       )
     };
-
-    if let Some(ext) = filename.extension()
-      && let Some(lang) =
-        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
-    {
-      trace!(
-        "Load syntax by file ext:{:?} lang:{:?}",
-        filename.extension(),
-        lang.name()
-      );
-      buf.syntax_mut().set_language(lang).unwrap();
-    }
 
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
