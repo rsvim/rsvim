@@ -54,7 +54,7 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (@negative_one $name:ident,$ty:ty) => {
+  (@negative_one $name:tt,$ty:tt) => {
     impl $name {
       pub const fn negative_one() -> Self {
         Self(-1)
