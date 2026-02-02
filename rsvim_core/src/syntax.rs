@@ -74,7 +74,7 @@ impl Syntax {
   }
 }
 
-structural_id_impl!(identity, LanguageId, CompactString);
+structural_id_impl!(stringify, LanguageId, CompactString);
 
 pub struct SyntaxManager {
   languages: FoldMap<LanguageId, Language>,
@@ -116,7 +116,7 @@ impl SyntaxManager {
   ) {
     self
       .id2ext
-      .entry(lang_id)
+      .entry(lang_id.clone())
       .or_default()
       .insert(ext.to_compact_string());
     self

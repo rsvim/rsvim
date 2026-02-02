@@ -62,7 +62,7 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (unsigned, $name:tt,$ty:tt) => {
+  (unsigned,$name:tt,$ty:tt) => {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct $name($ty);
 
@@ -73,7 +73,7 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@zero $name, $ty);
   };
 
-  (signed, $name:tt,$ty:tt) => {
+  (signed,$name:tt,$ty:tt) => {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct $name($ty);
 
@@ -85,8 +85,8 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@negative_one $name, $ty);
   };
 
-  (identity, $name:tt,$ty:tt) => {
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
+  (stringify,$name:tt,$ty:tt) => {
+    #[derive(Clone, PartialEq, Eq, Hash)]
     pub struct $name($ty);
 
     structural_id_impl!(@eq $name, $ty);
