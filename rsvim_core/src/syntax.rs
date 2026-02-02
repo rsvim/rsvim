@@ -89,11 +89,11 @@ pub enum LanguageId {
 }
 
 pub struct SyntaxManager {
-  languages: FoldMap<LanguageId, Language>,
+  languages: FoldMap<CompactString, Language>,
   // Maps language ID to file extensions
-  id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
+  id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to language ID
-  ext2id: FoldMap<CompactString, LanguageId>,
+  ext2id: FoldMap<CompactString, CompactString>,
 }
 
 impl Debug for SyntaxManager {
