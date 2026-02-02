@@ -141,7 +141,7 @@ impl SyntaxManager {
   }
 
   pub fn insert_lang(&mut self, id: LanguageId, lang: Language) {
-    self.languages.insert(id, lang);
+    self.languages.insert(id.clone(), lang);
     self.id2ext.entry(id.clone()).or_default();
   }
 
