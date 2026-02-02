@@ -71,7 +71,7 @@ macro_rules! structural_id_impl {
         value.0
       }
     }
-  }
+  };
 
   (@zero $name:tt,$ty:tt) => {
     impl $name {
