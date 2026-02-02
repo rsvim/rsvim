@@ -14,7 +14,6 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::next_incremental_id_impl;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
@@ -28,7 +27,6 @@ use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
