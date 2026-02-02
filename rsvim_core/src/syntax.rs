@@ -66,7 +66,7 @@ impl Syntax {
   }
 }
 
-structural_id_impl!(stringify, LanguageId);
+structural_id_impl!(str, LanguageId);
 
 pub struct SyntaxManager {
   languages: FoldMap<LanguageId, Language>,

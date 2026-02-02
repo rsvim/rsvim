@@ -132,7 +132,6 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@incremental $name, AtomicUsize, usize, $initial);
   };
 
-
   (i32,$name:tt,$initial:expr) => {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct $name(i32);
@@ -146,7 +145,7 @@ macro_rules! structural_id_impl {
     structural_id_impl!(@incremental $name, AtomicI32, i32, $initial);
   };
 
-  (stringify,$name:tt) => {
+  (str,$name:tt) => {
     #[derive(Clone, PartialEq, Eq, Hash)]
     pub struct $name(CompactString);
 

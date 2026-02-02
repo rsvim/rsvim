@@ -33,10 +33,8 @@ use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
 
-structural_id_impl!(signed, BufferId, i32);
-
 // BufferId starts from 1.
-next_incremental_id_impl!(next_buffer_id, BufferId, AtomicI32, i32, 1);
+structural_id_impl!(i32, BufferId, 1);
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
@@ -87,7 +85,7 @@ impl Buffer {
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
-      id: next_buffer_id(),
+      id: BufferId::next(),
       text,
       filename,
       absolute_filename,
