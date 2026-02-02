@@ -160,7 +160,7 @@ macro_rules! structural_id_impl {
   };
 
   (i32,$name:tt,$initial:expr) => {
-    structural_id_impl!(@signed usize,$name,$initial);
+    structural_id_impl!(@signed i32,$name,$initial);
   };
 
   (i8,$name:tt,$initial:expr) => {
