@@ -8,4 +8,12 @@ fn init1() {
     LanguageId::from("rust".to_compact_string()),
     "rs",
   );
+  let actual = syn_mgr.get_lang_id_by_file_ext("rs");
+  assert!(actual.is_some());
+  assert_eq!(actual.unwrap(), &LanguageId::from("rust"));
+  assert_eq!(actual.unwrap(), &LanguageId::from("rust".to_string()));
+  assert_eq!(
+    actual.unwrap(),
+    &LanguageId::from("rust".to_compact_string())
+  );
 }

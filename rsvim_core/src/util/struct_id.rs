@@ -71,6 +71,13 @@ macro_rules! structural_id_impl {
         value.0
       }
     }
+
+    impl From<&str> for $name {
+      fn from(value: &str) -> Self {
+        use compact_str::ToCompactString;
+        Self(value.to_compact_string())
+      }
+    }
   };
 
   (@zero $name:tt,$ty:tt) => {
