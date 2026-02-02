@@ -32,7 +32,7 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (@convert $name:tt,$ty:tt) => {
+  (@from_int $name:tt,$ty:tt) => {
     impl From<$ty> for $name {
       fn from(value: $ty) -> Self {
         Self(value)
@@ -46,52 +46,7 @@ macro_rules! structural_id_impl {
     }
   };
 
-  (@zero $name:tt,$ty:tt) => {
-    impl $name {
-      pub const fn zero() -> Self {
-        Self(0)
-      }
-    }
-  };
-
-  (@negative_one $name:tt,$ty:tt) => {
-    impl $name {
-      pub const fn negative_one() -> Self {
-        Self(-1)
-      }
-    }
-  };
-
-  (unsigned,$name:tt,$ty:tt) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name($ty);
-
-    structural_id_impl!(@ord $name, $ty);
-    structural_id_impl!(@eq $name, $ty);
-    structural_id_impl!(@display $name, $ty);
-    structural_id_impl!(@convert $name, $ty);
-    structural_id_impl!(@zero $name, $ty);
-  };
-
-  (signed,$name:tt,$ty:tt) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    pub struct $name($ty);
-
-    structural_id_impl!(@ord $name, $ty);
-    structural_id_impl!(@eq $name, $ty);
-    structural_id_impl!(@display $name, $ty);
-    structural_id_impl!(@convert $name, $ty);
-    structural_id_impl!(@zero $name, $ty);
-    structural_id_impl!(@negative_one $name, $ty);
-  };
-
-  (stringify,$name:tt) => {
-    #[derive(Clone, PartialEq, Eq, Hash)]
-    pub struct $name(CompactString);
-
-    structural_id_impl!(@eq $name, CompactString);
-    structural_id_impl!(@display $name, CompactString);
-
+  (@from_str $name:tt,$ty:tt) => {
     impl From<String> for $name {
       fn from(value: String) -> Self {
         use compact_str::ToCompactString;
@@ -116,6 +71,54 @@ macro_rules! structural_id_impl {
         value.0
       }
     }
+  }
+
+  (@zero $name:tt,$ty:tt) => {
+    impl $name {
+      pub const fn zero() -> Self {
+        Self(0)
+      }
+    }
+  };
+
+  (@negative_one $name:tt,$ty:tt) => {
+    impl $name {
+      pub const fn negative_one() -> Self {
+        Self(-1)
+      }
+    }
+  };
+
+  (unsigned,$name:tt,$ty:tt) => {
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct $name($ty);
+
+    structural_id_impl!(@ord $name, $ty);
+    structural_id_impl!(@eq $name, $ty);
+    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@from_int $name, $ty);
+    structural_id_impl!(@zero $name, $ty);
+  };
+
+  (signed,$name:tt,$ty:tt) => {
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    pub struct $name($ty);
+
+    structural_id_impl!(@ord $name, $ty);
+    structural_id_impl!(@eq $name, $ty);
+    structural_id_impl!(@display $name, $ty);
+    structural_id_impl!(@from_int $name, $ty);
+    structural_id_impl!(@zero $name, $ty);
+    structural_id_impl!(@negative_one $name, $ty);
+  };
+
+  (stringify,$name:tt) => {
+    #[derive(Clone, PartialEq, Eq, Hash)]
+    pub struct $name(CompactString);
+
+    structural_id_impl!(@eq $name, CompactString);
+    structural_id_impl!(@display $name, CompactString);
+    structural_id_impl!(@from_str $name, CompactString);
   };
 }
 
