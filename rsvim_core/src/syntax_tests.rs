@@ -51,5 +51,5 @@ fn get_lang1() {
   syn_mgr.insert_file_ext(LanguageId::from("rust".to_compact_string()), "rs");
   let lang = syn_mgr.get_lang_by_ext("rs");
   assert!(lang.is_some());
-  assert_eq!(lang.unwrap().name(), "rust");
+  assert_eq!(lang.unwrap().name(), Some("rust"));
 }
