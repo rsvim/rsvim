@@ -2,7 +2,7 @@ use super::syntax::*;
 use compact_str::ToCompactString;
 
 #[test]
-fn init1() {
+fn file_ext1() {
   let mut syn_mgr = SyntaxManager::new();
   syn_mgr.insert_lang_id_and_file_ext(
     LanguageId::from("rust".to_compact_string()),
@@ -16,4 +16,52 @@ fn init1() {
     actual.unwrap(),
     &LanguageId::from("rust".to_compact_string())
   );
+  let actual = syn_mgr.get_file_ext_by_lang_id(&LanguageId::from("rust"));
+  assert!(actual.is_some());
+  assert!(actual.unwrap().contains("rs"));
+}
+
+#[test]
+fn file_ext2() {
+  let mut syn_mgr = SyntaxManager::new();
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "cc",
+  );
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "cpp",
+  );
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "c++",
+  );
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "hh",
+  );
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "hpp",
+  );
+  syn_mgr.insert_lang_id_and_file_ext(
+    LanguageId::from("cpp".to_compact_string()),
+    "h++",
+  );
+  let actual = syn_mgr.get_lang_id_by_file_ext("hpp");
+  assert!(actual.is_some());
+  assert_eq!(actual.unwrap(), &LanguageId::from("cpp"));
+  assert_eq!(actual.unwrap(), &LanguageId::from("cpp".to_string()));
+  assert_eq!(
+    actual.unwrap(),
+    &LanguageId::from("cpp".to_compact_string())
+  );
+  let actual = syn_mgr.get_file_ext_by_lang_id(&LanguageId::from("cpp"));
+  assert!(actual.is_some());
+  assert!(actual.unwrap().contains("cc"));
+  assert!(actual.unwrap().contains("cpp"));
+  assert!(actual.unwrap().contains("c++"));
+  assert!(actual.unwrap().contains("hh"));
+  assert!(actual.unwrap().contains("hpp"));
+  assert!(actual.unwrap().contains("h++"));
 }

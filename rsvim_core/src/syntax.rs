@@ -137,9 +137,9 @@ impl SyntaxManager {
 
   pub fn get_file_ext_by_lang_id(
     &self,
-    lang_id: LanguageId,
+    lang_id: &LanguageId,
   ) -> Option<&FoldSet<CompactString>> {
-    self.id2ext.get(&lang_id)
+    self.id2ext.get(lang_id)
   }
 
   pub fn get_lang_id_by_file_ext(&self, ext: &str) -> Option<&LanguageId> {
