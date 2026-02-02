@@ -121,7 +121,11 @@ impl SyntaxManager {
   /// extensions:
   /// - Feader files: h, hh, h++, hpp
   /// - Source files: cpp, cc, c++
-  pub fn insert_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
+  pub fn insert_lang_id_and_file_ext(
+    &mut self,
+    lang_id: LanguageId,
+    ext: &str,
+  ) {
     self
       .id2ext
       .entry(lang_id)
@@ -134,9 +138,27 @@ impl SyntaxManager {
   }
 
   /// Un-associate a language ID with a file extension.
-  pub fn remove_file_ext(&mut self, lang_id: LanguageId, ext: &str) {
+  pub fn remove_lang_id_and_file_ext(
+    &mut self,
+    lang_id: LanguageId,
+    ext: &str,
+  ) {
     self.id2ext.entry(lang_id).or_default().remove(ext);
     self.ext2id.remove(ext);
+  }
+
+  pub fn get_file_ext_by_lang_id(
+    &self,
+    lang_id: LanguageId,
+  ) -> Option<&FoldSet<CompactString>> {
+    self.id2ext.get(&lang_id)
+  }
+
+  pub fn get_lang_id_by_file_ext(
+    &self,
+    lang_id: LanguageId,
+  ) -> Option<&FoldSet<CompactString>> {
+    self.id2ext.get(&lang_id)
   }
 
   pub fn get_lang(&mut self, lang_id: LanguageId) -> Option<&Language> {
