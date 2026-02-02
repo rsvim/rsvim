@@ -31,7 +31,6 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use text::Text;
 use tokio::time::Instant;
-use tree_sitter::LanguageError;
 use undo::Undo;
 
 structural_id_impl!(signed, BufferId, i32);
