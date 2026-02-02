@@ -34,12 +34,6 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to write file.
   FsWriteReq(FsWriteReq),
-
-  /// Master ask worker to full parse the buffer text when creating.
-  BufferFullParseReq(BufferFullParseReq),
-
-  /// Master ask worker to incremtnal parse the buffer text when editing.
-  BufferIncrParseReq(BufferIncrParseReq),
 }
 
 #[derive(Debug)]
@@ -80,19 +74,6 @@ pub struct FsWriteReq {
   pub task_id: TaskId,
   pub fd: usize,
   pub buf: Vec<u8>,
-}
-
-#[derive(Debug)]
-pub struct BufferFullParseReq {
-  pub buf_id: BufferId,
-  pub payload: Rope,
-}
-
-#[derive(Debug)]
-pub struct BufferIncrParseReq {
-  pub buf_id: BufferId,
-  pub payload: Rope,
-  pub edit: InputEdit,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
