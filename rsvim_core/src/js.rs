@@ -77,8 +77,8 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::PinScope);
 }
 
-structural_id_impl!(TimerId, i32);
-structural_id_impl!(TaskId, usize);
+structural_id_impl!(signed, TimerId, i32);
+structural_id_impl!(unsigned, TaskId, usize);
 
 // TimerId start from 1.
 next_incremental_id_impl!(next_timer_id, TimerId, AtomicI32, i32, 1);
