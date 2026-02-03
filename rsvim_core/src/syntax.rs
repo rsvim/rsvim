@@ -22,7 +22,7 @@ pub enum SyntaxStatus {
 #[derive(Debug, Clone)]
 pub struct SyntaxEditNew {
   payload: Rope,
-  version: usize,
+  version: isize,
 }
 
 impl PartialEq for SyntaxEditNew {
@@ -34,7 +34,7 @@ impl PartialEq for SyntaxEditNew {
 impl Eq for SyntaxEditNew {}
 
 impl SyntaxEditNew {
-  pub fn new(payload: Rope, version: usize) -> Self {
+  pub fn new(payload: Rope, version: isize) -> Self {
     Self { payload, version }
   }
 }
@@ -43,7 +43,7 @@ impl SyntaxEditNew {
 pub struct SyntaxEditUpdate {
   payload: Rope,
   input: InputEdit,
-  version: usize,
+  version: isize,
 }
 
 impl PartialEq for SyntaxEditUpdate {
@@ -55,7 +55,7 @@ impl PartialEq for SyntaxEditUpdate {
 impl Eq for SyntaxEditUpdate {}
 
 impl SyntaxEditUpdate {
-  pub fn new(payload: Rope, input: InputEdit, version: usize) -> Self {
+  pub fn new(payload: Rope, input: InputEdit, version: isize) -> Self {
     Self {
       payload,
       input,
@@ -75,7 +75,7 @@ pub struct Syntax {
   tree: Option<Tree>,
   status: SyntaxStatus,
   pending_edits: Vec<SyntaxEdit>,
-  tree_version: usize,
+  version: isize,
 }
 
 impl Debug for Syntax {

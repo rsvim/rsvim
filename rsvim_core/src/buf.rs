@@ -62,7 +62,7 @@ pub struct Buffer {
   syntax: Option<Syntax>,
 
   // Text editing version
-  editing_version: usize,
+  editing_version: isize,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -167,12 +167,12 @@ impl Buffer {
   }
 
   /// Text edit versioning
-  pub fn editing_version(&self) -> usize {
+  pub fn editing_version(&self) -> isize {
     self.editing_version
   }
 
   pub fn increase_editing_version(&mut self) {
-    self.editing_version = if self.editing_version == usize::MAX {
+    self.editing_version = if self.editing_version == isize::MAX {
       0
     } else {
       self.editing_version + 1
