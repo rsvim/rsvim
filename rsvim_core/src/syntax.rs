@@ -60,7 +60,7 @@ pub struct Syntax {
   parser: Parser,
   tree: Option<Tree>,
   status: SyntaxStatus,
-  pending_edits: Vec<SyntaxEdit>,
+  pending: Vec<SyntaxEdit>,
   version: isize,
 }
 
