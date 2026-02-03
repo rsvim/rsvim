@@ -85,6 +85,10 @@ pub struct Syntax {
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
 
+  // Whether the parser is already parsing the buffer text in a background
+  // task. If true, it means the `parser` is been locked by the running task.
+  parsing: bool,
+
   // Optional abort handle of a running background task that is parsing the
   // buffer text. There's no background task running if the value is `None`.
   //
