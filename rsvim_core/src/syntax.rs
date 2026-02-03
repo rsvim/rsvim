@@ -8,6 +8,7 @@ use parking_lot::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::sync::Arc;
+use tokio::task::AbortHandle;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -90,7 +91,7 @@ pub struct Syntax {
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be pushed to the `pending` job queue and wait
   // for the **current** task complete, then starts the next new task.
-  abort_handle: Option<tokio::task::AbortHandle>,
+  abort_handle: Option<AbortHandle>,
 }
 
 impl Debug for Syntax {
@@ -153,7 +154,7 @@ impl Syntax {
     self.abort_handle.is_some()
   }
 
-  pub fn set_abort_handle(&mut self, abort_handle: tokio::task::AbortHandle) {
+  pub fn set_abort_handle(&mut self, abort_handle: AbortHandle) {
     self.abort_handle = Some(abort_handle);
   }
 
