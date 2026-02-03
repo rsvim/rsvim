@@ -34,11 +34,8 @@ impl PartialEq for SyntaxEditNew {
 impl Eq for SyntaxEditNew {}
 
 impl SyntaxEditNew {
-  pub fn new(payload: Rope, buffer_version: usize) -> Self {
-    Self {
-      payload,
-      version: buffer_version,
-    }
+  pub fn new(payload: Rope, version: usize) -> Self {
+    Self { payload, version }
   }
 }
 
@@ -58,15 +55,11 @@ impl PartialEq for SyntaxEditUpdate {
 impl Eq for SyntaxEditUpdate {}
 
 impl SyntaxEditUpdate {
-  pub fn new(
-    payload: Rope,
-    input_edit: InputEdit,
-    buffer_version: usize,
-  ) -> Self {
+  pub fn new(payload: Rope, input: InputEdit, version: usize) -> Self {
     Self {
       payload,
-      input: input_edit,
-      version: buffer_version,
+      input,
+      version,
     }
   }
 }
