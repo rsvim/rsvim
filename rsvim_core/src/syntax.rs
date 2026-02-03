@@ -148,12 +148,8 @@ impl Syntax {
     self.parsing
   }
 
-  pub fn set_is_parsing(&mut self) {
-    self.parsing = true;
-  }
-
-  pub fn set_not_parsing(&mut self) {
-    self.parsing = false;
+  pub fn set_is_parsing(&mut self, value: bool) {
+    self.parsing = value;
   }
 
   pub fn add_pending(&mut self, value: SyntaxEdit) {
