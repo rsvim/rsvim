@@ -91,7 +91,6 @@ impl Buffer {
       undo: Undo::new(100),
       syntax,
       edit_version: 0,
-      parsing_version: 0,
     }
   }
 
@@ -168,7 +167,7 @@ impl Buffer {
   }
 
   /// Text edit versioning
-  pub fn version(&self) -> usize {
+  pub fn edit_version(&self) -> usize {
     self.edit_version
   }
 
