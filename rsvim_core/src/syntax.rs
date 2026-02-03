@@ -127,6 +127,10 @@ impl Syntax {
     })
   }
 
+  pub fn tree(&self) -> &Option<Tree> {
+    &self.tree
+  }
+
   pub fn is_parsing(&self) -> bool {
     self.parsing
   }
