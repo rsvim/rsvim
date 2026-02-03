@@ -12,6 +12,8 @@ use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
 
+pub const INVALID_SYNTAX_VERSION: isize = -1;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SyntaxStatus {
   Init,
