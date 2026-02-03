@@ -140,12 +140,16 @@ impl Syntax {
     })
   }
 
-  pub fn status(&self) -> SyntaxStatus {
-    self.status
+  pub fn is_parsing(&self) -> bool {
+    self.parsing
   }
 
-  pub fn set_status(&mut self, status: SyntaxStatus) {
-    self.status = status;
+  pub fn set_is_parsing(&mut self) {
+    self.parsing = true;
+  }
+
+  pub fn set_is_not_parsing(&mut self) {
+    self.parsing = false;
   }
 }
 
