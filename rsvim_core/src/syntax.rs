@@ -84,11 +84,13 @@ pub struct Syntax {
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
 
-  // Whether there's already a background task running on parsing.
+  // Optional abort handle of a running background task that is parsing the
+  // buffer text. There's no background task running if the value is `None`.
+  //
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be pushed to the `pending` job queue and wait
   // for the **current** task complete, then starts the next new task.
-  parsing: bool,
+  abort_handle: Option<tokio::task::AbortHandle>,
 }
 
 impl Debug for Syntax {
