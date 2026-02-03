@@ -129,6 +129,10 @@ impl Syntax {
     })
   }
 
+  pub fn parser(&self) -> Arc<Mutex<Parser>> {
+    self.parser.clone()
+  }
+
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
   }
