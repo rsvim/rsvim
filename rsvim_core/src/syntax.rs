@@ -129,7 +129,7 @@ impl Syntax {
       parser,
       language_name,
       pending: vec![],
-      parsing: false,
+      abort_handle: None,
     })
   }
 
@@ -150,11 +150,15 @@ impl Syntax {
   }
 
   pub fn is_parsing(&self) -> bool {
-    self.parsing
+    self.abort_handle.is_some()
   }
 
-  pub fn set_is_parsing(&mut self, value: bool) {
-    self.parsing = value;
+  pub fn set_abort_handle(&mut self, abort_handle: tokio::task::AbortHandle) {
+    self.abort_handle = Some(abort_handle);
+  }
+
+  pub fn clear_abort_handle(&mut self) {
+    self.abort_handle = None;
   }
 
   pub fn add_pending(&mut self, value: SyntaxEdit) {
