@@ -178,19 +178,6 @@ impl Buffer {
       self.editing_version + 1
     };
   }
-
-  /// Syntax parse versioning
-  pub fn parsing_version(&self) -> usize {
-    self.parsing_version
-  }
-
-  pub fn increase_parsing_version(&mut self) {
-    self.parsing_version = if self.parsing_version == usize::MAX {
-      0
-    } else {
-      self.parsing_version + 1
-    };
-  }
 }
 
 impl Buffer {
