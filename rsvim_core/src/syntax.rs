@@ -75,6 +75,7 @@ pub struct Syntax {
   tree: Option<Tree>,
   status: SyntaxStatus,
   pending_edits: Vec<SyntaxEdit>,
+  tree_version: usize,
 }
 
 impl Debug for Syntax {
