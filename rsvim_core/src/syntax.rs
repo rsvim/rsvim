@@ -6,7 +6,6 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ropey::Rope;
 use std::fmt::Debug;
-use std::ops::RangeBounds;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -157,7 +156,7 @@ impl Syntax {
     range: R,
   ) -> std::vec::Drain<'_, SyntaxEdit>
   where
-    R: RangeBounds<usize>,
+    R: std::ops::RangeBounds<usize>,
   {
     self.pending.drain(range)
   }
