@@ -17,8 +17,8 @@ pub const INVALID_SYNTAX_VERSION: isize = -1;
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SyntaxStatus {
   Init,
-  Parsing,
-  Match,
+  Busy, // Parsing
+  Idle, // Not Parsing
 }
 
 #[derive(Debug, Clone)]
