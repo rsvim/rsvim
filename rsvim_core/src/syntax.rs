@@ -147,11 +147,11 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn add_pending_edit(&mut self, value: SyntaxEdit) {
+  pub fn add_pending(&mut self, value: SyntaxEdit) {
     self.pending.push(value);
   }
 
-  pub fn drain_pending_edit<R>(
+  pub fn drain_pending<R>(
     &mut self,
     range: R,
   ) -> std::vec::Drain<'_, SyntaxEdit>
