@@ -99,7 +99,7 @@ pub struct Syntax {
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be pushed to the `pending` job queue and wait
   // for the **current** task complete, then starts the next new task.
-  __parsing: bool,
+  parsing: bool,
 }
 
 impl Debug for Syntax {
@@ -123,7 +123,7 @@ impl Debug for Syntax {
           .unwrap_or("unknown"),
       )
       .field("pending", &self.pending)
-      .field("__parsing", &self.__parsing)
+      .field("parsing", &self.parsing)
       .finish()
   }
 }
@@ -139,20 +139,20 @@ impl Syntax {
       tree_editing_version: INVALID_SYNTAX_TREE_EDITING_VERSION,
       parser,
       pending: vec![],
-      __parsing: false,
+      parsing: false,
     })
   }
 
   pub fn is_parsing(&self) -> bool {
-    self.__parsing
+    self.parsing
   }
 
   pub fn set_is_parsing(&mut self) {
-    self.__parsing = true;
+    self.parsing = true;
   }
 
   pub fn set_not_parsing(&mut self) {
-    self.__parsing = false;
+    self.parsing = false;
   }
 }
 
