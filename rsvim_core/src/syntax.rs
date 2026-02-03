@@ -90,7 +90,7 @@ pub struct Syntax {
   //
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be add to the `pending` job queue and wait for
-  // the **current** task complete, then starts the next new task.
+  // the **current** running task complete, then starts the next new task.
   abort_handle: Option<AbortHandle>,
 }
 
