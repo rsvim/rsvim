@@ -61,8 +61,8 @@ pub struct Buffer {
   // syntax parser
   syntax: Option<Syntax>,
 
-  // Text edit version
-  edit_version: usize,
+  // Text editing version
+  editing_version: usize,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -90,7 +90,7 @@ impl Buffer {
       last_sync_time,
       undo: Undo::new(100),
       syntax,
-      edit_version: 0,
+      editing_version: 0,
     }
   }
 
@@ -167,15 +167,15 @@ impl Buffer {
   }
 
   /// Text edit versioning
-  pub fn edit_version(&self) -> usize {
-    self.edit_version
+  pub fn editing_version(&self) -> usize {
+    self.editing_version
   }
 
   pub fn increase_editing_version(&mut self) {
-    self.edit_version = if self.edit_version == usize::MAX {
+    self.editing_version = if self.editing_version == usize::MAX {
       0
     } else {
-      self.edit_version + 1
+      self.editing_version + 1
     };
   }
 
