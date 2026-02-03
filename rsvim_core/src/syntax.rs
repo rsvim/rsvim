@@ -12,8 +12,6 @@ use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
 
-pub const INVALID_SYNTAX_VERSION: isize = -1;
-
 #[derive(Clone)]
 pub struct SyntaxEditNew {
   payload: Rope,
@@ -127,14 +125,18 @@ impl Debug for Syntax {
   }
 }
 
+const INVALID_SYNTAX_TREE_EDITING_VERSION: isize = -1;
+
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     Ok(Self {
-      parser,
       tree: None,
-      status: SyntaxStatus::Init,
+      tree_editing_version: INVALID_SYNTAX_TREE_EDITING_VERSION,
+      parser,
+      pending: vec![],
+      parsing: false,
     })
   }
 
