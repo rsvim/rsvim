@@ -155,11 +155,11 @@ impl Syntax {
     self.parsing = false;
   }
 
-  pub fn editing_version(&self) -> usize {
+  pub fn editing_version(&self) -> isize {
     self.editing_version
   }
 
-  pub fn set_editing_version(&mut self, value: usize) {
+  pub fn set_editing_version(&mut self, value: isize) {
     self.editing_version = value;
   }
 }
