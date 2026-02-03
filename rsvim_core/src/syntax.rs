@@ -89,8 +89,8 @@ pub struct Syntax {
   // buffer text. There's no background task running if the value is `None`.
   //
   // NOTE: At a certain timing, only 1 background task is running to parse a
-  // buffer. New editings will be pushed to the `pending` job queue and wait
-  // for the **current** task complete, then starts the next new task.
+  // buffer. New editings will be add to the `pending` job queue and wait for
+  // the **current** task complete, then starts the next new task.
   abort_handle: Option<AbortHandle>,
 }
 
