@@ -79,8 +79,8 @@ pub struct Syntax {
   // Syntax parser
   parser: Arc<Mutex<Parser>>,
 
-  // Language name
-  language_name: CompactString,
+  // Optional language name
+  language_name: Option<CompactString>,
 
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
@@ -104,7 +104,7 @@ impl Debug for Syntax {
         },
       )
       .field("editing_version", &self.editing_version)
-      .field("lang", &self.language_name)
+      .field("language_name", &self.language_name)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
       .finish()
@@ -115,10 +115,7 @@ const INVALID_EDITING_VERSION: isize = -1;
 
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
-    let language_name = lang
-      .name()
-      .map(|name| name.to_compact_string())
-      .unwrap_or("unknown".to_compact_string());
+    let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
