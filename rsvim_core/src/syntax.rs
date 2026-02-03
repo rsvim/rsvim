@@ -19,7 +19,7 @@ pub enum SyntaxStatus {
   NotMatch,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxEditNew {
   payload: Rope,
   buffer_version: usize,
@@ -34,13 +34,14 @@ impl SyntaxEditNew {
   }
 }
 
-pub struct SyntaxEditDiff {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SyntaxEditUpdate {
   payload: Rope,
   input_edit: InputEdit,
   buffer_version: usize,
 }
 
-impl SyntaxEditDiff {
+impl SyntaxEditUpdate {
   pub fn new(
     payload: Rope,
     input_edit: InputEdit,
@@ -54,8 +55,11 @@ impl SyntaxEditDiff {
   }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct SyntaxEdit {}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SyntaxEdit {
+  New(SyntaxEditNew),
+  Update(SyntaxEditUpdate),
+}
 
 pub struct Syntax {
   parser: Parser,
