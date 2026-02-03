@@ -14,8 +14,8 @@ use tree_sitter::Tree;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
-  payload: Rope,
-  version: isize,
+  pub payload: Rope,
+  pub version: isize,
 }
 
 impl Debug for SyntaxEditNew {
@@ -34,17 +34,11 @@ impl Debug for SyntaxEditNew {
   }
 }
 
-impl SyntaxEditNew {
-  pub fn new(payload: Rope, version: isize) -> Self {
-    Self { payload, version }
-  }
-}
-
 #[derive(Clone)]
 pub struct SyntaxEditUpdate {
-  payload: Rope,
-  input: InputEdit,
-  version: isize,
+  pub payload: Rope,
+  pub input: InputEdit,
+  pub version: isize,
 }
 
 impl Debug for SyntaxEditUpdate {
@@ -61,16 +55,6 @@ impl Debug for SyntaxEditUpdate {
       .field("input", &self.input)
       .field("version", &self.version)
       .finish()
-  }
-}
-
-impl SyntaxEditUpdate {
-  pub fn new(payload: Rope, input: InputEdit, version: isize) -> Self {
-    Self {
-      payload,
-      input,
-      version,
-    }
   }
 }
 
@@ -161,6 +145,10 @@ impl Syntax {
 
   pub fn set_editing_version(&mut self, value: isize) {
     self.editing_version = value;
+  }
+
+  pub fn add_pending_edit(&mut self, value: SyntaxEdit) {
+    self.pending.push(value);
   }
 }
 
