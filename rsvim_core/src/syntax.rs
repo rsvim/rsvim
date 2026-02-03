@@ -19,10 +19,16 @@ pub enum SyntaxStatus {
   NotMatch,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct SyntaxEditNew {
   payload: Rope,
   buffer_version: usize,
+}
+
+impl PartialEq for SyntaxEditNew {
+  fn eq(&self, other: &Self) -> bool {
+    self.buffer_version == other.buffer_version
+  }
 }
 
 impl SyntaxEditNew {
@@ -34,11 +40,17 @@ impl SyntaxEditNew {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct SyntaxEditUpdate {
   payload: Rope,
   input_edit: InputEdit,
   buffer_version: usize,
+}
+
+impl PartialEq for SyntaxEditUpdate {
+  fn eq(&self, other: &Self) -> bool {
+    self.buffer_version == other.buffer_version
+  }
 }
 
 impl SyntaxEditUpdate {
