@@ -107,7 +107,10 @@ impl Debug for Syntax {
       .field("editing_version", &self.editing_version)
       .field("language_name", &self.language_name)
       .field("pending", &self.pending)
-      .field("parsing", &self.parsing)
+      .field(
+        "abort_handle_id",
+        &self.abort_handle.as_ref().map(|handle| handle.id()),
+      )
       .finish()
   }
 }
