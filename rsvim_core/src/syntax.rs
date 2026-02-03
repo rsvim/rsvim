@@ -4,7 +4,9 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use ropey::Rope;
 use std::fmt::Debug;
+use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
@@ -17,10 +19,49 @@ pub enum SyntaxStatus {
   NotMatch,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct SyntaxEditNew {
+  payload: Rope,
+  buffer_version: usize,
+}
+
+impl SyntaxEditNew {
+  pub fn new(payload: Rope, buffer_version: usize) -> Self {
+    Self {
+      payload,
+      buffer_version,
+    }
+  }
+}
+
+pub struct SyntaxEditDiff {
+  payload: Rope,
+  input_edit: InputEdit,
+  buffer_version: usize,
+}
+
+impl SyntaxEditDiff {
+  pub fn new(
+    payload: Rope,
+    input_edit: InputEdit,
+    buffer_version: usize,
+  ) -> Self {
+    Self {
+      payload,
+      input_edit,
+      buffer_version,
+    }
+  }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct SyntaxEdit {}
+
 pub struct Syntax {
   parser: Parser,
   tree: Option<Tree>,
   status: SyntaxStatus,
+  pending_edits: Vec<SyntaxEdit>,
 }
 
 impl Debug for Syntax {
