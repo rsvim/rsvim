@@ -19,6 +19,7 @@ pub enum SyntaxStatus {
   Init,
   Parsing,
   NotMatch,
+  Match,
 }
 
 #[derive(Debug, Clone)]
