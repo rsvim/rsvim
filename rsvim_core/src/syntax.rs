@@ -31,6 +31,8 @@ impl PartialEq for SyntaxEditNew {
   }
 }
 
+impl Eq for SyntaxEditNew {}
+
 impl SyntaxEditNew {
   pub fn new(payload: Rope, buffer_version: usize) -> Self {
     Self {
@@ -52,6 +54,8 @@ impl PartialEq for SyntaxEditUpdate {
     self.buffer_version == other.buffer_version
   }
 }
+
+impl Eq for SyntaxEditUpdate {}
 
 impl SyntaxEditUpdate {
   pub fn new(
