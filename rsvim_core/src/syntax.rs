@@ -14,17 +14,26 @@ use tree_sitter::Tree;
 
 pub const INVALID_SYNTAX_VERSION: isize = -1;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum SyntaxStatus {
-  Init,
-  Busy, // Parsing
-  Idle, // Not Parsing
-}
-
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SyntaxEditNew {
   payload: Rope,
   version: isize,
+}
+
+impl Debug for SyntaxEditNew {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditNew")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("version", &self.version)
+      .finish()
+  }
 }
 
 impl SyntaxEditNew {
@@ -33,11 +42,28 @@ impl SyntaxEditNew {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SyntaxEditUpdate {
   payload: Rope,
   input: InputEdit,
   version: isize,
+}
+
+impl Debug for SyntaxEditUpdate {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditUpdate")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("input", &self.input)
+      .field("version", &self.version)
+      .finish()
+  }
 }
 
 impl SyntaxEditUpdate {
@@ -59,8 +85,8 @@ pub enum SyntaxEdit {
 pub struct Syntax {
   parser: Parser,
   tree: Option<Tree>,
-  status: SyntaxStatus,
-  pending_edits: Vec<SyntaxEdit>,
+  pending: Vec<SyntaxEdit>,
+  parsing: bool,
   version: isize,
 }
 
@@ -83,6 +109,7 @@ impl Debug for Syntax {
           &"none"
         },
       )
+      .field("pending_edits")
       .finish()
   }
 }
