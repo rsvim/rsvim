@@ -4,8 +4,11 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use parking_lot::Mutex;
+use parking_lot::lock_api::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
+use std::sync::Arc;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -74,7 +77,10 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: Parser,
+  parser: Arc<Mutex<Parser>>,
+
+  // Language name
+  language_name: CompactString,
 
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
@@ -98,14 +104,7 @@ impl Debug for Syntax {
         },
       )
       .field("editing_version", &self.editing_version)
-      .field(
-        "parser",
-        &self
-          .parser
-          .language()
-          .map(|l| l.name().unwrap_or("unknown"))
-          .unwrap_or("unknown"),
-      )
+      .field("lang", &self.language_name)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
       .finish()
@@ -116,12 +115,18 @@ const INVALID_EDITING_VERSION: isize = -1;
 
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
+    let language_name = lang
+      .name()
+      .map(|name| name.to_compact_string())
+      .unwrap_or("unknown".to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
+    let parser = Arc::new(Mutex::new(parser));
     Ok(Self {
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
+      language_name,
       pending: vec![],
       parsing: false,
     })
