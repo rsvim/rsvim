@@ -87,7 +87,7 @@ pub struct Syntax {
 
   // Buffer's editing version of the syntax tree, this is copied from the
   // buffer's `editing_version` when starts parsing the buffer.
-  tree_editing_version: isize,
+  editing_version: isize,
 
   // Syntax parser
   parser: Parser,
@@ -113,7 +113,7 @@ impl Debug for Syntax {
           &"none"
         },
       )
-      .field("tree_version", &self.tree_editing_version)
+      .field("editing_version", &self.editing_version)
       .field(
         "parser",
         &self
@@ -128,7 +128,7 @@ impl Debug for Syntax {
   }
 }
 
-const INVALID_SYNTAX_TREE_EDITING_VERSION: isize = -1;
+const INVALID_EDITING_VERSION: isize = -1;
 
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
@@ -136,7 +136,7 @@ impl Syntax {
     parser.set_language(lang)?;
     Ok(Self {
       tree: None,
-      tree_editing_version: INVALID_SYNTAX_TREE_EDITING_VERSION,
+      editing_version: INVALID_EDITING_VERSION,
       parser,
       pending: vec![],
       parsing: false,
@@ -153,6 +153,14 @@ impl Syntax {
 
   pub fn set_not_parsing(&mut self) {
     self.parsing = false;
+  }
+
+  pub fn editing_version(&self) -> usize {
+    self.editing_version
+  }
+
+  pub fn set_editing_version(&mut self, value: usize) {
+    self.editing_version = value;
   }
 }
 
