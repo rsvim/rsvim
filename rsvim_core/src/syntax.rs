@@ -87,14 +87,14 @@ pub struct Syntax {
 
   // Whether the parser is already parsing the buffer text in a background
   // task. If true, it means the `parser` is been locked by the running task.
-  parsing: bool,
-
-  // Optional abort handle of a running background task that is parsing the
-  // buffer text. There's no background task running if the value is `None`.
   //
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be add to the `pending` job queue and wait for
   // the **current** running task complete, then starts the next new task.
+  parsing: bool,
+
+  // Optional abort handle of a running background task that is parsing the
+  // buffer text.
   abort_handle: Option<AbortHandle>,
 }
 
@@ -112,6 +112,7 @@ impl Debug for Syntax {
       .field("editing_version", &self.editing_version)
       .field("language_name", &self.language_name)
       .field("pending", &self.pending)
+      .field("parsing", &self.parsing)
       .field(
         "abort_handle_id",
         &self.abort_handle.as_ref().map(|handle| handle.id()),
@@ -134,6 +135,7 @@ impl Syntax {
       parser,
       language_name,
       pending: vec![],
+      parsing: false,
       abort_handle: None,
     })
   }
@@ -155,7 +157,15 @@ impl Syntax {
   }
 
   pub fn is_parsing(&self) -> bool {
-    self.abort_handle.is_some()
+    self.parsing
+  }
+
+  pub fn set_is_parsing(&mut self, value: bool) {
+    self.parsing = value;
+  }
+
+  pub fn abort_handle(&self) -> &AbortHandle {
+    &self.abort_handle
   }
 
   pub fn set_abort_handle(&mut self, abort_handle: AbortHandle) {
