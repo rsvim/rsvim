@@ -6,6 +6,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ropey::Rope;
 use std::fmt::Debug;
+use std::ops::RangeBounds;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -149,6 +150,16 @@ impl Syntax {
 
   pub fn add_pending_edit(&mut self, value: SyntaxEdit) {
     self.pending.push(value);
+  }
+
+  pub fn drain_pending_edit<R>(
+    &mut self,
+    range: R,
+  ) -> std::vec::Drain<'_, SyntaxEdit>
+  where
+    R: RangeBounds<usize>,
+  {
+    self.pending.drain(range)
   }
 }
 
