@@ -129,12 +129,20 @@ impl Syntax {
     })
   }
 
-  pub fn parser(&self) -> Arc<Mutex<Parser>> {
-    self.parser.clone()
-  }
-
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
+  }
+
+  pub fn editing_version(&self) -> isize {
+    self.editing_version
+  }
+
+  pub fn set_editing_version(&mut self, value: isize) {
+    self.editing_version = value;
+  }
+
+  pub fn parser(&self) -> Arc<Mutex<Parser>> {
+    self.parser.clone()
   }
 
   pub fn is_parsing(&self) -> bool {
@@ -147,14 +155,6 @@ impl Syntax {
 
   pub fn set_not_parsing(&mut self) {
     self.parsing = false;
-  }
-
-  pub fn editing_version(&self) -> isize {
-    self.editing_version
-  }
-
-  pub fn set_editing_version(&mut self, value: isize) {
-    self.editing_version = value;
   }
 
   pub fn add_pending(&mut self, value: SyntaxEdit) {
