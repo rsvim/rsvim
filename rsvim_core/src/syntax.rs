@@ -84,19 +84,22 @@ pub enum SyntaxEdit {
 pub struct Syntax {
   // Parsed syntax tree
   tree: Option<Tree>,
+
   // Buffer's editing version of the syntax tree, this is copied from the
   // buffer's `editing_version` when starts parsing the buffer.
   tree_editing_version: isize,
 
   // Syntax parser
   parser: Parser,
+
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
+
   // Whether there's already a background task running on parsing.
   // NOTE: At a certain timing, only 1 background task is running to parse a
   // buffer. New editings will be pushed to the `pending` job queue and wait
   // for the **current** task complete, then starts the next new task.
-  parsing: bool,
+  __parsing: bool,
 }
 
 impl Debug for Syntax {
@@ -120,7 +123,7 @@ impl Debug for Syntax {
           .unwrap_or("unknown"),
       )
       .field("pending", &self.pending)
-      .field("parsing", &self.parsing)
+      .field("parsing", &self.__parsing)
       .finish()
   }
 }
@@ -136,20 +139,20 @@ impl Syntax {
       tree_editing_version: INVALID_SYNTAX_TREE_EDITING_VERSION,
       parser,
       pending: vec![],
-      parsing: false,
+      __parsing: false,
     })
   }
 
   pub fn is_parsing(&self) -> bool {
-    self.parsing
+    self.__parsing
   }
 
   pub fn set_is_parsing(&mut self) {
-    self.parsing = true;
+    self.__parsing = true;
   }
 
   pub fn set_is_not_parsing(&mut self) {
-    self.parsing = false;
+    self.__parsing = false;
   }
 }
 
