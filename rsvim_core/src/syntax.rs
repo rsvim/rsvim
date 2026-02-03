@@ -27,14 +27,6 @@ pub struct SyntaxEditNew {
   version: isize,
 }
 
-impl PartialEq for SyntaxEditNew {
-  fn eq(&self, other: &Self) -> bool {
-    self.version == other.version
-  }
-}
-
-impl Eq for SyntaxEditNew {}
-
 impl SyntaxEditNew {
   pub fn new(payload: Rope, version: isize) -> Self {
     Self { payload, version }
@@ -48,14 +40,6 @@ pub struct SyntaxEditUpdate {
   version: isize,
 }
 
-impl PartialEq for SyntaxEditUpdate {
-  fn eq(&self, other: &Self) -> bool {
-    self.version == other.version
-  }
-}
-
-impl Eq for SyntaxEditUpdate {}
-
 impl SyntaxEditUpdate {
   pub fn new(payload: Rope, input: InputEdit, version: isize) -> Self {
     Self {
@@ -66,7 +50,7 @@ impl SyntaxEditUpdate {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum SyntaxEdit {
   New(SyntaxEditNew),
   Update(SyntaxEditUpdate),
