@@ -82,25 +82,28 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
+/// Buffer syntax.
 pub struct Syntax {
-  parser: Parser,
+  // Parsed syntax tree
   tree: Option<Tree>,
+  // Buffer's editing version of the syntax tree, this is copied from the
+  // buffer's `editing_version` when starts parsing the buffer.
+  tree_editing_version: isize,
+
+  // Syntax parser
+  parser: Parser,
+  // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
+  // Whether there's already a background task running on parsing.
+  // NOTE: At a certain timing, only 1 background task is running to parse a
+  // buffer. New editings will be pushed to the `pending` job queue and wait
+  // for the **current** task complete, then starts the next new task.
   parsing: bool,
-  version: isize,
 }
 
 impl Debug for Syntax {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Syntax")
-      .field(
-        "parser",
-        &self
-          .parser
-          .language()
-          .map(|l| l.name().unwrap_or("unknown"))
-          .unwrap_or("unknown"),
-      )
       .field(
         "tree",
         if self.tree.is_some() {
@@ -109,7 +112,17 @@ impl Debug for Syntax {
           &"none"
         },
       )
-      .field("pending_edits")
+      .field("tree_version", &self.tree_editing_version)
+      .field(
+        "parser",
+        &self
+          .parser
+          .language()
+          .map(|l| l.name().unwrap_or("unknown"))
+          .unwrap_or("unknown"),
+      )
+      .field("pending", &self.pending)
+      .field("parsing", &self.parsing)
       .finish()
   }
 }
