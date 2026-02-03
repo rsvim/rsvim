@@ -5,7 +5,6 @@ use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
-use parking_lot::lock_api::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::sync::Arc;
