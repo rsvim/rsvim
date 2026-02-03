@@ -18,7 +18,6 @@ pub const INVALID_SYNTAX_VERSION: isize = -1;
 pub enum SyntaxStatus {
   Init,
   Parsing,
-  NotMatch,
   Match,
 }
 
