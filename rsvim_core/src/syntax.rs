@@ -164,16 +164,12 @@ impl Syntax {
     self.parsing = value;
   }
 
-  pub fn abort_handle(&self) -> &AbortHandle {
+  pub fn abort_handle(&self) -> &Option<AbortHandle> {
     &self.abort_handle
   }
 
-  pub fn set_abort_handle(&mut self, abort_handle: AbortHandle) {
-    self.abort_handle = Some(abort_handle);
-  }
-
-  pub fn clear_abort_handle(&mut self) {
-    self.abort_handle = None;
+  pub fn set_abort_handle(&mut self, abort_handle: Option<AbortHandle>) {
+    self.abort_handle = abort_handle;
   }
 
   pub fn add_pending(&mut self, value: SyntaxEdit) {
