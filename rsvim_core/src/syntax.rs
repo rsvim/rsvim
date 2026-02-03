@@ -123,7 +123,7 @@ impl Debug for Syntax {
           .unwrap_or("unknown"),
       )
       .field("pending", &self.pending)
-      .field("parsing", &self.__parsing)
+      .field("__parsing", &self.__parsing)
       .finish()
   }
 }
@@ -151,7 +151,7 @@ impl Syntax {
     self.__parsing = true;
   }
 
-  pub fn set_is_not_parsing(&mut self) {
+  pub fn set_not_parsing(&mut self) {
     self.__parsing = false;
   }
 }
