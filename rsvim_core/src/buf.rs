@@ -171,7 +171,7 @@ impl Buffer {
     self.editing_version
   }
 
-  pub fn next_editing_version(&mut self) {
+  pub fn increase_editing_version(&mut self) {
     self.editing_version = if self.editing_version == isize::MAX {
       0
     } else {
