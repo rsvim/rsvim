@@ -535,7 +535,7 @@ impl EventLoop {
         match maybe_buf_id {
           Ok(buf_id) => {
             let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
-            Self::_add_pending_syntax_edit(buf);
+            self._add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
@@ -558,7 +558,7 @@ impl EventLoop {
         let buf = buffers.get(&buf_id).unwrap().clone();
         (buf_id, buf)
       };
-      Self::_add_pending_syntax_edit(buf);
+      self._add_pending_syntax_edit(buf);
       trace!("Created empty buffer {:?}", buf_id);
     }
 
