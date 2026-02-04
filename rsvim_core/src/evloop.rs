@@ -21,7 +21,6 @@ use crate::js::module::async_load_import;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
-use crate::msg::SyntaxEditReq;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -515,7 +514,7 @@ impl EventLoop {
         .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
       msg::send_to_master(
         self.master_tx.clone(),
-        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+        MasterMessage::SyntaxEditReq(MasterMessages::SyntaxEditReq {
           buffer_id: buf.id(),
         }),
       );
