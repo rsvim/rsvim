@@ -790,7 +790,9 @@ impl EventLoop {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if lock!(self.buffers).contains_key(&req.buffer_id) {
             let buffers = self.buffers.clone();
-            self.detached_tracker.spawn(async move {});
+            self.detached_tracker.spawn(async move {
+              let parse_result = parsing::parse_syntax(buffers).await;
+            });
           }
         }
       }
