@@ -1,5 +1,7 @@
 //! Tree-sitter based syntax engine.
 
+pub mod parsing;
+
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
