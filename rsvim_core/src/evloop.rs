@@ -788,11 +788,24 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
-          if lock!(self.buffers).contains_key(&req.buffer_id) {
-            let buffers = self.buffers.clone();
-            self.detached_tracker.spawn(async move {
-              let parse_result = parsing::parse_syntax(buffers).await;
-            });
+          let buffers = lock!(self.buffers);
+          if let Some(buf) = buffers.get(&req.buffer_id) {
+            let mut buf = lock!(buf);
+            let buf_editing_version = buf.editing_version();
+            if let Some(syn) = buf.syntax_mut() {
+              let syn_parser = syn.parser();
+              let syn_tree = syn.tree().clone();
+              let pending_edits = syn.drain_pending(..);
+              self.detached_tracker.spawn(async move {
+                let parse_result = parsing::parse_syntax(
+                  syn_parser,
+                  buf_editing_version,
+                  syn_tree,
+                  pending_edits,
+                )
+                .await;
+              });
+            }
           }
         }
       }
