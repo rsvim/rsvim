@@ -514,7 +514,7 @@ impl EventLoop {
         .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
       msg::send_to_master(
         self.master_tx.clone(),
-        MasterMessage::SyntaxEditReq(MasterMessages::SyntaxEditReq {
+        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
           buffer_id: buf.id(),
         }),
       );
