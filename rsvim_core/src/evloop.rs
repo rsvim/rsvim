@@ -3,6 +3,7 @@
 pub mod ui;
 pub mod writer;
 
+use crate::buf::BufferArc;
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
@@ -501,6 +502,20 @@ impl EventLoop {
     Ok(())
   }
 
+  fn _add_pending_syntax_edit(buf: BufferArc) {
+    let mut buf = lock!(buf);
+    if buf.syntax().is_some() {
+      let payload = buf.text().rope().clone();
+      let version = buf.editing_version();
+      buf
+        .syntax_mut()
+        .as_mut()
+        .unwrap()
+        .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
+      msg::send_to_master(master_tx, message);
+    }
+  }
+
   /// Initialize buffers.
   pub fn _init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
@@ -514,19 +529,7 @@ impl EventLoop {
         match maybe_buf_id {
           Ok(buf_id) => {
             let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
-            let mut buf = lock!(buf);
-            if buf.syntax().is_some() {
-              let payload = buf.text().rope().clone();
-              let version = buf.editing_version();
-              buf
-                .syntax_mut()
-                .as_mut()
-                .unwrap()
-                .add_pending(SyntaxEdit::New(SyntaxEditNew {
-                  payload,
-                  version,
-                }));
-            }
+            Self::_add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
@@ -549,6 +552,7 @@ impl EventLoop {
         let buf = buffers.get(&buf_id).unwrap().clone();
         (buf_id, buf)
       };
+      Self::_add_pending_syntax_edit(buf);
       trace!("Created empty buffer {:?}", buf_id);
     }
 
