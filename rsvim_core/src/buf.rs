@@ -61,9 +61,8 @@ pub struct Buffer {
   // syntax parser
   syntax: Option<Syntax>,
 
-  // Versioning for text editing and syntax parsing.
-  editing_version: usize,
-  parsing_version: usize,
+  // Text editing version
+  editing_version: isize,
 }
 
 arc_mutex_ptr!(Buffer);
@@ -92,7 +91,6 @@ impl Buffer {
       undo: Undo::new(100),
       syntax,
       editing_version: 0,
-      parsing_version: 0,
     }
   }
 
@@ -168,27 +166,16 @@ impl Buffer {
     self.syntax = value;
   }
 
-  pub fn editing_version(&self) -> usize {
+  /// Text edit versioning
+  pub fn editing_version(&self) -> isize {
     self.editing_version
   }
 
   pub fn increase_editing_version(&mut self) {
-    self.editing_version = if self.editing_version == usize::MAX {
+    self.editing_version = if self.editing_version == isize::MAX {
       0
     } else {
       self.editing_version + 1
-    };
-  }
-
-  pub fn parsing_version(&self) -> usize {
-    self.parsing_version
-  }
-
-  pub fn increase_parsing_version(&mut self) {
-    self.parsing_version = if self.parsing_version == usize::MAX {
-      0
-    } else {
-      self.parsing_version + 1
     };
   }
 }

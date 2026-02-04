@@ -3,6 +3,7 @@
 pub mod ui;
 pub mod writer;
 
+use crate::buf::BufferArc;
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
@@ -25,6 +26,8 @@ use crate::state::State;
 use crate::state::StateDataAccess;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditNew;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -499,6 +502,25 @@ impl EventLoop {
     Ok(())
   }
 
+  fn _add_pending_syntax_edit(&self, buf: BufferArc) {
+    let mut buf = lock!(buf);
+    if buf.syntax().is_some() {
+      let payload = buf.text().rope().clone();
+      let version = buf.editing_version();
+      buf
+        .syntax_mut()
+        .as_mut()
+        .unwrap()
+        .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
+      msg::send_to_master(
+        self.master_tx.clone(),
+        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+          buffer_id: buf.id(),
+        }),
+      );
+    }
+  }
+
   /// Initialize buffers.
   pub fn _init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
@@ -511,6 +533,8 @@ impl EventLoop {
           lock!(self.buffers).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
+            let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
+            self._add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
@@ -527,7 +551,13 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = lock!(self.buffers).new_empty_buffer(canvas_size);
+      let (buf_id, buf) = {
+        let mut buffers = lock!(self.buffers);
+        let buf_id = buffers.new_empty_buffer(canvas_size);
+        let buf = buffers.get(&buf_id).unwrap().clone();
+        (buf_id, buf)
+      };
+      self._add_pending_syntax_edit(buf);
       trace!("Created empty buffer {:?}", buf_id);
     }
 
@@ -754,6 +784,9 @@ impl EventLoop {
               }))
               .unwrap();
           });
+        }
+        MasterMessage::SyntaxEditReq(req) => {
+          trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
         }
       }
     }

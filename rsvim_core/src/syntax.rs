@@ -4,36 +4,103 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use parking_lot::Mutex;
+use ropey::Rope;
 use std::fmt::Debug;
+use std::sync::Arc;
+use tokio::task::AbortHandle;
+use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum SyntaxStatus {
-  Init,
-  Parsing,
-  NotMatch,
+#[derive(Clone)]
+pub struct SyntaxEditNew {
+  pub payload: Rope,
+  pub version: isize,
 }
 
+impl Debug for SyntaxEditNew {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditNew")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("version", &self.version)
+      .finish()
+  }
+}
+
+#[derive(Clone)]
+pub struct SyntaxEditUpdate {
+  pub payload: Rope,
+  pub input: InputEdit,
+  pub version: isize,
+}
+
+impl Debug for SyntaxEditUpdate {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditUpdate")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("input", &self.input)
+      .field("version", &self.version)
+      .finish()
+  }
+}
+
+#[derive(Debug, Clone)]
+pub enum SyntaxEdit {
+  New(SyntaxEditNew),
+  Update(SyntaxEditUpdate),
+}
+
+/// Buffer syntax.
 pub struct Syntax {
-  parser: Parser,
+  // Parsed syntax tree
   tree: Option<Tree>,
-  status: SyntaxStatus,
+
+  // Buffer's editing version of the syntax tree, this is copied from the
+  // buffer's `editing_version` when starts parsing the buffer.
+  editing_version: isize,
+
+  // Syntax parser
+  parser: Arc<Mutex<Parser>>,
+
+  // Optional language name
+  language_name: Option<CompactString>,
+
+  // Pending edits that waiting for parsing
+  pending: Vec<SyntaxEdit>,
+
+  // Whether the parser is already parsing the buffer text in a background
+  // task. If true, it means the `parser` is been locked by the running task.
+  //
+  // NOTE: At a certain timing, only 1 background task is running to parse a
+  // buffer. New editings will be add to the `pending` job queue and wait for
+  // the **current** running task complete, then starts the next new task.
+  parsing: bool,
+
+  // Optional abort handle of a running background task that is parsing the
+  // buffer text.
+  abort_handle: Option<AbortHandle>,
 }
 
 impl Debug for Syntax {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Syntax")
-      .field(
-        "parser",
-        &self
-          .parser
-          .language()
-          .map(|l| l.name().unwrap_or("unknown"))
-          .unwrap_or("unknown"),
-      )
       .field(
         "tree",
         if self.tree.is_some() {
@@ -42,27 +109,81 @@ impl Debug for Syntax {
           &"none"
         },
       )
+      .field("editing_version", &self.editing_version)
+      .field("language_name", &self.language_name)
+      .field("pending", &self.pending)
+      .field("parsing", &self.parsing)
+      .field(
+        "abort_handle_id",
+        &self.abort_handle.as_ref().map(|handle| handle.id()),
+      )
       .finish()
   }
 }
 
+const INVALID_EDITING_VERSION: isize = -1;
+
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
+    let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
+    let parser = Arc::new(Mutex::new(parser));
     Ok(Self {
-      parser,
       tree: None,
-      status: SyntaxStatus::Init,
+      editing_version: INVALID_EDITING_VERSION,
+      parser,
+      language_name,
+      pending: vec![],
+      parsing: false,
+      abort_handle: None,
     })
   }
 
-  pub fn status(&self) -> SyntaxStatus {
-    self.status
+  pub fn tree(&self) -> &Option<Tree> {
+    &self.tree
   }
 
-  pub fn set_status(&mut self, status: SyntaxStatus) {
-    self.status = status;
+  pub fn editing_version(&self) -> isize {
+    self.editing_version
+  }
+
+  pub fn set_editing_version(&mut self, value: isize) {
+    self.editing_version = value;
+  }
+
+  pub fn parser(&self) -> Arc<Mutex<Parser>> {
+    self.parser.clone()
+  }
+
+  pub fn is_parsing(&self) -> bool {
+    self.parsing
+  }
+
+  pub fn set_is_parsing(&mut self, value: bool) {
+    self.parsing = value;
+  }
+
+  pub fn abort_handle(&self) -> &Option<AbortHandle> {
+    &self.abort_handle
+  }
+
+  pub fn set_abort_handle(&mut self, abort_handle: Option<AbortHandle>) {
+    self.abort_handle = abort_handle;
+  }
+
+  pub fn add_pending(&mut self, value: SyntaxEdit) {
+    self.pending.push(value);
+  }
+
+  pub fn drain_pending<R>(
+    &mut self,
+    range: R,
+  ) -> std::vec::Drain<'_, SyntaxEdit>
+  where
+    R: std::ops::RangeBounds<usize>,
+  {
+    self.pending.drain(range)
   }
 }
 
