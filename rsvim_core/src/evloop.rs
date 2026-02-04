@@ -511,6 +511,7 @@ impl EventLoop {
           lock!(self.buffers).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
+            let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
