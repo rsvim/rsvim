@@ -28,6 +28,7 @@ use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::parsing;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -787,6 +788,10 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
+          if lock!(self.buffers).contains_key(&req.buffer_id) {
+            let buffers = self.buffers.clone();
+            self.detached_tracker.spawn(async move {});
+          }
         }
       }
     }
