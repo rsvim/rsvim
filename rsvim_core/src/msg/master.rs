@@ -1,6 +1,7 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
+use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
@@ -31,6 +32,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to write file.
   FsWriteReq(FsWriteReq),
+
+  /// Ask master to parse text for a syntax editing.
+  SyntaxEditReq(SyntaxEditReq),
 }
 
 #[derive(Debug)]
@@ -71,6 +75,11 @@ pub struct FsWriteReq {
   pub task_id: TaskId,
   pub fd: usize,
   pub buf: Vec<u8>,
+}
+
+#[derive(Debug)]
+pub struct SyntaxEditReq {
+  pub buffer_id: BufferId,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".

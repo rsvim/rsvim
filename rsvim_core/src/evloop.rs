@@ -21,6 +21,7 @@ use crate::js::module::async_load_import;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
+use crate::msg::SyntaxEditReq;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -502,7 +503,7 @@ impl EventLoop {
     Ok(())
   }
 
-  fn _add_pending_syntax_edit(buf: BufferArc) {
+  fn _add_pending_syntax_edit(&self, buf: BufferArc) {
     let mut buf = lock!(buf);
     if buf.syntax().is_some() {
       let payload = buf.text().rope().clone();
@@ -512,7 +513,12 @@ impl EventLoop {
         .as_mut()
         .unwrap()
         .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
-      msg::send_to_master(master_tx, message);
+      msg::send_to_master(
+        self.master_tx.clone(),
+        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+          buffer_id: buf.id(),
+        }),
+      );
     }
   }
 
