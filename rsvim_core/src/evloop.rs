@@ -786,6 +786,9 @@ impl EventLoop {
               .unwrap();
           });
         }
+        MasterMessage::SyntaxEditReq(req) => {
+          trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
+        }
       }
     }
   }
