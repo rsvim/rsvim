@@ -290,17 +290,17 @@ impl Default for SyntaxManager {
 
 pub async fn parse(
   parser: Arc<Mutex<Parser>>,
-  editing_version: isize,
   mut old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) {
   let mut parser = lock!(parser);
-  let mut new_tree: Option<Tree> = None;
+
   for edit in pending_edits {
     match edit {
       SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
-        parser.parse(&payload, old_tree.as_ref());
+        let new_tree = parser.parse(&payload, old_tree.as_ref());
+        old_tree = new_tree.clone();
       }
       SyntaxEdit::Update(update) => {}
     }

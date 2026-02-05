@@ -825,13 +825,7 @@ impl EventLoop {
             drop(buf);
 
             self.detached_tracker.spawn(async move {
-              syntax::parse(
-                syn_parser,
-                buf_editing_version,
-                syn_tree,
-                pending_edits,
-              )
-              .await;
+              syntax::parse(syn_parser, syn_tree, pending_edits).await;
             });
 
             // If the buffer and its syntax still exist
