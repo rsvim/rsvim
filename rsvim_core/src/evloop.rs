@@ -791,9 +791,9 @@ impl EventLoop {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
             let mut buf = lock!(buf);
+            let buf_id = buf.id();
             let buf_editing_version = buf.editing_version();
             if let Some(syn) = buf.syntax_mut() {
-              let buf_id = buf.id();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
               let pending_edits = syn.drain_pending(..).collect_vec();
