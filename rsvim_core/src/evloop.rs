@@ -789,8 +789,7 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
-          let buffers = lock!(self.buffers);
-          if let Some(buf) = buffers.get(&req.buffer_id) {
+          if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
             let mut buf = lock!(buf);
             let buf_editing_version = buf.editing_version();
             if let Some(syn) = buf.syntax_mut() {
