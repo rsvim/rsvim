@@ -199,7 +199,7 @@ impl JsFuture for EsModuleFuture {
     debug_assert!(self.maybe_result.is_some());
     let result = self.maybe_result.take().unwrap();
     let source = match result {
-      Ok(data) => bincode::deserialize::<String>(&data).unwrap(),
+      Ok(data) => postcard::from_bytes::<String>(&data).unwrap(),
       Err(e) => {
         self.handle_failure(&state, e);
         return;

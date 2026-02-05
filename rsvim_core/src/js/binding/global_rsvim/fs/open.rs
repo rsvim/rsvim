@@ -177,7 +177,7 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let fd = bincode::deserialize::<usize>(&result).unwrap();
+    let fd = postcard::from_bytes::<usize>(&result).unwrap();
     let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
