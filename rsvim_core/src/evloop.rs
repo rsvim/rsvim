@@ -796,10 +796,11 @@ impl EventLoop {
             if let Some(syn) = buf.syntax_mut()
               && !syn.is_parsing()
             {
-              let syn_parser = syn.parser();
-              let syn_tree = syn.tree().clone();
               let pending_edits = syn.drain_pending(..).collect_vec();
               if !pending_edits.is_empty() {
+                let syn_parser = syn.parser();
+                let syn_tree = syn.tree().clone();
+                syn.set_is_parsing(true);
                 let buffers = self.buffers.clone();
                 self.detached_tracker.spawn(async move {
                   parsing::parse_syntax(
@@ -812,6 +813,7 @@ impl EventLoop {
                   )
                   .await;
                 });
+                syn.set_is_parsing(true);
               }
             }
           }
