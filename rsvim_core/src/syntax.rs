@@ -14,6 +14,8 @@ use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
 
+const INVALID_EDITING_VERSION: isize = -1;
+
 #[derive(Clone)]
 pub struct SyntaxEditNew {
   pub payload: Rope,
@@ -115,8 +117,6 @@ impl Debug for Syntax {
       .finish()
   }
 }
-
-const INVALID_EDITING_VERSION: isize = -1;
 
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
@@ -278,9 +278,10 @@ pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
-) -> Option<Tree> {
+) -> (Option<Tree>, isize) {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
+  let mut editing_version = INVALID_EDITING_VERSION;
 
   for edit in pending_edits {
     match edit {
@@ -288,6 +289,7 @@ pub async fn parse(
         let payload = new.payload.to_string();
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
+        editing_version = new.version;
       }
       SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
@@ -297,9 +299,10 @@ pub async fn parse(
         let payload = update.payload.to_string();
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
+        editing_version = update.version;
       }
     }
   }
 
-  tree
+  (tree, editing_version)
 }

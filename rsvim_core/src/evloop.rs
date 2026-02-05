@@ -791,7 +791,6 @@ impl EventLoop {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
             let mut buf = lock!(buf);
-            let buf_editing_version = buf.editing_version();
 
             // Early quit if any below conditions are met:
             // 1. Has no syntax
@@ -827,7 +826,7 @@ impl EventLoop {
             let buffers = self.buffers.clone();
 
             self.detached_tracker.spawn(async move {
-              let parsed_tree =
+              let (parsed_tree, parsed_editing_version) =
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
               // If the buffer and its syntax still exist
@@ -835,7 +834,7 @@ impl EventLoop {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   syn.set_tree(parsed_tree);
-                  syn.set_editing_version(buf_editing_version);
+                  syn.set_editing_version(parsed_editing_version);
                   syn.set_is_parsing(false);
                 }
               }
