@@ -12,6 +12,7 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
+use arcstr::ArcStr;
 use cache::CachedLines;
 use cache::CachedLinesKey;
 use cache::CachedWidth;
@@ -22,7 +23,6 @@ use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::ops::Range;
-use std::sync::Arc;
 
 #[derive(Debug)]
 /// Text content backend.
@@ -111,18 +111,18 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Arc<String>> {
+  ) -> Option<ArcStr> {
     match self.rope.get_line(line_idx) {
       Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
-              return Some(Arc::new(builder));
+              return Some(ArcStr::from(builder));
             }
             builder.push(c);
           }
-          Some(Arc::new(builder))
+          Some(ArcStr::from(builder))
         }
         None => None,
       },
@@ -136,7 +136,7 @@ impl Text {
     start_char_idx: usize,
     max_chars: usize,
     skip_cache: bool,
-  ) -> Option<Arc<String>> {
+  ) -> Option<ArcStr> {
     let mut cached_lines = self.cached_lines.borrow_mut();
 
     let key = CachedLinesKey {
@@ -163,7 +163,7 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Arc<String>> {
+  ) -> Option<ArcStr> {
     let result1 =
       self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, false);
 
