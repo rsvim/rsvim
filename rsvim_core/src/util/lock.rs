@@ -7,7 +7,7 @@ macro_rules! arc_mutex_ptr {
     paste::paste! {
       pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
       pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
-      pub type [<$name ReasGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
+      pub type [<$name MutexGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
 
       impl $name {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
