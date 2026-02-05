@@ -8,7 +8,6 @@ use parking_lot::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::sync::Arc;
-use tokio::task::AbortHandle;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -96,10 +95,6 @@ pub struct Syntax {
   // buffer. New editings will be add to the `pending` job queue and wait for
   // the **current** running task complete, then starts the next new task.
   parsing: bool,
-
-  // Optional abort handle of a running background task that is parsing the
-  // buffer text.
-  abort_handle: Option<AbortHandle>,
 }
 
 impl Debug for Syntax {
@@ -117,10 +112,6 @@ impl Debug for Syntax {
       .field("language_name", &self.language_name)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
-      .field(
-        "abort_handle_id",
-        &self.abort_handle.as_ref().map(|handle| handle.id()),
-      )
       .finish()
   }
 }
@@ -140,7 +131,6 @@ impl Syntax {
       language_name,
       pending: vec![],
       parsing: false,
-      abort_handle: None,
     })
   }
 
@@ -170,14 +160,6 @@ impl Syntax {
 
   pub fn set_is_parsing(&mut self, value: bool) {
     self.parsing = value;
-  }
-
-  pub fn abort_handle(&self) -> &Option<AbortHandle> {
-    &self.abort_handle
-  }
-
-  pub fn set_abort_handle(&mut self, abort_handle: Option<AbortHandle>) {
-    self.abort_handle = abort_handle;
   }
 
   pub fn pending_is_empty(&self) -> bool {
