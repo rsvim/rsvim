@@ -797,8 +797,10 @@ impl EventLoop {
               let syn_tree = syn.tree().clone();
               let pending_edits = syn.drain_pending(..).collect_vec();
               if !pending_edits.is_empty() {
+                let buffers = self.buffers.clone();
                 self.detached_tracker.spawn(async move {
                   parsing::parse_syntax(
+                    buffers,
                     syn_parser,
                     buf_editing_version,
                     syn_tree,
