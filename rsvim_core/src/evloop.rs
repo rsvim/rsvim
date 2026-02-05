@@ -793,6 +793,7 @@ impl EventLoop {
             let mut buf = lock!(buf);
             let buf_editing_version = buf.editing_version();
             if let Some(syn) = buf.syntax_mut() {
+              let buf_id = buf.id();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
               let pending_edits = syn.drain_pending(..).collect_vec();
@@ -801,6 +802,7 @@ impl EventLoop {
                 self.detached_tracker.spawn(async move {
                   parsing::parse_syntax(
                     buffers,
+                    buf_id,
                     syn_parser,
                     buf_editing_version,
                     syn_tree,

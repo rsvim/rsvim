@@ -1,5 +1,6 @@
 //! Parsing syntax.
 
+use crate::buf::BufferId;
 use crate::buf::BuffersManagerArc;
 use crate::syntax::SyntaxEdit;
 use parking_lot::Mutex;
@@ -9,6 +10,7 @@ use tree_sitter::Tree;
 
 pub async fn parse_syntax(
   buffers: BuffersManagerArc,
+  buf_id: BufferId,
   parser: Arc<Mutex<Parser>>,
   editing_version: isize,
   tree: Option<Tree>,
