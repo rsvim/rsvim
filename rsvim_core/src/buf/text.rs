@@ -23,7 +23,6 @@ use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::ops::Range;
-use std::rc::Rc;
 
 #[derive(Debug)]
 /// Text content backend.

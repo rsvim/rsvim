@@ -9,7 +9,6 @@ use crate::prelude::*;
 use arcstr::ArcStr;
 use lru::LruCache;
 use std::hash::Hash;
-use std::rc::Rc;
 
 #[cfg(debug_assertions)]
 #[derive(Debug, Default)]
