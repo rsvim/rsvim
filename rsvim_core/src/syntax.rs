@@ -2,7 +2,6 @@
 
 use crate::prelude::*;
 use crate::structural_id_impl;
-use crate::syntax::SyntaxEdit;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
@@ -181,7 +180,7 @@ impl Syntax {
     self.pending.is_empty()
   }
 
-  pub fn pending_len(&self) -> bool {
+  pub fn pending_len(&self) -> usize {
     self.pending.len()
   }
 
@@ -292,8 +291,18 @@ impl Default for SyntaxManager {
 pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   editing_version: isize,
-  tree: Option<Tree>,
+  mut old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) {
   let mut parser = lock!(parser);
+  let mut new_tree: Option<Tree> = None;
+  for edit in pending_edits {
+    match edit {
+      SyntaxEdit::New(new) => {
+        let payload = new.payload.to_string();
+        parser.parse(&payload, old_tree.as_ref());
+      }
+      SyntaxEdit::Update(update) => {}
+    }
+  }
 }
