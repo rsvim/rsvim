@@ -810,7 +810,7 @@ impl EventLoop {
                   )
                   .await;
                 });
-                syn.set_is_parsing(true);
+                syn.set_is_parsing(false);
               }
             }
           }
