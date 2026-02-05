@@ -1,5 +1,6 @@
 //! Parsing syntax.
 
+use crate::prelude::*;
 use crate::syntax::SyntaxEdit;
 use parking_lot::Mutex;
 use std::sync::Arc;
@@ -12,4 +13,5 @@ pub async fn parse_syntax(
   tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) {
+  let mut parser = lock!(parser);
 }

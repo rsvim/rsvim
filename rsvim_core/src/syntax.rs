@@ -69,6 +69,10 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
+pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
+pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
+pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+
 /// Buffer syntax.
 pub struct Syntax {
   // Parsed syntax tree

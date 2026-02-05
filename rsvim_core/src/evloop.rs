@@ -818,12 +818,11 @@ impl EventLoop {
               let pending_edits = syn.drain_pending(..).collect_vec();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
-
-              // release lock on the buffer
-              drop(buf);
-
               (pending_edits, syn_parser, syn_tree)
             };
+
+            // release lock on the buffer
+            drop(buf);
 
             self.detached_tracker.spawn(async move {
               parsing::parse_syntax(
