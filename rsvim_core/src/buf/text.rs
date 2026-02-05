@@ -22,7 +22,7 @@ use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::ops::Range;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 /// Text content backend.
@@ -111,18 +111,18 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Rc<String>> {
+  ) -> Option<Arc<String>> {
     match self.rope.get_line(line_idx) {
       Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
-              return Some(Rc::new(builder));
+              return Some(Arc::new(builder));
             }
             builder.push(c);
           }
-          Some(Rc::new(builder))
+          Some(Arc::new(builder))
         }
         None => None,
       },
@@ -136,7 +136,7 @@ impl Text {
     start_char_idx: usize,
     max_chars: usize,
     skip_cache: bool,
-  ) -> Option<Rc<String>> {
+  ) -> Option<Arc<String>> {
     let mut cached_lines = self.cached_lines.borrow_mut();
 
     let key = CachedLinesKey {
@@ -163,7 +163,7 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Rc<String>> {
+  ) -> Option<Arc<String>> {
     let result1 =
       self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, false);
 

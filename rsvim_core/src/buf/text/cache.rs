@@ -8,7 +8,7 @@ use crate::buf::text::cidx::ColumnIndex;
 use crate::prelude::*;
 use lru::LruCache;
 use std::hash::Hash;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[cfg(debug_assertions)]
 #[derive(Debug, Default)]
@@ -172,5 +172,5 @@ pub struct CachedLinesKey {
 
 /// Cached cloned lines.
 ///
-/// Key `CachedLinesKey` (line_idx, start_char_idx, max_chars) => Value `Rc<String>`.
-pub type CachedLines = GenericCache<CachedLinesKey, Rc<String>>;
+/// Key `CachedLinesKey` (line_idx, start_char_idx, max_chars) => Value `Arc<String>`.
+pub type CachedLines = GenericCache<CachedLinesKey, Arc<String>>;
