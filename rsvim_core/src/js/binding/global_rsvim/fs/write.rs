@@ -57,7 +57,7 @@ impl JsFuture for FsWriteFuture {
 
     // Otherwise, resolve the promise passing the result.
     let data = result.unwrap();
-    let bytes_written = bincode::deserialize::<usize>(&data).unwrap();
+    let bytes_written = postcard::from_bytes::<usize>(&data).unwrap();
 
     let bytes_written = v8::Integer::new(scope, bytes_written as i32);
 

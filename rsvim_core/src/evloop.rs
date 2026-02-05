@@ -728,7 +728,9 @@ impl EventLoop {
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
-                  Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+                  Ok(source) => {
+                    Some(Ok(postcard::to_allocvec(&source).unwrap()))
+                  }
                   Err(e) => Some(Err(e)),
                 },
               }))
@@ -751,7 +753,7 @@ impl EventLoop {
               .send(JsMessage::FsOpenResp(msg::FsOpenResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(fd) => Some(Ok(bincode::serialize(&fd).unwrap())),
+                  Ok(fd) => Some(Ok(postcard::to_allocvec(&fd).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
@@ -780,7 +782,7 @@ impl EventLoop {
               .send(JsMessage::FsWriteResp(msg::FsWriteResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(n) => Some(Ok(bincode::serialize(&n).unwrap())),
+                  Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
