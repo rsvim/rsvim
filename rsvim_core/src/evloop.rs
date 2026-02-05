@@ -824,17 +824,22 @@ impl EventLoop {
             // release lock on the buffer
             drop(buf);
 
-            self.detached_tracker.spawn(async move {
-              syntax::parse(syn_parser, syn_tree, pending_edits).await;
-            });
+            let buffers = self.buffers.clone();
 
-            // If the buffer and its syntax still exist
-            if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
-              let mut buf = lock!(buf);
-              if let Some(syn) = buf.syntax_mut() {
-                syn.set_is_parsing(false);
+            self.detached_tracker.spawn(async move {
+              let parsed_tree =
+                syntax::parse(syn_parser, syn_tree, pending_edits).await;
+
+              // If the buffer and its syntax still exist
+              if let Some(buf) = lock!(buffers).get(&req.buffer_id) {
+                let mut buf = lock!(buf);
+                if let Some(syn) = buf.syntax_mut() {
+                  syn.set_tree(parsed_tree);
+                  syn.set_editing_version(buf_editing_version);
+                  syn.set_is_parsing(false);
+                }
               }
-            }
+            });
           }
         }
       }

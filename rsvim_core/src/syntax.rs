@@ -148,6 +148,10 @@ impl Syntax {
     &self.tree
   }
 
+  pub fn set_tree(&mut self, tree: Option<Tree>) {
+    self.tree = tree;
+  }
+
   pub fn editing_version(&self) -> isize {
     self.editing_version
   }
