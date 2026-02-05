@@ -1,6 +1,5 @@
 //! Parsing syntax.
 
-use crate::buf::BuffersManagerArc;
 use crate::syntax::SyntaxEdit;
 use parking_lot::Mutex;
 use std::sync::Arc;

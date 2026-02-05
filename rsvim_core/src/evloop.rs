@@ -798,7 +798,7 @@ impl EventLoop {
               let pending_edits = syn.drain_pending(..).collect_vec();
               if !pending_edits.is_empty() {
                 self.detached_tracker.spawn(async move {
-                  let parse_result = parsing::parse_syntax(
+                  parsing::parse_syntax(
                     syn_parser,
                     buf_editing_version,
                     syn_tree,
