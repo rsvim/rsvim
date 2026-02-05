@@ -83,7 +83,7 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: Arc<Mutex<Parser>>,
+  parser: SyntaxParserArc,
 
   // Optional language name
   language_name: Option<CompactString>,
