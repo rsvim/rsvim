@@ -797,18 +797,18 @@ impl EventLoop {
             // 1. Has no syntax
             // 2. Syntax is parsing
             // 3. Syntax has no pending edits
-            if buf.syntax().is_none()
-              || buf
-                .syntax()
-                .as_ref()
-                .map(|s| s.is_parsing())
-                .unwrap_or(false)
-              || buf
-                .syntax()
-                .as_ref()
-                .map(|s| s.pending_is_empty())
-                .unwrap_or(true)
-            {
+            let has_no_syntax = buf.syntax().is_none();
+            let syntax_is_parsing = buf
+              .syntax()
+              .as_ref()
+              .map(|s| s.is_parsing())
+              .unwrap_or(false);
+            let syntax_has_pending_edits = buf
+              .syntax()
+              .as_ref()
+              .map(|s| !s.pending_is_empty())
+              .unwrap_or(false);
+            if has_no_syntax || syntax_is_parsing || !syntax_has_pending_edits {
               return;
             }
 
