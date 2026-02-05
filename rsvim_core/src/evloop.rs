@@ -26,9 +26,9 @@ use crate::state::State;
 use crate::state::StateDataAccess;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
+use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
-use crate::syntax::parsing;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -825,7 +825,7 @@ impl EventLoop {
             drop(buf);
 
             self.detached_tracker.spawn(async move {
-              parsing::parse_syntax(
+              syntax::parse(
                 syn_parser,
                 buf_editing_version,
                 syn_tree,

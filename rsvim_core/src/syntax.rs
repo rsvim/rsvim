@@ -1,9 +1,8 @@
 //! Tree-sitter based syntax engine.
 
-pub mod parsing;
-
 use crate::prelude::*;
 use crate::structural_id_impl;
+use crate::syntax::SyntaxEdit;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
@@ -288,4 +287,13 @@ impl Default for SyntaxManager {
   fn default() -> Self {
     Self::new()
   }
+}
+
+pub async fn parse(
+  parser: Arc<Mutex<Parser>>,
+  editing_version: isize,
+  tree: Option<Tree>,
+  pending_edits: Vec<SyntaxEdit>,
+) {
+  let mut parser = lock!(parser);
 }
