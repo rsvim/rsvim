@@ -9,8 +9,6 @@ use tree_sitter::Parser;
 use tree_sitter::Tree;
 
 pub async fn parse_syntax(
-  buffers: BuffersManagerArc,
-  buf_id: BufferId,
   parser: Arc<Mutex<Parser>>,
   editing_version: isize,
   tree: Option<Tree>,

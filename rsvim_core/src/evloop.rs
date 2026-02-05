@@ -801,11 +801,8 @@ impl EventLoop {
                 let syn_parser = syn.parser();
                 let syn_tree = syn.tree().clone();
                 syn.set_is_parsing(true);
-                let buffers = self.buffers.clone();
                 self.detached_tracker.spawn(async move {
                   parsing::parse_syntax(
-                    buffers,
-                    buf_id,
                     syn_parser,
                     buf_editing_version,
                     syn_tree,
