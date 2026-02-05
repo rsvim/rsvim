@@ -794,22 +794,24 @@ impl EventLoop {
             let buf_id = buf.id();
             let buf_editing_version = buf.editing_version();
             if let Some(syn) = buf.syntax_mut() {
-              let syn_parser = syn.parser();
-              let syn_tree = syn.tree().clone();
-              let pending_edits = syn.drain_pending(..).collect_vec();
-              if !pending_edits.is_empty() {
-                let buffers = self.buffers.clone();
-                self.detached_tracker.spawn(async move {
-                  parsing::parse_syntax(
-                    buffers,
-                    buf_id,
-                    syn_parser,
-                    buf_editing_version,
-                    syn_tree,
-                    pending_edits,
-                  )
-                  .await;
-                });
+              if !syn.is_parsing() {
+                let syn_parser = syn.parser();
+                let syn_tree = syn.tree().clone();
+                let pending_edits = syn.drain_pending(..).collect_vec();
+                if !pending_edits.is_empty() {
+                  let buffers = self.buffers.clone();
+                  self.detached_tracker.spawn(async move {
+                    parsing::parse_syntax(
+                      buffers,
+                      buf_id,
+                      syn_parser,
+                      buf_editing_version,
+                      syn_tree,
+                      pending_edits,
+                    )
+                    .await;
+                  });
+                }
               }
             }
           }
