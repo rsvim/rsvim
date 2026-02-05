@@ -67,6 +67,7 @@ bincode = { workspace = true }
 oxc_resolver = { workspace = true }
 encoding_rs = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
+arcstr = { workspace = true, features = ["std"] }
 tree-sitter = { workspace = true }
 tree-sitter-loader = { workspace = true }
 tree-sitter-highlight = { workspace = true }
