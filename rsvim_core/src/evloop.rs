@@ -26,6 +26,7 @@ use crate::state::State;
 use crate::state::StateDataAccess;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
+use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
 use crate::ui::canvas::Canvas;
@@ -34,6 +35,7 @@ use crate::ui::tree::*;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
+use itertools::Itertools;
 use std::sync::Arc;
 use taffy::Style;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -787,6 +789,57 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
+          if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
+            let mut buf = lock!(buf);
+
+            // Early quit if any below conditions are met:
+            // 1. Has no syntax
+            // 2. Syntax is parsing
+            // 3. Syntax has no pending edits
+            let has_no_syntax = buf.syntax().is_none();
+            let syntax_is_parsing = buf
+              .syntax()
+              .as_ref()
+              .map(|s| s.is_parsing())
+              .unwrap_or(false);
+            let syntax_has_pending_edits = buf
+              .syntax()
+              .as_ref()
+              .map(|s| !s.pending_is_empty())
+              .unwrap_or(false);
+            if has_no_syntax || syntax_is_parsing || !syntax_has_pending_edits {
+              return;
+            }
+
+            let (pending_edits, syn_parser, syn_tree) = {
+              let syn = buf.syntax_mut().as_mut().unwrap();
+              syn.set_is_parsing(true);
+              let pending_edits = syn.drain_pending(..).collect_vec();
+              let syn_parser = syn.parser();
+              let syn_tree = syn.tree().clone();
+              (pending_edits, syn_parser, syn_tree)
+            };
+
+            // release lock on the buffer
+            drop(buf);
+
+            let buffers = self.buffers.clone();
+
+            self.detached_tracker.spawn(async move {
+              let (parsed_tree, parsed_editing_version) =
+                syntax::parse(syn_parser, syn_tree, pending_edits).await;
+
+              // If the buffer and its syntax still exist
+              if let Some(buf) = lock!(buffers).get(&req.buffer_id) {
+                let mut buf = lock!(buf);
+                if let Some(syn) = buf.syntax_mut() {
+                  syn.set_tree(parsed_tree);
+                  syn.set_editing_version(parsed_editing_version);
+                  syn.set_is_parsing(false);
+                }
+              }
+            });
+          }
         }
       }
     }

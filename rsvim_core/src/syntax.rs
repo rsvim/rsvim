@@ -8,12 +8,13 @@ use parking_lot::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::sync::Arc;
-use tokio::task::AbortHandle;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Tree;
+
+const INVALID_EDITING_VERSION: isize = -1;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
@@ -67,6 +68,10 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
+pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
+pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
+pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+
 /// Buffer syntax.
 pub struct Syntax {
   // Parsed syntax tree
@@ -77,7 +82,7 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: Arc<Mutex<Parser>>,
+  parser: SyntaxParserArc,
 
   // Optional language name
   language_name: Option<CompactString>,
@@ -92,10 +97,6 @@ pub struct Syntax {
   // buffer. New editings will be add to the `pending` job queue and wait for
   // the **current** running task complete, then starts the next new task.
   parsing: bool,
-
-  // Optional abort handle of a running background task that is parsing the
-  // buffer text.
-  abort_handle: Option<AbortHandle>,
 }
 
 impl Debug for Syntax {
@@ -113,15 +114,9 @@ impl Debug for Syntax {
       .field("language_name", &self.language_name)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
-      .field(
-        "abort_handle_id",
-        &self.abort_handle.as_ref().map(|handle| handle.id()),
-      )
       .finish()
   }
 }
-
-const INVALID_EDITING_VERSION: isize = -1;
 
 impl Syntax {
   pub fn new(lang: &Language) -> Result<Self, LanguageError> {
@@ -136,12 +131,15 @@ impl Syntax {
       language_name,
       pending: vec![],
       parsing: false,
-      abort_handle: None,
     })
   }
 
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
+  }
+
+  pub fn set_tree(&mut self, tree: Option<Tree>) {
+    self.tree = tree;
   }
 
   pub fn editing_version(&self) -> isize {
@@ -152,7 +150,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> Arc<Mutex<Parser>> {
+  pub fn parser(&self) -> SyntaxParserArc {
     self.parser.clone()
   }
 
@@ -164,12 +162,12 @@ impl Syntax {
     self.parsing = value;
   }
 
-  pub fn abort_handle(&self) -> &Option<AbortHandle> {
-    &self.abort_handle
+  pub fn pending_is_empty(&self) -> bool {
+    self.pending.is_empty()
   }
 
-  pub fn set_abort_handle(&mut self, abort_handle: Option<AbortHandle>) {
-    self.abort_handle = abort_handle;
+  pub fn pending_len(&self) -> usize {
+    self.pending.len()
   }
 
   pub fn add_pending(&mut self, value: SyntaxEdit) {
@@ -274,4 +272,37 @@ impl Default for SyntaxManager {
   fn default() -> Self {
     Self::new()
   }
+}
+
+pub async fn parse(
+  parser: Arc<Mutex<Parser>>,
+  old_tree: Option<Tree>,
+  pending_edits: Vec<SyntaxEdit>,
+) -> (Option<Tree>, isize) {
+  let mut parser = lock!(parser);
+  let mut tree = old_tree;
+  let mut editing_version = INVALID_EDITING_VERSION;
+
+  for edit in pending_edits {
+    match edit {
+      SyntaxEdit::New(new) => {
+        let payload = new.payload.to_string();
+        let new_tree = parser.parse(&payload, tree.as_ref());
+        tree = new_tree;
+        editing_version = new.version;
+      }
+      SyntaxEdit::Update(update) => {
+        debug_assert!(tree.is_some());
+        if let Some(ref mut tree1) = tree {
+          tree1.edit(&update.input);
+        }
+        let payload = update.payload.to_string();
+        let new_tree = parser.parse(&payload, tree.as_ref());
+        tree = new_tree;
+        editing_version = update.version;
+      }
+    }
+  }
+
+  (tree, editing_version)
 }
