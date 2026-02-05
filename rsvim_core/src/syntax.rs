@@ -158,7 +158,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> Arc<Mutex<Parser>> {
+  pub fn parser(&self) -> SyntaxParserArc {
     self.parser.clone()
   }
 
