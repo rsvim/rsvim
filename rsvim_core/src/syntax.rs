@@ -174,6 +174,14 @@ impl Syntax {
     self.abort_handle = abort_handle;
   }
 
+  pub fn pending_is_empty(&self) -> bool {
+    self.pending.is_empty()
+  }
+
+  pub fn pending_len(&self) -> bool {
+    self.pending.len()
+  }
+
   pub fn add_pending(&mut self, value: SyntaxEdit) {
     self.pending.push(value);
   }

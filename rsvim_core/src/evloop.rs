@@ -791,25 +791,54 @@ impl EventLoop {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
             let mut buf = lock!(buf);
-            let buf_id = buf.id();
             let buf_editing_version = buf.editing_version();
-            if let Some(syn) = buf.syntax_mut()
-              && !syn.is_parsing()
+
+            // Early quit if any below conditions are met:
+            // 1. Has no syntax
+            // 2. Syntax is parsing
+            // 3. Syntax has no pending edits
+            if buf.syntax().is_none()
+              || buf
+                .syntax()
+                .as_ref()
+                .map(|s| s.is_parsing())
+                .unwrap_or(false)
+              || buf
+                .syntax()
+                .as_ref()
+                .map(|s| s.pending_is_empty())
+                .unwrap_or(true)
             {
+              return;
+            }
+
+            let (pending_edits, syn_parser, syn_tree) = {
+              let syn = buf.syntax_mut().as_mut().unwrap();
+              syn.set_is_parsing(true);
               let pending_edits = syn.drain_pending(..).collect_vec();
-              if !pending_edits.is_empty() {
-                let syn_parser = syn.parser();
-                let syn_tree = syn.tree().clone();
-                syn.set_is_parsing(true);
-                self.detached_tracker.spawn(async move {
-                  parsing::parse_syntax(
-                    syn_parser,
-                    buf_editing_version,
-                    syn_tree,
-                    pending_edits,
-                  )
-                  .await;
-                });
+              let syn_parser = syn.parser();
+              let syn_tree = syn.tree().clone();
+
+              // release lock on the buffer
+              drop(buf);
+
+              (pending_edits, syn_parser, syn_tree)
+            };
+
+            self.detached_tracker.spawn(async move {
+              parsing::parse_syntax(
+                syn_parser,
+                buf_editing_version,
+                syn_tree,
+                pending_edits,
+              )
+              .await;
+            });
+
+            // If the buffer and its syntax still exist
+            if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
+              let mut buf = lock!(buf);
+              if let Some(syn) = buf.syntax_mut() {
                 syn.set_is_parsing(false);
               }
             }
