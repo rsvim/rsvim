@@ -35,6 +35,7 @@ use crate::ui::tree::*;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
+use itertools::Itertools;
 use std::sync::Arc;
 use taffy::Style;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -795,16 +796,18 @@ impl EventLoop {
             if let Some(syn) = buf.syntax_mut() {
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
-              let pending_edits = syn.drain_pending(..);
-              self.detached_tracker.spawn(async move {
-                let parse_result = parsing::parse_syntax(
-                  syn_parser,
-                  buf_editing_version,
-                  syn_tree,
-                  pending_edits,
-                )
-                .await;
-              });
+              let pending_edits = syn.drain_pending(..).collect_vec();
+              if !pending_edits.is_empty() {
+                self.detached_tracker.spawn(async move {
+                  let parse_result = parsing::parse_syntax(
+                    syn_parser,
+                    buf_editing_version,
+                    syn_tree,
+                    pending_edits,
+                  )
+                  .await;
+                });
+              }
             }
           }
         }
