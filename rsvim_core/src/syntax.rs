@@ -292,7 +292,7 @@ pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
-) {
+) -> Option<Tree> {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
 
@@ -314,4 +314,6 @@ pub async fn parse(
       }
     }
   }
+
+  tree
 }
