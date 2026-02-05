@@ -824,6 +824,7 @@ impl EventLoop {
             drop(buf);
 
             let buffers = self.buffers.clone();
+            let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {
               let (parsed_tree, parsed_editing_version) =
@@ -836,6 +837,17 @@ impl EventLoop {
                   syn.set_tree(parsed_tree);
                   syn.set_editing_version(parsed_editing_version);
                   syn.set_is_parsing(false);
+
+                  // If buffer already has more pending editings, trigger next
+                  // parsing immediately.
+                  if !syn.pending_is_empty() {
+                    msg::send_to_master(
+                      master_tx,
+                      MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+                        buffer_id: buf.id(),
+                      }),
+                    );
+                  }
                 }
               }
             });
