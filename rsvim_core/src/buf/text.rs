@@ -770,7 +770,14 @@ impl Text {
     line_idx: usize,
     char_idx: usize,
     n: isize,
-  ) -> Range<usize> {
+  ) -> Option<Range<usize>> {
+    if line_idx >= self.rope().len_lines() {
+      return None;
+    }
+    if char_idx >= self.rope.line(line_idx).len_chars() {
+      return None;
+    }
+
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
     let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
@@ -781,7 +788,7 @@ impl Text {
 
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e.
     // we treat `\r\n` as 1 single char when deleting it.
-    if n > 0 {
+    let result = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
       let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
       debug_assert!(upper <= self.rope.len_chars());
@@ -790,7 +797,8 @@ impl Text {
       // Delete to left side, on range `[cursor-n,cursor)`.
       let lower = self.n_chars_to_left(absolute_char_idx, (-n) as usize);
       lower..absolute_char_idx
-    }
+    };
+    Some(result)
   }
 
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left
@@ -814,15 +822,11 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    if line_idx >= self.rope.len_lines()
-      || char_idx >= self.rope.line(line_idx).len_chars()
-    {
-      return None;
-    }
     let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
-    if to_delete_range.is_empty() {
+    if to_delete_range.is_none() {
       return None;
     }
+    let to_delete_range = to_delete_range.unwrap();
 
     self.rope_mut().remove(to_delete_range.clone());
 

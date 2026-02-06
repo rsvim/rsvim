@@ -122,7 +122,7 @@ impl Insert {
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
-      if n < 0 {
+      let (edit_start_byte, edit_old_end_byte, edit_new_end_byte) = if n < 0 {
         if cfg!(debug_assertions) {
           let cursor_viewport =
             tree.editable_cursor_viewport(current_window_id);
@@ -138,6 +138,7 @@ impl Insert {
           char_idx_before: absolute_delete_range.end,
           char_idx_after: absolute_delete_range.start,
         });
+        buffer.text().rope().char_to_byte(absolute_delete_range.end);
       } else {
         if cfg!(debug_assertions) {
           let cursor_viewport =

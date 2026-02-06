@@ -729,12 +729,6 @@ pub fn cursor_absolute_delete_chars_range(
   let cursor_viewport = tree.editable_cursor_viewport(id);
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
-  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
 
-  // If line is empty, cursor cannot delete any text content.
-  if cursor_char_idx >= text.rope().line(cursor_line_idx).len_chars() {
-    return None;
-  }
-
-  Some(text.get_removable_char_range(cursor_line_idx, cursor_char_idx, n))
+  text.get_removable_char_range(cursor_line_idx, cursor_char_idx, n)
 }
