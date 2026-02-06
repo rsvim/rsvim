@@ -3441,9 +3441,9 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_lexer"
-version = "32.0.0"
+version = "32.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12d58eb86de97d91c79a2b5dc11ac458e6f9378a580f53d325eff8025b6507bb"
+checksum = "f1833643caf2aa3d6c3eb67ca3371e472523e7eeedf27228a80e3641d8350d47"
 dependencies = [
  "bitflags",
  "either",
