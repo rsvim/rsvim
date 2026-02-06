@@ -822,9 +822,11 @@ impl Text {
     n: isize,
   ) -> Option<(usize, usize)> {
     let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
-    if to_delete_range.is_empty() {
+    if to_delete_range.is_none() || to_delete_range.as_ref().unwrap().is_empty()
+    {
       return None;
     }
+    let to_delete_range = to_delete_range.unwrap();
 
     self.rope_mut().remove(to_delete_range.clone());
 
