@@ -8,6 +8,8 @@ use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use compact_str::CompactString;
@@ -15,6 +17,7 @@ use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
+use tree_sitter::InputEdit;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
@@ -158,6 +161,7 @@ impl Insert {
         buffer.text_mut(),
         n,
       );
+      buffer.increase_editing_version();
       debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
         buffer.text().get_char_1d(
@@ -166,6 +170,14 @@ impl Insert {
         ),
         absolute_delete_range.start
       );
+
+      if let Some(syn) = buffer.syntax_mut() {
+        syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+          payload: buffer.text().rope().clone(),
+          input: InputEdit {},
+          version: buffer.editing_version(),
+        }));
+      }
     }
 
     State::Insert(Insert::default())
