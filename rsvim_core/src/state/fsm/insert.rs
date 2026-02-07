@@ -8,6 +8,9 @@ use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use compact_str::CompactString;
@@ -15,6 +18,7 @@ use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
+use tree_sitter::InputEdit;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
@@ -101,21 +105,20 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_chars_range =
-      cursor_ops::cursor_absolute_delete_chars_range(
-        &tree,
-        current_window_id,
-        buffer.text(),
-        n,
-      );
-    if let Some(absolute_delete_range) = absolute_delete_chars_range
-      && !absolute_delete_range.is_empty()
+    let absolute_delete_range = cursor_ops::cursor_absolute_delete_chars_range(
+      &tree,
+      current_window_id,
+      buffer.text(),
+      n,
+    );
+    if let Some(delete_range) = absolute_delete_range
+      && !delete_range.is_empty()
     {
       let payload = buffer
         .text()
         .rope()
-        .chars_at(absolute_delete_range.start)
-        .take(absolute_delete_range.len())
+        .chars_at(delete_range.start)
+        .take(delete_range.len())
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
@@ -126,14 +129,14 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.end,
+            delete_range.end,
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.end,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: delete_range.end,
+          char_idx_after: delete_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -142,30 +145,60 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.start,
+            delete_range.start,
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.start,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: delete_range.start,
+          char_idx_after: delete_range.start,
         });
       };
+
+      let edit_start_byte =
+        buffer.text().rope().char_to_byte(delete_range.start);
+      let edit_old_end_byte =
+        buffer.text().rope().char_to_byte(delete_range.end);
+      let edit_new_end_byte = edit_start_byte;
+      let edit_start_pos =
+        syntax::convert_char_to_point(buffer.text().rope(), delete_range.start);
+      let edit_old_end_pos =
+        syntax::convert_char_to_point(buffer.text().rope(), delete_range.end);
+      let edit_new_end_pos = edit_start_pos;
+
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
         buffer.text_mut(),
         n,
       );
+      buffer.increase_editing_version();
       debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
         buffer.text().get_char_1d(
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        absolute_delete_range.start
+        delete_range.start
       );
+
+      let rope = buffer.text().rope().clone();
+      let editing_version = buffer.editing_version();
+      if let Some(syn) = buffer.syntax_mut() {
+        syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+          payload: rope,
+          input: InputEdit {
+            start_byte: edit_start_byte,
+            old_end_byte: edit_old_end_byte,
+            new_end_byte: edit_new_end_byte,
+            start_position: edit_start_pos,
+            old_end_position: edit_old_end_pos,
+            new_end_position: edit_new_end_pos,
+          },
+          version: editing_version,
+        }));
+      }
     }
 
     State::Insert(Insert::default())
