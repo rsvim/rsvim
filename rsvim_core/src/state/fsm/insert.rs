@@ -121,7 +121,7 @@ impl Insert {
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
-      let (edit_start_byte, edit_old_end_byte, edit_new_end_byte) = if n < 0 {
+      if n < 0 {
         if cfg!(debug_assertions) {
           let cursor_viewport =
             tree.editable_cursor_viewport(current_window_id);
@@ -137,11 +137,6 @@ impl Insert {
           char_idx_before: delete_range.end,
           char_idx_after: delete_range.start,
         });
-        let start_byte = buffer.text().rope().char_to_byte(delete_range.end);
-        let old_end_byte =
-          buffer.text().rope().char_to_byte(delete_range.start);
-        let new_end_byte = start_byte;
-        (start_byte, old_end_byte, new_end_byte)
       } else {
         if cfg!(debug_assertions) {
           let cursor_viewport =
@@ -159,6 +154,13 @@ impl Insert {
           char_idx_after: delete_range.start,
         });
       };
+
+      let edit_start_byte =
+        buffer.text().rope().char_to_byte(delete_range.start);
+      let edit_old_end_byte =
+        buffer.text().rope().char_to_byte(delete_range.end);
+      let edit_new_end_byte = edit_start_byte;
+
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
@@ -178,7 +180,11 @@ impl Insert {
       if let Some(syn) = buffer.syntax_mut() {
         syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
           payload: buffer.text().rope().clone(),
-          input: InputEdit {},
+          input: InputEdit {
+            start_byte: edit_start_byte,
+            old_end_byte: edit_old_end_byte,
+            new_end_byte: edit_new_end_byte,
+          },
           version: buffer.editing_version(),
         }));
       }
