@@ -104,21 +104,20 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_chars_range =
-      cursor_ops::cursor_absolute_delete_chars_range(
-        &tree,
-        current_window_id,
-        buffer.text(),
-        n,
-      );
-    if let Some(absolute_delete_range) = absolute_delete_chars_range
-      && !absolute_delete_range.is_empty()
+    let absolute_delete_range = cursor_ops::cursor_absolute_delete_chars_range(
+      &tree,
+      current_window_id,
+      buffer.text(),
+      n,
+    );
+    if let Some(delete_range) = absolute_delete_range
+      && !delete_range.is_empty()
     {
       let payload = buffer
         .text()
         .rope()
-        .chars_at(absolute_delete_range.start)
-        .take(absolute_delete_range.len())
+        .chars_at(delete_range.start)
+        .take(delete_range.len())
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
@@ -129,16 +128,20 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.end,
+            delete_range.end,
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.end,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: delete_range.end,
+          char_idx_after: delete_range.start,
         });
-        buffer.text().rope().char_to_byte(absolute_delete_range.end);
+        let start_byte = buffer.text().rope().char_to_byte(delete_range.end);
+        let old_end_byte =
+          buffer.text().rope().char_to_byte(delete_range.start);
+        let new_end_byte = start_byte;
+        (start_byte, old_end_byte, new_end_byte)
       } else {
         if cfg!(debug_assertions) {
           let cursor_viewport =
@@ -146,14 +149,14 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.start,
+            delete_range.start,
             buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.start,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: delete_range.start,
+          char_idx_after: delete_range.start,
         });
       };
       let _cursor_position_after = cursor_ops::cursor_delete(
@@ -169,7 +172,7 @@ impl Insert {
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        absolute_delete_range.start
+        delete_range.start
       );
 
       if let Some(syn) = buffer.syntax_mut() {
