@@ -160,8 +160,15 @@ impl Insert {
       let edit_old_end_byte =
         buffer.text().rope().char_to_byte(delete_range.end);
       let edit_new_end_byte = edit_start_byte;
-      let edit_start_point = {
+      let edit_start_pos = {
         let row = buffer.text().rope().char_to_line(delete_range.start);
+        let column = buffer.text().rope().line(row).char_to_byte(
+          delete_range.start - buffer.text().rope().line_to_char(row),
+        );
+        tree_sitter::Point { row, column }
+      };
+      let edit_old_end_pos = {
+        let row = buffer.text().rope().char_to_line(delete_range.end);
         let column = buffer.text().rope().line(row).char_to_byte(
           delete_range.start - buffer.text().rope().line_to_char(row),
         );
