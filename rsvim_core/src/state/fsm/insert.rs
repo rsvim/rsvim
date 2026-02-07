@@ -183,9 +183,11 @@ impl Insert {
         delete_range.start
       );
 
+      let rope = buffer.text().rope().clone();
+      let editing_version = buffer.editing_version();
       if let Some(syn) = buffer.syntax_mut() {
         syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
-          payload: buffer.text().rope().clone(),
+          payload: rope,
           input: InputEdit {
             start_byte: edit_start_byte,
             old_end_byte: edit_old_end_byte,
@@ -194,7 +196,7 @@ impl Insert {
             old_end_position: edit_old_end_pos,
             new_end_position: edit_new_end_pos,
           },
-          version: buffer.editing_version(),
+          version: editing_version,
         }));
       }
     }
