@@ -12,6 +12,7 @@ use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
+use tree_sitter::Point;
 use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -272,6 +273,16 @@ impl Default for SyntaxManager {
   fn default() -> Self {
     Self::new()
   }
+}
+
+pub fn convert_char_to_point(rope: &Rope, absolute_char_idx: usize) -> Point {
+  let row = rope.char_to_line(absolute_char_idx);
+  debug_assert!(rope.get_line(row).is_some());
+  let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
+  debug_assert!(rope.line(row).len_chars() > relative_char_idx);
+  debug_assert!(rope.line(row).get_char(relative_char_idx).is_some());
+  let column = rope.line(row).char_to_byte(relative_char_idx);
+  tree_sitter::Point { row, column }
 }
 
 pub async fn parse(

@@ -8,6 +8,7 @@ use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
@@ -160,20 +161,11 @@ impl Insert {
       let edit_old_end_byte =
         buffer.text().rope().char_to_byte(delete_range.end);
       let edit_new_end_byte = edit_start_byte;
-      let edit_start_pos = {
-        let row = buffer.text().rope().char_to_line(delete_range.start);
-        let column = buffer.text().rope().line(row).char_to_byte(
-          delete_range.start - buffer.text().rope().line_to_char(row),
-        );
-        tree_sitter::Point { row, column }
-      };
-      let edit_old_end_pos = {
-        let row = buffer.text().rope().char_to_line(delete_range.end);
-        let column = buffer.text().rope().line(row).char_to_byte(
-          delete_range.start - buffer.text().rope().line_to_char(row),
-        );
-        tree_sitter::Point { row, column }
-      };
+      let edit_start_pos =
+        syntax::convert_char_to_point(buffer.text().rope(), delete_range.start);
+      let edit_old_end_pos =
+        syntax::convert_char_to_point(buffer.text().rope(), delete_range.end);
+      let edit_new_end_pos = edit_start_pos;
 
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
@@ -198,6 +190,9 @@ impl Insert {
             start_byte: edit_start_byte,
             old_end_byte: edit_old_end_byte,
             new_end_byte: edit_new_end_byte,
+            start_position: edit_start_pos,
+            old_end_position: edit_old_end_pos,
+            new_end_position: edit_new_end_pos,
           },
           version: buffer.editing_version(),
         }));
