@@ -771,13 +771,12 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<Range<usize>> {
-    if line_idx >= self.rope().len_lines() {
+    if line_idx >= self.rope.len_lines() {
       return None;
     }
     if char_idx >= self.rope.line(line_idx).len_chars() {
       return None;
     }
-
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
     let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
@@ -823,7 +822,8 @@ impl Text {
     n: isize,
   ) -> Option<(usize, usize)> {
     let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
-    if to_delete_range.is_none() {
+    if to_delete_range.is_none() || to_delete_range.as_ref().unwrap().is_empty()
+    {
       return None;
     }
     let to_delete_range = to_delete_range.unwrap();
