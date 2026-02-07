@@ -800,37 +800,23 @@ impl Text {
     Some(result)
   }
 
-  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left
-  /// or right direction.
-  ///
-  /// 1. If `n<0`, delete to the left direction, i.e. delete the range
-  ///    `[char_idx-n, char_idx)`.
-  /// 2. If `n>0`, delete to the right direction, i.e. delete the range
-  ///    `[char_idx, char_idx+n)`.
-  /// 3. If `n=0`, delete nothing.
-  ///
-  /// # Returns
-  /// 1. It returns the new position `(line_idx,char_idx)` after deleted.
-  /// 2. It returns `None` if delete nothing.
-  ///
-  /// # Panics
-  /// It panics if the position doesn't exist on text rope.
-  pub fn remove(
+  /// Same with [`remove`] but accept an extra `delete_range` parameter, it
+  /// must be calculated from [`get_removable_char_range`].
+  pub fn remove_with_range(
     &mut self,
     line_idx: usize,
     char_idx: usize,
-    n: isize,
+    _n: isize,
+    delete_range: Option<Range<usize>>,
   ) -> Option<(usize, usize)> {
-    let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
-    if to_delete_range.is_none() || to_delete_range.as_ref().unwrap().is_empty()
-    {
+    if delete_range.is_none() || delete_range.as_ref().unwrap().is_empty() {
       return None;
     }
-    let to_delete_range = to_delete_range.unwrap();
+    let delete_range = delete_range.unwrap();
 
-    self.rope_mut().remove(to_delete_range.clone());
+    self.rope_mut().remove(delete_range.clone());
 
-    let absolute_char_idx_after_deleted = to_delete_range.start;
+    let absolute_char_idx_after_deleted = delete_range.start;
     let absolute_char_idx_after_deleted =
       std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
     let (line_idx_after_deleted, char_idx_after_deleted) =
@@ -853,6 +839,31 @@ impl Text {
     );
 
     Some((line_idx_after_deleted, char_idx_after_deleted))
+  }
+
+  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left
+  /// or right direction.
+  ///
+  /// 1. If `n<0`, delete to the left direction, i.e. delete the range
+  ///    `[char_idx-n, char_idx)`.
+  /// 2. If `n>0`, delete to the right direction, i.e. delete the range
+  ///    `[char_idx, char_idx+n)`.
+  /// 3. If `n=0`, delete nothing.
+  ///
+  /// # Returns
+  /// 1. It returns the new position `(line_idx,char_idx)` after deleted.
+  /// 2. It returns `None` if delete nothing.
+  ///
+  /// # Panics
+  /// It panics if the position doesn't exist on text rope.
+  pub fn remove(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    n: isize,
+  ) -> Option<(usize, usize)> {
+    let delete_range = self.get_removable_char_range(line_idx, char_idx, n);
+    self.remove_with_range(line_idx, char_idx, n, delete_range)
   }
 
   /// Clear all text payload in current content.
