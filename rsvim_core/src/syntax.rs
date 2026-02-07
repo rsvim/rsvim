@@ -279,9 +279,14 @@ pub fn convert_char_to_point(rope: &Rope, absolute_char_idx: usize) -> Point {
   let row = rope.char_to_line(absolute_char_idx);
   debug_assert!(rope.get_line(row).is_some());
   let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
-  debug_assert!(rope.line(row).len_chars() > relative_char_idx);
-  debug_assert!(rope.line(row).get_char(relative_char_idx).is_some());
-  let column = rope.line(row).char_to_byte(relative_char_idx);
+  let line = rope.line(row);
+  let column = if line.len_chars() <= relative_char_idx {
+    line.len_bytes()
+  } else {
+    debug_assert!(rope.line(row).len_chars() > relative_char_idx);
+    debug_assert!(rope.line(row).get_char(relative_char_idx).is_some());
+    line.char_to_byte(relative_char_idx)
+  };
   tree_sitter::Point { row, column }
 }
 
