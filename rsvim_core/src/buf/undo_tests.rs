@@ -802,7 +802,7 @@ mod tests_buffer_editing {
       let mut revert_rope = buf.text().rope().clone();
       buf.undo_mut().undo(0, &mut revert_rope).unwrap();
       let before_payload = revert_rope.to_string();
-      assert_eq!(before_payload, buf_eol);
+      assert_eq!(before_payload, format!("{}", buf_eol));
     }
 
     Ok(())
