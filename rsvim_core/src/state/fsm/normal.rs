@@ -21,7 +21,6 @@ use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
-use tree_sitter::InputEdit;
 
 #[cfg(test)]
 use crate::buf::text::Text;
