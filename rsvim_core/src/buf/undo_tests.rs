@@ -753,6 +753,11 @@ mod tests_buffer_editing {
   async fn insert1() -> IoResult<()> {
     test_log_init();
 
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![
