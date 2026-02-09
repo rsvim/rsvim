@@ -419,7 +419,6 @@ pub async fn parse(
       debug_assert_eq!(i, 0);
       continue;
     }
-
     match edit {
       SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
