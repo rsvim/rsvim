@@ -107,14 +107,14 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_remove_char_idx_range =
+    let absolute_char_idx_range =
       cursor_ops::cursor_absolute_delete_chars_range(
         &tree,
         current_window_id,
         buffer.text(),
         n,
       );
-    if let Some(absolute_char_idx_range) = absolute_remove_char_idx_range
+    if let Some(absolute_char_idx_range) = absolute_char_idx_range
       && !absolute_char_idx_range.is_empty()
     {
       let payload = buffer
