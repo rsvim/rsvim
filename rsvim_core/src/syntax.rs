@@ -341,10 +341,9 @@ pub fn make_input_edit_by_delete(
 pub fn make_input_edit_by_insert(
   buffer: &Buffer,
   absolute_char_idx: usize,
-  insert_chars: usize,
+  absolute_end_char_idx: usize,
 ) -> Option<InputEdit> {
   if buffer.syntax().is_some() {
-    let absolute_end_char_idx = absolute_char_idx + insert_chars;
     let start_byte =
       convert_edit_char_to_byte(buffer.text().rope(), absolute_char_idx);
     let old_end_byte = start_byte;
