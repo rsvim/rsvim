@@ -393,6 +393,7 @@ pub async fn parse(
         trace!(
           "Parsed new tree:{:?}, editing_version:{:?}",
           tree
+            .clone()
             .map(|t| t.root_node().to_string())
             .unwrap_or("None".to_string()),
           editing_version
@@ -410,6 +411,7 @@ pub async fn parse(
         trace!(
           "Parsed update tree:{:?}, editing_version:{:?}",
           tree
+            .clone()
             .map(|t| t.root_node().to_string())
             .unwrap_or("None".to_string()),
           editing_version
