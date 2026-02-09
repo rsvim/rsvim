@@ -367,6 +367,13 @@ pub fn make_input_edit_by_insert(
   }
 }
 
+// #[cfg(not(test))]
+// fn dbg_tree(_tree: &Tree) {}
+//
+// #[cfg(test)]
+// fn dbg_tree(tree: &Tree) {
+// }
+
 pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
@@ -385,7 +392,10 @@ pub async fn parse(
         editing_version = new.version;
         trace!(
           "Parsed new tree:{:?}, editing_version:{:?}",
-          tree, editing_version
+          tree
+            .map(|t| t.root_node().to_string())
+            .unwrap_or("None".to_string()),
+          editing_version
         );
       }
       SyntaxEdit::Update(update) => {
@@ -399,7 +409,10 @@ pub async fn parse(
         editing_version = update.version;
         trace!(
           "Parsed update tree:{:?}, editing_version:{:?}",
-          tree, editing_version
+          tree
+            .map(|t| t.root_node().to_string())
+            .unwrap_or("None".to_string()),
+          editing_version
         );
       }
     }
