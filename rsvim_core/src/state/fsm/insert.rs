@@ -1,6 +1,8 @@
 //! The insert mode.
 
 use crate::buf::undo;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -18,7 +20,6 @@ use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
-use tokio_util::bytes::buf;
 use tree_sitter::InputEdit;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -211,6 +212,12 @@ impl Insert {
           },
           version: editing_version,
         }));
+        msg::send_to_master(
+          data_access.master_tx.clone(),
+          MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+            buffer_id: buffer.id(),
+          }),
+        );
       }
     }
 
