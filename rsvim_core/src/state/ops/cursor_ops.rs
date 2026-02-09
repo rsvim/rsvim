@@ -327,10 +327,10 @@ pub fn raw_cursor_viewport_move_to(
 
   let new_cursor_viewport =
     _update_cursor_viewport(tree, id, viewport, text, line_idx, char_idx);
-  trace!(
-    "after updated, new_cursor_viewport:{:?}",
-    new_cursor_viewport
-  );
+  // trace!(
+  //   "after updated, new_cursor_viewport:{:?}",
+  //   new_cursor_viewport
+  // );
 
   new_cursor_viewport
 }
