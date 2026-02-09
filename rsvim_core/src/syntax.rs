@@ -307,11 +307,11 @@ pub fn convert_edit_char_to_point(
   tree_sitter::Point { row, column }
 }
 
-pub fn make_input_edit_by_remove(
+pub fn make_input_edit_by_delete(
   buffer: &Buffer,
-  absolute_char_idx_range: Range<usize>,
+  absolute_char_idx_range: &Range<usize>,
 ) -> Option<InputEdit> {
-  let edit_input_positions = if buffer.syntax().is_some() {
+  if buffer.syntax().is_some() {
     let start_byte = convert_edit_char_to_byte(
       buffer.text().rope(),
       absolute_char_idx_range.start,
@@ -331,7 +331,37 @@ pub fn make_input_edit_by_remove(
     );
     let new_end_position = start_position;
 
-    Some(InputEdit{
+    Some(InputEdit {
+      start_byte,
+      old_end_byte,
+      new_end_byte,
+      start_position,
+      old_end_position,
+      new_end_position,
+    })
+  } else {
+    None
+  }
+}
+
+pub fn make_input_edit_by_insert(
+  buffer: &Buffer,
+  absolute_char_idx: usize,
+  insert_chars: usize,
+) -> Option<InputEdit> {
+  if buffer.syntax().is_some() {
+    let absolute_end_char_idx = absolute_char_idx + insert_chars;
+    let start_byte =
+      convert_edit_char_to_byte(buffer.text().rope(), absolute_char_idx);
+    let old_end_byte = start_byte;
+    let new_end_byte =
+      convert_edit_char_to_byte(buffer.text().rope(), absolute_end_char_idx);
+    let start_position =
+      convert_edit_char_to_point(buffer.text().rope(), absolute_char_idx);
+    let old_end_position = start_position;
+    let new_end_position =
+      convert_edit_char_to_point(buffer.text().rope(), absolute_end_char_idx);
+    Some(InputEdit {
       start_byte,
       old_end_byte,
       new_end_byte,
