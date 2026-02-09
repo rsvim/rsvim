@@ -870,15 +870,42 @@ mod tests_buffer_editing {
         .clone();
       let mut buf = lock!(buf);
       info!("undo_stack:{:?}", buf.undo().undo_stack());
-      let max_commits = buf.undo().undo_stack().len();
-      debug_assert_eq!(max_commits, 1);
+
+      debug_assert_eq!(buf.undo().undo_stack().len(), 4);
       let buf_eol = buf.options().end_of_line();
       let after_payload = buf.text().rope().to_string();
-      assert_eq!(after_payload, format!("Hello, World{}", buf_eol));
-      let mut revert_rope = buf.text().rope().clone();
-      buf.undo_mut().undo(0, &mut revert_rope).unwrap();
-      let before_payload = revert_rope.to_string();
-      assert_eq!(before_payload, format!("{}", buf_eol));
+      assert_eq!(after_payload, format!("HelloWorld{}", buf_eol));
+
+      {
+        let mut rope1 = buf.text().rope().clone();
+        buf.undo_mut().undo(3, &mut rope1).unwrap();
+        let before_payload1 = rope1.to_string();
+        assert_eq!(before_payload1, format!("Hello, World{}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 3);
+        let mut rope2 = buf.text().rope().clone();
+        buf.undo_mut().undo(2, &mut rope2).unwrap();
+        let before_payload2 = rope2.to_string();
+        assert_eq!(before_payload2, format!("Hello, {}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 2);
+        let mut rope3 = buf.text().rope().clone();
+        buf.undo_mut().undo(1, &mut rope3).unwrap();
+        let before_payload3 = rope3.to_string();
+        assert_eq!(before_payload3, format!("Hello{}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 1);
+        let mut rope4 = buf.text().rope().clone();
+        buf.undo_mut().undo(0, &mut rope4).unwrap();
+        let before_payload4 = rope4.to_string();
+        assert_eq!(before_payload4, format!("{}", buf_eol));
+      }
     }
 
     Ok(())
