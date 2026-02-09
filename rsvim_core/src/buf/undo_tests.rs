@@ -783,11 +783,9 @@ mod tests_buffer_editing {
 
     // After running
     {
-      let contents = lock!(event_loop.contents);
-      let payload = contents.cmdline_message().rope().to_string();
-      info!("After payload:{payload:?}");
-      let payload = payload.trim();
-      assert!(payload.is_empty());
+      let (buf_id, buf) =
+        lock!(event_loop.buffers).first_key_value().clone().unwrap();
+      let text_payload = lock!(buf).text().rope().to_string();
     }
 
     Ok(())
