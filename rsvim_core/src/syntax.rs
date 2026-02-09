@@ -275,12 +275,27 @@ impl Default for SyntaxManager {
   }
 }
 
-pub fn convert_char_to_point(rope: &Rope, absolute_char_idx: usize) -> Point {
+pub fn convert_edit_char_to_byte(
+  rope: &Rope,
+  absolute_char_idx: usize,
+) -> usize {
+  if absolute_char_idx >= rope.len_chars() {
+    rope.len_bytes()
+  } else {
+    debug_assert!(rope.try_char_to_byte(absolute_char_idx).is_ok());
+    rope.char_to_byte(absolute_char_idx)
+  }
+}
+
+pub fn convert_edit_char_to_point(
+  rope: &Rope,
+  absolute_char_idx: usize,
+) -> Point {
   let row = rope.char_to_line(absolute_char_idx);
   debug_assert!(rope.get_line(row).is_some());
   let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
   let line = rope.line(row);
-  let column = if line.len_chars() <= relative_char_idx {
+  let column = if relative_char_idx >= line.len_chars() {
     line.len_bytes()
   } else {
     debug_assert!(rope.line(row).len_chars() > relative_char_idx);
