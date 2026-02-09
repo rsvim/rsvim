@@ -376,6 +376,25 @@ pub async fn parse(
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
 
+  let mut new_edits: Vec<SyntaxEditNew> = vec![];
+  let mut update_edits: Vec<SyntaxEditUpdate> = vec![];
+
+  if cfg!(debug_assertions) {
+    let mut new_count: usize = 0;
+    for (i, edit) in pending_edits.iter().enumerate() {
+      match edit {
+        SyntaxEdit::New(_) => {
+          debug_assert_eq!(i, 0);
+          debug_assert_eq!(new_count, 0);
+          new_count += 1;
+          debug_assert_eq!(new_count, 1);
+        }
+        SyntaxEdit::Update(_) => {}
+      }
+    }
+    debug_assert!(new_count <= 1);
+  }
+
   for edit in pending_edits {
     match edit {
       SyntaxEdit::New(new) => {
