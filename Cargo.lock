@@ -4107,9 +4107,9 @@ checksum = "4ae62f7eae5eb549c71b76658648b72cc6111f2d87d24a1e31fa907f4943e3ce"
 
 [[package]]
 name = "tree-sitter-loader"
-version = "0.26.3"
+version = "0.26.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9e7775e4858aee78af012d79836de81b8683209bbecfb9ded12e2654a475b62"
+checksum = "a08790f36f076fc7c84f7a76a445710f34acf582c192acc4e331182f6460bd92"
 dependencies = [
  "cc",
  "etcetera",
@@ -4141,9 +4141,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-tags"
-version = "0.26.3"
+version = "0.26.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec1df7dd15620f0cb7756e3d9256817373498c9cc3e77d56fdcba1da8f15ef3b"
+checksum = "ebf3b5c590b6cf0cefdf7e513053009b843044ae716ae9abf023f99abc518d1f"
 dependencies = [
  "memchr",
  "regex",
