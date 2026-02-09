@@ -106,7 +106,7 @@ swc_ecma_ast = "=20.0.1"
 swc_ecma_codegen = "=23.0.0"
 swc_ecma_codegen_macros = "=2.0.2"
 swc_ecma_loader = "=18.0.0"
-swc_ecma_lexer = "=32.0.0"
+swc_ecma_lexer = "=32.0.1"
 swc_ecma_parser = "=33.0.1"
 swc_ecma_transforms_base = { version = "=36.0.1", features = [
   "inline-helpers",
