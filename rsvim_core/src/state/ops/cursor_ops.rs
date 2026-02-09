@@ -737,5 +737,5 @@ pub fn cursor_absolute_delete_chars_range(
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
 
-  text.get_removable_char_range(cursor_line_idx, cursor_char_idx, n)
+  text.get_removable_char_idx_range(cursor_line_idx, cursor_char_idx, n)
 }
