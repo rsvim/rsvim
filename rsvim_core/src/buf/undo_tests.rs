@@ -810,7 +810,7 @@ mod tests_buffer_editing {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn insert2() -> IoResult<()> {
+  async fn delete1() -> IoResult<()> {
     test_log_init();
 
     let src: &str = r#""#;
@@ -842,7 +842,13 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("World".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::Operation(state_ops::Operation::CursorMoveTo((5, 0))),
+      // Hello, World
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorDelete(-2)),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       MockOperation::SleepFor(Duration::from_millis(30)),
     ];
 
