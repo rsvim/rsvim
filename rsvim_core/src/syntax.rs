@@ -383,6 +383,10 @@ pub async fn parse(
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = new.version;
+        trace!(
+          "Parsed new tree:{:?}, editing_version:{:?}",
+          tree, editing_version
+        );
       }
       SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
@@ -393,6 +397,10 @@ pub async fn parse(
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = update.version;
+        trace!(
+          "Parsed update tree:{:?}, editing_version:{:?}",
+          tree, editing_version
+        );
       }
     }
   }
