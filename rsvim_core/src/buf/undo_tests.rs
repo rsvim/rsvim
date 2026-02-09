@@ -783,9 +783,20 @@ mod tests_buffer_editing {
 
     // After running
     {
-      let (buf_id, buf) =
-        lock!(event_loop.buffers).first_key_value().clone().unwrap();
-      let text_payload = lock!(buf).text().rope().to_string();
+      let buf = lock!(event_loop.buffers)
+        .first_key_value()
+        .unwrap()
+        .1
+        .clone();
+      let mut buf = lock!(buf);
+      let after_payload = buf.text().rope().to_string();
+      assert_eq!(after_payload, "Hello, World");
+      let max_commits = buf.undo().undo_stack().len();
+      debug_assert_eq!(max_commits, 1);
+      let mut revert_rope = buf.text().rope().clone();
+      buf.undo_mut().undo(0, &mut revert_rope).unwrap();
+      let before_payload = revert_rope.to_string();
+      assert_eq!(before_payload, "");
     }
 
     Ok(())
