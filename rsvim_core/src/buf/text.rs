@@ -623,7 +623,7 @@ impl Text {
 
   /// Convert 1-dimensional absolute `char_idx` into 2-dimensional
   /// `(line_idx, char_idx)`.
-  pub fn get_line_idx_char_idx_2d(
+  pub fn get_line_and_char_idx_2d(
     &self,
     absolute_char_idx: usize,
   ) -> (/* line_idx */ usize, /* char_idx*/ usize) {
@@ -681,11 +681,11 @@ impl Text {
   ) -> (usize, usize) {
     let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
     debug_assert_eq!(
-      self.get_line_idx_char_idx_2d(absolute_char_idx).0,
+      self.get_line_and_char_idx_2d(absolute_char_idx).0,
       line_idx
     );
     debug_assert_eq!(
-      self.get_line_idx_char_idx_2d(absolute_char_idx).1,
+      self.get_line_and_char_idx_2d(absolute_char_idx).1,
       char_idx
     );
 
@@ -698,7 +698,7 @@ impl Text {
     let absolute_char_idx_after_inserted =
       absolute_char_idx + payload.chars().count();
     let (line_idx_after_inserted, char_idx_after_inserted) =
-      self.get_line_idx_char_idx_2d(absolute_char_idx_after_inserted);
+      self.get_line_and_char_idx_2d(absolute_char_idx_after_inserted);
 
     self.reset_cache_after_edit(
       line_idx,
@@ -787,11 +787,11 @@ impl Text {
 
     let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
     debug_assert_eq!(
-      self.get_line_idx_char_idx_2d(absolute_char_idx).0,
+      self.get_line_and_char_idx_2d(absolute_char_idx).0,
       line_idx
     );
     debug_assert_eq!(
-      self.get_line_idx_char_idx_2d(absolute_char_idx).1,
+      self.get_line_and_char_idx_2d(absolute_char_idx).1,
       char_idx
     );
 
@@ -845,7 +845,7 @@ impl Text {
     let absolute_char_idx_after_deleted =
       std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
     let (line_idx_after_deleted, char_idx_after_deleted) =
-      self.get_line_idx_char_idx_2d(absolute_char_idx_after_deleted);
+      self.get_line_and_char_idx_2d(absolute_char_idx_after_deleted);
 
     self.reset_cache_after_edit(
       line_idx,
