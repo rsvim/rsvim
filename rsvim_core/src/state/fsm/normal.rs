@@ -1,6 +1,8 @@
 //! The normal mode.
 
 use crate::buf::undo;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -8,6 +10,9 @@ use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
@@ -239,11 +244,19 @@ impl Normal {
           current_window_id,
           buffer.text(),
         );
+        let cursor_absolute_end_char_idx =
+          cursor_absolute_char_idx + eol.chars().count();
         buffer.undo_mut().current_mut().insert(undo::Insert {
           payload: eol.clone(),
           char_idx_before: cursor_absolute_char_idx,
-          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+          char_idx_after: cursor_absolute_end_char_idx,
         });
+        let syn_edit_input = syntax::make_input_edit_by_insert(
+          &buffer,
+          cursor_absolute_char_idx,
+          cursor_absolute_end_char_idx,
+        );
+
         let (_cursor_line_idx_after, _cursor_char_idx_after) =
           cursor_ops::cursor_insert(
             &mut tree,
@@ -254,7 +267,7 @@ impl Normal {
         debug_assert_eq!(
           buffer
             .text()
-            .get_char_1d(_cursor_line_idx_after, _cursor_char_idx_after),
+            .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
           cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,
@@ -269,6 +282,23 @@ impl Normal {
             buffer.text(),
           )
         );
+
+        let rope = buffer.text().rope().clone();
+        let editing_version = buffer.editing_version();
+        if let Some(syn) = buffer.syntax_mut() {
+          debug_assert!(syn_edit_input.is_some());
+          syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+            payload: rope,
+            input: syn_edit_input.unwrap(),
+            version: editing_version,
+          }));
+          msg::send_to_master(
+            data_access.master_tx.clone(),
+            MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+              buffer_id: buffer.id(),
+            }),
+          );
+        }
       }
     };
 

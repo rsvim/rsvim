@@ -1,5 +1,6 @@
 //! Tree-sitter based syntax engine.
 
+use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -7,11 +8,13 @@ use compact_str::ToCompactString;
 use parking_lot::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
+use std::ops::Range;
 use std::sync::Arc;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
+use tree_sitter::Point;
 use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -274,6 +277,96 @@ impl Default for SyntaxManager {
   }
 }
 
+fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
+  if absolute_char_idx >= rope.len_chars() {
+    rope.len_bytes()
+  } else {
+    debug_assert!(rope.try_char_to_byte(absolute_char_idx).is_ok());
+    rope.char_to_byte(absolute_char_idx)
+  }
+}
+
+fn convert_edit_char_to_point(rope: &Rope, absolute_char_idx: usize) -> Point {
+  let row = rope.char_to_line(absolute_char_idx);
+  debug_assert!(rope.get_line(row).is_some());
+  let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
+  let line = rope.line(row);
+  let column = if relative_char_idx >= line.len_chars() {
+    line.len_bytes()
+  } else {
+    debug_assert!(rope.line(row).len_chars() > relative_char_idx);
+    debug_assert!(rope.line(row).get_char(relative_char_idx).is_some());
+    line.char_to_byte(relative_char_idx)
+  };
+  tree_sitter::Point { row, column }
+}
+
+pub fn make_input_edit_by_delete(
+  buffer: &Buffer,
+  absolute_char_idx_range: &Range<usize>,
+) -> Option<InputEdit> {
+  if buffer.syntax().is_some() {
+    let start_byte = convert_edit_char_to_byte(
+      buffer.text().rope(),
+      absolute_char_idx_range.start,
+    );
+    let old_end_byte = convert_edit_char_to_byte(
+      buffer.text().rope(),
+      absolute_char_idx_range.end,
+    );
+    let new_end_byte = start_byte;
+    let start_position = convert_edit_char_to_point(
+      buffer.text().rope(),
+      absolute_char_idx_range.start,
+    );
+    let old_end_position = convert_edit_char_to_point(
+      buffer.text().rope(),
+      absolute_char_idx_range.end,
+    );
+    let new_end_position = start_position;
+
+    Some(InputEdit {
+      start_byte,
+      old_end_byte,
+      new_end_byte,
+      start_position,
+      old_end_position,
+      new_end_position,
+    })
+  } else {
+    None
+  }
+}
+
+pub fn make_input_edit_by_insert(
+  buffer: &Buffer,
+  absolute_char_idx: usize,
+  absolute_end_char_idx: usize,
+) -> Option<InputEdit> {
+  if buffer.syntax().is_some() {
+    let start_byte =
+      convert_edit_char_to_byte(buffer.text().rope(), absolute_char_idx);
+    let old_end_byte = start_byte;
+    let new_end_byte =
+      convert_edit_char_to_byte(buffer.text().rope(), absolute_end_char_idx);
+    let start_position =
+      convert_edit_char_to_point(buffer.text().rope(), absolute_char_idx);
+    let old_end_position = start_position;
+    let new_end_position =
+      convert_edit_char_to_point(buffer.text().rope(), absolute_end_char_idx);
+    Some(InputEdit {
+      start_byte,
+      old_end_byte,
+      new_end_byte,
+      start_position,
+      old_end_position,
+      new_end_position,
+    })
+  } else {
+    None
+  }
+}
+
 pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
@@ -283,25 +376,74 @@ pub async fn parse(
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
 
-  for edit in pending_edits {
-    match edit {
+  if cfg!(debug_assertions) {
+    let mut new_count: usize = 0;
+    for (i, edit) in pending_edits.iter().enumerate() {
+      match edit {
+        SyntaxEdit::New(_) => {
+          debug_assert_eq!(i, 0);
+          debug_assert_eq!(new_count, 0);
+          new_count += 1;
+          debug_assert_eq!(new_count, 1);
+        }
+        SyntaxEdit::Update(_) => {}
+      }
+    }
+    debug_assert!(new_count <= 1);
+  }
+
+  if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
+  {
+    match &pending_edits[0] {
       SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = new.version;
+        trace!(
+          "Parsed new tree:{:?}, editing_version:{:?}",
+          tree
+            .clone()
+            .map(|t| t.root_node().to_string())
+            .unwrap_or("None".to_string()),
+          editing_version
+        );
       }
+      _ => unreachable!(),
+    }
+  }
+
+  let mut last_update: Option<&SyntaxEditUpdate> = None;
+  for (i, edit) in pending_edits.iter().enumerate() {
+    if matches!(edit, SyntaxEdit::New(_)) {
+      debug_assert_eq!(i, 0);
+      continue;
+    }
+    match edit {
       SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
         if let Some(ref mut tree1) = tree {
           tree1.edit(&update.input);
         }
-        let payload = update.payload.to_string();
-        let new_tree = parser.parse(&payload, tree.as_ref());
-        tree = new_tree;
-        editing_version = update.version;
+        last_update = Some(update);
       }
+      SyntaxEdit::New(_) => unreachable!(),
     }
+  }
+
+  if let Some(last_update) = last_update {
+    let payload = last_update.payload.to_string();
+    let new_tree = parser.parse(&payload, tree.as_ref());
+    tree = new_tree;
+    editing_version = last_update.version;
+    trace!(
+      "Parsed update tree:{:?}, editing_version:{:?}",
+      tree
+        .clone()
+        .map(|t| t.root_node().to_string())
+        .unwrap_or("None".to_string()),
+      editing_version
+    );
   }
 
   (tree, editing_version)

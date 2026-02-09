@@ -612,7 +612,7 @@ impl Text {
 
   /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute
   /// `char_idx`.
-  pub fn get_char_1d(&self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn get_char_idx_1d(&self, line_idx: usize, char_idx: usize) -> usize {
     // debug_assert!(!payload.is_empty());
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
@@ -623,7 +623,7 @@ impl Text {
 
   /// Convert 1-dimensional absolute `char_idx` into 2-dimensional
   /// `(line_idx, char_idx)`.
-  pub fn get_line_char_2d(
+  pub fn get_line_and_char_idx_2d(
     &self,
     absolute_char_idx: usize,
   ) -> (/* line_idx */ usize, /* char_idx*/ usize) {
@@ -679,9 +679,15 @@ impl Text {
     char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
-    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).0, line_idx);
-    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).1, char_idx);
+    let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
+    debug_assert_eq!(
+      self.get_line_and_char_idx_2d(absolute_char_idx).0,
+      line_idx
+    );
+    debug_assert_eq!(
+      self.get_line_and_char_idx_2d(absolute_char_idx).1,
+      char_idx
+    );
 
     self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
@@ -692,7 +698,7 @@ impl Text {
     let absolute_char_idx_after_inserted =
       absolute_char_idx + payload.chars().count();
     let (line_idx_after_inserted, char_idx_after_inserted) =
-      self.get_line_char_2d(absolute_char_idx_after_inserted);
+      self.get_line_and_char_idx_2d(absolute_char_idx_after_inserted);
 
     self.reset_cache_after_edit(
       line_idx,
@@ -765,7 +771,7 @@ impl Text {
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
-  pub fn get_removable_char_range(
+  pub fn get_removable_char_idx_range(
     &self,
     line_idx: usize,
     char_idx: usize,
@@ -779,9 +785,15 @@ impl Text {
     }
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let absolute_char_idx = self.get_char_1d(line_idx, char_idx);
-    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).0, line_idx);
-    debug_assert_eq!(self.get_line_char_2d(absolute_char_idx).1, char_idx);
+    let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
+    debug_assert_eq!(
+      self.get_line_and_char_idx_2d(absolute_char_idx).0,
+      line_idx
+    );
+    debug_assert_eq!(
+      self.get_line_and_char_idx_2d(absolute_char_idx).1,
+      char_idx
+    );
 
     self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
@@ -821,20 +833,19 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    let to_delete_range = self.get_removable_char_range(line_idx, char_idx, n);
-    if to_delete_range.is_none() || to_delete_range.as_ref().unwrap().is_empty()
-    {
+    let delete_range = self.get_removable_char_idx_range(line_idx, char_idx, n);
+    if delete_range.is_none() || delete_range.as_ref().unwrap().is_empty() {
       return None;
     }
-    let to_delete_range = to_delete_range.unwrap();
+    let delete_range = delete_range.unwrap();
 
-    self.rope_mut().remove(to_delete_range.clone());
+    self.rope_mut().remove(delete_range.clone());
 
-    let absolute_char_idx_after_deleted = to_delete_range.start;
+    let absolute_char_idx_after_deleted = delete_range.start;
     let absolute_char_idx_after_deleted =
       std::cmp::min(absolute_char_idx_after_deleted, self.rope.len_chars());
     let (line_idx_after_deleted, char_idx_after_deleted) =
-      self.get_line_char_2d(absolute_char_idx_after_deleted);
+      self.get_line_and_char_idx_2d(absolute_char_idx_after_deleted);
 
     self.reset_cache_after_edit(
       line_idx,

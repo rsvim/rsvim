@@ -1,6 +1,8 @@
 //! The insert mode.
 
 use crate::buf::undo;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -8,6 +10,9 @@ use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use compact_str::CompactString;
@@ -101,21 +106,21 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_chars_range =
+    let absolute_char_idx_range =
       cursor_ops::cursor_absolute_delete_chars_range(
         &tree,
         current_window_id,
         buffer.text(),
         n,
       );
-    if let Some(absolute_delete_range) = absolute_delete_chars_range
-      && !absolute_delete_range.is_empty()
+    if let Some(absolute_char_idx_range) = absolute_char_idx_range
+      && !absolute_char_idx_range.is_empty()
     {
       let payload = buffer
         .text()
         .rope()
-        .chars_at(absolute_delete_range.start)
-        .take(absolute_delete_range.len())
+        .chars_at(absolute_char_idx_range.start)
+        .take(absolute_char_idx_range.len())
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
@@ -126,14 +131,16 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.end,
-            buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
+            absolute_char_idx_range.end,
+            buffer
+              .text()
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.end,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: absolute_char_idx_range.end,
+          char_idx_after: absolute_char_idx_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -142,30 +149,53 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            absolute_delete_range.start,
-            buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
+            absolute_char_idx_range.start,
+            buffer
+              .text()
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_delete_range.start,
-          char_idx_after: absolute_delete_range.start,
+          char_idx_before: absolute_char_idx_range.start,
+          char_idx_after: absolute_char_idx_range.start,
         });
       };
+      let syn_edit_input =
+        syntax::make_input_edit_by_delete(&buffer, &absolute_char_idx_range);
+
       let _cursor_position_after = cursor_ops::cursor_delete(
         &mut tree,
         current_window_id,
         buffer.text_mut(),
         n,
       );
+      buffer.increase_editing_version();
       debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
-        buffer.text().get_char_1d(
+        buffer.text().get_char_idx_1d(
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        absolute_delete_range.start
+        absolute_char_idx_range.start
       );
+
+      let rope = buffer.text().rope().clone();
+      let editing_version = buffer.editing_version();
+      if let Some(syn) = buffer.syntax_mut() {
+        debug_assert!(syn_edit_input.is_some());
+        syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+          payload: rope,
+          input: syn_edit_input.unwrap(),
+          version: editing_version,
+        }));
+        msg::send_to_master(
+          data_access.master_tx.clone(),
+          MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+            buffer_id: buffer.id(),
+          }),
+        );
+      }
     }
 
     State::Insert(Insert::default())
@@ -210,11 +240,19 @@ impl Insert {
       current_window_id,
       buffer.text(),
     );
+    let cursor_absolute_end_char_idx =
+      cursor_absolute_char_idx + payload.chars().count();
     buffer.undo_mut().current_mut().insert(undo::Insert {
       payload: payload.clone(),
       char_idx_before: cursor_absolute_char_idx,
-      char_idx_after: cursor_absolute_char_idx + payload.chars().count(),
+      char_idx_after: cursor_absolute_end_char_idx,
     });
+    let syn_edit_input = syntax::make_input_edit_by_insert(
+      &buffer,
+      cursor_absolute_char_idx,
+      cursor_absolute_end_char_idx,
+    );
+
     let (_cursor_line_idx_after, _cursor_char_idx_after) =
       cursor_ops::cursor_insert(
         &mut tree,
@@ -225,7 +263,7 @@ impl Insert {
     debug_assert_eq!(
       buffer
         .text()
-        .get_char_1d(_cursor_line_idx_after, _cursor_char_idx_after),
+        .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
@@ -240,6 +278,23 @@ impl Insert {
         buffer.text(),
       )
     );
+
+    let rope = buffer.text().rope().clone();
+    let editing_version = buffer.editing_version();
+    if let Some(syn) = buffer.syntax_mut() {
+      debug_assert!(syn_edit_input.is_some());
+      syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+        payload: rope,
+        input: syn_edit_input.unwrap(),
+        version: editing_version,
+      }));
+      msg::send_to_master(
+        data_access.master_tx.clone(),
+        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+          buffer_id: buffer.id(),
+        }),
+      );
+    }
 
     State::Insert(Insert::default())
   }
