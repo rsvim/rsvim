@@ -1,6 +1,8 @@
 //! The normal mode.
 
 use crate::buf::undo;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -8,6 +10,9 @@ use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::syntax;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
@@ -16,6 +21,7 @@ use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
+use tree_sitter::InputEdit;
 
 #[cfg(test)]
 use crate::buf::text::Text;
@@ -239,11 +245,45 @@ impl Normal {
           current_window_id,
           buffer.text(),
         );
+        let cursor_absolute_end_char_idx =
+          cursor_absolute_char_idx + eol.chars().count();
         buffer.undo_mut().current_mut().insert(undo::Insert {
           payload: eol.clone(),
           char_idx_before: cursor_absolute_char_idx,
-          char_idx_after: cursor_absolute_char_idx + eol.chars().count(),
+          char_idx_after: cursor_absolute_end_char_idx,
         });
+
+        let edit_input_positions = if buffer.syntax().is_some() {
+          let start_byte = syntax::convert_edit_char_to_byte(
+            buffer.text().rope(),
+            cursor_absolute_char_idx,
+          );
+          let old_end_byte = start_byte;
+          let new_end_byte = syntax::convert_edit_char_to_byte(
+            buffer.text().rope(),
+            cursor_absolute_end_char_idx,
+          );
+          let start_position = syntax::convert_edit_char_to_point(
+            buffer.text().rope(),
+            cursor_absolute_char_idx,
+          );
+          let old_end_position = start_position;
+          let new_end_position = syntax::convert_edit_char_to_point(
+            buffer.text().rope(),
+            cursor_absolute_end_char_idx,
+          );
+          Some((
+            start_byte,
+            old_end_byte,
+            new_end_byte,
+            start_position,
+            old_end_position,
+            new_end_position,
+          ))
+        } else {
+          None
+        };
+
         let (_cursor_line_idx_after, _cursor_char_idx_after) =
           cursor_ops::cursor_insert(
             &mut tree,
@@ -269,6 +309,38 @@ impl Normal {
             buffer.text(),
           )
         );
+
+        let rope = buffer.text().rope().clone();
+        let editing_version = buffer.editing_version();
+        if let Some(syn) = buffer.syntax_mut() {
+          debug_assert!(edit_input_positions.is_some());
+          let (
+            start_byte,
+            old_end_byte,
+            new_end_byte,
+            start_position,
+            old_end_position,
+            new_end_position,
+          ) = edit_input_positions.unwrap();
+          syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+            payload: rope,
+            input: InputEdit {
+              start_byte,
+              old_end_byte,
+              new_end_byte,
+              start_position,
+              old_end_position,
+              new_end_position,
+            },
+            version: editing_version,
+          }));
+          msg::send_to_master(
+            data_access.master_tx.clone(),
+            MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+              buffer_id: buffer.id(),
+            }),
+          );
+        }
       }
     };
 
