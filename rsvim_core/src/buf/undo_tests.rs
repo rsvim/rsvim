@@ -750,7 +750,7 @@ mod tests_buffer_editing {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn undefined1() -> IoResult<()> {
+  async fn insert1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
