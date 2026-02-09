@@ -829,14 +829,14 @@ mod tests_buffer_editing {
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
-        state_ops::GotoInsertModeVariant::Keep,
+        state_ops::GotoInsertModeVariant::Append,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
-        state_ops::GotoInsertModeVariant::Keep,
+        state_ops::GotoInsertModeVariant::Append,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text("World".to_compact_string()),
