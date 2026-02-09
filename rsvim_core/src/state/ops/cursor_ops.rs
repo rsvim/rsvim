@@ -434,8 +434,8 @@ fn _update_viewport_after_text_changed(
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
-  trace!("before viewport:{:?}", viewport);
-  trace!("before cursor_viewport:{:?}", cursor_viewport);
+  // trace!("before viewport:{:?}", viewport);
+  // trace!("before cursor_viewport:{:?}", cursor_viewport);
 
   let start_line = std::cmp::min(
     viewport.start_line_idx(),
