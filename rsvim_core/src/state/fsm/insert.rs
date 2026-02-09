@@ -163,7 +163,18 @@ impl Insert {
       let edit_start_byte =
         buffer.text().rope().char_to_byte(delete_range.start);
       let edit_old_end_byte =
-        buffer.text().rope().char_to_byte(delete_range.end);
+        if delete_range.end >= buffer.text().rope().len_chars() {
+          buffer.text().rope().len_bytes()
+        } else {
+          debug_assert!(
+            buffer
+              .text()
+              .rope()
+              .try_char_to_byte(delete_range.end)
+              .is_ok()
+          );
+          buffer.text().rope().char_to_byte(delete_range.end)
+        };
       let edit_new_end_byte = edit_start_byte;
       let edit_start_pos =
         syntax::convert_char_to_point(buffer.text().rope(), delete_range.start);
