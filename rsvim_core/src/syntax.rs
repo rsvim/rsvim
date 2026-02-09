@@ -1,5 +1,6 @@
 //! Tree-sitter based syntax engine.
 
+use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -7,6 +8,7 @@ use compact_str::ToCompactString;
 use parking_lot::Mutex;
 use ropey::Rope;
 use std::fmt::Debug;
+use std::ops::Range;
 use std::sync::Arc;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
@@ -303,6 +305,43 @@ pub fn convert_edit_char_to_point(
     line.char_to_byte(relative_char_idx)
   };
   tree_sitter::Point { row, column }
+}
+
+pub fn make_input_edit_by_remove(
+  buffer: &Buffer,
+  absolute_char_idx_range: Range<usize>,
+) -> Option<InputEdit> {
+  let edit_input_positions = if buffer.syntax().is_some() {
+    let start_byte = convert_edit_char_to_byte(
+      buffer.text().rope(),
+      absolute_char_idx_range.start,
+    );
+    let old_end_byte = convert_edit_char_to_byte(
+      buffer.text().rope(),
+      absolute_char_idx_range.end,
+    );
+    let new_end_byte = start_byte;
+    let start_position = convert_edit_char_to_point(
+      buffer.text().rope(),
+      absolute_char_idx_range.start,
+    );
+    let old_end_position = convert_edit_char_to_point(
+      buffer.text().rope(),
+      absolute_char_idx_range.end,
+    );
+    let new_end_position = start_position;
+
+    Some(InputEdit{
+      start_byte,
+      old_end_byte,
+      new_end_byte,
+      start_position,
+      old_end_position,
+      new_end_position,
+    })
+  } else {
+    None
+  }
 }
 
 pub async fn parse(
