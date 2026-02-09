@@ -367,13 +367,6 @@ pub fn make_input_edit_by_insert(
   }
 }
 
-// #[cfg(not(test))]
-// fn dbg_tree(_tree: &Tree) {}
-//
-// #[cfg(test)]
-// fn dbg_tree(tree: &Tree) {
-// }
-
 pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
