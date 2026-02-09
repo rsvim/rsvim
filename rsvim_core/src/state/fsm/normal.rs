@@ -254,7 +254,7 @@ impl Normal {
         debug_assert_eq!(
           buffer
             .text()
-            .get_char_1d(_cursor_line_idx_after, _cursor_char_idx_after),
+            .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
           cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,

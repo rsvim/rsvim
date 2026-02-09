@@ -130,7 +130,9 @@ impl Insert {
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
             delete_range.end,
-            buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
+            buffer
+              .text()
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
@@ -146,7 +148,9 @@ impl Insert {
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
             delete_range.start,
-            buffer.text().get_char_1d(cursor_line_idx, cursor_char_idx)
+            buffer
+              .text()
+              .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
@@ -176,7 +180,7 @@ impl Insert {
       buffer.increase_editing_version();
       debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
-        buffer.text().get_char_1d(
+        buffer.text().get_char_idx_1d(
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
@@ -258,7 +262,7 @@ impl Insert {
     debug_assert_eq!(
       buffer
         .text()
-        .get_char_1d(_cursor_line_idx_after, _cursor_char_idx_after),
+        .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
