@@ -107,20 +107,21 @@ impl Insert {
     let mut buffer = lock!(buffer);
 
     // Save editing change
-    let absolute_delete_range = cursor_ops::cursor_absolute_delete_chars_range(
-      &tree,
-      current_window_id,
-      buffer.text(),
-      n,
-    );
-    if let Some(delete_range) = absolute_delete_range
-      && !delete_range.is_empty()
+    let absolute_remove_char_idx_range =
+      cursor_ops::cursor_absolute_delete_chars_range(
+        &tree,
+        current_window_id,
+        buffer.text(),
+        n,
+      );
+    if let Some(char_idx_range) = absolute_remove_char_idx_range
+      && !char_idx_range.is_empty()
     {
       let payload = buffer
         .text()
         .rope()
-        .chars_at(delete_range.start)
-        .take(delete_range.len())
+        .chars_at(char_idx_range.start)
+        .take(char_idx_range.len())
         .collect::<CompactString>();
 
       debug_assert_ne!(n, 0);
@@ -131,7 +132,7 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            delete_range.end,
+            char_idx_range.end,
             buffer
               .text()
               .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
@@ -139,8 +140,8 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: delete_range.end,
-          char_idx_after: delete_range.start,
+          char_idx_before: char_idx_range.end,
+          char_idx_after: char_idx_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -149,7 +150,7 @@ impl Insert {
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
           debug_assert_eq!(
-            delete_range.start,
+            char_idx_range.start,
             buffer
               .text()
               .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
@@ -157,28 +158,28 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: delete_range.start,
-          char_idx_after: delete_range.start,
+          char_idx_before: char_idx_range.start,
+          char_idx_after: char_idx_range.start,
         });
       };
 
       let edit_input_positions = if buffer.syntax().is_some() {
         let start_byte = syntax::convert_edit_char_to_byte(
           buffer.text().rope(),
-          delete_range.start,
+          char_idx_range.start,
         );
         let old_end_byte = syntax::convert_edit_char_to_byte(
           buffer.text().rope(),
-          delete_range.end,
+          char_idx_range.end,
         );
         let new_end_byte = start_byte;
         let start_position = syntax::convert_edit_char_to_point(
           buffer.text().rope(),
-          delete_range.start,
+          char_idx_range.start,
         );
         let old_end_position = syntax::convert_edit_char_to_point(
           buffer.text().rope(),
-          delete_range.end,
+          char_idx_range.end,
         );
         let new_end_position = start_position;
         Some((
@@ -206,7 +207,7 @@ impl Insert {
           _cursor_position_after.unwrap().0,
           _cursor_position_after.unwrap().1
         ),
-        delete_range.start
+        char_idx_range.start
       );
 
       let rope = buffer.text().rope().clone();
