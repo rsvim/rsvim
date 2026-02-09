@@ -376,9 +376,6 @@ pub async fn parse(
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
 
-  let mut new_edits: Vec<SyntaxEditNew> = vec![];
-  let mut update_edits: Vec<SyntaxEditUpdate> = vec![];
-
   if cfg!(debug_assertions) {
     let mut new_count: usize = 0;
     for (i, edit) in pending_edits.iter().enumerate() {
@@ -395,8 +392,9 @@ pub async fn parse(
     debug_assert!(new_count <= 1);
   }
 
-  for edit in pending_edits {
-    match edit {
+  if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
+  {
+    match &pending_edits[0] {
       SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
         let new_tree = parser.parse(&payload, tree.as_ref());
@@ -411,25 +409,42 @@ pub async fn parse(
           editing_version
         );
       }
+      _ => unreachable!(),
+    }
+  }
+
+  let mut last_update: Option<&SyntaxEditUpdate> = None;
+  for (i, edit) in pending_edits.iter().enumerate() {
+    if matches!(edit, SyntaxEdit::New(_)) {
+      debug_assert_eq!(i, 0);
+      continue;
+    }
+
+    match edit {
       SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
         if let Some(ref mut tree1) = tree {
           tree1.edit(&update.input);
         }
-        let payload = update.payload.to_string();
-        let new_tree = parser.parse(&payload, tree.as_ref());
-        tree = new_tree;
-        editing_version = update.version;
-        trace!(
-          "Parsed update tree:{:?}, editing_version:{:?}",
-          tree
-            .clone()
-            .map(|t| t.root_node().to_string())
-            .unwrap_or("None".to_string()),
-          editing_version
-        );
+        last_update = Some(update);
       }
+      SyntaxEdit::New(_) => unreachable!(),
     }
+  }
+
+  if let Some(last_update) = last_update {
+    let payload = last_update.payload.to_string();
+    let new_tree = parser.parse(&payload, tree.as_ref());
+    tree = new_tree;
+    editing_version = last_update.version;
+    trace!(
+      "Parsed update tree:{:?}, editing_version:{:?}",
+      tree
+        .clone()
+        .map(|t| t.root_node().to_string())
+        .unwrap_or("None".to_string()),
+      editing_version
+    );
   }
 
   (tree, editing_version)
