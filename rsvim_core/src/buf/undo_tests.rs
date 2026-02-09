@@ -755,24 +755,22 @@ mod tests_buffer_editing {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-
-    let src: &str = r#"
-    const buf = Rsvim.buf.current();
-    if (buf !== undefined) {
-        throw new Error("Current buffer ID is not undefined!");
-    }
-    const bufs = Rsvim.buf.list();
-    if (!Array.isArray(bufs)) {
-        throw new Error("Buffers is not an array!");
-    }
-    if (bufs.length > 0) {
-        throw new Error("Buffers list is not empty!");
-    }
-    "#;
-
-    // Prepare $RSVIM_CONFIG/rsvim.js
-    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+    let mocked_ops = vec![
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("World".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(30)),
+    ];
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
