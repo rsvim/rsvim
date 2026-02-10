@@ -287,9 +287,9 @@ mod tests_undo {
     undo.current_mut().delete(Delete {
       payload: "!".to_compact_string(),
       start_char: 12,
-      end_char: 11,
-      cursor_char_idx_before: 0,
-      cursor_char_idx_after: 0,
+      end_char: 13,
+      cursor_char_idx_before: 13,
+      cursor_char_idx_after: 12,
     });
 
     let actual = undo.current();

@@ -45,23 +45,6 @@ pub struct Delete {
   pub cursor_char_idx_after: usize,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DeleteDirection {
-  ToLeft,
-  ToRight,
-}
-
-impl Delete {
-  fn direction(&self) -> DeleteDirection {
-    debug_assert!(self.end_char <= self.start_char);
-    if self.end_char < self.start_char {
-      DeleteDirection::ToLeft
-    } else {
-      DeleteDirection::ToRight
-    }
-  }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// An operation is either a [`Insert`] or a [`Delete`].
 /// The "Replace" operation can be converted into "Delete"+"Insert" operations.
@@ -130,15 +113,14 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
-      && last.direction() == DeleteDirection::ToLeft
-      && op.direction() == DeleteDirection::ToLeft
       && op.start_char == last.end_char
     {
-      // Merge 2 deletions to left
+      // Merge 2 deletions
       trace!("last-1:{:?}, op:{:?}", last, op);
-      last.payload.insert_str(0, &op.payload);
+      last.payload.push_str(&op.payload);
       last.end_char = op.end_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
