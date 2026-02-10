@@ -798,21 +798,21 @@ mod tests_undo {
 
     let result1 = undo.undo(3, &mut text2);
     assert!(result1.is_ok());
-    assert_eq!(text2.len_chars(), 11);
+    assert_eq!(text2.len_chars(), 12);
     assert_eq!(text2.to_compact_string(), "Hello, World");
     assert_eq!(undo.undo_stack().len(), 3);
     assert_eq!(undo.redo_stack().len(), 1);
 
     let result2 = undo.undo(2, &mut text2);
     assert!(result2.is_ok());
-    assert_eq!(text2.len_chars(), 5);
+    assert_eq!(text2.len_chars(), 7);
     assert_eq!(text2.to_compact_string(), "Hello, ");
     assert_eq!(undo.undo_stack().len(), 2);
     assert_eq!(undo.redo_stack().len(), 2);
 
     let result3 = undo.undo(1, &mut text2);
     assert!(result3.is_ok());
-    assert_eq!(text2.len_chars(), 7);
+    assert_eq!(text2.len_chars(), 5);
     assert_eq!(text2.to_compact_string(), "Hello");
     assert_eq!(undo.undo_stack().len(), 1);
     assert_eq!(undo.redo_stack().len(), 3);

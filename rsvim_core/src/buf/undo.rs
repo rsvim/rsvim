@@ -271,7 +271,7 @@ impl Undo {
             rope.len_chars(),
             delete.char_idx_after
           );
-          debug_assert!(rope.len_chars() <= delete.char_idx_after);
+          debug_assert!(rope.len_chars() >= delete.char_idx_after);
           rope.insert(delete.char_idx_after, &delete.payload);
         }
       }
