@@ -15,10 +15,10 @@ pub const START_VERSION: usize = 1;
 pub struct Insert {
   pub payload: CompactString,
 
-  /// Absolute char idx of insert start position.
+  /// Absolute char idx before insert.
   pub char_idx_before: usize,
 
-  /// Absolute char idx of insert end position.
+  /// Absolute char idx after insert.
   pub char_idx_after: usize,
 }
 
