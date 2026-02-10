@@ -750,20 +750,20 @@ mod tests_undo {
     let mut undo = Undo::new(MAX_SIZE);
     let mut text1 = RopeBuilder::new().finish();
 
-    let payload1 = "Hello, ";
+    let payload1 = "Hello";
     text1.insert(0, payload1);
     undo.current_mut().insert(Insert {
       char_idx_before: 0,
       char_idx_after: payload1.chars().count(),
       payload: payload1.to_compact_string(),
     });
+    undo.commit();
 
     let payload2 = ", ";
-    assert_rope(&text1, 5..7, payload2);
-    text1.remove(5..7);
-    undo.current_mut().delete(Delete {
+    text1.insert(5, payload2);
+    undo.current_mut().insert(Insert {
       char_idx_before: 5,
-      char_idx_after: 5,
+      char_idx_after: 5 + payload2.chars().count(),
       payload: payload2.to_compact_string(),
     });
 
