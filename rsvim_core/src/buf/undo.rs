@@ -19,7 +19,7 @@ pub struct Insert {
   pub char_idx: usize,
 
   /// New absolute char idx after insert position.
-  pub end_char_idx: usize,
+  pub new_char_idx: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -145,7 +145,7 @@ impl Current {
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
       && ((last.char_idx == op.char_idx_after
-        && last.end_char_idx == op.char_idx_before
+        && last.new_char_idx == op.char_idx_before
         && op.direction() == DeleteDirection::ToLeft)
         || (last.char_idx == op.char_idx_before
           && last.char_idx == op.char_idx_after
@@ -166,7 +166,7 @@ impl Current {
   }
 
   pub fn insert(&mut self, op: Insert) {
-    debug_assert_eq!(op.char_idx + op.payload.chars().count(), op.end_char_idx);
+    debug_assert_eq!(op.char_idx + op.payload.chars().count(), op.new_char_idx);
 
     if op.payload.is_empty() {
       return;
@@ -174,12 +174,12 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
-      && last.end_char_idx == op.char_idx
+      && last.new_char_idx == op.char_idx
     {
       trace!("last-1:{:?}, op:{:?}", last, op);
       // Append to last insertion
       last.payload.push_str(&op.payload);
-      last.end_char_idx = op.end_char_idx;
+      last.new_char_idx = op.new_char_idx;
       last_record.moment = Instant::now();
     } else {
       trace!("last-2, op:{:?}", op);
@@ -250,20 +250,20 @@ impl Undo {
           trace!(
             "rope.len_chars:{:?}, insert.char_idx_after:{:?}",
             rope.len_chars(),
-            insert.end_char_idx
+            insert.new_char_idx
           );
-          debug_assert!(rope.len_chars() >= insert.end_char_idx);
+          debug_assert!(rope.len_chars() >= insert.new_char_idx);
           if cfg!(debug_assertions) {
             let range: std::ops::Range<usize> =
-              insert.char_idx..insert.end_char_idx;
+              insert.char_idx..insert.new_char_idx;
             let chars = rope.chars_at(range.start);
-            debug_assert!(chars.len() >= insert.end_char_idx - insert.char_idx);
+            debug_assert!(chars.len() >= insert.new_char_idx - insert.char_idx);
             let actual = chars
               .take(range.end - range.start)
               .collect::<CompactString>();
             debug_assert_eq!(actual, insert.payload);
           }
-          rope.remove(insert.char_idx..insert.end_char_idx);
+          rope.remove(insert.char_idx..insert.new_char_idx);
         }
         Operation::Delete(delete) => {
           trace!(
