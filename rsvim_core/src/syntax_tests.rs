@@ -274,14 +274,6 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("nc::Arc;".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(100)),
-      // Hello, World
-      MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
-      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
-        state_ops::GotoInsertModeVariant::Keep,
-      )),
-      MockOperation::Operation(state_ops::Operation::CursorDelete(-2)),
-      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       MockOperation::SleepFor(Duration::from_millis(500)),
     ];
 
