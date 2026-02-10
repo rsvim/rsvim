@@ -139,8 +139,8 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          delete_start_char_idx: absolute_char_idx_range.end,
-          new_char_idx: absolute_char_idx_range.start,
+          char_idx_before: absolute_char_idx_range.end,
+          char_idx_after: absolute_char_idx_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -157,8 +157,8 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          delete_start_char_idx: absolute_char_idx_range.start,
-          new_char_idx: absolute_char_idx_range.start,
+          char_idx_before: absolute_char_idx_range.start,
+          char_idx_after: absolute_char_idx_range.start,
         });
       };
       let syn_edit_input =
