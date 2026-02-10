@@ -967,25 +967,22 @@ mod tests_buffer_editing {
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 3);
-        let mut rope2 = buf.text().rope().clone();
-        buf.undo_mut().undo(2, &mut rope2).unwrap();
-        let before_payload2 = rope2.to_string();
+        buf.undo_mut().undo(2, &mut rope1).unwrap();
+        let before_payload2 = rope1.to_string();
         assert_eq!(before_payload2, format!("Hello, {}", buf_eol));
       }
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 2);
-        let mut rope3 = buf.text().rope().clone();
-        buf.undo_mut().undo(1, &mut rope3).unwrap();
-        let before_payload3 = rope3.to_string();
+        buf.undo_mut().undo(1, &mut rope1).unwrap();
+        let before_payload3 = rope1.to_string();
         assert_eq!(before_payload3, format!("Hello{}", buf_eol));
       }
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 1);
-        let mut rope4 = buf.text().rope().clone();
-        buf.undo_mut().undo(0, &mut rope4).unwrap();
-        let before_payload4 = rope4.to_string();
+        buf.undo_mut().undo(0, &mut rope1).unwrap();
+        let before_payload4 = rope1.to_string();
         assert_eq!(before_payload4, format!("{}", buf_eol));
       }
     }
