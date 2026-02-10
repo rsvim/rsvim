@@ -766,22 +766,23 @@ mod tests_undo {
       char_idx_after: 5 + payload2.chars().count(),
       payload: payload2.to_compact_string(),
     });
+    undo.commit();
 
-    let payload3 = "World!";
-    assert_eq!(payload1.len() - payload2.len(), 5);
-    text1.insert(5, payload3);
+    let payload3 = "World";
+    text1.insert(7, payload3);
     undo.current_mut().insert(Insert {
-      char_idx_before: 5,
-      char_idx_after: 5 + payload3.len(),
+      char_idx_before: 7,
+      char_idx_after: 7 + payload3.len(),
       payload: payload3.to_compact_string(),
     });
+    undo.commit();
 
-    let payload4 = "!";
-    assert_rope(&text1, 10..11, payload4);
-    text1.remove(10..11);
+    let payload4 = ", ";
+    assert_rope(&text1, 5..7, payload4);
+    text1.remove(5..7);
     undo.current_mut().delete(Delete {
-      char_idx_before: 10,
-      char_idx_after: 10,
+      char_idx_before: 7,
+      char_idx_after: 5,
       payload: payload4.to_compact_string(),
     });
 
