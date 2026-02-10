@@ -20,6 +20,12 @@ pub struct Insert {
 
   /// Absolute char idx of end insert position.
   pub end_char: usize,
+
+  /// Cursor absolute char idx before insert.
+  pub cursor_char_idx_before: usize,
+
+  /// Cursor absolute char idx after insert.
+  pub cursor_char_idx_after: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
