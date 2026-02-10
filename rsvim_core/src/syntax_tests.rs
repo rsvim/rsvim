@@ -461,7 +461,7 @@ mod tests_buffer_editing {
       );
       assert_eq!(
         syn_tree.as_ref().unwrap().root_node().to_string(),
-        "(source_file (use_declaration argument: (scoped_identifier path: (scoped_identifier path: (identifier) name: (identifier)) name: (identifier))))"
+        "(source_file (use_declaration argument: (scoped_identifier path: (scoped_identifier path: (identifier) name: (identifier)) name: (identifier))) (function_item name: (identifier) parameters: (parameters) body: (block (expression_statement (macro_invocation macro: (identifier) (token_tree (string_literal (string_content))))))))"
       );
     }
 
