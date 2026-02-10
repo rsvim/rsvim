@@ -26,16 +26,10 @@ pub struct Insert {
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Absolute char idx of delete start position.
+  /// Absolute char idx before delete.
   pub char_idx_before: usize,
 
-  /// Absolute char idx of delete end position.
-  pub char_idx_after: usize,
-
-  /// Cursor absolute char idx before delete.
-  pub cursor_char_idx_before: usize,
-
-  /// Cursor absolute char idx after delete.
+  /// Absolute char idx after delete.
   pub char_idx_after: usize,
 }
 
