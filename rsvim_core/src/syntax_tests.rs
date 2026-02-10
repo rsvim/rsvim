@@ -126,7 +126,7 @@ mod tests_buffer_editing {
         .clone();
       let buf = lock!(buf);
       let payload = buf.text().rope().to_string();
-      assert_eq!("Hello, World", &payload);
+      assert_eq!("Hello, World\n", &payload);
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
@@ -218,7 +218,7 @@ mod tests_buffer_editing {
         .clone();
       let buf = lock!(buf);
       let payload = buf.text().rope().to_string();
-      assert_eq!("Hello, World", &payload);
+      assert_eq!("HelloWorld\n", &payload);
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
