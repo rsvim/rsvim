@@ -278,27 +278,26 @@ impl Default for SyntaxManager {
 }
 
 fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
-  if absolute_char_idx >= rope.len_chars() {
-    rope.len_bytes()
-  } else {
-    debug_assert!(rope.try_char_to_byte(absolute_char_idx).is_ok());
-    rope.char_to_byte(absolute_char_idx)
-  }
+  rope
+    .try_char_to_byte(absolute_char_idx)
+    .unwrap_or(rope.len_bytes())
 }
 
 fn convert_edit_char_to_point(rope: &Rope, absolute_char_idx: usize) -> Point {
-  let row = rope.char_to_line(absolute_char_idx);
-  debug_assert!(rope.get_line(row).is_some());
-  let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
-  let line = rope.line(row);
-  let column = if relative_char_idx >= line.len_chars() {
-    line.len_bytes()
+  if absolute_char_idx >= rope.len_chars() {
+    let row = rope.len_lines();
+    let column = 0;
+    tree_sitter::Point { row, column }
   } else {
-    debug_assert!(rope.line(row).len_chars() > relative_char_idx);
-    debug_assert!(rope.line(row).get_char(relative_char_idx).is_some());
-    line.char_to_byte(relative_char_idx)
-  };
-  tree_sitter::Point { row, column }
+    let row = rope.char_to_line(absolute_char_idx);
+    debug_assert!(rope.get_line(row).is_some());
+    let relative_char_idx = absolute_char_idx - rope.line_to_char(row);
+    let line = rope.line(row);
+    let column = line
+      .try_char_to_byte(relative_char_idx)
+      .unwrap_or(line.len_bytes());
+    tree_sitter::Point { row, column }
+  }
 }
 
 pub fn make_input_edit_by_delete(
