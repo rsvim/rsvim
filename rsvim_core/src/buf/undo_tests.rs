@@ -957,32 +957,32 @@ mod tests_buffer_editing {
       let buf_eol = buf.options().end_of_line();
       let after_payload = buf.text().rope().to_string();
       assert_eq!(after_payload, format!("HelloWorld{}", buf_eol));
+      let mut rope = buf.text().rope().clone();
 
       {
-        let mut rope1 = buf.text().rope().clone();
-        buf.undo_mut().undo(3, &mut rope1).unwrap();
-        let before_payload1 = rope1.to_string();
+        buf.undo_mut().undo(3, &mut rope).unwrap();
+        let before_payload1 = rope.to_string();
         assert_eq!(before_payload1, format!("Hello, World{}", buf_eol));
       }
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 3);
-        buf.undo_mut().undo(2, &mut rope1).unwrap();
-        let before_payload2 = rope1.to_string();
+        buf.undo_mut().undo(2, &mut rope).unwrap();
+        let before_payload2 = rope.to_string();
         assert_eq!(before_payload2, format!("Hello, {}", buf_eol));
       }
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 2);
-        buf.undo_mut().undo(1, &mut rope1).unwrap();
-        let before_payload3 = rope1.to_string();
+        buf.undo_mut().undo(1, &mut rope).unwrap();
+        let before_payload3 = rope.to_string();
         assert_eq!(before_payload3, format!("Hello{}", buf_eol));
       }
 
       {
         debug_assert_eq!(buf.undo().undo_stack().len(), 1);
-        buf.undo_mut().undo(0, &mut rope1).unwrap();
-        let before_payload4 = rope1.to_string();
+        buf.undo_mut().undo(0, &mut rope).unwrap();
+        let before_payload4 = rope.to_string();
         assert_eq!(before_payload4, format!("{}", buf_eol));
       }
     }
