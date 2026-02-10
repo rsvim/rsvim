@@ -125,8 +125,9 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
+      let buf_eol = buf.options().end_of_line();
       let payload = buf.text().rope().to_string();
-      assert_eq!("Hello, World\n", &payload);
+      assert_eq!(format!("Hello, World{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
@@ -217,8 +218,9 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
+      let buf_eol = buf.options().end_of_line();
       let payload = buf.text().rope().to_string();
-      assert_eq!("HelloWorld\n", &payload);
+      assert_eq!(format!("HelloWorld{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
@@ -301,8 +303,9 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
+      let buf_eol = buf.options().end_of_line();
       let payload = buf.text().rope().to_string();
-      assert_eq!("use std::sync::Arc;\n", &payload);
+      assert_eq!(format!("use std::sync::Arc;{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
@@ -444,10 +447,13 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
+      let buf_eol = buf.options().end_of_line();
       let payload = buf.text().rope().to_string();
       assert_eq!(
-        "use std::sync::Arc;\nfn main() {\n  println!(\"Hello, World\");\n}\n",
-        &payload
+        format!(
+          "use std::sync::Arc;{buf_eol}fn main() {{{buf_eol}  println!(\"Hello, World\");{buf_eol}}}{buf_eol}"
+        ),
+        payload
       );
       let buf_editing_version = buf.editing_version();
       let syn_editing_version =
