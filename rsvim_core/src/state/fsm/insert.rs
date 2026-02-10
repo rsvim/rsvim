@@ -242,29 +242,34 @@ impl Insert {
     );
     let cursor_absolute_end_char_idx =
       cursor_absolute_char_idx + payload.chars().count();
-    buffer.undo_mut().current_mut().insert(undo::Insert {
-      payload: payload.clone(),
-      char_idx_before: cursor_absolute_char_idx,
-      char_idx_after: cursor_absolute_end_char_idx,
-    });
-    let syn_edit_input = syntax::make_input_edit_by_insert(
+    let syn_insert = syntax::make_input_edit_by_insert(
       &buffer,
       cursor_absolute_char_idx,
       cursor_absolute_end_char_idx,
     );
 
-    let (_cursor_line_idx_after, _cursor_char_idx_after) =
+    let (cursor_line_idx_after, cursor_char_idx_after) =
       cursor_ops::cursor_insert(
         &mut tree,
         current_window_id,
         buffer.text_mut(),
         payload.clone(),
       );
+    let cursor_absolute_char_idx_after = buffer
+      .text()
+      .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after);
+    buffer.undo_mut().current_mut().insert(undo::Insert {
+      payload: payload.clone(),
+      start_char: cursor_absolute_char_idx,
+      end_char: cursor_absolute_end_char_idx,
+      cursor_char_idx_before: cursor_absolute_char_idx,
+      cursor_char_idx_after: cursor_absolute_char_idx_after,
+    });
     buffer.increase_editing_version();
     debug_assert_eq!(
       buffer
         .text()
-        .get_char_idx_1d(_cursor_line_idx_after, _cursor_char_idx_after),
+        .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
@@ -283,10 +288,10 @@ impl Insert {
     let rope = buffer.text().rope().clone();
     let editing_version = buffer.editing_version();
     if let Some(syn) = buffer.syntax_mut() {
-      debug_assert!(syn_edit_input.is_some());
+      debug_assert!(syn_insert.is_some());
       syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
         payload: rope,
-        input: syn_edit_input.unwrap(),
+        input: syn_insert.unwrap(),
         version: editing_version,
       }));
       msg::send_to_master(
