@@ -32,10 +32,10 @@ pub struct Insert {
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Absolute char idx before delete.
+  /// Absolute char idx of start delete position.
   pub char_idx_before: usize,
 
-  /// Absolute char idx after delete.
+  /// Absolute char idx of end delete position.
   pub char_idx_after: usize,
 }
 
