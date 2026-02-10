@@ -72,7 +72,7 @@ mod tests_buffer_editing {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn insert1() -> IoResult<()> {
+  async fn rust_error1() -> IoResult<()> {
     test_log_init();
 
     let src: &str = r#""#;
@@ -142,7 +142,7 @@ mod tests_buffer_editing {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn delete1() -> IoResult<()> {
+  async fn rust_error2() -> IoResult<()> {
     test_log_init();
 
     let src: &str = r#""#;
