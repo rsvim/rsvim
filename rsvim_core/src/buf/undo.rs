@@ -37,6 +37,12 @@ pub struct Delete {
 
   /// Absolute char idx of end delete position.
   pub end_char: usize,
+
+  /// Cursor absolute char idx before delete.
+  pub cursor_char_idx_before: usize,
+
+  /// Cursor absolute char idx after delete.
+  pub cursor_char_idx_after: usize,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
