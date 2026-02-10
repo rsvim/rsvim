@@ -121,7 +121,7 @@ impl Insert {
       let cursor_char_idx = cursor_viewport.char_idx();
       let cursor_absolute_char_idx = buffer
         .text()
-        .get_absolute_char_idx(cursor_line_idx, cursor_char_idx);
+        .to_absolute_char_idx(cursor_line_idx, cursor_char_idx);
       let payload = buffer
         .text()
         .rope()
@@ -136,14 +136,14 @@ impl Insert {
             absolute_char_idx_range.end,
             buffer
               .text()
-              .get_absolute_char_idx(cursor_line_idx, cursor_char_idx)
+              .to_absolute_char_idx(cursor_line_idx, cursor_char_idx)
           );
         } else {
           debug_assert_eq!(
             absolute_char_idx_range.start,
             buffer
               .text()
-              .get_absolute_char_idx(cursor_line_idx, cursor_char_idx)
+              .to_absolute_char_idx(cursor_line_idx, cursor_char_idx)
           );
         }
       }
@@ -161,7 +161,7 @@ impl Insert {
         .unwrap();
       let cursor_absolute_char_idx_after = buffer
         .text()
-        .get_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
+        .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
       buffer.undo_mut().current_mut().delete(undo::Delete {
         payload,
         start_char: absolute_char_idx_range.start,
@@ -173,7 +173,7 @@ impl Insert {
       debug_assert_eq!(
         buffer
           .text()
-          .get_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
+          .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
         absolute_char_idx_range.start
       );
 
@@ -255,7 +255,7 @@ impl Insert {
       );
     let cursor_absolute_char_idx_after = buffer
       .text()
-      .get_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
+      .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
     buffer.undo_mut().current_mut().insert(undo::Insert {
       payload: payload.clone(),
       start_char: cursor_absolute_char_idx,
@@ -267,7 +267,7 @@ impl Insert {
     debug_assert_eq!(
       buffer
         .text()
-        .get_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
+        .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,

@@ -261,7 +261,7 @@ impl Normal {
           );
         let cursor_absolute_char_idx_after = buffer
           .text()
-          .get_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
+          .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
         buffer.undo_mut().current_mut().insert(undo::Insert {
           payload: eol.clone(),
           start_char: cursor_absolute_char_idx,
@@ -271,10 +271,9 @@ impl Normal {
         });
         buffer.increase_editing_version();
         debug_assert_eq!(
-          buffer.text().get_absolute_char_idx(
-            cursor_line_idx_after,
-            cursor_char_idx_after
-          ),
+          buffer
+            .text()
+            .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
           cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,
