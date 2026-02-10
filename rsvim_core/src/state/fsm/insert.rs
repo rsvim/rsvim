@@ -169,7 +169,6 @@ impl Insert {
         cursor_char_idx_before: cursor_absolute_char_idx,
         cursor_char_idx_after: cursor_absolute_char_idx_after,
       });
-
       buffer.increase_editing_version();
       debug_assert_eq!(
         buffer
