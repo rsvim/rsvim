@@ -26,7 +26,7 @@ pub struct Insert {
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Cursor's absolute char idx before doing deletion.
+  /// Absolute char idx before doing deletion.
   pub char_idx_before: usize,
 
   /// Cursor's absolute char idx after doing deletion.
