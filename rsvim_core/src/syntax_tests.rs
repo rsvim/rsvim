@@ -5,11 +5,7 @@ use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
-use ropey::Rope;
-use ropey::RopeBuilder;
-use std::ops::Range;
 use std::time::Duration;
 
 #[cfg(test)]
