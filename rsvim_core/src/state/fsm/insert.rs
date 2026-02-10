@@ -244,8 +244,8 @@ impl Insert {
       cursor_absolute_char_idx + payload.chars().count();
     buffer.undo_mut().current_mut().insert(undo::Insert {
       payload: payload.clone(),
-      char_idx: cursor_absolute_char_idx,
-      end_char_idx: cursor_absolute_end_char_idx,
+      start_char: cursor_absolute_char_idx,
+      end_char: cursor_absolute_end_char_idx,
     });
     let syn_edit_input = syntax::make_input_edit_by_insert(
       &buffer,
