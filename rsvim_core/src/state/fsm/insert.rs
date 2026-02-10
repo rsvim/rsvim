@@ -126,7 +126,7 @@ impl Insert {
         .text()
         .rope()
         .chars_at(absolute_char_idx_range.start)
-        .take(absolute_char_idx_range.end - absolute_char_idx_range.start)
+        .take(absolute_char_idx_range.len())
         .collect::<CompactString>();
 
       if cfg!(debug_assertions) {
