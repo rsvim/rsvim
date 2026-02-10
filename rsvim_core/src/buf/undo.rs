@@ -123,24 +123,17 @@ impl Current {
       last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
-      && last.direction() == DeleteDirection::ToRight
-      && op.direction() == DeleteDirection::ToRight
       && op.start_char == last.end_char
     {
-      // Merge 2 deletions to right
+      // Merge 2 deletions
       trace!("last-2:{:?}, op:{:?}", last, op);
-      last.payload.push_str(&op.payload);
-      last.end_char = op.end_char;
+      last.payload.insert_str(0, &op.payload);
+      last.start_char = op.start_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
-      && last.payload == op.payload
-      && ((last.start_char == op.end_char
-        && last.end_char == op.start_char
-        && op.direction() == DeleteDirection::ToLeft)
-        || (last.start_char == op.start_char
-          && last.start_char == op.end_char
-          && op.direction() == DeleteDirection::ToRight))
+      && last.payload == op.payload && (last.start_char == op.start_char && last.start_char == op.end_char )
     {
       // Offset the effect of 1 insertion and 1 deletion
       trace!("last-3:{:?}, op:{:?}", last, op);
@@ -172,6 +165,7 @@ impl Current {
       last.payload.push_str(&op.payload);
       last.end_char = op.end_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else {
       trace!("last-2, op:{:?}", op);
       self.records.push(Record {
