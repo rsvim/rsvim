@@ -625,6 +625,127 @@ mod tests_undo {
   }
 
   #[test]
+  fn delete4() {
+    let mut undo = Undo::new(MAX_SIZE);
+    let payload1 = "Hello, World!";
+    undo.current_mut().insert(Insert {
+      payload: payload1.to_compact_string(),
+      start_char: 0,
+      end_char: payload1.chars().count(),
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+
+    let actual = undo.current();
+    assert_eq!(actual.records().len(), 1);
+    assert_insert(
+      &undo,
+      0,
+      Insert {
+        payload: payload1.to_compact_string(),
+        start_char: 0,
+        end_char: payload1.chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
+      },
+    );
+
+    undo.current_mut().delete(Delete {
+      payload: "o".to_compact_string(),
+      start_char: 8,
+      end_char: 9,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+    undo.current_mut().delete(Delete {
+      payload: "r".to_compact_string(),
+      start_char: 9,
+      end_char: 10,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+
+    let actual = undo.current();
+    assert_eq!(actual.records().len(), 2);
+
+    assert_insert(
+      &undo,
+      0,
+      Insert {
+        payload: payload1.to_compact_string(),
+        start_char: 0,
+        end_char: payload1.chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
+      },
+    );
+    assert_delete(
+      &undo,
+      1,
+      Delete {
+        payload: "or".to_compact_string(),
+        start_char: 8,
+        end_char: 10,
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
+      },
+    );
+
+    undo.current_mut().delete(Delete {
+      payload: "l".to_compact_string(),
+      start_char: 10,
+      end_char: 11,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+    undo.current_mut().delete(Delete {
+      payload: "d".to_compact_string(),
+      start_char: 11,
+      end_char: 12,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+    undo.current_mut().delete(Delete {
+      payload: "!".to_compact_string(),
+      start_char: 12,
+      end_char: 13,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
+    });
+
+    let actual = undo.current();
+    assert_eq!(actual.records().len(), 2);
+
+    assert_insert(
+      &undo,
+      0,
+      Insert {
+        payload: payload1.to_compact_string(),
+        start_char: 0,
+        end_char: payload1.chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
+      },
+    );
+    assert_delete(
+      &undo,
+      1,
+      Delete {
+        payload: "orld!".to_compact_string(),
+        start_char: 8,
+        end_char: 13,
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
+      },
+    );
+
+    undo.commit();
+
+    let actual = undo.current();
+    assert!(actual.records().is_empty());
+  }
+
+  #[test]
   fn revert1() {
     test_log_init();
 
