@@ -446,7 +446,7 @@ mod tests_buffer_editing {
       let buf = lock!(buf);
       let payload = buf.text().rope().to_string();
       assert_eq!(
-        "use std::sync::Arc;\nfn main() {\nprintln!(\"\");\n}\n",
+        "use std::sync::Arc;\nfn main() {\n  println!(\"Hello, World\");\n}\n",
         &payload
       );
       let buf_editing_version = buf.editing_version();
