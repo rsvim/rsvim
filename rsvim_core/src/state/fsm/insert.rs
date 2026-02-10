@@ -277,7 +277,7 @@ impl Insert {
       )
     );
     debug_assert_eq!(
-      cursor_absolute_char_idx_after + payload.chars().count(),
+      cursor_absolute_char_idx + payload.chars().count(),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
