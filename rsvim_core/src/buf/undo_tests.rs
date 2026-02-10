@@ -547,7 +547,7 @@ mod tests_undo {
     undo.current_mut().delete(Delete {
       payload: ", ".to_compact_string(),
       start_char: 5,
-      end_char: 5,
+      end_char: 7,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
@@ -572,7 +572,7 @@ mod tests_undo {
       Delete {
         payload: ", ".to_compact_string(),
         start_char: 5,
-        end_char: 5,
+        end_char: 7,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
@@ -581,7 +581,7 @@ mod tests_undo {
     undo.current_mut().delete(Delete {
       payload: "loWo".to_compact_string(),
       start_char: 3,
-      end_char: 3,
+      end_char: 7,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
@@ -606,7 +606,7 @@ mod tests_undo {
       Delete {
         payload: ", ".to_compact_string(),
         start_char: 5,
-        end_char: 5,
+        end_char: 7,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
@@ -617,7 +617,7 @@ mod tests_undo {
       Delete {
         payload: "loWo".to_compact_string(),
         start_char: 3,
-        end_char: 3,
+        end_char: 7,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
