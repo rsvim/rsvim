@@ -451,7 +451,7 @@ fn _update_viewport_after_text_changed(
 
   let updated_viewport =
     _update_viewport(tree, id, text, start_line, start_column);
-  trace!("after updated_viewport:{:?}", updated_viewport);
+  // trace!("after updated_viewport:{:?}", updated_viewport);
 
   raw_cursor_viewport_move_to(
     tree,
