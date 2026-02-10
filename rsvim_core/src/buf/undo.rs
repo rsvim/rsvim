@@ -234,11 +234,7 @@ impl Undo {
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
-          trace!(
-            "rope.len_chars:{:?}, insert.char_idx_after:{:?}",
-            rope.len_chars(),
-            insert.end_char
-          );
+          trace!("rope.len_chars:{:?}, insert:{:?}", rope.len_chars(), insert);
           debug_assert!(rope.len_chars() >= insert.end_char);
           if cfg!(debug_assertions) {
             let range: std::ops::Range<usize> =
@@ -253,13 +249,9 @@ impl Undo {
           rope.remove(insert.start_char..insert.end_char);
         }
         Operation::Delete(delete) => {
-          trace!(
-            "rope.len_chars:{:?}, delete.char_idx_after:{:?}",
-            rope.len_chars(),
-            delete.end_char
-          );
-          debug_assert!(rope.len_chars() >= delete.end_char);
-          rope.insert(delete.end_char, &delete.payload);
+          trace!("rope.len_chars:{:?}, delete:{:?}", rope.len_chars(), delete);
+          debug_assert!(rope.len_chars() >= delete.start_char);
+          rope.insert(delete.start_char, &delete.payload);
         }
       }
       i -= 1;

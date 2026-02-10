@@ -790,7 +790,7 @@ mod tests_undo {
     text1.remove(5..7);
     undo.current_mut().delete(Delete {
       start_char: 5,
-      end_char: 5,
+      end_char: 7,
       payload: payload2.to_compact_string(),
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
@@ -812,7 +812,7 @@ mod tests_undo {
     text1.remove(10..11);
     undo.current_mut().delete(Delete {
       start_char: 10,
-      end_char: 10,
+      end_char: 11,
       payload: payload4.to_compact_string(),
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
@@ -901,8 +901,8 @@ mod tests_undo {
     assert_rope(&text1, 5..7, payload4);
     text1.remove(5..7);
     undo.current_mut().delete(Delete {
-      start_char: 7,
-      end_char: 5,
+      start_char: 5,
+      end_char: 7,
       payload: payload4.to_compact_string(),
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
