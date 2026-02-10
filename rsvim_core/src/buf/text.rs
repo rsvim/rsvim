@@ -612,7 +612,11 @@ impl Text {
 
   /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute
   /// `char_idx`.
-  pub fn get_char_idx_1d(&self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn get_absolute_char_idx(
+    &self,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> usize {
     // debug_assert!(!payload.is_empty());
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
@@ -679,7 +683,7 @@ impl Text {
     char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
+    let absolute_char_idx = self.get_absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
       self.get_line_and_char_idx_2d(absolute_char_idx).0,
       line_idx
@@ -785,7 +789,7 @@ impl Text {
     }
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let absolute_char_idx = self.get_char_idx_1d(line_idx, char_idx);
+    let absolute_char_idx = self.get_absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
       self.get_line_and_char_idx_2d(absolute_char_idx).0,
       line_idx
