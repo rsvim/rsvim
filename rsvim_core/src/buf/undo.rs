@@ -122,10 +122,7 @@ impl Current {
   }
 
   pub fn delete(&mut self, op: Delete) {
-    debug_assert!(
-      op.end_char == op.start_char
-        || op.start_char == op.end_char + op.payload.chars().count()
-    );
+    debug_assert!(op.start_char + op.payload.chars().count() == op.end_char);
 
     if op.payload.is_empty() {
       return;
