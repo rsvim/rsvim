@@ -53,7 +53,7 @@ mod tests_undo {
     for (i, c) in payload.chars().enumerate() {
       undo.current_mut().insert(Insert {
         payload: c.to_compact_string(),
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + c.to_compact_string().chars().count(),
       });
     }
@@ -64,7 +64,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload.to_compact_string().chars().count(),
       },
     );
@@ -81,7 +81,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       undo.current_mut().insert(Insert {
         payload: c.to_compact_string(),
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
       });
     }
@@ -92,7 +92,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.to_compact_string().chars().count(),
       },
     );
@@ -100,7 +100,7 @@ mod tests_undo {
     let payload2 = "World!";
     for (i, c) in payload2.chars().enumerate() {
       undo.current_mut().insert(Insert {
-        char_idx_before: i + 3,
+        char_idx: i + 3,
         char_idx_after: i + 4,
         payload: c.to_compact_string(),
       });
@@ -112,7 +112,7 @@ mod tests_undo {
       0,
       Insert {
         payload: "Hello, ".to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: "Hello, ".chars().count(),
       },
     );
@@ -121,7 +121,7 @@ mod tests_undo {
       1,
       Insert {
         payload: payload2.to_compact_string(),
-        char_idx_before: 3,
+        char_idx: 3,
         char_idx_after: 3 + "World!".chars().count(),
       },
     );
@@ -129,9 +129,7 @@ mod tests_undo {
     let payload3 = "汤姆(Tom)?";
     for (i, c) in payload3.chars().enumerate() {
       undo.current_mut().insert(Insert {
-        char_idx_before: i
-          + payload1.chars().count()
-          + payload2.chars().count(),
+        char_idx: i + payload1.chars().count() + payload2.chars().count(),
         char_idx_after: i
           + payload1.chars().count()
           + payload2.chars().count()
@@ -146,7 +144,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -155,7 +153,7 @@ mod tests_undo {
       1,
       Insert {
         payload: payload2.to_compact_string(),
-        char_idx_before: 3,
+        char_idx: 3,
         char_idx_after: 3 + payload2.chars().count(),
       },
     );
@@ -164,7 +162,7 @@ mod tests_undo {
       2,
       Insert {
         payload: payload3.to_compact_string(),
-        char_idx_before: payload1.chars().count() + payload2.chars().count(),
+        char_idx: payload1.chars().count() + payload2.chars().count(),
         char_idx_after: payload1.chars().count()
           + payload2.chars().count()
           + payload3.chars().count(),
@@ -175,7 +173,7 @@ mod tests_undo {
     for (i, c) in payload4.chars().enumerate() {
       undo.current_mut().insert(Insert {
         payload: c.to_compact_string(),
-        char_idx_before: i + 100,
+        char_idx: i + 100,
         char_idx_after: i + 100 + 1,
       });
     }
@@ -186,7 +184,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -195,7 +193,7 @@ mod tests_undo {
       1,
       Insert {
         payload: payload2.to_compact_string(),
-        char_idx_before: 3,
+        char_idx: 3,
         char_idx_after: 3 + payload2.chars().count(),
       },
     );
@@ -204,7 +202,7 @@ mod tests_undo {
       2,
       Insert {
         payload: payload3.to_compact_string(),
-        char_idx_before: payload1.chars().count() + payload2.chars().count(),
+        char_idx: payload1.chars().count() + payload2.chars().count(),
         char_idx_after: payload1.chars().count()
           + payload2.chars().count()
           + payload3.chars().count(),
@@ -215,7 +213,7 @@ mod tests_undo {
       3,
       Insert {
         payload: payload4.to_compact_string(),
-        char_idx_before: 100,
+        char_idx: 100,
         char_idx_after: 100 + payload4.chars().count(),
       },
     );
@@ -233,7 +231,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       undo.current_mut().insert(Insert {
         payload: c.to_compact_string(),
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
       });
     }
@@ -245,7 +243,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -263,7 +261,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -280,7 +278,7 @@ mod tests_undo {
     let payload2 = "Tom（汤姆） and Jerry（杰瑞）。";
     undo.current_mut().insert(Insert {
       payload: payload2.to_compact_string(),
-      char_idx_before: 12,
+      char_idx: 12,
       char_idx_after: 12 + payload2.chars().count(),
     });
 
@@ -291,7 +289,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -309,7 +307,7 @@ mod tests_undo {
       2,
       Insert {
         payload: payload2.to_compact_string(),
-        char_idx_before: 12,
+        char_idx: 12,
         char_idx_after: 12 + payload2.chars().count(),
       },
     );
@@ -328,7 +326,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -355,7 +353,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       undo.current_mut().insert(Insert {
         payload: c.to_compact_string(),
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
       });
     }
@@ -367,7 +365,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -396,7 +394,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -424,7 +422,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -450,7 +448,7 @@ mod tests_undo {
     let payload1 = "Hello, World!";
     undo.current_mut().insert(Insert {
       payload: payload1.to_compact_string(),
-      char_idx_before: 0,
+      char_idx: 0,
       char_idx_after: payload1.chars().count(),
     });
 
@@ -461,7 +459,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -480,7 +478,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -508,7 +506,7 @@ mod tests_undo {
       0,
       Insert {
         payload: payload1.to_compact_string(),
-        char_idx_before: 0,
+        char_idx: 0,
         char_idx_after: payload1.chars().count(),
       },
     );
@@ -543,7 +541,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       text1.insert_char(i, c);
       undo.current_mut().insert(Insert {
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
         payload: c.to_compact_string(),
       });
@@ -552,7 +550,7 @@ mod tests_undo {
     let payload2 = ", ";
     text1.insert(payload1.len(), payload2);
     undo.current_mut().insert(Insert {
-      char_idx_before: payload1.len(),
+      char_idx: payload1.len(),
       char_idx_after: payload1.len() + payload2.len(),
       payload: payload2.to_compact_string(),
     });
@@ -560,7 +558,7 @@ mod tests_undo {
     let payload3 = "World!";
     text1.insert(payload1.len() + payload2.len(), payload3);
     undo.current_mut().insert(Insert {
-      char_idx_before: payload1.len() + payload2.len(),
+      char_idx: payload1.len() + payload2.len(),
       char_idx_after: payload1.len() + payload2.len() + payload3.len(),
       payload: payload3.to_compact_string(),
     });
@@ -588,7 +586,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       text1.insert_char(i, c);
       undo.current_mut().insert(Insert {
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
         payload: c.to_compact_string(),
       });
@@ -607,7 +605,7 @@ mod tests_undo {
     assert_eq!(payload1.len() - payload2.len(), 5);
     text1.insert(5, payload3);
     undo.current_mut().insert(Insert {
-      char_idx_before: 5,
+      char_idx: 5,
       char_idx_after: 5 + payload3.len(),
       payload: payload3.to_compact_string(),
     });
@@ -671,7 +669,7 @@ mod tests_undo {
     for (i, c) in payload1.chars().enumerate() {
       text1.insert_char(i, c);
       undo.current_mut().insert(Insert {
-        char_idx_before: i,
+        char_idx: i,
         char_idx_after: i + 1,
         payload: c.to_compact_string(),
       });
@@ -690,7 +688,7 @@ mod tests_undo {
     assert_eq!(payload1.len() - payload2.len(), 5);
     text1.insert(5, payload3);
     undo.current_mut().insert(Insert {
-      char_idx_before: 5,
+      char_idx: 5,
       char_idx_after: 5 + payload3.len(),
       payload: payload3.to_compact_string(),
     });
@@ -753,7 +751,7 @@ mod tests_undo {
     let payload1 = "Hello";
     text1.insert(0, payload1);
     undo.current_mut().insert(Insert {
-      char_idx_before: 0,
+      char_idx: 0,
       char_idx_after: payload1.chars().count(),
       payload: payload1.to_compact_string(),
     });
@@ -762,7 +760,7 @@ mod tests_undo {
     let payload2 = ", ";
     text1.insert(5, payload2);
     undo.current_mut().insert(Insert {
-      char_idx_before: 5,
+      char_idx: 5,
       char_idx_after: 5 + payload2.chars().count(),
       payload: payload2.to_compact_string(),
     });
@@ -771,7 +769,7 @@ mod tests_undo {
     let payload3 = "World";
     text1.insert(7, payload3);
     undo.current_mut().insert(Insert {
-      char_idx_before: 7,
+      char_idx: 7,
       char_idx_after: 7 + payload3.len(),
       payload: payload3.to_compact_string(),
     });
