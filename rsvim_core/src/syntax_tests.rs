@@ -1,5 +1,6 @@
 use super::syntax::*;
 use crate::cli::CliOptions;
+use crate::cli::SpecialCliOptions;
 use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
@@ -99,11 +100,18 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("World".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(30)),
+      MockOperation::SleepFor(Duration::from_millis(100)),
     ];
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![Path::new("test1.rs").to_path_buf()],
+        false,
+      ),
+    );
 
     event_loop.initialize()?;
     event_loop
@@ -128,6 +136,113 @@ mod tests_buffer_editing {
       buf.undo_mut().undo(0, &mut revert_rope).unwrap();
       let before_payload = revert_rope.to_string();
       assert_eq!(before_payload, format!("{}", buf_eol));
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn delete1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Append,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Append,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("World".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      // Hello, World
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorDelete(-2)),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(30)),
+    ];
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![Path::new("test2.rs").to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buf = lock!(event_loop.buffers)
+        .first_key_value()
+        .unwrap()
+        .1
+        .clone();
+      let mut buf = lock!(buf);
+      info!("undo_stack:{:?}", buf.undo().undo_stack());
+
+      debug_assert_eq!(buf.undo().undo_stack().len(), 4);
+      let buf_eol = buf.options().end_of_line();
+      let after_payload = buf.text().rope().to_string();
+      assert_eq!(after_payload, format!("HelloWorld{}", buf_eol));
+      let mut rope = buf.text().rope().clone();
+
+      {
+        buf.undo_mut().undo(3, &mut rope).unwrap();
+        let before_payload1 = rope.to_string();
+        assert_eq!(before_payload1, format!("Hello, World{}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 3);
+        buf.undo_mut().undo(2, &mut rope).unwrap();
+        let before_payload2 = rope.to_string();
+        assert_eq!(before_payload2, format!("Hello, {}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 2);
+        buf.undo_mut().undo(1, &mut rope).unwrap();
+        let before_payload3 = rope.to_string();
+        assert_eq!(before_payload3, format!("Hello{}", buf_eol));
+      }
+
+      {
+        debug_assert_eq!(buf.undo().undo_stack().len(), 1);
+        buf.undo_mut().undo(0, &mut rope).unwrap();
+        let before_payload4 = rope.to_string();
+        assert_eq!(before_payload4, format!("{}", buf_eol));
+      }
     }
 
     Ok(())
