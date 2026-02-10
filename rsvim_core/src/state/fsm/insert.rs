@@ -1,7 +1,6 @@
 //! The insert mode.
 
 use crate::buf::undo;
-use crate::buf::undo::Insert;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
@@ -261,14 +260,15 @@ impl Insert {
         buffer.text_mut(),
         payload.clone(),
       );
+    let cursor_absolute_char_idx_after = buffer
+      .text()
+      .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after);
     buffer.undo_mut().current_mut().insert(undo::Insert {
       payload: undo_insert.0,
       start_char: undo_insert.1,
       end_char: undo_insert.2,
       cursor_char_idx_before: undo_insert.1,
-      cursor_char_idx_after: buffer
-        .text()
-        .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after),
+      cursor_char_idx_after: cursor_absolute_char_idx_after,
     });
     buffer.increase_editing_version();
     debug_assert_eq!(
@@ -282,7 +282,7 @@ impl Insert {
       )
     );
     debug_assert_eq!(
-      cursor_absolute_char_idx + payload.chars().count(),
+      cursor_absolute_char_idx_after + payload.chars().count(),
       cursor_ops::cursor_absolute_char_idx(
         &tree,
         current_window_id,
