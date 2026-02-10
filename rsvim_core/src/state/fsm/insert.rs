@@ -116,38 +116,29 @@ impl Insert {
     if let Some(absolute_char_idx_range) = absolute_char_idx_range
       && !absolute_char_idx_range.is_empty()
     {
+      let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
+      let cursor_line_idx = cursor_viewport.line_idx();
+      let cursor_char_idx = cursor_viewport.char_idx();
+      let cursor_absolute_char_idx = buffer
+        .text()
+        .get_char_idx_1d(cursor_line_idx, cursor_char_idx);
       let payload = buffer
         .text()
         .rope()
         .chars_at(absolute_char_idx_range.start)
-        .take(absolute_char_idx_range.len())
+        .take(absolute_char_idx_range.end - absolute_char_idx_range.start)
         .collect::<CompactString>();
 
-      debug_assert_ne!(n, 0);
-      if n < 0 {
-        if cfg!(debug_assertions) {
-          let cursor_viewport =
-            tree.editable_cursor_viewport(current_window_id);
-          let cursor_line_idx = cursor_viewport.line_idx();
-          let cursor_char_idx = cursor_viewport.char_idx();
+      if cfg!(debug_assertions) {
+        debug_assert_ne!(n, 0);
+        if n < 0 {
           debug_assert_eq!(
             absolute_char_idx_range.end,
             buffer
               .text()
               .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
-        }
-        buffer.undo_mut().current_mut().delete(undo::Delete {
-          payload: payload.clone(),
-          start_char: absolute_char_idx_range.end,
-          end_char: absolute_char_idx_range.start,
-        });
-      } else {
-        if cfg!(debug_assertions) {
-          let cursor_viewport =
-            tree.editable_cursor_viewport(current_window_id);
-          let cursor_line_idx = cursor_viewport.line_idx();
-          let cursor_char_idx = cursor_viewport.char_idx();
+        } else {
           debug_assert_eq!(
             absolute_char_idx_range.start,
             buffer
@@ -155,38 +146,45 @@ impl Insert {
               .get_char_idx_1d(cursor_line_idx, cursor_char_idx)
           );
         }
-        buffer.undo_mut().current_mut().delete(undo::Delete {
-          payload: payload.clone(),
-          start_char: absolute_char_idx_range.start,
-          end_char: absolute_char_idx_range.start,
-        });
-      };
-      let syn_edit_input =
+      }
+
+      let syn_delete =
         syntax::make_input_edit_by_delete(&buffer, &absolute_char_idx_range);
 
-      let _cursor_position_after = cursor_ops::cursor_delete(
-        &mut tree,
-        current_window_id,
-        buffer.text_mut(),
-        n,
-      );
+      let (cursor_line_idx_after, cursor_char_idx_after) =
+        cursor_ops::cursor_delete(
+          &mut tree,
+          current_window_id,
+          buffer.text_mut(),
+          n,
+        )
+        .unwrap();
+      let cursor_absolute_char_idx_after = buffer
+        .text()
+        .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after);
+      buffer.undo_mut().current_mut().delete(undo::Delete {
+        payload,
+        start_char: absolute_char_idx_range.start,
+        end_char: absolute_char_idx_range.end,
+        cursor_char_idx_before: cursor_absolute_char_idx,
+        cursor_char_idx_after: cursor_absolute_char_idx_after,
+      });
+
       buffer.increase_editing_version();
-      debug_assert!(_cursor_position_after.is_some());
       debug_assert_eq!(
-        buffer.text().get_char_idx_1d(
-          _cursor_position_after.unwrap().0,
-          _cursor_position_after.unwrap().1
-        ),
+        buffer
+          .text()
+          .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after),
         absolute_char_idx_range.start
       );
 
       let rope = buffer.text().rope().clone();
       let editing_version = buffer.editing_version();
       if let Some(syn) = buffer.syntax_mut() {
-        debug_assert!(syn_edit_input.is_some());
+        debug_assert!(syn_delete.is_some());
         syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
           payload: rope,
-          input: syn_edit_input.unwrap(),
+          input: syn_delete.unwrap(),
           version: editing_version,
         }));
         msg::send_to_master(
