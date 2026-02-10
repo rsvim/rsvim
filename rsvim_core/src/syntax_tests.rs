@@ -256,7 +256,7 @@ mod tests_buffer_editing {
         state_ops::GotoInsertModeVariant::Append,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text("nc::Arc".to_compact_string()),
+        state_ops::CursorInsertPayload::Text("nc::Arc;".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       // Hello, World
