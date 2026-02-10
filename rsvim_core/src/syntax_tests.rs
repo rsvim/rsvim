@@ -89,9 +89,11 @@ mod tests_buffer_editing {
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
       )),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
       )),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text("World".to_compact_string()),
       )),
@@ -128,12 +130,14 @@ mod tests_buffer_editing {
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
-        syn_tree
-          .as_ref()
-          .map(|t| t.root_node().to_string())
-          .unwrap_or("None".to_string())
+        syn_tree.as_ref().unwrap().root_node().to_string()
+      );
+      assert_eq!(
+        syn_tree.as_ref().unwrap().root_node().to_string(),
+        "(source_file (ERROR (identifier) (identifier)))"
       );
     }
 
@@ -160,6 +164,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
         state_ops::GotoInsertModeVariant::Append,
       )),
@@ -167,6 +172,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
         state_ops::GotoInsertModeVariant::Append,
       )),
@@ -174,6 +180,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("World".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       // Hello, World
       MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
@@ -213,12 +220,14 @@ mod tests_buffer_editing {
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
-        syn_tree
-          .as_ref()
-          .map(|t| t.root_node().to_string())
-          .unwrap_or("None".to_string())
+        syn_tree.as_ref().unwrap().root_node().to_string()
+      );
+      assert_eq!(
+        syn_tree.as_ref().unwrap().root_node().to_string(),
+        "(source_file (ERROR (identifier)))"
       );
     }
 
@@ -245,6 +254,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("use ".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
         state_ops::GotoInsertModeVariant::Append,
       )),
@@ -252,6 +262,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("std::sy".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
         state_ops::GotoInsertModeVariant::Append,
       )),
@@ -259,6 +270,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("nc::Arc;".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(100)),
       // Hello, World
       MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
       MockOperation::Operation(state_ops::Operation::GotoInsertMode(
@@ -298,12 +310,14 @@ mod tests_buffer_editing {
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
-        syn_tree
-          .as_ref()
-          .map(|t| t.root_node().to_string())
-          .unwrap_or("None".to_string())
+        syn_tree.as_ref().unwrap().root_node().to_string()
+      );
+      assert_eq!(
+        syn_tree.as_ref().unwrap().root_node().to_string(),
+        "(source_file (use_declaration argument: (scoped_identifier path: (scoped_identifier path: (identifier) name: (identifier)) name: (identifier))))"
       );
     }
 
