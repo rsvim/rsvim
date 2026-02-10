@@ -751,10 +751,10 @@ mod tests_undo {
     let mut text1 = RopeBuilder::new().finish();
 
     let payload1 = "Hello, ";
-    text1.insert(0, &payload1);
+    text1.insert(0, payload1);
     undo.current_mut().insert(Insert {
       char_idx_before: 0,
-      char_idx_after: 0 + payload1.chars().count(),
+      char_idx_after: payload1.chars().count(),
       payload: payload1.to_compact_string(),
     });
 
