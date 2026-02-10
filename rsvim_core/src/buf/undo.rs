@@ -204,16 +204,6 @@ pub struct Undo {
   __next_version: usize,
 }
 
-// impl Debug for UndoManager {
-//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//     f.debug_struct("UndoManager")
-//       .field("history.len", &self.history.len())
-//       .field("current", &self.current)
-//       .field("__next_version", &self.__next_version)
-//       .finish()
-//   }
-// }
-
 impl Undo {
   pub fn new(max_size: usize) -> Self {
     Self {
