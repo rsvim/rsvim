@@ -266,6 +266,11 @@ impl Undo {
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
         Operation::Delete(delete) => {
+          trace!(
+            "rope.len_chars:{:?}, delete.char_idx_after:{:?}",
+            rope.len_chars(),
+            delete.char_idx_after
+          );
           debug_assert!(rope.len_chars() <= delete.char_idx_after);
           rope.insert(delete.char_idx_after, &delete.payload);
         }
