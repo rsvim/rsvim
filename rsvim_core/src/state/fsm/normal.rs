@@ -264,6 +264,7 @@ impl Normal {
             buffer.text_mut(),
             eol.clone(),
           );
+        buffer.increase_editing_version();
         debug_assert_eq!(
           buffer
             .text()

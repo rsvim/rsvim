@@ -260,6 +260,7 @@ impl Insert {
         buffer.text_mut(),
         payload.clone(),
       );
+    buffer.increase_editing_version();
     debug_assert_eq!(
       buffer
         .text()

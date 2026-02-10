@@ -15,10 +15,10 @@ pub const START_VERSION: usize = 1;
 pub struct Insert {
   pub payload: CompactString,
 
-  /// Cursor's absolute char idx before doing insertion.
+  /// Absolute char idx before insert.
   pub char_idx_before: usize,
 
-  /// Cursor's absolute char idx after doing insertion.
+  /// Absolute char idx after insert.
   pub char_idx_after: usize,
 }
 
@@ -26,10 +26,10 @@ pub struct Insert {
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Cursor's absolute char idx before doing deletion.
+  /// Absolute char idx before delete.
   pub char_idx_before: usize,
 
-  /// Cursor's absolute char idx after doing deletion.
+  /// Absolute char idx after delete.
   pub char_idx_after: usize,
 }
 
@@ -204,16 +204,6 @@ pub struct Undo {
   __next_version: usize,
 }
 
-// impl Debug for UndoManager {
-//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//     f.debug_struct("UndoManager")
-//       .field("history.len", &self.history.len())
-//       .field("current", &self.current)
-//       .field("__next_version", &self.__next_version)
-//       .finish()
-//   }
-// }
-
 impl Undo {
   pub fn new(max_size: usize) -> Self {
     Self {
@@ -260,6 +250,11 @@ impl Undo {
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
+          trace!(
+            "rope.len_chars:{:?}, insert.char_idx_after:{:?}",
+            rope.len_chars(),
+            insert.char_idx_after
+          );
           debug_assert!(rope.len_chars() >= insert.char_idx_after);
           if cfg!(debug_assertions) {
             let range: std::ops::Range<usize> =
@@ -276,7 +271,12 @@ impl Undo {
           rope.remove(insert.char_idx_before..insert.char_idx_after);
         }
         Operation::Delete(delete) => {
-          debug_assert!(rope.len_chars() <= delete.char_idx_after);
+          trace!(
+            "rope.len_chars:{:?}, delete.char_idx_after:{:?}",
+            rope.len_chars(),
+            delete.char_idx_after
+          );
+          debug_assert!(rope.len_chars() >= delete.char_idx_after);
           rope.insert(delete.char_idx_after, &delete.payload);
         }
       }
