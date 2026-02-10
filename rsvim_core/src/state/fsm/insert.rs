@@ -242,11 +242,6 @@ impl Insert {
     );
     let cursor_absolute_end_char_idx =
       cursor_absolute_char_idx + payload.chars().count();
-    let undo_insert = (
-      payload.clone(),
-      cursor_absolute_char_idx,
-      cursor_absolute_end_char_idx,
-    );
     let syn_insert = syntax::make_input_edit_by_insert(
       &buffer,
       cursor_absolute_char_idx,
@@ -264,10 +259,10 @@ impl Insert {
       .text()
       .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after);
     buffer.undo_mut().current_mut().insert(undo::Insert {
-      payload: undo_insert.0,
-      start_char: undo_insert.1,
-      end_char: undo_insert.2,
-      cursor_char_idx_before: undo_insert.1,
+      payload: payload.clone(),
+      start_char: cursor_absolute_char_idx,
+      end_char: cursor_absolute_end_char_idx,
+      cursor_char_idx_before: cursor_absolute_char_idx,
       cursor_char_idx_after: cursor_absolute_char_idx_after,
     });
     buffer.increase_editing_version();
