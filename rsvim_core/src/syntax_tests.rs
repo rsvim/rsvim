@@ -230,7 +230,7 @@ mod tests_buffer_editing {
   async fn rust_ok1() -> IoResult<()> {
     test_log_init();
 
-    let src: &str = r#"use std::sync::Arc;"#;
+    let src: &str = r#""#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
@@ -242,14 +242,29 @@ mod tests_buffer_editing {
         state_ops::GotoInsertModeVariant::Keep,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
+        state_ops::CursorInsertPayload::Text("use ".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Append,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
+        state_ops::CursorInsertPayload::Text("std::sy".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Append,
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text("World".to_compact_string()),
+        state_ops::CursorInsertPayload::Text("nc::Arc".to_compact_string()),
       )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      // Hello, World
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((7, 0))),
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorDelete(-2)),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
       MockOperation::SleepFor(Duration::from_millis(500)),
     ];
@@ -259,7 +274,7 @@ mod tests_buffer_editing {
       terminal_rows,
       CliOptions::new(
         SpecialCliOptions::empty(),
-        vec![Path::new("test1.rs").to_path_buf()],
+        vec![Path::new("test2.rs").to_path_buf()],
         false,
       ),
     );
