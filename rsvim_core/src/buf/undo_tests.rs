@@ -785,8 +785,8 @@ mod tests_undo {
       char_idx_after: 5,
       payload: payload4.to_compact_string(),
     });
-
     undo.commit();
+
     info!("undo:{:?}", undo);
 
     let mut text2 = text1.clone();
