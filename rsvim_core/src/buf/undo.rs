@@ -33,10 +33,10 @@ pub struct Delete {
   pub payload: CompactString,
 
   /// Absolute char idx of start delete position.
-  pub char_idx_before: usize,
+  pub start_char: usize,
 
   /// Absolute char idx of end delete position.
-  pub char_idx_after: usize,
+  pub end_char: usize,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -47,8 +47,8 @@ pub enum DeleteDirection {
 
 impl Delete {
   fn direction(&self) -> DeleteDirection {
-    debug_assert!(self.char_idx_after <= self.char_idx_before);
-    if self.char_idx_after < self.char_idx_before {
+    debug_assert!(self.end_char <= self.start_char);
+    if self.end_char < self.start_char {
       DeleteDirection::ToLeft
     } else {
       DeleteDirection::ToRight
@@ -117,8 +117,8 @@ impl Current {
 
   pub fn delete(&mut self, op: Delete) {
     debug_assert!(
-      op.char_idx_after == op.char_idx_before
-        || op.char_idx_before == op.char_idx_after + op.payload.chars().count()
+      op.end_char == op.start_char
+        || op.start_char == op.end_char + op.payload.chars().count()
     );
 
     if op.payload.is_empty() {
@@ -129,32 +129,32 @@ impl Current {
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToLeft
       && op.direction() == DeleteDirection::ToLeft
-      && op.char_idx_before == last.char_idx_after
+      && op.start_char == last.end_char
     {
       // Merge 2 deletions to left
       trace!("last-1:{:?}, op:{:?}", last, op);
       last.payload.insert_str(0, &op.payload);
-      last.char_idx_after = op.char_idx_after;
+      last.end_char = op.end_char;
       last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
       && last.direction() == DeleteDirection::ToRight
       && op.direction() == DeleteDirection::ToRight
-      && op.char_idx_before == last.char_idx_after
+      && op.start_char == last.end_char
     {
       // Merge 2 deletions to right
       trace!("last-2:{:?}, op:{:?}", last, op);
       last.payload.push_str(&op.payload);
-      last.char_idx_after = op.char_idx_after;
+      last.end_char = op.end_char;
       last_record.moment = Instant::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
-      && ((last.start_char == op.char_idx_after
-        && last.end_char == op.char_idx_before
+      && ((last.start_char == op.end_char
+        && last.end_char == op.start_char
         && op.direction() == DeleteDirection::ToLeft)
-        || (last.start_char == op.char_idx_before
-          && last.start_char == op.char_idx_after
+        || (last.start_char == op.start_char
+          && last.start_char == op.end_char
           && op.direction() == DeleteDirection::ToRight))
     {
       // Offset the effect of 1 insertion and 1 deletion
@@ -275,10 +275,10 @@ impl Undo {
           trace!(
             "rope.len_chars:{:?}, delete.char_idx_after:{:?}",
             rope.len_chars(),
-            delete.char_idx_after
+            delete.end_char
           );
-          debug_assert!(rope.len_chars() >= delete.char_idx_after);
-          rope.insert(delete.char_idx_after, &delete.payload);
+          debug_assert!(rope.len_chars() >= delete.end_char);
+          rope.insert(delete.end_char, &delete.payload);
         }
       }
       i -= 1;
