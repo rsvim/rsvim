@@ -55,6 +55,8 @@ mod tests_undo {
         payload: c.to_compact_string(),
         start_char: i,
         end_char: i + c.to_compact_string().chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
       });
     }
     let actual = undo.current();
@@ -66,6 +68,8 @@ mod tests_undo {
         payload: payload.to_compact_string(),
         start_char: 0,
         end_char: payload.to_compact_string().chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
       },
     );
     undo.commit();
@@ -83,6 +87,8 @@ mod tests_undo {
         payload: c.to_compact_string(),
         start_char: i,
         end_char: i + 1,
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
       });
     }
     let actual = undo.current();
@@ -94,6 +100,8 @@ mod tests_undo {
         payload: payload1.to_compact_string(),
         start_char: 0,
         end_char: payload1.to_compact_string().chars().count(),
+        cursor_char_idx_before: 0,
+        cursor_char_idx_after: 0,
       },
     );
 
