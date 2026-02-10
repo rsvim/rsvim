@@ -139,8 +139,8 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_char_idx_range.end,
-          char_idx_after: absolute_char_idx_range.start,
+          delete_start_char_idx: absolute_char_idx_range.end,
+          new_char_idx: absolute_char_idx_range.start,
         });
       } else {
         if cfg!(debug_assertions) {
@@ -157,8 +157,8 @@ impl Insert {
         }
         buffer.undo_mut().current_mut().delete(undo::Delete {
           payload: payload.clone(),
-          char_idx_before: absolute_char_idx_range.start,
-          char_idx_after: absolute_char_idx_range.start,
+          delete_start_char_idx: absolute_char_idx_range.start,
+          new_char_idx: absolute_char_idx_range.start,
         });
       };
       let syn_edit_input =
@@ -244,8 +244,8 @@ impl Insert {
       cursor_absolute_char_idx + payload.chars().count();
     buffer.undo_mut().current_mut().insert(undo::Insert {
       payload: payload.clone(),
-      char_idx: cursor_absolute_char_idx,
-      new_char_idx: cursor_absolute_end_char_idx,
+      char_idx_before: cursor_absolute_char_idx,
+      char_idx_after: cursor_absolute_end_char_idx,
     });
     let syn_edit_input = syntax::make_input_edit_by_insert(
       &buffer,
