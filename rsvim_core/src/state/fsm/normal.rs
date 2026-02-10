@@ -261,7 +261,7 @@ impl Normal {
           );
         let cursor_absolute_char_idx_after = buffer
           .text()
-          .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after);
+          .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
         buffer.undo_mut().current_mut().insert(undo::Insert {
           payload: eol.clone(),
           start_char: cursor_absolute_char_idx,
@@ -273,7 +273,7 @@ impl Normal {
         debug_assert_eq!(
           buffer
             .text()
-            .get_char_idx_1d(cursor_line_idx_after, cursor_char_idx_after),
+            .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
           cursor_ops::cursor_absolute_char_idx(
             &tree,
             current_window_id,
@@ -289,9 +289,10 @@ impl Normal {
           )
         );
 
-        let rope = buffer.text().rope().clone();
-        let editing_version = buffer.editing_version();
-        if let Some(syn) = buffer.syntax_mut() {
+        if buffer.syntax().is_some() {
+          let rope = buffer.text().rope().clone();
+          let editing_version = buffer.editing_version();
+          let syn = buffer.syntax_mut().as_mut().unwrap();
           debug_assert!(syn_insert.is_some());
           syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
             payload: rope,

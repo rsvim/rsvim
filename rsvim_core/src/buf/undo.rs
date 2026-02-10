@@ -32,28 +32,17 @@ pub struct Insert {
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Absolute char idx before delete.
-  pub char_idx_before: usize,
+  /// Absolute char idx of start delete position.
+  pub start_char: usize,
 
-  /// Absolute char idx after delete.
-  pub char_idx_after: usize,
-}
+  /// Absolute char idx of end delete position.
+  pub end_char: usize,
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DeleteDirection {
-  ToLeft,
-  ToRight,
-}
+  /// Cursor absolute char idx before delete.
+  pub cursor_char_idx_before: usize,
 
-impl Delete {
-  fn direction(&self) -> DeleteDirection {
-    debug_assert!(self.char_idx_after <= self.char_idx_before);
-    if self.char_idx_after < self.char_idx_before {
-      DeleteDirection::ToLeft
-    } else {
-      DeleteDirection::ToRight
-    }
-  }
+  /// Cursor absolute char idx after delete.
+  pub cursor_char_idx_after: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -116,10 +105,7 @@ impl Current {
   }
 
   pub fn delete(&mut self, op: Delete) {
-    debug_assert!(
-      op.char_idx_after == op.char_idx_before
-        || op.char_idx_before == op.char_idx_after + op.payload.chars().count()
-    );
+    debug_assert!(op.start_char + op.payload.chars().count() == op.end_char);
 
     if op.payload.is_empty() {
       return;
@@ -127,35 +113,29 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
-      && last.direction() == DeleteDirection::ToLeft
-      && op.direction() == DeleteDirection::ToLeft
-      && op.char_idx_before == last.char_idx_after
+      && op.start_char == last.end_char
     {
-      // Merge 2 deletions to left
+      // Merge 2 deletions
       trace!("last-1:{:?}, op:{:?}", last, op);
-      last.payload.insert_str(0, &op.payload);
-      last.char_idx_after = op.char_idx_after;
+      last.payload.push_str(&op.payload);
+      last.end_char = op.end_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
-      && last.direction() == DeleteDirection::ToRight
-      && op.direction() == DeleteDirection::ToRight
-      && op.char_idx_before == last.char_idx_after
+      && op.end_char == last.start_char
     {
-      // Merge 2 deletions to right
+      // Merge 2 deletions
       trace!("last-2:{:?}, op:{:?}", last, op);
-      last.payload.push_str(&op.payload);
-      last.char_idx_after = op.char_idx_after;
+      last.payload.insert_str(0, &op.payload);
+      last.start_char = op.start_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
-      && ((last.start_char == op.char_idx_after
-        && last.end_char == op.char_idx_before
-        && op.direction() == DeleteDirection::ToLeft)
-        || (last.start_char == op.char_idx_before
-          && last.start_char == op.char_idx_after
-          && op.direction() == DeleteDirection::ToRight))
+      && last.start_char == op.start_char
+      && last.end_char == op.end_char
     {
       // Offset the effect of 1 insertion and 1 deletion
       trace!("last-3:{:?}, op:{:?}", last, op);
@@ -187,6 +167,7 @@ impl Current {
       last.payload.push_str(&op.payload);
       last.end_char = op.end_char;
       last_record.moment = Instant::now();
+      last_record.timestamp = jiff::Zoned::now();
     } else {
       trace!("last-2, op:{:?}", op);
       self.records.push(Record {
@@ -253,11 +234,7 @@ impl Undo {
       // Revert all editing operations on the passed `rope`.
       match &record.op {
         Operation::Insert(insert) => {
-          trace!(
-            "rope.len_chars:{:?}, insert.char_idx_after:{:?}",
-            rope.len_chars(),
-            insert.end_char
-          );
+          trace!("rope.len_chars:{:?}, insert:{:?}", rope.len_chars(), insert);
           debug_assert!(rope.len_chars() >= insert.end_char);
           if cfg!(debug_assertions) {
             let range: std::ops::Range<usize> =
@@ -272,13 +249,9 @@ impl Undo {
           rope.remove(insert.start_char..insert.end_char);
         }
         Operation::Delete(delete) => {
-          trace!(
-            "rope.len_chars:{:?}, delete.char_idx_after:{:?}",
-            rope.len_chars(),
-            delete.char_idx_after
-          );
-          debug_assert!(rope.len_chars() >= delete.char_idx_after);
-          rope.insert(delete.char_idx_after, &delete.payload);
+          trace!("rope.len_chars:{:?}, delete:{:?}", rope.len_chars(), delete);
+          debug_assert!(rope.len_chars() >= delete.start_char);
+          rope.insert(delete.start_char, &delete.payload);
         }
       }
       i -= 1;
