@@ -16,20 +16,26 @@ pub struct Insert {
   pub payload: CompactString,
 
   /// Absolute char idx of insert start position.
-  pub char_idx_before: usize,
+  pub char_idx: usize,
 
   /// Absolute char idx of insert end position.
-  pub char_idx_after: usize,
+  pub new_char_idx: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Delete {
   pub payload: CompactString,
 
-  /// Absolute char idx before doing deletion.
+  /// Absolute char idx of delete start position.
   pub char_idx_before: usize,
 
-  /// Cursor's absolute char idx after doing deletion.
+  /// Absolute char idx of delete end position.
+  pub char_idx_after: usize,
+
+  /// Cursor absolute char idx before delete.
+  pub cursor_char_idx_before: usize,
+
+  /// Cursor absolute char idx after delete.
   pub char_idx_after: usize,
 }
 
@@ -145,7 +151,7 @@ impl Current {
       && let Operation::Insert(ref mut last) = last_record.op
       && last.payload == op.payload
       && ((last.char_idx_before == op.char_idx_after
-        && last.char_idx_after == op.char_idx_before
+        && last.new_char_idx == op.char_idx_before
         && op.direction() == DeleteDirection::ToLeft)
         || (last.char_idx_before == op.char_idx_before
           && last.char_idx_before == op.char_idx_after
@@ -168,7 +174,7 @@ impl Current {
   pub fn insert(&mut self, op: Insert) {
     debug_assert_eq!(
       op.char_idx_before + op.payload.chars().count(),
-      op.char_idx_after
+      op.new_char_idx
     );
 
     if op.payload.is_empty() {
@@ -177,12 +183,12 @@ impl Current {
 
     if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
-      && last.char_idx_after == op.char_idx_before
+      && last.new_char_idx == op.char_idx_before
     {
       trace!("last-1:{:?}, op:{:?}", last, op);
       // Append to last insertion
       last.payload.push_str(&op.payload);
-      last.char_idx_after = op.char_idx_after;
+      last.new_char_idx = op.new_char_idx;
       last_record.moment = Instant::now();
     } else {
       trace!("last-2, op:{:?}", op);
@@ -253,22 +259,22 @@ impl Undo {
           trace!(
             "rope.len_chars:{:?}, insert.char_idx_after:{:?}",
             rope.len_chars(),
-            insert.char_idx_after
+            insert.new_char_idx
           );
-          debug_assert!(rope.len_chars() >= insert.char_idx_after);
+          debug_assert!(rope.len_chars() >= insert.new_char_idx);
           if cfg!(debug_assertions) {
             let range: std::ops::Range<usize> =
-              insert.char_idx_before..insert.char_idx_after;
+              insert.char_idx_before..insert.new_char_idx;
             let chars = rope.chars_at(range.start);
             debug_assert!(
-              chars.len() >= insert.char_idx_after - insert.char_idx_before
+              chars.len() >= insert.new_char_idx - insert.char_idx_before
             );
             let actual = chars
               .take(range.end - range.start)
               .collect::<CompactString>();
             debug_assert_eq!(actual, insert.payload);
           }
-          rope.remove(insert.char_idx_before..insert.char_idx_after);
+          rope.remove(insert.char_idx_before..insert.new_char_idx);
         }
         Operation::Delete(delete) => {
           trace!(
