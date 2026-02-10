@@ -123,7 +123,7 @@ impl Current {
       last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Delete(ref mut last) = last_record.op
-      && op.start_char == last.end_char
+      && op.end_char == last.start_char
     {
       // Merge 2 deletions
       trace!("last-2:{:?}, op:{:?}", last, op);

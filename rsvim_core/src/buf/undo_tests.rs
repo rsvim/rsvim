@@ -433,21 +433,21 @@ mod tests_undo {
     undo.current_mut().delete(Delete {
       payload: "!".to_compact_string(),
       start_char: 12,
-      end_char: 11,
+      end_char: 13,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
     undo.current_mut().delete(Delete {
       payload: "d".to_compact_string(),
       start_char: 11,
-      end_char: 10,
+      end_char: 12,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
     undo.current_mut().delete(Delete {
       payload: "l".to_compact_string(),
       start_char: 10,
-      end_char: 9,
+      end_char: 11,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
@@ -471,8 +471,8 @@ mod tests_undo {
       1,
       Delete {
         payload: "ld!".to_compact_string(),
-        start_char: 12,
-        end_char: 9,
+        start_char: 10,
+        end_char: 13,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
@@ -480,8 +480,8 @@ mod tests_undo {
 
     undo.current_mut().delete(Delete {
       payload: "or".to_compact_string(),
-      start_char: 9,
-      end_char: 7,
+      start_char: 8,
+      end_char: 10,
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
@@ -505,8 +505,8 @@ mod tests_undo {
       1,
       Delete {
         payload: "orld!".to_compact_string(),
-        start_char: 12,
-        end_char: 7,
+        start_char: 8,
+        end_char: 13,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
