@@ -182,7 +182,7 @@ mod tests_buffer_editing {
       )),
       MockOperation::Operation(state_ops::Operation::CursorDelete(-2)),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(30)),
+      MockOperation::SleepFor(Duration::from_millis(100)),
     ];
 
     let mut event_loop = make_event_loop(
