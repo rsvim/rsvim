@@ -133,7 +133,9 @@ impl Current {
       last_record.timestamp = jiff::Zoned::now();
     } else if let Some(last_record) = self.records.last_mut()
       && let Operation::Insert(ref mut last) = last_record.op
-      && last.payload == op.payload && (last.start_char == op.start_char && last.start_char == op.end_char )
+      && last.payload == op.payload
+      && last.start_char == op.start_char
+      && last.end_char == op.end_char
     {
       // Offset the effect of 1 insertion and 1 deletion
       trace!("last-3:{:?}, op:{:?}", last, op);

@@ -288,8 +288,8 @@ mod tests_undo {
       payload: "!".to_compact_string(),
       start_char: 12,
       end_char: 13,
-      cursor_char_idx_before: 13,
-      cursor_char_idx_after: 12,
+      cursor_char_idx_before: 0,
+      cursor_char_idx_after: 0,
     });
 
     let actual = undo.current();
@@ -311,7 +311,7 @@ mod tests_undo {
       Delete {
         payload: "!".to_compact_string(),
         start_char: 12,
-        end_char: 11,
+        end_char: 13,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
@@ -345,7 +345,7 @@ mod tests_undo {
       Delete {
         payload: "!".to_compact_string(),
         start_char: 12,
-        end_char: 11,
+        end_char: 13,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
@@ -365,7 +365,7 @@ mod tests_undo {
     undo.current_mut().delete(Delete {
       payload: payload2.to_compact_string(),
       start_char: 12,
-      end_char: 12,
+      end_char: 12 + payload2.chars().count(),
       cursor_char_idx_before: 0,
       cursor_char_idx_after: 0,
     });
@@ -390,7 +390,7 @@ mod tests_undo {
       Delete {
         payload: "!".to_compact_string(),
         start_char: 12,
-        end_char: 11,
+        end_char: 13,
         cursor_char_idx_before: 0,
         cursor_char_idx_after: 0,
       },
