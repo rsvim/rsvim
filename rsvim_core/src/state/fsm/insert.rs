@@ -178,9 +178,10 @@ impl Insert {
         absolute_char_idx_range.start
       );
 
-      let rope = buffer.text().rope().clone();
-      let editing_version = buffer.editing_version();
-      if let Some(syn) = buffer.syntax_mut() {
+      if buffer.syntax().is_some() {
+        let rope = buffer.text().rope().clone();
+        let editing_version = buffer.editing_version();
+        let syn = buffer.syntax_mut().as_mut().unwrap();
         debug_assert!(syn_delete.is_some());
         syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
           payload: rope,
