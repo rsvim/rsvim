@@ -2,7 +2,7 @@
 
 pub use crate::arc_mutex_ptr;
 pub use crate::arc_ptr;
-pub use crate::consts::*;
+pub use crate::constant::*;
 pub use crate::coord::*;
 pub use crate::err::*;
 pub use crate::lock;

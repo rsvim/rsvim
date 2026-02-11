@@ -38,7 +38,9 @@ macro_rules! arc_ptr {
 #[macro_export]
 macro_rules! lock {
   ($id:expr) => {
-    ($id).try_lock_for(*$crate::consts::MUTEX_TIMEOUT).unwrap()
+    ($id)
+      .try_lock_for(*$crate::constant::MUTEX_TIMEOUT)
+      .unwrap()
   };
 }
 

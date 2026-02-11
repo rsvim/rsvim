@@ -3,7 +3,7 @@
 pub mod buf;
 pub mod cfg;
 pub mod cli;
-pub mod consts;
+pub mod constant;
 pub mod content;
 pub mod coord;
 pub mod err;
