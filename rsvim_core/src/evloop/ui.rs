@@ -1,7 +1,7 @@
 //! UI utility.
 
 use crate::buf::BufferWk;
-use crate::content::TextContentsWk;
+use crate::cmdtext::TextContentsWk;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Tree;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;

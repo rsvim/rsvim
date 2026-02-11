@@ -1,6 +1,6 @@
 //! Commandline's message widget.
 
-use crate::content::TextContentsWk;
+use crate::cmdtext::TextContentsWk;
 use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
