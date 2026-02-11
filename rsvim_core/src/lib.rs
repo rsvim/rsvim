@@ -2,6 +2,7 @@
 
 pub mod buf;
 pub mod cfg;
+pub mod chan;
 pub mod cli;
 pub mod constant;
 pub mod content;
@@ -10,7 +11,6 @@ pub mod err;
 pub mod evloop;
 pub mod js;
 pub mod log;
-pub mod msg;
 pub mod prelude;
 pub mod state;
 pub mod syntax;

@@ -1,11 +1,11 @@
 //! Pending async tasks.
 
+use crate::chan;
+use crate::chan::MasterMessage;
 use crate::js::JsRuntimeState;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
-use crate::msg;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use tokio::time::Instant;
 
@@ -21,9 +21,9 @@ pub fn create_timer(
 ) {
   state.pending_timers.insert(timer_id, cb);
   let start_at = Instant::now();
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::TimeoutReq(msg::TimeoutReq {
+    MasterMessage::TimeoutReq(chan::TimeoutReq {
       timer_id,
       start_at,
       delay,
@@ -46,9 +46,9 @@ pub fn create_import_loader(
   cb: TaskCallback,
 ) {
   state.pending_import_loaders.insert(task_id, cb);
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::LoadImportReq(msg::LoadImportReq {
+    MasterMessage::LoadImportReq(chan::LoadImportReq {
       task_id,
       specifier: specifier.to_string(),
     }),
@@ -64,9 +64,9 @@ pub fn create_fs_open(
 ) {
   state.pending_tasks.insert(task_id, cb);
   let path = path.to_path_buf();
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsOpenReq(msg::FsOpenReq {
+    MasterMessage::FsOpenReq(chan::FsOpenReq {
       task_id,
       path,
       options,
@@ -82,9 +82,9 @@ pub fn create_fs_read(
   cb: TaskCallback,
 ) {
   state.pending_tasks.insert(task_id, cb);
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsReadReq(msg::FsReadReq {
+    MasterMessage::FsReadReq(chan::FsReadReq {
       task_id,
       fd,
       bufsize,
@@ -100,8 +100,8 @@ pub fn create_fs_write(
   cb: TaskCallback,
 ) {
   state.pending_tasks.insert(task_id, cb);
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsWriteReq(msg::FsWriteReq { task_id, fd, buf }),
+    MasterMessage::FsWriteReq(chan::FsWriteReq { task_id, fd, buf }),
   );
 }

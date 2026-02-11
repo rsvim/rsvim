@@ -1,8 +1,8 @@
 //! The command-line ex mode.
 
-use crate::msg;
-use crate::msg::ExCommandReq;
-use crate::msg::JsMessage;
+use crate::chan;
+use crate::chan::ExCommandReq;
+use crate::chan::JsMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -107,7 +107,7 @@ impl CmdlineEx {
     let buffer = lock!(buffer);
     let current_buf_id = buffer.id();
 
-    msg::send_to_jsrt(
+    chan::send_to_jsrt(
       data_access.jsrt_forwarder_tx.clone(),
       JsMessage::ExCommandReq(ExCommandReq {
         payload: cmdline_input_content,
