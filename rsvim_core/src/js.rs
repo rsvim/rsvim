@@ -33,7 +33,7 @@ use crate::chan;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
-use crate::cmdtext::TextContentsArc;
+use crate::cmdtext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;
@@ -368,7 +368,7 @@ pub mod boost {
     pub cli_opts: CliOptions,
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
-    pub contents: TextContentsArc,
+    pub contents: CmdlineTextArc,
     pub commands: CommandsManagerArc,
     // Data Access for RSVIM }
   }
@@ -411,7 +411,7 @@ pub mod boost {
       cli_opts: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
-      contents: TextContentsArc,
+      contents: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -501,7 +501,7 @@ pub mod boost {
       cli_opt: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
-      contents: TextContentsArc,
+      contents: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.

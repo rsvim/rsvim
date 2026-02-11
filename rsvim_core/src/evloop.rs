@@ -10,8 +10,8 @@ use crate::chan;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
-use crate::cmdtext::TextContents;
-use crate::cmdtext::TextContentsArc;
+use crate::cmdtext::CmdlineText;
+use crate::cmdtext::CmdlineTextArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
@@ -93,7 +93,7 @@ pub struct EventLoop {
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
-  pub contents: TextContentsArc,
+  pub contents: CmdlineTextArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -155,7 +155,7 @@ impl EventLoop {
     /* tree */ TreeArc,
     /* state_machine */ State,
     /* buffers */ BuffersManagerArc,
-    /* contents */ TextContentsArc,
+    /* contents */ CmdlineTextArc,
     /* commands */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -196,7 +196,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
+    let text_contents = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let ex_commands_manager =
       CommandsManager::to_arc(CommandsManager::default());
 

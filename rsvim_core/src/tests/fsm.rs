@@ -2,7 +2,7 @@ use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
-use crate::cmdtext::TextContents;
+use crate::cmdtext::CmdlineText;
 use crate::cmdtext::TextContentsArc;
 use crate::prelude::*;
 use crate::state::StateDataAccess;
@@ -36,7 +36,7 @@ pub fn make_fsm(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let contents = TextContents::to_arc(TextContents::new(terminal_size));
+  let contents = CmdlineText::to_arc(CmdlineText::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -89,7 +89,7 @@ pub fn make_fsm_with_cmdline(
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let contents = TextContents::to_arc(TextContents::new(terminal_size));
+  let contents = CmdlineText::to_arc(CmdlineText::new(terminal_size));
   let tree = make_tree_with_buffers_cmdline(
     terminal_size,
     window_local_opts,

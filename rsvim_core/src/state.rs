@@ -20,7 +20,7 @@ mod mode_tests;
 use crate::buf::BuffersManagerArc;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
-use crate::cmdtext::TextContentsArc;
+use crate::cmdtext::CmdlineTextArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
@@ -40,7 +40,7 @@ use tokio::sync::mpsc::UnboundedSender;
 pub struct StateDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
-  pub contents: TextContentsArc,
+  pub contents: CmdlineTextArc,
   pub master_tx: UnboundedSender<MasterMessage>,
   pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
 }
@@ -49,7 +49,7 @@ impl StateDataAccess {
   pub fn new(
     tree: TreeArc,
     buffers: BuffersManagerArc,
-    contents: TextContentsArc,
+    contents: CmdlineTextArc,
     master_tx: UnboundedSender<MasterMessage>,
     jsrt_forwarder_tx: UnboundedSender<JsMessage>,
   ) -> Self {
