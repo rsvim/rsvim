@@ -29,11 +29,11 @@ mod converter_tests;
 mod module_tests;
 
 use crate::buf::BuffersManagerArc;
+use crate::chan;
+use crate::chan::JsMessage;
+use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::msg;
-use crate::msg::JsMessage;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;
@@ -603,7 +603,7 @@ pub mod boost {
           > self.pending_import_loaders_count())
         || (!self.has_unresolved_imports() && self.has_pending_imports())
       {
-        msg::send_to_master(
+        chan::send_to_master(
           self.get_state().borrow().master_tx.clone(),
           MasterMessage::TickAgainReq,
         );

@@ -6,6 +6,9 @@ pub mod writer;
 use crate::buf::BufferArc;
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
+use crate::chan;
+use crate::chan::JsMessage;
+use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
@@ -18,9 +21,6 @@ use crate::js::binding::global_rsvim::fs::write::async_fs_write;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
 use crate::js::module::async_load_import;
-use crate::msg;
-use crate::msg::JsMessage;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -514,9 +514,9 @@ impl EventLoop {
         .as_mut()
         .unwrap()
         .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
-      msg::send_to_master(
+      chan::send_to_master(
         self.master_tx.clone(),
-        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+        MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
           buffer_id: buf.id(),
         }),
       );
@@ -710,7 +710,7 @@ impl EventLoop {
               + tokio::time::Duration::from_millis(req.delay as u64);
             tokio::time::sleep_until(expire_at).await;
             jsrt_forwarder_tx
-              .send(JsMessage::TimeoutResp(msg::TimeoutResp {
+              .send(JsMessage::TimeoutResp(chan::TimeoutResp {
                 timer_id: req.timer_id,
                 expire_at,
                 delay: req.delay,
@@ -725,7 +725,7 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let maybe_source = async_load_import(&req.specifier, false).await;
             jsrt_forwarder_tx
-              .send(JsMessage::LoadImportResp(msg::LoadImportResp {
+              .send(JsMessage::LoadImportResp(chan::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
                   Ok(source) => {
@@ -750,7 +750,7 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_open(&req.path, req.options).await;
             jsrt_forwarder_tx
-              .send(JsMessage::FsOpenResp(msg::FsOpenResp {
+              .send(JsMessage::FsOpenResp(chan::FsOpenResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
                   Ok(fd) => Some(Ok(postcard::to_allocvec(&fd).unwrap())),
@@ -766,7 +766,7 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_read(req.fd, req.bufsize).await;
             jsrt_forwarder_tx
-              .send(JsMessage::FsReadResp(msg::FsReadResp {
+              .send(JsMessage::FsReadResp(chan::FsReadResp {
                 task_id: req.task_id,
                 maybe_result: Some(maybe_result),
               }))
@@ -779,7 +779,7 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_write(req.fd, req.buf).await;
             jsrt_forwarder_tx
-              .send(JsMessage::FsWriteResp(msg::FsWriteResp {
+              .send(JsMessage::FsWriteResp(chan::FsWriteResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
                   Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
@@ -843,9 +843,9 @@ impl EventLoop {
                   // If buffer already has more pending editings, trigger next
                   // parsing immediately.
                   if !syn.pending_is_empty() {
-                    msg::send_to_master(
+                    chan::send_to_master(
                       master_tx,
-                      MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+                      MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
                         buffer_id: buf.id(),
                       }),
                     );

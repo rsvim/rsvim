@@ -1,8 +1,8 @@
 //! The insert mode.
 
 use crate::buf::undo;
-use crate::msg;
-use crate::msg::MasterMessage;
+use crate::chan;
+use crate::chan::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
@@ -187,9 +187,9 @@ impl Insert {
           input: syn_delete.unwrap(),
           version: editing_version,
         }));
-        msg::send_to_master(
+        chan::send_to_master(
           data_access.master_tx.clone(),
-          MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+          MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
             buffer_id: buffer.id(),
           }),
         );
@@ -293,9 +293,9 @@ impl Insert {
         input: syn_insert.unwrap(),
         version: editing_version,
       }));
-      msg::send_to_master(
+      chan::send_to_master(
         data_access.master_tx.clone(),
-        MasterMessage::SyntaxEditReq(msg::SyntaxEditReq {
+        MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
           buffer_id: buffer.id(),
         }),
       );

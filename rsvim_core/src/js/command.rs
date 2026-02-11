@@ -10,6 +10,7 @@ mod attr_tests;
 #[cfg(test)]
 mod opt_tests;
 
+use crate::chan::ExCommandReq;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::TaskId;
@@ -17,7 +18,6 @@ use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::converter::*;
 use crate::js::execute_module;
-use crate::msg::ExCommandReq;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;

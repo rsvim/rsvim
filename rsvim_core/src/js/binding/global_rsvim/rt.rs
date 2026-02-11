@@ -1,10 +1,10 @@
 //! APIs for `Rsvim.rt` namespace.
 
+use crate::chan;
+use crate::chan::MasterMessage;
 use crate::is_v8_int;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
-use crate::msg;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 
 /// Exit editor.
@@ -21,8 +21,8 @@ pub fn exit<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
-  msg::send_to_master(
+  chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::ExitReq(msg::ExitReq { exit_code }),
+    MasterMessage::ExitReq(chan::ExitReq { exit_code }),
   );
 }
