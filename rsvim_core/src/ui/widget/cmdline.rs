@@ -7,7 +7,7 @@ pub mod message;
 #[cfg(test)]
 pub mod indicator_tests;
 
-use crate::cmdtext::TextContentsWk;
+use crate::cmdtext::CmdlineTextWk;
 use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
@@ -41,7 +41,7 @@ impl Cmdline {
   pub fn new(
     id: NodeId,
     ctx: TreeContextWk,
-    text_contents: TextContentsWk,
+    text_contents: CmdlineTextWk,
     input_panel_id: NodeId,
     indicator_id: NodeId,
     input_id: NodeId,

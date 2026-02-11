@@ -1,6 +1,6 @@
 //! Commandline's message widget.
 
-use crate::cmdtext::TextContentsWk;
+use crate::cmdtext::CmdlineTextWk;
 use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
@@ -13,7 +13,7 @@ use crate::ui::widget::Widgetable;
 /// Commandline message.
 pub struct CmdlineMessage {
   __node: InodeBase,
-  text_contents: TextContentsWk,
+  text_contents: CmdlineTextWk,
   viewport: ViewportWk,
 }
 
@@ -23,7 +23,7 @@ impl CmdlineMessage {
   pub fn new(
     id: NodeId,
     ctx: TreeContextWk,
-    text_contents: TextContentsWk,
+    text_contents: CmdlineTextWk,
     viewport: ViewportWk,
   ) -> Self {
     CmdlineMessage {
