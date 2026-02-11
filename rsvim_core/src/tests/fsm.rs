@@ -3,7 +3,7 @@ use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::cmdtext::CmdlineText;
-use crate::cmdtext::TextContentsArc;
+use crate::cmdtext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::state::StateDataAccess;
 use crate::tests::buf::make_buffer_from_lines;
@@ -29,7 +29,7 @@ pub fn make_fsm(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  TextContentsArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
@@ -67,7 +67,7 @@ pub fn make_fsm_default_bufopts(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  TextContentsArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
@@ -84,7 +84,7 @@ pub fn make_fsm_with_cmdline(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  TextContentsArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
@@ -125,7 +125,7 @@ pub fn make_fsm_with_cmdline_default_bufopts(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  TextContentsArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();

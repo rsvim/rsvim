@@ -7,7 +7,7 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::cmdtext::CmdlineText;
-use crate::cmdtext::TextContentsArc;
+use crate::cmdtext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
