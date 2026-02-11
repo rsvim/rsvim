@@ -3,7 +3,7 @@
 pub mod internal;
 
 use crate::buf::BufferWk;
-use crate::cmdtext::CmdlineTextWk;
+use crate::cmdtext::CmdTextWk;
 use crate::inodify_enum_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -522,7 +522,7 @@ impl Tree {
     parent_id: NodeId,
     style: Style,
     indicator_symbol: CmdlineIndicatorSymbol,
-    cmdline_text: CmdlineTextWk,
+    cmdline_text: CmdTextWk,
   ) -> TaffyResult<NodeId> {
     let (
       id,
