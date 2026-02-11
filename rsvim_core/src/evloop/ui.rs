@@ -1,7 +1,7 @@
 //! UI utility.
 
 use crate::buf::BufferWk;
-use crate::cmdtext::CmdlineTextWk;
+use crate::cmdtext::CmdTextWk;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Tree;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
@@ -10,7 +10,7 @@ use taffy::Style;
 pub fn init_default_window(
   tree: &mut Tree,
   buf: BufferWk,
-  cmdline_text: CmdlineTextWk,
+  cmdline_text: CmdTextWk,
   cursor_blinking: bool,
   cursor_hidden: bool,
   cursor_style: CursorStyle,

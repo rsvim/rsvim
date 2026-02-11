@@ -1,6 +1,6 @@
 //! Command-line operations.
 
-use crate::cmdtext::CmdlineText;
+use crate::cmdtext::CmdText;
 use crate::prelude::*;
 use crate::ui::tree::Inodify;
 use crate::ui::tree::Tree;
@@ -10,7 +10,7 @@ use compact_str::ToCompactString;
 
 fn _set_message_impl(
   tree: &mut Tree,
-  text_contents: &mut CmdlineText,
+  text_contents: &mut CmdText,
   payload: Option<String>,
 ) {
   debug_assert!(tree.cmdline_id().is_some());
@@ -32,7 +32,7 @@ fn _set_message_impl(
 
 pub fn cmdline_set_last_pending_message_on_initialize(
   tree: &mut Tree,
-  text_contents: &mut CmdlineText,
+  text_contents: &mut CmdText,
 ) {
   // If message history contains some payload. This means before we actually
   // running the event loop, there's already some messages wait for print.
@@ -50,7 +50,7 @@ pub fn cmdline_set_last_pending_message_on_initialize(
 
 pub fn cmdline_set_message(
   tree: &mut Tree,
-  text_contents: &mut CmdlineText,
+  text_contents: &mut CmdText,
   payload: String,
 ) {
   _set_message_impl(tree, text_contents, Some(payload.clone()));
@@ -60,12 +60,12 @@ pub fn cmdline_set_message(
   cmdline_hist.push_overwrite(payload);
 }
 
-pub fn cmdline_clear_message(tree: &mut Tree, text_contents: &mut CmdlineText) {
+pub fn cmdline_clear_message(tree: &mut Tree, text_contents: &mut CmdText) {
   debug_assert!(tree.cmdline_id().is_some());
   _set_message_impl(tree, text_contents, None);
 }
 
-pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut CmdlineText) {
+pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut CmdText) {
   debug_assert!(tree.cmdline_id().is_some());
 
   let input_text = text_contents.cmdline_input_mut();
