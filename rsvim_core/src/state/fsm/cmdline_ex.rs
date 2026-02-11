@@ -177,7 +177,7 @@ impl CmdlineEx {
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
 
     // Clear command-line both input content and message.
-    let contents = data_access.contents.clone();
+    let contents = data_access.cmdline_text.clone();
     let mut contents = lock!(contents);
     let cmdline_input_content =
       contents.cmdline_input().rope().to_compact_string();
@@ -205,7 +205,7 @@ impl CmdlineEx {
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
     let cmdline_id = tree.cmdline_id().unwrap();
-    let contents = data_access.contents.clone();
+    let contents = data_access.cmdline_text.clone();
     let contents = lock!(contents);
 
     cursor_ops::cursor_move(
@@ -230,7 +230,7 @@ impl CmdlineEx {
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
     let cmdline_id = tree.cmdline_id().unwrap();
-    let contents = data_access.contents.clone();
+    let contents = data_access.cmdline_text.clone();
     let mut contents = lock!(contents);
 
     let payload = match payload {
@@ -258,7 +258,7 @@ impl CmdlineEx {
   ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let contents = data_access.contents.clone();
+    let contents = data_access.cmdline_text.clone();
     let mut contents = lock!(contents);
     let text = contents.cmdline_input_mut();
 

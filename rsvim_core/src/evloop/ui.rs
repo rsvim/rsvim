@@ -10,7 +10,7 @@ use taffy::Style;
 pub fn init_default_window(
   tree: &mut Tree,
   buf: BufferWk,
-  text_contents: CmdlineTextWk,
+  cmdline_text: CmdlineTextWk,
   cursor_blinking: bool,
   cursor_hidden: bool,
   cursor_style: CursorStyle,
@@ -51,7 +51,7 @@ pub fn init_default_window(
       tree_root_id,
       cmdline_style,
       CmdlineIndicatorSymbol::Empty,
-      text_contents,
+      cmdline_text,
     )
     .unwrap();
 }

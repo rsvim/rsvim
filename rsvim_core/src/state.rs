@@ -40,7 +40,7 @@ use tokio::sync::mpsc::UnboundedSender;
 pub struct StateDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
-  pub contents: CmdlineTextArc,
+  pub cmdline_text: CmdlineTextArc,
   pub master_tx: UnboundedSender<MasterMessage>,
   pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
 }
@@ -49,14 +49,14 @@ impl StateDataAccess {
   pub fn new(
     tree: TreeArc,
     buffers: BuffersManagerArc,
-    contents: CmdlineTextArc,
+    cmdline_text: CmdlineTextArc,
     master_tx: UnboundedSender<MasterMessage>,
     jsrt_forwarder_tx: UnboundedSender<JsMessage>,
   ) -> Self {
     StateDataAccess {
       tree,
       buffers,
-      contents,
+      cmdline_text,
       master_tx,
       jsrt_forwarder_tx,
     }

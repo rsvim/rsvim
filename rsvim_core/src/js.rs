@@ -368,7 +368,7 @@ pub mod boost {
     pub cli_opts: CliOptions,
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
-    pub contents: CmdlineTextArc,
+    pub cmdline_text: CmdlineTextArc,
     pub commands: CommandsManagerArc,
     // Data Access for RSVIM }
   }
@@ -465,7 +465,7 @@ pub mod boost {
         cli_opts,
         tree,
         buffers,
-        contents,
+        cmdline_text: contents,
         commands,
       });
 
@@ -539,7 +539,7 @@ pub mod boost {
         cli_opts: cli_opt,
         tree,
         buffers,
-        contents,
+        cmdline_text: contents,
         commands,
       });
 
