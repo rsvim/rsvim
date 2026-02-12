@@ -14,6 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
+use crate::hl::HighlightManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
@@ -205,6 +206,9 @@ pub struct BufferManager {
 
   // Syntax manager
   syntax_manager: SyntaxManager,
+
+  // Highlight manager
+  highlight_manager: HighlightManager;
 }
 
 arc_mutex_ptr!(BufferManager);

@@ -40,5 +40,3 @@ pub struct HighlightManager {
   // Maps highlight ID => highlight
   highlights: FoldMap<HighlightId, Highlight>,
 }
-
-arc_mutex_ptr!(HighlightManager);
