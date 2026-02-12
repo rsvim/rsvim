@@ -121,7 +121,7 @@ impl ColorScheme {
   /// boolean = "black"
   ///
   /// [ui]
-  /// # TODO
+  /// background = "#000000"
   ///
   /// [palette]
   /// white = "#ffffff"
