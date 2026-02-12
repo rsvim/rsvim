@@ -1,5 +1,6 @@
 //! Highlight.
 
+pub mod style;
 pub mod syn;
 
 use crate::prelude::*;
