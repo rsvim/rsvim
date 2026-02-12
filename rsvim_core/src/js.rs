@@ -39,7 +39,7 @@ use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
-use command::CommandsManagerArc;
+use command::CommandManagerArc;
 use err::JsError;
 use err::report_js_error;
 use exception::ExceptionState;
@@ -369,7 +369,7 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffer_manager: BufferManagerArc,
     pub cmdline_text: CmdlineTextArc,
-    pub command_manager: CommandsManagerArc,
+    pub command_manager: CommandManagerArc,
     // Data Access for RSVIM }
   }
 
@@ -412,7 +412,7 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
-      command_manager: CommandsManagerArc,
+      command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -502,7 +502,7 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
-      command_manager: CommandsManagerArc,
+      command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));

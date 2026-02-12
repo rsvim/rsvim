@@ -72,7 +72,7 @@ impl JsFuture for CommandFuture {
 }
 
 #[derive(Debug, Default)]
-pub struct CommandsManager {
+pub struct CommandManager {
   // Maps from command "name" to its "definition".
   commands: BTreeMap<CompactString, CommandDefinitionRc>,
 
@@ -80,7 +80,7 @@ pub struct CommandsManager {
   aliases: FoldMap<CompactString, CompactString>,
 }
 
-arc_mutex_ptr!(CommandsManager);
+arc_mutex_ptr!(CommandManager);
 
 pub type CommandsManagerKeys<'a> =
   std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
@@ -89,7 +89,7 @@ pub type CommandsManagerValues<'a> =
 pub type CommandsManagerIter<'a> =
   std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
 
-impl CommandsManager {
+impl CommandManager {
   pub fn is_empty(&self) -> bool {
     self.commands.is_empty()
   }
@@ -176,7 +176,7 @@ impl CommandsManager {
   }
 }
 
-impl CommandsManager {
+impl CommandManager {
   pub fn parse(&self, req: &ExCommandReq) -> Option<CommandFuture> {
     debug_assert_eq!(req.payload.trim(), req.payload);
 

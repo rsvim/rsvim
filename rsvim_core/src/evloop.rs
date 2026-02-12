@@ -18,8 +18,8 @@ use crate::js::SnapshotData;
 use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::binding::global_rsvim::fs::read::async_fs_read;
 use crate::js::binding::global_rsvim::fs::write::async_fs_write;
-use crate::js::command::CommandsManager;
-use crate::js::command::CommandsManagerArc;
+use crate::js::command::CommandManager;
+use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
 use crate::prelude::*;
 use crate::state::State;
@@ -156,7 +156,7 @@ impl EventLoop {
     /* state_machine */ State,
     /* buffer_manager */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
-    /* command_manager */ CommandsManagerArc,
+    /* command_manager */ CommandManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -197,7 +197,7 @@ impl EventLoop {
     // Buffers
     let buffer_manager = BufferManager::to_arc(BufferManager::new());
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-    let command_manager = CommandsManager::to_arc(CommandsManager::default());
+    let command_manager = CommandManager::to_arc(CommandManager::default());
 
     // State
     let state_machine = State::default();
