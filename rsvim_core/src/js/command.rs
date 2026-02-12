@@ -82,11 +82,11 @@ pub struct CommandManager {
 
 arc_mutex_ptr!(CommandManager);
 
-pub type CommandsManagerKeys<'a> =
+pub type CommandManagerKeys<'a> =
   std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
-pub type CommandsManagerValues<'a> =
+pub type CommandManagerValues<'a> =
   std::collections::btree_map::Values<'a, CompactString, CommandDefinitionRc>;
-pub type CommandsManagerIter<'a> =
+pub type CommandManagerIter<'a> =
   std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
 
 impl CommandManager {
@@ -151,15 +151,15 @@ impl CommandManager {
     self.commands.contains_key(name)
   }
 
-  pub fn keys(&self) -> CommandsManagerKeys<'_> {
+  pub fn keys(&self) -> CommandManagerKeys<'_> {
     self.commands.keys()
   }
 
-  pub fn values(&self) -> CommandsManagerValues<'_> {
+  pub fn values(&self) -> CommandManagerValues<'_> {
     self.commands.values()
   }
 
-  pub fn iter(&self) -> CommandsManagerIter<'_> {
+  pub fn iter(&self) -> CommandManagerIter<'_> {
     self.commands.iter()
   }
 

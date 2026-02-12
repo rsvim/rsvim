@@ -214,13 +214,6 @@ pub struct BufferManager {
 
 arc_mutex_ptr!(BufferManager);
 
-pub type BuffersManagerKeys<'a> =
-  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersManagerValues<'a> =
-  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersManagerIter<'a> =
-  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
-
 impl BufferManager {
   pub fn new() -> Self {
     BufferManager {
@@ -394,7 +387,6 @@ impl BufferManager {
 }
 
 // Primitive APIs {
-
 impl BufferManager {
   fn read_file(
     &self,
@@ -471,14 +463,53 @@ impl BufferManager {
 }
 // Primitive APIs }
 
+pub type BufferManagerKeys<'a> =
+  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BufferManagerValues<'a> =
+  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BufferManagerIter<'a> =
+  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+
 // Buffers {
 impl BufferManager {
-  pub fn buffers(&self) -> &BTreeMap<BufferId, BufferArc> {
-    &self.buffers
+  pub fn is_empty(&self) -> bool {
+    self.buffers.is_empty()
   }
 
-  pub fn buffers_mut(&mut self) -> &mut BTreeMap<BufferId, BufferArc> {
-    &mut self.buffers
+  pub fn len(&self) -> usize {
+    self.buffers.len()
+  }
+
+  pub fn remove(&mut self, id: &BufferId) -> Option<BufferArc> {
+    self.buffers.remove(id)
+  }
+
+  pub fn get(&self, id: &BufferId) -> Option<&BufferArc> {
+    self.buffers.get(id)
+  }
+
+  pub fn contains_key(&self, id: &BufferId) -> bool {
+    self.buffers.contains_key(id)
+  }
+
+  pub fn keys(&self) -> BufferManagerKeys<'_> {
+    self.buffers.keys()
+  }
+
+  pub fn values(&self) -> BufferManagerValues<'_> {
+    self.buffers.values()
+  }
+
+  pub fn iter(&self) -> BufferManagerIter<'_> {
+    self.buffers.iter()
+  }
+
+  pub fn first_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.first_key_value()
+  }
+
+  pub fn last_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.last_key_value()
   }
 }
 // Buffers }

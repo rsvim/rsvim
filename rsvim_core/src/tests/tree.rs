@@ -42,7 +42,7 @@ pub fn make_tree_with_buffers(
   let tree_root_id = tree.root_id();
 
   // Window
-  let (_, buf) = buffer_manager.buffers().first_key_value().unwrap();
+  let (_, buf) = buffer_manager.first_key_value().unwrap();
   let window_id = tree
     .new_window_with_parent(
       tree_root_id,
@@ -89,7 +89,7 @@ pub fn make_tree_with_buffers_cmdline(
   };
   let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
   let buffer_manager = lock!(buffers_manager);
-  let (_, buf) = buffer_manager.buffers().first_key_value().unwrap();
+  let (_, buf) = buffer_manager.first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
   let cmdline_text = Arc::downgrade(&cmdline_text);
 
