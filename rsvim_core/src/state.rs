@@ -39,7 +39,7 @@ use tokio::sync::mpsc::UnboundedSender;
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StateDataAccess {
   pub tree: TreeArc,
-  pub buffers: BufferManagerArc,
+  pub buffer_manager: BufferManagerArc,
   pub cmdline_text: CmdlineTextArc,
   pub master_tx: UnboundedSender<MasterMessage>,
   pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
@@ -48,14 +48,14 @@ pub struct StateDataAccess {
 impl StateDataAccess {
   pub fn new(
     tree: TreeArc,
-    buffers: BufferManagerArc,
+    buffer_manager: BufferManagerArc,
     cmdline_text: CmdlineTextArc,
     master_tx: UnboundedSender<MasterMessage>,
     jsrt_forwarder_tx: UnboundedSender<JsMessage>,
   ) -> Self {
     StateDataAccess {
       tree,
-      buffers,
+      buffer_manager,
       cmdline_text,
       master_tx,
       jsrt_forwarder_tx,
