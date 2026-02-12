@@ -24,6 +24,9 @@ pub struct Style {
   pub attr: Attributes,
 }
 
+pub const SYNTAX_PREFIX: &str = "syn.";
+pub const UI_PREFIX: &str = "ui.";
+
 pub static SYNTAX_NAMES: Lazy<FoldSet<CompactString>> = Lazy::new(|| {
   vec![
     "attribute",
@@ -80,7 +83,7 @@ pub static SYNTAX_NAMES: Lazy<FoldSet<CompactString>> = Lazy::new(|| {
     "variable.parameter",
   ]
   .iter()
-  .map(|i| i.to_compact_string())
+  .map(|i| format!("{}{}", SYNTAX_PREFIX, i).to_compact_string())
   .collect::<FoldSet<CompactString>>()
 });
 
@@ -123,6 +126,7 @@ impl Highlight {
   }
 
   pub fn syntax(&self) -> &FoldMap<CompactString, Style> {
+    if cfg!(debug_assertions) {}
     &self.syntax
   }
 
