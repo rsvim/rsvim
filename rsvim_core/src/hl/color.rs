@@ -1,0 +1,3 @@
+//! Color.
+
+pub struct HighlightColor {}
