@@ -31,7 +31,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert!(contents.cmdline_message().rope().to_string().is_empty());
+    assert!(contents.message().rope().to_string().is_empty());
   }
 
   event_loop.initialize()?;
@@ -43,7 +43,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let payload = contents.cmdline_message().rope().to_string();
+    let payload = contents.message().rope().to_string();
     let payload = payload.trim();
     assert!(
       payload
@@ -79,7 +79,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert!(contents.cmdline_message().rope().to_string().is_empty());
+    assert!(contents.message().rope().to_string().is_empty());
   }
 
   event_loop.initialize()?;
@@ -91,7 +91,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let payload = contents.cmdline_message().rope().to_string();
+    let payload = contents.message().rope().to_string();
     let payload = payload.trim();
     assert!(
       payload
@@ -127,7 +127,7 @@ async fn test_echo3() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert_eq!(contents.cmdline_message().rope().to_string(), "");
+    assert_eq!(contents.message().rope().to_string(), "");
   }
 
   event_loop.initialize()?;
@@ -139,7 +139,7 @@ async fn test_echo3() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message().rope().to_string();
+    let actual = contents.message().rope().to_string();
     let actual = actual.trim();
     assert!(
       actual.is_empty()
@@ -179,7 +179,7 @@ async fn test_echo4() -> IoResult<()> {
   // Before running
   {
     let text_cmdline = lock!(event_loop.cmdline_text);
-    let actual = text_cmdline.cmdline_message().rope().to_string();
+    let actual = text_cmdline.message().rope().to_string();
     assert!(actual.is_empty());
   }
 
@@ -192,7 +192,7 @@ async fn test_echo4() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message().rope().to_string();
+    let actual = contents.message().rope().to_string();
     let actual = actual.trim();
     assert_eq!(actual, "true");
   }

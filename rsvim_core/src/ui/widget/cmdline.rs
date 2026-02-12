@@ -60,25 +60,13 @@ impl Cmdline {
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let cmdline_text = cmdline_text.upgrade().unwrap();
       let cmdline_text = lock!(cmdline_text);
-      let input_viewport = Viewport::view(
-        &options,
-        cmdline_text.cmdline_input(),
-        input_size,
-        0,
-        0,
-      );
-      let input_cursor_viewport = CursorViewport::from_top_left(
-        &input_viewport,
-        cmdline_text.cmdline_input(),
-      );
+      let input_viewport =
+        Viewport::view(&options, cmdline_text.input(), input_size, 0, 0);
+      let input_cursor_viewport =
+        CursorViewport::from_top_left(&input_viewport, cmdline_text.input());
 
-      let message_viewport = Viewport::view(
-        &options,
-        cmdline_text.cmdline_message(),
-        message_size,
-        0,
-        0,
-      );
+      let message_viewport =
+        Viewport::view(&options, cmdline_text.message(), message_size, 0, 0);
       (input_viewport, input_cursor_viewport, message_viewport)
     };
 

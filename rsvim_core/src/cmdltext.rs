@@ -31,22 +31,22 @@ impl CmdlineText {
   }
 
   /// Command-line input content
-  pub fn cmdline_input(&self) -> &Text {
+  pub fn input(&self) -> &Text {
     &self.input
   }
 
   /// Mutable command-line input content
-  pub fn cmdline_input_mut(&mut self) -> &mut Text {
+  pub fn input_mut(&mut self) -> &mut Text {
     &mut self.input
   }
 
   /// Command-line message
-  pub fn cmdline_message(&self) -> &Text {
+  pub fn message(&self) -> &Text {
     &self.message
   }
 
   /// Mutable command-line message
-  pub fn cmdline_message_mut(&mut self) -> &mut Text {
+  pub fn message_mut(&mut self) -> &mut Text {
     &mut self.message
   }
 

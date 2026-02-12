@@ -15,7 +15,7 @@ fn _set_message_impl(
 ) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let message_text = cmdline_text.cmdline_message_mut();
+  let message_text = cmdline_text.message_mut();
   message_text.clear();
   if let Some(payload) = payload {
     message_text.insert(0, 0, payload.to_compact_string());
@@ -68,7 +68,7 @@ pub fn cmdline_clear_message(tree: &mut Tree, cmdline_text: &mut CmdlineText) {
 pub fn cmdline_clear_input(tree: &mut Tree, cmdline_text: &mut CmdlineText) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let input_text = cmdline_text.cmdline_input_mut();
+  let input_text = cmdline_text.input_mut();
   input_text.clear();
 
   let opts = *tree.cmdline().unwrap().options();
