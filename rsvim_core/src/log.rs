@@ -1,6 +1,6 @@
 //! Logging utils.
 
-use crate::constant::RSVIM_LOG;
+pub const RSVIM_LOG: &str = "RSVIM_LOG";
 
 /// Initialize file logging, always use file logging.
 ///
