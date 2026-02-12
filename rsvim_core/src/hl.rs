@@ -74,7 +74,7 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
 
 #[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
-pub struct Style {
+pub struct Highlight {
   /// Style ID
   pub id: CompactString,
 
@@ -98,10 +98,10 @@ pub struct ColorScheme {
   palette: FoldMap<CompactString, CompactString>,
 
   // Maps ID => syntax colors
-  syntax: FoldMap<CompactString, Style>,
+  syntax: FoldMap<CompactString, Highlight>,
 
   // Maps ID => UI colors
-  ui: FoldMap<CompactString, Style>,
+  ui: FoldMap<CompactString, Highlight>,
 }
 
 impl ColorScheme {
@@ -128,7 +128,7 @@ impl ColorScheme {
     &mut self.palette
   }
 
-  pub fn syntax(&self) -> &FoldMap<CompactString, Style> {
+  pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
         debug_assert!(k.starts_with(SYNTAX_PREFIX));
@@ -137,11 +137,11 @@ impl ColorScheme {
     &self.syntax
   }
 
-  pub fn syntax_mut(&mut self) -> &mut FoldMap<CompactString, Style> {
+  pub fn syntax_mut(&mut self) -> &mut FoldMap<CompactString, Highlight> {
     &mut self.syntax
   }
 
-  pub fn ui(&self) -> &FoldMap<CompactString, Style> {
+  pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.ui.keys() {
         debug_assert!(k.starts_with(UI_PREFIX));
@@ -150,7 +150,7 @@ impl ColorScheme {
     &self.ui
   }
 
-  pub fn ui_mut(&self) -> &FoldMap<CompactString, Style> {
+  pub fn ui_mut(&self) -> &FoldMap<CompactString, Highlight> {
     &self.ui
   }
 }
