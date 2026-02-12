@@ -14,7 +14,7 @@ pub struct Style {
   pub bg: Color,
 
   /// Attributes: underline, bold, italic, etc.
-  pub attrs: Attributes,
+  pub attr: Attributes,
 }
 
 pub struct Highlight {}
