@@ -35,6 +35,7 @@ pub struct Highlight {
   styles: FoldMap<StyleId, Style>,
 }
 
+#[derive(Debug)]
 pub struct HighlightManager {
   // Maps highlight ID => highlight
   highlights: FoldMap<HighlightId, Highlight>,
