@@ -14,41 +14,36 @@ mod tests_getter_setter {
 
   #[test]
   fn file_ext1() {
-    let mut syn_mgr = SyntaxManager::new();
-    syn_mgr
+    let mut syn_manager = SyntaxManager::new();
+    syn_manager
       .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let actual = syn_mgr.get_id_by_file_ext("rs");
+    let actual = syn_manager.get_id_by_file_ext("rs");
     assert!(actual.is_some());
     assert_eq!(actual.unwrap(), "rust");
-    let actual = syn_mgr.get_file_ext_by_id("rust");
+    let actual = syn_manager.get_file_ext_by_id("rust");
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("rs"));
   }
 
   #[test]
   fn file_ext2() {
-    let mut syn_mgr = SyntaxManager::new();
-    syn_mgr
+    let mut syn_manager = SyntaxManager::new();
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "cc".to_compact_string());
-    syn_mgr
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "cpp".to_compact_string());
-    syn_mgr
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "c++".to_compact_string());
-    syn_mgr
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "hh".to_compact_string());
-    syn_mgr
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "hpp".to_compact_string());
-    syn_mgr
+    syn_manager
       .insert_file_ext("cpp".to_compact_string(), "h++".to_compact_string());
-    let actual = syn_mgr.get_id_by_file_ext("hpp");
+    let actual = syn_manager.get_id_by_file_ext("hpp");
     assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), &LanguageId::from("cpp"));
-    assert_eq!(actual.unwrap(), &LanguageId::from("cpp".to_string()));
-    assert_eq!(
-      actual.unwrap(),
-      &LanguageId::from("cpp".to_compact_string())
-    );
-    let actual = syn_mgr.get_file_ext_by_id(&LanguageId::from("cpp"));
+    assert_eq!(actual.unwrap(), "cpp");
+    let actual = syn_manager.get_file_ext_by_id(&LanguageId::from("cpp"));
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("cc"));
     assert!(actual.unwrap().contains("cpp"));
