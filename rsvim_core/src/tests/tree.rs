@@ -1,7 +1,7 @@
 //! Tree utils for testing.
 
 use crate::buf::BuffersManagerArc;
-use crate::cmdtext::CmdTextArc;
+use crate::cmdlinetext::CmdTextArc;
 use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;

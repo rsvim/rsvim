@@ -20,7 +20,7 @@ mod mode_tests;
 use crate::buf::BuffersManagerArc;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
-use crate::cmdtext::CmdTextArc;
+use crate::cmdlinetext::CmdTextArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;

@@ -3,7 +3,7 @@
 pub mod internal;
 
 use crate::buf::BufferWk;
-use crate::cmdtext::CmdTextWk;
+use crate::cmdlinetext::CmdTextWk;
 use crate::inodify_enum_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;

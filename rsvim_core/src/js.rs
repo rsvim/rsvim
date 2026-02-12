@@ -33,7 +33,7 @@ use crate::chan;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
-use crate::cmdtext::CmdTextArc;
+use crate::cmdlinetext::CmdTextArc;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::ui::tree::TreeArc;

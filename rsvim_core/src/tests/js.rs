@@ -1,6 +1,6 @@
 use crate::buf::BuffersManager;
 use crate::cli::CliOptions;
-use crate::cmdtext::CmdText;
+use crate::cmdlinetext::CmdText;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::command::CommandsManager;

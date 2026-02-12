@@ -1,6 +1,6 @@
 //! Command-line operations.
 
-use crate::cmdtext::CmdText;
+use crate::cmdlinetext::CmdText;
 use crate::prelude::*;
 use crate::ui::tree::Inodify;
 use crate::ui::tree::Tree;

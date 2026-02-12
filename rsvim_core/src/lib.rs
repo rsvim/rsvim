@@ -4,7 +4,7 @@ pub mod buf;
 pub mod cfg;
 pub mod chan;
 pub mod cli;
-pub mod cmdtext;
+pub mod cmdlinetext;
 pub mod constant;
 pub mod coord;
 pub mod err;
