@@ -411,7 +411,7 @@ pub mod boost {
       cli_opts: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
-      contents: CmdlineTextArc,
+      cmdline_text: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -465,7 +465,7 @@ pub mod boost {
         cli_opts,
         tree,
         buffers,
-        cmdline_text: contents,
+        cmdline_text,
         commands,
       });
 
@@ -501,7 +501,7 @@ pub mod boost {
       cli_opt: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
-      contents: CmdlineTextArc,
+      cmdline_text: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -539,7 +539,7 @@ pub mod boost {
         cli_opts: cli_opt,
         tree,
         buffers,
-        cmdline_text: contents,
+        cmdline_text,
         commands,
       });
 
