@@ -89,8 +89,8 @@ arcstr = { version = "1.2", features = ["std"] }
 tree-sitter = "0.26"
 tree-sitter-loader = "0.26"
 tree-sitter-rust = "0.24"
-tree-sitter-md = "0.5.2"
-tree-sitter-toml-ng = "0.7.0"
+tree-sitter-md = "0.5"
+tree-sitter-toml-ng = "0.7"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
