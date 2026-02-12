@@ -38,7 +38,7 @@ pub fn list(
 ) {
   debug_assert!(_args.length() == 0);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = state_rc.borrow().buffer_manager.clone();
   let buffers = lock!(buffers);
   trace!("Rsvim.buf.list: {:?}", buffers.buffers().keys());
 
@@ -64,7 +64,7 @@ pub fn write_sync<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let buffers = state.buffers.clone();
+  let buffers = state.buffer_manager.clone();
   let buffers = lock!(buffers);
 
   match buffers.write_buffer(buf_id) {

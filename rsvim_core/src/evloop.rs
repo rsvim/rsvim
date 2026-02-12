@@ -91,7 +91,7 @@ pub struct EventLoop {
   pub state_machine: State,
 
   /// Vim buffers.
-  pub buffers: BufferManagerArc,
+  pub buffer_manager: BufferManagerArc,
   /// Text contents (except buffers).
   pub cmdline_text: CmdlineTextArc,
 
@@ -314,7 +314,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager: buffers,
       cmdline_text,
       writer,
       cancellation_token,
@@ -384,7 +384,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager: buffers,
       cmdline_text,
       writer,
       cancellation_token,
@@ -456,7 +456,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager: buffers,
       cmdline_text,
       writer,
       cancellation_token,
@@ -532,11 +532,14 @@ impl EventLoop {
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
-          lock!(self.buffers).new_file_buffer(canvas_size, input_file);
+          lock!(self.buffer_manager).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
-            let buf =
-              lock!(self.buffers).buffers().get(&buf_id).unwrap().clone();
+            let buf = lock!(self.buffer_manager)
+              .buffers()
+              .get(&buf_id)
+              .unwrap()
+              .clone();
             self._add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
@@ -555,7 +558,7 @@ impl EventLoop {
       }
     } else {
       let (buf_id, buf) = {
-        let mut buffers = lock!(self.buffers);
+        let mut buffers = lock!(self.buffer_manager);
         let buf_id = buffers.new_empty_buffer(canvas_size);
         let buf = buffers.buffers().get(&buf_id).unwrap().clone();
         (buf_id, buf)
@@ -581,7 +584,7 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let (_buf_id, buf) = {
-      let buffers = lock!(self.buffers);
+      let buffers = lock!(self.buffer_manager);
       let (buf_id, buf) = buffers.buffers().first_key_value().unwrap();
       (*buf_id, buf.clone())
     };
@@ -633,7 +636,7 @@ impl EventLoop {
         trace!("Polled terminal event ok: {:?}", event);
         let data_access = StateDataAccess::new(
           self.tree.clone(),
-          self.buffers.clone(),
+          self.buffer_manager.clone(),
           self.cmdline_text.clone(),
           self.master_tx.clone(),
           self.jsrt_forwarder_tx.clone(),
@@ -667,7 +670,7 @@ impl EventLoop {
           MockOperation::Operation(op) => {
             let data_access = StateDataAccess::new(
               self.tree.clone(),
-              self.buffers.clone(),
+              self.buffer_manager.clone(),
               self.cmdline_text.clone(),
               self.master_tx.clone(),
               self.jsrt_forwarder_tx.clone(),
@@ -792,7 +795,9 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
-          if let Some(buf) = lock!(self.buffers).buffers().get(&req.buffer_id) {
+          if let Some(buf) =
+            lock!(self.buffer_manager).buffers().get(&req.buffer_id)
+          {
             let mut buf = lock!(buf);
 
             // Early quit if any below conditions are met:
@@ -826,7 +831,7 @@ impl EventLoop {
             // release lock on the buffer
             drop(buf);
 
-            let buffers = self.buffers.clone();
+            let buffers = self.buffer_manager.clone();
             let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {

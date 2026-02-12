@@ -81,7 +81,7 @@ mod tests_tab_stop {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
@@ -94,7 +94,7 @@ mod tests_tab_stop {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 4);
 
@@ -127,7 +127,7 @@ mod tests_tab_stop {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
@@ -140,7 +140,7 @@ mod tests_tab_stop {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 1);
 
@@ -173,7 +173,7 @@ mod tests_tab_stop {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
@@ -186,7 +186,7 @@ mod tests_tab_stop {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
@@ -232,7 +232,7 @@ mod tests_file_encoding {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
@@ -249,7 +249,7 @@ mod tests_file_encoding {
     {
       use crate::buf::opt::FileEncodingOption;
 
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(
         global_local_options.file_encoding(),
@@ -285,7 +285,7 @@ mod tests_file_encoding {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
     }
@@ -298,7 +298,7 @@ mod tests_file_encoding {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
 
@@ -341,7 +341,7 @@ mod tests_file_format {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
@@ -358,7 +358,7 @@ mod tests_file_format {
     {
       use crate::buf::opt::FileFormatOption;
 
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
 
@@ -391,7 +391,7 @@ mod tests_file_format {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
@@ -404,7 +404,7 @@ mod tests_file_format {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_format(), FILE_FORMAT);
 
@@ -446,7 +446,7 @@ mod tests_expand_tab {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
@@ -459,7 +459,7 @@ mod tests_expand_tab {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert!(global_local_options.expand_tab());
 
@@ -492,7 +492,7 @@ mod tests_expand_tab {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
@@ -505,7 +505,7 @@ mod tests_expand_tab {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
 
@@ -548,7 +548,7 @@ mod tests_shift_width {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
@@ -561,7 +561,7 @@ mod tests_shift_width {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), 4);
 
@@ -594,7 +594,7 @@ mod tests_shift_width {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
@@ -607,7 +607,7 @@ mod tests_shift_width {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), 255);
 
@@ -640,7 +640,7 @@ mod tests_shift_width {
 
     // Before running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
@@ -653,7 +653,7 @@ mod tests_shift_width {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffers);
+      let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
 
