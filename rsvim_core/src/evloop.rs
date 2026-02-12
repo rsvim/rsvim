@@ -195,7 +195,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffers_manager = BufferManager::to_arc(BufferManager::new());
+    let buffer_manager = BufferManager::to_arc(BufferManager::new());
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let ex_commands_manager =
       CommandsManager::to_arc(CommandsManager::default());
@@ -249,7 +249,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers_manager,
+      buffer_manager,
       cmdline_text,
       ex_commands_manager,
       CancellationToken::new(),
