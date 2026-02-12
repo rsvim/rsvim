@@ -3,8 +3,10 @@
 
 use crate::prelude::*;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
+use once_cell::sync::Lazy;
 
 #[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
@@ -21,6 +23,66 @@ pub struct Style {
   /// Attributes: underline, bold, italic, etc.
   pub attr: Attributes,
 }
+
+pub const SYNTAX_NAMES: Lazy<FoldSet<CompactString>> = Lazy::new(|| {
+  vec![
+    "attribute",
+    "boolean",
+    "carriage-return",
+    "comment",
+    "comment.documentation",
+    "constant",
+    "constant.builtin",
+    "constructor",
+    "constructor.builtin",
+    "embedded",
+    "error",
+    "escape",
+    "function",
+    "function.builtin",
+    "keyword",
+    "markup",
+    "markup.bold",
+    "markup.heading",
+    "markup.italic",
+    "markup.link",
+    "markup.link.url",
+    "markup.list",
+    "markup.list.checked",
+    "markup.list.numbered",
+    "markup.list.unchecked",
+    "markup.list.unnumbered",
+    "markup.quote",
+    "markup.raw",
+    "markup.raw.block",
+    "markup.raw.inline",
+    "markup.strikethrough",
+    "module",
+    "number",
+    "operator",
+    "property",
+    "property.builtin",
+    "punctuation",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "punctuation.special",
+    "string",
+    "string.escape",
+    "string.regexp",
+    "string.special",
+    "string.special.symbol",
+    "tag",
+    "type",
+    "type.builtin",
+    "variable",
+    "variable.builtin",
+    "variable.member",
+    "variable.parameter",
+  ]
+  .iter()
+  .map(|i| i.to_compact_string())
+  .collect::<FoldSet<CompactString>>()
+});
 
 #[derive(Debug, Clone)]
 pub struct Highlight {
