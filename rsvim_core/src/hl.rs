@@ -78,4 +78,24 @@ impl HighlightManager {
   pub fn len(&self) -> usize {
     self.highlights.len()
   }
+
+  pub fn get(&self, id: &HighlightId) -> Option<&Highlight> {
+    self.highlights.get(id)
+  }
+
+  pub fn contains_key(&self, id: &HighlightId) -> bool {
+    self.highlights.contains_key(id)
+  }
+
+  pub fn insert(
+    &mut self,
+    key: HighlightId,
+    value: Highlight,
+  ) -> Option<Highlight> {
+    self.highlights.insert(key, value)
+  }
+
+  pub fn remove(&mut self, id: &HighlightId) -> Option<Highlight> {
+    self.highlights.remove(id)
+  }
 }
