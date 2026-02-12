@@ -28,12 +28,18 @@ mod tests_getter_setter {
   #[test]
   fn file_ext2() {
     let mut syn_mgr = SyntaxManager::new();
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "cc");
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "cpp");
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "c++");
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "hh");
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "hpp");
-    syn_mgr.insert_file_ext(LanguageId::from("cpp".to_compact_string()), "h++");
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "cc".to_compact_string());
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "cpp".to_compact_string());
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "c++".to_compact_string());
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "hh".to_compact_string());
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "hpp".to_compact_string());
+    syn_mgr
+      .insert_file_ext("cpp".to_compact_string(), "h++".to_compact_string());
     let actual = syn_mgr.get_id_by_file_ext("hpp");
     assert!(actual.is_some());
     assert_eq!(actual.unwrap(), &LanguageId::from("cpp"));
