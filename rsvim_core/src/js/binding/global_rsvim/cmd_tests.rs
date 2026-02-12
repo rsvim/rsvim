@@ -812,7 +812,7 @@ Rsvim.cmd.echo(`${prev}`);
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
     assert_eq!(commands.commands().len(), 1);
-    let first_command = commands.first_key_value();
+    let first_command = commands.commands().first_key_value();
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
