@@ -156,7 +156,7 @@ impl EventLoop {
     /* state_machine */ State,
     /* buffer_manager */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
-    /* commands */ CommandsManagerArc,
+    /* command_manager */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -197,8 +197,7 @@ impl EventLoop {
     // Buffers
     let buffer_manager = BufferManager::to_arc(BufferManager::new());
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-    let ex_commands_manager =
-      CommandsManager::to_arc(CommandsManager::default());
+    let command_manager = CommandsManager::to_arc(CommandsManager::default());
 
     // State
     let state_machine = State::default();
@@ -251,7 +250,7 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
-      ex_commands_manager,
+      command_manager,
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
@@ -276,7 +275,7 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
-      commands,
+      command_manager,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -304,7 +303,7 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
-      commands,
+      command_manager,
     );
 
     Ok(EventLoop {
