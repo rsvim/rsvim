@@ -24,7 +24,7 @@ pub struct Style {
   pub attr: Attributes,
 }
 
-pub const SYNTAX_NAMES: Lazy<FoldSet<CompactString>> = Lazy::new(|| {
+pub static SYNTAX_NAMES: Lazy<FoldSet<CompactString>> = Lazy::new(|| {
   vec![
     "attribute",
     "boolean",
