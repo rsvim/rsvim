@@ -10,12 +10,13 @@ use crossterm::style::Color;
 pub struct Cell {
   // The character/grapheme.
   symbol: CompactString,
-  // Foreground color.
+
+  // Foreground and background colors.
   fg: Color,
-  // Background color.
   bg: Color,
+
   // Attributes: underline, bold, italic, etc.
-  attrs: Attributes,
+  attr: Attributes,
 }
 
 impl Cell {
@@ -60,13 +61,13 @@ impl Cell {
   }
 
   /// Get attributes.
-  pub fn attrs(&self) -> Attributes {
-    self.attrs
+  pub fn attr(&self) -> Attributes {
+    self.attr
   }
 
   /// Set attributes.
-  pub fn set_attrs(&mut self, attrs: Attributes) {
-    self.attrs = attrs;
+  pub fn set_attr(&mut self, value: Attributes) {
+    self.attr = value;
   }
 }
 
@@ -83,13 +84,13 @@ impl Cell {
     symbol: CompactString,
     fg: Color,
     bg: Color,
-    attrs: Attributes,
+    attr: Attributes,
   ) -> Self {
     Cell {
       symbol,
       fg,
       bg,
-      attrs,
+      attr,
     }
   }
 
@@ -99,7 +100,7 @@ impl Cell {
       symbol: " ".to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attrs: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -109,7 +110,7 @@ impl Cell {
       symbol: CompactString::const_new(""),
       fg: Color::Reset,
       bg: Color::Reset,
-      attrs: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -118,7 +119,7 @@ impl Cell {
       symbol: c.to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attrs: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -127,7 +128,7 @@ impl Cell {
       symbol: s,
       fg: Color::Reset,
       bg: Color::Reset,
-      attrs: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 }
@@ -153,7 +154,7 @@ mod tests {
     assert_eq!(c.symbol(), "");
     assert_eq!(c.fg(), Color::Reset);
     assert_eq!(c.bg(), Color::Reset);
-    assert_eq!(c.attrs(), Attributes::default());
+    assert_eq!(c.attr(), Attributes::default());
   }
 
   #[test]
@@ -171,8 +172,8 @@ mod tests {
     assert_eq!(c1.fg(), c2.fg());
     assert_eq!(c1.bg(), Color::Reset);
     assert_eq!(c1.bg(), c2.bg());
-    assert_eq!(c1.attrs(), Attributes::default());
-    assert_eq!(c1.attrs(), c2.attrs());
+    assert_eq!(c1.attr(), Attributes::default());
+    assert_eq!(c1.attr(), c2.attr());
   }
 
   #[test]

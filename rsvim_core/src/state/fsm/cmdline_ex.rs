@@ -179,8 +179,7 @@ impl CmdlineEx {
     // Clear command-line both input content and message.
     let contents = data_access.cmdline_text.clone();
     let mut contents = lock!(contents);
-    let cmdline_input_content =
-      contents.cmdline_input().rope().to_compact_string();
+    let cmdline_input_content = contents.input().rope().to_compact_string();
 
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
@@ -208,13 +207,7 @@ impl CmdlineEx {
     let contents = data_access.cmdline_text.clone();
     let contents = lock!(contents);
 
-    cursor_ops::cursor_move(
-      &mut tree,
-      cmdline_id,
-      contents.cmdline_input(),
-      op,
-      true,
-    );
+    cursor_ops::cursor_move(&mut tree, cmdline_id, contents.input(), op, true);
 
     State::CmdlineEx(CmdlineEx::default())
   }
@@ -242,7 +235,7 @@ impl CmdlineEx {
     cursor_ops::cursor_insert(
       &mut tree,
       cmdline_id,
-      contents.cmdline_input_mut(),
+      contents.input_mut(),
       payload,
     );
 
@@ -260,7 +253,7 @@ impl CmdlineEx {
     let mut tree = lock!(tree);
     let contents = data_access.cmdline_text.clone();
     let mut contents = lock!(contents);
-    let text = contents.cmdline_input_mut();
+    let text = contents.input_mut();
 
     let cmdline_id = tree.cmdline_id().unwrap();
     debug_assert_eq!(

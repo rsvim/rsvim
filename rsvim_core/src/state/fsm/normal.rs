@@ -170,8 +170,7 @@ impl Normal {
     if cfg!(debug_assertions) {
       let contents = data_access.cmdline_text.clone();
       let contents = lock!(contents);
-      let cmdline_input_content =
-        contents.cmdline_input().rope().to_compact_string();
+      let cmdline_input_content = contents.input().rope().to_compact_string();
       debug_assert!(cmdline_input_content.is_empty());
     }
 

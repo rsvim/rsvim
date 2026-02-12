@@ -547,7 +547,7 @@ impl EventLoop {
             // print once TUI initialized.
             let mut cmdline_text = lock!(self.cmdline_text);
             cmdline_text
-              .cmdline_message_history_mut()
+              .message_history_mut()
               .push_overwrite(e.to_string());
           }
         }
