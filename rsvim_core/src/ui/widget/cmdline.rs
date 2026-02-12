@@ -7,7 +7,7 @@ pub mod message;
 #[cfg(test)]
 pub mod indicator_tests;
 
-use crate::cmdlinetext::CmdTextWk;
+use crate::cmdltext::CmdTextWk;
 use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;

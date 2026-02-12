@@ -1,6 +1,6 @@
 use crate::buf::BuffersManager;
 use crate::cli::CliOptions;
-use crate::cmdlinetext::CmdText;
+use crate::cmdltext::CmdlineText;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::command::CommandsManager;
@@ -29,7 +29,7 @@ pub fn make_js_runtime() -> JsRuntime {
   };
   let tree = Tree::to_arc(Tree::new(style).unwrap());
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-  let text_contents = CmdText::to_arc(CmdText::new(canvas_size));
+  let text_contents = CmdlineText::to_arc(CmdlineText::new(canvas_size));
   let ex_commands_manager = CommandsManager::to_arc(CommandsManager::default());
 
   let startup_moment = Instant::now();

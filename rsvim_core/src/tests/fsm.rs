@@ -2,8 +2,8 @@ use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
-use crate::cmdlinetext::CmdText;
-use crate::cmdlinetext::CmdTextArc;
+use crate::cmdltext::CmdlineText;
+use crate::cmdltext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::state::StateDataAccess;
 use crate::tests::buf::make_buffer_from_lines;
@@ -29,14 +29,14 @@ pub fn make_fsm(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  CmdTextArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let contents = CmdText::to_arc(CmdText::new(terminal_size));
+  let contents = CmdlineText::to_arc(CmdlineText::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -67,7 +67,7 @@ pub fn make_fsm_default_bufopts(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  CmdTextArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
@@ -84,12 +84,12 @@ pub fn make_fsm_with_cmdline(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  CmdTextArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let contents = CmdText::to_arc(CmdText::new(terminal_size));
+  let contents = CmdlineText::to_arc(CmdlineText::new(terminal_size));
   let tree = make_tree_with_buffers_cmdline(
     terminal_size,
     window_local_opts,
@@ -125,7 +125,7 @@ pub fn make_fsm_with_cmdline_default_bufopts(
   TreeArc,
   BuffersManagerArc,
   BufferArc,
-  CmdTextArc,
+  CmdlineTextArc,
   StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();

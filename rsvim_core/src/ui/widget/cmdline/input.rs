@@ -1,6 +1,6 @@
 //! Commandline's input content widget.
 
-use crate::cmdlinetext::CmdTextWk;
+use crate::cmdltext::CmdTextWk;
 use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;

@@ -1,7 +1,7 @@
 //! Tree utils for testing.
 
 use crate::buf::BuffersManagerArc;
-use crate::cmdlinetext::CmdTextArc;
+use crate::cmdltext::CmdlineTextArc;
 use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
@@ -73,7 +73,7 @@ pub fn make_tree_with_buffers_cmdline(
   canvas_size: U16Size,
   window_local_opts: WindowOptions,
   buffers_manager: BuffersManagerArc,
-  text_contents: CmdTextArc,
+  text_contents: CmdlineTextArc,
 ) -> TreeArc {
   let tree_style = Style {
     display: taffy::Display::Grid,

@@ -7,15 +7,15 @@ use ropey::Rope;
 use std::fmt::Debug;
 
 /// Temporary contents except buffers.
-pub struct CmdText {
+pub struct CmdlineText {
   cmdline_input: Text,
   cmdline_message: Text,
   cmdline_message_history: RingBuffer<String>,
 }
 
-arc_mutex_ptr!(CmdText);
+arc_mutex_ptr!(CmdlineText);
 
-impl CmdText {
+impl CmdlineText {
   pub fn new(canvas_size: U16Size) -> Self {
     let cmdline_opts = BufferOptionsBuilder::default().build().unwrap();
     Self {
@@ -56,7 +56,7 @@ impl CmdText {
   }
 }
 
-impl Debug for CmdText {
+impl Debug for CmdlineText {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.write_str("TextContents")
   }
