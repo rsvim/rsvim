@@ -101,6 +101,7 @@ impl Highlight {
     Self {
       id,
       syntax: FoldMap::new(),
+      ui: FoldMap::new(),
     }
   }
 
