@@ -2,7 +2,6 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
@@ -188,14 +187,12 @@ impl Syntax {
   }
 }
 
-structural_id_impl!(str, LanguageId);
-
 pub struct SyntaxManager {
-  languages: FoldMap<LanguageId, Language>,
+  languages: FoldMap<CompactString, Language>,
   // Maps language ID to file extensions
-  id2ext: FoldMap<LanguageId, FoldSet<CompactString>>,
+  id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to language ID
-  ext2id: FoldMap<CompactString, LanguageId>,
+  ext2id: FoldMap<CompactString, CompactString>,
 }
 
 impl Debug for SyntaxManager {
@@ -215,10 +212,11 @@ impl SyntaxManager {
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
     };
-    let rust_id = LanguageId::from("rust");
-    it.languages
-      .insert(rust_id.clone(), tree_sitter_rust::LANGUAGE.into());
-    it.insert_file_ext(rust_id, "rs");
+    it.languages.insert(
+      "rust".to_compact_string(),
+      tree_sitter_rust::LANGUAGE.into(),
+    );
+    it.insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
     it
   }
 
@@ -228,7 +226,7 @@ impl SyntaxManager {
   /// extensions:
   /// - Feader files: hh, h++, hpp
   /// - Source files: cc, c++, cpp
-  pub fn insert_file_ext(&mut self, id: LanguageId, ext: &str) {
+  pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
     self
       .id2ext
       .entry(id.clone())
@@ -238,34 +236,38 @@ impl SyntaxManager {
   }
 
   /// Un-associate a language ID with a file extension.
-  pub fn remove_file_ext(&mut self, id: LanguageId, ext: &str) {
-    self.id2ext.entry(id).or_default().remove(ext);
+  pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
+    self
+      .id2ext
+      .entry(id.to_compact_string())
+      .or_default()
+      .remove(ext);
     self.ext2id.remove(ext);
   }
 
   pub fn get_file_ext_by_id(
     &self,
-    id: &LanguageId,
+    id: &str,
   ) -> Option<&FoldSet<CompactString>> {
     self.id2ext.get(id)
   }
 
-  pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&LanguageId> {
+  pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
     self.ext2id.get(ext)
   }
 
-  pub fn insert_lang(&mut self, id: LanguageId, lang: Language) {
+  pub fn insert_lang(&mut self, id: CompactString, lang: Language) {
     self.languages.insert(id.clone(), lang);
     self.id2ext.entry(id.clone()).or_default();
   }
 
-  pub fn get_lang(&self, id: LanguageId) -> Option<&Language> {
-    self.languages.get(&id)
+  pub fn get_lang(&self, id: &str) -> Option<&Language> {
+    self.languages.get(id)
   }
 
   pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
     match self.ext2id.get(ext) {
-      Some(id) => self.get_lang(id.clone()),
+      Some(id) => self.get_lang(id),
       None => None,
     }
   }
