@@ -51,6 +51,10 @@ impl Highlight {
     }
   }
 
+  pub fn id(&self) -> &HighlightId {
+    &self.id
+  }
+
   pub fn is_empty(&self) -> bool {
     self.styles.is_empty()
   }
