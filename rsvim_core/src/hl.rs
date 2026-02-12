@@ -126,7 +126,11 @@ impl Highlight {
   }
 
   pub fn syntax(&self) -> &FoldMap<CompactString, Style> {
-    if cfg!(debug_assertions) {}
+    if cfg!(debug_assertions) {
+      for k in self.syntax.keys() {
+        debug_assert!(k.starts_with(SYNTAX_PREFIX));
+      }
+    }
     &self.syntax
   }
 
@@ -135,6 +139,11 @@ impl Highlight {
   }
 
   pub fn ui(&self) -> &FoldMap<CompactString, Style> {
+    if cfg!(debug_assertions) {
+      for k in self.ui.keys() {
+        debug_assert!(k.starts_with(UI_PREFIX));
+      }
+    }
     &self.ui
   }
 
