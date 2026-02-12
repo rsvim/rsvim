@@ -98,4 +98,16 @@ impl HighlightManager {
   pub fn remove(&mut self, id: &HighlightId) -> Option<Highlight> {
     self.highlights.remove(id)
   }
+
+  pub fn keys(&self) -> HighlightManagerKeys<'_> {
+    self.highlights.keys()
+  }
+
+  pub fn values(&self) -> HighlightManagerValues<'_> {
+    self.highlights.values()
+  }
+
+  pub fn iter(&self) -> HighlightManagerIter<'_> {
+    self.highlights.iter()
+  }
 }
