@@ -57,6 +57,13 @@ impl Default for HighlightManager {
   }
 }
 
+pub type HighlightManagerKeys<'a> =
+  std::collections::hash_map::Keys<'a, HighlightId, Highlight>;
+pub type HighlightManagerValues<'a> =
+  std::collections::hash_map::Values<'a, HighlightId, Highlight>;
+pub type HighlightManagerIter<'a> =
+  std::collections::hash_map::Iter<'a, HighlightId, Highlight>;
+
 impl HighlightManager {
   pub fn new() -> Self {
     Self {
