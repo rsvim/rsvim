@@ -6,7 +6,9 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
+use futures::stream::Fold;
 use once_cell::sync::Lazy;
+use swc_ecma_lexer::common::syntax;
 
 pub const SYNTAX_HIGHLIGHT_PREFIX: &str = "syn.";
 pub const UI_HIGHLIGHT_PREFIX: &str = "ui.";
@@ -128,11 +130,15 @@ impl ColorScheme {
   /// black = "#000000"
   /// ```
   pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
+    let mut palette: FoldMap<CompactString, CompactString> = FoldMap::new();
+    let mut syntax: FoldMap<CompactString, Highlight> = FoldMap::new();
+    let mut ui: FoldMap<CompactString, Highlight> = FoldMap::new();
+
     Self {
       name,
-      palette: FoldMap::new(),
-      syntax: FoldMap::new(),
-      ui: FoldMap::new(),
+      palette,
+      syntax,
+      ui,
     }
   }
 
