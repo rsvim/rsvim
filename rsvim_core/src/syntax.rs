@@ -121,13 +121,10 @@ impl Debug for Syntax {
 }
 
 impl Syntax {
-  pub fn new(lang: &Language) -> TheResult<Self> {
+  pub fn new(lang: &Language) -> Result<Self, LanguageError> {
     let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
-    match parser.set_language(lang) {
-      Ok(_) => {}
-      Err(e) => return Err(TheErr::LoadSyntaxFailed(e)),
-    }
+    parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
     Ok(Self {
       tree: None,

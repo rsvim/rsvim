@@ -375,7 +375,12 @@ impl BufferManager {
       );
       match Syntax::new(lang) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(e),
+        Err(e) => {
+          return Err(TheErr::LoadSyntaxFailed(
+            ext.to_string_lossy().to_compact_string(),
+            e,
+          ));
+        }
       }
     } else {
       Ok(None)
