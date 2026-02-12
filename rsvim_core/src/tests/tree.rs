@@ -88,10 +88,10 @@ pub fn make_tree_with_buffers_cmdline(
     ..Default::default()
   };
   let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
-  let buffers = lock!(buffers_manager);
-  let (_, buf) = buffers.buffers().first_key_value().unwrap();
+  let buffer_manager = lock!(buffers_manager);
+  let (_, buf) = buffer_manager.buffers().first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
-  let text_contents = Arc::downgrade(&cmdline_text);
+  let cmdline_text = Arc::downgrade(&cmdline_text);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(window_local_opts);
@@ -99,7 +99,7 @@ pub fn make_tree_with_buffers_cmdline(
   evloop_ui::init_default_window(
     &mut tree,
     buf,
-    text_contents,
+    cmdline_text,
     BLINKING,
     HIDDEN,
     CURSOR_STYLE,
