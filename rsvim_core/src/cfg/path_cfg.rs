@@ -1,5 +1,6 @@
 //! File path configs.
 
+use once_cell::sync::Lazy;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -229,3 +230,5 @@ impl Default for PathConfig {
     PathConfig::new()
   }
 }
+
+pub static PATH_CONFIG: Lazy<PathConfig> = Lazy::new(PathConfig::new);
