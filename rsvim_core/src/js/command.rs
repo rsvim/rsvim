@@ -82,24 +82,15 @@ pub struct CommandManager {
 
 arc_mutex_ptr!(CommandManager);
 
-pub type CommandsManagerKeys<'a> =
-  std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
-pub type CommandsManagerValues<'a> =
-  std::collections::btree_map::Values<'a, CompactString, CommandDefinitionRc>;
-pub type CommandsManagerIter<'a> =
-  std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
-
 impl CommandManager {
-  pub fn is_empty(&self) -> bool {
-    self.commands.is_empty()
+  pub fn commands(&self) -> &BTreeMap<CompactString, CommandDefinitionRc> {
+    &self.commands
   }
 
-  pub fn len(&self) -> usize {
-    self.commands.len()
-  }
-
-  pub fn remove(&mut self, name: &str) -> Option<CommandDefinitionRc> {
-    self.commands.remove(name)
+  pub fn commands_mut(
+    &mut self,
+  ) -> &mut BTreeMap<CompactString, CommandDefinitionRc> {
+    &mut self.commands
   }
 
   /// Insert new command definition.
@@ -141,38 +132,6 @@ impl CommandManager {
 
     let maybe_old = self.commands.insert(name, definition);
     Ok(maybe_old)
-  }
-
-  pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
-    self.commands.get(name).cloned()
-  }
-
-  pub fn contains_key(&self, name: &str) -> bool {
-    self.commands.contains_key(name)
-  }
-
-  pub fn keys(&self) -> CommandsManagerKeys<'_> {
-    self.commands.keys()
-  }
-
-  pub fn values(&self) -> CommandsManagerValues<'_> {
-    self.commands.values()
-  }
-
-  pub fn iter(&self) -> CommandsManagerIter<'_> {
-    self.commands.iter()
-  }
-
-  pub fn first_key_value(
-    &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
-    self.commands.first_key_value()
-  }
-
-  pub fn last_key_value(
-    &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
-    self.commands.last_key_value()
   }
 }
 
