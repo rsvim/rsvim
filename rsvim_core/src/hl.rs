@@ -104,6 +104,7 @@ impl Highlight {
   pub fn new(id: CompactString) -> Self {
     Self {
       id,
+      palette: FoldMap::new(),
       syntax: FoldMap::new(),
       ui: FoldMap::new(),
     }
@@ -111,6 +112,14 @@ impl Highlight {
 
   pub fn id(&self) -> &CompactString {
     &self.id
+  }
+
+  pub fn palette(&self) -> &FoldMap<CompactString, CompactString> {
+    &self.palette
+  }
+
+  pub fn palette_mut(&mut self) -> &mut FoldMap<CompactString, CompactString> {
+    &mut self.palette
   }
 
   pub fn syntax(&self) -> &FoldMap<CompactString, Style> {
