@@ -535,7 +535,8 @@ impl EventLoop {
           lock!(self.buffers).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
-            let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
+            let buf =
+              lock!(self.buffers).buffers().get(&buf_id).unwrap().clone();
             self._add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
@@ -556,7 +557,7 @@ impl EventLoop {
       let (buf_id, buf) = {
         let mut buffers = lock!(self.buffers);
         let buf_id = buffers.new_empty_buffer(canvas_size);
-        let buf = buffers.get(&buf_id).unwrap().clone();
+        let buf = buffers.buffers().get(&buf_id).unwrap().clone();
         (buf_id, buf)
       };
       self._add_pending_syntax_edit(buf);
@@ -581,7 +582,7 @@ impl EventLoop {
     let mut tree = lock!(self.tree);
     let (_buf_id, buf) = {
       let buffers = lock!(self.buffers);
-      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      let (buf_id, buf) = buffers.buffers().first_key_value().unwrap();
       (*buf_id, buf.clone())
     };
     let buf = Arc::downgrade(&buf);
@@ -791,7 +792,7 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
-          if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
+          if let Some(buf) = lock!(self.buffers).buffers().get(&req.buffer_id) {
             let mut buf = lock!(buf);
 
             // Early quit if any below conditions are met:
@@ -833,7 +834,7 @@ impl EventLoop {
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
               // If the buffer and its syntax still exist
-              if let Some(buf) = lock!(buffers).get(&req.buffer_id) {
+              if let Some(buf) = lock!(buffers).buffers().get(&req.buffer_id) {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   syn.set_tree(parsed_tree);
