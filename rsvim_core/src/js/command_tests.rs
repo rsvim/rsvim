@@ -41,11 +41,11 @@ async fn test_js_echo1() -> IoResult<()> {
 
   // After running
   {
-    let mut cmdline_text = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
