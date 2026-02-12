@@ -2,8 +2,8 @@
 
 use crate::buf::Buffer;
 use crate::buf::BufferArc;
-use crate::buf::BuffersManager;
-use crate::buf::BuffersManagerArc;
+use crate::buf::BufferManager;
+use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::prelude::*;
 use ropey::Rope;
@@ -43,11 +43,11 @@ pub fn make_empty_buffer(
 pub fn make_buffers_manager(
   opts: BufferOptions,
   bufs: Vec<BufferArc>,
-) -> BuffersManagerArc {
-  let mut bm = BuffersManager::new();
+) -> BufferManagerArc {
+  let mut bm = BufferManager::new();
   bm.set_global_local_options(&opts);
   for buf in bufs.iter() {
     bm._add_buffer(buf.clone());
   }
-  BuffersManager::to_arc(bm)
+  BufferManager::to_arc(bm)
 }

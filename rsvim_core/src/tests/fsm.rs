@@ -1,5 +1,5 @@
 use crate::buf::BufferArc;
-use crate::buf::BuffersManagerArc;
+use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::cmdltext::CmdlineText;
@@ -27,7 +27,7 @@ pub fn make_fsm(
 ) -> (
   Event,
   TreeArc,
-  BuffersManagerArc,
+  BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
   StateDataAccess,
@@ -65,7 +65,7 @@ pub fn make_fsm_default_bufopts(
 ) -> (
   Event,
   TreeArc,
-  BuffersManagerArc,
+  BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
   StateDataAccess,
@@ -82,7 +82,7 @@ pub fn make_fsm_with_cmdline(
 ) -> (
   Event,
   TreeArc,
-  BuffersManagerArc,
+  BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
   StateDataAccess,
@@ -123,7 +123,7 @@ pub fn make_fsm_with_cmdline_default_bufopts(
 ) -> (
   Event,
   TreeArc,
-  BuffersManagerArc,
+  BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
   StateDataAccess,

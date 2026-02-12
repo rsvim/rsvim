@@ -17,7 +17,7 @@ pub mod ops;
 #[cfg(test)]
 mod mode_tests;
 
-use crate::buf::BuffersManagerArc;
+use crate::buf::BufferManagerArc;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
 use crate::cmdltext::CmdlineTextArc;
@@ -39,7 +39,7 @@ use tokio::sync::mpsc::UnboundedSender;
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StateDataAccess {
   pub tree: TreeArc,
-  pub buffers: BuffersManagerArc,
+  pub buffers: BufferManagerArc,
   pub cmdline_text: CmdlineTextArc,
   pub master_tx: UnboundedSender<MasterMessage>,
   pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
@@ -48,7 +48,7 @@ pub struct StateDataAccess {
 impl StateDataAccess {
   pub fn new(
     tree: TreeArc,
-    buffers: BuffersManagerArc,
+    buffers: BufferManagerArc,
     cmdline_text: CmdlineTextArc,
     master_tx: UnboundedSender<MasterMessage>,
     jsrt_forwarder_tx: UnboundedSender<JsMessage>,

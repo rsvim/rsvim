@@ -1,4 +1,4 @@
-use crate::buf::BuffersManager;
+use crate::buf::BufferManager;
 use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineText;
 use crate::js::JsRuntime;
@@ -28,7 +28,7 @@ pub fn make_js_runtime() -> JsRuntime {
     ..Default::default()
   };
   let tree = Tree::to_arc(Tree::new(style).unwrap());
-  let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
+  let buffers_manager = BufferManager::to_arc(BufferManager::new());
   let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
   let ex_commands_manager = CommandsManager::to_arc(CommandsManager::default());
 

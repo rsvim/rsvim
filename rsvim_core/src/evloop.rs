@@ -4,8 +4,8 @@ pub mod ui;
 pub mod writer;
 
 use crate::buf::BufferArc;
-use crate::buf::BuffersManager;
-use crate::buf::BuffersManagerArc;
+use crate::buf::BufferManager;
+use crate::buf::BufferManagerArc;
 use crate::chan;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
@@ -91,7 +91,7 @@ pub struct EventLoop {
   pub state_machine: State,
 
   /// Vim buffers.
-  pub buffers: BuffersManagerArc,
+  pub buffers: BufferManagerArc,
   /// Text contents (except buffers).
   pub cmdline_text: CmdlineTextArc,
 
@@ -154,7 +154,7 @@ impl EventLoop {
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ State,
-    /* buffers */ BuffersManagerArc,
+    /* buffers */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
     /* commands */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
@@ -195,7 +195,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
+    let buffers_manager = BufferManager::to_arc(BufferManager::new());
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let ex_commands_manager =
       CommandsManager::to_arc(CommandsManager::default());

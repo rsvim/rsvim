@@ -2,7 +2,7 @@
 
 use super::cmdline_ex::*;
 use crate::buf::BufferArc;
-use crate::buf::BuffersManagerArc;
+use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;

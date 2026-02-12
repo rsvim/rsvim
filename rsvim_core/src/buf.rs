@@ -193,7 +193,7 @@ impl Buffer {
 /// The manager for all normal (file) buffers.
 ///
 /// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
-pub struct BuffersManager {
+pub struct BufferManager {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
 
@@ -207,7 +207,7 @@ pub struct BuffersManager {
   syntax_manager: SyntaxManager,
 }
 
-arc_mutex_ptr!(BuffersManager);
+arc_mutex_ptr!(BufferManager);
 
 pub type BuffersManagerKeys<'a> =
   std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
@@ -216,9 +216,9 @@ pub type BuffersManagerValues<'a> =
 pub type BuffersManagerIter<'a> =
   std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
-impl BuffersManager {
+impl BufferManager {
   pub fn new() -> Self {
-    BuffersManager {
+    BufferManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
@@ -389,7 +389,7 @@ impl BuffersManager {
 
 // Primitive APIs {
 
-impl BuffersManager {
+impl BufferManager {
   fn read_file(
     &self,
     canvas_size: U16Size,
@@ -467,7 +467,7 @@ impl BuffersManager {
 // Primitive APIs }
 
 // BTreeMap {
-impl BuffersManager {
+impl BufferManager {
   pub fn is_empty(&self) -> bool {
     self.buffers.is_empty()
   }
@@ -510,14 +510,14 @@ impl BuffersManager {
 }
 // BTreeMap }
 
-impl Default for BuffersManager {
+impl Default for BufferManager {
   fn default() -> Self {
-    BuffersManager::new()
+    BufferManager::new()
   }
 }
 
 // Options {
-impl BuffersManager {
+impl BufferManager {
   pub fn global_local_options(&self) -> &BufferOptions {
     &self.global_local_options
   }
