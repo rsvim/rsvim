@@ -1,6 +1,7 @@
 //! Highlight.
 
 use crate::prelude::*;
+use crate::structural_id_impl;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 
@@ -16,6 +17,8 @@ pub struct Style {
   /// Attributes: underline, bold, italic, etc.
   pub attr: Attributes,
 }
+
+structural_id_impl!(str, HighlightId);
 
 pub struct Highlight {}
 
