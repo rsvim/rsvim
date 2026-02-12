@@ -472,12 +472,44 @@ pub type BufferManagerIter<'a> =
 
 // Buffers {
 impl BufferManager {
-  pub fn buffers(&self) -> &BTreeMap<BufferId, BufferArc> {
-    &self.buffers
+  pub fn is_empty(&self) -> bool {
+    self.buffers.is_empty()
   }
 
-  pub fn buffers_mut(&mut self) -> &mut BTreeMap<BufferId, BufferArc> {
-    &mut self.buffers
+  pub fn len(&self) -> usize {
+    self.buffers.len()
+  }
+
+  pub fn remove(&mut self, id: &BufferId) -> Option<BufferArc> {
+    self.buffers.remove(id)
+  }
+
+  pub fn get(&self, id: &BufferId) -> Option<&BufferArc> {
+    self.buffers.get(id)
+  }
+
+  pub fn contains_key(&self, id: &BufferId) -> bool {
+    self.buffers.contains_key(id)
+  }
+
+  pub fn keys(&self) -> BuffersManagerKeys<'_> {
+    self.buffers.keys()
+  }
+
+  pub fn values(&self) -> BuffersManagerValues<'_> {
+    self.buffers.values()
+  }
+
+  pub fn iter(&self) -> BuffersManagerIter<'_> {
+    self.buffers.iter()
+  }
+
+  pub fn first_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.first_key_value()
+  }
+
+  pub fn last_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.last_key_value()
   }
 }
 // Buffers }
