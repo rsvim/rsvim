@@ -345,7 +345,7 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
-      commands,
+      command_manager,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -373,7 +373,7 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
-      commands,
+      command_manager,
     );
 
     Ok(EventLoop {
@@ -416,7 +416,7 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
-      commands,
+      command_manager,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -445,7 +445,7 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
-      commands,
+      command_manager,
     );
 
     Ok(EventLoop {

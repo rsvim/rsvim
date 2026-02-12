@@ -412,7 +412,7 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
-      commands: CommandsManagerArc,
+      command_manager: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -466,7 +466,7 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
-        command_manager: commands,
+        command_manager,
       });
 
       isolate.set_slot(state.clone());
@@ -502,7 +502,7 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
-      commands: CommandsManagerArc,
+      command_manager: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -540,7 +540,7 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
-        command_manager: commands,
+        command_manager,
       });
 
       isolate.set_slot(state.clone());
@@ -659,9 +659,9 @@ pub mod boost {
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{:?}", req.payload);
             let mut state = state_rc.borrow_mut();
-            let commands = state.command_manager.clone();
-            let commands = lock!(commands);
-            if let Some(command_cb) = commands.parse(&req) {
+            let command_manager = state.command_manager.clone();
+            let command_manager = lock!(command_manager);
+            if let Some(command_cb) = command_manager.parse(&req) {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message
