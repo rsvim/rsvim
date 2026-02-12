@@ -64,10 +64,10 @@ pub fn write_sync<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let buffers = state.buffer_manager.clone();
-  let buffers = lock!(buffers);
+  let buffer_manager = state.buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
 
-  match buffers.write_buffer(buf_id) {
+  match buffer_manager.write_buffer(buf_id) {
     Ok(n) => {
       trace!("write_sync success, bufId:{:?}, bytes:{:?}", buf_id, n);
       rv.set_int32(n as i32);
