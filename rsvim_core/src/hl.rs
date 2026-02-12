@@ -24,6 +24,7 @@ pub struct Style {
   pub attr: Attributes,
 }
 
+#[derive(Debug, Clone)]
 pub struct Highlight {
   styles: FoldMap<HighlightId, Style>,
 }
