@@ -89,22 +89,18 @@ pub struct Highlight {
   // Highlight ID
   id: CompactString,
 
-  // Maps style ID => style
-  styles: FoldMap<CompactString, Style>,
-}
+  // Maps ID => syntax colors
+  syntax: FoldMap<CompactString, Style>,
 
-pub type HighlightKeys<'a> =
-  std::collections::hash_map::Keys<'a, CompactString, Style>;
-pub type HighlightValues<'a> =
-  std::collections::hash_map::Values<'a, CompactString, Style>;
-pub type HighlightIter<'a> =
-  std::collections::hash_map::Iter<'a, CompactString, Style>;
+  // Maps ID => UI colors
+  ui: FoldMap<CompactString, Style>,
+}
 
 impl Highlight {
   pub fn new(id: CompactString) -> Self {
     Self {
       id,
-      styles: FoldMap::new(),
+      syntax: FoldMap::new(),
     }
   }
 
@@ -112,40 +108,20 @@ impl Highlight {
     &self.id
   }
 
-  pub fn is_empty(&self) -> bool {
-    self.styles.is_empty()
+  pub fn syntax(&self) -> &FoldMap<CompactString, Style> {
+    &self.syntax
   }
 
-  pub fn len(&self) -> usize {
-    self.styles.len()
+  pub fn syntax_mut(&mut self) -> &mut FoldMap<CompactString, Style> {
+    &mut self.syntax
   }
 
-  pub fn get(&self, id: &str) -> Option<&Style> {
-    self.styles.get(id)
+  pub fn ui(&self) -> &FoldMap<CompactString, Style> {
+    &self.ui
   }
 
-  pub fn contains_key(&self, id: &str) -> bool {
-    self.styles.contains_key(id)
-  }
-
-  pub fn insert(&mut self, key: CompactString, value: Style) -> Option<Style> {
-    self.styles.insert(key, value)
-  }
-
-  pub fn remove(&mut self, id: &str) -> Option<Style> {
-    self.styles.remove(id)
-  }
-
-  pub fn keys(&self) -> HighlightKeys<'_> {
-    self.styles.keys()
-  }
-
-  pub fn values(&self) -> HighlightValues<'_> {
-    self.styles.values()
-  }
-
-  pub fn iter(&self) -> HighlightIter<'_> {
-    self.styles.iter()
+  pub fn ui_mut(&self) -> &FoldMap<CompactString, Style> {
+    &self.ui
   }
 }
 
