@@ -35,6 +35,15 @@ pub struct Highlight {
   styles: FoldMap<StyleId, Style>,
 }
 
+impl Highlight {
+  pub fn new(id: HighlightId) -> Self {
+    Self {
+      id,
+      styles: FoldMap::new(),
+    }
+  }
+}
+
 #[derive(Debug)]
 pub struct HighlightManager {
   // Maps highlight ID => highlight
