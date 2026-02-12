@@ -89,6 +89,9 @@ pub struct Highlight {
   // Highlight ID
   id: CompactString,
 
+  // Maps color name to RGB value.
+  palette: FoldMap<CompactString, CompactString>,
+
   // Maps ID => syntax colors
   syntax: FoldMap<CompactString, Style>,
 
