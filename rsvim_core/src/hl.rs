@@ -116,7 +116,7 @@ impl ColorScheme {
 
   pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {}
 
-  pub fn id(&self) -> &CompactString {
+  pub fn name(&self) -> &CompactString {
     &self.name
   }
 
