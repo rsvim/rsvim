@@ -186,9 +186,9 @@ pub fn get_file_encoding(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().file_encoding();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
   rv.set(value.into());
@@ -205,11 +205,13 @@ pub fn set_file_encoding<'s>(
   let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   let value = FileEncodingOption::try_from(value.as_str()).unwrap();
-  buffers.global_local_options_mut().set_file_encoding(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_file_encoding(value);
 }
 
 /// Get the _file-format_ option.
