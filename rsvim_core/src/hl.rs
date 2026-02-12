@@ -9,7 +9,7 @@ use crossterm::style::Color;
 
 structural_id_impl!(str, StyleId);
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
 pub struct Style {
   /// Style ID
