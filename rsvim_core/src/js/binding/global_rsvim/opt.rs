@@ -222,9 +222,9 @@ pub fn get_file_format(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().file_format();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
   rv.set(value.into());
