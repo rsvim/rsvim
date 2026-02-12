@@ -214,6 +214,7 @@ mod tests_buffer_editing {
     // After running
     {
       let buf = lock!(event_loop.buffers)
+        .buffers()
         .first_key_value()
         .unwrap()
         .1
@@ -299,6 +300,7 @@ mod tests_buffer_editing {
     // After running
     {
       let buf = lock!(event_loop.buffers)
+        .buffers()
         .first_key_value()
         .unwrap()
         .1
@@ -443,6 +445,7 @@ mod tests_buffer_editing {
     // After running
     {
       let buf = lock!(event_loop.buffers)
+        .buffers()
         .first_key_value()
         .unwrap()
         .1
