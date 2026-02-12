@@ -6,13 +6,13 @@ use compact_str::CompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 
-structural_id_impl!(str, HighlightId);
+structural_id_impl!(str, StyleId);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Highlight style, including colors and attributes.
 pub struct Style {
   /// Style ID
-  pub id: HighlightId,
+  pub id: StyleId,
 
   /// Foreground color.
   pub fg: Color,
@@ -24,13 +24,20 @@ pub struct Style {
   pub attr: Attributes,
 }
 
+structural_id_impl!(str, HighlightId);
+
 #[derive(Debug, Clone)]
 pub struct Highlight {
-  styles: FoldMap<HighlightId, Style>,
+  // Highlight ID
+  id: HighlightId,
+
+  // Maps style ID => style
+  styles: FoldMap<StyleId, Style>,
 }
 
-arc_mutex_ptr!(Highlight);
-
-pub struct HighlightManager {}
+pub struct HighlightManager {
+  // Maps highlight ID => highlight
+  highlights: FoldMap<HighlightId, Highlight>,
+}
 
 arc_mutex_ptr!(HighlightManager);
