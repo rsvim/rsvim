@@ -66,8 +66,8 @@ impl Cell {
   }
 
   /// Set attributes.
-  pub fn set_attributes(&mut self, attrs: Attributes) {
-    self.attributes = attrs;
+  pub fn set_attributes(&mut self, value: Attributes) {
+    self.attributes = value;
   }
 }
 
