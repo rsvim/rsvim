@@ -71,11 +71,11 @@ impl HighlightManager {
     }
   }
 
-  pub fn highlights(&self) -> &FoldMap<HighlightId, Highlight> {
-    &self.highlights
+  pub fn is_empty(&self) -> bool {
+    self.highlights.is_empty()
   }
 
-  pub fn highlights_mut(&mut self) -> &mut FoldMap<HighlightId, Highlight> {
-    &mut self.highlights
+  pub fn len(&self) -> usize {
+    self.highlights.len()
   }
 }
