@@ -1,6 +1,6 @@
 //! Commandline's input content widget.
 
-use crate::cmdltext::CmdTextWk;
+use crate::cmdltext::CmdlineTextWk;
 use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
@@ -13,7 +13,7 @@ use crate::ui::widget::Widgetable;
 /// Commandline input content.
 pub struct CmdlineInput {
   __node: InodeBase,
-  text_contents: CmdTextWk,
+  text_contents: CmdlineTextWk,
   viewport: ViewportWk,
 }
 
@@ -23,7 +23,7 @@ impl CmdlineInput {
   pub fn new(
     id: NodeId,
     ctx: TreeContextWk,
-    text_contents: CmdTextWk,
+    text_contents: CmdlineTextWk,
     viewport: ViewportWk,
   ) -> Self {
     CmdlineInput {
