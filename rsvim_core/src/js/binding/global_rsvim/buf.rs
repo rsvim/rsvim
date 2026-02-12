@@ -38,11 +38,11 @@ pub fn list(
 ) {
   debug_assert!(_args.length() == 0);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  trace!("Rsvim.buf.list: {:?}", buffers.buffers().keys());
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  trace!("Rsvim.buf.list: {:?}", buffer_manager.buffers().keys());
 
-  let bufs = buffers
+  let bufs = buffer_manager
     .buffers()
     .keys()
     .collect::<Vec<&BufferId>>()
