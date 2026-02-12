@@ -30,7 +30,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
 
   // Before running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     assert!(contents.cmdline_message().rope().to_string().is_empty());
   }
 
@@ -42,7 +42,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     let payload = contents.cmdline_message().rope().to_string();
     let payload = payload.trim();
     assert!(
@@ -78,7 +78,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
 
   // Before running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     assert!(contents.cmdline_message().rope().to_string().is_empty());
   }
 
@@ -90,7 +90,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     let payload = contents.cmdline_message().rope().to_string();
     let payload = payload.trim();
     assert!(
@@ -126,7 +126,7 @@ async fn test_echo3() -> IoResult<()> {
 
   // Before running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     assert_eq!(contents.cmdline_message().rope().to_string(), "");
   }
 
@@ -138,7 +138,7 @@ async fn test_echo3() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     let actual = contents.cmdline_message().rope().to_string();
     let actual = actual.trim();
     assert!(
@@ -178,7 +178,7 @@ async fn test_echo4() -> IoResult<()> {
 
   // Before running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     let actual = contents.cmdline_message().rope().to_string();
     assert!(actual.is_empty());
   }
@@ -191,7 +191,7 @@ async fn test_echo4() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.cmdline_text);
     let actual = contents.cmdline_message().rope().to_string();
     let actual = actual.trim();
     assert_eq!(actual, "true");
@@ -238,7 +238,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -296,7 +296,7 @@ setTimeout(() => {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 3);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -367,7 +367,7 @@ setTimeout(() => {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -435,7 +435,7 @@ setTimeout(() => {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -504,7 +504,7 @@ setTimeout(() => {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -567,7 +567,7 @@ Rsvim.cmd.list().forEach((name) => {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
@@ -628,7 +628,7 @@ Rsvim.cmd.echo(`name:${def.name}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
@@ -689,7 +689,7 @@ Rsvim.cmd.echo(`name:${def}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
@@ -750,7 +750,7 @@ Rsvim.cmd.echo(prev.name);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
@@ -798,7 +798,7 @@ Rsvim.cmd.echo(`${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
@@ -854,7 +854,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -902,7 +902,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -950,7 +950,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -998,7 +998,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1046,7 +1046,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1094,7 +1094,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1142,7 +1142,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1190,7 +1190,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1238,7 +1238,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();
@@ -1286,7 +1286,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
     let actual = contents.cmdline_message_history_mut().pop();

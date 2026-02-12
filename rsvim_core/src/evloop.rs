@@ -93,7 +93,7 @@ pub struct EventLoop {
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
-  pub contents: CmdlineTextArc,
+  pub cmdline_text: CmdlineTextArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -155,7 +155,7 @@ impl EventLoop {
     /* tree */ TreeArc,
     /* state_machine */ State,
     /* buffers */ BuffersManagerArc,
-    /* contents */ CmdlineTextArc,
+    /* cmdline_text */ CmdlineTextArc,
     /* commands */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -196,7 +196,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = CmdlineText::to_arc(CmdlineText::new(canvas_size));
+    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let ex_commands_manager =
       CommandsManager::to_arc(CommandsManager::default());
 
@@ -250,7 +250,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers_manager,
-      text_contents,
+      cmdline_text,
       ex_commands_manager,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -315,7 +315,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text: contents,
       writer,
       cancellation_token,
       detached_tracker,
@@ -385,7 +385,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text: contents,
       writer,
       cancellation_token,
       detached_tracker,
@@ -457,7 +457,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text: contents,
       writer,
       cancellation_token,
       detached_tracker,
@@ -545,7 +545,7 @@ impl EventLoop {
 
             // Append error message to command line message history, wait for
             // print once TUI initialized.
-            let mut contents = lock!(self.contents);
+            let mut contents = lock!(self.cmdline_text);
             contents
               .cmdline_message_history_mut()
               .push_overwrite(e.to_string());
@@ -585,7 +585,7 @@ impl EventLoop {
       (*buf_id, buf.clone())
     };
     let buf = Arc::downgrade(&buf);
-    let text_contents = Arc::downgrade(&self.contents);
+    let text_contents = Arc::downgrade(&self.cmdline_text);
 
     ui::init_default_window(
       &mut tree,
@@ -611,7 +611,7 @@ impl EventLoop {
   //
   // And all messages will be print once the editor TUI is initialized.
   fn _init_pending_messages(&mut self) {
-    let mut contents = lock!(self.contents);
+    let mut contents = lock!(self.cmdline_text);
     let mut tree = lock!(self.tree);
     cmdline_ops::cmdline_set_last_pending_message_on_initialize(
       &mut tree,
@@ -633,7 +633,7 @@ impl EventLoop {
         let data_access = StateDataAccess::new(
           self.tree.clone(),
           self.buffers.clone(),
-          self.contents.clone(),
+          self.cmdline_text.clone(),
           self.master_tx.clone(),
           self.jsrt_forwarder_tx.clone(),
         );
@@ -667,7 +667,7 @@ impl EventLoop {
             let data_access = StateDataAccess::new(
               self.tree.clone(),
               self.buffers.clone(),
-              self.contents.clone(),
+              self.cmdline_text.clone(),
               self.master_tx.clone(),
               self.jsrt_forwarder_tx.clone(),
             );

@@ -36,7 +36,7 @@ pub fn make_fsm(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let contents = CmdlineText::to_arc(CmdlineText::new(terminal_size));
+  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -50,12 +50,12 @@ pub fn make_fsm(
   let data_access = StateDataAccess::new(
     tree.clone(),
     bufs.clone(),
-    contents.clone(),
+    cmdline_text.clone(),
     master_tx,
     jsrt_forwarder_tx,
   );
 
-  (event, tree, bufs, buf, contents, data_access)
+  (event, tree, bufs, buf, cmdline_text, data_access)
 }
 
 pub fn make_fsm_default_bufopts(
