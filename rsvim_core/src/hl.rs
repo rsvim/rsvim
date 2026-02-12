@@ -88,7 +88,6 @@ pub struct Highlight {
   pub attr: Attributes,
 }
 
-
 #[derive(Debug, Clone)]
 pub struct ColorScheme {
   // Name.
@@ -106,16 +105,16 @@ pub struct ColorScheme {
 }
 
 impl ColorScheme {
-  pub fn new(id: CompactString) -> Self {
+  pub fn from_empty(name: CompactString) -> Self {
     Self {
-      name: id,
+      name,
       palette: FoldMap::new(),
       syntax: FoldMap::new(),
       ui: FoldMap::new(),
     }
   }
 
-  pub fn from_toml(id: CompactString, )
+  pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {}
 
   pub fn id(&self) -> &CompactString {
     &self.name
@@ -222,4 +221,3 @@ impl ColorSchemeManager {
     self.highlights.iter()
   }
 }
-
