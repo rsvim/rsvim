@@ -187,11 +187,11 @@ impl Default for ColorSchemeManager {
   }
 }
 
-pub type HighlightManagerKeys<'a> =
+pub type ColorSchemeManagerKeys<'a> =
   std::collections::hash_map::Keys<'a, CompactString, ColorScheme>;
-pub type HighlightManagerValues<'a> =
+pub type ColorSchemeManagerValues<'a> =
   std::collections::hash_map::Values<'a, CompactString, ColorScheme>;
-pub type HighlightManagerIter<'a> =
+pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
 
 impl ColorSchemeManager {
@@ -229,15 +229,15 @@ impl ColorSchemeManager {
     self.highlights.remove(id)
   }
 
-  pub fn keys(&self) -> HighlightManagerKeys<'_> {
+  pub fn keys(&self) -> ColorSchemeManagerKeys<'_> {
     self.highlights.keys()
   }
 
-  pub fn values(&self) -> HighlightManagerValues<'_> {
+  pub fn values(&self) -> ColorSchemeManagerValues<'_> {
     self.highlights.values()
   }
 
-  pub fn iter(&self) -> HighlightManagerIter<'_> {
+  pub fn iter(&self) -> ColorSchemeManagerIter<'_> {
     self.highlights.iter()
   }
 }
