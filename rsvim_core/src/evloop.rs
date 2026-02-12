@@ -611,11 +611,11 @@ impl EventLoop {
   //
   // And all messages will be print once the editor TUI is initialized.
   fn _init_pending_messages(&mut self) {
-    let mut contents = lock!(self.cmdline_text);
+    let mut cmdline_text = lock!(self.cmdline_text);
     let mut tree = lock!(self.tree);
     cmdline_ops::cmdline_set_last_pending_message_on_initialize(
       &mut tree,
-      &mut contents,
+      &mut cmdline_text,
     );
   }
 

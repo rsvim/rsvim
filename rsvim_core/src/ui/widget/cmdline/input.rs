@@ -42,11 +42,11 @@ impl Widgetable for CmdlineInput {
   fn draw(&self, canvas: &mut Canvas) {
     if self.enabled() {
       let actual_shape = self.actual_shape();
-      let contents = self.cmdline_text.upgrade().unwrap();
-      let contents = lock!(contents);
+      let cmdline_text = self.cmdline_text.upgrade().unwrap();
+      let cmdline_text = lock!(cmdline_text);
       let viewport = self.viewport.upgrade().unwrap();
 
-      viewport.draw(contents.cmdline_input(), &actual_shape, canvas);
+      viewport.draw(cmdline_text.cmdline_input(), &actual_shape, canvas);
     }
   }
 }
