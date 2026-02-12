@@ -248,7 +248,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -319,7 +319,7 @@ setTimeout(() => {
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -384,7 +384,7 @@ setTimeout(() => {
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 2);
     for (name, def) in commands.iter() {
       assert!(name == "write" || name == "writeSync");
@@ -452,7 +452,7 @@ setTimeout(() => {
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -521,7 +521,7 @@ setTimeout(() => {
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -583,7 +583,7 @@ Rsvim.cmd.list().forEach((name) => {
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -644,7 +644,7 @@ Rsvim.cmd.echo(`name:${def.name}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -705,7 +705,7 @@ Rsvim.cmd.echo(`name:${def}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -762,7 +762,7 @@ Rsvim.cmd.echo(prev.name);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -810,7 +810,7 @@ Rsvim.cmd.echo(`${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert_eq!(commands.len(), 1);
     let first_command = commands.first_key_value();
     assert!(first_command.is_some());
@@ -867,7 +867,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -915,7 +915,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -963,7 +963,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1011,7 +1011,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1059,7 +1059,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1107,7 +1107,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1155,7 +1155,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1203,7 +1203,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1251,7 +1251,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 
@@ -1299,7 +1299,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
-    let commands = lock!(state.commands);
+    let commands = lock!(state.command_manager);
     assert!(commands.is_empty());
   }
 

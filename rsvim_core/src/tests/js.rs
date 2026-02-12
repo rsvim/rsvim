@@ -3,7 +3,7 @@ use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineText;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
-use crate::js::command::CommandsManager;
+use crate::js::command::CommandManager;
 use crate::prelude::*;
 use crate::ui::tree::Tree;
 use std::time::SystemTime;
@@ -30,7 +30,7 @@ pub fn make_js_runtime() -> JsRuntime {
   let tree = Tree::to_arc(Tree::new(style).unwrap());
   let buffers_manager = BufferManager::to_arc(BufferManager::new());
   let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-  let ex_commands_manager = CommandsManager::to_arc(CommandsManager::default());
+  let ex_commands_manager = CommandManager::to_arc(CommandManager::default());
 
   let startup_moment = Instant::now();
   let startup_unix_epoch = SystemTime::now()
