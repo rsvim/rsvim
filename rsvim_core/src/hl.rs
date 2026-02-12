@@ -6,9 +6,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use futures::stream::Fold;
 use once_cell::sync::Lazy;
-use swc_ecma_lexer::common::syntax;
 
 pub const SYNTAX_HIGHLIGHT_PREFIX: &str = "syn.";
 pub const UI_HIGHLIGHT_PREFIX: &str = "ui.";
