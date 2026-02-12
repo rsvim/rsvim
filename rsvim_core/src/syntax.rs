@@ -231,8 +231,8 @@ impl SyntaxManager {
       .id2ext
       .entry(id.clone())
       .or_default()
-      .insert(ext.to_compact_string());
-    self.ext2id.entry(ext.to_compact_string()).or_insert(id);
+      .insert(ext.clone());
+    self.ext2id.entry(ext).or_insert(id);
   }
 
   /// Un-associate a language ID with a file extension.
