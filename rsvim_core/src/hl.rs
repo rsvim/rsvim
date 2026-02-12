@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::structural_id_impl;
+use compact_str::CompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 
