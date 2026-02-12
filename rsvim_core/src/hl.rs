@@ -91,7 +91,7 @@ pub struct Highlight {
 
 #[derive(Debug, Clone)]
 pub struct ColorScheme {
-  // Name 
+  // Name.
   name: CompactString,
 
   // Maps color name to RGB value.
