@@ -151,9 +151,9 @@ pub fn get_shift_width(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().shift_width();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().shift_width();
   trace!("get_shift_width: {:?}", value);
   rv.set_int32(value as i32);
 }
@@ -169,11 +169,11 @@ pub fn set_shift_width<'s>(
   let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   debug_assert!(value <= u8::MAX as u32);
-  buffers
+  buffer_manager
     .global_local_options_mut()
     .set_shift_width(value as u8);
 }
