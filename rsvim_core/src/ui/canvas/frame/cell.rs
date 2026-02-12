@@ -16,7 +16,7 @@ pub struct Cell {
   bg: Color,
 
   // Attributes: underline, bold, italic, etc.
-  attributes: Attributes,
+  attr: Attributes,
 }
 
 impl Cell {
@@ -61,13 +61,13 @@ impl Cell {
   }
 
   /// Get attributes.
-  pub fn attributes(&self) -> Attributes {
-    self.attributes
+  pub fn attr(&self) -> Attributes {
+    self.attr
   }
 
   /// Set attributes.
   pub fn set_attributes(&mut self, value: Attributes) {
-    self.attributes = value;
+    self.attr = value;
   }
 }
 
@@ -90,7 +90,7 @@ impl Cell {
       symbol,
       fg,
       bg,
-      attributes: attrs,
+      attr: attrs,
     }
   }
 
@@ -100,7 +100,7 @@ impl Cell {
       symbol: " ".to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attributes: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -110,7 +110,7 @@ impl Cell {
       symbol: CompactString::const_new(""),
       fg: Color::Reset,
       bg: Color::Reset,
-      attributes: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -119,7 +119,7 @@ impl Cell {
       symbol: c.to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attributes: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 
@@ -128,7 +128,7 @@ impl Cell {
       symbol: s,
       fg: Color::Reset,
       bg: Color::Reset,
-      attributes: Attributes::default(),
+      attr: Attributes::default(),
     }
   }
 }
@@ -154,7 +154,7 @@ mod tests {
     assert_eq!(c.symbol(), "");
     assert_eq!(c.fg(), Color::Reset);
     assert_eq!(c.bg(), Color::Reset);
-    assert_eq!(c.attributes(), Attributes::default());
+    assert_eq!(c.attr(), Attributes::default());
   }
 
   #[test]
@@ -172,8 +172,8 @@ mod tests {
     assert_eq!(c1.fg(), c2.fg());
     assert_eq!(c1.bg(), Color::Reset);
     assert_eq!(c1.bg(), c2.bg());
-    assert_eq!(c1.attributes(), Attributes::default());
-    assert_eq!(c1.attributes(), c2.attributes());
+    assert_eq!(c1.attr(), Attributes::default());
+    assert_eq!(c1.attr(), c2.attr());
   }
 
   #[test]
