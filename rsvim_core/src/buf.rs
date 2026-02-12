@@ -214,13 +214,6 @@ pub struct BufferManager {
 
 arc_mutex_ptr!(BufferManager);
 
-pub type BuffersManagerKeys<'a> =
-  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersManagerValues<'a> =
-  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersManagerIter<'a> =
-  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
-
 impl BufferManager {
   pub fn new() -> Self {
     BufferManager {
@@ -394,7 +387,6 @@ impl BufferManager {
 }
 
 // Primitive APIs {
-
 impl BufferManager {
   fn read_file(
     &self,
@@ -470,6 +462,13 @@ impl BufferManager {
   }
 }
 // Primitive APIs }
+
+pub type BuffersManagerKeys<'a> =
+  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> =
+  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> =
+  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 // Buffers {
 impl BufferManager {
