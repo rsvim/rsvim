@@ -241,9 +241,11 @@ pub fn set_file_format<'s>(
   let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   let value = FileFormatOption::try_from(value.as_str()).unwrap();
-  buffers.global_local_options_mut().set_file_format(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_file_format(value);
 }
