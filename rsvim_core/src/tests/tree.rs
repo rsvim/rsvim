@@ -35,14 +35,14 @@ pub fn make_tree_with_buffers(
   };
 
   let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
-  let buffers = lock!(buffers_manager);
+  let buffer_manager = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(window_local_opts);
   let tree_root_id = tree.root_id();
 
   // Window
-  let (_, buf) = buffers.buffers().first_key_value().unwrap();
+  let (_, buf) = buffer_manager.buffers().first_key_value().unwrap();
   let window_id = tree
     .new_window_with_parent(
       tree_root_id,
