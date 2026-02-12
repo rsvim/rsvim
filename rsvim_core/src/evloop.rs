@@ -275,7 +275,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text,
       commands,
       cancellation_token,
       detached_tracker,
@@ -303,7 +303,7 @@ impl EventLoop {
       cli_opts.clone(),
       tree.clone(),
       buffers.clone(),
-      contents.clone(),
+      cmdline_text.clone(),
       commands,
     );
 
@@ -315,7 +315,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      cmdline_text: contents,
+      cmdline_text,
       writer,
       cancellation_token,
       detached_tracker,
@@ -345,7 +345,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text,
       commands,
       cancellation_token,
       detached_tracker,
@@ -373,7 +373,7 @@ impl EventLoop {
       cli_opts.clone(),
       tree.clone(),
       buffers.clone(),
-      contents.clone(),
+      cmdline_text.clone(),
       commands,
     );
 
@@ -385,7 +385,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      cmdline_text: contents,
+      cmdline_text,
       writer,
       cancellation_token,
       detached_tracker,
@@ -416,7 +416,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      contents,
+      cmdline_text,
       commands,
       cancellation_token,
       detached_tracker,
@@ -445,7 +445,7 @@ impl EventLoop {
       cli_opts.clone(),
       tree.clone(),
       buffers.clone(),
-      contents.clone(),
+      cmdline_text.clone(),
       commands,
     );
 
@@ -457,7 +457,7 @@ impl EventLoop {
       tree,
       state_machine,
       buffers,
-      cmdline_text: contents,
+      cmdline_text,
       writer,
       cancellation_token,
       detached_tracker,
@@ -545,8 +545,8 @@ impl EventLoop {
 
             // Append error message to command line message history, wait for
             // print once TUI initialized.
-            let mut contents = lock!(self.cmdline_text);
-            contents
+            let mut cmdline_text = lock!(self.cmdline_text);
+            cmdline_text
               .cmdline_message_history_mut()
               .push_overwrite(e.to_string());
           }
@@ -585,12 +585,12 @@ impl EventLoop {
       (*buf_id, buf.clone())
     };
     let buf = Arc::downgrade(&buf);
-    let text_contents = Arc::downgrade(&self.cmdline_text);
+    let cmdline_text = Arc::downgrade(&self.cmdline_text);
 
     ui::init_default_window(
       &mut tree,
       buf,
-      text_contents,
+      cmdline_text,
       cursor_blinking,
       cursor_hidden,
       cursor_style,
