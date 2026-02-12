@@ -14,7 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::hl::ColorSchemeManager;
+use crate::hl::colorscheme::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
