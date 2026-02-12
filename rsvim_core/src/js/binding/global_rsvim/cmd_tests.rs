@@ -31,7 +31,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert!(cmdline_text.cmdline_message().rope().to_string().is_empty());
+    assert!(contents.cmdline_message().rope().to_string().is_empty());
   }
 
   event_loop.initialize()?;
@@ -79,7 +79,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert!(cmdline_text.cmdline_message().rope().to_string().is_empty());
+    assert!(contents.cmdline_message().rope().to_string().is_empty());
   }
 
   event_loop.initialize()?;
@@ -91,7 +91,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let payload = cmdline_text.cmdline_message().rope().to_string();
+    let payload = contents.cmdline_message().rope().to_string();
     let payload = payload.trim();
     assert!(
       payload
@@ -127,7 +127,7 @@ async fn test_echo3() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.cmdline_text);
-    assert_eq!(cmdline_text.cmdline_message().rope().to_string(), "");
+    assert_eq!(contents.cmdline_message().rope().to_string(), "");
   }
 
   event_loop.initialize()?;
@@ -139,7 +139,7 @@ async fn test_echo3() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = cmdline_text.cmdline_message().rope().to_string();
+    let actual = contents.cmdline_message().rope().to_string();
     let actual = actual.trim();
     assert!(
       actual.is_empty()
@@ -192,7 +192,7 @@ async fn test_echo4() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = cmdline_text.cmdline_message().rope().to_string();
+    let actual = contents.cmdline_message().rope().to_string();
     let actual = actual.trim();
     assert_eq!(actual, "true");
   }
@@ -239,9 +239,9 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous command:undefined"));
@@ -297,21 +297,21 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 3);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-1 command:undefined"));
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert_eq!(actual, "1");
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -368,15 +368,15 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-1 command:undefined"));
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -436,15 +436,15 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-1 command:undefined"));
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -505,15 +505,15 @@ setTimeout(() => {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 2);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-1 command:undefined"));
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
