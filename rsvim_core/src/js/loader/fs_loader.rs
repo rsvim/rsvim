@@ -1,5 +1,6 @@
 //! Fs (filesystem) module loader.
 
+use crate::cfg::path_cfg::PATH_CONFIG;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::js::module::ModulePath;
