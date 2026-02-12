@@ -5,7 +5,6 @@ pub mod cfg;
 pub mod chan;
 pub mod cli;
 pub mod cmdltext;
-pub mod constant;
 pub mod coord;
 pub mod err;
 pub mod evloop;
