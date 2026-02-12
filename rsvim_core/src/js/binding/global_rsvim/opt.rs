@@ -135,10 +135,12 @@ pub fn set_expand_tab<'s>(
   let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
-  buffers.global_local_options_mut().set_expand_tab(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_expand_tab(value);
 }
 
 /// Get the _shift-width_ option.
