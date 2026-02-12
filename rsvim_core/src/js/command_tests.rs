@@ -42,10 +42,10 @@ async fn test_js_echo1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -83,9 +83,9 @@ async fn test_js_throw1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -123,9 +123,9 @@ async fn test_js_invalid1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -183,10 +183,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -244,10 +244,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -301,10 +301,10 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -368,10 +368,10 @@ Rsvim.cmd.create("msg", msg);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
 
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert_eq!(actual.unwrap(), "n:12");
   }

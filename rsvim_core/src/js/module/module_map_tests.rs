@@ -43,7 +43,7 @@ mod test_static_import {
     // Before running
     {
       let contents = lock!(event_loop.cmdline_text);
-      assert!(contents.cmdline_message_history().is_empty());
+      assert!(contents.message_history().is_empty());
     }
 
     event_loop.initialize()?;
@@ -59,11 +59,8 @@ mod test_static_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -113,11 +110,8 @@ mod test_static_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -201,11 +195,8 @@ mod test_static_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("3".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("3".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -293,10 +284,10 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
+      assert_eq!(1, contents.message_history().len());
       assert_eq!(
         Some("D:C:B:A:5".to_string()),
-        contents.cmdline_message_history_mut().pop()
+        contents.message_history_mut().pop()
       );
     }
 
@@ -381,11 +372,8 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("9".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("9".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -456,9 +444,9 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(2, contents.cmdline_message_history().len());
+      assert_eq!(2, contents.message_history().len());
       for _i in 0..2 {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         assert!(actual.is_some());
         let actual = actual.unwrap();
         assert_eq!(actual, "6");
@@ -533,9 +521,9 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(2, contents.cmdline_message_history().len());
+      assert_eq!(2, contents.message_history().len());
       for _i in 0..2 {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         assert!(actual.is_some());
         let actual = actual.unwrap();
         assert_eq!(actual, "6");
@@ -579,7 +567,7 @@ export function echoD(value) {
     // Before running
     {
       let contents = lock!(event_loop.cmdline_text);
-      assert!(contents.cmdline_message_history().is_empty());
+      assert!(contents.message_history().is_empty());
     }
 
     event_loop.initialize()?;
@@ -595,11 +583,8 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -650,11 +635,8 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -722,10 +704,10 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      let n = contents.cmdline_message_history().len();
+      let n = contents.message_history().len();
       assert_eq!(2, n);
       for _i in 0..n {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         assert!(actual.is_some());
         let actual = actual.unwrap();
         assert!(actual == "1" || actual == "2");
@@ -824,11 +806,11 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      let n = contents.cmdline_message_history().len();
+      let n = contents.message_history().len();
       info!("home_dir3 n:{:?}", n);
       assert_eq!(2, n);
       for i in 0..n {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         info!("home_dir3 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
         let actual = actual.unwrap();
@@ -886,8 +868,8 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      let actual = contents.cmdline_message_history_mut().pop();
+      assert_eq!(1, contents.message_history().len());
+      let actual = contents.message_history_mut().pop();
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
@@ -984,11 +966,11 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      let n = contents.cmdline_message_history().len();
+      let n = contents.message_history().len();
       info!("home_dir4 n:{:?}", n);
       assert_eq!(2, n);
       for i in 0..n {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         info!("home_dir4 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
         let actual = actual.unwrap();
@@ -1061,11 +1043,11 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      let n = contents.cmdline_message_history().len();
+      let n = contents.message_history().len();
       info!("home_dir5 n:{:?}", n);
       assert_eq!(2, n);
       for i in 0..n {
-        let actual = contents.cmdline_message_history_mut().pop();
+        let actual = contents.message_history_mut().pop();
         info!("home_dir5 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
         let actual = actual.unwrap();
@@ -1154,8 +1136,8 @@ export function echoA(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      let actual = contents.cmdline_message_history_mut().pop();
+      assert_eq!(1, contents.message_history().len());
+      let actual = contents.message_history_mut().pop();
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
@@ -1248,9 +1230,9 @@ export function echoMain(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(5, contents.cmdline_message_history().len());
+      assert_eq!(5, contents.message_history().len());
 
-      let url = contents.cmdline_message_history_mut().pop();
+      let url = contents.message_history_mut().pop();
       assert!(url.is_some());
       let actual = url.unwrap();
       info!("url:{:?}", actual);
@@ -1281,7 +1263,7 @@ export function echoMain(value) {
           == 2
       );
 
-      let filename = contents.cmdline_message_history_mut().pop();
+      let filename = contents.message_history_mut().pop();
       assert!(filename.is_some());
       let actual = filename.unwrap();
       info!("filename:{:?}", actual);
@@ -1302,7 +1284,7 @@ export function echoMain(value) {
         )
       );
 
-      let dirname = contents.cmdline_message_history_mut().pop();
+      let dirname = contents.message_history_mut().pop();
       assert!(dirname.is_some());
       let actual = dirname.unwrap();
       info!("dirname:{:?}", actual);
@@ -1318,13 +1300,13 @@ export function echoMain(value) {
           )
       );
 
-      let is_main = contents.cmdline_message_history_mut().pop();
+      let is_main = contents.message_history_mut().pop();
       assert!(is_main.is_some());
       let actual = is_main.unwrap();
       info!("main:{:?}", actual);
       assert_eq!(actual, "false:true");
 
-      let resolved_module_path = contents.cmdline_message_history_mut().pop();
+      let resolved_module_path = contents.message_history_mut().pop();
       assert!(resolved_module_path.is_some());
       let actual = resolved_module_path.unwrap();
       info!("resolve:{:?}", actual);
@@ -1401,21 +1383,21 @@ setTimeout(() => {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(3, contents.cmdline_message_history().len());
+      assert_eq!(3, contents.message_history().len());
 
-      let url1 = contents.cmdline_message_history_mut().pop();
+      let url1 = contents.message_history_mut().pop();
       assert!(url1.is_some());
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(actual.contains("TypeError: Module `undefined` not found"));
 
-      let url2 = contents.cmdline_message_history_mut().pop();
+      let url2 = contents.message_history_mut().pop();
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
       assert!(actual.contains("TypeError: Module `null` not found"));
 
-      let url3 = contents.cmdline_message_history_mut().pop();
+      let url3 = contents.message_history_mut().pop();
       assert!(url3.is_some());
       let actual = url3.unwrap();
       info!("url3:{:?}", actual);
@@ -1482,11 +1464,8 @@ mod test_dynamic_import {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -1547,14 +1526,11 @@ Rsvim.rt.exit(0);
       let mut contents = lock!(event_loop.cmdline_text);
       info!(
         "command_line_message_history occupied_len:{}, vacant_len: {}",
-        contents.cmdline_message_history().len(),
-        contents.cmdline_message_history().max_size()
+        contents.message_history().len(),
+        contents.message_history().max_size()
       );
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("1".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("1".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -1647,11 +1623,8 @@ Rsvim.rt.exit(0);
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("7".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("7".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -1725,11 +1698,8 @@ try {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("9".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("9".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -1824,10 +1794,10 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
+      assert_eq!(1, contents.message_history().len());
       assert_eq!(
         Some("D:C:B:A:5".to_string()),
-        contents.cmdline_message_history_mut().pop()
+        contents.message_history_mut().pop()
       );
     }
 
@@ -1919,11 +1889,8 @@ export default {};
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("9".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("9".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -2014,11 +1981,8 @@ export default {};
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      assert_eq!(
-        Some("9".to_string()),
-        contents.cmdline_message_history_mut().pop()
-      );
+      assert_eq!(1, contents.message_history().len());
+      assert_eq!(Some("9".to_string()), contents.message_history_mut().pop());
     }
 
     Ok(())
@@ -2072,8 +2036,8 @@ mod test_require {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.cmdline_text);
-      assert_eq!(1, contents.cmdline_message_history().len());
-      let actual = contents.cmdline_message_history_mut().pop();
+      assert_eq!(1, contents.message_history().len());
+      let actual = contents.message_history_mut().pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(

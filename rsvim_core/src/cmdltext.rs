@@ -51,12 +51,12 @@ impl CmdlineText {
   }
 
   /// Command-line message history
-  pub fn cmdline_message_history(&self) -> &RingBuffer<String> {
+  pub fn message_history(&self) -> &RingBuffer<String> {
     &self.message_history
   }
 
   /// Mutable command-line message history
-  pub fn cmdline_message_history_mut(&mut self) -> &mut RingBuffer<String> {
+  pub fn message_history_mut(&mut self) -> &mut RingBuffer<String> {
     &mut self.message_history
   }
 }

@@ -34,9 +34,9 @@ async fn test_queue_microtask1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert_eq!(actual, "1");
@@ -77,9 +77,9 @@ async fn test_queue_microtask2() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert_eq!(actual, "2");
@@ -118,9 +118,9 @@ async fn test_queue_microtask_failed3() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Uncaught Error: 3"));
@@ -161,9 +161,9 @@ async fn test_queue_microtask_failed4() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Uncaught Error: 4"));
@@ -200,9 +200,9 @@ async fn test_report_error1() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Uncaught undefined"));
@@ -241,9 +241,9 @@ async fn test_report_error2() -> IoResult<()> {
   // After
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert!(n == 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Uncaught undefined"));

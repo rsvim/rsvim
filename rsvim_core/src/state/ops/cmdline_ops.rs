@@ -36,7 +36,7 @@ pub fn cmdline_set_last_pending_message_on_initialize(
 ) {
   // If message history contains some payload. This means before we actually
   // running the event loop, there's already some messages wait for print.
-  let last_msg = cmdline_text.cmdline_message_history().last().cloned();
+  let last_msg = cmdline_text.message_history().last().cloned();
   trace!("|cmdline_flush_pending_message| last_msg:{:?}", last_msg);
   if let Some(last_msg) = last_msg {
     // Current "command-line-message" widget can only print 1 single-line
@@ -56,7 +56,7 @@ pub fn cmdline_set_message(
   _set_message_impl(tree, cmdline_text, Some(payload.clone()));
 
   // Also append message history:
-  let cmdline_hist = cmdline_text.cmdline_message_history_mut();
+  let cmdline_hist = cmdline_text.message_history_mut();
   cmdline_hist.push_overwrite(payload);
 }
 

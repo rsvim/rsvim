@@ -53,7 +53,7 @@ async fn test_open_close1() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message_history().is_empty();
+    let actual = contents.message_history().is_empty();
     assert!(actual);
   }
 
@@ -100,7 +100,7 @@ async fn test_open_close2() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message_history().is_empty();
+    let actual = contents.message_history().is_empty();
     assert!(actual);
   }
 
@@ -148,7 +148,7 @@ async fn test_open_close3() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message_history().is_empty();
+    let actual = contents.message_history().is_empty();
     assert!(actual);
     assert!(tmpfile.exists());
   }
@@ -197,7 +197,7 @@ async fn test_open_close4() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.cmdline_text);
-    let actual = contents.cmdline_message_history().is_empty();
+    let actual = contents.message_history().is_empty();
     assert!(actual);
     assert!(tmpfile.exists());
   }
@@ -243,9 +243,9 @@ try {{
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -294,9 +294,9 @@ try {{
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 1);
-    let actual = contents.cmdline_message_history_mut().pop();
+    let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -350,11 +350,11 @@ async fn test_read_write1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n1:13");
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n2:0");
   }
 
@@ -403,11 +403,11 @@ async fn test_read_write2() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n1:0");
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n2:13");
   }
 
@@ -454,11 +454,11 @@ async fn test_read_write3() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n1:11");
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n2:0");
     assert_eq!(
       std::fs::read_to_string(tmpfile.path()).unwrap(),
@@ -509,11 +509,11 @@ async fn test_read_write4() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = contents.cmdline_message_history().len();
+    let n = contents.message_history().len();
     assert_eq!(n, 2);
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n1:11");
-    let actual = contents.cmdline_message_history_mut().pop().unwrap();
+    let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "n2:0");
     assert_eq!(
       std::fs::read_to_string(tmpfile.path()).unwrap(),

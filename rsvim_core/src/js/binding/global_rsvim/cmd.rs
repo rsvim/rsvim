@@ -24,9 +24,7 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
     // all pending messages to TUI before running the event loop.
     //
     // See [crate::evloop::EventLoop::flush_pending_command_line_messages].
-    cmdline_text
-      .cmdline_message_history_mut()
-      .push_overwrite(payload);
+    cmdline_text.message_history_mut().push_overwrite(payload);
   }
 }
 
