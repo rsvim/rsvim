@@ -7,9 +7,9 @@ use crossterm::style::Color;
 /// Highlight style, including colors and attributes.
 pub struct Style {
   // Foreground color.
-  fg: Color,
+  pub fg: Color,
   // Background color.
-  bg: Color,
+  pub bg: Color,
   // Attributes: underline, bold, italic, etc.
-  attrs: Attributes,
+  pub attrs: Attributes,
 }
