@@ -463,11 +463,11 @@ impl BufferManager {
 }
 // Primitive APIs }
 
-pub type BuffersManagerKeys<'a> =
+pub type BufferManagerKeys<'a> =
   std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersManagerValues<'a> =
+pub type BufferManagerValues<'a> =
   std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersManagerIter<'a> =
+pub type BufferManagerIter<'a> =
   std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 // Buffers {
