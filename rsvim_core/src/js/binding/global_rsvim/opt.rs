@@ -82,9 +82,9 @@ pub fn get_tab_stop(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().tab_stop();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().tab_stop();
   trace!("get_tab_stop: {:?}", value);
   rv.set_int32(value as i32);
 }
