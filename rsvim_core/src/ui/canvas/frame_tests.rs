@@ -96,7 +96,7 @@ fn set_cell1() {
     assert_eq!(actual.symbol(), CompactString::new(""));
     assert_eq!(actual.fg(), Color::Reset);
     assert_eq!(actual.bg(), Color::Reset);
-    assert_eq!(actual.attrs(), Attributes::default());
+    assert_eq!(actual.attributes(), Attributes::default());
   }
   for (i, input) in inputs.iter().enumerate() {
     let actual = frame.get_cell(input.0);
@@ -104,7 +104,7 @@ fn set_cell1() {
     assert_eq!(actual.symbol(), input.1.to_compact_string());
     assert_eq!(actual.fg(), Color::Reset);
     assert_eq!(actual.bg(), Color::Reset);
-    assert_eq!(actual.attrs(), Attributes::default());
+    assert_eq!(actual.attributes(), Attributes::default());
   }
 }
 
@@ -132,7 +132,7 @@ fn set_empty_cell1() {
     assert_eq!(actual.symbol(), CompactString::new(""));
     assert_eq!(actual.fg(), Color::Reset);
     assert_eq!(actual.bg(), Color::Reset);
-    assert_eq!(actual.attrs(), Attributes::default());
+    assert_eq!(actual.attributes(), Attributes::default());
   }
   for (i, input) in inputs.iter().enumerate() {
     let actual = frame.get_cell(input.0);
@@ -140,7 +140,7 @@ fn set_empty_cell1() {
     assert_eq!(actual.symbol(), input.1.to_compact_string());
     assert_eq!(actual.fg(), Color::Reset);
     assert_eq!(actual.bg(), Color::Reset);
-    assert_eq!(actual.attrs(), Attributes::default());
+    assert_eq!(actual.attributes(), Attributes::default());
   }
   for (i, input) in inputs.iter().enumerate() {
     let mut c = Cell::default();
