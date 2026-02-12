@@ -114,7 +114,14 @@ impl ColorScheme {
     }
   }
 
-  pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {}
+  pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
+    Self {
+      name,
+      palette: FoldMap::new(),
+      syntax: FoldMap::new(),
+      ui: FoldMap::new(),
+    }
+  }
 
   pub fn name(&self) -> &CompactString {
     &self.name
