@@ -208,7 +208,7 @@ pub struct BufferManager {
   syntax_manager: SyntaxManager,
 
   // Highlight manager
-  highlight_manager: HighlightManager;
+  highlight_manager: HighlightManager,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -227,6 +227,7 @@ impl BufferManager {
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager: SyntaxManager::new(),
+      highlight_manager: HighlightManager::new(),
     }
   }
 

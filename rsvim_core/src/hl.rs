@@ -40,3 +40,17 @@ pub struct HighlightManager {
   // Maps highlight ID => highlight
   highlights: FoldMap<HighlightId, Highlight>,
 }
+
+impl Default for HighlightManager {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+impl HighlightManager {
+  pub fn new() -> Self {
+    Self {
+      highlights: FoldMap::new(),
+    }
+  }
+}
