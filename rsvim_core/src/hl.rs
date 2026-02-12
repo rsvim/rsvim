@@ -104,6 +104,19 @@ pub struct ColorScheme {
   ui: FoldMap<CompactString, Highlight>,
 }
 
+fn parse_palette(
+  colorscheme: &toml::Table,
+) -> FoldMap<CompactString, CompactString> {
+  let mut result: FoldMap<CompactString, CompactString> = FoldMap::new();
+  if let Some(palette_value) = colorscheme.get("palette")
+    && let Some(palette) = palette_value.as_table()
+  {
+    for (k, v) in palette.iter() {}
+  }
+
+  result
+}
+
 impl ColorScheme {
   pub fn from_empty(name: CompactString) -> Self {
     Self {
@@ -129,7 +142,6 @@ impl ColorScheme {
   /// yellow = "#ffff00"
   /// ```
   pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
-    let mut palette: FoldMap<CompactString, CompactString> = FoldMap::new();
     let mut syntax: FoldMap<CompactString, Highlight> = FoldMap::new();
     let mut ui: FoldMap<CompactString, Highlight> = FoldMap::new();
 
