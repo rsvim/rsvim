@@ -41,7 +41,7 @@ impl Cmdline {
   pub fn new(
     id: NodeId,
     ctx: TreeContextWk,
-    text_contents: CmdlineTextWk,
+    cmdline_text: CmdlineTextWk,
     input_panel_id: NodeId,
     indicator_id: NodeId,
     input_id: NodeId,
@@ -58,23 +58,23 @@ impl Cmdline {
       .unwrap();
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let text_contents = text_contents.upgrade().unwrap();
-      let text_contents = lock!(text_contents);
+      let cmdline_text = cmdline_text.upgrade().unwrap();
+      let cmdline_text = lock!(cmdline_text);
       let input_viewport = Viewport::view(
         &options,
-        text_contents.cmdline_input(),
+        cmdline_text.cmdline_input(),
         input_size,
         0,
         0,
       );
       let input_cursor_viewport = CursorViewport::from_top_left(
         &input_viewport,
-        text_contents.cmdline_input(),
+        cmdline_text.cmdline_input(),
       );
 
       let message_viewport = Viewport::view(
         &options,
-        text_contents.cmdline_message(),
+        cmdline_text.cmdline_message(),
         message_size,
         0,
         0,
