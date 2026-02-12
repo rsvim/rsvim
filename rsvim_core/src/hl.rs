@@ -1,8 +1,5 @@
 //! Highlight.
 
-pub mod style;
-pub mod syn;
-
 use crate::prelude::*;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
