@@ -114,6 +114,19 @@ impl ColorScheme {
     }
   }
 
+  /// A ColorScheme can be defined with a toml file, for example:
+  /// ```toml
+  /// [syn]
+  /// attribute = "white"
+  /// boolean = "black"
+  ///
+  /// [ui]
+  /// # TODO
+  ///
+  /// [palette]
+  /// white = "#ffffff"
+  /// black = "#000000"
+  /// ```
   pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
     Self {
       name,
