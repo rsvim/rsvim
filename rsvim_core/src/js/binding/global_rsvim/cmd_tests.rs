@@ -249,8 +249,8 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
-    assert_eq!(commands.len(), 1);
-    let first_command = commands.first_key_value();
+    assert_eq!(commands.commands().len(), 1);
+    let first_command = commands.commands().first_key_value();
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
@@ -320,8 +320,8 @@ setTimeout(() => {
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
-    assert_eq!(commands.len(), 1);
-    let first_command = commands.first_key_value();
+    assert_eq!(commands.commands().len(), 1);
+    let first_command = commands.commands().first_key_value();
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
@@ -385,8 +385,8 @@ setTimeout(() => {
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
-    assert_eq!(commands.len(), 2);
-    for (name, def) in commands.iter() {
+    assert_eq!(commands.commands().len(), 2);
+    for (name, def) in commands.commands().iter() {
       assert!(name == "write" || name == "writeSync");
       assert_eq!(name, def.name);
       assert!(!def.attributes.bang);
@@ -453,8 +453,8 @@ setTimeout(() => {
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
-    assert_eq!(commands.len(), 1);
-    let first_command = commands.first_key_value();
+    assert_eq!(commands.commands().len(), 1);
+    let first_command = commands.commands().first_key_value();
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
@@ -522,8 +522,8 @@ setTimeout(() => {
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.command_manager);
-    assert_eq!(commands.len(), 1);
-    let first_command = commands.first_key_value();
+    assert_eq!(commands.commands().len(), 1);
+    let first_command = commands.commands().first_key_value();
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
