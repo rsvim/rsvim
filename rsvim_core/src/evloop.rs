@@ -831,7 +831,7 @@ impl EventLoop {
             // release lock on the buffer
             drop(buf);
 
-            let buffers = self.buffer_manager.clone();
+            let buffer_manager = self.buffer_manager.clone();
             let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {
@@ -839,7 +839,9 @@ impl EventLoop {
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
               // If the buffer and its syntax still exist
-              if let Some(buf) = lock!(buffers).buffers().get(&req.buffer_id) {
+              if let Some(buf) =
+                lock!(buffer_manager).buffers().get(&req.buffer_id)
+              {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   syn.set_tree(parsed_tree);

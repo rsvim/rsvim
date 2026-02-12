@@ -410,7 +410,7 @@ pub mod boost {
       jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opts: CliOptions,
       tree: TreeArc,
-      buffers: BufferManagerArc,
+      buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
@@ -464,7 +464,7 @@ pub mod boost {
         jsrt_rx,
         cli_opts,
         tree,
-        buffer_manager: buffers,
+        buffer_manager,
         cmdline_text,
         commands,
       });
