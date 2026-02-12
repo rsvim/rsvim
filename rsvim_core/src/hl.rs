@@ -118,7 +118,7 @@ impl ColorScheme {
   /// ```toml
   /// [syn]
   /// attribute = "white"
-  /// boolean = "black"
+  /// boolean = { fg = "yellow", bold = true }
   ///
   /// [ui]
   /// background = "#000000"
@@ -126,6 +126,7 @@ impl ColorScheme {
   /// [palette]
   /// white = "#ffffff"
   /// black = "#000000"
+  /// yellow = "#ffff00"
   /// ```
   pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
     let mut palette: FoldMap<CompactString, CompactString> = FoldMap::new();
