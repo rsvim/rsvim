@@ -43,7 +43,7 @@ mod tests_getter_setter {
     let actual = syn_manager.get_id_by_file_ext("hpp");
     assert!(actual.is_some());
     assert_eq!(actual.unwrap(), "cpp");
-    let actual = syn_manager.get_file_ext_by_id(&LanguageId::from("cpp"));
+    let actual = syn_manager.get_file_ext_by_id("cpp");
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("cc"));
     assert!(actual.unwrap().contains("cpp"));
@@ -56,7 +56,8 @@ mod tests_getter_setter {
   #[test]
   fn get_lang1() {
     let mut syn_mgr = SyntaxManager::new();
-    syn_mgr.insert_file_ext(LanguageId::from("rust".to_compact_string()), "rs");
+    syn_mgr
+      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
     let lang = syn_mgr.get_lang_by_ext("rs");
     assert!(lang.is_some());
     assert_eq!(lang.unwrap().name(), Some("rust"));
