@@ -88,9 +88,10 @@ pub struct Highlight {
   pub attr: Attributes,
 }
 
+
 #[derive(Debug, Clone)]
 pub struct ColorScheme {
-  // Highlight name 
+  // Name 
   name: CompactString,
 
   // Maps color name to RGB value.
