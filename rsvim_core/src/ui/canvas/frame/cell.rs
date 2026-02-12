@@ -84,13 +84,13 @@ impl Cell {
     symbol: CompactString,
     fg: Color,
     bg: Color,
-    attrs: Attributes,
+    attr: Attributes,
   ) -> Self {
     Cell {
       symbol,
       fg,
       bg,
-      attr: attrs,
+      attr,
     }
   }
 
