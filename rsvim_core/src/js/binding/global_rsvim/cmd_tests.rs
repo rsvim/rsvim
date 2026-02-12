@@ -690,13 +690,13 @@ Rsvim.cmd.echo(`name:${def}`);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
     let expects = ["name:undefined"];
 
     for i in 0..n {
-      let actual = cmdline_text.cmdline_message_history_mut().pop();
+      let actual = contents.cmdline_message_history_mut().pop();
       info!("actual{}:{:?}", i, actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
@@ -751,10 +751,10 @@ Rsvim.cmd.echo(prev.name);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -799,10 +799,10 @@ Rsvim.cmd.echo(`${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -855,9 +855,9 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
   // After running
   {
     let mut contents = lock!(event_loop.cmdline_text);
-    let n = cmdline_text.cmdline_message_history().len();
+    let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
-    let actual = cmdline_text.cmdline_message_history_mut().pop();
+    let actual = contents.cmdline_message_history_mut().pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
