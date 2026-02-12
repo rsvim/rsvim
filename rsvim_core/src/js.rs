@@ -369,7 +369,7 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffer_manager: BufferManagerArc,
     pub cmdline_text: CmdlineTextArc,
-    pub commands: CommandsManagerArc,
+    pub command_manager: CommandsManagerArc,
     // Data Access for RSVIM }
   }
 
@@ -466,7 +466,7 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
-        commands,
+        command_manager: commands,
       });
 
       isolate.set_slot(state.clone());
@@ -540,7 +540,7 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
-        commands,
+        command_manager: commands,
       });
 
       isolate.set_slot(state.clone());
@@ -659,7 +659,7 @@ pub mod boost {
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{:?}", req.payload);
             let mut state = state_rc.borrow_mut();
-            let commands = state.commands.clone();
+            let commands = state.command_manager.clone();
             let commands = lock!(commands);
             if let Some(command_cb) = commands.parse(&req) {
               state.pending_futures.push(Box::new(command_cb));

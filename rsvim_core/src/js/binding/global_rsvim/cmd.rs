@@ -55,9 +55,9 @@ pub fn create<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let mut commands = lock!(state.commands);
+  let mut command_manager = lock!(state.command_manager);
 
-  let result = commands
+  let result = command_manager
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match result {
@@ -80,9 +80,9 @@ pub fn list(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let commands = lock!(state.commands);
+  let command_manager = lock!(state.command_manager);
 
-  let commands = commands
+  let commands = command_manager
     .keys()
     .collect::<Vec<&CompactString>>()
     .to_v8(scope, |scope, cmd| cmd.to_v8(scope).into());
@@ -103,8 +103,8 @@ pub fn get<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let commands = lock!(state.commands);
-  match commands.get(&name) {
+  let command_manager = lock!(state.command_manager);
+  match command_manager.get(&name) {
     Some(def) => rv.set(def.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
@@ -123,8 +123,8 @@ pub fn remove<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let mut commands = lock!(state.commands);
-  match commands.remove(&name) {
+  let mut command_manager = lock!(state.command_manager);
+  match command_manager.remove(&name) {
     Some(removed) => rv.set(removed.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
