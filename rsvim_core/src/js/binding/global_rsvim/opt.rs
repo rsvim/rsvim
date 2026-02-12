@@ -82,9 +82,9 @@ pub fn get_tab_stop(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().tab_stop();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().tab_stop();
   trace!("get_tab_stop: {:?}", value);
   rv.set_int32(value as i32);
 }
@@ -100,11 +100,13 @@ pub fn set_tab_stop<'s>(
   let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   debug_assert!(value <= u8::MAX as u32);
-  buffers.global_local_options_mut().set_tab_stop(value as u8);
+  buffer_manager
+    .global_local_options_mut()
+    .set_tab_stop(value as u8);
 }
 
 /// Get the _expand-tab_ option.
@@ -115,9 +117,9 @@ pub fn get_expand_tab(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().expand_tab();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().expand_tab();
   trace!("get_expand_tab: {:?}", value);
   rv.set_bool(value);
 }
@@ -133,10 +135,12 @@ pub fn set_expand_tab<'s>(
   let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
-  buffers.global_local_options_mut().set_expand_tab(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_expand_tab(value);
 }
 
 /// Get the _shift-width_ option.
@@ -147,9 +151,9 @@ pub fn get_shift_width(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().shift_width();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().shift_width();
   trace!("get_shift_width: {:?}", value);
   rv.set_int32(value as i32);
 }
@@ -165,11 +169,11 @@ pub fn set_shift_width<'s>(
   let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   debug_assert!(value <= u8::MAX as u32);
-  buffers
+  buffer_manager
     .global_local_options_mut()
     .set_shift_width(value as u8);
 }
@@ -182,9 +186,9 @@ pub fn get_file_encoding(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().file_encoding();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
   rv.set(value.into());
@@ -201,11 +205,13 @@ pub fn set_file_encoding<'s>(
   let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   let value = FileEncodingOption::try_from(value.as_str()).unwrap();
-  buffers.global_local_options_mut().set_file_encoding(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_file_encoding(value);
 }
 
 /// Get the _file-format_ option.
@@ -216,9 +222,9 @@ pub fn get_file_format(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().file_format();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
   rv.set(value.into());
@@ -235,9 +241,11 @@ pub fn set_file_format<'s>(
   let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   let value = FileFormatOption::try_from(value.as_str()).unwrap();
-  buffers.global_local_options_mut().set_file_format(value);
+  buffer_manager
+    .global_local_options_mut()
+    .set_file_format(value);
 }

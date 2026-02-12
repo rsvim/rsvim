@@ -14,6 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
+use crate::hl::HighlightManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
@@ -189,6 +190,7 @@ impl Buffer {
   }
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
@@ -205,6 +207,9 @@ pub struct BufferManager {
 
   // Syntax manager
   syntax_manager: SyntaxManager,
+
+  // Highlight manager
+  highlight_manager: HighlightManager,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -223,6 +228,7 @@ impl BufferManager {
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager: SyntaxManager::new(),
+      highlight_manager: HighlightManager::new(),
     }
   }
 
@@ -463,52 +469,19 @@ impl BufferManager {
     }
   }
 }
-
 // Primitive APIs }
 
-// BTreeMap {
+// Buffers {
 impl BufferManager {
-  pub fn is_empty(&self) -> bool {
-    self.buffers.is_empty()
+  pub fn buffers(&self) -> &BTreeMap<BufferId, BufferArc> {
+    &self.buffers
   }
 
-  pub fn len(&self) -> usize {
-    self.buffers.len()
-  }
-
-  pub fn remove(&mut self, id: &BufferId) -> Option<BufferArc> {
-    self.buffers.remove(id)
-  }
-
-  pub fn get(&self, id: &BufferId) -> Option<&BufferArc> {
-    self.buffers.get(id)
-  }
-
-  pub fn contains_key(&self, id: &BufferId) -> bool {
-    self.buffers.contains_key(id)
-  }
-
-  pub fn keys(&self) -> BuffersManagerKeys<'_> {
-    self.buffers.keys()
-  }
-
-  pub fn values(&self) -> BuffersManagerValues<'_> {
-    self.buffers.values()
-  }
-
-  pub fn iter(&self) -> BuffersManagerIter<'_> {
-    self.buffers.iter()
-  }
-
-  pub fn first_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
-    self.buffers.first_key_value()
-  }
-
-  pub fn last_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
-    self.buffers.last_key_value()
+  pub fn buffers_mut(&mut self) -> &mut BTreeMap<BufferId, BufferArc> {
+    &mut self.buffers
   }
 }
-// BTreeMap }
+// Buffers }
 
 impl Default for BufferManager {
   fn default() -> Self {

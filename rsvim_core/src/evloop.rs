@@ -91,7 +91,7 @@ pub struct EventLoop {
   pub state_machine: State,
 
   /// Vim buffers.
-  pub buffers: BufferManagerArc,
+  pub buffer_manager: BufferManagerArc,
   /// Text contents (except buffers).
   pub cmdline_text: CmdlineTextArc,
 
@@ -154,7 +154,7 @@ impl EventLoop {
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ State,
-    /* buffers */ BufferManagerArc,
+    /* buffer_manager */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
     /* commands */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
@@ -195,7 +195,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffers_manager = BufferManager::to_arc(BufferManager::new());
+    let buffer_manager = BufferManager::to_arc(BufferManager::new());
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let ex_commands_manager =
       CommandsManager::to_arc(CommandsManager::default());
@@ -249,7 +249,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers_manager,
+      buffer_manager,
       cmdline_text,
       ex_commands_manager,
       CancellationToken::new(),
@@ -274,7 +274,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       commands,
       cancellation_token,
@@ -302,7 +302,7 @@ impl EventLoop {
       jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
-      buffers.clone(),
+      buffer_manager.clone(),
       cmdline_text.clone(),
       commands,
     );
@@ -314,7 +314,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       writer,
       cancellation_token,
@@ -344,7 +344,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       commands,
       cancellation_token,
@@ -372,7 +372,7 @@ impl EventLoop {
       jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
-      buffers.clone(),
+      buffer_manager.clone(),
       cmdline_text.clone(),
       commands,
     );
@@ -384,7 +384,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       writer,
       cancellation_token,
@@ -415,7 +415,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       commands,
       cancellation_token,
@@ -444,7 +444,7 @@ impl EventLoop {
       jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
-      buffers.clone(),
+      buffer_manager.clone(),
       cmdline_text.clone(),
       commands,
     );
@@ -456,7 +456,7 @@ impl EventLoop {
       canvas,
       tree,
       state_machine,
-      buffers,
+      buffer_manager,
       cmdline_text,
       writer,
       cancellation_token,
@@ -532,10 +532,14 @@ impl EventLoop {
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
-          lock!(self.buffers).new_file_buffer(canvas_size, input_file);
+          lock!(self.buffer_manager).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
-            let buf = lock!(self.buffers).get(&buf_id).unwrap().clone();
+            let buf = lock!(self.buffer_manager)
+              .buffers()
+              .get(&buf_id)
+              .unwrap()
+              .clone();
             self._add_pending_syntax_edit(buf);
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
@@ -554,9 +558,9 @@ impl EventLoop {
       }
     } else {
       let (buf_id, buf) = {
-        let mut buffers = lock!(self.buffers);
-        let buf_id = buffers.new_empty_buffer(canvas_size);
-        let buf = buffers.get(&buf_id).unwrap().clone();
+        let mut buffer_manager = lock!(self.buffer_manager);
+        let buf_id = buffer_manager.new_empty_buffer(canvas_size);
+        let buf = buffer_manager.buffers().get(&buf_id).unwrap().clone();
         (buf_id, buf)
       };
       self._add_pending_syntax_edit(buf);
@@ -580,8 +584,8 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let (_buf_id, buf) = {
-      let buffers = lock!(self.buffers);
-      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      let buffer_manager = lock!(self.buffer_manager);
+      let (buf_id, buf) = buffer_manager.buffers().first_key_value().unwrap();
       (*buf_id, buf.clone())
     };
     let buf = Arc::downgrade(&buf);
@@ -632,7 +636,7 @@ impl EventLoop {
         trace!("Polled terminal event ok: {:?}", event);
         let data_access = StateDataAccess::new(
           self.tree.clone(),
-          self.buffers.clone(),
+          self.buffer_manager.clone(),
           self.cmdline_text.clone(),
           self.master_tx.clone(),
           self.jsrt_forwarder_tx.clone(),
@@ -666,7 +670,7 @@ impl EventLoop {
           MockOperation::Operation(op) => {
             let data_access = StateDataAccess::new(
               self.tree.clone(),
-              self.buffers.clone(),
+              self.buffer_manager.clone(),
               self.cmdline_text.clone(),
               self.master_tx.clone(),
               self.jsrt_forwarder_tx.clone(),
@@ -791,7 +795,9 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
-          if let Some(buf) = lock!(self.buffers).get(&req.buffer_id) {
+          if let Some(buf) =
+            lock!(self.buffer_manager).buffers().get(&req.buffer_id)
+          {
             let mut buf = lock!(buf);
 
             // Early quit if any below conditions are met:
@@ -825,7 +831,7 @@ impl EventLoop {
             // release lock on the buffer
             drop(buf);
 
-            let buffers = self.buffers.clone();
+            let buffer_manager = self.buffer_manager.clone();
             let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {
@@ -833,7 +839,9 @@ impl EventLoop {
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
               // If the buffer and its syntax still exist
-              if let Some(buf) = lock!(buffers).get(&req.buffer_id) {
+              if let Some(buf) =
+                lock!(buffer_manager).buffers().get(&req.buffer_id)
+              {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   syn.set_tree(parsed_tree);

@@ -38,11 +38,12 @@ pub fn list(
 ) {
   debug_assert!(_args.length() == 0);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffers.clone();
-  let buffers = lock!(buffers);
-  trace!("Rsvim.buf.list: {:?}", buffers.keys());
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  trace!("Rsvim.buf.list: {:?}", buffer_manager.buffers().keys());
 
-  let bufs = buffers
+  let bufs = buffer_manager
+    .buffers()
     .keys()
     .collect::<Vec<&BufferId>>()
     .to_v8(scope, |scope, buf_id| buf_id.to_v8(scope).into());
@@ -63,10 +64,10 @@ pub fn write_sync<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let buffers = state.buffers.clone();
-  let buffers = lock!(buffers);
+  let buffer_manager = state.buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
 
-  match buffers.write_buffer(buf_id) {
+  match buffer_manager.write_buffer(buf_id) {
     Ok(n) => {
       trace!("write_sync success, bufId:{:?}, bytes:{:?}", buf_id, n);
       rv.set_int32(n as i32);

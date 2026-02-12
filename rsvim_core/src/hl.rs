@@ -1,12 +1,20 @@
+#![allow(dead_code, unused_variables)]
 //! Highlight.
 
 use crate::prelude::*;
+use crate::structural_id_impl;
+use compact_str::CompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
+
+structural_id_impl!(str, StyleId);
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Highlight style, including colors and attributes.
 pub struct Style {
+  /// Style ID
+  pub id: StyleId,
+
   /// Foreground color.
   pub fg: Color,
 
@@ -17,10 +25,42 @@ pub struct Style {
   pub attr: Attributes,
 }
 
-pub struct Highlight {}
+structural_id_impl!(str, HighlightId);
 
-arc_mutex_ptr!(Highlight);
+#[derive(Debug, Clone)]
+pub struct Highlight {
+  // Highlight ID
+  id: HighlightId,
 
-pub struct HighlightManager {}
+  // Maps style ID => style
+  styles: FoldMap<StyleId, Style>,
+}
 
-arc_mutex_ptr!(HighlightManager);
+impl Highlight {
+  pub fn new(id: HighlightId) -> Self {
+    Self {
+      id,
+      styles: FoldMap::new(),
+    }
+  }
+}
+
+#[derive(Debug)]
+pub struct HighlightManager {
+  // Maps highlight ID => highlight
+  highlights: FoldMap<HighlightId, Highlight>,
+}
+
+impl Default for HighlightManager {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+impl HighlightManager {
+  pub fn new() -> Self {
+    Self {
+      highlights: FoldMap::new(),
+    }
+  }
+}

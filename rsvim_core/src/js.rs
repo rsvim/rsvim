@@ -367,7 +367,7 @@ pub mod boost {
     pub jsrt_rx: UnboundedReceiver<JsMessage>,
     pub cli_opts: CliOptions,
     pub tree: TreeArc,
-    pub buffers: BufferManagerArc,
+    pub buffer_manager: BufferManagerArc,
     pub cmdline_text: CmdlineTextArc,
     pub commands: CommandsManagerArc,
     // Data Access for RSVIM }
@@ -410,7 +410,7 @@ pub mod boost {
       jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opts: CliOptions,
       tree: TreeArc,
-      buffers: BufferManagerArc,
+      buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
@@ -464,7 +464,7 @@ pub mod boost {
         jsrt_rx,
         cli_opts,
         tree,
-        buffers,
+        buffer_manager,
         cmdline_text,
         commands,
       });
@@ -500,7 +500,7 @@ pub mod boost {
       jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opt: CliOptions,
       tree: TreeArc,
-      buffers: BufferManagerArc,
+      buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
       commands: CommandsManagerArc,
     ) -> Self {
@@ -538,7 +538,7 @@ pub mod boost {
         jsrt_rx,
         cli_opts: cli_opt,
         tree,
-        buffers,
+        buffer_manager,
         cmdline_text,
         commands,
       });
