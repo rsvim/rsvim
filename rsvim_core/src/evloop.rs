@@ -558,9 +558,9 @@ impl EventLoop {
       }
     } else {
       let (buf_id, buf) = {
-        let mut buffers = lock!(self.buffer_manager);
-        let buf_id = buffers.new_empty_buffer(canvas_size);
-        let buf = buffers.buffers().get(&buf_id).unwrap().clone();
+        let mut buffer_manager = lock!(self.buffer_manager);
+        let buf_id = buffer_manager.new_empty_buffer(canvas_size);
+        let buf = buffer_manager.buffers().get(&buf_id).unwrap().clone();
         (buf_id, buf)
       };
       self._add_pending_syntax_edit(buf);
