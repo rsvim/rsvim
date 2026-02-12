@@ -37,6 +37,9 @@ pub enum TheErr {
   #[error("Failed to load syntax for language {0}: {1}.")]
   LoadSyntaxFailed(CompactString, LanguageError),
 
+  #[error("Failed to load colorscheme palette: {0}.")]
+  LoadColorSchemePaletteFailed(CompactString),
+
   #[error("Undo commit `{0}` not exist.")]
   UndoCommitNotExist(usize),
 

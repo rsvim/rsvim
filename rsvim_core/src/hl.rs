@@ -106,15 +106,26 @@ pub struct ColorScheme {
 
 fn parse_palette(
   colorscheme: &toml::Table,
-) -> FoldMap<CompactString, CompactString> {
+) -> TheResult<FoldMap<CompactString, CompactString>> {
   let mut result: FoldMap<CompactString, CompactString> = FoldMap::new();
   if let Some(palette_value) = colorscheme.get("palette")
     && let Some(palette) = palette_value.as_table()
   {
-    for (k, v) in palette.iter() {}
+    for (k, v) in palette.iter() {
+      match v.as_str() {
+        Some(val) => {
+          result
+            .insert(k.as_str().to_compact_string(), val.to_compact_string());
+        }
+        None => {
+          return Err(TheErr::LoadColorSchemePaletteFailed(
+            k.as_str().to_compact_string(),
+          ));
+        }
+      }
+    }
   }
-
-  result
+  Ok(result)
 }
 
 impl ColorScheme {
