@@ -63,4 +63,12 @@ impl HighlightManager {
       highlights: FoldMap::new(),
     }
   }
+
+  pub fn highlights(&self) -> &FoldMap<HighlightId, Highlight> {
+    &self.highlights
+  }
+
+  pub fn highlights_mut(&mut self) -> &mut FoldMap<HighlightId, Highlight> {
+    &mut self.highlights
+  }
 }
