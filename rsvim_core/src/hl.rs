@@ -36,12 +36,55 @@ pub struct Highlight {
   styles: FoldMap<StyleId, Style>,
 }
 
+pub type HighlightKeys<'a> =
+  std::collections::hash_map::Keys<'a, StyleId, Style>;
+pub type HighlightValues<'a> =
+  std::collections::hash_map::Values<'a, StyleId, Style>;
+pub type HighlightIter<'a> =
+  std::collections::hash_map::Iter<'a, StyleId, Style>;
+
 impl Highlight {
   pub fn new(id: HighlightId) -> Self {
     Self {
       id,
       styles: FoldMap::new(),
     }
+  }
+
+  pub fn is_empty(&self) -> bool {
+    self.styles.is_empty()
+  }
+
+  pub fn len(&self) -> usize {
+    self.styles.len()
+  }
+
+  pub fn get(&self, id: &StyleId) -> Option<&Style> {
+    self.styles.get(id)
+  }
+
+  pub fn contains_key(&self, id: &StyleId) -> bool {
+    self.styles.contains_key(id)
+  }
+
+  pub fn insert(&mut self, key: StyleId, value: Style) -> Option<Style> {
+    self.styles.insert(key, value)
+  }
+
+  pub fn remove(&mut self, id: &StyleId) -> Option<Style> {
+    self.styles.remove(id)
+  }
+
+  pub fn keys(&self) -> HighlightKeys<'_> {
+    self.styles.keys()
+  }
+
+  pub fn values(&self) -> HighlightValues<'_> {
+    self.styles.values()
+  }
+
+  pub fn iter(&self) -> HighlightIter<'_> {
+    self.styles.iter()
   }
 }
 
