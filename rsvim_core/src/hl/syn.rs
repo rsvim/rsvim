@@ -1,3 +1,3 @@
 //! Syntax highlight.
 
-pub struct SyntaxHighlight {}
+pub struct SyntaxHl {}
