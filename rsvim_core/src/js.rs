@@ -29,6 +29,7 @@ mod converter_tests;
 mod module_tests;
 
 use crate::buf::BufferManagerArc;
+use crate::cfg::path_cfg::PATH_CONFIG;
 use crate::chan;
 use crate::chan::JsMessage;
 use crate::chan::MasterMessage;

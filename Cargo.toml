@@ -74,7 +74,7 @@ git2 = "0.20"
 strum = "0.27"
 strum_macros = "0.27"
 async-trait = "0.1"
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
 # serde_json = "1.0"
 normpath = "1.5"
 postcard = { version = "1.1", default-features = false, features = ["use-std"] }
@@ -89,8 +89,8 @@ arcstr = { version = "1.2", features = ["std"] }
 tree-sitter = "0.26"
 tree-sitter-loader = "0.26"
 tree-sitter-rust = "0.24"
-tree-sitter-md = "0.5.2"
-tree-sitter-toml-ng = "0.7.0"
+tree-sitter-md = "0.5"
+tree-sitter-toml-ng = "0.7"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
