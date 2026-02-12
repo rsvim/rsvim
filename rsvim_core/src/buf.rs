@@ -190,6 +190,7 @@ impl Buffer {
   }
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
