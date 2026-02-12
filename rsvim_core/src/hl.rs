@@ -7,13 +7,11 @@ use compact_str::CompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 
-structural_id_impl!(str, StyleId);
-
 #[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
 pub struct Style {
   /// Style ID
-  pub id: StyleId,
+  pub id: CompactString,
 
   /// Foreground color.
   pub fg: Color,
@@ -33,15 +31,15 @@ pub struct Highlight {
   id: HighlightId,
 
   // Maps style ID => style
-  styles: FoldMap<StyleId, Style>,
+  styles: FoldMap<CompactString, Style>,
 }
 
 pub type HighlightKeys<'a> =
-  std::collections::hash_map::Keys<'a, StyleId, Style>;
+  std::collections::hash_map::Keys<'a, CompactString, Style>;
 pub type HighlightValues<'a> =
-  std::collections::hash_map::Values<'a, StyleId, Style>;
+  std::collections::hash_map::Values<'a, CompactString, Style>;
 pub type HighlightIter<'a> =
-  std::collections::hash_map::Iter<'a, StyleId, Style>;
+  std::collections::hash_map::Iter<'a, CompactString, Style>;
 
 impl Highlight {
   pub fn new(id: HighlightId) -> Self {
@@ -63,19 +61,19 @@ impl Highlight {
     self.styles.len()
   }
 
-  pub fn get(&self, id: &StyleId) -> Option<&Style> {
+  pub fn get(&self, id: &str) -> Option<&Style> {
     self.styles.get(id)
   }
 
-  pub fn contains_key(&self, id: &StyleId) -> bool {
+  pub fn contains_key(&self, id: &str) -> bool {
     self.styles.contains_key(id)
   }
 
-  pub fn insert(&mut self, key: StyleId, value: Style) -> Option<Style> {
+  pub fn insert(&mut self, key: CompactString, value: Style) -> Option<Style> {
     self.styles.insert(key, value)
   }
 
-  pub fn remove(&mut self, id: &StyleId) -> Option<Style> {
+  pub fn remove(&mut self, id: &str) -> Option<Style> {
     self.styles.remove(id)
   }
 
