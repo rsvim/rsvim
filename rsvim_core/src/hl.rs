@@ -8,8 +8,12 @@ use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
-pub const SYNTAX_HIGHLIGHT_PREFIX: &str = "syn.";
-pub const UI_HIGHLIGHT_PREFIX: &str = "ui.";
+pub const SYN: &str = "syn";
+pub const SYN_DOT: &str = "syn.";
+pub const UI: &str = "ui";
+pub const UI_DOT: &str = "ui.";
+pub const PALETTE: &str = "palette";
+pub const PALETTE_DOT: &str = "palette.";
 
 pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
@@ -68,7 +72,7 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
       "variable.parameter",
     ]
     .iter()
-    .map(|i| format!("{}{}", SYNTAX_HIGHLIGHT_PREFIX, i).to_compact_string())
+    .map(|i| format!("{}{}", SYN_DOT, i).to_compact_string())
     .collect::<FoldSet<CompactString>>()
   });
 
@@ -118,10 +122,52 @@ fn parse_palette(
             .insert(k.as_str().to_compact_string(), val.to_compact_string());
         }
         None => {
-          return Err(TheErr::LoadColorSchemePaletteFailed(
-            k.as_str().to_compact_string(),
+          return Err(TheErr::LoadColorSchemeFailed(
+            format!("{}{}", PALETTE_DOT, k.as_str()).to_compact_string(),
           ));
         }
+      }
+    }
+  }
+  Ok(result)
+}
+
+fn parse_color_code(code: &str) -> Color {
+  if code.starts_with("#") {
+    Color::Rgb { r: (), g: (), b: () }
+  }
+}
+
+fn parse_hl(
+  colorscheme: &toml::Table,
+  group: &str,
+) -> TheResult<FoldMap<CompactString, Highlight>> {
+  debug_assert!(group == SYN || group == UI);
+  let dot_names: FoldMap<&str, &str> =
+    vec![(SYN, SYN_DOT), (UI, UI_DOT)].into_iter().collect();
+  let dot = dot_names[group];
+
+  let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
+  if let Some(palette_value) = colorscheme.get("palette")
+    && let Some(palette) = palette_value.as_table()
+  {
+    for (k, v) in palette.iter() {
+      let id = format!("{}{}", dot, k.as_str()).to_compact_string();
+      if v.is_table() {
+        let v = v.as_table().unwrap();
+        result.insert(
+          id,
+          Highlight {
+            id,
+            fg: Color::
+          },
+        );
+      } else if v.is_str() {
+        let v = v.as_str().unwrap();
+      } else {
+        return Err(TheErr::LoadColorSchemeFailed(
+          format!("{}{}", dot, k.as_str()).to_compact_string(),
+        ));
       }
     }
   }
@@ -179,7 +225,7 @@ impl ColorScheme {
   pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
-        debug_assert!(k.starts_with(SYNTAX_HIGHLIGHT_PREFIX));
+        debug_assert!(k.starts_with(SYN_DOT));
       }
     }
     &self.syntax
@@ -192,7 +238,7 @@ impl ColorScheme {
   pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.ui.keys() {
-        debug_assert!(k.starts_with(UI_HIGHLIGHT_PREFIX));
+        debug_assert!(k.starts_with(UI_DOT));
       }
     }
     &self.ui
