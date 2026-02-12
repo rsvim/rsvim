@@ -68,7 +68,7 @@ pub struct Buffer {
 arc_mutex_ptr!(Buffer);
 
 impl Buffer {
-  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
+  /// NOTE: This API should not be used to create new buffer, please use [`BufferManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
     opts: BufferOptions,
