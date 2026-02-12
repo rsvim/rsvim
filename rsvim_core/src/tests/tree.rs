@@ -1,7 +1,7 @@
 //! Tree utils for testing.
 
 use crate::buf::BuffersManagerArc;
-use crate::content::TextContentsArc;
+use crate::cmdltext::CmdlineTextArc;
 use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
@@ -73,7 +73,7 @@ pub fn make_tree_with_buffers_cmdline(
   canvas_size: U16Size,
   window_local_opts: WindowOptions,
   buffers_manager: BuffersManagerArc,
-  text_contents: TextContentsArc,
+  cmdline_text: CmdlineTextArc,
 ) -> TreeArc {
   let tree_style = Style {
     display: taffy::Display::Grid,
@@ -91,7 +91,7 @@ pub fn make_tree_with_buffers_cmdline(
   let buffers = lock!(buffers_manager);
   let (_, buf) = buffers.first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
-  let text_contents = Arc::downgrade(&text_contents);
+  let text_contents = Arc::downgrade(&cmdline_text);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(window_local_opts);

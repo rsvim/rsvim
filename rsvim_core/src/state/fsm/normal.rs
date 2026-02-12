@@ -168,7 +168,7 @@ impl Normal {
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Colon);
 
     if cfg!(debug_assertions) {
-      let contents = data_access.contents.clone();
+      let contents = data_access.cmdline_text.clone();
       let contents = lock!(contents);
       let cmdline_input_content =
         contents.cmdline_input().rope().to_compact_string();

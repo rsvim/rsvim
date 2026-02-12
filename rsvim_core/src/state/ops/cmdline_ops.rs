@@ -1,6 +1,6 @@
 //! Command-line operations.
 
-use crate::content::TextContents;
+use crate::cmdltext::CmdlineText;
 use crate::prelude::*;
 use crate::ui::tree::Inodify;
 use crate::ui::tree::Tree;
@@ -10,12 +10,12 @@ use compact_str::ToCompactString;
 
 fn _set_message_impl(
   tree: &mut Tree,
-  text_contents: &mut TextContents,
+  cmdline_text: &mut CmdlineText,
   payload: Option<String>,
 ) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let message_text = text_contents.cmdline_message_mut();
+  let message_text = cmdline_text.cmdline_message_mut();
   message_text.clear();
   if let Some(payload) = payload {
     message_text.insert(0, 0, payload.to_compact_string());
@@ -32,11 +32,11 @@ fn _set_message_impl(
 
 pub fn cmdline_set_last_pending_message_on_initialize(
   tree: &mut Tree,
-  text_contents: &mut TextContents,
+  cmdline_text: &mut CmdlineText,
 ) {
   // If message history contains some payload. This means before we actually
   // running the event loop, there's already some messages wait for print.
-  let last_msg = text_contents.cmdline_message_history().last().cloned();
+  let last_msg = cmdline_text.cmdline_message_history().last().cloned();
   trace!("|cmdline_flush_pending_message| last_msg:{:?}", last_msg);
   if let Some(last_msg) = last_msg {
     // Current "command-line-message" widget can only print 1 single-line
@@ -44,34 +44,31 @@ pub fn cmdline_set_last_pending_message_on_initialize(
     //
     // FIXME: Fix me once our "command-line-message" widget support
     // multi-line messages.
-    _set_message_impl(tree, text_contents, Some(last_msg));
+    _set_message_impl(tree, cmdline_text, Some(last_msg));
   }
 }
 
 pub fn cmdline_set_message(
   tree: &mut Tree,
-  text_contents: &mut TextContents,
+  cmdline_text: &mut CmdlineText,
   payload: String,
 ) {
-  _set_message_impl(tree, text_contents, Some(payload.clone()));
+  _set_message_impl(tree, cmdline_text, Some(payload.clone()));
 
   // Also append message history:
-  let cmdline_hist = text_contents.cmdline_message_history_mut();
+  let cmdline_hist = cmdline_text.cmdline_message_history_mut();
   cmdline_hist.push_overwrite(payload);
 }
 
-pub fn cmdline_clear_message(
-  tree: &mut Tree,
-  text_contents: &mut TextContents,
-) {
+pub fn cmdline_clear_message(tree: &mut Tree, cmdline_text: &mut CmdlineText) {
   debug_assert!(tree.cmdline_id().is_some());
-  _set_message_impl(tree, text_contents, None);
+  _set_message_impl(tree, cmdline_text, None);
 }
 
-pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
+pub fn cmdline_clear_input(tree: &mut Tree, cmdline_text: &mut CmdlineText) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let input_text = text_contents.cmdline_input_mut();
+  let input_text = cmdline_text.cmdline_input_mut();
   input_text.clear();
 
   let opts = *tree.cmdline().unwrap().options();

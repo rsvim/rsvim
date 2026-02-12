@@ -80,7 +80,7 @@ async fn create_snapshot1() -> IoResult<()> {
 
   // After running
   {
-    let mut contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.cmdline_message_history().len();
     assert_eq!(n, 1);
 

@@ -98,7 +98,7 @@ mod tests_tab_stop {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 4);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
@@ -144,7 +144,7 @@ mod tests_tab_stop {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 1);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 0);
     }
@@ -190,7 +190,7 @@ mod tests_tab_stop {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
-      let mut contents = lock!(event_loop.contents);
+      let mut contents = lock!(event_loop.cmdline_text);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
       let actual = contents.cmdline_message_history_mut().pop();
@@ -256,7 +256,7 @@ mod tests_file_encoding {
         FileEncodingOption::Utf8,
       );
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
@@ -302,7 +302,7 @@ mod tests_file_encoding {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
@@ -362,7 +362,7 @@ mod tests_file_format {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
@@ -408,7 +408,7 @@ mod tests_file_format {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.file_format(), FILE_FORMAT);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
@@ -463,7 +463,7 @@ mod tests_expand_tab {
       let global_local_options = buffers.global_local_options();
       assert!(global_local_options.expand_tab());
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
@@ -509,7 +509,7 @@ mod tests_expand_tab {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
@@ -565,7 +565,7 @@ mod tests_shift_width {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), 4);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let actual = contents.cmdline_message().rope().to_string();
       assert!(actual.trim().is_empty());
     }
@@ -611,7 +611,7 @@ mod tests_shift_width {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), 255);
 
-      let contents = lock!(event_loop.contents);
+      let contents = lock!(event_loop.cmdline_text);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 0);
     }
@@ -657,7 +657,7 @@ mod tests_shift_width {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
 
-      let mut contents = lock!(event_loop.contents);
+      let mut contents = lock!(event_loop.cmdline_text);
       let n = contents.cmdline_message_history().len();
       assert_eq!(n, 1);
       let actual = contents.cmdline_message_history_mut().pop();
