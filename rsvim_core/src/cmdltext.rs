@@ -8,9 +8,14 @@ use std::fmt::Debug;
 
 /// Temporary contents except buffers.
 pub struct CmdlineText {
-  cmdline_input: Text,
-  cmdline_message: Text,
-  cmdline_message_history: RingBuffer<String>,
+  // Cmdline input text
+  input: Text,
+
+  // Cmdline message text
+  message: Text,
+
+  // Cmdline message history
+  message_history: RingBuffer<String>,
 }
 
 arc_mutex_ptr!(CmdlineText);
@@ -19,40 +24,40 @@ impl CmdlineText {
   pub fn new(canvas_size: U16Size) -> Self {
     let cmdline_opts = BufferOptionsBuilder::default().build().unwrap();
     Self {
-      cmdline_input: Text::new(cmdline_opts, canvas_size, Rope::new()),
-      cmdline_message: Text::new(cmdline_opts, canvas_size, Rope::new()),
-      cmdline_message_history: RingBuffer::new(500),
+      input: Text::new(cmdline_opts, canvas_size, Rope::new()),
+      message: Text::new(cmdline_opts, canvas_size, Rope::new()),
+      message_history: RingBuffer::new(500),
     }
   }
 
   /// Command-line input content
   pub fn cmdline_input(&self) -> &Text {
-    &self.cmdline_input
+    &self.input
   }
 
   /// Mutable command-line input content
   pub fn cmdline_input_mut(&mut self) -> &mut Text {
-    &mut self.cmdline_input
+    &mut self.input
   }
 
   /// Command-line message
   pub fn cmdline_message(&self) -> &Text {
-    &self.cmdline_message
+    &self.message
   }
 
   /// Mutable command-line message
   pub fn cmdline_message_mut(&mut self) -> &mut Text {
-    &mut self.cmdline_message
+    &mut self.message
   }
 
   /// Command-line message history
   pub fn cmdline_message_history(&self) -> &RingBuffer<String> {
-    &self.cmdline_message_history
+    &self.message_history
   }
 
   /// Mutable command-line message history
   pub fn cmdline_message_history_mut(&mut self) -> &mut RingBuffer<String> {
-    &mut self.cmdline_message_history
+    &mut self.message_history
   }
 }
 
