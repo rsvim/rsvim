@@ -584,8 +584,8 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let (_buf_id, buf) = {
-      let buffers = lock!(self.buffer_manager);
-      let (buf_id, buf) = buffers.buffers().first_key_value().unwrap();
+      let buffer_manager = lock!(self.buffer_manager);
+      let (buf_id, buf) = buffer_manager.buffers().first_key_value().unwrap();
       (*buf_id, buf.clone())
     };
     let buf = Arc::downgrade(&buf);
