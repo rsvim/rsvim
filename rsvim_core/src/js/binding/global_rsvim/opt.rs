@@ -100,11 +100,13 @@ pub fn set_tab_stop<'s>(
   let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let mut buffers = lock!(buffers);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
 
   debug_assert!(value <= u8::MAX as u32);
-  buffers.global_local_options_mut().set_tab_stop(value as u8);
+  buffer_manager
+    .global_local_options_mut()
+    .set_tab_stop(value as u8);
 }
 
 /// Get the _expand-tab_ option.
@@ -115,9 +117,9 @@ pub fn get_expand_tab(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let buffers = state_rc.borrow().buffer_manager.clone();
-  let buffers = lock!(buffers);
-  let value = buffers.global_local_options().expand_tab();
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().expand_tab();
   trace!("get_expand_tab: {:?}", value);
   rv.set_bool(value);
 }
