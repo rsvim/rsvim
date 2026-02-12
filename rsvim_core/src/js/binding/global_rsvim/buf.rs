@@ -40,9 +40,10 @@ pub fn list(
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
   let buffers = lock!(buffers);
-  trace!("Rsvim.buf.list: {:?}", buffers.keys());
+  trace!("Rsvim.buf.list: {:?}", buffers.buffers().keys());
 
   let bufs = buffers
+    .buffers()
     .keys()
     .collect::<Vec<&BufferId>>()
     .to_v8(scope, |scope, buf_id| buf_id.to_v8(scope).into());
