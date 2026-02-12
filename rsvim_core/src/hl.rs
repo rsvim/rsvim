@@ -11,6 +11,7 @@ structural_id_impl!(str, HighlightId);
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Highlight style, including colors and attributes.
 pub struct Style {
+  /// Style ID
   pub id: HighlightId,
 
   /// Foreground color.
