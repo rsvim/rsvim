@@ -5,7 +5,6 @@ use crate::cfg::path_cfg::PathConfig;
 use once_cell::sync::Lazy;
 use std::time::Duration;
 
-pub const RSVIM_LOG: &str = "RSVIM_LOG";
 pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
