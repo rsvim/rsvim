@@ -23,12 +23,10 @@ pub struct Style {
   pub attr: Attributes,
 }
 
-structural_id_impl!(str, HighlightId);
-
 #[derive(Debug, Clone)]
 pub struct Highlight {
   // Highlight ID
-  id: HighlightId,
+  id: CompactString,
 
   // Maps style ID => style
   styles: FoldMap<CompactString, Style>,
@@ -42,14 +40,14 @@ pub type HighlightIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, Style>;
 
 impl Highlight {
-  pub fn new(id: HighlightId) -> Self {
+  pub fn new(id: CompactString) -> Self {
     Self {
       id,
       styles: FoldMap::new(),
     }
   }
 
-  pub fn id(&self) -> &HighlightId {
+  pub fn id(&self) -> &CompactString {
     &self.id
   }
 
@@ -93,7 +91,7 @@ impl Highlight {
 #[derive(Debug)]
 pub struct HighlightManager {
   // Maps highlight ID => highlight
-  highlights: FoldMap<HighlightId, Highlight>,
+  highlights: FoldMap<CompactString, Highlight>,
 }
 
 impl Default for HighlightManager {
@@ -103,11 +101,11 @@ impl Default for HighlightManager {
 }
 
 pub type HighlightManagerKeys<'a> =
-  std::collections::hash_map::Keys<'a, HighlightId, Highlight>;
+  std::collections::hash_map::Keys<'a, CompactString, Highlight>;
 pub type HighlightManagerValues<'a> =
-  std::collections::hash_map::Values<'a, HighlightId, Highlight>;
+  std::collections::hash_map::Values<'a, CompactString, Highlight>;
 pub type HighlightManagerIter<'a> =
-  std::collections::hash_map::Iter<'a, HighlightId, Highlight>;
+  std::collections::hash_map::Iter<'a, CompactString, Highlight>;
 
 impl HighlightManager {
   pub fn new() -> Self {
@@ -124,23 +122,23 @@ impl HighlightManager {
     self.highlights.len()
   }
 
-  pub fn get(&self, id: &HighlightId) -> Option<&Highlight> {
+  pub fn get(&self, id: &CompactString) -> Option<&Highlight> {
     self.highlights.get(id)
   }
 
-  pub fn contains_key(&self, id: &HighlightId) -> bool {
+  pub fn contains_key(&self, id: &CompactString) -> bool {
     self.highlights.contains_key(id)
   }
 
   pub fn insert(
     &mut self,
-    key: HighlightId,
+    key: CompactString,
     value: Highlight,
   ) -> Option<Highlight> {
     self.highlights.insert(key, value)
   }
 
-  pub fn remove(&mut self, id: &HighlightId) -> Option<Highlight> {
+  pub fn remove(&mut self, id: &CompactString) -> Option<Highlight> {
     self.highlights.remove(id)
   }
 

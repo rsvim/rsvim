@@ -15,16 +15,12 @@ mod tests_getter_setter {
   #[test]
   fn file_ext1() {
     let mut syn_mgr = SyntaxManager::new();
-    syn_mgr.insert_file_ext(LanguageId::from("rust".to_compact_string()), "rs");
+    syn_mgr
+      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
     let actual = syn_mgr.get_id_by_file_ext("rs");
     assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), &LanguageId::from("rust"));
-    assert_eq!(actual.unwrap(), &LanguageId::from("rust".to_string()));
-    assert_eq!(
-      actual.unwrap(),
-      &LanguageId::from("rust".to_compact_string())
-    );
-    let actual = syn_mgr.get_file_ext_by_id(&LanguageId::from("rust"));
+    assert_eq!(actual.unwrap(), "rust");
+    let actual = syn_mgr.get_file_ext_by_id("rust");
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("rs"));
   }
