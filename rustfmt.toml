@@ -6,3 +6,5 @@ max_width = 80
 
 unstable_features = true
 imports_granularity = "Item"
+format_macro_matchers = true
+format_macro_bodies = true
