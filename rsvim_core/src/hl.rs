@@ -4,6 +4,7 @@
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
@@ -107,7 +108,7 @@ pub enum HighlightColor {
   Code(Color),
 
   /// A color link to the one defined in `palette`.
-  Pelette(CompactString),
+  Palette(CompactString),
 }
 
 #[derive(Debug, Clone)]
@@ -202,12 +203,17 @@ fn parse_palette(
 
 fn parse_hl(
   colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
   group: &str,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   debug_assert!(group == SYN || group == UI);
   let group_dots: FoldMap<&str, &str> =
     vec![(SYN, SYN_DOT), (UI, UI_DOT)].into_iter().collect();
   let dot = group_dots[group];
+
+  let the_err = |k| {
+    TheErr::LoadColorSchemeFailed(format!("{}{}", dot, k).to_compact_string())
+  };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
   if let Some(palette_value) = colorscheme.get("palette")
@@ -218,26 +224,63 @@ fn parse_hl(
       if val.is_table() {
         let hl_table = val.as_table().unwrap();
 
-        let fg = if let Some(fg) = hl_table.get("fg") {
-          let fg = fg.as_str().ok_or(TheErr::LoadColorSchemeFailed(
-            format!("{}{}", dot, key).to_compact_string(),
-          ))?;
-          Some(fg)
-        } else {
-          None
-        };
-        let bg = if let Some(bg) = hl_table.get("bg") {
-          let bg = bg.as_str().ok_or(TheErr::LoadColorSchemeFailed(
-            format!("{}{}", dot, key).to_compact_string(),
-          ))?;
-          Some(bg)
-        } else {
-          None
+        let parse_color = |x| -> TheResult<Option<HighlightColor>> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_str().ok_or(the_err(key))?;
+              if palette.contains_key(x) {
+                Ok(Some(HighlightColor::Palette(x.to_compact_string())))
+              } else {
+                let code = parse_code(dot, key, x)?;
+                Ok(Some(HighlightColor::Code(code)))
+              }
+            }
+            None => Ok(None),
+          }
         };
 
-        result.insert(id, Highlight { id });
+        let fg = parse_color(FG)?;
+        let bg = parse_color(BG)?;
+
+        let parse_bool = |x| -> TheResult<bool> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_bool().ok_or(the_err(key))?;
+              Ok(x)
+            }
+            None => Ok(false),
+          }
+        };
+
+        let bold = parse_bool(BOLD)?;
+        let italic = parse_bool(ITALIC)?;
+        let underlined = parse_bool(UNDERLINED)?;
+
+        let mut attr = Attributes::none();
+        if bold {
+          attr.set(Attribute::Bold);
+        }
+        if italic {
+          attr.set(Attribute::Italic);
+        }
+        if underlined {
+          attr.set(Attribute::Underlined);
+        }
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else if val.is_str() {
-        let v = val.as_str().unwrap();
+        let fg = val.as_str().unwrap();
+        let fg = if palette.contains_key(fg) {
+          Some(HighlightColor::Palette(fg.to_compact_string()))
+        } else {
+          let code = parse_code(dot, key, fg)?;
+          Some(HighlightColor::Code(code))
+        };
+
+        let bg = None;
+        let attr = Attributes::none();
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
         return Err(TheErr::LoadColorSchemeFailed(
           format!("{}{}", dot, key.as_str()).to_compact_string(),
