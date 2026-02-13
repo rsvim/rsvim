@@ -266,10 +266,11 @@ impl SyntaxManager {
   }
 
   pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
-    match self.ext2id.get(ext) {
-      Some(id) => self.get_lang(id),
-      None => None,
-    }
+    self
+      .ext2id
+      .get(ext)
+      .map(|id| self.get_lang(id))
+      .unwrap_or(None)
   }
 }
 
