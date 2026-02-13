@@ -7,7 +7,9 @@ use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
+use std::str::FromStr;
 
+// Group
 pub const SYN: &str = "syn";
 pub const SYN_DOT: &str = "syn.";
 pub const UI: &str = "ui";
@@ -15,7 +17,18 @@ pub const UI_DOT: &str = "ui.";
 pub const PALETTE: &str = "palette";
 pub const PALETTE_DOT: &str = "palette.";
 
-pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
+// Color
+pub const FG: &str = "fg";
+pub const FG_DOT: &str = "fg.";
+pub const BG: &str = "bg";
+pub const BG_DOT: &str = "bg.";
+
+// Attribute
+pub const BOLD: &str = "bold";
+pub const ITALIC: &str = "italic";
+pub const UNDERLINED: &str = "underlined";
+
+pub static TREE_SITTER_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
     vec![
       "attribute",
@@ -72,9 +85,30 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
       "variable.parameter",
     ]
     .iter()
-    .map(|i| format!("{}{}", SYN_DOT, i).to_compact_string())
+    .map(|i| i.to_compact_string())
     .collect::<FoldSet<CompactString>>()
   });
+
+pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
+  Lazy::new(|| {
+    TREE_SITTER_HIGHLIGHT_NAMES
+      .iter()
+      .map(|i| format!("{}{}", SYN_DOT, i).to_compact_string())
+      .collect::<FoldSet<CompactString>>()
+  });
+
+#[derive(Debug, Clone)]
+/// Highlight color, it can be either a real color value (color name or RGB
+/// color) or a color link to the one defined in `palette`.
+pub enum HighlightColor {
+  /// A color code:
+  /// - Color name such as white, black, grey, etc.
+  /// - RGB color code such as #ffffff, #000000, etc.
+  Code(Color),
+
+  /// A color link to the one defined in `palette`.
+  Pelette(CompactString),
+}
 
 #[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
@@ -83,12 +117,12 @@ pub struct Highlight {
   pub id: CompactString,
 
   /// Foreground color.
-  pub fg: Color,
+  pub fg: Option<HighlightColor>,
 
   /// Background color.
-  pub bg: Color,
+  pub bg: Option<HighlightColor>,
 
-  /// Attributes: underline, bold, italic, etc.
+  /// Attributes: underlined, bold, italic, etc.
   pub attr: Attributes,
 }
 
@@ -97,9 +131,9 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Maps color name to RGB value.
+  // Maps color name to color code.
   // For example: white => #ffffff, black => #000000
-  palette: FoldMap<CompactString, CompactString>,
+  palette: FoldMap<CompactString, Color>,
 
   // Maps ID => syntax colors
   syntax: FoldMap<CompactString, Highlight>,
@@ -108,18 +142,52 @@ pub struct ColorScheme {
   ui: FoldMap<CompactString, Highlight>,
 }
 
+fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
+  let parse_hex = |x| {
+    u8::from_str_radix(x, 16).map_err(|e| {
+      TheErr::LoadColorSchemeFailed(
+        format!("{}{}", prefix, k).to_compact_string(),
+      )
+    })
+  };
+
+  if s.starts_with("#") && s.len() == 7 {
+    // Parse hex 6 digits, for example: #ffffff
+    let r = parse_hex(&s[1..3])?;
+    let g = parse_hex(&s[3..5])?;
+    let b = parse_hex(&s[5..7])?;
+    Ok(Color::Rgb { r, g, b })
+  } else if s.starts_with("#") && s.len() == 4 {
+    // Parse hex 3 digits, for example: #fff
+    let r = parse_hex(&s[1..2])?;
+    let r = r | (r << 4);
+    let g = parse_hex(&s[2..3])?;
+    let g = g | (g << 4);
+    let b = parse_hex(&s[3..4])?;
+    let b = b | (b << 4);
+    Ok(Color::Rgb { r, g, b })
+  } else {
+    // Try parse color name
+    Color::from_str(s).map_err(|e| {
+      TheErr::LoadColorSchemeFailed(
+        format!("{}{}", prefix, k).to_compact_string(),
+      )
+    })
+  }
+}
+
 fn parse_palette(
   colorscheme: &toml::Table,
-) -> TheResult<FoldMap<CompactString, CompactString>> {
-  let mut result: FoldMap<CompactString, CompactString> = FoldMap::new();
+) -> TheResult<FoldMap<CompactString, Color>> {
+  let mut result: FoldMap<CompactString, Color> = FoldMap::new();
   if let Some(palette_value) = colorscheme.get("palette")
     && let Some(palette) = palette_value.as_table()
   {
     for (k, v) in palette.iter() {
       match v.as_str() {
         Some(val) => {
-          result
-            .insert(k.as_str().to_compact_string(), val.to_compact_string());
+          let code = parse_code(PALETTE_DOT, k, val)?;
+          result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
           return Err(TheErr::LoadColorSchemeFailed(
@@ -132,41 +200,47 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_color_code(code: &str) -> Color {
-  if code.starts_with("#") {
-    Color::Rgb { r: (), g: (), b: () }
-  }
-}
-
 fn parse_hl(
   colorscheme: &toml::Table,
   group: &str,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   debug_assert!(group == SYN || group == UI);
-  let dot_names: FoldMap<&str, &str> =
+  let group_dots: FoldMap<&str, &str> =
     vec![(SYN, SYN_DOT), (UI, UI_DOT)].into_iter().collect();
-  let dot = dot_names[group];
+  let dot = group_dots[group];
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
   if let Some(palette_value) = colorscheme.get("palette")
     && let Some(palette) = palette_value.as_table()
   {
-    for (k, v) in palette.iter() {
-      let id = format!("{}{}", dot, k.as_str()).to_compact_string();
-      if v.is_table() {
-        let v = v.as_table().unwrap();
-        result.insert(
-          id,
-          Highlight {
-            id,
-            fg: Color::
-          },
-        );
-      } else if v.is_str() {
-        let v = v.as_str().unwrap();
+    for (key, val) in palette.iter() {
+      let id = format!("{}{}", dot, key.as_str()).to_compact_string();
+      if val.is_table() {
+        let hl_table = val.as_table().unwrap();
+
+        let fg = if let Some(fg) = hl_table.get("fg") {
+          let fg = fg.as_str().ok_or(TheErr::LoadColorSchemeFailed(
+            format!("{}{}", dot, key).to_compact_string(),
+          ))?;
+          Some(fg)
+        } else {
+          None
+        };
+        let bg = if let Some(bg) = hl_table.get("bg") {
+          let bg = bg.as_str().ok_or(TheErr::LoadColorSchemeFailed(
+            format!("{}{}", dot, key).to_compact_string(),
+          ))?;
+          Some(bg)
+        } else {
+          None
+        };
+
+        result.insert(id, Highlight { id });
+      } else if val.is_str() {
+        let v = val.as_str().unwrap();
       } else {
         return Err(TheErr::LoadColorSchemeFailed(
-          format!("{}{}", dot, k.as_str()).to_compact_string(),
+          format!("{}{}", dot, key.as_str()).to_compact_string(),
         ));
       }
     }
