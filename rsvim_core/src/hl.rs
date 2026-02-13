@@ -282,9 +282,7 @@ fn parse_hl(
 
         result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
-        return Err(TheErr::LoadColorSchemeFailed(
-          format!("{}{}", dot, key.as_str()).to_compact_string(),
-        ));
+        return Err(the_err(key));
       }
     }
   }
