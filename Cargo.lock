@@ -2645,6 +2645,7 @@ dependencies = [
 name = "rsvim"
 version = "0.1.2"
 dependencies = [
+ "foldhash 0.2.0",
  "git2",
  "log",
  "mimalloc-safe",
@@ -2724,6 +2725,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-util",
+ "toml",
  "tree-sitter",
  "tree-sitter-loader",
  "tree-sitter-md",
@@ -4010,6 +4012,7 @@ version = "0.9.11+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3afc9a848309fe1aaffaed6e1546a7a14de1f935dc9d89d32afd9a44bab7c46"
 dependencies = [
+ "foldhash 0.2.0",
  "indexmap",
  "serde_core",
  "serde_spanned",

@@ -25,56 +25,57 @@ simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
+# anyhow = { workspace = true }
+ascii = { workspace = true }
+arcstr = { workspace = true, features = ["std"] }
+async-trait = { workspace = true }
+compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
-lexopt = { workspace = true }
+derive_builder = { workspace = true }
+dirs = { workspace = true }
+encoding_rs = { workspace = true }
+env_filter = { workspace = true }
+fern = { workspace = true }
+foldhash = { workspace = true }
+futures = { workspace = true }
+geo = { workspace = true }
+icu = { workspace = true, features = ["compiled_data"] }
+itertools = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
+lexopt = { workspace = true }
+litemap = { workspace = true }
 log = { workspace = true, features = [
   "max_level_trace",
   "release_max_level_error",
 ] }
-env_filter = { workspace = true }
-fern = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
-tokio-util = { workspace = true, features = ["full"] }
-futures = { workspace = true }
-compact_str = { workspace = true }
-ropey = { workspace = true, default-features = false }
-geo = { workspace = true }
-taffy = { workspace = true }
-num-traits = { workspace = true }
-parking_lot = { workspace = true }
-dirs = { workspace = true }
-# anyhow = { workspace = true }
-thiserror = { workspace = true }
-foldhash = { workspace = true }
-# url = { workspace = true }
-path-absolutize = { workspace = true }
-# zstd = { workspace = true }
-ascii = { workspace = true }
-icu = { workspace = true, features = ["compiled_data"] }
-itertools = { workspace = true }
-derive_builder = { workspace = true }
 lru = { workspace = true }
-paste = { workspace = true }
-litemap = { workspace = true }
-strum = { workspace = true }
-strum_macros = { workspace = true }
-async-trait = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-# serde_json = { workspace = true }
 normpath = { workspace = true }
+num-traits = { workspace = true }
+oxc_resolver = { workspace = true }
+once_cell = { workspace = true, features = ["parking_lot"] }
+parking_lot = { workspace = true }
+path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
-oxc_resolver = { workspace = true }
-encoding_rs = { workspace = true }
-once_cell = { workspace = true, features = ["parking_lot"] }
-arcstr = { workspace = true, features = ["std"] }
+paste = { workspace = true }
+ropey = { workspace = true, default-features = false }
+serde = { workspace = true, features = ["derive"] }
+# serde_json = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+taffy = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true, features = ["full"] }
+toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
 tree-sitter-loader = { workspace = true }
 tree-sitter-rust = { workspace = true }
 tree-sitter-md = { workspace = true }
 tree-sitter-toml-ng = { workspace = true }
+# url = { workspace = true }
+# zstd = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
@@ -113,17 +114,16 @@ v8 = { workspace = true, default-features = false, features = [
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
-bitflags = { workspace = true }
-unicode-width = { workspace = true }
-# unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
+bitflags = { workspace = true }
+regex = { workspace = true }
 # tracing = { workspace = true, features = [
 #   "max_level_trace",
 #   "release_max_level_error",
 # ] }
+# tracing-appender = { workspace = true, features = ["parking_lot"] }
 # tracing-subscriber = { workspace = true, features = [
 #   "env-filter",
 #   "parking_lot",
 # ] }
-# tracing-appender = { workspace = true, features = ["parking_lot"] }
-regex = { workspace = true }
+unicode-width = { workspace = true }
