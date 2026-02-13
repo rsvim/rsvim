@@ -354,7 +354,7 @@ impl ColorScheme {
     &self.ui
   }
 
-  pub fn get_original_highlight(&self, id: &str) -> Option<&Highlight> {}
+  pub fn get_raw_highlight(&self, id: &str) -> Option<&Highlight> {}
 
   pub fn get_processed_highlight(&self, id: &str) -> Option<&Highlight> {}
 }
