@@ -313,16 +313,19 @@ impl ColorScheme {
   /// black = "#000000"
   /// yellow = "#ffff00"
   /// ```
-  pub fn from_toml(name: CompactString, colorscheme: toml::Table) -> Self {
-    let mut syntax: FoldMap<CompactString, Highlight> = FoldMap::new();
-    let mut ui: FoldMap<CompactString, Highlight> = FoldMap::new();
-
-    Self {
+  pub fn from_toml(
+    name: CompactString,
+    colorscheme: toml::Table,
+  ) -> TheResult<Self> {
+    let palette = parse_palette(&colorscheme)?;
+    let syntax = parse_hl(&colorscheme, &palette, SYN)?;
+    let ui = parse_hl(&colorscheme, &palette, UI)?;
+    Ok(Self {
       name,
       palette,
       syntax,
       ui,
-    }
+    })
   }
 
   pub fn name(&self) -> &CompactString {
