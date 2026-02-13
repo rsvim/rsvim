@@ -68,7 +68,7 @@ taffy = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
-toml = { workspace = true }
+toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
 tree-sitter-loader = { workspace = true }
 tree-sitter-rust = { workspace = true }
