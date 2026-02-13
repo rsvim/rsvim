@@ -332,11 +332,11 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn palette(&self) -> &FoldMap<CompactString, CompactString> {
+  pub fn palette(&self) -> &FoldMap<CompactString, Color> {
     &self.palette
   }
 
-  pub fn palette_mut(&mut self) -> &mut FoldMap<CompactString, CompactString> {
+  pub fn palette_mut(&mut self) -> &mut FoldMap<CompactString, Color> {
     &mut self.palette
   }
 
