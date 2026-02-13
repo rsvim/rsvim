@@ -336,10 +336,6 @@ impl ColorScheme {
     &self.palette
   }
 
-  pub fn palette_mut(&mut self) -> &mut FoldMap<CompactString, Color> {
-    &mut self.palette
-  }
-
   pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
@@ -349,20 +345,12 @@ impl ColorScheme {
     &self.syntax
   }
 
-  pub fn syntax_mut(&mut self) -> &mut FoldMap<CompactString, Highlight> {
-    &mut self.syntax
-  }
-
   pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.ui.keys() {
         debug_assert!(k.starts_with(UI_DOT));
       }
     }
-    &self.ui
-  }
-
-  pub fn ui_mut(&self) -> &FoldMap<CompactString, Highlight> {
     &self.ui
   }
 }
