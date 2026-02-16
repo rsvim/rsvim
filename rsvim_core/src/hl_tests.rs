@@ -10,6 +10,7 @@ mod parse_toml {
 [syn]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
+comment = { fg = "#ffffff", bg = "#000000", bold = true, italic = true, underlined = true }
 
 [ui]
 background = "#000000"
