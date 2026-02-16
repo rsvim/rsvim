@@ -10,26 +10,7 @@ use crossterm::style::Color;
 use once_cell::sync::Lazy;
 use std::str::FromStr;
 
-// Group
-pub const SYN: &str = "syn";
-pub const SYN_DOT: &str = "syn.";
-pub const UI: &str = "ui";
-pub const UI_DOT: &str = "ui.";
-pub const PALETTE: &str = "palette";
-pub const PALETTE_DOT: &str = "palette.";
-
-// Color
-pub const FG: &str = "fg";
-pub const FG_DOT: &str = "fg.";
-pub const BG: &str = "bg";
-pub const BG_DOT: &str = "bg.";
-
-// Attribute
-pub const BOLD: &str = "bold";
-pub const ITALIC: &str = "italic";
-pub const UNDERLINED: &str = "underlined";
-
-pub static TREE_SITTER_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
+pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
     vec![
       "attribute",
@@ -88,14 +69,6 @@ pub static TREE_SITTER_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
     .iter()
     .map(|i| i.to_compact_string())
     .collect::<FoldSet<CompactString>>()
-  });
-
-pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
-  Lazy::new(|| {
-    TREE_SITTER_HIGHLIGHT_NAMES
-      .iter()
-      .map(|i| format!("{}{}", SYN_DOT, i).to_compact_string())
-      .collect::<FoldSet<CompactString>>()
   });
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -172,12 +145,12 @@ fn parse_palette(
     for (k, v) in palette.iter() {
       match v.as_str() {
         Some(val) => {
-          let code = parse_code(PALETTE_DOT, k, val)?;
+          let code = parse_code("palette.", k, val)?;
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
           return Err(TheErr::LoadColorSchemeFailed(
-            format!("{}{}", PALETTE_DOT, k.as_str()).to_compact_string(),
+            format!("palette.{}", k.as_str()).to_compact_string(),
           ));
         }
       }
@@ -191,9 +164,9 @@ fn parse_hl(
   palette: &FoldMap<CompactString, Color>,
   group: &str,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  debug_assert!(group == SYN || group == UI);
+  debug_assert!(group == "syn" || group == "ui");
   let group_dots: FoldMap<&str, &str> =
-    vec![(SYN, SYN_DOT), (UI, UI_DOT)].into_iter().collect();
+    vec![("syn", "syn."), ("ui", "ui.")].into_iter().collect();
   let dot = group_dots[group];
 
   let the_err = |k| {
@@ -222,8 +195,8 @@ fn parse_hl(
           }
         };
 
-        let fg = parse_color(FG)?;
-        let bg = parse_color(BG)?;
+        let fg = parse_color("fg")?;
+        let bg = parse_color("bg")?;
 
         let parse_bool = |x| -> TheResult<bool> {
           match hl_table.get(x) {
@@ -235,9 +208,9 @@ fn parse_hl(
           }
         };
 
-        let bold = parse_bool(BOLD)?;
-        let italic = parse_bool(ITALIC)?;
-        let underlined = parse_bool(UNDERLINED)?;
+        let bold = parse_bool("bold")?;
+        let italic = parse_bool("italic")?;
+        let underlined = parse_bool("underlined")?;
 
         let mut attr = Attributes::none();
         if bold {
@@ -298,8 +271,8 @@ impl ColorScheme {
     colorscheme: toml::Table,
   ) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let syntax = parse_hl(&colorscheme, &palette, SYN)?;
-    let ui = parse_hl(&colorscheme, &palette, UI)?;
+    let syntax = parse_hl(&colorscheme, &palette, "syn")?;
+    let ui = parse_hl(&colorscheme, &palette, "ui")?;
     Ok(Self { name, syntax, ui })
   }
 
@@ -310,7 +283,7 @@ impl ColorScheme {
   pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
-        debug_assert!(k.starts_with(SYN_DOT));
+        debug_assert!(k.starts_with("syn."));
       }
     }
     &self.syntax
@@ -319,16 +292,16 @@ impl ColorScheme {
   pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.ui.keys() {
-        debug_assert!(k.starts_with(UI_DOT));
+        debug_assert!(k.starts_with("ui."));
       }
     }
     &self.ui
   }
 
   pub fn get(&self, id: &str) -> Option<&Highlight> {
-    if id.starts_with(SYN_DOT) {
+    if id.starts_with("syn.") {
       self.syntax.get(id)
-    } else if id.starts_with(UI_DOT) {
+    } else if id.starts_with("ui.") {
       self.ui.get(id)
     } else {
       None
