@@ -223,7 +223,11 @@ background = "#000000"
         "ui.foreground",
         Some(Highlight {
           id: "ui.foreground".to_compact_string(),
-          fg: Some(Color::White),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0xff,
+          }),
           bg: None,
           attr: Attributes::none(),
         }),
