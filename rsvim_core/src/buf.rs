@@ -14,7 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::hl::HighlightManager;
+use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
@@ -208,8 +208,8 @@ pub struct BufferManager {
   // Syntax manager
   syntax_manager: SyntaxManager,
 
-  // Highlight manager
-  highlight_manager: HighlightManager,
+  // ColorScheme manager
+  colorscheme_manager: ColorSchemeManager,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -221,7 +221,7 @@ impl BufferManager {
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager: SyntaxManager::new(),
-      highlight_manager: HighlightManager::new(),
+      colorscheme_manager: ColorSchemeManager::new(),
     }
   }
 
@@ -375,7 +375,7 @@ impl BufferManager {
       );
       match Syntax::new(lang) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadLanguageSyntaxFailed(
+        Err(e) => Err(TheErr::LoadSyntaxFailed(
           ext.to_string_lossy().to_compact_string(),
           e,
         )),
