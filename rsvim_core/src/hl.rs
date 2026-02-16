@@ -99,29 +99,16 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   });
 
 #[derive(Debug, Clone)]
-/// Highlight color, it can be either a real color value (color name or RGB
-/// color) or a color link to the one defined in `palette`.
-pub enum HighlightColor {
-  /// A color code:
-  /// - Color name such as white, black, grey, etc.
-  /// - RGB color code such as #ffffff, #000000, etc.
-  Code(Color),
-
-  /// A color link to the one defined in `palette`.
-  Palette(CompactString),
-}
-
-#[derive(Debug, Clone)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
   /// Style ID
   pub id: CompactString,
 
   /// Foreground color.
-  pub fg: Option<HighlightColor>,
+  pub fg: Option<Color>,
 
   /// Background color.
-  pub bg: Option<HighlightColor>,
+  pub bg: Option<Color>,
 
   /// Attributes: underlined, bold, italic, etc.
   pub attr: Attributes,
@@ -154,17 +141,19 @@ fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
 
   if s.starts_with("#") && s.len() == 7 {
     // Parse hex 6 digits, for example: #ffffff
-    let r = parse_hex(&s[1..3])?;
-    let g = parse_hex(&s[3..5])?;
-    let b = parse_hex(&s[5..7])?;
+    let s = &s[1..];
+    let r = parse_hex(&s[0..2])?;
+    let g = parse_hex(&s[2..4])?;
+    let b = parse_hex(&s[4..6])?;
     Ok(Color::Rgb { r, g, b })
   } else if s.starts_with("#") && s.len() == 4 {
     // Parse hex 3 digits, for example: #fff
-    let r = parse_hex(&s[1..2])?;
+    let s = &s[1..];
+    let r = parse_hex(&s[0..1])?;
     let r = r | (r << 4);
-    let g = parse_hex(&s[2..3])?;
+    let g = parse_hex(&s[1..2])?;
     let g = g | (g << 4);
-    let b = parse_hex(&s[3..4])?;
+    let b = parse_hex(&s[2..3])?;
     let b = b | (b << 4);
     Ok(Color::Rgb { r, g, b })
   } else {
