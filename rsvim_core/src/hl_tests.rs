@@ -10,7 +10,8 @@ mod parse_toml {
 [syn]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
-comment = { fg = "#ffffff", bg = "#000000", bold = true, italic = true, underlined = true }
+comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+keyword = { fg = "#ffffff", bg = "green", italic = true }
 
 [ui]
 background = "#000000"
@@ -19,6 +20,8 @@ background = "#000000"
 white = "#ffffff"
 black = "#000000"
 yellow = "#ffff00"
+green = "#00ff00"
+grey = "#c0c0c0"
 "#;
 
     let payload_table = payload.parse::<toml::Table>().unwrap();
