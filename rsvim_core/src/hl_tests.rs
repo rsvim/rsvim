@@ -219,7 +219,15 @@ background = "#000000"
           attr: Attributes::none(),
         }),
       ),
-      ("ui.foreground", None),
+      (
+        "ui.foreground",
+        Some(Highlight {
+          id: "ui.foreground".to_compact_string(),
+          fg: Some(Color::White),
+          bg: None,
+          attr: Attributes::none(),
+        }),
+      ),
     ];
 
     for expect in ui_expects.iter() {
