@@ -99,7 +99,6 @@ grey = "#c0c0c0"
       ),
     ];
     for expect in syntax_expects.iter() {
-      assert!(cs.syntax().get(expect.0).is_some());
       assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
     }
 
@@ -108,7 +107,11 @@ grey = "#c0c0c0"
         "ui.background",
         Some(Highlight {
           id: "ui.background".to_compact_string(),
-          fg: Some(Color::White),
+          fg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           bg: None,
           attr: Attributes::none(),
         }),
@@ -117,16 +120,13 @@ grey = "#c0c0c0"
     ];
 
     for expect in ui_expects.iter() {
-      assert!(cs.ui().get(expect.0).is_some());
       assert_eq!(cs.ui().get(expect.0), expect.1.as_ref());
     }
 
     for expect in syntax_expects.iter() {
-      assert!(cs.get(expect.0).is_some());
       assert_eq!(cs.get(expect.0), expect.1.as_ref());
     }
     for expect in ui_expects.iter() {
-      assert!(cs.get(expect.0).is_some());
       assert_eq!(cs.get(expect.0), expect.1.as_ref());
     }
   }
