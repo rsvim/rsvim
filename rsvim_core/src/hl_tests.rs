@@ -195,16 +195,8 @@ background = "#000000"
         "syn.keyword",
         Some(Highlight {
           id: "syn.keyword".to_compact_string(),
-          fg: Some(Color::Rgb {
-            r: 0xff,
-            g: 0xff,
-            b: 0xff,
-          }),
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0xff,
-            b: 0x0,
-          }),
+          fg: Some(Color::Red),
+          bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
         }),
       ),
