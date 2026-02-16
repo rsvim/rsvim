@@ -1,5 +1,7 @@
 use super::hl::*;
-use crossterm::style::{Attributes, Color};
+use crossterm::style::{Attributes};
+use crossterm::style::{Color};
+use crossterm::style::Attribute;
 
 #[cfg(test)]
 mod parse_toml {
@@ -32,8 +34,11 @@ grey = "#c0c0c0"
     assert_eq!(cs.syntax().len(), 4);
     assert!(cs.syntax().get("syn.attribute").is_some());
     assert_eq!(cs.syntax().get("syn.attribute").unwrap(), Highlight {id: "syn.attribute", fg: Option<Color::White>, bg: None, attr: Attributes::none()});
-    assert_eq!(cs.syntax().get("syn.boolean").unwrap(), Highlight {id: "syn.attribute", fg: Option<Color::White>, bg: None, attr: Attributes::none()});
+    assert_eq!(cs.syntax().get("syn.boolean").unwrap(), Highlight {id: "syn.boolean", fg: Option<Color::White>, bg: None, attr: Attributes::none()});
     assert_eq!(cs.syntax().get("syn.carriage-return"), None);
+    assert_eq!(cs.syntax().get("syn.comment").unwrap(), Highlight { id: "syn.comment", fg: Option<Color::Rgb { r: 0xc0, g: 0xc0, b: 0xc0 }>, bg: Option<Color::Rgb { r: 0x0, g: 0x0, b: 0x0 }>, attr: Attributes::none().with(Attribute::Bold).with(Attribute::Italic).with(Attribute::Underlined) });
+    assert_eq!(cs.syntax().get("syn.keyword").unwrap(), Highlight { id: "syn.keyword", fg: Option<Color::Rgb { r: 0xff, g: 0xff, b: 0xff}>, bg: Option<Color::Rgb { r: 0x0, g: 0xff, b: 0x0 }>, attr: Attributes::none().with(Attribute::Italic) });
     assert_eq!(cs.ui().len(), 1);
+    assert_eq!(cs.ui().get("ui.background").unwrap(), Highlight { id: "ui.background", fg: Option<Color::Rgb { r: 0x0, g: 0x0, b: 0x0}>, bg: None, attr: Attributes::none() });
   }
 }
