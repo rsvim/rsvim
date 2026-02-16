@@ -35,80 +35,90 @@ grey = "#c0c0c0"
       ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table)
         .unwrap();
     assert_eq!(cs.syntax().len(), 4);
-    assert!(cs.syntax().get("syn.attribute").is_some());
-    assert_eq!(
-      cs.syntax().get("syn.attribute").unwrap().clone(),
-      Highlight {
-        id: "syn.attribute".to_compact_string(),
-        fg: Some(Color::White),
-        bg: None,
-        attr: Attributes::none()
-      }
-    );
-    assert_eq!(
-      cs.syntax().get("syn.boolean").unwrap().clone(),
-      Highlight {
-        id: "syn.boolean".to_compact_string(),
-        fg: Some(Color::Rgb {
-          r: 0xff,
-          g: 0xff,
-          b: 0x00
+
+    let syntax_expects = vec![
+      (
+        "syn.attribute",
+        Some(Highlight {
+          id: "syn.attribute".to_compact_string(),
+          fg: Some(Color::White),
+          bg: None,
+          attr: Attributes::none(),
         }),
-        bg: None,
-        attr: Attributes::none().with(Attribute::Bold)
-      }
-    );
-    assert_eq!(cs.syntax().get("syn.carriage-return"), None);
-    assert_eq!(
-      cs.syntax().get("syn.comment").unwrap().clone(),
-      Highlight {
-        id: "syn.comment".to_compact_string(),
-        fg: Some(Color::Rgb {
-          r: 0xc0,
-          g: 0xc0,
-          b: 0xc0
+      ),
+      (
+        "syn.boolean",
+        Some(Highlight {
+          id: "syn.boolean".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x00,
+          }),
+          bg: None,
+          attr: Attributes::none().with(Attribute::Bold),
         }),
-        bg: Some(Color::Rgb {
-          r: 0x0,
-          g: 0x0,
-          b: 0x0
+      ),
+      ("syn.carriage-return", None),
+      (
+        "syn.comment",
+        Some(Highlight {
+          id: "syn.comment".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xc0,
+            g: 0xc0,
+            b: 0xc0,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none()
+            .with(Attribute::Bold)
+            .with(Attribute::Italic)
+            .with(Attribute::Underlined),
         }),
-        attr: Attributes::none()
-          .with(Attribute::Bold)
-          .with(Attribute::Italic)
-          .with(Attribute::Underlined)
-      }
-    );
-    assert_eq!(
-      cs.syntax().get("syn.keyword").unwrap().clone(),
-      Highlight {
-        id: "syn.keyword".to_compact_string(),
-        fg: Some(Color::Rgb {
-          r: 0xff,
-          g: 0xff,
-          b: 0xff
+      ),
+      (
+        "syn.keyword",
+        Some(Highlight {
+          id: "syn.keyword".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0xff,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0xff,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Italic),
         }),
-        bg: Some(Color::Rgb {
-          r: 0x0,
-          g: 0xff,
-          b: 0x0
+      ),
+    ];
+    for expect in syntax_expects {
+      assert!(cs.syntax().get(expect.0).is_some());
+      assert_eq!(cs.syntax().get(expect.0), expect.1);
+    }
+
+    let ui_expects = vec![
+      (
+        "ui.background",
+        Some(Highlight {
+          id: "ui.background".to_compact_string(),
+          fg: Some(Color::White),
+          bg: None,
+          attr: Attributes::none(),
         }),
-        attr: Attributes::none().with(Attribute::Italic)
-      }
-    );
-    assert_eq!(cs.ui().len(), 1);
-    assert_eq!(
-      cs.ui().get("ui.background").unwrap().clone(),
-      Highlight {
-        id: "ui.background".to_compact_string(),
-        fg: Some(Color::Rgb {
-          r: 0x0,
-          g: 0x0,
-          b: 0x0
-        }),
-        bg: None,
-        attr: Attributes::none()
-      }
-    );
+      ),
+      ("ui.foreground", None),
+    ];
+
+    for expect in ui_expects {
+      assert!(cs.ui().get(expect.0).is_some());
+      assert_eq!(cs.ui().get(expect.0), expect.1);
+    }
   }
 }
