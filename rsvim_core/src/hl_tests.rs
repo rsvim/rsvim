@@ -31,9 +31,7 @@ grey = "#c0c0c0"
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
-    let cs =
-      ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table)
-        .unwrap();
+    let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
     assert_eq!(cs.syntax().len(), 4);
 
     let syntax_expects = [
@@ -146,9 +144,7 @@ background = { bg = "#000000" }
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
-    let cs =
-      ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table)
-        .unwrap();
+    let cs = ColorScheme::from_toml("toml2", colorscheme_table).unwrap();
     assert_eq!(cs.syntax().len(), 4);
 
     let syntax_expects = [
@@ -254,8 +250,7 @@ attribute = "#zxcvas"
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
-    let cs =
-      ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table);
+    let cs = ColorScheme::from_toml("failed1", colorscheme_table);
     assert!(cs.is_err());
   }
 }
