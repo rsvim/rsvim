@@ -10,7 +10,7 @@ mod parse_toml {
 
   #[test]
   fn toml1() {
-    let payload: &str = r##" 
+    let payload: &str = r##"
 [syn]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
