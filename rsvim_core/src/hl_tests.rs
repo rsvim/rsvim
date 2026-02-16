@@ -18,7 +18,7 @@ comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlin
 keyword = { fg = "#ffffff", bg = "green", italic = true }
 
 [ui]
-background = "#000000"
+background = {bg = "#000000"}
 
 [palette]
 # white = "#ffffff"
@@ -107,12 +107,12 @@ grey = "#c0c0c0"
         "ui.background",
         Some(Highlight {
           id: "ui.background".to_compact_string(),
-          fg: Some(Color::Rgb {
+          fg: None,
+          bg: Some(Color::Rgb {
             r: 0x0,
             g: 0x0,
             b: 0x0,
           }),
-          bg: None,
           attr: Attributes::none(),
         }),
       ),
@@ -142,7 +142,7 @@ keyword = { fg = "red", bg = "green", italic = true }
 
 [ui]
 foreground = "#fff"
-background = "#000000"
+background = { bg="#000000" }
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
@@ -210,12 +210,12 @@ background = "#000000"
         "ui.background",
         Some(Highlight {
           id: "ui.background".to_compact_string(),
-          fg: Some(Color::Rgb {
+          fg: None,
+          bg: Some(Color::Rgb {
             r: 0x0,
             g: 0x0,
             b: 0x0,
           }),
-          bg: None,
           attr: Attributes::none(),
         }),
       ),
