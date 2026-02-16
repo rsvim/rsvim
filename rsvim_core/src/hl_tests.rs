@@ -49,9 +49,13 @@ grey = "#c0c0c0"
       cs.syntax().get("syn.boolean").unwrap().clone(),
       Highlight {
         id: "syn.boolean".to_compact_string(),
-        fg: Some(Color::White),
+        fg: Some(Color::Rgb {
+          r: 0xff,
+          g: 0xff,
+          b: 0x00
+        }),
         bg: None,
-        attr: Attributes::none()
+        attr: Attributes::none().with(Attribute::Bold)
       }
     );
     assert_eq!(cs.syntax().get("syn.carriage-return"), None);
