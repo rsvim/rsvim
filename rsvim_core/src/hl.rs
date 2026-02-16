@@ -119,10 +119,6 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Maps color name to color code.
-  // For example: white => #ffffff, black => #000000
-  palette: FoldMap<CompactString, Color>,
-
   // Maps ID => syntax colors
   syntax: FoldMap<CompactString, Highlight>,
 
@@ -278,7 +274,6 @@ impl ColorScheme {
   pub fn from_empty(name: CompactString) -> Self {
     Self {
       name,
-      palette: FoldMap::new(),
       syntax: FoldMap::new(),
       ui: FoldMap::new(),
     }
@@ -305,12 +300,7 @@ impl ColorScheme {
     let palette = parse_palette(&colorscheme)?;
     let syntax = parse_hl(&colorscheme, &palette, SYN)?;
     let ui = parse_hl(&colorscheme, &palette, UI)?;
-    Ok(Self {
-      name,
-      palette,
-      syntax,
-      ui,
-    })
+    Ok(Self { name, syntax, ui })
   }
 
   pub fn name(&self) -> &CompactString {
@@ -335,7 +325,15 @@ impl ColorScheme {
     &self.ui
   }
 
-  pub fn get(&self, id: &str) -> Option<&Highlight> {}
+  pub fn get(&self, id: &str) -> Option<&Highlight> {
+    if id.starts_with(SYN_DOT) {
+      self.syntax.get(id)
+    } else if id.starts_with(UI_DOT) {
+      self.ui.get(id)
+    } else {
+      None
+    }
+  }
 }
 
 #[derive(Debug)]
