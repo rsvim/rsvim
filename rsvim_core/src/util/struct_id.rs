@@ -166,13 +166,13 @@ macro_rules! structural_id_impl {
   (i8,$name:tt,$initial:expr) => {
     structural_id_impl!(@signed i8,$name,$initial);
   };
-}
 
-// (str,$name:tt) => {
-//   #[derive(Clone, PartialEq, Eq, Hash)]
-//   pub struct $name(CompactString);
-//
-//   structural_id_impl!(@eq $name, CompactString);
-//   structural_id_impl!(@display $name, CompactString);
-//   structural_id_impl!(@from_str $name, CompactString);
-// };
+  (str,$name:tt) => {
+    #[derive(Clone, PartialEq, Eq, Hash)]
+    pub struct $name(CompactString);
+
+    structural_id_impl!(@eq $name, CompactString);
+    structural_id_impl!(@display $name, CompactString);
+    structural_id_impl!(@from_str $name, CompactString);
+  };
+}

@@ -214,7 +214,7 @@ fn parse_hl(
             Some(x) => {
               let x = x.as_str().ok_or(the_err(key))?;
               match palette.get(x) {
-                Some(x) => Ok(Some(x.clone())),
+                Some(x) => Ok(Some(*x)),
                 None => Ok(Some(parse_code(dot, key, x)?)),
               }
             }
@@ -254,7 +254,7 @@ fn parse_hl(
       } else if val.is_str() {
         let fg = val.as_str().unwrap();
         let fg = match palette.get(fg) {
-          Some(fg) => Some(fg.clone()),
+          Some(fg) => Some(*fg),
           None => Some(parse_code(dot, key, fg)?),
         };
 
