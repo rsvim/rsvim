@@ -7,13 +7,5 @@ comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlin
 keyword = { fg = "#ffffff", bg = "green", italic = true }
 
 [ui]
-background = "#000000"
-
-[palette]
-# white = "#ffffff"
-black = "#000000"
-yellow = "#ffff00"
-green = "#00ff00"
-
-# Never used
-grey = "#c0c0c0"
+foreground = "white"
+background = "black"

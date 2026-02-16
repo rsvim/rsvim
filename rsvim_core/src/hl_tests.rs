@@ -132,6 +132,121 @@ grey = "#c0c0c0"
   }
 
   #[test]
+  fn toml2() {
+    let payload: &str = r##"
+[syn]
+attribute = "white"
+boolean = { fg = "yellow", bold = true }
+comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+keyword = { fg = "red", bg = "green", italic = true }
+
+[ui]
+foreground = "#fff"
+background = "#000000"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs =
+      ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table)
+        .unwrap();
+    assert_eq!(cs.syntax().len(), 4);
+
+    let syntax_expects = [
+      (
+        "syn.attribute",
+        Some(Highlight {
+          id: "syn.attribute".to_compact_string(),
+          fg: Some(Color::White),
+          bg: None,
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "syn.boolean",
+        Some(Highlight {
+          id: "syn.boolean".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x00,
+          }),
+          bg: None,
+          attr: Attributes::none().with(Attribute::Bold),
+        }),
+      ),
+      ("syn.carriage-return", None),
+      (
+        "syn.comment",
+        Some(Highlight {
+          id: "syn.comment".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xc0,
+            g: 0xc0,
+            b: 0xc0,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none()
+            .with(Attribute::Bold)
+            .with(Attribute::Italic)
+            .with(Attribute::Underlined),
+        }),
+      ),
+      (
+        "syn.keyword",
+        Some(Highlight {
+          id: "syn.keyword".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0xff,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0xff,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Italic),
+        }),
+      ),
+    ];
+    for expect in syntax_expects.iter() {
+      assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
+    }
+
+    let ui_expects = [
+      (
+        "ui.background",
+        Some(Highlight {
+          id: "ui.background".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          bg: None,
+          attr: Attributes::none(),
+        }),
+      ),
+      ("ui.foreground", None),
+    ];
+
+    for expect in ui_expects.iter() {
+      assert_eq!(cs.ui().get(expect.0), expect.1.as_ref());
+    }
+
+    for expect in syntax_expects.iter() {
+      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+    }
+    for expect in ui_expects.iter() {
+      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+    }
+  }
+
+  #[test]
   fn failed1() {
     let payload: &str = r##"
 [syn]
