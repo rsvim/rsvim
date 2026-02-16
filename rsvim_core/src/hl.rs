@@ -244,9 +244,9 @@ fn parse_hl(
 }
 
 impl ColorScheme {
-  pub fn from_empty(name: CompactString) -> Self {
+  pub fn from_empty(name: &str) -> Self {
     Self {
-      name,
+      name: name.to_compact_string(),
       syntax: FoldMap::new(),
       ui: FoldMap::new(),
     }
@@ -267,13 +267,13 @@ impl ColorScheme {
   /// yellow = "#ffff00"
   /// ```
   pub fn from_toml(
-    name: CompactString,
+    name: &str,
     colorscheme: toml::Table,
   ) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let syntax = parse_hl(&colorscheme, &palette, "syn")?;
     let ui = parse_hl(&colorscheme, &palette, "ui")?;
-    Ok(Self { name, syntax, ui })
+    Ok(Self { name: name.to_compact_string(), syntax, ui })
   }
 
   pub fn name(&self) -> &CompactString {
