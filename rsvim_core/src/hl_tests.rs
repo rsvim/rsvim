@@ -130,4 +130,17 @@ grey = "#c0c0c0"
       assert_eq!(cs.get(expect.0), expect.1.as_ref());
     }
   }
+
+  #[test]
+  fn failed1() {
+    let payload: &str = r##"
+[syn]
+attribute = "#zxcvas"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs =
+      ColorScheme::from_toml("toml1".to_compact_string(), colorscheme_table);
+    assert!(cs.is_err());
+  }
 }
