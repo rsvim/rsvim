@@ -36,7 +36,7 @@ grey = "#c0c0c0"
         .unwrap();
     assert_eq!(cs.syntax().len(), 4);
 
-    let syntax_expects = vec![
+    let syntax_expects = [
       (
         "syn.attribute",
         Some(Highlight {
@@ -98,12 +98,12 @@ grey = "#c0c0c0"
         }),
       ),
     ];
-    for expect in syntax_expects {
+    for expect in syntax_expects.iter() {
       assert!(cs.syntax().get(expect.0).is_some());
       assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
     }
 
-    let ui_expects = vec![
+    let ui_expects = [
       (
         "ui.background",
         Some(Highlight {
@@ -116,9 +116,18 @@ grey = "#c0c0c0"
       ("ui.foreground", None),
     ];
 
-    for expect in ui_expects {
+    for expect in ui_expects.iter() {
       assert!(cs.ui().get(expect.0).is_some());
       assert_eq!(cs.ui().get(expect.0), expect.1.as_ref());
+    }
+
+    for expect in syntax_expects.iter() {
+      assert!(cs.get(expect.0).is_some());
+      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+    }
+    for expect in ui_expects.iter() {
+      assert!(cs.get(expect.0).is_some());
+      assert_eq!(cs.get(expect.0), expect.1.as_ref());
     }
   }
 }
