@@ -266,14 +266,15 @@ impl ColorScheme {
   /// black = "#000000"
   /// yellow = "#ffff00"
   /// ```
-  pub fn from_toml(
-    name: &str,
-    colorscheme: toml::Table,
-  ) -> TheResult<Self> {
+  pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let syntax = parse_hl(&colorscheme, &palette, "syn")?;
     let ui = parse_hl(&colorscheme, &palette, "ui")?;
-    Ok(Self { name: name.to_compact_string(), syntax, ui })
+    Ok(Self {
+      name: name.to_compact_string(),
+      syntax,
+      ui,
+    })
   }
 
   pub fn name(&self) -> &CompactString {
@@ -331,10 +332,12 @@ pub type ColorSchemeManagerIter<'a> =
 impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut highlights = FoldMap::new();
-    let default_toml_data = include_str!( concat!(env!("CARGO_MANIFEST_DIR"), "/src/hl/default.toml"));
+    let default_toml_data =
+      include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/hl/default.toml"));
     let default_toml_data = default_toml_data.parse::<toml::Table>().unwrap();
-    let default_colorscheme = ColorScheme::from_toml("default", default_toml_data).unwrap();
-    highlights.insert("default", v)
+    let default_colorscheme =
+      ColorScheme::from_toml("default", default_toml_data).unwrap();
+    highlights.insert("default".to_compact_string(), default_colorscheme);
     Self { highlights }
   }
 
