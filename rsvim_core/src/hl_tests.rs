@@ -18,6 +18,7 @@ keyword = { fg = "#ffffff", bg = "green", italic = true }
 background = "#000000"
 
 [palette]
+# white = "#ffffff"
 black = "#000000"
 yellow = "#ffff00"
 green = "#00ff00"
@@ -31,6 +32,8 @@ grey = "#c0c0c0"
     assert_eq!(cs.syntax().len(), 4);
     assert!(cs.syntax().get("syn.attribute").is_some());
     assert_eq!(cs.syntax().get("syn.attribute").unwrap(), Highlight {id: "syn.attribute", fg: Option<Color::White>, bg: None, attr: Attributes::none()});
+    assert_eq!(cs.syntax().get("syn.boolean").unwrap(), Highlight {id: "syn.attribute", fg: Option<Color::White>, bg: None, attr: Attributes::none()});
+    assert_eq!(cs.syntax().get("syn.carriage-return"), None);
     assert_eq!(cs.ui().len(), 1);
   }
 }
