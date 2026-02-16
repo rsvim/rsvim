@@ -3,7 +3,6 @@ use crossterm::style::{Attributes, Color};
 
 #[cfg(test)]
 mod parse_toml {
-
 use super::*;
 
   #[test]
