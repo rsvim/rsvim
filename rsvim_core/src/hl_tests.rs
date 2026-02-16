@@ -21,6 +21,8 @@ white = "#ffffff"
 black = "#000000"
 yellow = "#ffff00"
 green = "#00ff00"
+
+# Never used
 grey = "#c0c0c0"
 "#;
 
