@@ -165,11 +165,7 @@ background = "#000000"
         "syn.boolean",
         Some(Highlight {
           id: "syn.boolean".to_compact_string(),
-          fg: Some(Color::Rgb {
-            r: 0xff,
-            g: 0xff,
-            b: 0x00,
-          }),
+          fg: Some(Color::Yellow),
           bg: None,
           attr: Attributes::none().with(Attribute::Bold),
         }),
