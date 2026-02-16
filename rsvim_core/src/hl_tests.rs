@@ -100,7 +100,7 @@ grey = "#c0c0c0"
     ];
     for expect in syntax_expects {
       assert!(cs.syntax().get(expect.0).is_some());
-      assert_eq!(cs.syntax().get(expect.0), expect.1);
+      assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
     }
 
     let ui_expects = vec![
@@ -118,7 +118,7 @@ grey = "#c0c0c0"
 
     for expect in ui_expects {
       assert!(cs.ui().get(expect.0).is_some());
-      assert_eq!(cs.ui().get(expect.0), expect.1);
+      assert_eq!(cs.ui().get(expect.0), expect.1.as_ref());
     }
   }
 }
