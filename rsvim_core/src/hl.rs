@@ -205,23 +205,21 @@ fn parse_hl(
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(palette_value) = colorscheme.get("palette")
-    && let Some(palette) = palette_value.as_table()
+  if let Some(group_value) = colorscheme.get(group)
+    && let Some(group_table) = group_value.as_table()
   {
-    for (key, val) in palette.iter() {
+    for (key, val) in group_table.iter() {
       let id = format!("{}{}", dot, key.as_str()).to_compact_string();
       if val.is_table() {
         let hl_table = val.as_table().unwrap();
 
-        let parse_color = |x| -> TheResult<Option<HighlightColor>> {
+        let parse_color = |x| -> TheResult<Option<Color>> {
           match hl_table.get(x) {
             Some(x) => {
               let x = x.as_str().ok_or(the_err(key))?;
-              if palette.contains_key(x) {
-                Ok(Some(HighlightColor::Palette(x.to_compact_string())))
-              } else {
-                let code = parse_code(dot, key, x)?;
-                Ok(Some(HighlightColor::Code(code)))
+              match palette.get(x) {
+                Some(x) => Ok(Some(x.clone())),
+                None => Ok(Some(parse_code(dot, key, x)?)),
               }
             }
             None => Ok(None),
@@ -259,11 +257,9 @@ fn parse_hl(
         result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else if val.is_str() {
         let fg = val.as_str().unwrap();
-        let fg = if palette.contains_key(fg) {
-          Some(HighlightColor::Palette(fg.to_compact_string()))
-        } else {
-          let code = parse_code(dot, key, fg)?;
-          Some(HighlightColor::Code(code))
+        let fg = match palette.get(fg) {
+          Some(fg) => Some(fg.clone()),
+          None => Some(parse_code(dot, key, fg)?),
         };
 
         let bg = None;
@@ -321,10 +317,6 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn palette(&self) -> &FoldMap<CompactString, Color> {
-    &self.palette
-  }
-
   pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
@@ -343,9 +335,7 @@ impl ColorScheme {
     &self.ui
   }
 
-  pub fn get_raw_highlight(&self, id: &str) -> Option<&Highlight> {}
-
-  pub fn get_highlight(&self, id: &str) -> Option<&Highlight> {}
+  pub fn get(&self, id: &str) -> Option<&Highlight> {}
 }
 
 #[derive(Debug)]
