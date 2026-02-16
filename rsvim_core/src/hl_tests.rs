@@ -19,7 +19,7 @@ mod parser {
     let payload : &str = r#"
 [syn]
 attribute = "white"
-boolean = {{ fg = "yellow", bold = true }}
+boolean = { fg = "yellow", bold = true }
 
 [ui]
 background = "#000000"
