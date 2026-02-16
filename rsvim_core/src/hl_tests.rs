@@ -18,7 +18,7 @@ comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlin
 keyword = { fg = "#ffffff", bg = "green", italic = true }
 
 [ui]
-background = {bg = "#000000"}
+background = { bg = "#000000" }
 
 [palette]
 # white = "#ffffff"
@@ -142,7 +142,7 @@ keyword = { fg = "red", bg = "green", italic = true }
 
 [ui]
 foreground = "#fff"
-background = { bg="#000000" }
+background = { bg = "#000000" }
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
