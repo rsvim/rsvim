@@ -330,9 +330,12 @@ pub type ColorSchemeManagerIter<'a> =
 
 impl ColorSchemeManager {
   pub fn new() -> Self {
-    Self {
-      highlights: FoldMap::new(),
-    }
+    let mut highlights = FoldMap::new();
+    let default_toml_data = include_str!( concat!(env!("CARGO_MANIFEST_DIR"), "/src/hl/default.toml"));
+    let default_toml_data = default_toml_data.parse::<toml::Table>().unwrap();
+    let default_colorscheme = ColorScheme::from_toml("default", default_toml_data).unwrap();
+    highlights.insert("default", v)
+    Self { highlights }
   }
 
   pub fn is_empty(&self) -> bool {
