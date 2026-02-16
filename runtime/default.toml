@@ -2,9 +2,18 @@
 
 [syn]
 attribute = "white"
-boolean = { fg = "yellow", bold = true }
-comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
-keyword = { fg = "#ffffff", bg = "green", italic = true }
+boolean = "magenta"
+comment = "grey"
+constant = "red"
+constructor = "cyan"
+embedded = "cyan"
+error = "red"
+function = "green"
+keyword = "yellow"
+module = "red"
+number = "red"
+operator = "yellow"
+property = "cyan"
 
 [ui]
 foreground = "white"
