@@ -2359,7 +2359,7 @@ dependencies = [
 name = "rsvim"
 version = "0.1.2"
 dependencies = [
- "foldhash 0.1.5",
+ "foldhash 0.2.0",
  "git2",
  "log",
  "mimalloc-safe",
@@ -2388,7 +2388,7 @@ dependencies = [
  "encoding_rs",
  "env_filter",
  "fern",
- "foldhash 0.1.5",
+ "foldhash 0.2.0",
  "futures",
  "geo",
  "icu_properties 2.1.1",
