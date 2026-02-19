@@ -9,7 +9,6 @@ use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
 use std::num::ParseIntError;
-use std::str::FromStr;
 
 pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
