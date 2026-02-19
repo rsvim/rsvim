@@ -102,26 +102,36 @@ pub struct ColorScheme {
   plain: FoldMap<CompactString, Color>,
 }
 
-fn parse_code(s: &str) -> Result<Option<Color>, ParseIntError> {
+fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
+  let parse_hex = |x| {
+    u8::from_str_radix(x, 16).map_err(|e| {
+      TheErr::LoadColorSchemeFailed(
+        format!("{}{}", prefix, key).to_compact_string(),
+      )
+    })
+  };
+
   if s.starts_with("#") && s.len() == 7 {
     // Parse hex 6 digits, for example: #ffffff
     let s = &s[1..];
-    let r = u8::from_str_radix(&s[0..2], 16)?;
-    let g = u8::from_str_radix(&s[2..4], 16)?;
-    let b = u8::from_str_radix(&s[4..6], 16)?;
-    Ok(Some(Color::Rgb { r, g, b }))
+    let r = parse_hex(&s[0..2])?;
+    let g = parse_hex(&s[2..4])?;
+    let b = parse_hex(&s[4..6])?;
+    Ok(Color::Rgb { r, g, b })
   } else if s.starts_with("#") && s.len() == 4 {
     // Parse hex 3 digits, for example: #fff
     let s = &s[1..];
-    let r = u8::from_str_radix(&s[0..1], 16)?;
+    let r = parse_hex(&s[0..1])?;
     let r = r | (r << 4);
-    let g = u8::from_str_radix(&s[1..2], 16)?;
+    let g = parse_hex(&s[1..2])?;
     let g = g | (g << 4);
-    let b = u8::from_str_radix(&s[2..3], 16)?;
+    let b = parse_hex(&s[2..3])?;
     let b = b | (b << 4);
-    Ok(Some(Color::Rgb { r, g, b }))
+    Ok(Color::Rgb { r, g, b })
   } else {
-    Ok(None)
+    Err(TheErr::LoadColorSchemeFailed(
+      format!("{}{}", prefix, key).to_compact_string(),
+    ))
   }
 }
 
@@ -139,9 +149,7 @@ fn parse_palette(
     for (k, v) in palette.iter() {
       match v.as_str() {
         Some(val) => {
-          let code = parse_code(val)
-            .map_err(|_e| the_err(k))?
-            .ok_or(the_err(k))?;
+          let code = parse_code(val, "palette.", k)?;
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
@@ -150,6 +158,53 @@ fn parse_palette(
       }
     }
   }
+  Ok(result)
+}
+
+fn parse_plain(
+  colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+) -> TheResult<FoldMap<CompactString, Color>> {
+  let foreground = "foreground";
+  let background = "background";
+  let ui_foreground = "ui.foreground";
+  let ui_background = "ui.background";
+  let plains = [foreground, background]
+    .into_iter()
+    .collect::<FoldSet<&str>>();
+
+  let the_err = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
+  };
+
+  let mut result: FoldMap<CompactString, Color> = FoldMap::new();
+  if let Some(ui_value) = colorscheme.get("ui")
+    && let Some(ui_table) = ui_value.as_table()
+  {
+    for (key, val) in ui_table.iter() {
+      if plains.contains(key.as_str()) {
+        let id = format!("ui.{}", key).to_compact_string();
+        if val.is_str() {
+          let val1 = val.as_str().unwrap();
+          let val1 = match palette.get(val1) {
+            Some(palette_value) => *palette_value,
+            None => parse_code(val1, "ui.", key)?,
+          };
+          result.insert(id.clone(), val1);
+        } else {
+          return Err(the_err(key));
+        }
+      }
+    }
+  }
+
+  if !result.contains_key(ui_foreground) {
+    return Err(the_err(foreground));
+  }
+  if !result.contains_key(ui_background) {
+    return Err(the_err(background));
+  }
+
   Ok(result)
 }
 
