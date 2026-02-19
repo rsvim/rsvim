@@ -167,7 +167,10 @@ fn parse_hl(
   debug_assert!(group == "syn" || group == "ui");
   let group_dot = &format!("{}.", group);
 
-  let the_err = |k| {
+  let ui_foreground = "ui.foreground";
+  let ui_background = "ui.background";
+
+  let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(
       format!("{}{}", group_dot, k).to_compact_string(),
     )
@@ -240,6 +243,21 @@ fn parse_hl(
       }
     }
   }
+
+  if group == "ui" {
+    for i in [ui_foreground, ui_background].iter() {
+      if !result.contains_key(*i) {
+        return Err(the_err(i));
+      }
+    }
+    if result.get(ui_foreground).unwrap().fg.is_none() {
+      return Err(the_err(ui_foreground));
+    }
+    if result.get(ui_background).unwrap().bg.is_none() {
+      return Err(the_err(ui_background));
+    }
+  }
+
   Ok(result)
 }
 
@@ -270,6 +288,7 @@ impl ColorScheme {
     let palette = parse_palette(&colorscheme)?;
     let ui = parse_hl(&colorscheme, &palette, "ui")?;
     let syntax = parse_hl(&colorscheme, &palette, "syn")?;
+
     Ok(Self {
       name: name.to_compact_string(),
       syntax,
@@ -309,9 +328,20 @@ impl ColorScheme {
     }
   }
 
-  pub fn get(&self, id: &str) -> Option<&Highlight> {
+  pub fn get(&self, id: &str) -> Option<Highlight> {
+    let ui_foreground = "ui.foreground";
+    let ui_background = "ui.background";
+
     if id.starts_with("syn.") {
-      self.syntax.get(id)
+      self.syntax.get(id).map(|c| {
+        let mut c1 = c.clone();
+        if c1.fg.is_none() {
+          c1.fg = self.ui.get(ui_foreground).unwrap().fg.clone();
+        }
+        if c1.bg.is_none() {
+          c1.bg = self.ui.get(ui_background).unwrap().bg.clone();
+        }
+      })
     } else if id.starts_with("ui.") {
       self.ui.get(id)
     } else {
