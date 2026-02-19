@@ -159,22 +159,98 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_hl(
+fn parse_ui(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
-  group: &str,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  debug_assert!(group == "syn" || group == "ui");
-  let group_dots: FoldMap<&str, &str> =
-    vec![("syn", "syn."), ("ui", "ui.")].into_iter().collect();
-  let dot = group_dots[group];
+  let dot = "ui.";
 
   let the_err = |k| {
     TheErr::LoadColorSchemeFailed(format!("{}{}", dot, k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(group_value) = colorscheme.get(group)
+  if let Some(group_value) = colorscheme.get("ui")
+    && let Some(group_table) = group_value.as_table()
+  {
+    for (key, val) in group_table.iter() {
+      let id = format!("{}{}", dot, key.as_str()).to_compact_string();
+      if val.is_table() {
+        let hl_table = val.as_table().unwrap();
+
+        let parse_color = |x| -> TheResult<Option<Color>> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_str().ok_or(the_err(key))?;
+              match palette.get(x) {
+                Some(x) => Ok(Some(*x)),
+                None => Ok(Some(parse_code(dot, key, x)?)),
+              }
+            }
+            None => Ok(None),
+          }
+        };
+
+        let fg = parse_color("fg")?;
+        let bg = parse_color("bg")?;
+
+        let parse_bool = |x| -> TheResult<bool> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_bool().ok_or(the_err(key))?;
+              Ok(x)
+            }
+            None => Ok(false),
+          }
+        };
+
+        let bold = parse_bool("bold")?;
+        let italic = parse_bool("italic")?;
+        let underlined = parse_bool("underlined")?;
+
+        let mut attr = Attributes::none();
+        if bold {
+          attr.set(Attribute::Bold);
+        }
+        if italic {
+          attr.set(Attribute::Italic);
+        }
+        if underlined {
+          attr.set(Attribute::Underlined);
+        }
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+      } else if val.is_str() {
+        let fg = val.as_str().unwrap();
+        let fg = match palette.get(fg) {
+          Some(fg) => Some(*fg),
+          None => Some(parse_code(dot, key, fg)?),
+        };
+
+        let bg = None;
+        let attr = Attributes::none();
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+      } else {
+        return Err(the_err(key));
+      }
+    }
+  }
+  Ok(result)
+}
+
+fn parse_syn(
+  colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+) -> TheResult<FoldMap<CompactString, Highlight>> {
+  let dot = "syn.";
+
+  let the_err = |k| {
+    TheErr::LoadColorSchemeFailed(format!("{}{}", dot, k).to_compact_string())
+  };
+
+  let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
+  if let Some(group_value) = colorscheme.get("syn")
     && let Some(group_table) = group_value.as_table()
   {
     for (key, val) in group_table.iter() {
@@ -268,8 +344,8 @@ impl ColorScheme {
   /// ```
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let syntax = parse_hl(&colorscheme, &palette, "syn")?;
-    let ui = parse_hl(&colorscheme, &palette, "ui")?;
+    let ui = parse_ui(&colorscheme, &palette)?;
+    let syntax = parse_syn(&colorscheme, &palette)?;
     Ok(Self {
       name: name.to_compact_string(),
       syntax,
@@ -297,6 +373,16 @@ impl ColorScheme {
       }
     }
     &self.ui
+  }
+
+  pub fn get_raw(&self, id: &str) -> Option<&Highlight> {
+    if id.starts_with("syn.") {
+      self.syntax.get(id)
+    } else if id.starts_with("ui.") {
+      self.ui.get(id)
+    } else {
+      None
+    }
   }
 
   pub fn get(&self, id: &str) -> Option<&Highlight> {
