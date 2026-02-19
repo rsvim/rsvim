@@ -102,11 +102,7 @@ pub struct ColorScheme {
   plain: FoldMap<CompactString, Color>,
 }
 
-fn parse_code(
-  prefix: &str,
-  k: &str,
-  s: &str,
-) -> Result<Option<Color>, ParseIntError> {
+fn parse_code(s: &str) -> Result<Option<Color>, ParseIntError> {
   if s.starts_with("#") && s.len() == 7 {
     // Parse hex 6 digits, for example: #ffffff
     let s = &s[1..];
@@ -132,6 +128,10 @@ fn parse_code(
 fn parse_palette(
   colorscheme: &toml::Table,
 ) -> TheResult<FoldMap<CompactString, Color>> {
+  let the_err = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("palette.{}", k).to_compact_string())
+  };
+
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
   if let Some(palette_value) = colorscheme.get("palette")
     && let Some(palette) = palette_value.as_table()
@@ -139,13 +139,13 @@ fn parse_palette(
     for (k, v) in palette.iter() {
       match v.as_str() {
         Some(val) => {
-          let code = parse_code("palette.", k, val)?;
+          let code = parse_code(val)
+            .map_err(|_e| the_err(k))?
+            .ok_or(the_err(k))?;
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("palette.{}", k.as_str()).to_compact_string(),
-          ));
+          return Err(the_err(k));
         }
       }
     }
