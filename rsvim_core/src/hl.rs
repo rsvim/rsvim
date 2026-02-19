@@ -421,10 +421,11 @@ impl ColorScheme {
     let palette = parse_palette(&colorscheme)?;
     let plain = parse_plain(&colorscheme, &palette)?;
     let ui = parse_ui(&colorscheme, &palette)?;
-    let syntax = parse_syn(&colorscheme, &palette, "syn")?;
+    let syntax = parse_syn(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
+      plain,
       syntax,
       ui,
     })
@@ -462,25 +463,32 @@ impl ColorScheme {
     }
   }
 
-  pub fn get(&self, id: &str) -> Option<Highlight> {
-    let ui_foreground = "ui.foreground";
-    let ui_background = "ui.background";
+  pub fn get_highlight(&self, id: &str) -> Option<Highlight> {
+    let (_foreground, _background, ui_foreground, ui_background, _plains) =
+      plain_keys();
+
+    let clone_hl = |h: &Highlight| {
+      let mut hl = h.clone();
+      if hl.fg.is_none() {
+        hl.fg = Some(*self.plain.get(ui_foreground).unwrap());
+      }
+      if hl.bg.is_none() {
+        hl.bg = Some(*self.plain.get(ui_background).unwrap());
+      }
+      hl
+    };
 
     if id.starts_with("syn.") {
-      self.syntax.get(id).map(|c| {
-        let mut c1 = c.clone();
-        if c1.fg.is_none() {
-          c1.fg = self.ui.get(ui_foreground).unwrap().fg.clone();
-        }
-        if c1.bg.is_none() {
-          c1.bg = self.ui.get(ui_background).unwrap().bg.clone();
-        }
-      })
+      self.syntax.get(id).map(|h| clone_hl(h))
     } else if id.starts_with("ui.") {
-      self.ui.get(id)
+      self.ui.get(id).map(|h| clone_hl(h))
     } else {
       None
     }
+  }
+
+  pub fn get_plain(&self, id: &str) -> Option<Color> {
+    self.plain.get(id).cloned()
   }
 }
 
