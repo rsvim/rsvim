@@ -236,86 +236,80 @@ fn parse_ui(
     && let Some(ui_table) = ui_value.as_table()
   {
     for (key, val) in ui_table.iter() {
-      let id = format!("ui.{}", key.as_str()).to_compact_string();
-      if val.is_table() {
-        if key == foreground || key == background {
+      if !plains.contains(key.as_str()) {
+        let id = format!("ui.{}", key.as_str()).to_compact_string();
+        if val.is_table() {
+          if key == foreground || key == background {
+            return Err(the_err(key));
+          }
+
+          let hl_table = val.as_table().unwrap();
+
+          let parse_color = |x| -> TheResult<Option<Color>> {
+            match hl_table.get(x) {
+              Some(x) => {
+                let x = x.as_str().ok_or(the_err(key))?;
+                match palette.get(x) {
+                  Some(x) => Ok(Some(*x)),
+                  None => Ok(Some(parse_code("ui.", key, x)?)),
+                }
+              }
+              None => Ok(None),
+            }
+          };
+
+          let fg = parse_color("fg")?;
+          let bg = parse_color("bg")?;
+
+          let parse_bool = |x| -> TheResult<bool> {
+            match hl_table.get(x) {
+              Some(x) => {
+                let x = x.as_bool().ok_or(the_err(key))?;
+                Ok(x)
+              }
+              None => Ok(false),
+            }
+          };
+
+          let bold = parse_bool("bold")?;
+          let italic = parse_bool("italic")?;
+          let underlined = parse_bool("underlined")?;
+
+          let mut attr = Attributes::none();
+          if bold {
+            attr.set(Attribute::Bold);
+          }
+          if italic {
+            attr.set(Attribute::Italic);
+          }
+          if underlined {
+            attr.set(Attribute::Underlined);
+          }
+
+          result.insert(id.clone(), Highlight { id, fg, bg, attr });
+        } else if val.is_str() {
+          let fg = val.as_str().unwrap();
+          let fg = match palette.get(fg) {
+            Some(fg) => Some(*fg),
+            None => Some(parse_code("ui.", key, fg)?),
+          };
+
+          let bg = None;
+          let attr = Attributes::none();
+
+          result.insert(id.clone(), Highlight { id, fg, bg, attr });
+        } else {
           return Err(the_err(key));
         }
-
-        let hl_table = val.as_table().unwrap();
-
-        let parse_color = |x| -> TheResult<Option<Color>> {
-          match hl_table.get(x) {
-            Some(x) => {
-              let x = x.as_str().ok_or(the_err(key))?;
-              match palette.get(x) {
-                Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code("ui.", key, x)?)),
-              }
-            }
-            None => Ok(None),
-          }
-        };
-
-        let fg = parse_color("fg")?;
-        let bg = parse_color("bg")?;
-
-        let parse_bool = |x| -> TheResult<bool> {
-          match hl_table.get(x) {
-            Some(x) => {
-              let x = x.as_bool().ok_or(the_err(key))?;
-              Ok(x)
-            }
-            None => Ok(false),
-          }
-        };
-
-        let bold = parse_bool("bold")?;
-        let italic = parse_bool("italic")?;
-        let underlined = parse_bool("underlined")?;
-
-        let mut attr = Attributes::none();
-        if bold {
-          attr.set(Attribute::Bold);
-        }
-        if italic {
-          attr.set(Attribute::Italic);
-        }
-        if underlined {
-          attr.set(Attribute::Underlined);
-        }
-
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
-      } else if val.is_str() {
-        let fg = val.as_str().unwrap();
-        let fg = match palette.get(fg) {
-          Some(fg) => Some(*fg),
-          None => Some(parse_code("ui.", key, fg)?),
-        };
-
-        let bg = None;
-        let attr = Attributes::none();
-
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
-      } else {
-        return Err(the_err(key));
       }
     }
   }
 
-  if group == "ui" {
-    let ui_foreground = "ui.foreground";
-    let ui_background = "ui.background";
-    if !result.contains_key(ui_foreground)
-      || result.get(ui_foreground).unwrap().fg.is_none()
-    {
-      return Err(the_err(foreground));
-    }
-    if !result.contains_key(ui_background)
-      || result.get(ui_background).unwrap().bg.is_none()
-    {
-      return Err(the_err(background));
-    }
+  if result.contains_key(ui_foreground) {
+    return Err(the_err(foreground));
+  }
+  if result.contains_key(ui_background) {
+    return Err(the_err(background));
   }
 
   Ok(result)
@@ -324,40 +318,26 @@ fn parse_ui(
 fn parse_syn(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
-  group: &str,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  debug_assert!(group == "syn" || group == "ui");
-  let group_dot = &format!("{}.", group);
-
-  let foreground = "foreground";
-  let background = "background";
-
   let the_err = |k: &str| {
-    TheErr::LoadColorSchemeFailed(
-      format!("{}{}", group_dot, k).to_compact_string(),
-    )
+    TheErr::LoadColorSchemeFailed(format!("syn.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(group_value) = colorscheme.get(group)
-    && let Some(group_table) = group_value.as_table()
+  if let Some(syn_value) = colorscheme.get("syn")
+    && let Some(syn_table) = syn_value.as_table()
   {
-    for (key, val) in group_table.iter() {
-      let id = format!("{}{}", group_dot, key.as_str()).to_compact_string();
+    for (key, val) in syn_table.iter() {
+      let id = format!("syn.{}", key).to_compact_string();
       if val.is_table() {
-        if key == foreground || key == background {
-          return Err(the_err(key));
-        }
-
-        let hl_table = val.as_table().unwrap();
-
+        let syn_table = val.as_table().unwrap();
         let parse_color = |x| -> TheResult<Option<Color>> {
-          match hl_table.get(x) {
+          match syn_table.get(x) {
             Some(x) => {
               let x = x.as_str().ok_or(the_err(key))?;
               match palette.get(x) {
                 Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code(group_dot, key, x)?)),
+                None => Ok(Some(parse_code(x, "syn.", key)?)),
               }
             }
             None => Ok(None),
@@ -368,7 +348,7 @@ fn parse_syn(
         let bg = parse_color("bg")?;
 
         let parse_bool = |x| -> TheResult<bool> {
-          match hl_table.get(x) {
+          match syn_table.get(x) {
             Some(x) => {
               let x = x.as_bool().ok_or(the_err(key))?;
               Ok(x)
@@ -397,7 +377,7 @@ fn parse_syn(
         let fg = val.as_str().unwrap();
         let fg = match palette.get(fg) {
           Some(fg) => Some(*fg),
-          None => Some(parse_code(group_dot, key, fg)?),
+          None => Some(parse_code(fg, "syn.", key)?),
         };
 
         let bg = None;
@@ -408,19 +388,6 @@ fn parse_syn(
         return Err(the_err(key));
       }
     }
-  }
-
-  let ui_foreground = "ui.foreground";
-  let ui_background = "ui.background";
-  if !result.contains_key(ui_foreground)
-    || result.get(ui_foreground).unwrap().fg.is_none()
-  {
-    return Err(the_err(foreground));
-  }
-  if !result.contains_key(ui_background)
-    || result.get(ui_background).unwrap().bg.is_none()
-  {
-    return Err(the_err(background));
   }
 
   Ok(result)
@@ -430,6 +397,7 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
+      plain: FoldMap::new(),
       syntax: FoldMap::new(),
       ui: FoldMap::new(),
     }
@@ -453,7 +421,7 @@ impl ColorScheme {
     let palette = parse_palette(&colorscheme)?;
     let plain = parse_plain(&colorscheme, &palette)?;
     let ui = parse_ui(&colorscheme, &palette)?;
-    let syntax = parse_hl(&colorscheme, &palette, "syn")?;
+    let syntax = parse_syn(&colorscheme, &palette, "syn")?;
 
     Ok(Self {
       name: name.to_compact_string(),
