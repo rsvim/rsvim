@@ -332,11 +332,11 @@ pub type ColorSchemeManagerIter<'a> =
 impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut highlights = FoldMap::new();
-    let default_toml_data =
+    let default_data =
       include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/hl/default.toml"));
-    let default_toml_data = default_toml_data.parse::<toml::Table>().unwrap();
+    let default_table = default_data.parse::<toml::Table>().unwrap();
     let default_colorscheme =
-      ColorScheme::from_toml("default", default_toml_data).unwrap();
+      ColorScheme::from_toml("default", default_table).unwrap();
     highlights.insert("default".to_compact_string(), default_colorscheme);
     Self { highlights }
   }
