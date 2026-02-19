@@ -161,17 +161,29 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_plain(
-  colorscheme: &toml::Table,
-  palette: &FoldMap<CompactString, Color>,
-) -> TheResult<FoldMap<CompactString, Color>> {
+fn plain_keys() -> (
+  /* foreground */ &'static str,
+  /* background */ &'static str,
+  /* ui_foreground */ &'static str,
+  /* ui_background */ &'static str,
+  /* plains */ FoldSet<&'static str>,
+) {
   let foreground = "foreground";
   let background = "background";
   let ui_foreground = "ui.foreground";
   let ui_background = "ui.background";
   let plains = [foreground, background]
     .into_iter()
-    .collect::<FoldSet<&str>>();
+    .collect::<FoldSet<&'static str>>();
+  (foreground, background, ui_foreground, ui_background, plains)
+}
+
+fn parse_plain(
+  colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+) -> TheResult<FoldMap<CompactString, Color>> {
+  let (foreground, background, ui_foreground, ui_background, plains) =
+    plain_keys();
 
   let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
@@ -212,18 +224,18 @@ fn parse_ui(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  let foreground = "foreground";
-  let background = "background";
+  let (foreground, background, ui_foreground, ui_background, plains) =
+    plain_keys();
 
   let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(group_value) = colorscheme.get(group)
-    && let Some(group_table) = group_value.as_table()
+  if let Some(ui_value) = colorscheme.get("ui")
+    && let Some(ui_table) = ui_value.as_table()
   {
-    for (key, val) in group_table.iter() {
+    for (key, val) in ui_table.iter() {
       let id = format!("ui.{}", key.as_str()).to_compact_string();
       if val.is_table() {
         if key == foreground || key == background {
@@ -439,7 +451,8 @@ impl ColorScheme {
   /// ```
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let ui = parse_hl(&colorscheme, &palette, "ui")?;
+    let plain = parse_plain(&colorscheme, &palette)?;
+    let ui = parse_ui(&colorscheme, &palette)?;
     let syntax = parse_hl(&colorscheme, &palette, "syn")?;
 
     Ok(Self {
