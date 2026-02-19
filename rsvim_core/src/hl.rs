@@ -8,6 +8,7 @@ use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
+use std::num::ParseIntError;
 use std::str::FromStr;
 
 pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
@@ -97,41 +98,35 @@ pub struct ColorScheme {
 
   // Maps ID => UI colors
   ui: FoldMap<CompactString, Highlight>,
+
+  // Map ID => plain colors
+  plain: FoldMap<CompactString, Color>,
 }
 
-fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
-  let parse_hex = |x| {
-    u8::from_str_radix(x, 16).map_err(|e| {
-      TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, k).to_compact_string(),
-      )
-    })
-  };
-
+fn parse_code(
+  prefix: &str,
+  k: &str,
+  s: &str,
+) -> Result<Option<Color>, ParseIntError> {
   if s.starts_with("#") && s.len() == 7 {
     // Parse hex 6 digits, for example: #ffffff
     let s = &s[1..];
-    let r = parse_hex(&s[0..2])?;
-    let g = parse_hex(&s[2..4])?;
-    let b = parse_hex(&s[4..6])?;
-    Ok(Color::Rgb { r, g, b })
+    let r = u8::from_str_radix(&s[0..2], 16)?;
+    let g = u8::from_str_radix(&s[2..4], 16)?;
+    let b = u8::from_str_radix(&s[4..6], 16)?;
+    Ok(Some(Color::Rgb { r, g, b }))
   } else if s.starts_with("#") && s.len() == 4 {
     // Parse hex 3 digits, for example: #fff
     let s = &s[1..];
-    let r = parse_hex(&s[0..1])?;
+    let r = u8::from_str_radix(&s[0..1], 16)?;
     let r = r | (r << 4);
-    let g = parse_hex(&s[1..2])?;
+    let g = u8::from_str_radix(&s[1..2], 16)?;
     let g = g | (g << 4);
-    let b = parse_hex(&s[2..3])?;
+    let b = u8::from_str_radix(&s[2..3], 16)?;
     let b = b | (b << 4);
-    Ok(Color::Rgb { r, g, b })
+    Ok(Some(Color::Rgb { r, g, b }))
   } else {
-    // Try parse color name
-    Color::from_str(s).map_err(|e| {
-      TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, k).to_compact_string(),
-      )
-    })
+    Ok(None)
   }
 }
 
@@ -159,7 +154,108 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_hl(
+fn parse_ui(
+  colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+) -> TheResult<FoldMap<CompactString, Highlight>> {
+  let foreground = "foreground";
+  let background = "background";
+
+  let the_err = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
+  };
+
+  let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
+  if let Some(group_value) = colorscheme.get(group)
+    && let Some(group_table) = group_value.as_table()
+  {
+    for (key, val) in group_table.iter() {
+      let id = format!("ui.{}", key.as_str()).to_compact_string();
+      if val.is_table() {
+        if key == foreground || key == background {
+          return Err(the_err(key));
+        }
+
+        let hl_table = val.as_table().unwrap();
+
+        let parse_color = |x| -> TheResult<Option<Color>> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_str().ok_or(the_err(key))?;
+              match palette.get(x) {
+                Some(x) => Ok(Some(*x)),
+                None => Ok(Some(parse_code("ui.", key, x)?)),
+              }
+            }
+            None => Ok(None),
+          }
+        };
+
+        let fg = parse_color("fg")?;
+        let bg = parse_color("bg")?;
+
+        let parse_bool = |x| -> TheResult<bool> {
+          match hl_table.get(x) {
+            Some(x) => {
+              let x = x.as_bool().ok_or(the_err(key))?;
+              Ok(x)
+            }
+            None => Ok(false),
+          }
+        };
+
+        let bold = parse_bool("bold")?;
+        let italic = parse_bool("italic")?;
+        let underlined = parse_bool("underlined")?;
+
+        let mut attr = Attributes::none();
+        if bold {
+          attr.set(Attribute::Bold);
+        }
+        if italic {
+          attr.set(Attribute::Italic);
+        }
+        if underlined {
+          attr.set(Attribute::Underlined);
+        }
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+      } else if val.is_str() {
+        let fg = val.as_str().unwrap();
+        let fg = match palette.get(fg) {
+          Some(fg) => Some(*fg),
+          None => Some(parse_code("ui.", key, fg)?),
+        };
+
+        let bg = None;
+        let attr = Attributes::none();
+
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+      } else {
+        return Err(the_err(key));
+      }
+    }
+  }
+
+  if group == "ui" {
+    let ui_foreground = "ui.foreground";
+    let ui_background = "ui.background";
+    if !result.contains_key(ui_foreground)
+      || result.get(ui_foreground).unwrap().fg.is_none()
+    {
+      return Err(the_err(foreground));
+    }
+    if !result.contains_key(ui_background)
+      || result.get(ui_background).unwrap().bg.is_none()
+    {
+      return Err(the_err(background));
+    }
+  }
+
+  Ok(result)
+}
+
+fn parse_syn(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
   group: &str,
@@ -167,8 +263,8 @@ fn parse_hl(
   debug_assert!(group == "syn" || group == "ui");
   let group_dot = &format!("{}.", group);
 
-  let ui_foreground = "ui.foreground";
-  let ui_background = "ui.background";
+  let foreground = "foreground";
+  let background = "background";
 
   let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(
@@ -183,6 +279,10 @@ fn parse_hl(
     for (key, val) in group_table.iter() {
       let id = format!("{}{}", group_dot, key.as_str()).to_compact_string();
       if val.is_table() {
+        if key == foreground || key == background {
+          return Err(the_err(key));
+        }
+
         let hl_table = val.as_table().unwrap();
 
         let parse_color = |x| -> TheResult<Option<Color>> {
@@ -244,18 +344,17 @@ fn parse_hl(
     }
   }
 
-  if group == "ui" {
-    for i in [ui_foreground, ui_background].iter() {
-      if !result.contains_key(*i) {
-        return Err(the_err(i));
-      }
-    }
-    if result.get(ui_foreground).unwrap().fg.is_none() {
-      return Err(the_err(ui_foreground));
-    }
-    if result.get(ui_background).unwrap().bg.is_none() {
-      return Err(the_err(ui_background));
-    }
+  let ui_foreground = "ui.foreground";
+  let ui_background = "ui.background";
+  if !result.contains_key(ui_foreground)
+    || result.get(ui_foreground).unwrap().fg.is_none()
+  {
+    return Err(the_err(foreground));
+  }
+  if !result.contains_key(ui_background)
+    || result.get(ui_background).unwrap().bg.is_none()
+  {
+    return Err(the_err(background));
   }
 
   Ok(result)
