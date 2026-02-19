@@ -8,7 +8,6 @@ use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
-use std::num::ParseIntError;
 
 pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
@@ -479,9 +478,9 @@ impl ColorScheme {
     };
 
     if id.starts_with("syn.") {
-      self.syntax.get(id).map(|h| clone_hl(h))
+      self.syntax.get(id).map(&clone_hl)
     } else if id.starts_with("ui.") {
-      self.ui.get(id).map(|h| clone_hl(h))
+      self.ui.get(id).map(&clone_hl)
     } else {
       None
     }
