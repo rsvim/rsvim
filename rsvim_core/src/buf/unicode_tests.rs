@@ -4,8 +4,8 @@ use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ascii::AsciiChar;
-use icu::properties::CodePointMapData;
-use icu::properties::props::EastAsianWidth;
+use icu_properties::CodePointMapData;
+use icu_properties::props::EastAsianWidth;
 use unicode_width::UnicodeWidthChar;
 
 #[test]

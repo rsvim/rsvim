@@ -4,8 +4,8 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::FileFormatOption;
 use ascii::AsciiChar;
 use compact_str::CompactString;
-use icu::properties::CodePointMapData;
-use icu::properties::props::EastAsianWidth;
+use icu_properties::CodePointMapData;
+use icu_properties::props::EastAsianWidth;
 use std::fmt;
 
 /// The formatter for ASCII control code in [`AsciiChar`], helps implement the
@@ -72,7 +72,7 @@ impl fmt::Display for AsciiControlCodeFormatter {
 /// The char display width follows the
 /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/),
 /// implemented with
-/// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
+/// [icu_properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
 pub fn char_width(opt: &BufferOptions, c: char) -> usize {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();

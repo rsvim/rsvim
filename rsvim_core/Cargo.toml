@@ -39,7 +39,8 @@ fern = { workspace = true }
 foldhash = { workspace = true }
 futures = { workspace = true }
 geo = { workspace = true }
-icu = { workspace = true, features = ["compiled_data"] }
+icu_segmenter = { workspace = true, features = ["compiled_data"] }
+icu_properties = { workspace = true, features = ["compiled_data"] }
 itertools = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 lexopt = { workspace = true }
