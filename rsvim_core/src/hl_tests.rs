@@ -122,10 +122,10 @@ grey = "#c0c0c0"
     }
 
     for expect in syntax_expects.iter() {
-      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
     }
     for expect in ui_expects.iter() {
-      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
     }
   }
 
@@ -235,10 +235,10 @@ background = { bg = "#000000" }
     }
 
     for expect in syntax_expects.iter() {
-      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
     }
     for expect in ui_expects.iter() {
-      assert_eq!(cs.get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
     }
   }
 
