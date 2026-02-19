@@ -38,7 +38,8 @@ futures = "0.3"
 geo = "0.32"
 git2 = "0.20"
 # heed = "0.20.5"
-icu = { version = "2", features = ["compiled_data"] }
+icu_segmenter = { version = "2", features = ["compiled_data"] }
+icu_properties = { version = "2", features = ["compiled_data"] }
 itertools = "0.14"
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 lexopt = "0.3"
