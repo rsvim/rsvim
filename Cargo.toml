@@ -141,7 +141,7 @@ opt-level = 1
 [profile.nightly]
 inherits = "release"
 debug = true
-strip = true
+strip = "none"
 panic = "unwind"
 
 # Release
