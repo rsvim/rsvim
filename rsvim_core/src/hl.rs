@@ -253,10 +253,7 @@ fn parse_syn_highlights(
 
         let parse_bool = |x| -> TheResult<bool> {
           match val_table.get(x) {
-            Some(x) => {
-              let x = x.as_bool().ok_or(err(key))?;
-              Ok(x)
-            }
+            Some(x) => Ok(x.as_bool().ok_or(err(key))?),
             None => Ok(false),
           }
         };
