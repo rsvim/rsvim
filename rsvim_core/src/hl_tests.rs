@@ -29,7 +29,7 @@ mod parse_toml {
 
     assert!(cs.syn().get("syn.comment").is_some());
     assert!(cs.syn().get("syn.comment").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.comment").unwrap().fg, Some(Color::Grey));
+    assert_eq!(cs.syn().get("syn.comment").unwrap().fg, Some(Color::Cyan));
     assert_eq!(
       cs.syn().get("syn.comment").unwrap().attr,
       Attributes::none()
