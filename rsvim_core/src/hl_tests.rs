@@ -18,7 +18,7 @@ comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlin
 keyword = { fg = "#ffffff", bg = "green", italic = true }
 
 [ui]
-background = { bg = "#000000" }
+background = "#000000"
 
 [palette]
 # white = "#ffffff"
@@ -100,33 +100,15 @@ grey = "#c0c0c0"
       assert_eq!(cs.syn().get(expect.0), expect.1.as_ref());
     }
 
-    let ui_expects = [
-      (
-        "ui.background",
-        Some(Highlight {
-          id: "ui.background".to_compact_string(),
-          fg: None,
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0x0,
-            b: 0x0,
-          }),
-          attr: Attributes::none(),
-        }),
-      ),
-      ("ui.foreground", None),
-    ];
-
-    for expect in ui_expects.iter() {
-      assert_eq!(cs.ui().get(expect.0), expect.1.as_ref());
-    }
-
-    for expect in syntax_expects.iter() {
-      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
-    }
-    for expect in ui_expects.iter() {
-      assert_eq!(cs.get_raw(expect.0), expect.1.as_ref());
-    }
+    assert_eq!(
+      *cs.background(),
+      Color::Rgb {
+        r: 0x0,
+        g: 0x0,
+        b: 0x0
+      }
+    );
+    assert_eq!(*cs.foreground(), Color::White);
   }
 
   #[test]
