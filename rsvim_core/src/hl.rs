@@ -377,15 +377,40 @@ pub type ColorSchemeManagerValues<'a> =
 pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
 
+pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
+  let config = toml::toml! {
+    [syn]
+    attribute = "white"
+    boolean = "magenta"
+    comment = "grey"
+    constant = "red"
+    constructor = "cyan"
+    embedded = "cyan"
+    error = "red"
+    function = "green"
+    keyword = "yellow"
+    markup = "yellow"
+    module = "red"
+    number = "red"
+    operator = "yellow"
+    property = "cyan"
+    string = "red"
+    tag = "magenta"
+    type = "green"
+    variable = "cyan"
+
+    [ui]
+    foreground = "white"
+    background = "black"
+  };
+  ColorScheme::from_toml("default", config).unwrap()
+});
+
 impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut highlights = FoldMap::new();
-    let default_data =
-      include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/hl/default.toml"));
-    let default_table = default_data.parse::<toml::Table>().unwrap();
-    let default_colorscheme =
-      ColorScheme::from_toml("default", default_table).unwrap();
-    highlights.insert("default".to_compact_string(), default_colorscheme);
+    highlights
+      .insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
     Self { highlights }
   }
 
