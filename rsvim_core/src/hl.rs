@@ -15,6 +15,7 @@ pub const UI_FOREGROUND: &str = "ui.foreground";
 pub const UI_BACKGROUND: &str = "ui.background";
 pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
 pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
+pub const DEFAULT: &str = "default";
 
 pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
@@ -424,11 +425,11 @@ impl ColorSchemeManager {
     self.highlights.len()
   }
 
-  pub fn get(&self, id: &CompactString) -> Option<&ColorScheme> {
+  pub fn get(&self, id: &str) -> Option<&ColorScheme> {
     self.highlights.get(id)
   }
 
-  pub fn contains_key(&self, id: &CompactString) -> bool {
+  pub fn contains_key(&self, id: &str) -> bool {
     self.highlights.contains_key(id)
   }
 
@@ -440,7 +441,7 @@ impl ColorSchemeManager {
     self.highlights.insert(key, value)
   }
 
-  pub fn remove(&mut self, id: &CompactString) -> Option<ColorScheme> {
+  pub fn remove(&mut self, id: &str) -> Option<ColorScheme> {
     self.highlights.remove(id)
   }
 

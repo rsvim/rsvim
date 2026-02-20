@@ -9,6 +9,23 @@ mod parse_toml {
   use super::*;
 
   #[test]
+  fn default1() {
+    let cs_manager = ColorSchemeManager::new();
+    let cs = cs_manager.get("default").unwrap();
+    assert_eq!(cs.syn().len(), 4);
+
+    assert_eq!(*cs.background(), Color::Black);
+    assert_eq!(*cs.foreground(), Color::White);
+
+    assert!(cs.syn().get("syn.attribute").is_some());
+    assert!(cs.syn().get("syn.attribute").unwrap().bg.is_none());
+    assert_eq!(
+      cs.syn().get("syn.attribute").unwrap().fg,
+      Some(Color::White)
+    );
+  }
+
+  #[test]
   fn toml1() {
     let payload: &str = r##"
 [syn]
@@ -122,7 +139,7 @@ keyword = { fg = "red", bg = "green", italic = true }
 
 [ui]
 foreground = "#fff"
-background = { bg = "#000000" }
+background = "#000000"
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
