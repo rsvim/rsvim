@@ -1,8 +1,6 @@
 #![allow(dead_code, unused_variables)]
 //! Highlight and ColorScheme.
 
-use std::str::FromStr;
-
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
