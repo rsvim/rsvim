@@ -318,12 +318,13 @@ impl ColorScheme {
   /// ```
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let plain = parse_plain_colors(&colorscheme, &palette)?;
+    let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
     let syntax = parse_syn_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      plain,
+      foreground: *plain_colors.get(UI_FOREGROUND).unwrap(),
+      background: *plain_colors.get(UI_BACKGROUND).unwrap(),
       syntax,
     })
   }
