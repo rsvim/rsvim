@@ -190,13 +190,13 @@ fn parse_plain_colors(
     for (key, val) in ui_table.iter() {
       if plain_colors.contains(key.as_str()) {
         if val.is_str() {
-          let id = format!("ui.{}", key).to_compact_string();
           let value = val.as_str().unwrap();
           let value = match palette.get(value) {
             Some(code) => *code,
             None => parse_code(value, "ui.", key)?,
           };
-          result.insert(id.clone(), value);
+          let id = format!("ui.{}", key).to_compact_string();
+          result.insert(id, value);
         } else {
           return Err(the_err(key));
         }
@@ -204,11 +204,11 @@ fn parse_plain_colors(
     }
   }
 
-  if !result.contains_key(ui_foreground) {
-    return Err(the_err(foreground));
+  if !result.contains_key(UI_FOREGROUND) {
+    return Err(the_err(FOREGROUND));
   }
-  if !result.contains_key(ui_background) {
-    return Err(the_err(background));
+  if !result.contains_key(UI_BACKGROUND) {
+    return Err(the_err(BACKGROUND));
   }
 
   Ok(result)
