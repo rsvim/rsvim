@@ -145,7 +145,7 @@ debug = true
 # Release
 [profile.release]
 lto = true
-strip = true
-incremental = true
+strip = "symbols"
 codegen-units = 1
 opt-level = "s"
+panic = "abort"
