@@ -9,7 +9,14 @@ use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
-pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
+pub const FOREGROUND: &str = "foreground";
+pub const BACKGROUND: &str = "background";
+pub const UI_FOREGROUND: &str = "ui.foreground";
+pub const UI_BACKGROUND: &str = "ui.background";
+pub const PLAIN_COLOR_NAMES: [&str; 2] = [FOREGROUND, BACKGROUND];
+pub const UI_PLAIN_COLOR_NAMES: [&str; 2] = [FOREGROUND, BACKGROUND];
+
+pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
     vec![
       "attribute",
@@ -70,6 +77,14 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
     .collect::<FoldSet<CompactString>>()
   });
 
+pub static SYN_TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
+  Lazy::new(|| {
+    TREESITTER_HIGHLIGHTS
+      .iter()
+      .map(|i| format!("syn.{}", i).to_compact_string())
+      .collect::<FoldSet<CompactString>>()
+  });
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
@@ -95,7 +110,7 @@ pub struct ColorScheme {
   foreground: Color,
   background: Color,
 
-  // Maps ID => syntax colors
+  // Syntax colors
   syntax: FoldMap<CompactString, Highlight>,
 }
 
@@ -158,40 +173,22 @@ fn parse_palette(
   Ok(result)
 }
 
-fn plain_keys() -> (
-  /* foreground */ &'static str,
-  /* background */ &'static str,
-  /* ui_foreground */ &'static str,
-  /* ui_background */ &'static str,
-  /* plains */ FoldSet<&'static str>,
-) {
-  let foreground = "foreground";
-  let background = "background";
-  let ui_foreground = "ui.foreground";
-  let ui_background = "ui.background";
-  let plains = [foreground, background]
-    .into_iter()
-    .collect::<FoldSet<&'static str>>();
-  (foreground, background, ui_foreground, ui_background, plains)
-}
-
-fn parse_plain(
+fn parse_plain_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let (foreground, background, ui_foreground, ui_background, plains) =
-    plain_keys();
+  let plain_colors = PLAIN_COLOR_NAMES.into_iter().collect::<FoldSet<&str>>();
 
   let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
-  if let Some(ui_value) = colorscheme.get("ui")
-    && let Some(ui_table) = ui_value.as_table()
+  if let Some(ui) = colorscheme.get("ui")
+    && let Some(ui_table) = ui.as_table()
   {
     for (key, val) in ui_table.iter() {
-      if plains.contains(key.as_str()) {
+      if plain_colors.contains(key.as_str()) {
         let id = format!("ui.{}", key).to_compact_string();
         if val.is_str() {
           let val1 = val.as_str().unwrap();
@@ -416,7 +413,7 @@ impl ColorScheme {
   /// ```
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let plain = parse_plain(&colorscheme, &palette)?;
+    let plain = parse_plain_colors(&colorscheme, &palette)?;
     let ui = parse_ui(&colorscheme, &palette)?;
     let syntax = parse_syn(&colorscheme, &palette)?;
 
