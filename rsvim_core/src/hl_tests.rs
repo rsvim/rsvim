@@ -23,6 +23,61 @@ mod parse_toml {
       cs.syn().get("syn.attribute").unwrap().fg,
       Some(Color::White)
     );
+    assert_eq!(
+      cs.syn().get("syn.attribute").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.boolean").is_some());
+    assert!(cs.syn().get("syn.boolean").unwrap().bg.is_none());
+    assert_eq!(
+      cs.syn().get("syn.boolean").unwrap().fg,
+      Some(Color::Magenta)
+    );
+    assert_eq!(
+      cs.syn().get("syn.boolean").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.comment").is_some());
+    assert!(cs.syn().get("syn.comment").unwrap().bg.is_none());
+    assert_eq!(cs.syn().get("syn.comment").unwrap().fg, Some(Color::Grey));
+    assert_eq!(
+      cs.syn().get("syn.comment").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.constant").is_some());
+    assert!(cs.syn().get("syn.constant").unwrap().bg.is_none());
+    assert_eq!(cs.syn().get("syn.constant").unwrap().fg, Some(Color::Red));
+    assert_eq!(
+      cs.syn().get("syn.constant").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.constructor").is_some());
+    assert!(cs.syn().get("syn.constructor").unwrap().bg.is_none());
+    assert_eq!(
+      cs.syn().get("syn.constructor").unwrap().fg,
+      Some(Color::Cyan)
+    );
+    assert_eq!(
+      cs.syn().get("syn.constructor").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.embedded").is_some());
+    assert!(cs.syn().get("syn.embedded").unwrap().bg.is_none());
+    assert_eq!(cs.syn().get("syn.embedded").unwrap().fg, Some(Color::Cyan));
+    assert_eq!(
+      cs.syn().get("syn.embedded").unwrap().attr,
+      Attributes::none()
+    );
+
+    assert!(cs.syn().get("syn.error").is_some());
+    assert!(cs.syn().get("syn.error").unwrap().bg.is_none());
+    assert_eq!(cs.syn().get("syn.error").unwrap().fg, Some(Color::Red));
+    assert_eq!(cs.syn().get("syn.error").unwrap().attr, Attributes::none());
   }
 
   #[test]
