@@ -13,8 +13,8 @@ pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
 pub const UI_FOREGROUND: &str = "ui.foreground";
 pub const UI_BACKGROUND: &str = "ui.background";
-pub const PLAIN_COLOR_NAMES: [&str; 2] = [FOREGROUND, BACKGROUND];
-pub const UI_PLAIN_COLOR_NAMES: [&str; 2] = [FOREGROUND, BACKGROUND];
+pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
+pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
 
 pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
@@ -177,10 +177,14 @@ fn parse_plain_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let plain_colors = PLAIN_COLOR_NAMES.into_iter().collect::<FoldSet<&str>>();
+  let plain_colors = [FOREGROUND, BACKGROUND]
+    .into_iter()
+    .collect::<FoldSet<&str>>();
 
-  let the_err = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
+  let err = |k: &str| {
+    Err(TheErr::LoadColorSchemeFailed(
+      format!("ui.{}", k).to_compact_string(),
+    ))
   };
 
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
@@ -198,122 +202,27 @@ fn parse_plain_colors(
           let id = format!("ui.{}", key).to_compact_string();
           result.insert(id, value);
         } else {
-          return Err(the_err(key));
+          return err(key);
         }
       }
     }
   }
 
   if !result.contains_key(UI_FOREGROUND) {
-    return Err(the_err(FOREGROUND));
+    return err(FOREGROUND);
   }
   if !result.contains_key(UI_BACKGROUND) {
-    return Err(the_err(BACKGROUND));
+    return err(BACKGROUND);
   }
 
   Ok(result)
 }
 
-fn parse_ui(
+fn parse_syn_highlights(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  let (foreground, background, ui_foreground, ui_background, plains) =
-    plain_keys();
-
-  let the_err = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("ui.{}", k).to_compact_string())
-  };
-
-  let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(ui_value) = colorscheme.get("ui")
-    && let Some(ui_table) = ui_value.as_table()
-  {
-    for (key, val) in ui_table.iter() {
-      if !plains.contains(key.as_str()) {
-        let id = format!("ui.{}", key.as_str()).to_compact_string();
-        if val.is_table() {
-          if key == foreground || key == background {
-            return Err(the_err(key));
-          }
-
-          let hl_table = val.as_table().unwrap();
-
-          let parse_color = |x| -> TheResult<Option<Color>> {
-            match hl_table.get(x) {
-              Some(x) => {
-                let x = x.as_str().ok_or(the_err(key))?;
-                match palette.get(x) {
-                  Some(x) => Ok(Some(*x)),
-                  None => Ok(Some(parse_code("ui.", key, x)?)),
-                }
-              }
-              None => Ok(None),
-            }
-          };
-
-          let fg = parse_color("fg")?;
-          let bg = parse_color("bg")?;
-
-          let parse_bool = |x| -> TheResult<bool> {
-            match hl_table.get(x) {
-              Some(x) => {
-                let x = x.as_bool().ok_or(the_err(key))?;
-                Ok(x)
-              }
-              None => Ok(false),
-            }
-          };
-
-          let bold = parse_bool("bold")?;
-          let italic = parse_bool("italic")?;
-          let underlined = parse_bool("underlined")?;
-
-          let mut attr = Attributes::none();
-          if bold {
-            attr.set(Attribute::Bold);
-          }
-          if italic {
-            attr.set(Attribute::Italic);
-          }
-          if underlined {
-            attr.set(Attribute::Underlined);
-          }
-
-          result.insert(id.clone(), Highlight { id, fg, bg, attr });
-        } else if val.is_str() {
-          let fg = val.as_str().unwrap();
-          let fg = match palette.get(fg) {
-            Some(fg) => Some(*fg),
-            None => Some(parse_code("ui.", key, fg)?),
-          };
-
-          let bg = None;
-          let attr = Attributes::none();
-
-          result.insert(id.clone(), Highlight { id, fg, bg, attr });
-        } else {
-          return Err(the_err(key));
-        }
-      }
-    }
-  }
-
-  if result.contains_key(ui_foreground) {
-    return Err(the_err(foreground));
-  }
-  if result.contains_key(ui_background) {
-    return Err(the_err(background));
-  }
-
-  Ok(result)
-}
-
-fn parse_syn(
-  colorscheme: &toml::Table,
-  palette: &FoldMap<CompactString, Color>,
-) -> TheResult<FoldMap<CompactString, Highlight>> {
-  let the_err = |k: &str| {
+  let err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("syn.{}", k).to_compact_string())
   };
 
@@ -328,7 +237,7 @@ fn parse_syn(
         let parse_color = |x| -> TheResult<Option<Color>> {
           match syn_table.get(x) {
             Some(x) => {
-              let x = x.as_str().ok_or(the_err(key))?;
+              let x = x.as_str().ok_or(err(key))?;
               match palette.get(x) {
                 Some(x) => Ok(Some(*x)),
                 None => Ok(Some(parse_code(x, "syn.", key)?)),
@@ -344,7 +253,7 @@ fn parse_syn(
         let parse_bool = |x| -> TheResult<bool> {
           match syn_table.get(x) {
             Some(x) => {
-              let x = x.as_bool().ok_or(the_err(key))?;
+              let x = x.as_bool().ok_or(err(key))?;
               Ok(x)
             }
             None => Ok(false),
@@ -379,7 +288,7 @@ fn parse_syn(
 
         result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
-        return Err(the_err(key));
+        return Err(err(key));
       }
     }
   }
@@ -391,9 +300,7 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
-      plain: FoldMap::new(),
       syntax: FoldMap::new(),
-      ui: FoldMap::new(),
     }
   }
 
@@ -414,14 +321,12 @@ impl ColorScheme {
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let plain = parse_plain_colors(&colorscheme, &palette)?;
-    let ui = parse_ui(&colorscheme, &palette)?;
-    let syntax = parse_syn(&colorscheme, &palette)?;
+    let syntax = parse_syn_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
       plain,
       syntax,
-      ui,
     })
   }
 
