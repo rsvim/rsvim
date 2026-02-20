@@ -1,6 +1,8 @@
 #![allow(dead_code, unused_variables)]
 //! Highlight and ColorScheme.
 
+use std::str::FromStr;
+
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -141,9 +143,11 @@ fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
     let b = b | (b << 4);
     Ok(Color::Rgb { r, g, b })
   } else {
-    Err(TheErr::LoadColorSchemeFailed(
-      format!("{}{}", prefix, key).to_compact_string(),
-    ))
+    Color::try_from(s).map_err(|e| {
+      TheErr::LoadColorSchemeFailed(
+        format!("{}{}", prefix, key).to_compact_string(),
+      )
+    })
   }
 }
 
