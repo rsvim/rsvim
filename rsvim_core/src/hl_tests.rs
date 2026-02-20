@@ -32,7 +32,7 @@ grey = "#c0c0c0"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
-    assert_eq!(cs.syntax().len(), 4);
+    assert_eq!(cs.syn().len(), 4);
 
     let syntax_expects = [
       (
@@ -97,7 +97,7 @@ grey = "#c0c0c0"
       ),
     ];
     for expect in syntax_expects.iter() {
-      assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.syn().get(expect.0), expect.1.as_ref());
     }
 
     let ui_expects = [
@@ -145,7 +145,7 @@ background = { bg = "#000000" }
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("toml2", colorscheme_table).unwrap();
-    assert_eq!(cs.syntax().len(), 4);
+    assert_eq!(cs.syn().len(), 4);
 
     let syntax_expects = [
       (
@@ -198,7 +198,7 @@ background = { bg = "#000000" }
       ),
     ];
     for expect in syntax_expects.iter() {
-      assert_eq!(cs.syntax().get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.syn().get(expect.0), expect.1.as_ref());
     }
 
     let ui_expects = [
