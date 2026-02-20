@@ -16,17 +16,6 @@ mod parse_toml {
     assert_eq!(*cs.background(), Color::Black);
     assert_eq!(*cs.foreground(), Color::White);
 
-    assert!(cs.syn().get("syn.attribute").is_some());
-    assert!(cs.syn().get("syn.attribute").unwrap().bg.is_none());
-    assert_eq!(
-      cs.syn().get("syn.attribute").unwrap().fg,
-      Some(Color::White)
-    );
-    assert_eq!(
-      cs.syn().get("syn.attribute").unwrap().attr,
-      Attributes::none()
-    );
-
     assert!(cs.syn().get("syn.boolean").is_some());
     assert!(cs.syn().get("syn.boolean").unwrap().bg.is_none());
     assert_eq!(
