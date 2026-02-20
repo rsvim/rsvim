@@ -233,9 +233,10 @@ fn parse_syn_highlights(
     for (key, val) in syn_table.iter() {
       let id = format!("syn.{}", key).to_compact_string();
       if val.is_table() {
-        let syn_table = val.as_table().unwrap();
+        let val_table = val.as_table().unwrap();
+
         let parse_color = |x| -> TheResult<Option<Color>> {
-          match syn_table.get(x) {
+          match val_table.get(x) {
             Some(x) => {
               let x = x.as_str().ok_or(err(key))?;
               match palette.get(x) {
@@ -251,7 +252,7 @@ fn parse_syn_highlights(
         let bg = parse_color("bg")?;
 
         let parse_bool = |x| -> TheResult<bool> {
-          match syn_table.get(x) {
+          match val_table.get(x) {
             Some(x) => {
               let x = x.as_bool().ok_or(err(key))?;
               Ok(x)
