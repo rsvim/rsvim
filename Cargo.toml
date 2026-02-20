@@ -142,6 +142,7 @@ opt-level = 1
 inherits = "release"
 debug = true
 strip = true
+panic = "unwind"
 
 # Release
 [profile.release]
