@@ -9,82 +9,241 @@ use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
+pub const DEFAULT: &str = "default";
+
+// Default UI colors
+pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
+pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
+
+// "ui."
 pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
 pub const UI_FOREGROUND: &str = "ui.foreground";
 pub const UI_BACKGROUND: &str = "ui.background";
-pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
-pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
-pub const DEFAULT: &str = "default";
 
-pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
-  Lazy::new(|| {
-    vec![
-      "attribute",
-      "boolean",
-      "carriage-return",
-      "comment",
-      "comment.documentation",
-      "constant",
-      "constant.builtin",
-      "constructor",
-      "constructor.builtin",
-      "embedded",
-      "error",
-      "escape",
-      "function",
-      "function.builtin",
-      "keyword",
-      "markup",
-      "markup.bold",
-      "markup.heading",
-      "markup.italic",
-      "markup.link",
-      "markup.link.url",
-      "markup.list",
-      "markup.list.checked",
-      "markup.list.numbered",
-      "markup.list.unchecked",
-      "markup.list.unnumbered",
-      "markup.quote",
-      "markup.raw",
-      "markup.raw.block",
-      "markup.raw.inline",
-      "markup.strikethrough",
-      "module",
-      "number",
-      "operator",
-      "property",
-      "property.builtin",
-      "punctuation",
-      "punctuation.bracket",
-      "punctuation.delimiter",
-      "punctuation.special",
-      "string",
-      "string.escape",
-      "string.regexp",
-      "string.special",
-      "string.special.symbol",
-      "tag",
-      "type",
-      "type.builtin",
-      "variable",
-      "variable.builtin",
-      "variable.member",
-      "variable.parameter",
-    ]
-    .iter()
-    .map(|i| i.to_compact_string())
-    .collect::<FoldSet<CompactString>>()
-  });
+// "syn."
+pub const ATTRIBUTE: &str = "attribute";
+pub const BOOLEAN: &str = "boolean";
+pub const CARRIAGE_RETURN: &str = "carriage-return";
+pub const COMMENT: &str = "comment";
+pub const COMMENT_DOCUMENTATION: &str = "comment.documentation";
+pub const CONSTANT: &str = "constant";
+pub const CONSTANT_BUILTIN: &str = "constant.builtin";
+pub const CONSTRUCTOR: &str = "constructor";
+pub const CONSTRUCTOR_BUILTIN: &str = "constructor.builtin";
+pub const EMBEDDED: &str = "embedded";
+pub const ERROR: &str = "error";
+pub const ESCAPE: &str = "escape";
+pub const FUNCTION: &str = "function";
+pub const FUNCTION_BUILTIN: &str = "function.builtin";
+pub const KEYWORD: &str = "keyword";
+pub const MARKUP: &str = "markup";
+pub const MARKUP_BOLD: &str = "markup.bold";
+pub const MARKUP_HEADING: &str = "markup.heading";
+pub const MARKUP_ITALIC: &str = "markup.italic";
+pub const MARKUP_LINK: &str = "markup.link";
+pub const MARKUP_LINK_URL: &str = "markup.link.url";
+pub const MARKUP_LIST: &str = "markup.list";
+pub const MARKUP_LIST_CHECKED: &str = "markup.list.checked";
+pub const MARKUP_LIST_NUMBERED: &str = "markup.list.numbered";
+pub const MARKUP_LIST_UNCHECKED: &str = "markup.list.unchecked";
+pub const MARKUP_LIST_UNNUMBERED: &str = "markup.list.unnumbered";
+pub const MARKUP_QUOTE: &str = "markup.quote";
+pub const MARKUP_RAW: &str = "markup.raw";
+pub const MARKUP_RAW_BLOCK: &str = "markup.raw.block";
+pub const MARKUP_RAW_INLINE: &str = "markup.raw.inline";
+pub const MARKUP_STRIKETHROUGH: &str = "markup.strikethrough";
+pub const MODULE: &str = "module";
+pub const NUMBER: &str = "number";
+pub const OPERATOR: &str = "operator";
+pub const PROPERTY: &str = "property";
+pub const PROPERTY_BUILTIN: &str = "property.builtin";
+pub const PUNCTUATION: &str = "punctuation";
+pub const PUNCTUATION_BRACKET: &str = "punctuation.bracket";
+pub const PUNCTUATION_DELIMITER: &str = "punctuation.delimiter";
+pub const PUNCTUATION_SPECIAL: &str = "punctuation.special";
+pub const STRING: &str = "string";
+pub const STRING_ESCAPE: &str = "string.escape";
+pub const STRING_REGEXP: &str = "string.regexp";
+pub const STRING_SPECIAL: &str = "string.special";
+pub const STRING_SPECIAL_SYMBOL: &str = "string.special.symbol";
+pub const TAG: &str = "tag";
+pub const TYPE: &str = "type";
+pub const TYPE_BUILTIN: &str = "type.builtin";
+pub const VARIABLE: &str = "variable";
+pub const VARIABLE_BUILTIN: &str = "variable.builtin";
+pub const VARIABLE_MEMBER: &str = "variable.member";
+pub const VARIABLE_PARAMETER: &str = "variable.parameter";
+pub const SYN_ATTRIBUTE: &str = "syn.attribute";
+pub const SYN_BOOLEAN: &str = "syn.boolean";
+pub const SYN_CARRIAGE_RETURN: &str = "syn.carriage-return";
+pub const SYN_COMMENT: &str = "syn.comment";
+pub const SYN_COMMENT_DOCUMENTATION: &str = "syn.comment.documentation";
+pub const SYN_CONSTANT: &str = "syn.constant";
+pub const SYN_CONSTANT_BUILTIN: &str = "syn.constant.builtin";
+pub const SYN_CONSTRUCTOR: &str = "syn.constructor";
+pub const SYN_CONSTRUCTOR_BUILTIN: &str = "syn.constructor.builtin";
+pub const SYN_EMBEDDED: &str = "syn.embedded";
+pub const SYN_ERROR: &str = "syn.error";
+pub const SYN_ESCAPE: &str = "syn.escape";
+pub const SYN_FUNCTION: &str = "syn.function";
+pub const SYN_FUNCTION_BUILTIN: &str = "syn.function.builtin";
+pub const SYN_KEYWORD: &str = "syn.keyword";
+pub const SYN_MARKUP: &str = "syn.markup";
+pub const SYN_MARKUP_BOLD: &str = "syn.markup.bold";
+pub const SYN_MARKUP_HEADING: &str = "syn.markup.heading";
+pub const SYN_MARKUP_ITALIC: &str = "syn.markup.italic";
+pub const SYN_MARKUP_LINK: &str = "syn.markup.link";
+pub const SYN_MARKUP_LINK_URL: &str = "syn.markup.link.url";
+pub const SYN_MARKUP_LIST: &str = "syn.markup.list";
+pub const SYN_MARKUP_LIST_CHECKED: &str = "syn.markup.list.checked";
+pub const SYN_MARKUP_LIST_NUMBERED: &str = "syn.markup.list.numbered";
+pub const SYN_MARKUP_LIST_UNCHECKED: &str = "syn.markup.list.unchecked";
+pub const SYN_MARKUP_LIST_UNNUMBERED: &str = "syn.markup.list.unnumbered";
+pub const SYN_MARKUP_QUOTE: &str = "syn.markup.quote";
+pub const SYN_MARKUP_RAW: &str = "syn.markup.raw";
+pub const SYN_MARKUP_RAW_BLOCK: &str = "syn.markup.raw.block";
+pub const SYN_MARKUP_RAW_INLINE: &str = "syn.markup.raw.inline";
+pub const SYN_MARKUP_STRIKETHROUGH: &str = "syn.markup.strikethrough";
+pub const SYN_MODULE: &str = "syn.module";
+pub const SYN_NUMBER: &str = "syn.number";
+pub const SYN_OPERATOR: &str = "syn.operator";
+pub const SYN_PROPERTY: &str = "syn.property";
+pub const SYN_PROPERTY_BUILTIN: &str = "syn.property.builtin";
+pub const SYN_PUNCTUATION: &str = "syn.punctuation";
+pub const SYN_PUNCTUATION_BRACKET: &str = "syn.punctuation.bracket";
+pub const SYN_PUNCTUATION_DELIMITER: &str = "syn.punctuation.delimiter";
+pub const SYN_PUNCTUATION_SPECIAL: &str = "syn.punctuation.special";
+pub const SYN_STRING: &str = "syn.string";
+pub const SYN_STRING_ESCAPE: &str = "syn.string.escape";
+pub const SYN_STRING_REGEXP: &str = "syn.string.regexp";
+pub const SYN_STRING_SPECIAL: &str = "syn.string.special";
+pub const SYN_STRING_SPECIAL_SYMBOL: &str = "syn.string.special.symbol";
+pub const SYN_TAG: &str = "syn.tag";
+pub const SYN_TYPE: &str = "syn.type";
+pub const SYN_TYPE_BUILTIN: &str = "syn.type.builtin";
+pub const SYN_VARIABLE: &str = "syn.variable";
+pub const SYN_VARIABLE_BUILTIN: &str = "syn.variable.builtin";
+pub const SYN_VARIABLE_MEMBER: &str = "syn.variable.member";
+pub const SYN_VARIABLE_PARAMETER: &str = "syn.variable.parameter";
 
-pub static SYN_TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
-  Lazy::new(|| {
-    TREESITTER_HIGHLIGHTS
-      .iter()
-      .map(|i| format!("syn.{}", i).to_compact_string())
-      .collect::<FoldSet<CompactString>>()
-  });
+pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<&str>> = Lazy::new(|| {
+  [
+    ATTRIBUTE,
+    BOOLEAN,
+    CARRIAGE_RETURN,
+    COMMENT,
+    COMMENT_DOCUMENTATION,
+    CONSTANT,
+    CONSTANT_BUILTIN,
+    CONSTRUCTOR,
+    CONSTRUCTOR_BUILTIN,
+    EMBEDDED,
+    ERROR,
+    ESCAPE,
+    FUNCTION,
+    FUNCTION_BUILTIN,
+    KEYWORD,
+    MARKUP,
+    MARKUP_BOLD,
+    MARKUP_HEADING,
+    MARKUP_ITALIC,
+    MARKUP_LINK,
+    MARKUP_LINK_URL,
+    MARKUP_LIST,
+    MARKUP_LIST_CHECKED,
+    MARKUP_LIST_NUMBERED,
+    MARKUP_LIST_UNCHECKED,
+    MARKUP_LIST_UNNUMBERED,
+    MARKUP_QUOTE,
+    MARKUP_RAW,
+    MARKUP_RAW_BLOCK,
+    MARKUP_RAW_INLINE,
+    MARKUP_STRIKETHROUGH,
+    MODULE,
+    NUMBER,
+    OPERATOR,
+    PROPERTY,
+    PROPERTY_BUILTIN,
+    PUNCTUATION,
+    PUNCTUATION_BRACKET,
+    PUNCTUATION_DELIMITER,
+    PUNCTUATION_SPECIAL,
+    STRING,
+    STRING_ESCAPE,
+    STRING_REGEXP,
+    STRING_SPECIAL,
+    STRING_SPECIAL_SYMBOL,
+    TAG,
+    TYPE,
+    TYPE_BUILTIN,
+    VARIABLE,
+    VARIABLE_BUILTIN,
+    VARIABLE_MEMBER,
+    VARIABLE_PARAMETER,
+  ]
+  .into_iter()
+  .collect::<FoldSet<&str>>()
+});
+
+pub static SYN_TREESITTER_HIGHLIGHTS: Lazy<FoldSet<&str>> = Lazy::new(|| {
+  [
+    SYN_ATTRIBUTE,
+    SYN_BOOLEAN,
+    SYN_CARRIAGE_RETURN,
+    SYN_COMMENT,
+    SYN_COMMENT_DOCUMENTATION,
+    SYN_CONSTANT,
+    SYN_CONSTANT_BUILTIN,
+    SYN_CONSTRUCTOR,
+    SYN_CONSTRUCTOR_BUILTIN,
+    SYN_EMBEDDED,
+    SYN_ERROR,
+    SYN_ESCAPE,
+    SYN_FUNCTION,
+    SYN_FUNCTION_BUILTIN,
+    SYN_KEYWORD,
+    SYN_MARKUP,
+    SYN_MARKUP_BOLD,
+    SYN_MARKUP_HEADING,
+    SYN_MARKUP_ITALIC,
+    SYN_MARKUP_LINK,
+    SYN_MARKUP_LINK_URL,
+    SYN_MARKUP_LIST,
+    SYN_MARKUP_LIST_CHECKED,
+    SYN_MARKUP_LIST_NUMBERED,
+    SYN_MARKUP_LIST_UNCHECKED,
+    SYN_MARKUP_LIST_UNNUMBERED,
+    SYN_MARKUP_QUOTE,
+    SYN_MARKUP_RAW,
+    SYN_MARKUP_RAW_BLOCK,
+    SYN_MARKUP_RAW_INLINE,
+    SYN_MARKUP_STRIKETHROUGH,
+    SYN_MODULE,
+    SYN_NUMBER,
+    SYN_OPERATOR,
+    SYN_PROPERTY,
+    SYN_PROPERTY_BUILTIN,
+    SYN_PUNCTUATION,
+    SYN_PUNCTUATION_BRACKET,
+    SYN_PUNCTUATION_DELIMITER,
+    SYN_PUNCTUATION_SPECIAL,
+    SYN_STRING,
+    SYN_STRING_ESCAPE,
+    SYN_STRING_REGEXP,
+    SYN_STRING_SPECIAL,
+    SYN_STRING_SPECIAL_SYMBOL,
+    SYN_TAG,
+    SYN_TYPE,
+    SYN_TYPE_BUILTIN,
+    SYN_VARIABLE,
+    SYN_VARIABLE_BUILTIN,
+    SYN_VARIABLE_MEMBER,
+    SYN_VARIABLE_PARAMETER,
+  ]
+  .into_iter()
+  .collect::<FoldSet<&str>>()
+});
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
@@ -383,21 +542,19 @@ pub type ColorSchemeManagerIter<'a> =
 pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
   let config = toml::toml! {
     [syn]
-    attribute = "white"
     boolean = "magenta"
-    comment = "grey"
-    constant = "red"
+    comment = "cyan"
+    constant = "magenta"
     constructor = "cyan"
     embedded = "cyan"
     error = "red"
     function = "green"
     keyword = "yellow"
     markup = "yellow"
-    module = "red"
-    number = "red"
+    module = "magenta"
+    number = "magenta"
     operator = "yellow"
-    property = "cyan"
-    string = "red"
+    string = "magenta"
     tag = "magenta"
     type = "green"
     variable = "cyan"

@@ -141,11 +141,13 @@ opt-level = 1
 [profile.nightly]
 inherits = "release"
 debug = true
+strip = true
+panic = "unwind"
 
 # Release
 [profile.release]
 lto = true
-strip = true
-incremental = true
 codegen-units = 1
 opt-level = "s"
+strip = "symbols"
+panic = "abort"

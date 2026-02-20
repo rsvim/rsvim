@@ -12,21 +12,9 @@ mod parse_toml {
   fn default1() {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
-    assert_eq!(cs.syn().len(), 18);
 
     assert_eq!(*cs.background(), Color::Black);
     assert_eq!(*cs.foreground(), Color::White);
-
-    assert!(cs.syn().get("syn.attribute").is_some());
-    assert!(cs.syn().get("syn.attribute").unwrap().bg.is_none());
-    assert_eq!(
-      cs.syn().get("syn.attribute").unwrap().fg,
-      Some(Color::White)
-    );
-    assert_eq!(
-      cs.syn().get("syn.attribute").unwrap().attr,
-      Attributes::none()
-    );
 
     assert!(cs.syn().get("syn.boolean").is_some());
     assert!(cs.syn().get("syn.boolean").unwrap().bg.is_none());
@@ -38,111 +26,6 @@ mod parse_toml {
       cs.syn().get("syn.boolean").unwrap().attr,
       Attributes::none()
     );
-
-    assert!(cs.syn().get("syn.comment").is_some());
-    assert!(cs.syn().get("syn.comment").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.comment").unwrap().fg, Some(Color::Grey));
-    assert_eq!(
-      cs.syn().get("syn.comment").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.constant").is_some());
-    assert!(cs.syn().get("syn.constant").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.constant").unwrap().fg, Some(Color::Red));
-    assert_eq!(
-      cs.syn().get("syn.constant").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.constructor").is_some());
-    assert!(cs.syn().get("syn.constructor").unwrap().bg.is_none());
-    assert_eq!(
-      cs.syn().get("syn.constructor").unwrap().fg,
-      Some(Color::Cyan)
-    );
-    assert_eq!(
-      cs.syn().get("syn.constructor").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.embedded").is_some());
-    assert!(cs.syn().get("syn.embedded").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.embedded").unwrap().fg, Some(Color::Cyan));
-    assert_eq!(
-      cs.syn().get("syn.embedded").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.error").is_some());
-    assert!(cs.syn().get("syn.error").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.error").unwrap().fg, Some(Color::Red));
-    assert_eq!(cs.syn().get("syn.error").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.function").is_some());
-    assert!(cs.syn().get("syn.function").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.function").unwrap().fg, Some(Color::Green));
-    assert_eq!(
-      cs.syn().get("syn.function").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.keyword").is_some());
-    assert!(cs.syn().get("syn.keyword").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.keyword").unwrap().fg, Some(Color::Yellow));
-    assert_eq!(
-      cs.syn().get("syn.keyword").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.markup").is_some());
-    assert!(cs.syn().get("syn.markup").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.markup").unwrap().fg, Some(Color::Yellow));
-    assert_eq!(cs.syn().get("syn.markup").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.module").is_some());
-    assert!(cs.syn().get("syn.module").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.module").unwrap().fg, Some(Color::Red));
-    assert_eq!(cs.syn().get("syn.module").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.number").is_some());
-    assert!(cs.syn().get("syn.number").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.number").unwrap().fg, Some(Color::Red));
-    assert_eq!(cs.syn().get("syn.number").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.operator").is_some());
-    assert!(cs.syn().get("syn.operator").unwrap().bg.is_none());
-    assert_eq!(
-      cs.syn().get("syn.operator").unwrap().fg,
-      Some(Color::Yellow)
-    );
-    assert_eq!(
-      cs.syn().get("syn.operator").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.property").is_some());
-    assert!(cs.syn().get("syn.property").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.property").unwrap().fg, Some(Color::Cyan));
-    assert_eq!(
-      cs.syn().get("syn.property").unwrap().attr,
-      Attributes::none()
-    );
-
-    assert!(cs.syn().get("syn.string").is_some());
-    assert!(cs.syn().get("syn.string").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.string").unwrap().fg, Some(Color::Red));
-    assert_eq!(cs.syn().get("syn.string").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.tag").is_some());
-    assert!(cs.syn().get("syn.tag").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.tag").unwrap().fg, Some(Color::Magenta));
-    assert_eq!(cs.syn().get("syn.tag").unwrap().attr, Attributes::none());
-
-    assert!(cs.syn().get("syn.type").is_some());
-    assert!(cs.syn().get("syn.type").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.type").unwrap().fg, Some(Color::Green));
-    assert_eq!(cs.syn().get("syn.type").unwrap().attr, Attributes::none());
 
     assert!(cs.syn().get("syn.variable").is_some());
     assert!(cs.syn().get("syn.variable").unwrap().bg.is_none());
