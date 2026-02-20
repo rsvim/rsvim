@@ -8,9 +8,16 @@ use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use once_cell::sync::Lazy;
-use std::str::FromStr;
 
-pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
+pub const FOREGROUND: &str = "foreground";
+pub const BACKGROUND: &str = "background";
+pub const UI_FOREGROUND: &str = "ui.foreground";
+pub const UI_BACKGROUND: &str = "ui.background";
+pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
+pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
+pub const DEFAULT: &str = "default";
+
+pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
   Lazy::new(|| {
     vec![
       "attribute",
@@ -71,6 +78,14 @@ pub static SYNTAX_HIGHLIGHT_NAMES: Lazy<FoldSet<CompactString>> =
     .collect::<FoldSet<CompactString>>()
   });
 
+pub static SYN_TREESITTER_HIGHLIGHTS: Lazy<FoldSet<CompactString>> =
+  Lazy::new(|| {
+    TREESITTER_HIGHLIGHTS
+      .iter()
+      .map(|i| format!("syn.{}", i).to_compact_string())
+      .collect::<FoldSet<CompactString>>()
+  });
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
@@ -92,18 +107,19 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Maps ID => syntax colors
-  syntax: FoldMap<CompactString, Highlight>,
+  // Plain colors
+  foreground: Color,
+  background: Color,
 
-  // Maps ID => UI colors
-  ui: FoldMap<CompactString, Highlight>,
+  // Syntax colors
+  syn: FoldMap<CompactString, Highlight>,
 }
 
-fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
+fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, k).to_compact_string(),
+        format!("{}{}", prefix, key).to_compact_string(),
       )
     })
   };
@@ -126,10 +142,9 @@ fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
     let b = b | (b << 4);
     Ok(Color::Rgb { r, g, b })
   } else {
-    // Try parse color name
-    Color::from_str(s).map_err(|e| {
+    Color::try_from(s).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, k).to_compact_string(),
+        format!("{}{}", prefix, key).to_compact_string(),
       )
     })
   }
@@ -138,20 +153,22 @@ fn parse_code(prefix: &str, k: &str, s: &str) -> TheResult<Color> {
 fn parse_palette(
   colorscheme: &toml::Table,
 ) -> TheResult<FoldMap<CompactString, Color>> {
+  let the_err = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("palette.{}", k).to_compact_string())
+  };
+
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
-  if let Some(palette_value) = colorscheme.get("palette")
-    && let Some(palette) = palette_value.as_table()
+  if let Some(palette) = colorscheme.get("palette")
+    && let Some(palette_table) = palette.as_table()
   {
-    for (k, v) in palette.iter() {
+    for (k, v) in palette_table.iter() {
       match v.as_str() {
         Some(val) => {
-          let code = parse_code("palette.", k, val)?;
+          let code = parse_code(val, "palette.", k)?;
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("palette.{}", k.as_str()).to_compact_string(),
-          ));
+          return Err(the_err(k));
         }
       }
     }
@@ -159,36 +176,68 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_hl(
+fn parse_plain_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
-  group: &str,
-) -> TheResult<FoldMap<CompactString, Highlight>> {
-  debug_assert!(group == "syn" || group == "ui");
-  let group_dots: FoldMap<&str, &str> =
-    vec![("syn", "syn."), ("ui", "ui.")].into_iter().collect();
-  let dot = group_dots[group];
+) -> TheResult<FoldMap<CompactString, Color>> {
+  let plain_colors = [FOREGROUND, BACKGROUND]
+    .into_iter()
+    .collect::<FoldSet<&str>>();
 
-  let the_err = |k| {
-    TheErr::LoadColorSchemeFailed(format!("{}{}", dot, k).to_compact_string())
+  let err = |k: &str| {
+    Err(TheErr::LoadColorSchemeFailed(
+      format!("ui.{}", k).to_compact_string(),
+    ))
+  };
+
+  let mut result: FoldMap<CompactString, Color> = FoldMap::new();
+  if let Some(ui) = colorscheme.get("ui")
+    && let Some(ui_table) = ui.as_table()
+  {
+    for (key, val) in ui_table.iter() {
+      if plain_colors.contains(key.as_str()) {
+        if val.is_str() {
+          let value = val.as_str().unwrap();
+          let value = match palette.get(value) {
+            Some(code) => *code,
+            None => parse_code(value, "ui.", key)?,
+          };
+          let id = format!("ui.{}", key).to_compact_string();
+          result.insert(id, value);
+        } else {
+          return err(key);
+        }
+      }
+    }
+  }
+
+  Ok(result)
+}
+
+fn parse_syntax_highlights(
+  colorscheme: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+) -> TheResult<FoldMap<CompactString, Highlight>> {
+  let err = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("syn.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(group_value) = colorscheme.get(group)
-    && let Some(group_table) = group_value.as_table()
+  if let Some(syn) = colorscheme.get("syn")
+    && let Some(syn_table) = syn.as_table()
   {
-    for (key, val) in group_table.iter() {
-      let id = format!("{}{}", dot, key.as_str()).to_compact_string();
+    for (key, val) in syn_table.iter() {
+      let id = format!("syn.{}", key).to_compact_string();
       if val.is_table() {
-        let hl_table = val.as_table().unwrap();
+        let val_table = val.as_table().unwrap();
 
         let parse_color = |x| -> TheResult<Option<Color>> {
-          match hl_table.get(x) {
+          match val_table.get(x) {
             Some(x) => {
-              let x = x.as_str().ok_or(the_err(key))?;
+              let x = x.as_str().ok_or(err(key))?;
               match palette.get(x) {
                 Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code(dot, key, x)?)),
+                None => Ok(Some(parse_code(x, "syn.", key)?)),
               }
             }
             None => Ok(None),
@@ -199,11 +248,8 @@ fn parse_hl(
         let bg = parse_color("bg")?;
 
         let parse_bool = |x| -> TheResult<bool> {
-          match hl_table.get(x) {
-            Some(x) => {
-              let x = x.as_bool().ok_or(the_err(key))?;
-              Ok(x)
-            }
+          match val_table.get(x) {
+            Some(x) => Ok(x.as_bool().ok_or(err(key))?),
             None => Ok(false),
           }
         };
@@ -228,7 +274,7 @@ fn parse_hl(
         let fg = val.as_str().unwrap();
         let fg = match palette.get(fg) {
           Some(fg) => Some(*fg),
-          None => Some(parse_code(dot, key, fg)?),
+          None => Some(parse_code(fg, "syn.", key)?),
         };
 
         let bg = None;
@@ -236,19 +282,21 @@ fn parse_hl(
 
         result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
-        return Err(the_err(key));
+        return Err(err(key));
       }
     }
   }
+
   Ok(result)
 }
 
 impl ColorScheme {
-  pub fn from_empty(name: CompactString) -> Self {
+  pub fn from_empty(name: &str) -> Self {
     Self {
-      name,
-      syntax: FoldMap::new(),
-      ui: FoldMap::new(),
+      name: name.to_compact_string(),
+      foreground: DEFAULT_FOREGROUND_COLOR,
+      background: DEFAULT_BACKGROUND_COLOR,
+      syn: FoldMap::new(),
     }
   }
 
@@ -266,46 +314,50 @@ impl ColorScheme {
   /// black = "#000000"
   /// yellow = "#ffff00"
   /// ```
-  pub fn from_toml(
-    name: CompactString,
-    colorscheme: toml::Table,
-  ) -> TheResult<Self> {
+  pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let syntax = parse_hl(&colorscheme, &palette, "syn")?;
-    let ui = parse_hl(&colorscheme, &palette, "ui")?;
-    Ok(Self { name, syntax, ui })
+    let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
+    let syn = parse_syntax_highlights(&colorscheme, &palette)?;
+
+    Ok(Self {
+      name: name.to_compact_string(),
+      foreground: *plain_colors
+        .get(UI_FOREGROUND)
+        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
+      background: *plain_colors
+        .get(UI_BACKGROUND)
+        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
+      syn,
+    })
   }
 
   pub fn name(&self) -> &CompactString {
     &self.name
   }
 
-  pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
+  pub fn foreground(&self) -> &Color {
+    &self.foreground
+  }
+
+  pub fn set_foreground(&mut self, value: Color) {
+    self.foreground = value;
+  }
+
+  pub fn background(&self) -> &Color {
+    &self.background
+  }
+
+  pub fn set_background(&mut self, value: Color) {
+    self.background = value;
+  }
+
+  pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
-      for k in self.syntax.keys() {
+      for k in self.syn.keys() {
         debug_assert!(k.starts_with("syn."));
       }
     }
-    &self.syntax
-  }
-
-  pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
-    if cfg!(debug_assertions) {
-      for k in self.ui.keys() {
-        debug_assert!(k.starts_with("ui."));
-      }
-    }
-    &self.ui
-  }
-
-  pub fn get(&self, id: &str) -> Option<&Highlight> {
-    if id.starts_with("syn.") {
-      self.syntax.get(id)
-    } else if id.starts_with("ui.") {
-      self.ui.get(id)
-    } else {
-      None
-    }
+    &self.syn
   }
 }
 
@@ -328,11 +380,41 @@ pub type ColorSchemeManagerValues<'a> =
 pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
 
+pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
+  let config = toml::toml! {
+    [syn]
+    attribute = "white"
+    boolean = "magenta"
+    comment = "grey"
+    constant = "red"
+    constructor = "cyan"
+    embedded = "cyan"
+    error = "red"
+    function = "green"
+    keyword = "yellow"
+    markup = "yellow"
+    module = "red"
+    number = "red"
+    operator = "yellow"
+    property = "cyan"
+    string = "red"
+    tag = "magenta"
+    type = "green"
+    variable = "cyan"
+
+    [ui]
+    foreground = "white"
+    background = "black"
+  };
+  ColorScheme::from_toml("default", config).unwrap()
+});
+
 impl ColorSchemeManager {
   pub fn new() -> Self {
-    Self {
-      highlights: FoldMap::new(),
-    }
+    let mut highlights = FoldMap::new();
+    highlights
+      .insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
+    Self { highlights }
   }
 
   pub fn is_empty(&self) -> bool {
@@ -343,11 +425,11 @@ impl ColorSchemeManager {
     self.highlights.len()
   }
 
-  pub fn get(&self, id: &CompactString) -> Option<&ColorScheme> {
+  pub fn get(&self, id: &str) -> Option<&ColorScheme> {
     self.highlights.get(id)
   }
 
-  pub fn contains_key(&self, id: &CompactString) -> bool {
+  pub fn contains_key(&self, id: &str) -> bool {
     self.highlights.contains_key(id)
   }
 
@@ -359,7 +441,7 @@ impl ColorSchemeManager {
     self.highlights.insert(key, value)
   }
 
-  pub fn remove(&mut self, id: &CompactString) -> Option<ColorScheme> {
+  pub fn remove(&mut self, id: &str) -> Option<ColorScheme> {
     self.highlights.remove(id)
   }
 
