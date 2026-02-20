@@ -227,8 +227,8 @@ fn parse_syn_highlights(
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(syn_value) = colorscheme.get("syn")
-    && let Some(syn_table) = syn_value.as_table()
+  if let Some(syn) = colorscheme.get("syn")
+    && let Some(syn_table) = syn.as_table()
   {
     for (key, val) in syn_table.iter() {
       let id = format!("syn.{}", key).to_compact_string();
