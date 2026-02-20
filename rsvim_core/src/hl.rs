@@ -111,7 +111,7 @@ pub struct ColorScheme {
   background: Color,
 
   // Syntax colors
-  syntax: FoldMap<CompactString, Highlight>,
+  syn: FoldMap<CompactString, Highlight>,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
@@ -211,7 +211,7 @@ fn parse_plain_colors(
   Ok(result)
 }
 
-fn parse_syn_highlights(
+fn parse_syntax_highlights(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
@@ -293,7 +293,7 @@ impl ColorScheme {
       name: name.to_compact_string(),
       foreground: DEFAULT_FOREGROUND_COLOR,
       background: DEFAULT_BACKGROUND_COLOR,
-      syntax: FoldMap::new(),
+      syn: FoldMap::new(),
     }
   }
 
@@ -314,7 +314,7 @@ impl ColorScheme {
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
-    let syntax = parse_syn_highlights(&colorscheme, &palette)?;
+    let syn = parse_syntax_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
@@ -324,7 +324,7 @@ impl ColorScheme {
       background: *plain_colors
         .get(UI_BACKGROUND)
         .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
-      syntax,
+      syn,
     })
   }
 
@@ -348,26 +348,16 @@ impl ColorScheme {
     self.background = value;
   }
 
-  pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
+  pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
-      for k in self.syntax.keys() {
+      for k in self.syn.keys() {
         debug_assert!(k.starts_with("syn."));
       }
     }
-    &self.syntax
+    &self.syn
   }
 
-  pub fn get_raw(&self, id: &str) -> Option<&Highlight> {
-    if id.starts_with("syn.") {
-      self.syntax.get(id)
-    } else if id.starts_with("ui.") {
-      self.ui.get(id)
-    } else {
-      None
-    }
-  }
-
-  pub fn get_highlight(&self, id: &str) -> Option<Highlight> {
+  pub fn get_syn_highlight(&self, id: &str) -> Option<Highlight> {
     let (_foreground, _background, ui_foreground, ui_background, _plains) =
       plain_keys();
 
@@ -383,7 +373,7 @@ impl ColorScheme {
     };
 
     if id.starts_with("syn.") {
-      self.syntax.get(id).map(&clone_hl)
+      self.syn.get(id).map(&clone_hl)
     } else if id.starts_with("ui.") {
       self.ui.get(id).map(&clone_hl)
     } else {
