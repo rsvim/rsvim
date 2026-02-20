@@ -91,14 +91,12 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
+  // Plain colors
+  foreground: Color,
+  background: Color,
+
   // Maps ID => syntax colors
   syntax: FoldMap<CompactString, Highlight>,
-
-  // Maps ID => UI colors
-  ui: FoldMap<CompactString, Highlight>,
-
-  // Map ID => plain colors
-  plain: FoldMap<CompactString, Color>,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
@@ -142,10 +140,10 @@ fn parse_palette(
   };
 
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
-  if let Some(palette_value) = colorscheme.get("palette")
-    && let Some(palette) = palette_value.as_table()
+  if let Some(palette) = colorscheme.get("palette")
+    && let Some(palette_table) = palette.as_table()
   {
-    for (k, v) in palette.iter() {
+    for (k, v) in palette_table.iter() {
       match v.as_str() {
         Some(val) => {
           let code = parse_code(val, "palette.", k)?;
