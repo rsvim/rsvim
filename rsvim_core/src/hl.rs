@@ -332,6 +332,22 @@ impl ColorScheme {
     &self.name
   }
 
+  pub fn foreground(&self) -> &Color {
+    &self.foreground
+  }
+
+  pub fn set_foreground(&mut self, value: Color) {
+    self.foreground = value;
+  }
+
+  pub fn background(&self) -> &Color {
+    &self.background
+  }
+
+  pub fn set_background(&mut self, value: Color) {
+    self.background = value;
+  }
+
   pub fn syntax(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.syntax.keys() {
@@ -339,15 +355,6 @@ impl ColorScheme {
       }
     }
     &self.syntax
-  }
-
-  pub fn ui(&self) -> &FoldMap<CompactString, Highlight> {
-    if cfg!(debug_assertions) {
-      for k in self.ui.keys() {
-        debug_assert!(k.starts_with("ui."));
-      }
-    }
-    &self.ui
   }
 
   pub fn get_raw(&self, id: &str) -> Option<&Highlight> {
