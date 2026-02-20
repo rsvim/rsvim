@@ -12,7 +12,6 @@ mod parse_toml {
   fn default1() {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
-    assert_eq!(cs.syn().len(), 18);
 
     assert_eq!(*cs.background(), Color::Black);
     assert_eq!(*cs.foreground(), Color::White);

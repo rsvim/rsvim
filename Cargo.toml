@@ -142,12 +142,12 @@ opt-level = 1
 inherits = "release"
 debug = true
 strip = true
-panic = "unwind"
 
 # Release
 [profile.release]
 lto = true
-strip = "symbols"
 codegen-units = 1
 opt-level = "s"
-panic = "abort"
+debug = "line-tables-only"
+strip = "debuginfo"
+split-debuginfo = "packed"
