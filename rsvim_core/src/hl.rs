@@ -208,13 +208,6 @@ fn parse_plain_colors(
     }
   }
 
-  if !result.contains_key(UI_FOREGROUND) {
-    return err(FOREGROUND);
-  }
-  if !result.contains_key(UI_BACKGROUND) {
-    return err(BACKGROUND);
-  }
-
   Ok(result)
 }
 
@@ -298,6 +291,8 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
+      foreground: DEFAULT_FOREGROUND_COLOR,
+      background: DEFAULT_BACKGROUND_COLOR,
       syntax: FoldMap::new(),
     }
   }
@@ -323,8 +318,12 @@ impl ColorScheme {
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *plain_colors.get(UI_FOREGROUND).unwrap(),
-      background: *plain_colors.get(UI_BACKGROUND).unwrap(),
+      foreground: *plain_colors
+        .get(UI_FOREGROUND)
+        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
+      background: *plain_colors
+        .get(UI_BACKGROUND)
+        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
       syntax,
     })
   }
