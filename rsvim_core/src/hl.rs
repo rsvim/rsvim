@@ -356,34 +356,6 @@ impl ColorScheme {
     }
     &self.syn
   }
-
-  pub fn get_syn_highlight(&self, id: &str) -> Option<Highlight> {
-    let (_foreground, _background, ui_foreground, ui_background, _plains) =
-      plain_keys();
-
-    let clone_hl = |h: &Highlight| {
-      let mut hl = h.clone();
-      if hl.fg.is_none() {
-        hl.fg = Some(*self.plain.get(ui_foreground).unwrap());
-      }
-      if hl.bg.is_none() {
-        hl.bg = Some(*self.plain.get(ui_background).unwrap());
-      }
-      hl
-    };
-
-    if id.starts_with("syn.") {
-      self.syn.get(id).map(&clone_hl)
-    } else if id.starts_with("ui.") {
-      self.ui.get(id).map(&clone_hl)
-    } else {
-      None
-    }
-  }
-
-  pub fn get_plain(&self, id: &str) -> Option<Color> {
-    self.plain.get(id).cloned()
-  }
 }
 
 #[derive(Debug)]
