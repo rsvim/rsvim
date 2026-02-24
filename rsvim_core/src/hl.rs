@@ -357,12 +357,13 @@ fn parse_ui_colors(
 fn parse_scope(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
-) -> TheResult<FoldMap<CompactString, Highlight>> {
+) -> TheResult<toml::Table> {
   let err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
   };
 
-  let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
+  let mut result =
+    toml::Table::with_capacity(colorscheme.len().saturating_sub(palette.len()));
   if let Some(scope) = colorscheme.get("scope")
     && let Some(scope_table) = scope.as_table()
   {
