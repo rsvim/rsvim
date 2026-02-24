@@ -48,9 +48,16 @@
 //!     default it is `false`.
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
-//! background text colors.
+//! background text colors. There're some default configs:
 //!
-//! `palette` section is a helper section for `scope` and `ui` section,
+//! - `ui.foreground`: uses `white` by default.
+//! - `ui.background`: uses `black` by default.
+//!
+//! `palette` section is a helper section for defining `scope` and `ui` section
+//! more easily. By adding a `key=value` pair in palette section, you can use
+//! the `key` as a color name in `scope` and `ui` section, syntax highlighting
+//! parser will lookup for the real color `value` behind the `key` when loading
+//! the colorscheme config.
 
 use crate::prelude::*;
 use compact_str::CompactString;
