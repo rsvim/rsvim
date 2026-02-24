@@ -254,7 +254,7 @@ impl SyntaxManager {
       ),
     ];
 
-    for lang_binding in language_bindings.iter() {
+    for lang_binding in language_bindings {
       for lang_ext in lang_binding.3.iter() {
         it.insert_file_ext(
           lang_binding.0.to_compact_string(),
