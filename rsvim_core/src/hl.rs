@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Highlight and ColorScheme.
 
 use crate::prelude::*;

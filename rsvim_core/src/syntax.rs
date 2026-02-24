@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
