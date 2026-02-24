@@ -129,14 +129,14 @@ impl Debug for Syntax {
 impl Syntax {
   pub fn new(
     lang: &Language,
-    highlight_query: Option<&str>,
+    highlight_query: Option<&String>,
   ) -> Result<Self, LanguageError> {
     let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
     let highlight_query = match highlight_query {
-      Some(source) => Query::new(lang, source).map(|q| Some(q)).unwrap_or(None),
+      Some(source) => Query::new(lang, source).map(Some).unwrap_or(None),
       None => None,
     };
 
@@ -337,6 +337,14 @@ impl SyntaxManager {
       .ext2id
       .get(ext)
       .map(|id| self.get_lang(id))
+      .unwrap_or(None)
+  }
+
+  pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
+    self
+      .ext2id
+      .get(ext)
+      .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
   }
 }

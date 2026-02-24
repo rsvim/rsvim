@@ -373,7 +373,10 @@ impl BufferManager {
         file_extension,
         lang.name()
       );
-      match Syntax::new(lang) {
+      let highlight_query = self
+        .syntax_manager
+        .get_highlight_query_by_ext(&ext.to_string_lossy());
+      match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
         Err(e) => Err(TheErr::LoadSyntaxFailed(
           ext.to_string_lossy().to_compact_string(),
