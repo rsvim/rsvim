@@ -93,11 +93,13 @@ pub struct Syntax {
   pending: Vec<SyntaxEdit>,
 
   // Whether the parser is already parsing the buffer text in a background
-  // task. If true, it means the `parser` is been locked by the running task.
+  // task. If true, it means the `parser` is parsing in a background task.
   //
-  // NOTE: At a certain timing, only 1 background task is running to parse a
-  // buffer. New editings will be add to the `pending` job queue and wait for
-  // the **current** running task complete, then starts the next new task.
+  // NOTE: At a certain time, only 1 background task is parsing a buffer, there
+  // will be no multiple background tasks parsing the same buffer
+  // simultaneously, for data safety reason. New editings will be add to the
+  // `pending` job queue and wait for the **current** running task complete,
+  // then starts the next new task.
   parsing: bool,
 }
 
