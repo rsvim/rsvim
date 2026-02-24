@@ -239,19 +239,19 @@ impl SyntaxManager {
         "rust",
         tree_sitter_rust::LANGUAGE,
         Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
-        ["rs"],
+        vec!["rs"],
       ),
       (
         "markdown",
         tree_sitter_md::LANGUAGE,
         Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
-        ["md"],
+        vec!["md", "markdown"],
       ),
       (
         "toml",
         tree_sitter_toml_ng::LANGUAGE,
         Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
-        ["toml"],
+        vec!["toml"],
       ),
     ];
 
