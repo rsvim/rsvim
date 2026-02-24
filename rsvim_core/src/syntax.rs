@@ -204,7 +204,7 @@ impl Syntax {
 
 pub struct SyntaxManager {
   languages: FoldMap<CompactString, Language>,
-  highlight_queries: FoldMap<CompactString, String>,
+  highlight_queries: FoldMap<CompactString, &'static str>,
 
   // Maps language ID to file extensions
   id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
@@ -232,15 +232,42 @@ impl SyntaxManager {
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
     };
-    it.languages.insert(
-      "rust".to_compact_string(),
-      tree_sitter_rust::LANGUAGE.into(),
-    );
-    it.highlight_queries.insert(
-      "rust".to_compact_string(),
-      tree_sitter_rust::HIGHLIGHTS_QUERY.to_string(),
-    );
-    it.insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
+
+    let language_bindings = [
+      (
+        "rust",
+        tree_sitter_rust::LANGUAGE,
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
+        ["rs"],
+      ),
+      (
+        "markdown",
+        tree_sitter_md::LANGUAGE,
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
+        ["md"],
+      ),
+      (
+        "toml",
+        tree_sitter_toml_ng::LANGUAGE,
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
+        ["toml"],
+      ),
+    ];
+
+    for lang_binding in language_bindings.iter() {
+      for lang_ext in lang_binding.3.iter() {
+        it.insert_file_ext(
+          lang_binding.0.to_compact_string(),
+          lang_ext.to_compact_string(),
+        );
+      }
+      it.insert_lang(
+        lang_binding.0.to_compact_string(),
+        lang_binding.1.into(),
+        lang_binding.2,
+      );
+    }
+
     it
   }
 
@@ -291,6 +318,9 @@ impl SyntaxManager {
     highlight_query: Option<&str>,
   ) {
     self.languages.insert(id.clone(), lang);
+    if let Some(hl_query) = highlight_query {
+      self.highlight_queries.insert(id.clone(), hl_query);
+    }
     self.id2ext.entry(id.clone()).or_default();
   }
 
