@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_variables)]
+#![allow(dead_code)]
 //! Highlight and ColorScheme.
 
 use crate::prelude::*;
@@ -278,7 +278,8 @@ fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, key).to_compact_string(),
+        format!("{}{}: {:?}", prefix, key, e).to_compact_string(),
+        e,
       )
     })
   };
@@ -303,7 +304,7 @@ fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   } else {
     Color::try_from(s).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}", prefix, key).to_compact_string(),
+        format!("{}{}: {:?}", prefix, key, e).to_compact_string(),
       )
     })
   }
