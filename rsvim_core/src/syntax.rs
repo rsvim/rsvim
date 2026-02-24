@@ -204,7 +204,7 @@ impl Syntax {
 
 pub struct SyntaxManager {
   languages: FoldMap<CompactString, Language>,
-  highlight_queries: FoldMap<CompactString, &'static str>,
+  highlight_queries: FoldMap<CompactString, String>,
 
   // Maps language ID to file extensions
   id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
@@ -237,19 +237,19 @@ impl SyntaxManager {
       (
         "rust",
         tree_sitter_rust::LANGUAGE,
-        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY.to_string()),
         ["rs"],
       ),
       (
         "markdown",
         tree_sitter_md::LANGUAGE,
-        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string()),
         ["md"],
       ),
       (
         "toml",
         tree_sitter_toml_ng::LANGUAGE,
-        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string()),
         ["toml"],
       ),
     ];
@@ -315,7 +315,7 @@ impl SyntaxManager {
     &mut self,
     id: CompactString,
     lang: Language,
-    highlight_query: Option<&str>,
+    highlight_query: Option<String>,
   ) {
     self.languages.insert(id.clone(), lang);
     if let Some(hl_query) = highlight_query {
@@ -328,8 +328,8 @@ impl SyntaxManager {
     self.languages.get(id)
   }
 
-  pub fn get_highlight_query(&self, id: &str) -> Option<&str> {
-    self.languages.get(id)
+  pub fn get_highlight_query(&self, id: &str) -> Option<&String> {
+    self.highlight_queries.get(id)
   }
 
   pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
