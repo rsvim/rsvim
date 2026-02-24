@@ -16,25 +16,25 @@ mod parse_toml {
     assert_eq!(*cs.background(), Color::Black);
     assert_eq!(*cs.foreground(), Color::White);
 
-    assert!(cs.scope().get("syn.boolean").is_some());
-    assert!(cs.scope().get("syn.boolean").unwrap().bg.is_none());
+    assert!(cs.scope().get("scope.boolean").is_some());
+    assert!(cs.scope().get("scope.boolean").unwrap().bg.is_none());
     assert_eq!(
-      cs.scope().get("syn.boolean").unwrap().fg,
+      cs.scope().get("scope.boolean").unwrap().fg,
       Some(Color::Magenta)
     );
     assert_eq!(
-      cs.scope().get("syn.boolean").unwrap().attr,
+      cs.scope().get("scope.boolean").unwrap().attr,
       Attributes::none()
     );
 
-    assert!(cs.scope().get("syn.variable").is_some());
-    assert!(cs.scope().get("syn.variable").unwrap().bg.is_none());
+    assert!(cs.scope().get("scope.variable").is_some());
+    assert!(cs.scope().get("scope.variable").unwrap().bg.is_none());
     assert_eq!(
-      cs.scope().get("syn.variable").unwrap().fg,
+      cs.scope().get("scope.variable").unwrap().fg,
       Some(Color::Cyan)
     );
     assert_eq!(
-      cs.scope().get("syn.variable").unwrap().attr,
+      cs.scope().get("scope.variable").unwrap().attr,
       Attributes::none()
     );
   }
@@ -65,20 +65,20 @@ grey = "#c0c0c0"
     let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
     assert_eq!(cs.scope().len(), 4);
 
-    let syntax_expects = [
+    let scope_expects = [
       (
-        "syn.attribute",
+        "scope.attribute",
         Some(Highlight {
-          id: "syn.attribute".to_compact_string(),
+          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: None,
           attr: Attributes::none(),
         }),
       ),
       (
-        "syn.boolean",
+        "scope.boolean",
         Some(Highlight {
-          id: "syn.boolean".to_compact_string(),
+          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -88,11 +88,11 @@ grey = "#c0c0c0"
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("syn.carriage-return", None),
+      ("scope.carriage-return", None),
       (
-        "syn.comment",
+        "scope.comment",
         Some(Highlight {
-          id: "syn.comment".to_compact_string(),
+          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -110,9 +110,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "syn.keyword",
+        "scope.keyword",
         Some(Highlight {
-          id: "syn.keyword".to_compact_string(),
+          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -127,7 +127,7 @@ grey = "#c0c0c0"
         }),
       ),
     ];
-    for expect in syntax_expects.iter() {
+    for expect in scope_expects.iter() {
       assert_eq!(cs.scope().get(expect.0), expect.1.as_ref());
     }
 
@@ -160,30 +160,30 @@ background = "#000000"
     let cs = ColorScheme::from_toml("toml2", colorscheme_table).unwrap();
     assert_eq!(cs.scope().len(), 4);
 
-    let syntax_expects = [
+    let scope_expects = [
       (
-        "syn.attribute",
+        "scope.attribute",
         Some(Highlight {
-          id: "syn.attribute".to_compact_string(),
+          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: None,
           attr: Attributes::none(),
         }),
       ),
       (
-        "syn.boolean",
+        "scope.boolean",
         Some(Highlight {
-          id: "syn.boolean".to_compact_string(),
+          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Yellow),
           bg: None,
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("syn.carriage-return", None),
+      ("scope.carriage-return", None),
       (
-        "syn.comment",
+        "scope.comment",
         Some(Highlight {
-          id: "syn.comment".to_compact_string(),
+          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -201,16 +201,16 @@ background = "#000000"
         }),
       ),
       (
-        "syn.keyword",
+        "scope.keyword",
         Some(Highlight {
-          id: "syn.keyword".to_compact_string(),
+          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Red),
           bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
         }),
       ),
     ];
-    for expect in syntax_expects.iter() {
+    for expect in scope_expects.iter() {
       assert_eq!(cs.scope().get(expect.0), expect.1.as_ref());
     }
 
