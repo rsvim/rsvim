@@ -76,9 +76,9 @@
 //! }
 //! ```
 //!
-//! If you want to overwrite highlightings for ruby in your colorscheme, you
-//! need to add a subsection `scope.source.ruby`, the `source.ruby` matches the
-//! `"scope": "source.ruby"` in the `tree-sitter.json` file.
+//! To overwrite highlightings for ruby in your colorscheme, you need to add a
+//! subsection `scope.source.ruby`, the `source.ruby` matches the
+//! line `"scope": "source.ruby"` in the `tree-sitter.json` file.
 //!
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
