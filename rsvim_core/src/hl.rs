@@ -444,10 +444,10 @@ impl ColorScheme {
     self.background = value;
   }
 
-  pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
+  pub fn scope(&self) -> &FoldMap<CompactString, Highlight> {
     if cfg!(debug_assertions) {
       for k in self.scope.keys() {
-        debug_assert!(k.starts_with("syn."));
+        debug_assert!(k.starts_with("scope."));
       }
     }
     &self.scope
