@@ -471,7 +471,7 @@ pub type ColorSchemeManagerIter<'a> =
 
 pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
   let config = toml::toml! {
-    [syn]
+    [scope]
     boolean = "magenta"
     comment = "cyan"
     constant = "magenta"
@@ -486,7 +486,7 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     operator = "yellow"
     string = "magenta"
     tag = "magenta"
-    type = "green"
+    "type" = "green"
     variable = "cyan"
 
     [ui]
