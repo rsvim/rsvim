@@ -14,6 +14,7 @@ use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Point;
+use tree_sitter::Query;
 use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -76,6 +77,9 @@ pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 
 /// Buffer syntax.
 pub struct Syntax {
+  // Highlight query
+  highlight_query: Option<Query>,
+
   // Parsed syntax tree
   tree: Option<Tree>,
 
@@ -123,12 +127,21 @@ impl Debug for Syntax {
 }
 
 impl Syntax {
-  pub fn new(lang: &Language) -> Result<Self, LanguageError> {
+  pub fn new(
+    lang: &Language,
+    highlight_query: Option<&str>,
+  ) -> Result<Self, LanguageError> {
     let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
+    let highlight_query = match highlight_query {
+      Some(source) => Query::new(lang, source).map(|q| Some(q)).unwrap_or(None),
+      None => None,
+    };
+
     Ok(Self {
+      highlight_query,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
@@ -191,6 +204,8 @@ impl Syntax {
 
 pub struct SyntaxManager {
   languages: FoldMap<CompactString, Language>,
+  highlight_queries: FoldMap<CompactString, String>,
+
   // Maps language ID to file extensions
   id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to language ID
@@ -201,22 +216,29 @@ impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
       .field("languages", &self.languages)
+      .field("highlight_queries", &self.highlight_queries)
       .field("id2ext", &self.id2ext)
       .field("ext2id", &self.ext2id)
       .finish()
   }
 }
 
+// Language ID and file extensions {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
       languages: FoldMap::new(),
+      highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
     };
     it.languages.insert(
       "rust".to_compact_string(),
       tree_sitter_rust::LANGUAGE.into(),
+    );
+    it.highlight_queries.insert(
+      "rust".to_compact_string(),
+      tree_sitter_rust::HIGHLIGHTS_QUERY.to_string(),
     );
     it.insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
     it
@@ -257,13 +279,26 @@ impl SyntaxManager {
   pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
     self.ext2id.get(ext)
   }
+}
+// Language ID and file extensions }
 
-  pub fn insert_lang(&mut self, id: CompactString, lang: Language) {
+// Language and queries {
+impl SyntaxManager {
+  pub fn insert_lang(
+    &mut self,
+    id: CompactString,
+    lang: Language,
+    highlight_query: Option<&str>,
+  ) {
     self.languages.insert(id.clone(), lang);
     self.id2ext.entry(id.clone()).or_default();
   }
 
   pub fn get_lang(&self, id: &str) -> Option<&Language> {
+    self.languages.get(id)
+  }
+
+  pub fn get_highlight_query(&self, id: &str) -> Option<&str> {
     self.languages.get(id)
   }
 
@@ -275,6 +310,7 @@ impl SyntaxManager {
       .unwrap_or(None)
   }
 }
+// Language and queries }
 
 impl Default for SyntaxManager {
   fn default() -> Self {
