@@ -279,7 +279,6 @@ fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
     u8::from_str_radix(x, 16).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
         format!("{}{}: {:?}", prefix, key, e).to_compact_string(),
-        e,
       )
     })
   };
