@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
@@ -14,6 +15,7 @@ use tree_sitter::Language;
 use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Point;
+use tree_sitter::Query;
 use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -76,6 +78,9 @@ pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 
 /// Buffer syntax.
 pub struct Syntax {
+  // Highlight query
+  highlight_query: Option<Query>,
+
   // Parsed syntax tree
   tree: Option<Tree>,
 
@@ -93,11 +98,13 @@ pub struct Syntax {
   pending: Vec<SyntaxEdit>,
 
   // Whether the parser is already parsing the buffer text in a background
-  // task. If true, it means the `parser` is been locked by the running task.
+  // task. If true, it means the `parser` is parsing in a background task.
   //
-  // NOTE: At a certain timing, only 1 background task is running to parse a
-  // buffer. New editings will be add to the `pending` job queue and wait for
-  // the **current** running task complete, then starts the next new task.
+  // NOTE: At a certain time, only 1 background task is parsing a buffer, there
+  // will be no multiple background tasks parsing the same buffer
+  // simultaneously, for data safety reason. New editings will be add to the
+  // `pending` job queue and wait for the **current** running task complete,
+  // then starts the next new task.
   parsing: bool,
 }
 
@@ -121,12 +128,21 @@ impl Debug for Syntax {
 }
 
 impl Syntax {
-  pub fn new(lang: &Language) -> Result<Self, LanguageError> {
+  pub fn new(
+    lang: &Language,
+    highlight_query: Option<&String>,
+  ) -> Result<Self, LanguageError> {
     let language_name = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
+    let highlight_query = match highlight_query {
+      Some(source) => Query::new(lang, source).map(Some).unwrap_or(None),
+      None => None,
+    };
+
     Ok(Self {
+      highlight_query,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
@@ -189,6 +205,8 @@ impl Syntax {
 
 pub struct SyntaxManager {
   languages: FoldMap<CompactString, Language>,
+  highlight_queries: FoldMap<CompactString, String>,
+
   // Maps language ID to file extensions
   id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to language ID
@@ -199,24 +217,58 @@ impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
       .field("languages", &self.languages)
+      .field("highlight_queries", &self.highlight_queries)
       .field("id2ext", &self.id2ext)
       .field("ext2id", &self.ext2id)
       .finish()
   }
 }
 
+// Language ID and file extensions {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
       languages: FoldMap::new(),
+      highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
     };
-    it.languages.insert(
-      "rust".to_compact_string(),
-      tree_sitter_rust::LANGUAGE.into(),
-    );
-    it.insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
+
+    let language_bindings = [
+      (
+        "rust",
+        tree_sitter_rust::LANGUAGE,
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
+        vec!["rs"],
+      ),
+      (
+        "markdown",
+        tree_sitter_md::LANGUAGE,
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
+        vec!["md", "markdown"],
+      ),
+      (
+        "toml",
+        tree_sitter_toml_ng::LANGUAGE,
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
+        vec!["toml"],
+      ),
+    ];
+
+    for lang_binding in language_bindings {
+      for lang_ext in lang_binding.3.iter() {
+        it.insert_file_ext(
+          lang_binding.0.to_compact_string(),
+          lang_ext.to_compact_string(),
+        );
+      }
+      it.insert_lang(
+        lang_binding.0.to_compact_string(),
+        lang_binding.1.into(),
+        lang_binding.2.map(|q| q.to_string()),
+      );
+    }
+
     it
   }
 
@@ -255,14 +307,30 @@ impl SyntaxManager {
   pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
     self.ext2id.get(ext)
   }
+}
+// Language ID and file extensions }
 
-  pub fn insert_lang(&mut self, id: CompactString, lang: Language) {
+// Language and queries {
+impl SyntaxManager {
+  pub fn insert_lang(
+    &mut self,
+    id: CompactString,
+    lang: Language,
+    highlight_query: Option<String>,
+  ) {
     self.languages.insert(id.clone(), lang);
+    if let Some(hl_query) = highlight_query {
+      self.highlight_queries.insert(id.clone(), hl_query);
+    }
     self.id2ext.entry(id.clone()).or_default();
   }
 
   pub fn get_lang(&self, id: &str) -> Option<&Language> {
     self.languages.get(id)
+  }
+
+  pub fn get_highlight_query(&self, id: &str) -> Option<&String> {
+    self.highlight_queries.get(id)
   }
 
   pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
@@ -272,7 +340,16 @@ impl SyntaxManager {
       .map(|id| self.get_lang(id))
       .unwrap_or(None)
   }
+
+  pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
+    self
+      .ext2id
+      .get(ext)
+      .map(|id| self.get_highlight_query(id))
+      .unwrap_or(None)
+  }
 }
+// Language and queries }
 
 impl Default for SyntaxManager {
   fn default() -> Self {
