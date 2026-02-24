@@ -12,7 +12,7 @@
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
 //!
-//! [scope.ruby]
+//! [scope.source.ruby]
 //! boolean = "red"
 //!
 //! [ui]
@@ -28,9 +28,8 @@
 //! grey = "#c0c0c0"
 //! ```
 //!
-//! `scope` section defines syntax highlightings for programming languages, and
-//! you can overwrite highlightings for some specific languages by adding the
-//! `scope.{lang}` subsection. The value of a scope item can have two formats:
+//! `scope` section defines syntax highlightings for programming languages, the
+//! value of a scope item can have two formats:
 //!
 //! - A string defines the foreground text color for that syntax highlighting,
 //!   it accepts either ANSI color name, such as "white", "yellow", etc. Or RGB
@@ -46,6 +45,41 @@
 //!     it is `false`.
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
+//!
+//! You can overwrite highlightings for specific languages by adding a
+//! `scope.source.{lang}` subsection. The `source.{lang}` part should match the
+//! tree-sitter grammar `grammars.0.scope` field inside the `tree-sitter.json`
+//! config.
+//!
+//! For example in
+//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby), the
+//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
+//! is:
+//!
+//! ```json
+//! {
+//!   "grammars": [
+//!     {
+//!       "name": "ruby",
+//!       "camelcase": "Ruby",
+//!       "scope": "source.ruby",
+//!       "path": ".",
+//!       "file-types": [
+//!         "rb"
+//!       ],
+//!       "highlights": "queries/highlights.scm",
+//!       "tags": "queries/tags.scm",
+//!       "injection-regex": "ruby"
+//!     }
+//!   ],
+//!   ...
+//! }
+//! ```
+//!
+//! If you want to overwrite highlightings for ruby in your colorscheme, you
+//! need to add a subsection `scope.source.ruby`, the `source.ruby` matches the
+//! `"scope": "source.ruby"` in the `tree-sitter.json` file.
+//!
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
