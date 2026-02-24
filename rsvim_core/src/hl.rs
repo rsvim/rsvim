@@ -247,11 +247,11 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Plain colors
+  // UI colors
   foreground: Color,
   background: Color,
 
-  // Scope colors
+  // Scope highlights
   scope: FoldMap<CompactString, Highlight>,
 }
 
@@ -316,7 +316,7 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_ui(
+fn parse_ui_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
@@ -443,13 +443,17 @@ impl ColorScheme {
   /// Load ColorScheme from a toml config.
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let ui = parse_ui(&colorscheme, &palette)?;
+    let ui_colors = parse_ui_colors(&colorscheme, &palette)?;
     let scope = parse_scope(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *ui.get(UI_FOREGROUND).unwrap_or(&DEFAULT_FOREGROUND_COLOR),
-      background: *ui.get(UI_BACKGROUND).unwrap_or(&DEFAULT_BACKGROUND_COLOR),
+      foreground: *ui_colors
+        .get(UI_FOREGROUND)
+        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
+      background: *ui_colors
+        .get(UI_BACKGROUND)
+        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
       scope,
     })
   }
@@ -522,10 +526,6 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     tag = "magenta"
     "type" = "green"
     variable = "cyan"
-
-    [ui]
-    foreground = "white"
-    background = "black"
   };
   ColorScheme::from_toml("default", config).unwrap()
 });
