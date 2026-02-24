@@ -282,7 +282,7 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_plain_colors(
+fn parse_ui(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
@@ -320,7 +320,7 @@ fn parse_plain_colors(
   Ok(result)
 }
 
-fn parse_scoped_highlights(
+fn parse_scope(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
@@ -409,17 +409,13 @@ impl ColorScheme {
   /// Load ColorScheme from a toml config.
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
-    let scope = parse_scoped_highlights(&colorscheme, &palette)?;
+    let ui = parse_ui(&colorscheme, &palette)?;
+    let scope = parse_scope(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *plain_colors
-        .get(UI_FOREGROUND)
-        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
-      background: *plain_colors
-        .get(UI_BACKGROUND)
-        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
+      foreground: *ui.get(UI_FOREGROUND).unwrap_or(&DEFAULT_FOREGROUND_COLOR),
+      background: *ui.get(UI_BACKGROUND).unwrap_or(&DEFAULT_BACKGROUND_COLOR),
       scope,
     })
   }
