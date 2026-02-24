@@ -237,19 +237,19 @@ impl SyntaxManager {
       (
         "rust",
         tree_sitter_rust::LANGUAGE,
-        Some(tree_sitter_rust::HIGHLIGHTS_QUERY.to_string()),
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
         ["rs"],
       ),
       (
         "markdown",
         tree_sitter_md::LANGUAGE,
-        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string()),
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
         ["md"],
       ),
       (
         "toml",
         tree_sitter_toml_ng::LANGUAGE,
-        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string()),
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
         ["toml"],
       ),
     ];
@@ -264,7 +264,7 @@ impl SyntaxManager {
       it.insert_lang(
         lang_binding.0.to_compact_string(),
         lang_binding.1.into(),
-        lang_binding.2,
+        lang_binding.2.map(|q| q.to_string()),
       );
     }
 
