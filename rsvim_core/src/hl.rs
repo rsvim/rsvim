@@ -451,7 +451,7 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn colors(&self) -> FoldMap<CompactString, Color> {
+  pub fn colors(&self) -> &FoldMap<CompactString, Color> {
     &self.colors
   }
 
