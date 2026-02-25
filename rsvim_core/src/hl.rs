@@ -188,7 +188,7 @@ pub struct ColorScheme {
   colors: FoldMap<CompactString, Color>,
 
   // Highlights
-  syn: FoldMap<CompactString, Highlight>,
+  highlights: FoldMap<CompactString, Highlight>,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
@@ -295,17 +295,17 @@ fn parse_highlights(
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   let err = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("syn.{}", k).to_compact_string())
+    TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(syn) = colorscheme.get("syn")
-    && let Some(syn_table) = syn.as_table()
+  if let Some(scope) = colorscheme.get("scope")
+    && let Some(scope_table) = scope.as_table()
   {
-    for (key, val) in syn_table.iter() {
-      let id = format!("syn.{}", key).to_compact_string();
-      if val.is_table() {
-        let val_table = val.as_table().unwrap();
+    for (key, value) in scope_table.iter() {
+      let id = format!("scope.{}", key).to_compact_string();
+      if value.is_table() {
+        let val_table = value.as_table().unwrap();
 
         let parse_color = |x| -> TheResult<Option<Color>> {
           match val_table.get(x) {
@@ -313,7 +313,7 @@ fn parse_highlights(
               let x = x.as_str().ok_or(err(key))?;
               match palette.get(x) {
                 Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code(x, "syn.", key)?)),
+                None => Ok(Some(parse_code(x, "scope.", key)?)),
               }
             }
             None => Ok(None),
@@ -346,11 +346,11 @@ fn parse_highlights(
         }
 
         result.insert(id.clone(), Highlight { id, fg, bg, attr });
-      } else if val.is_str() {
-        let fg = val.as_str().unwrap();
+      } else if value.is_str() {
+        let fg = value.as_str().unwrap();
         let fg = match palette.get(fg) {
           Some(fg) => Some(*fg),
-          None => Some(parse_code(fg, "syn.", key)?),
+          None => Some(parse_code(fg, "scope.", key)?),
         };
 
         let bg = None;
@@ -371,33 +371,20 @@ impl ColorScheme {
     Self {
       name: name.to_compact_string(),
       colors: FoldMap::new(),
-      syn: FoldMap::new(),
+      highlights: FoldMap::new(),
     }
   }
 
-  /// A ColorScheme can be defined with a toml file, for example:
-  /// ```toml
-  /// [syn]
-  /// attribute = "white"
-  /// boolean = { fg = "yellow", bold = true }
-  ///
-  /// [ui]
-  /// background = "#000000"
-  ///
-  /// [palette]
-  /// white = "#ffffff"
-  /// black = "#000000"
-  /// yellow = "#ffff00"
-  /// ```
+  /// A ColorScheme can be defined with a toml file.
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let colors = parse_colors(&colorscheme, &palette)?;
-    let syn = parse_highlights(&colorscheme, &palette)?;
+    let highlights = parse_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
       colors,
-      syn,
+      highlights,
     })
   }
 
@@ -409,8 +396,8 @@ impl ColorScheme {
     &self.colors
   }
 
-  pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
-    &self.syn
+  pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
+    &self.highlights
   }
 }
 
@@ -435,7 +422,7 @@ pub type ColorSchemeManagerIter<'a> =
 
 pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
   let config = toml::toml! {
-    [syn]
+    [scope]
     boolean = "magenta"
     comment = "cyan"
     constant = "magenta"
@@ -452,10 +439,6 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     tag = "magenta"
     type = "green"
     variable = "cyan"
-
-    [ui]
-    foreground = "white"
-    background = "black"
   };
   ColorScheme::from_toml("default", config).unwrap()
 });
