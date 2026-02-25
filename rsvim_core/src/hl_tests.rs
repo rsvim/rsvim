@@ -13,8 +13,8 @@ mod parse_toml {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
 
-    assert_eq!(*cs.colors().get("ui.background").unwrap(), Color::Black);
-    assert_eq!(*cs.colors().get("ui.foreground").unwrap(), Color::White);
+    assert_eq!(cs.colors().get("ui.background").is_none());
+    assert_eq!(cs.colors().get("ui.foreground").is_none());
 
     assert!(cs.highlights().get("scope.boolean").is_some());
     assert!(cs.highlights().get("scope.boolean").unwrap().bg.is_none());
