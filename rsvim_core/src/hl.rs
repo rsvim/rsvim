@@ -455,8 +455,44 @@ impl ColorScheme {
     &self.colors
   }
 
+  pub fn color(&self, id1: &str) -> Option<&Color> {
+    debug_assert!(!id1.is_empty());
+    debug_assert!(!id1.trim().is_empty());
+    debug_assert_eq!(id1.trim(), id1);
+    debug_assert_ne!(&id1[0..1], ".");
+    debug_assert_ne!(&id1[id1.len() - 1..id1.len()], ".");
+    let mut id = id1;
+    loop {
+      if let Some(color) = self.colors.get(id) {
+        return Some(color);
+      }
+      match id.rfind(".") {
+        Some(pos) => id = &id[..pos],
+        None => return None,
+      }
+    }
+  }
+
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
+  }
+
+  pub fn highlight(&self, id1: &str) -> Option<&Highlight> {
+    debug_assert!(!id1.is_empty());
+    debug_assert!(!id1.trim().is_empty());
+    debug_assert_eq!(id1.trim(), id1);
+    debug_assert_ne!(id1[0], '.');
+    debug_assert_ne!(id1[id1.len() - 1], '.');
+    let mut id = id1;
+    loop {
+      if let Some(hl) = self.highlights.get(id) {
+        return Some(hl);
+      }
+      match id.rfind(".") {
+        Some(pos) => id = &id[..pos],
+        None => return None,
+      }
+    }
   }
 }
 
