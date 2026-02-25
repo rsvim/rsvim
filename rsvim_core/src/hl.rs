@@ -248,7 +248,7 @@ pub struct ColorScheme {
   colors: FoldMap<CompactString, Color>,
 }
 
-fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
+fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
@@ -285,23 +285,23 @@ fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
 
 fn parse_palette(
   colorscheme: &toml::Table,
-) -> TheResult<FoldMap<CompactString, Color>> {
+) -> TheResult<FoldMap<CompactString, CompactString>> {
   let the_err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("palette.{}", k).to_compact_string())
   };
 
-  let mut result: FoldMap<CompactString, Color> = FoldMap::new();
+  let mut result: FoldMap<CompactString, CompactString> = FoldMap::new();
+
   if let Some(palette) = colorscheme.get("palette")
     && let Some(palette_table) = palette.as_table()
   {
-    for (k, v) in palette_table.iter() {
-      match v.as_str() {
-        Some(val) => {
-          let code = parse_code(val, "palette.", k)?;
-          result.insert(k.as_str().to_compact_string(), code);
+    for (key, value) in palette_table.iter() {
+      match value.as_str() {
+        Some(color) => {
+          result.insert(key.to_compact_string(), color.to_compact_string());
         }
         None => {
-          return Err(the_err(k));
+          return Err(the_err(key));
         }
       }
     }
@@ -309,11 +309,11 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_colors(
-  colorscheme: &toml::Table,
+fn process_ui(
+  colorscheme: &mut toml::Table,
   palette: &FoldMap<CompactString, Color>,
-) -> TheResult<FoldMap<CompactString, Color>> {
-  let plain_colors = [FOREGROUND, BACKGROUND]
+) -> TheResult<()> {
+  let ui_colors = [FOREGROUND, BACKGROUND]
     .into_iter()
     .collect::<FoldSet<&str>>();
 
@@ -323,20 +323,21 @@ fn parse_colors(
     ))
   };
 
-  let mut result: FoldMap<CompactString, Color> = FoldMap::new();
-  if let Some(ui) = colorscheme.get("ui")
+  if let Some(ui) = colorscheme.get_mut("ui")
     && let Some(ui_table) = ui.as_table()
   {
-    for (key, val) in ui_table.iter() {
-      if plain_colors.contains(key.as_str()) {
+    for (key, val) in ui_table.iter_mut() {
+      if ui_colors.contains(key.as_str()) {
         if val.is_str() {
           let value = val.as_str().unwrap();
-          let value = match palette.get(value) {
+          let value = match colorscheme
+            .get("palette")
+            .map(|palette| palette.get(value))
+          {
             Some(code) => *code,
-            None => parse_code(value, "ui.", key)?,
+            None => parse_color(value, "ui.", key)?,
           };
-          let id = format!("ui.{}", key).to_compact_string();
-          result.insert(id, value);
+          *val = value;
         } else {
           return err(key);
         }
@@ -344,10 +345,10 @@ fn parse_colors(
     }
   }
 
-  Ok(result)
+  Ok(())
 }
 
-fn parse_highlights(
+fn process_scope(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
@@ -372,7 +373,7 @@ fn parse_highlights(
               let x = x.as_str().ok_or(err(key))?;
               match palette.get(x) {
                 Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code(x, "scope.", key)?)),
+                None => Ok(Some(parse_color(x, "scope.", key)?)),
               }
             }
             None => Ok(None),
@@ -409,7 +410,7 @@ fn parse_highlights(
         let fg = value.as_str().unwrap();
         let fg = match palette.get(fg) {
           Some(fg) => Some(*fg),
-          None => Some(parse_code(fg, "scope.", key)?),
+          None => Some(parse_color(fg, "scope.", key)?),
         };
 
         let bg = None;
@@ -435,10 +436,13 @@ impl ColorScheme {
   }
 
   /// Load ColorScheme from a toml config.
-  pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
+  pub fn from_toml(
+    name: &str,
+    mut colorscheme: toml::Table,
+  ) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let colors = parse_colors(&colorscheme, &palette)?;
-    let highlights = parse_highlights(&colorscheme, &palette)?;
+    let colors = process_ui(&colorscheme, &palette)?;
+    let highlights = process_scope(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
