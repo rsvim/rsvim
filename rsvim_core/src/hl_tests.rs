@@ -136,7 +136,7 @@ grey = "#c0c0c0"
         b: 0x0
       }
     );
-    assert_eq!(*cs.colors().get("ui.foreground").unwrap(), Color::White);
+    assert!(cs.colors().get("ui.foreground").is_none());
   }
 
   #[test]
