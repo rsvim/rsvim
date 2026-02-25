@@ -84,7 +84,11 @@ grey = "#c0c0c0"
             g: 0xff,
             b: 0x00,
           }),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
@@ -175,7 +179,11 @@ background = "#000000"
         Some(Highlight {
           id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Yellow),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),

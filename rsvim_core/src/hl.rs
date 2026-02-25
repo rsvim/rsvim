@@ -366,7 +366,7 @@ impl ColorScheme {
 
 #[derive(Debug)]
 pub struct ColorSchemeManager {
-  // Maps highlight ID => highlight
+  // Maps colorscheme name => colorscheme
   highlights: FoldMap<CompactString, ColorScheme>,
 }
 
