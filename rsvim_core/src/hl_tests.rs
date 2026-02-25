@@ -13,8 +13,8 @@ mod parse_toml {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
 
-    assert_eq!(*cs.background(), Color::Black);
-    assert_eq!(*cs.foreground(), Color::White);
+    assert_eq!(*cs.colors().get("ui.background").unwrap(), Color::Black);
+    assert_eq!(*cs.colors().get("ui.foreground").unwrap(), Color::White);
 
     assert!(cs.syn().get("syn.boolean").is_some());
     assert!(cs.syn().get("syn.boolean").unwrap().bg.is_none());
@@ -129,14 +129,14 @@ grey = "#c0c0c0"
     }
 
     assert_eq!(
-      *cs.background(),
+      *cs.colors().get("ui.background").unwrap(),
       Color::Rgb {
         r: 0x0,
         g: 0x0,
         b: 0x0
       }
     );
-    assert_eq!(*cs.foreground(), Color::White);
+    assert_eq!(*cs.colors().get("ui.foreground").unwrap(), Color::White);
   }
 
   #[test]
@@ -212,7 +212,7 @@ background = "#000000"
     }
 
     assert_eq!(
-      *cs.background(),
+      *cs.colors().get("ui.background").unwrap(),
       Color::Rgb {
         r: 0x0,
         g: 0x0,
@@ -220,7 +220,7 @@ background = "#000000"
       }
     );
     assert_eq!(
-      *cs.foreground(),
+      *cs.colors().get("ui.foreground").unwrap(),
       Color::Rgb {
         r: 0xff,
         g: 0xff,

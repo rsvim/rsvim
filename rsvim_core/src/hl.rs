@@ -103,10 +103,6 @@ use once_cell::sync::Lazy;
 
 pub const DEFAULT: &str = "default";
 
-// Default UI colors
-pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
-pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
-
 // "ui."
 pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
@@ -256,7 +252,7 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_plain_colors(
+fn parse_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
@@ -294,7 +290,7 @@ fn parse_plain_colors(
   Ok(result)
 }
 
-fn parse_syntax_highlights(
+fn parse_highlights(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
@@ -374,8 +370,7 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
-      foreground: DEFAULT_FOREGROUND_COLOR,
-      background: DEFAULT_BACKGROUND_COLOR,
+      colors: FoldMap::new(),
       syn: FoldMap::new(),
     }
   }
@@ -396,17 +391,12 @@ impl ColorScheme {
   /// ```
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
-    let syn = parse_syntax_highlights(&colorscheme, &palette)?;
+    let colors = parse_colors(&colorscheme, &palette)?;
+    let syn = parse_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *plain_colors
-        .get(UI_FOREGROUND)
-        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
-      background: *plain_colors
-        .get(UI_BACKGROUND)
-        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
+      colors,
       syn,
     })
   }
@@ -415,28 +405,11 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn foreground(&self) -> &Color {
-    &self.foreground
-  }
-
-  pub fn set_foreground(&mut self, value: Color) {
-    self.foreground = value;
-  }
-
-  pub fn background(&self) -> &Color {
-    &self.background
-  }
-
-  pub fn set_background(&mut self, value: Color) {
-    self.background = value;
+  pub fn colors(&self) -> &FoldMap<CompactString, Color> {
+    &self.colors
   }
 
   pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
-    if cfg!(debug_assertions) {
-      for k in self.syn.keys() {
-        debug_assert!(k.starts_with("syn."));
-      }
-    }
     &self.syn
   }
 }
