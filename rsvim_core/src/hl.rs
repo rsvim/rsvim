@@ -246,7 +246,7 @@ pub struct ColorScheme {
   highlights: FoldMap<CompactString, Highlight>,
 }
 
-fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
+fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|e| {
       TheErr::LoadColorSchemeFailed(
@@ -295,7 +295,7 @@ fn parse_palette(
     for (k, v) in palette_table.iter() {
       match v.as_str() {
         Some(val) => {
-          let code = parse_code(val, "palette.", k)?;
+          let code = parse_color(val, "palette.", k)?;
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
@@ -329,7 +329,7 @@ fn parse_colors(
         let value = val.as_str().unwrap();
         let value = match palette.get(value) {
           Some(code) => *code,
-          None => parse_code(value, "ui.", key)?,
+          None => parse_color(value, "ui.", key)?,
         };
         let id = format!("ui.{}", key).to_compact_string();
         result.insert(id, value);
@@ -360,7 +360,7 @@ fn parse_hl_as_table(
         let x = x.as_str().ok_or(failure(key))?;
         match palette.get(x) {
           Some(x) => Ok(Some(*x)),
-          None => Ok(Some(parse_code(x, "scope.", key)?)),
+          None => Ok(Some(parse_color(x, "scope.", key)?)),
         }
       }
       None => Ok(colors.get(fallback).copied()),
@@ -412,7 +412,7 @@ fn parse_hl_as_str(
 
   let fg = match palette.get(value) {
     Some(fg) => Some(*fg),
-    None => Some(parse_code(value, "scope.", key)?),
+    None => Some(parse_color(value, "scope.", key)?),
   };
 
   let bg = colors.get("ui.background").copied();
