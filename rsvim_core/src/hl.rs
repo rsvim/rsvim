@@ -250,7 +250,7 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{prefix}{key}").to_compact_string(),
+        format!("\"{prefix}{key}\"").to_compact_string(),
         format!("{:?}", s).to_compact_string(),
       )
     })
@@ -276,8 +276,8 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   } else {
     Color::try_from(s).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{prefix}{key}").to_compact_string(),
-        s.to_compact_string(),
+        format!("\"{prefix}{key}\"").to_compact_string(),
+        format!("{:?}", s).to_compact_string(),
       )
     })
   }
