@@ -367,7 +367,7 @@ impl ColorScheme {
 #[derive(Debug)]
 pub struct ColorSchemeManager {
   // Maps colorscheme name => colorscheme
-  highlights: FoldMap<CompactString, ColorScheme>,
+  colors: FoldMap<CompactString, ColorScheme>,
 }
 
 impl Default for ColorSchemeManager {
@@ -408,26 +408,25 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
 
 impl ColorSchemeManager {
   pub fn new() -> Self {
-    let mut highlights = FoldMap::new();
-    highlights
-      .insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
-    Self { highlights }
+    let mut colors = FoldMap::new();
+    colors.insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
+    Self { colors }
   }
 
   pub fn is_empty(&self) -> bool {
-    self.highlights.is_empty()
+    self.colors.is_empty()
   }
 
   pub fn len(&self) -> usize {
-    self.highlights.len()
+    self.colors.len()
   }
 
   pub fn get(&self, id: &str) -> Option<&ColorScheme> {
-    self.highlights.get(id)
+    self.colors.get(id)
   }
 
   pub fn contains_key(&self, id: &str) -> bool {
-    self.highlights.contains_key(id)
+    self.colors.contains_key(id)
   }
 
   pub fn insert(
@@ -435,22 +434,22 @@ impl ColorSchemeManager {
     key: CompactString,
     value: ColorScheme,
   ) -> Option<ColorScheme> {
-    self.highlights.insert(key, value)
+    self.colors.insert(key, value)
   }
 
   pub fn remove(&mut self, id: &str) -> Option<ColorScheme> {
-    self.highlights.remove(id)
+    self.colors.remove(id)
   }
 
   pub fn keys(&self) -> ColorSchemeManagerKeys<'_> {
-    self.highlights.keys()
+    self.colors.keys()
   }
 
   pub fn values(&self) -> ColorSchemeManagerValues<'_> {
-    self.highlights.values()
+    self.colors.values()
   }
 
   pub fn iter(&self) -> ColorSchemeManagerIter<'_> {
-    self.highlights.iter()
+    self.colors.iter()
   }
 }
