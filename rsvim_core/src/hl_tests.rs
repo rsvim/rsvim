@@ -516,4 +516,21 @@ foreground = { fg = "white" }
       info!("error:{:?}", e.to_string());
     }
   }
+
+  #[test]
+  fn failed5() {
+    test_log_init();
+
+    let payload: &str = r##"
+[palette]
+white = true
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed5", colorscheme_table);
+    assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
+  }
 }

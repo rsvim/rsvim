@@ -250,8 +250,8 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}: {:?}, invalid RGB color code", prefix, key, s)
-          .to_compact_string(),
+        format!("{prefix}{key}").to_compact_string(),
+        s.to_compact_string(),
       )
     })
   };
@@ -276,8 +276,8 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   } else {
     Color::try_from(s).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}: {:?}, invalid ANSI color name", prefix, key, s)
-          .to_compact_string(),
+        format!("{prefix}{key}").to_compact_string(),
+        s.to_compact_string(),
       )
     })
   }
@@ -286,22 +286,21 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
 fn parse_palette(
   colorscheme: &toml::Table,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let failure = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("palette.{}", k).to_compact_string())
-  };
-
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
   if let Some(palette) = colorscheme.get("palette")
     && let Some(palette_table) = palette.as_table()
   {
-    for (k, v) in palette_table.iter() {
-      match v.as_str() {
-        Some(val) => {
-          let code = parse_color(val, "palette.", k)?;
-          result.insert(k.as_str().to_compact_string(), code);
+    for (key, value) in palette_table.iter() {
+      match value.as_str() {
+        Some(value) => {
+          let code = parse_color(value, "palette.", key)?;
+          result.insert(key.as_str().to_compact_string(), code);
         }
         None => {
-          return Err(failure(k));
+          return Err(TheErr::LoadColorSchemeFailed(
+            format!("palette.{}", key).to_compact_string(),
+            format!("{:?}", value).to_compact_string(),
+          ));
         }
       }
     }
@@ -313,22 +312,19 @@ fn parse_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let failure = |k: &str| {
-    Err(TheErr::LoadColorSchemeFailed(
-      format!("ui.{}", k).to_compact_string(),
-    ))
-  };
-
   let mut result: FoldMap<CompactString, Color> = FoldMap::new();
   if let Some(ui) = colorscheme.get("ui")
     && let Some(ui_table) = ui.as_table()
   {
-    for (key, val) in ui_table.iter() {
+    for (key, value) in ui_table.iter() {
       if !UI_NAMES.contains(key.as_str()) {
-        return failure(key);
+        return Err(TheErr::LoadColorSchemeFailed(
+          format!("ui.{}", key).to_compact_string(),
+          format!("{:?}", value).to_compact_string(),
+        ));
       }
-      if val.is_str() {
-        let value = val.as_str().unwrap();
+      if value.is_str() {
+        let value = value.as_str().unwrap();
         let value = match palette.get(value) {
           Some(code) => *code,
           None => parse_color(value, "ui.", key)?,
@@ -336,7 +332,10 @@ fn parse_colors(
         let id = format!("ui.{}", key).to_compact_string();
         result.insert(id, value);
       } else {
-        return failure(key);
+        return Err(TheErr::LoadColorSchemeFailed(
+          format!("ui.{}", key).to_compact_string(),
+          format!("{:?}", value).to_compact_string(),
+        ));
       }
     }
   }
@@ -352,15 +351,16 @@ fn parse_hl_as_table(
 ) -> TheResult<(CompactString, Highlight)> {
   let id = format!("scope.{}", key).to_compact_string();
 
-  let failure = || TheErr::LoadColorSchemeFailed(id.clone());
-
   let parse_color = |x, fallback| -> TheResult<Option<Color>> {
     match value.get(x) {
-      Some(x) => {
-        let x = x.as_str().ok_or(failure())?;
-        match palette.get(x) {
+      Some(x_value) => {
+        let x_value = x_value.as_str().ok_or(TheErr::LoadColorSchemeFailed(
+          id.clone(),
+          format!("{:?}", x_value).to_compact_string(),
+        ))?;
+        match palette.get(x_value) {
           Some(x) => Ok(Some(*x)),
-          None => Ok(Some(parse_color(x, "scope.", key)?)),
+          None => Ok(Some(parse_color(x_value, "scope.", key)?)),
         }
       }
       None => Ok(colors.get(fallback).copied()),
@@ -372,7 +372,12 @@ fn parse_hl_as_table(
 
   let parse_bool = |x| -> TheResult<bool> {
     match value.get(x) {
-      Some(x) => Ok(x.as_bool().ok_or(failure())?),
+      Some(x_value) => {
+        Ok(x_value.as_bool().ok_or(TheErr::LoadColorSchemeFailed(
+          id.clone(),
+          format!("{:?}", x_value).to_compact_string(),
+        ))?)
+      }
       None => Ok(false),
     }
   };
@@ -433,10 +438,6 @@ fn parse_highlights(
   colors: &FoldMap<CompactString, Color>,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  let failure = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
-  };
-
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
   if let Some(scope) = colorscheme.get("scope")
@@ -450,7 +451,10 @@ fn parse_highlights(
           for (key_per_lang, value_per_lang) in scope_table_per_lang.iter() {
             let k = format!("{}.{}", key_per_lang, lang);
             if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
-              return Err(failure(&k));
+              return Err(TheErr::LoadColorSchemeFailed(
+                k.to_compact_string(),
+                format!("{:?}", value_per_lang).to_compact_string(),
+              ));
             }
             if value_per_lang.is_table() {
               let (id, hl) = parse_hl_as_table(
@@ -469,13 +473,19 @@ fn parse_highlights(
               )?;
               result.insert(id, hl);
             } else {
-              return Err(failure(&k));
+              return Err(TheErr::LoadColorSchemeFailed(
+                k.to_compact_string(),
+                format!("{:?}", value_per_lang).to_compact_string(),
+              ));
             }
           }
         }
       } else {
         if !SCOPE_NAMES.contains(key.as_str()) {
-          return Err(failure(key));
+          return Err(TheErr::LoadColorSchemeFailed(
+            key.to_compact_string(),
+            format!("{:?}", value).to_compact_string(),
+          ));
         }
         if value.is_table() {
           let (id, hl) =
@@ -486,7 +496,10 @@ fn parse_highlights(
             parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
           result.insert(id, hl);
         } else {
-          return Err(failure(key));
+          return Err(TheErr::LoadColorSchemeFailed(
+            key.to_compact_string(),
+            format!("{:?}", value).to_compact_string(),
+          ));
         }
       }
     }
