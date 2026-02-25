@@ -69,7 +69,6 @@ grey = "#c0c0c0"
       (
         "scope.attribute",
         Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: None,
           attr: Attributes::none(),
@@ -78,7 +77,6 @@ grey = "#c0c0c0"
       (
         "scope.boolean",
         Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -96,7 +94,6 @@ grey = "#c0c0c0"
       (
         "scope.comment",
         Some(Highlight {
-          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -116,7 +113,6 @@ grey = "#c0c0c0"
       (
         "scope.keyword",
         Some(Highlight {
-          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -168,7 +164,6 @@ background = "#000000"
       (
         "scope.attribute",
         Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: None,
           attr: Attributes::none(),
@@ -177,7 +172,6 @@ background = "#000000"
       (
         "scope.boolean",
         Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Yellow),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -191,7 +185,6 @@ background = "#000000"
       (
         "scope.comment",
         Some(Highlight {
-          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -211,7 +204,6 @@ background = "#000000"
       (
         "scope.keyword",
         Some(Highlight {
-          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Red),
           bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
@@ -340,6 +332,7 @@ grey = "#c0c0c0"
     ];
     for expect in scope_expects.iter() {
       assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
     }
 
     let resolved_scope_expects = [
@@ -393,6 +386,7 @@ grey = "#c0c0c0"
       ),
     ];
     for expect in resolved_scope_expects {
+      assert!(cs.highlights().get(expect.0).is_none());
       assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
     }
 

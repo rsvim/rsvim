@@ -297,7 +297,10 @@ fn parse_highlights(
     && let Some(scope_table) = scope.as_table()
   {
     for (key, value) in scope_table.iter() {
-      let id = format!("scope.{}", key).to_compact_string();
+      let id = match key.strip_prefix("source.") {
+        Some(striped) => format!("scope.{}", striped).to_compact_string(),
+        None => format!("scope.{}", key).to_compact_string(),
+      };
       if value.is_table() {
         let val_table = value.as_table().unwrap();
 
