@@ -162,6 +162,8 @@ pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
+  pub id: CompactString,
+
   /// Foreground color.
   pub fg: Option<Color>,
 
@@ -342,7 +344,7 @@ fn parse_highlights(
           attr.set(Attribute::Underlined);
         }
 
-        result.insert(id, Highlight { fg, bg, attr });
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else if value.is_str() {
         let fg = value.as_str().unwrap();
         let fg = match palette.get(fg) {
@@ -353,7 +355,7 @@ fn parse_highlights(
         let bg = colors.get("ui.background").copied();
         let attr = Attributes::none();
 
-        result.insert(id, Highlight { fg, bg, attr });
+        result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
         return Err(err(key));
       }
