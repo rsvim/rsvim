@@ -457,8 +457,10 @@ attribute = "#zxcvas"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed1", colorscheme_table);
-    info!("error:{:?}", cs);
     assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
   }
 
   #[test]
@@ -475,7 +477,9 @@ rustsrcour = "#ffffff"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed2", colorscheme_table);
-    info!("error:{:?}", cs);
     assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
   }
 }
