@@ -285,7 +285,7 @@ grey = "#c0c0c0"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
-    assert_eq!(cs.highlights().len(), 4);
+    assert_eq!(cs.highlights().len(), 6);
 
     let scope_expects = [
       (
