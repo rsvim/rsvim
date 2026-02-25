@@ -359,13 +359,27 @@ impl ColorScheme {
     &self.colors
   }
 
-  pub fn color(&self, id: &str) -> Option<&Color> {}
+  pub fn color(&self, id: &str) -> Option<&Color> {
+    debug_assert!(!id.is_empty());
+    debug_assert!(!id.trim().is_empty());
+    debug_assert_eq!(id.trim(), id);
+    debug_assert_ne!(&id[0..1], ".");
+    debug_assert_ne!(&id[(id.len() - 1)..id.len()], ".");
+    self.colors.get(id)
+  }
 
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
 
-  pub fn highlight(&self, id: &str) -> Option<&Highlight> {}
+  pub fn highlight(&self, id: &str) -> Option<&Highlight> {
+    debug_assert!(!id.is_empty());
+    debug_assert!(!id.trim().is_empty());
+    debug_assert_eq!(id.trim(), id);
+    debug_assert_ne!(&id[0..1], ".");
+    debug_assert_ne!(&id[(id.len() - 1)..id.len()], ".");
+    self.highlights.get(id)
+  }
 }
 
 #[derive(Debug)]
