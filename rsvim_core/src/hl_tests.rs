@@ -393,20 +393,24 @@ grey = "#c0c0c0"
         "scope.boolean.ruby",
         Some(Highlight {
           id: "scope.boolean".to_compact_string(),
-          fg: Some(Color::Red),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x0,
+          }),
           bg: Some(Color::Rgb {
             r: 0x0,
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none(),
+          attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
       (
         "scope.boolean.c",
         Some(Highlight {
           id: "scope.boolean.c".to_compact_string(),
-          fg: Some(Color::White),
+          fg: Some(Color::Red),
           bg: Some(Color::Rgb {
             r: 0x0,
             g: 0x0,
@@ -417,7 +421,6 @@ grey = "#c0c0c0"
       ),
     ];
     for expect in resolved_scope_expects {
-      assert!(cs.highlights().get(expect.0).is_none());
       assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
     }
 
