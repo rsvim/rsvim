@@ -448,6 +448,8 @@ grey = "#c0c0c0"
 
   #[test]
   fn failed1() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "#zxcvas"
@@ -455,11 +457,14 @@ attribute = "#zxcvas"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed1", colorscheme_table);
+    info!("error:{:?}", cs);
     assert!(cs.is_err());
   }
 
   #[test]
   fn failed2() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "white"
@@ -470,6 +475,7 @@ rustsrcour = "#ffffff"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed2", colorscheme_table);
+    info!("error:{:?}", cs);
     assert!(cs.is_err());
   }
 }
