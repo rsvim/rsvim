@@ -626,13 +626,13 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     type = "green"
     variable = "cyan"
   };
-  ColorScheme::from_toml("default", config).unwrap()
+  ColorScheme::from_toml(DEFAULT, config).unwrap()
 });
 
 impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut colors = FoldMap::new();
-    colors.insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
+    colors.insert(DEFAULT.to_compact_string(), DEFAULT_COLORSCHEME.clone());
     Self { colors }
   }
 
