@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use once_cell::sync::Lazy;
+use std::fmt;
 
 // "ui."
 pub const FOREGROUND: &str = "foreground";
@@ -66,6 +64,42 @@ pub const VARIABLE_BUILTIN: &str = "variable.builtin";
 pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 
+fn deserialize_color<E>(s: &str) -> Result<Color, E>
+where
+  E: serde::de::Error,
+{
+  let parse_hex = |x| {
+    u8::from_str_radix(x, 16)
+      .map_err(|e| serde::de::Error::custom(format!("{}: {:?}", s, e)))
+  };
+
+  if s.starts_with("#") && s.len() == 7 {
+    // Parse hex 6 digits, for example: #ffffff
+    let s = &s[1..];
+    let r = parse_hex(&s[0..2])?;
+    let g = parse_hex(&s[2..4])?;
+    let b = parse_hex(&s[4..6])?;
+    Ok(Color::Rgb { r, g, b })
+  } else if s.starts_with("#") && s.len() == 4 {
+    // Parse hex 3 digits, for example: #fff
+    let s = &s[1..];
+    let r = parse_hex(&s[0..1])?;
+    let r = r | (r << 4);
+    let g = parse_hex(&s[1..2])?;
+    let g = g | (g << 4);
+    let b = parse_hex(&s[2..3])?;
+    let b = b | (b << 4);
+    Ok(Color::Rgb { r, g, b })
+  } else {
+    Color::try_from(s).map_err(|e| {
+      serde::de::Error::custom(format!(
+        "Failed to parse color `{}`: {:?}",
+        s, e
+      ))
+    })
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
@@ -74,7 +108,81 @@ pub struct Highlight {
   pub attr: Attributes,
 }
 
-pub struct Scope {}
+struct HighlightVisitor;
+
+impl<'de> serde::de::Visitor<'de> for HighlightVisitor {
+  type Value = Highlight;
+
+  fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    formatter.write_str("highlight attributes table or color string")
+  }
+
+  fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+  where
+    A: serde::de::MapAccess<'de>,
+  {
+    let mut fg: Option<Color> = None;
+    let mut bg: Option<Color> = None;
+    let mut bold = false;
+    let mut italic = false;
+    let mut underlined = false;
+
+    while let Some(key) = map.next_key::<String>()? {
+      match key.as_str() {
+        "fg" => {
+          let s: String = map.next_value()?;
+          fg = Some(deserialize_color(&s)?);
+        }
+        "bg" => {
+          let s: String = map.next_value()?;
+          bg = Some(deserialize_color(&s)?);
+        }
+        "bold" => bold = map.next_value()?,
+        "italic" => italic = map.next_value()?,
+        "underlined" => underlined = map.next_value()?,
+        _ => {
+          let _: serde::de::IgnoredAny = map.next_value()?;
+        }
+      }
+    }
+
+    let mut attr = Attributes::none();
+    if bold {
+      attr.set(Attribute::Bold);
+    }
+    if italic {
+      attr.set(Attribute::Italic);
+    }
+    if underlined {
+      attr.set(Attribute::Underlined);
+    }
+
+    Ok(Highlight { fg, bg, attr })
+  }
+
+  fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+  where
+    E: serde::de::Error,
+  {
+    let fg = Some(deserialize_color(v)?);
+    let bg = None;
+    let attr = Attributes::none();
+    Ok(Highlight { fg, bg, attr })
+  }
+}
+
+impl<'de> serde::Deserialize<'de> for Highlight {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::Deserializer<'de>,
+  {
+    deserializer.deserialize_any(HighlightVisitor)
+  }
+}
+
+pub struct Scope {
+  // attribute:
+}
 
 pub struct Ui {}
 
