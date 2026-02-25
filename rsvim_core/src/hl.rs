@@ -443,34 +443,32 @@ fn parse_highlights(
     && let Some(scope_table) = scope.as_table()
   {
     for (key, value) in scope_table.iter() {
-      // trace!("key:{:?}, value:{:?}", key, value);
       if key.as_str() == "source" {
         let source_table = value.as_table().unwrap();
-        for (lang_key, lang_value) in source_table.iter() {
-          // trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
-          let lang_value_table = lang_value.as_table().unwrap();
-          for (attr_key, attr_value) in lang_value_table.iter() {
-            if !SCOPE_NAMES.contains(attr_key.as_str()) {
-              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
+        for (lang, value_per_lang) in source_table.iter() {
+          let scope_table_per_lang = value_per_lang.as_table().unwrap();
+          for (key_per_lang, value_per_lang) in scope_table_per_lang.iter() {
+            if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
+              return Err(failure(&format!("scope.{}.{}", key_per_lang, lang)));
             }
-            if attr_value.is_table() {
+            if value_per_lang.is_table() {
               let (id, hl) = parse_hl_as_table(
-                &format!("{}.{}", attr_key, lang_key),
-                attr_value.as_table().unwrap(),
+                &format!("{}.{}", key_per_lang, lang),
+                value_per_lang.as_table().unwrap(),
                 palette,
                 colors,
               )?;
               result.insert(id, hl);
-            } else if attr_value.is_str() {
+            } else if value_per_lang.is_str() {
               let (id, hl) = parse_hl_as_str(
-                &format!("{}.{}", attr_key, lang_key),
-                attr_value.as_str().unwrap(),
+                &format!("{}.{}", key_per_lang, lang),
+                value_per_lang.as_str().unwrap(),
                 palette,
                 colors,
               )?;
               result.insert(id, hl);
             } else {
-              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
+              return Err(failure(&format!("scope.{}.{}", key_per_lang, lang)));
             }
           }
         }
