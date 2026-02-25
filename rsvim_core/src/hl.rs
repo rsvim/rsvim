@@ -311,7 +311,7 @@ fn parse_palette(
 
 fn process_ui(
   colorscheme: &mut toml::Table,
-  palette: &FoldMap<CompactString, Color>,
+  palette: &FoldMap<CompactString, CompactString>,
 ) -> TheResult<()> {
   let ui_colors = [FOREGROUND, BACKGROUND]
     .into_iter()
@@ -330,12 +330,9 @@ fn process_ui(
       if ui_colors.contains(key.as_str()) {
         if val.is_str() {
           let value = val.as_str().unwrap();
-          let value = match colorscheme
-            .get("palette")
-            .map(|palette| palette.get(value))
-          {
-            Some(code) => *code,
-            None => parse_color(value, "ui.", key)?,
+          let value = match palette.get(value) {
+            Some(code) => code.clone(),
+            None => value.to_compact_string(),
           };
           *val = value;
         } else {
