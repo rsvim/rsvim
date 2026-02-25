@@ -386,29 +386,32 @@ fn parse_highlights(
     && let Some(scope_table) = scope.as_table()
   {
     for (key, value) in scope_table.iter() {
-      trace!("key:{:?}, value:{:?}", key, value);
+      // trace!("key:{:?}, value:{:?}", key, value);
       if key.as_str() == "source" {
         let source_table = value.as_table().unwrap();
         for (lang_key, lang_value) in source_table.iter() {
-          trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
-          if lang_value.is_table() {
-            let (id, hl) = parse_highlight_as_table(
-              &format!("{}.{}", key, lang_key),
-              lang_value.as_table().unwrap(),
-              palette,
-              colors,
-            )?;
-            result.insert(id, hl);
-          } else if lang_value.is_str() {
-            let (id, hl) = parse_highlight_as_str(
-              &format!("{}.{}", key, lang_key),
-              lang_value.as_str().unwrap(),
-              palette,
-              colors,
-            )?;
-            result.insert(id, hl);
-          } else {
-            return Err(failure(key));
+          // trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
+          let lang_value_table = lang_value.as_table().unwrap();
+          for (attr_key, attr_value) in lang_value_table.iter() {
+            if attr_value.is_table() {
+              let (id, hl) = parse_highlight_as_table(
+                &format!("{}.{}", attr_key, lang_key),
+                attr_value.as_table().unwrap(),
+                palette,
+                colors,
+              )?;
+              result.insert(id, hl);
+            } else if attr_value.is_str() {
+              let (id, hl) = parse_highlight_as_str(
+                &format!("{}.{}", attr_key, lang_key),
+                attr_value.as_str().unwrap(),
+                palette,
+                colors,
+              )?;
+              result.insert(id, hl);
+            } else {
+              return Err(failure(key));
+            }
           }
         }
       } else if value.is_table() {
