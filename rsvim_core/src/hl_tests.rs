@@ -241,6 +241,182 @@ background = "#000000"
   }
 
   #[test]
+  fn toml3() {
+    let payload: &str = r##"
+[scope]
+attribute = "white"
+boolean = { fg = "yellow", bold = true }
+comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+keyword = { fg = "#ffffff", bg = "green", italic = true }
+
+[scope.source.ruby]
+attribute = "red"
+
+[scope.source.c]
+boolean = "red"
+
+[ui]
+background = "#000000"
+
+[palette]
+# white = "#ffffff"
+black = "#000000"
+yellow = "#ffff00"
+green = "#00ff00"
+
+# Never used
+grey = "#c0c0c0"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
+    assert_eq!(cs.highlights().len(), 4);
+
+    let scope_expects = [
+      (
+        "scope.attribute",
+        Some(Highlight {
+          fg: Some(Color::White),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.boolean",
+        Some(Highlight {
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x00,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Bold),
+        }),
+      ),
+      ("scope.carriage-return", None),
+      (
+        "scope.comment",
+        Some(Highlight {
+          fg: Some(Color::Rgb {
+            r: 0xc0,
+            g: 0xc0,
+            b: 0xc0,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none()
+            .with(Attribute::Bold)
+            .with(Attribute::Italic)
+            .with(Attribute::Underlined),
+        }),
+      ),
+      (
+        "scope.keyword",
+        Some(Highlight {
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0xff,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0xff,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Italic),
+        }),
+      ),
+    ];
+    for expect in scope_expects.iter() {
+      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
+    }
+
+    let resolved_scope_expects = [
+      (
+        "scope.attribute.ruby",
+        Some(Highlight {
+          fg: Some(Color::Red),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.attribute.c",
+        Some(Highlight {
+          fg: Some(Color::White),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.boolean.ruby",
+        Some(Highlight {
+          fg: Some(Color::Red),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.boolean.c",
+        Some(Highlight {
+          fg: Some(Color::White),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+    ];
+    for expect in resolved_scope_expects {
+      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
+    }
+
+    assert_eq!(
+      *cs.colors().get("ui.background").unwrap(),
+      Color::Rgb {
+        r: 0x0,
+        g: 0x0,
+        b: 0x0
+      }
+    );
+    assert_eq!(
+      *cs.resolve_color("ui.background").unwrap(),
+      Color::Rgb {
+        r: 0x0,
+        g: 0x0,
+        b: 0x0
+      }
+    );
+    assert!(cs.colors().get("ui.foreground").is_none());
+    assert!(cs.resolve_color("ui.foreground").is_none());
+  }
+
+  #[test]
   fn failed1() {
     let payload: &str = r##"
 [scope]

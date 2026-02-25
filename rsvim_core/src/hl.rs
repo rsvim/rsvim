@@ -46,14 +46,14 @@
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
 //!
-//! You can overwrite highlightings for specific languages by adding
-//! `[scope.source.{lang}]`. The `source.{lang}` part should match the
-//! `grammars.scope` inside a `tree-sitter.json` grammar config.
+//! You can overwrite highlightings for specific languages by adding a
+//! `[scope.source.{lang}]` section. The `{lang}` should match the grammar name
+//! inside a `tree-sitter.json` grammar config.
 //!
 //! For example in
 //! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby),
 //! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
-//! is:
+//! grammar name is `"ruby"`:
 //!
 //! ```json
 //! {
@@ -75,8 +75,7 @@
 //! }
 //! ```
 //!
-//! To overwrite highlightings for ruby, you need to add `[scope.source.ruby]`,
-//! which matches the `"scope": "source.ruby"` line in the above json.
+//! In this case, you need to add `[scope.source.ruby]` section for ruby.
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
@@ -163,9 +162,6 @@ pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
-  /// Style ID
-  pub id: CompactString,
-
   /// Foreground color.
   pub fg: Option<Color>,
 
@@ -343,7 +339,7 @@ fn parse_highlights(
           attr.set(Attribute::Underlined);
         }
 
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+        result.insert(id, Highlight { fg, bg, attr });
       } else if value.is_str() {
         let fg = value.as_str().unwrap();
         let fg = match palette.get(fg) {
@@ -351,10 +347,10 @@ fn parse_highlights(
           None => Some(parse_code(fg, "scope.", key)?),
         };
 
-        let bg = None;
+        let bg = colors.get("ui.background").copied();
         let attr = Attributes::none();
 
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
+        result.insert(id, Highlight { fg, bg, attr });
       } else {
         return Err(err(key));
       }
