@@ -606,7 +606,7 @@ pub type ColorSchemeManagerValues<'a> =
 pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
 
-pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
+fn default_colorscheme() -> ColorScheme {
   let config = toml::toml! {
     [scope]
     boolean = "magenta"
@@ -627,12 +627,12 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     variable = "cyan"
   };
   ColorScheme::from_toml(DEFAULT, config).unwrap()
-});
+}
 
 impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut colors = FoldMap::new();
-    colors.insert(DEFAULT.to_compact_string(), DEFAULT_COLORSCHEME.clone());
+    colors.insert(DEFAULT.to_compact_string(), default_colorscheme());
     Self { colors }
   }
 
