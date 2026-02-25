@@ -93,8 +93,6 @@
 //! parser will lookup for the real color `value` behind the `key` when loading
 //! the colorscheme config.
 
-// pub mod data;
-
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
