@@ -188,11 +188,10 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Plain colors
-  foreground: Color,
-  background: Color,
+  // Colors
+  colors: FoldMap<CompactString, Color>,
 
-  // Syntax colors
+  // Highlights
   syn: FoldMap<CompactString, Highlight>,
 }
 
