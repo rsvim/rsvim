@@ -1,4 +1,5 @@
 use super::hl::*;
+use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
@@ -41,6 +42,8 @@ mod parse_toml {
 
   #[test]
   fn toml1() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "white"
@@ -152,6 +155,8 @@ grey = "#c0c0c0"
 
   #[test]
   fn toml2() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "white"
@@ -246,6 +251,8 @@ background = "#000000"
 
   #[test]
   fn toml3() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "white"
