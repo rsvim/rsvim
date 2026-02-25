@@ -248,9 +248,9 @@ pub struct ColorScheme {
 
 fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
-    u8::from_str_radix(x, 16).map_err(|e| {
+    u8::from_str_radix(x, 16).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}: {:?}", prefix, key, e).to_compact_string(),
+        format!("{}{}: {:?}", prefix, key, s).to_compact_string(),
       )
     })
   };
@@ -273,9 +273,9 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
     let b = b | (b << 4);
     Ok(Color::Rgb { r, g, b })
   } else {
-    Color::try_from(s).map_err(|e| {
+    Color::try_from(s).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{}{}: {:?}", prefix, key, e).to_compact_string(),
+        format!("{}{}: {:?}", prefix, key, s).to_compact_string(),
       )
     })
   }
@@ -284,7 +284,7 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
 fn parse_palette(
   colorscheme: &toml::Table,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let the_err = |k: &str| {
+  let failure = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("palette.{}", k).to_compact_string())
   };
 
@@ -299,7 +299,7 @@ fn parse_palette(
           result.insert(k.as_str().to_compact_string(), code);
         }
         None => {
-          return Err(the_err(k));
+          return Err(failure(k));
         }
       }
     }
@@ -350,14 +350,12 @@ fn parse_hl_as_table(
 ) -> TheResult<(CompactString, Highlight)> {
   let id = format!("scope.{}", key).to_compact_string();
 
-  let failure = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
-  };
+  let failure = || TheErr::LoadColorSchemeFailed(id.clone());
 
   let parse_color = |x, fallback| -> TheResult<Option<Color>> {
     match value.get(x) {
       Some(x) => {
-        let x = x.as_str().ok_or(failure(key))?;
+        let x = x.as_str().ok_or(failure())?;
         match palette.get(x) {
           Some(x) => Ok(Some(*x)),
           None => Ok(Some(parse_color(x, "scope.", key)?)),
@@ -372,7 +370,7 @@ fn parse_hl_as_table(
 
   let parse_bool = |x| -> TheResult<bool> {
     match value.get(x) {
-      Some(x) => Ok(x.as_bool().ok_or(failure(key))?),
+      Some(x) => Ok(x.as_bool().ok_or(failure())?),
       None => Ok(false),
     }
   };
@@ -448,12 +446,13 @@ fn parse_highlights(
         for (lang, value_per_lang) in source_table.iter() {
           let scope_table_per_lang = value_per_lang.as_table().unwrap();
           for (key_per_lang, value_per_lang) in scope_table_per_lang.iter() {
+            let k = format!("{}.{}", key_per_lang, lang);
             if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
-              return Err(failure(&format!("scope.{}.{}", key_per_lang, lang)));
+              return Err(failure(&k));
             }
             if value_per_lang.is_table() {
               let (id, hl) = parse_hl_as_table(
-                &format!("{}.{}", key_per_lang, lang),
+                &k,
                 value_per_lang.as_table().unwrap(),
                 palette,
                 colors,
@@ -461,14 +460,14 @@ fn parse_highlights(
               result.insert(id, hl);
             } else if value_per_lang.is_str() {
               let (id, hl) = parse_hl_as_str(
-                &format!("{}.{}", key_per_lang, lang),
+                &k,
                 value_per_lang.as_str().unwrap(),
                 palette,
                 colors,
               )?;
               result.insert(id, hl);
             } else {
-              return Err(failure(&format!("scope.{}.{}", key_per_lang, lang)));
+              return Err(failure(&k));
             }
           }
         }
