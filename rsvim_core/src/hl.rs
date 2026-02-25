@@ -12,9 +12,6 @@
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
 //!
-//! [scope.source.ruby]
-//! boolean = "red"
-//!
 //! [ui]
 //! background = "#000000"
 //!
@@ -45,41 +42,6 @@
 //!     it is `false`.
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
-//!
-//! You can overwrite highlightings for specific languages by adding a
-//! `scope.source.{lang}` subsection. The `source.{lang}` part should match the
-//! tree-sitter grammar `grammars.0.scope` field inside the `tree-sitter.json`
-//! config.
-//!
-//! For example in
-//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby), the
-//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
-//! is:
-//!
-//! ```json
-//! {
-//!   "grammars": [
-//!     {
-//!       "name": "ruby",
-//!       "camelcase": "Ruby",
-//!       "scope": "source.ruby",
-//!       "path": ".",
-//!       "file-types": [
-//!         "rb"
-//!       ],
-//!       "highlights": "queries/highlights.scm",
-//!       "tags": "queries/tags.scm",
-//!       "injection-regex": "ruby"
-//!     }
-//!   ],
-//!   ...
-//! }
-//! ```
-//!
-//! To overwrite highlightings for ruby in your colorscheme, you need to add a
-//! subsection `scope.source.ruby`, the `source.ruby` matches the
-//! line `"scope": "source.ruby"` in the `tree-sitter.json` file.
-//!
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
@@ -292,6 +254,7 @@ fn parse_colors(
 
 fn parse_highlights(
   colorscheme: &toml::Table,
+  colors: &FoldMap<CompactString, Color>,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   let err = |k: &str| {
@@ -307,7 +270,7 @@ fn parse_highlights(
       if value.is_table() {
         let val_table = value.as_table().unwrap();
 
-        let parse_color = |x| -> TheResult<Option<Color>> {
+        let parse_color = |x, fallback| -> TheResult<Option<Color>> {
           match val_table.get(x) {
             Some(x) => {
               let x = x.as_str().ok_or(err(key))?;
@@ -316,12 +279,12 @@ fn parse_highlights(
                 None => Ok(Some(parse_code(x, "scope.", key)?)),
               }
             }
-            None => Ok(None),
+            None => Ok(colors.get(fallback).copied()),
           }
         };
 
-        let fg = parse_color("fg")?;
-        let bg = parse_color("bg")?;
+        let fg = parse_color("fg", "ui.foreground")?;
+        let bg = parse_color("bg", "ui.background")?;
 
         let parse_bool = |x| -> TheResult<bool> {
           match val_table.get(x) {
@@ -379,7 +342,7 @@ impl ColorScheme {
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
     let colors = parse_colors(&colorscheme, &palette)?;
-    let highlights = parse_highlights(&colorscheme, &palette)?;
+    let highlights = parse_highlights(&colorscheme, &colors, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
@@ -396,9 +359,13 @@ impl ColorScheme {
     &self.colors
   }
 
+  pub fn color(&self, id: &str) -> Option<&Color> {}
+
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
+
+  pub fn highlight(&self, id: &str) -> Option<&Highlight> {}
 }
 
 #[derive(Debug)]
