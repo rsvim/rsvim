@@ -12,6 +12,9 @@
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
 //!
+//! [scope.source.ruby]
+//! attribute = "red"
+//!
 //! [ui]
 //! background = "#000000"
 //!
@@ -42,6 +45,38 @@
 //!     it is `false`.
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
+//!
+//! You can overwrite highlightings for specific languages by adding
+//! `[scope.source.{lang}]`. The `source.{lang}` part should match the
+//! `grammars.scope` inside a `tree-sitter.json` grammar config.
+//!
+//! For example in
+//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby),
+//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
+//! is:
+//!
+//! ```json
+//! {
+//!   "grammars": [
+//!     {
+//!       "name": "ruby",
+//!       "camelcase": "Ruby",
+//!       "scope": "source.ruby",
+//!       "path": ".",
+//!       "file-types": [
+//!         "rb"
+//!       ],
+//!       "highlights": "queries/highlights.scm",
+//!       "tags": "queries/tags.scm",
+//!       "injection-regex": "ruby"
+//!     }
+//!   ],
+//!   ...
+//! }
+//! ```
+//!
+//! To overwrite highlightings for ruby, you need to add `[scope.source.ruby]`,
+//! which matches the `"scope": "source.ruby"` line in the above json.
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
@@ -361,6 +396,10 @@ impl ColorScheme {
 
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
+  }
+
+  pub fn resolve_highlight(&self, id: &str) -> Option<&Highlight> {
+    debug_assert!();
   }
 }
 
