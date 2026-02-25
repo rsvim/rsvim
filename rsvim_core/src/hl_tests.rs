@@ -179,7 +179,11 @@ background = "#000000"
         Some(Highlight {
           id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none(),
         }),
       ),
