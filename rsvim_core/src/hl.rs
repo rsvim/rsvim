@@ -342,7 +342,7 @@ fn parse_colors(
   Ok(result)
 }
 
-fn parse_highlight_as_table(
+fn parse_hl_as_table(
   key: &str,
   value: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
@@ -402,7 +402,7 @@ fn parse_highlight_as_table(
   Ok((id, hl))
 }
 
-fn parse_highlight_as_str(
+fn parse_hl_as_str(
   key: &str,
   value: &str,
   palette: &FoldMap<CompactString, Color>,
@@ -454,7 +454,7 @@ fn parse_highlights(
               return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
             }
             if attr_value.is_table() {
-              let (id, hl) = parse_highlight_as_table(
+              let (id, hl) = parse_hl_as_table(
                 &format!("{}.{}", attr_key, lang_key),
                 attr_value.as_table().unwrap(),
                 palette,
@@ -462,7 +462,7 @@ fn parse_highlights(
               )?;
               result.insert(id, hl);
             } else if attr_value.is_str() {
-              let (id, hl) = parse_highlight_as_str(
+              let (id, hl) = parse_hl_as_str(
                 &format!("{}.{}", attr_key, lang_key),
                 attr_value.as_str().unwrap(),
                 palette,
@@ -479,20 +479,12 @@ fn parse_highlights(
           return Err(failure(key));
         }
         if value.is_table() {
-          let (id, hl) = parse_highlight_as_table(
-            key,
-            value.as_table().unwrap(),
-            palette,
-            colors,
-          )?;
+          let (id, hl) =
+            parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
           result.insert(id, hl);
         } else if value.is_str() {
-          let (id, hl) = parse_highlight_as_str(
-            key,
-            value.as_str().unwrap(),
-            palette,
-            colors,
-          )?;
+          let (id, hl) =
+            parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
           result.insert(id, hl);
         } else {
           return Err(failure(key));
