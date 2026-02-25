@@ -499,4 +499,21 @@ attribute = "beijing"
       info!("error:{:?}", e.to_string());
     }
   }
+
+  #[test]
+  fn failed4() {
+    test_log_init();
+
+    let payload: &str = r##"
+[ui]
+foreground = { fg = "white" }
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed4", colorscheme_table);
+    assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
+  }
 }
