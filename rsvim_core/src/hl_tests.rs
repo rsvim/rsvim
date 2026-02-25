@@ -1,5 +1,4 @@
 use super::hl::*;
-use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
