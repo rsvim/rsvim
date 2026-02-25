@@ -93,6 +93,8 @@
 //! parser will lookup for the real color `value` behind the `key` when loading
 //! the colorscheme config.
 
+pub mod data;
+
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -242,17 +244,25 @@ pub struct Highlight {
   pub attr: Attributes,
 }
 
+struct Scope {}
+
+struct Ui {}
+
+struct Palette {}
+
+struct Data {
+  pub scope: Option<Scope>,
+  pub ui: Option<Ui>,
+  pub palette: Option<Palette>,
+}
+
 #[derive(Debug, Clone)]
 pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // UI colors
-  foreground: Color,
-  background: Color,
-
-  // Scope highlights
-  scope: FoldMap<CompactString, Highlight>,
+  // Data items.
+  data: Data,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
