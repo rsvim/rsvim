@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
@@ -180,16 +182,76 @@ impl<'de> serde::Deserialize<'de> for Highlight {
   }
 }
 
-pub struct Scope {
-  // attribute:
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Data {
+  pub scope: FoldMap<CompactString, Highlight>,
+  pub ui: FoldMap<CompactString, Color>,
 }
 
-pub struct Ui {}
+struct PaletteData {
+  pub palette: FoldMap<CompactString, Color>,
+}
 
-pub struct Palette {}
+struct PaletteMapVisitor;
 
-pub struct Data {
-  pub scope: Option<Scope>,
-  pub ui: Option<Ui>,
-  pub palette: Option<Palette>,
+impl<'de> serde::de::Visitor<'de> for PaletteMapVisitor {
+  type Value = FoldMap<CompactString, Color>;
+
+  fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    formatter.write_str("palette table")
+  }
+
+  fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+  where
+    A: serde::de::MapAccess<'de>,
+  {
+    let mut palette: FoldMap<CompactString, Color> = FoldMap::new();
+
+    while let Some(key) = map.next_key::<String>()? {
+      let value = map.next_value::<String>()?;
+      let value = deserialize_color(&value)?;
+      palette.insert(key.to_compact_string(), value);
+    }
+
+    Ok(palette)
+  }
+}
+
+struct PaletteDataVisitor;
+
+impl<'de> serde::de::Visitor<'de> for PaletteDataVisitor {
+  type Value = FoldMap<CompactString, Color>;
+
+  fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    formatter.write_str("palette table")
+  }
+
+  fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+  where
+    A: serde::de::MapAccess<'de>,
+  {
+    while let Some(key) = map.next_key::<String>()? {
+      match key.as_str() {
+        "palette" => {
+          let palette_map = map.next_value::<>
+        }
+        _ => {
+          let _: serde::de::IgnoredAny = map.next_value()?;
+        }
+      }
+      let value = map.next_value::<String>()?;
+      let value = deserialize_color(&value)?;
+      palette.insert(key.to_compact_string(), value);
+    }
+
+    Ok(palette)
+  }
+}
+
+impl<'de> serde::Deserialize<'de> for PaletteData {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::Deserializer<'de>,
+  {
+  }
 }

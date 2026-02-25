@@ -93,7 +93,7 @@
 //! parser will lookup for the real color `value` behind the `key` when loading
 //! the colorscheme config.
 
-pub mod data;
+// pub mod data;
 
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -104,10 +104,6 @@ use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
 pub const DEFAULT: &str = "default";
-
-// Default UI colors
-pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
-pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
 
 // "ui."
 pub const FOREGROUND: &str = "foreground";
@@ -244,25 +240,14 @@ pub struct Highlight {
   pub attr: Attributes,
 }
 
-struct Scope {}
-
-struct Ui {}
-
-struct Palette {}
-
-struct Data {
-  pub scope: Option<Scope>,
-  pub ui: Option<Ui>,
-  pub palette: Option<Palette>,
-}
-
 #[derive(Debug, Clone)]
 pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Data items.
-  data: Data,
+  highlights: FoldMap<CompactString, Highlight>,
+
+  colors: FoldMap<CompactString, Color>,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
@@ -326,7 +311,7 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_ui_colors(
+fn parse_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
@@ -364,16 +349,17 @@ fn parse_ui_colors(
   Ok(result)
 }
 
-fn parse_scope(
+fn parse_highlights(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
-) -> TheResult<toml::Table> {
+) -> TheResult<FoldMap<CompactString, Highlight>> {
   let err = |k: &str| {
     TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
   };
 
   let mut result =
-    toml::Table::with_capacity(colorscheme.len().saturating_sub(palette.len()));
+    FoldMap::with_capacity(colorscheme.len().saturating_sub(palette.len()));
+
   if let Some(scope) = colorscheme.get("scope")
     && let Some(scope_table) = scope.as_table()
   {
@@ -445,27 +431,21 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
-      foreground: DEFAULT_FOREGROUND_COLOR,
-      background: DEFAULT_BACKGROUND_COLOR,
-      scope: FoldMap::new(),
+      colors: FoldMap::new(),
+      highlights: FoldMap::new(),
     }
   }
 
   /// Load ColorScheme from a toml config.
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let ui_colors = parse_ui_colors(&colorscheme, &palette)?;
-    let scope = parse_scope(&colorscheme, &palette)?;
+    let colors = parse_colors(&colorscheme, &palette)?;
+    let highlights = parse_highlights(&colorscheme, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *ui_colors
-        .get(UI_FOREGROUND)
-        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
-      background: *ui_colors
-        .get(UI_BACKGROUND)
-        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
-      scope,
+      colors,
+      highlights,
     })
   }
 
@@ -473,29 +453,12 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn foreground(&self) -> &Color {
-    &self.foreground
+  pub fn colors(&self) -> FoldMap<CompactString, Color> {
+    &self.colors
   }
 
-  pub fn set_foreground(&mut self, value: Color) {
-    self.foreground = value;
-  }
-
-  pub fn background(&self) -> &Color {
-    &self.background
-  }
-
-  pub fn set_background(&mut self, value: Color) {
-    self.background = value;
-  }
-
-  pub fn scope(&self) -> &FoldMap<CompactString, Highlight> {
-    if cfg!(debug_assertions) {
-      for k in self.scope.keys() {
-        debug_assert!(k.starts_with("scope."));
-      }
-    }
-    &self.scope
+  pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
+    &self.highlights
   }
 }
 
