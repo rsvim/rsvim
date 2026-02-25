@@ -335,7 +335,14 @@ fn parse_highlight_as_table(
     attr.set(Attribute::Underlined);
   }
 
-  Ok((id.clone(), Highlight { id, fg, bg, attr }))
+  let hl = Highlight {
+    id: id.clone(),
+    fg,
+    bg,
+    attr,
+  };
+  trace!("id:{:?},hl:{:?}", id, hl);
+  Ok((id, hl))
 }
 
 fn parse_highlight_as_str(
@@ -354,7 +361,14 @@ fn parse_highlight_as_str(
   let bg = colors.get("ui.background").copied();
   let attr = Attributes::none();
 
-  Ok((id.clone(), Highlight { id, fg, bg, attr }))
+  let hl = Highlight {
+    id: id.clone(),
+    fg,
+    bg,
+    attr,
+  };
+  trace!("id:{:?},hl:{:?}", id, hl);
+  Ok((id, hl))
 }
 
 fn parse_highlights(
