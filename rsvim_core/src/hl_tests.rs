@@ -1,4 +1,5 @@
 use super::hl::*;
+use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use crossterm::style::Attribute;
@@ -420,7 +421,8 @@ grey = "#c0c0c0"
         }),
       ),
     ];
-    for expect in resolved_scope_expects {
+    for (i, expect) in resolved_scope_expects.iter().enumerate() {
+      info!("i:{}, expect:{:?}", i, expect);
       assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
     }
 

@@ -450,13 +450,12 @@ fn parse_highlights(
           // trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
           let lang_value_table = lang_value.as_table().unwrap();
           for (attr_key, attr_value) in lang_value_table.iter() {
-            let id_key = format!("scope.{}.{}", attr_key, lang_key);
             if !SCOPE_NAMES.contains(attr_key.as_str()) {
-              return Err(failure(&id_key));
+              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
             }
             if attr_value.is_table() {
               let (id, hl) = parse_highlight_as_table(
-                &id_key,
+                &format!("{}.{}", attr_key, lang_key),
                 attr_value.as_table().unwrap(),
                 palette,
                 colors,
@@ -464,14 +463,14 @@ fn parse_highlights(
               result.insert(id, hl);
             } else if attr_value.is_str() {
               let (id, hl) = parse_highlight_as_str(
-                &id_key,
+                &format!("{}.{}", attr_key, lang_key),
                 attr_value.as_str().unwrap(),
                 palette,
                 colors,
               )?;
               result.insert(id, hl);
             } else {
-              return Err(failure(&id_key));
+              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
             }
           }
         }
