@@ -448,6 +448,8 @@ grey = "#c0c0c0"
 
   #[test]
   fn failed1() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "#zxcvas"
@@ -456,10 +458,15 @@ attribute = "#zxcvas"
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed1", colorscheme_table);
     assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
   }
 
   #[test]
   fn failed2() {
+    test_log_init();
+
     let payload: &str = r##"
 [scope]
 attribute = "white"
@@ -471,5 +478,59 @@ rustsrcour = "#ffffff"
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed2", colorscheme_table);
     assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
+  }
+
+  #[test]
+  fn failed3() {
+    test_log_init();
+
+    let payload: &str = r##"
+[scope]
+attribute = "beijing"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed3", colorscheme_table);
+    assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
+  }
+
+  #[test]
+  fn failed4() {
+    test_log_init();
+
+    let payload: &str = r##"
+[ui]
+foreground = { fg = "white" }
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed4", colorscheme_table);
+    assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
+  }
+
+  #[test]
+  fn failed5() {
+    test_log_init();
+
+    let payload: &str = r##"
+[palette]
+white = true
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed5", colorscheme_table);
+    assert!(cs.is_err());
+    if let Err(e) = cs {
+      info!("error:{:?}", e.to_string());
+    }
   }
 }
