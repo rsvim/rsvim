@@ -1,4 +1,6 @@
 use super::hl::*;
+use crate::prelude::*;
+use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
@@ -13,33 +15,38 @@ mod parse_toml {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
 
-    assert_eq!(*cs.background(), Color::Black);
-    assert_eq!(*cs.foreground(), Color::White);
+    assert!(cs.colors().get("ui.background").is_none());
+    assert!(cs.colors().get("ui.foreground").is_none());
 
-    assert!(cs.syn().get("syn.boolean").is_some());
-    assert!(cs.syn().get("syn.boolean").unwrap().bg.is_none());
+    assert!(cs.highlights().get("scope.boolean").is_some());
+    assert!(cs.highlights().get("scope.boolean").unwrap().bg.is_none());
     assert_eq!(
-      cs.syn().get("syn.boolean").unwrap().fg,
+      cs.highlights().get("scope.boolean").unwrap().fg,
       Some(Color::Magenta)
     );
     assert_eq!(
-      cs.syn().get("syn.boolean").unwrap().attr,
+      cs.highlights().get("scope.boolean").unwrap().attr,
       Attributes::none()
     );
 
-    assert!(cs.syn().get("syn.variable").is_some());
-    assert!(cs.syn().get("syn.variable").unwrap().bg.is_none());
-    assert_eq!(cs.syn().get("syn.variable").unwrap().fg, Some(Color::Cyan));
+    assert!(cs.highlights().get("scope.variable").is_some());
+    assert!(cs.highlights().get("scope.variable").unwrap().bg.is_none());
     assert_eq!(
-      cs.syn().get("syn.variable").unwrap().attr,
+      cs.highlights().get("scope.variable").unwrap().fg,
+      Some(Color::Cyan)
+    );
+    assert_eq!(
+      cs.highlights().get("scope.variable").unwrap().attr,
       Attributes::none()
     );
   }
 
   #[test]
   fn toml1() {
+    test_log_init();
+
     let payload: &str = r##"
-[syn]
+[scope]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
 comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
@@ -60,36 +67,44 @@ grey = "#c0c0c0"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
-    assert_eq!(cs.syn().len(), 4);
+    assert_eq!(cs.highlights().len(), 4);
 
-    let syntax_expects = [
+    let scope_expects = [
       (
-        "syn.attribute",
+        "scope.attribute",
         Some(Highlight {
-          id: "syn.attribute".to_compact_string(),
+          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none(),
         }),
       ),
       (
-        "syn.boolean",
+        "scope.boolean",
         Some(Highlight {
-          id: "syn.boolean".to_compact_string(),
+          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
             b: 0x00,
           }),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("syn.carriage-return", None),
+      ("scope.carriage-return", None),
       (
-        "syn.comment",
+        "scope.comment",
         Some(Highlight {
-          id: "syn.comment".to_compact_string(),
+          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -107,9 +122,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "syn.keyword",
+        "scope.keyword",
         Some(Highlight {
-          id: "syn.keyword".to_compact_string(),
+          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -124,25 +139,27 @@ grey = "#c0c0c0"
         }),
       ),
     ];
-    for expect in syntax_expects.iter() {
-      assert_eq!(cs.syn().get(expect.0), expect.1.as_ref());
+    for expect in scope_expects.iter() {
+      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
     }
 
     assert_eq!(
-      *cs.background(),
+      *cs.colors().get("ui.background").unwrap(),
       Color::Rgb {
         r: 0x0,
         g: 0x0,
         b: 0x0
       }
     );
-    assert_eq!(*cs.foreground(), Color::White);
+    assert!(cs.colors().get("ui.foreground").is_none());
   }
 
   #[test]
   fn toml2() {
+    test_log_init();
+
     let payload: &str = r##"
-[syn]
+[scope]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
 comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
@@ -155,32 +172,40 @@ background = "#000000"
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("toml2", colorscheme_table).unwrap();
-    assert_eq!(cs.syn().len(), 4);
+    assert_eq!(cs.highlights().len(), 4);
 
-    let syntax_expects = [
+    let scope_expects = [
       (
-        "syn.attribute",
+        "scope.attribute",
         Some(Highlight {
-          id: "syn.attribute".to_compact_string(),
+          id: "scope.attribute".to_compact_string(),
           fg: Some(Color::White),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none(),
         }),
       ),
       (
-        "syn.boolean",
+        "scope.boolean",
         Some(Highlight {
-          id: "syn.boolean".to_compact_string(),
+          id: "scope.boolean".to_compact_string(),
           fg: Some(Color::Yellow),
-          bg: None,
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("syn.carriage-return", None),
+      ("scope.carriage-return", None),
       (
-        "syn.comment",
+        "scope.comment",
         Some(Highlight {
-          id: "syn.comment".to_compact_string(),
+          id: "scope.comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -198,21 +223,21 @@ background = "#000000"
         }),
       ),
       (
-        "syn.keyword",
+        "scope.keyword",
         Some(Highlight {
-          id: "syn.keyword".to_compact_string(),
+          id: "scope.keyword".to_compact_string(),
           fg: Some(Color::Red),
           bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
         }),
       ),
     ];
-    for expect in syntax_expects.iter() {
-      assert_eq!(cs.syn().get(expect.0), expect.1.as_ref());
+    for expect in scope_expects.iter() {
+      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
     }
 
     assert_eq!(
-      *cs.background(),
+      *cs.colors().get("ui.background").unwrap(),
       Color::Rgb {
         r: 0x0,
         g: 0x0,
@@ -220,7 +245,7 @@ background = "#000000"
       }
     );
     assert_eq!(
-      *cs.foreground(),
+      *cs.colors().get("ui.foreground").unwrap(),
       Color::Rgb {
         r: 0xff,
         g: 0xff,
@@ -230,14 +255,221 @@ background = "#000000"
   }
 
   #[test]
+  fn toml3() {
+    test_log_init();
+
+    let payload: &str = r##"
+[scope]
+attribute = "white"
+boolean = { fg = "yellow", bold = true }
+comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+keyword = { fg = "#ffffff", bg = "green", italic = true }
+
+[scope.source.ruby]
+attribute = "red"
+
+[scope.source.c]
+boolean = "red"
+
+[ui]
+background = "#000000"
+
+[palette]
+# white = "#ffffff"
+black = "#000000"
+yellow = "#ffff00"
+green = "#00ff00"
+
+# Never used
+grey = "#c0c0c0"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("toml1", colorscheme_table).unwrap();
+    assert_eq!(cs.highlights().len(), 6);
+
+    let scope_expects = [
+      (
+        "scope.attribute",
+        Some(Highlight {
+          id: "scope.attribute".to_compact_string(),
+          fg: Some(Color::White),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.boolean",
+        Some(Highlight {
+          id: "scope.boolean".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x00,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Bold),
+        }),
+      ),
+      ("scope.carriage-return", None),
+      (
+        "scope.comment",
+        Some(Highlight {
+          id: "scope.comment".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xc0,
+            g: 0xc0,
+            b: 0xc0,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none()
+            .with(Attribute::Bold)
+            .with(Attribute::Italic)
+            .with(Attribute::Underlined),
+        }),
+      ),
+      (
+        "scope.keyword",
+        Some(Highlight {
+          id: "scope.keyword".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0xff,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0xff,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Italic),
+        }),
+      ),
+    ];
+    for expect in scope_expects.iter() {
+      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
+      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
+    }
+
+    let resolved_scope_expects = [
+      (
+        "scope.attribute.ruby",
+        Some(Highlight {
+          id: "scope.attribute.ruby".to_compact_string(),
+          fg: Some(Color::Red),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.attribute.c",
+        Some(Highlight {
+          id: "scope.attribute".to_compact_string(),
+          fg: Some(Color::White),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+      (
+        "scope.boolean.ruby",
+        Some(Highlight {
+          id: "scope.boolean".to_compact_string(),
+          fg: Some(Color::Rgb {
+            r: 0xff,
+            g: 0xff,
+            b: 0x0,
+          }),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none().with(Attribute::Bold),
+        }),
+      ),
+      (
+        "scope.boolean.c",
+        Some(Highlight {
+          id: "scope.boolean.c".to_compact_string(),
+          fg: Some(Color::Red),
+          bg: Some(Color::Rgb {
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+          }),
+          attr: Attributes::none(),
+        }),
+      ),
+    ];
+    for (i, expect) in resolved_scope_expects.iter().enumerate() {
+      info!("i:{}, expect:{:?}", i, expect);
+      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
+    }
+
+    assert_eq!(
+      *cs.colors().get("ui.background").unwrap(),
+      Color::Rgb {
+        r: 0x0,
+        g: 0x0,
+        b: 0x0
+      }
+    );
+    assert_eq!(
+      *cs.resolve_color("ui.background").unwrap(),
+      Color::Rgb {
+        r: 0x0,
+        g: 0x0,
+        b: 0x0
+      }
+    );
+    assert!(cs.colors().get("ui.foreground").is_none());
+    assert!(cs.resolve_color("ui.foreground").is_none());
+  }
+
+  #[test]
   fn failed1() {
     let payload: &str = r##"
-[syn]
+[scope]
 attribute = "#zxcvas"
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();
     let cs = ColorScheme::from_toml("failed1", colorscheme_table);
+    assert!(cs.is_err());
+  }
+
+  #[test]
+  fn failed2() {
+    let payload: &str = r##"
+[scope]
+attribute = "white"
+
+[scope.source.rust]
+rustsrcour = "#ffffff"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed2", colorscheme_table);
     assert!(cs.is_err());
   }
 }

@@ -1,4 +1,93 @@
 //! Highlight and ColorScheme.
+//!
+//! ColorScheme is defined by a toml config file, which references the theme
+//! configuration of the [helix](https://github.com/helix-editor/helix) editor.
+//!
+//! A colorscheme config file has 3 sections: scope, ui and palette:
+//!
+//! ```toml
+//! [scope]
+//! attribute = "white"
+//! boolean = { fg = "yellow", bold = true }
+//! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+//! keyword = { fg = "#ffffff", bg = "green", italic = true }
+//!
+//! [scope.source.ruby]
+//! attribute = "red"
+//!
+//! [ui]
+//! background = "#000000"
+//!
+//! [palette]
+//! # white = "#ffffff"
+//! black = "#000000"
+//! yellow = "#ffff00"
+//! green = "#00ff00"
+//!
+//! # Never used
+//! grey = "#c0c0c0"
+//! ```
+//!
+//! `scope` section defines syntax highlightings for programming languages, the
+//! value of a scope item can have two formats:
+//!
+//! - A string defines the foreground text color for that syntax highlighting,
+//!   it accepts either ANSI color name, such as "white", "yellow", etc. Or RGB
+//!   color code, such as "#ffffff", "#ffff00", etc.
+//! - A toml table with below optional attributes:
+//!   - `fg`: a string value indicates the foreground text color (ANSI/RGB), it
+//!     uses `ui.foreground` if been omitted.
+//!   - `bg`: a string value indicates the background text color (ANSI/RGB), it
+//!     uses `ui.background` if been omitted.
+//!   - `bold`: a boolean value indicates whether the text is bold, by default
+//!     it is `false`.
+//!   - `italic`: a boolean value indicates whether text is italic, by default
+//!     it is `false`.
+//!   - `underlined`: a boolean value indicates whether text is underlined, by
+//!     default it is `false`.
+//!
+//! You can overwrite highlightings for specific languages by adding a
+//! `[scope.source.{lang}]` section. The `{lang}` should match the grammar name
+//! inside a `tree-sitter.json` grammar config.
+//!
+//! For example in
+//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby),
+//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
+//! grammar name is `"ruby"`:
+//!
+//! ```json
+//! {
+//!   "grammars": [
+//!     {
+//!       "name": "ruby",
+//!       "camelcase": "Ruby",
+//!       "scope": "source.ruby",
+//!       "path": ".",
+//!       "file-types": [
+//!         "rb"
+//!       ],
+//!       "highlights": "queries/highlights.scm",
+//!       "tags": "queries/tags.scm",
+//!       "injection-regex": "ruby"
+//!     }
+//!   ],
+//!   ...
+//! }
+//! ```
+//!
+//! In this case, you need to add `[scope.source.ruby]` section for ruby.
+//!
+//! `ui` section defines other UI highlightings such as common foreground and
+//! background text colors. There're some default configs:
+//!
+//! - `ui.foreground`: uses `white` by default.
+//! - `ui.background`: uses `black` by default.
+//!
+//! `palette` section is a helper section for defining `scope` and `ui` section
+//! more easily. By adding a `key=value` pair in palette section, you can use
+//! the `key` as a color name in `scope` and `ui` section, syntax highlighting
+//! parser will lookup for the real color `value` behind the `key` when loading
+//! the colorscheme config.
 
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -10,17 +99,11 @@ use once_cell::sync::Lazy;
 
 pub const DEFAULT: &str = "default";
 
-// Default UI colors
-pub const DEFAULT_FOREGROUND_COLOR: Color = Color::White;
-pub const DEFAULT_BACKGROUND_COLOR: Color = Color::Black;
-
 // "ui."
 pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
-pub const UI_FOREGROUND: &str = "ui.foreground";
-pub const UI_BACKGROUND: &str = "ui.background";
 
-// "syn."
+// "scope."
 pub const ATTRIBUTE: &str = "attribute";
 pub const BOOLEAN: &str = "boolean";
 pub const CARRIAGE_RETURN: &str = "carriage-return";
@@ -73,60 +156,11 @@ pub const VARIABLE: &str = "variable";
 pub const VARIABLE_BUILTIN: &str = "variable.builtin";
 pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
-pub const SYN_ATTRIBUTE: &str = "syn.attribute";
-pub const SYN_BOOLEAN: &str = "syn.boolean";
-pub const SYN_CARRIAGE_RETURN: &str = "syn.carriage-return";
-pub const SYN_COMMENT: &str = "syn.comment";
-pub const SYN_COMMENT_DOCUMENTATION: &str = "syn.comment.documentation";
-pub const SYN_CONSTANT: &str = "syn.constant";
-pub const SYN_CONSTANT_BUILTIN: &str = "syn.constant.builtin";
-pub const SYN_CONSTRUCTOR: &str = "syn.constructor";
-pub const SYN_CONSTRUCTOR_BUILTIN: &str = "syn.constructor.builtin";
-pub const SYN_EMBEDDED: &str = "syn.embedded";
-pub const SYN_ERROR: &str = "syn.error";
-pub const SYN_ESCAPE: &str = "syn.escape";
-pub const SYN_FUNCTION: &str = "syn.function";
-pub const SYN_FUNCTION_BUILTIN: &str = "syn.function.builtin";
-pub const SYN_KEYWORD: &str = "syn.keyword";
-pub const SYN_MARKUP: &str = "syn.markup";
-pub const SYN_MARKUP_BOLD: &str = "syn.markup.bold";
-pub const SYN_MARKUP_HEADING: &str = "syn.markup.heading";
-pub const SYN_MARKUP_ITALIC: &str = "syn.markup.italic";
-pub const SYN_MARKUP_LINK: &str = "syn.markup.link";
-pub const SYN_MARKUP_LINK_URL: &str = "syn.markup.link.url";
-pub const SYN_MARKUP_LIST: &str = "syn.markup.list";
-pub const SYN_MARKUP_LIST_CHECKED: &str = "syn.markup.list.checked";
-pub const SYN_MARKUP_LIST_NUMBERED: &str = "syn.markup.list.numbered";
-pub const SYN_MARKUP_LIST_UNCHECKED: &str = "syn.markup.list.unchecked";
-pub const SYN_MARKUP_LIST_UNNUMBERED: &str = "syn.markup.list.unnumbered";
-pub const SYN_MARKUP_QUOTE: &str = "syn.markup.quote";
-pub const SYN_MARKUP_RAW: &str = "syn.markup.raw";
-pub const SYN_MARKUP_RAW_BLOCK: &str = "syn.markup.raw.block";
-pub const SYN_MARKUP_RAW_INLINE: &str = "syn.markup.raw.inline";
-pub const SYN_MARKUP_STRIKETHROUGH: &str = "syn.markup.strikethrough";
-pub const SYN_MODULE: &str = "syn.module";
-pub const SYN_NUMBER: &str = "syn.number";
-pub const SYN_OPERATOR: &str = "syn.operator";
-pub const SYN_PROPERTY: &str = "syn.property";
-pub const SYN_PROPERTY_BUILTIN: &str = "syn.property.builtin";
-pub const SYN_PUNCTUATION: &str = "syn.punctuation";
-pub const SYN_PUNCTUATION_BRACKET: &str = "syn.punctuation.bracket";
-pub const SYN_PUNCTUATION_DELIMITER: &str = "syn.punctuation.delimiter";
-pub const SYN_PUNCTUATION_SPECIAL: &str = "syn.punctuation.special";
-pub const SYN_STRING: &str = "syn.string";
-pub const SYN_STRING_ESCAPE: &str = "syn.string.escape";
-pub const SYN_STRING_REGEXP: &str = "syn.string.regexp";
-pub const SYN_STRING_SPECIAL: &str = "syn.string.special";
-pub const SYN_STRING_SPECIAL_SYMBOL: &str = "syn.string.special.symbol";
-pub const SYN_TAG: &str = "syn.tag";
-pub const SYN_TYPE: &str = "syn.type";
-pub const SYN_TYPE_BUILTIN: &str = "syn.type.builtin";
-pub const SYN_VARIABLE: &str = "syn.variable";
-pub const SYN_VARIABLE_BUILTIN: &str = "syn.variable.builtin";
-pub const SYN_VARIABLE_MEMBER: &str = "syn.variable.member";
-pub const SYN_VARIABLE_PARAMETER: &str = "syn.variable.parameter";
 
-pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<&str>> = Lazy::new(|| {
+pub static UI_NAMES: Lazy<FoldSet<&'static str>> =
+  Lazy::new(|| [FOREGROUND, BACKGROUND].into_iter().collect());
+
+pub static SCOPE_NAMES: Lazy<FoldSet<&'static str>> = Lazy::new(|| {
   [
     ATTRIBUTE,
     BOOLEAN,
@@ -182,72 +216,12 @@ pub static TREESITTER_HIGHLIGHTS: Lazy<FoldSet<&str>> = Lazy::new(|| {
     VARIABLE_PARAMETER,
   ]
   .into_iter()
-  .collect::<FoldSet<&str>>()
-});
-
-pub static SYN_TREESITTER_HIGHLIGHTS: Lazy<FoldSet<&str>> = Lazy::new(|| {
-  [
-    SYN_ATTRIBUTE,
-    SYN_BOOLEAN,
-    SYN_CARRIAGE_RETURN,
-    SYN_COMMENT,
-    SYN_COMMENT_DOCUMENTATION,
-    SYN_CONSTANT,
-    SYN_CONSTANT_BUILTIN,
-    SYN_CONSTRUCTOR,
-    SYN_CONSTRUCTOR_BUILTIN,
-    SYN_EMBEDDED,
-    SYN_ERROR,
-    SYN_ESCAPE,
-    SYN_FUNCTION,
-    SYN_FUNCTION_BUILTIN,
-    SYN_KEYWORD,
-    SYN_MARKUP,
-    SYN_MARKUP_BOLD,
-    SYN_MARKUP_HEADING,
-    SYN_MARKUP_ITALIC,
-    SYN_MARKUP_LINK,
-    SYN_MARKUP_LINK_URL,
-    SYN_MARKUP_LIST,
-    SYN_MARKUP_LIST_CHECKED,
-    SYN_MARKUP_LIST_NUMBERED,
-    SYN_MARKUP_LIST_UNCHECKED,
-    SYN_MARKUP_LIST_UNNUMBERED,
-    SYN_MARKUP_QUOTE,
-    SYN_MARKUP_RAW,
-    SYN_MARKUP_RAW_BLOCK,
-    SYN_MARKUP_RAW_INLINE,
-    SYN_MARKUP_STRIKETHROUGH,
-    SYN_MODULE,
-    SYN_NUMBER,
-    SYN_OPERATOR,
-    SYN_PROPERTY,
-    SYN_PROPERTY_BUILTIN,
-    SYN_PUNCTUATION,
-    SYN_PUNCTUATION_BRACKET,
-    SYN_PUNCTUATION_DELIMITER,
-    SYN_PUNCTUATION_SPECIAL,
-    SYN_STRING,
-    SYN_STRING_ESCAPE,
-    SYN_STRING_REGEXP,
-    SYN_STRING_SPECIAL,
-    SYN_STRING_SPECIAL_SYMBOL,
-    SYN_TAG,
-    SYN_TYPE,
-    SYN_TYPE_BUILTIN,
-    SYN_VARIABLE,
-    SYN_VARIABLE_BUILTIN,
-    SYN_VARIABLE_MEMBER,
-    SYN_VARIABLE_PARAMETER,
-  ]
-  .into_iter()
-  .collect::<FoldSet<&str>>()
+  .collect()
 });
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
-  /// Style ID
   pub id: CompactString,
 
   /// Foreground color.
@@ -265,12 +239,11 @@ pub struct ColorScheme {
   // Name.
   name: CompactString,
 
-  // Plain colors
-  foreground: Color,
-  background: Color,
+  // Colors
+  colors: FoldMap<CompactString, Color>,
 
-  // Syntax colors
-  syn: FoldMap<CompactString, Highlight>,
+  // Highlights
+  highlights: FoldMap<CompactString, Highlight>,
 }
 
 fn parse_code(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
@@ -334,15 +307,11 @@ fn parse_palette(
   Ok(result)
 }
 
-fn parse_plain_colors(
+fn parse_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let plain_colors = [FOREGROUND, BACKGROUND]
-    .into_iter()
-    .collect::<FoldSet<&str>>();
-
-  let err = |k: &str| {
+  let failure = |k: &str| {
     Err(TheErr::LoadColorSchemeFailed(
       format!("ui.{}", k).to_compact_string(),
     ))
@@ -353,18 +322,19 @@ fn parse_plain_colors(
     && let Some(ui_table) = ui.as_table()
   {
     for (key, val) in ui_table.iter() {
-      if plain_colors.contains(key.as_str()) {
-        if val.is_str() {
-          let value = val.as_str().unwrap();
-          let value = match palette.get(value) {
-            Some(code) => *code,
-            None => parse_code(value, "ui.", key)?,
-          };
-          let id = format!("ui.{}", key).to_compact_string();
-          result.insert(id, value);
-        } else {
-          return err(key);
-        }
+      if !UI_NAMES.contains(key.as_str()) {
+        return failure(key);
+      }
+      if val.is_str() {
+        let value = val.as_str().unwrap();
+        let value = match palette.get(value) {
+          Some(code) => *code,
+          None => parse_code(value, "ui.", key)?,
+        };
+        let id = format!("ui.{}", key).to_compact_string();
+        result.insert(id, value);
+      } else {
+        return failure(key);
       }
     }
   }
@@ -372,75 +342,153 @@ fn parse_plain_colors(
   Ok(result)
 }
 
-fn parse_syntax_highlights(
+fn parse_hl_as_table(
+  key: &str,
+  value: &toml::Table,
+  palette: &FoldMap<CompactString, Color>,
+  colors: &FoldMap<CompactString, Color>,
+) -> TheResult<(CompactString, Highlight)> {
+  let id = format!("scope.{}", key).to_compact_string();
+
+  let failure = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
+  };
+
+  let parse_color = |x, fallback| -> TheResult<Option<Color>> {
+    match value.get(x) {
+      Some(x) => {
+        let x = x.as_str().ok_or(failure(key))?;
+        match palette.get(x) {
+          Some(x) => Ok(Some(*x)),
+          None => Ok(Some(parse_code(x, "scope.", key)?)),
+        }
+      }
+      None => Ok(colors.get(fallback).copied()),
+    }
+  };
+
+  let fg = parse_color("fg", "ui.foreground")?;
+  let bg = parse_color("bg", "ui.background")?;
+
+  let parse_bool = |x| -> TheResult<bool> {
+    match value.get(x) {
+      Some(x) => Ok(x.as_bool().ok_or(failure(key))?),
+      None => Ok(false),
+    }
+  };
+
+  let bold = parse_bool("bold")?;
+  let italic = parse_bool("italic")?;
+  let underlined = parse_bool("underlined")?;
+
+  let mut attr = Attributes::none();
+  if bold {
+    attr.set(Attribute::Bold);
+  }
+  if italic {
+    attr.set(Attribute::Italic);
+  }
+  if underlined {
+    attr.set(Attribute::Underlined);
+  }
+
+  let hl = Highlight {
+    id: id.clone(),
+    fg,
+    bg,
+    attr,
+  };
+  trace!("id:{:?},hl:{:?}", id, hl);
+  Ok((id, hl))
+}
+
+fn parse_hl_as_str(
+  key: &str,
+  value: &str,
+  palette: &FoldMap<CompactString, Color>,
+  colors: &FoldMap<CompactString, Color>,
+) -> TheResult<(CompactString, Highlight)> {
+  let id = format!("scope.{}", key).to_compact_string();
+
+  let fg = match palette.get(value) {
+    Some(fg) => Some(*fg),
+    None => Some(parse_code(value, "scope.", key)?),
+  };
+
+  let bg = colors.get("ui.background").copied();
+  let attr = Attributes::none();
+
+  let hl = Highlight {
+    id: id.clone(),
+    fg,
+    bg,
+    attr,
+  };
+  trace!("id:{:?},hl:{:?}", id, hl);
+  Ok((id, hl))
+}
+
+fn parse_highlights(
   colorscheme: &toml::Table,
+  colors: &FoldMap<CompactString, Color>,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
-  let err = |k: &str| {
-    TheErr::LoadColorSchemeFailed(format!("syn.{}", k).to_compact_string())
+  let failure = |k: &str| {
+    TheErr::LoadColorSchemeFailed(format!("scope.{}", k).to_compact_string())
   };
 
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
-  if let Some(syn) = colorscheme.get("syn")
-    && let Some(syn_table) = syn.as_table()
+
+  if let Some(scope) = colorscheme.get("scope")
+    && let Some(scope_table) = scope.as_table()
   {
-    for (key, val) in syn_table.iter() {
-      let id = format!("syn.{}", key).to_compact_string();
-      if val.is_table() {
-        let val_table = val.as_table().unwrap();
-
-        let parse_color = |x| -> TheResult<Option<Color>> {
-          match val_table.get(x) {
-            Some(x) => {
-              let x = x.as_str().ok_or(err(key))?;
-              match palette.get(x) {
-                Some(x) => Ok(Some(*x)),
-                None => Ok(Some(parse_code(x, "syn.", key)?)),
-              }
+    for (key, value) in scope_table.iter() {
+      // trace!("key:{:?}, value:{:?}", key, value);
+      if key.as_str() == "source" {
+        let source_table = value.as_table().unwrap();
+        for (lang_key, lang_value) in source_table.iter() {
+          // trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
+          let lang_value_table = lang_value.as_table().unwrap();
+          for (attr_key, attr_value) in lang_value_table.iter() {
+            if !SCOPE_NAMES.contains(attr_key.as_str()) {
+              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
             }
-            None => Ok(None),
+            if attr_value.is_table() {
+              let (id, hl) = parse_hl_as_table(
+                &format!("{}.{}", attr_key, lang_key),
+                attr_value.as_table().unwrap(),
+                palette,
+                colors,
+              )?;
+              result.insert(id, hl);
+            } else if attr_value.is_str() {
+              let (id, hl) = parse_hl_as_str(
+                &format!("{}.{}", attr_key, lang_key),
+                attr_value.as_str().unwrap(),
+                palette,
+                colors,
+              )?;
+              result.insert(id, hl);
+            } else {
+              return Err(failure(&format!("scope.{}.{}", attr_key, lang_key)));
+            }
           }
-        };
-
-        let fg = parse_color("fg")?;
-        let bg = parse_color("bg")?;
-
-        let parse_bool = |x| -> TheResult<bool> {
-          match val_table.get(x) {
-            Some(x) => Ok(x.as_bool().ok_or(err(key))?),
-            None => Ok(false),
-          }
-        };
-
-        let bold = parse_bool("bold")?;
-        let italic = parse_bool("italic")?;
-        let underlined = parse_bool("underlined")?;
-
-        let mut attr = Attributes::none();
-        if bold {
-          attr.set(Attribute::Bold);
         }
-        if italic {
-          attr.set(Attribute::Italic);
-        }
-        if underlined {
-          attr.set(Attribute::Underlined);
-        }
-
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
-      } else if val.is_str() {
-        let fg = val.as_str().unwrap();
-        let fg = match palette.get(fg) {
-          Some(fg) => Some(*fg),
-          None => Some(parse_code(fg, "syn.", key)?),
-        };
-
-        let bg = None;
-        let attr = Attributes::none();
-
-        result.insert(id.clone(), Highlight { id, fg, bg, attr });
       } else {
-        return Err(err(key));
+        if !SCOPE_NAMES.contains(key.as_str()) {
+          return Err(failure(key));
+        }
+        if value.is_table() {
+          let (id, hl) =
+            parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
+          result.insert(id, hl);
+        } else if value.is_str() {
+          let (id, hl) =
+            parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
+          result.insert(id, hl);
+        } else {
+          return Err(failure(key));
+        }
       }
     }
   }
@@ -452,40 +500,21 @@ impl ColorScheme {
   pub fn from_empty(name: &str) -> Self {
     Self {
       name: name.to_compact_string(),
-      foreground: DEFAULT_FOREGROUND_COLOR,
-      background: DEFAULT_BACKGROUND_COLOR,
-      syn: FoldMap::new(),
+      colors: FoldMap::new(),
+      highlights: FoldMap::new(),
     }
   }
 
-  /// A ColorScheme can be defined with a toml file, for example:
-  /// ```toml
-  /// [syn]
-  /// attribute = "white"
-  /// boolean = { fg = "yellow", bold = true }
-  ///
-  /// [ui]
-  /// background = "#000000"
-  ///
-  /// [palette]
-  /// white = "#ffffff"
-  /// black = "#000000"
-  /// yellow = "#ffff00"
-  /// ```
+  /// A ColorScheme can be defined with a toml file.
   pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
     let palette = parse_palette(&colorscheme)?;
-    let plain_colors = parse_plain_colors(&colorscheme, &palette)?;
-    let syn = parse_syntax_highlights(&colorscheme, &palette)?;
+    let colors = parse_colors(&colorscheme, &palette)?;
+    let highlights = parse_highlights(&colorscheme, &colors, &palette)?;
 
     Ok(Self {
       name: name.to_compact_string(),
-      foreground: *plain_colors
-        .get(UI_FOREGROUND)
-        .unwrap_or(&DEFAULT_FOREGROUND_COLOR),
-      background: *plain_colors
-        .get(UI_BACKGROUND)
-        .unwrap_or(&DEFAULT_BACKGROUND_COLOR),
-      syn,
+      colors,
+      highlights,
     })
   }
 
@@ -493,36 +522,67 @@ impl ColorScheme {
     &self.name
   }
 
-  pub fn foreground(&self) -> &Color {
-    &self.foreground
+  pub fn colors(&self) -> &FoldMap<CompactString, Color> {
+    &self.colors
   }
 
-  pub fn set_foreground(&mut self, value: Color) {
-    self.foreground = value;
-  }
+  pub fn resolve_color(&self, id: &str) -> Option<&Color> {
+    debug_assert!(!id.is_empty());
+    debug_assert!(!id.trim().is_empty());
+    debug_assert_eq!(id.trim(), id);
+    debug_assert!(!id.starts_with("."));
+    debug_assert!(!id.ends_with("."));
 
-  pub fn background(&self) -> &Color {
-    &self.background
-  }
-
-  pub fn set_background(&mut self, value: Color) {
-    self.background = value;
-  }
-
-  pub fn syn(&self) -> &FoldMap<CompactString, Highlight> {
-    if cfg!(debug_assertions) {
-      for k in self.syn.keys() {
-        debug_assert!(k.starts_with("syn."));
+    let mut i = id;
+    loop {
+      if let Some(color) = self.colors.get(i) {
+        return Some(color);
+      }
+      match i.rfind(".") {
+        Some(pos) => {
+          i = &i[..pos];
+          if i.is_empty() {
+            return None;
+          }
+        }
+        None => return None,
       }
     }
-    &self.syn
+  }
+
+  pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
+    &self.highlights
+  }
+
+  pub fn resolve_highlight(&self, id: &str) -> Option<&Highlight> {
+    debug_assert!(!id.is_empty());
+    debug_assert!(!id.trim().is_empty());
+    debug_assert_eq!(id.trim(), id);
+    debug_assert!(!id.starts_with("."));
+    debug_assert!(!id.ends_with("."));
+
+    let mut i = id;
+    loop {
+      if let Some(hl) = self.highlights.get(i) {
+        return Some(hl);
+      }
+      match i.rfind(".") {
+        Some(pos) => {
+          i = &i[..pos];
+          if i.is_empty() {
+            return None;
+          }
+        }
+        None => return None,
+      }
+    }
   }
 }
 
 #[derive(Debug)]
 pub struct ColorSchemeManager {
-  // Maps highlight ID => highlight
-  highlights: FoldMap<CompactString, ColorScheme>,
+  // Maps colorscheme name => colorscheme
+  colors: FoldMap<CompactString, ColorScheme>,
 }
 
 impl Default for ColorSchemeManager {
@@ -538,9 +598,9 @@ pub type ColorSchemeManagerValues<'a> =
 pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
 
-pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
+fn default_colorscheme() -> ColorScheme {
   let config = toml::toml! {
-    [syn]
+    [scope]
     boolean = "magenta"
     comment = "cyan"
     constant = "magenta"
@@ -555,38 +615,33 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     operator = "yellow"
     string = "magenta"
     tag = "magenta"
-    type = "green"
+    "type" = "green"
     variable = "cyan"
-
-    [ui]
-    foreground = "white"
-    background = "black"
   };
-  ColorScheme::from_toml("default", config).unwrap()
-});
+  ColorScheme::from_toml(DEFAULT, config).unwrap()
+}
 
 impl ColorSchemeManager {
   pub fn new() -> Self {
-    let mut highlights = FoldMap::new();
-    highlights
-      .insert("default".to_compact_string(), DEFAULT_COLORSCHEME.clone());
-    Self { highlights }
+    let mut colors = FoldMap::new();
+    colors.insert(DEFAULT.to_compact_string(), default_colorscheme());
+    Self { colors }
   }
 
   pub fn is_empty(&self) -> bool {
-    self.highlights.is_empty()
+    self.colors.is_empty()
   }
 
   pub fn len(&self) -> usize {
-    self.highlights.len()
+    self.colors.len()
   }
 
   pub fn get(&self, id: &str) -> Option<&ColorScheme> {
-    self.highlights.get(id)
+    self.colors.get(id)
   }
 
   pub fn contains_key(&self, id: &str) -> bool {
-    self.highlights.contains_key(id)
+    self.colors.contains_key(id)
   }
 
   pub fn insert(
@@ -594,22 +649,22 @@ impl ColorSchemeManager {
     key: CompactString,
     value: ColorScheme,
   ) -> Option<ColorScheme> {
-    self.highlights.insert(key, value)
+    self.colors.insert(key, value)
   }
 
   pub fn remove(&mut self, id: &str) -> Option<ColorScheme> {
-    self.highlights.remove(id)
+    self.colors.remove(id)
   }
 
   pub fn keys(&self) -> ColorSchemeManagerKeys<'_> {
-    self.highlights.keys()
+    self.colors.keys()
   }
 
   pub fn values(&self) -> ColorSchemeManagerValues<'_> {
-    self.highlights.values()
+    self.colors.values()
   }
 
   pub fn iter(&self) -> ColorSchemeManagerIter<'_> {
-    self.highlights.iter()
+    self.colors.iter()
   }
 }
