@@ -102,8 +102,6 @@ pub const DEFAULT: &str = "default";
 // "ui."
 pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
-pub const UI_FOREGROUND: &str = "ui.foreground";
-pub const UI_BACKGROUND: &str = "ui.background";
 
 // "scope."
 pub const ATTRIBUTE: &str = "attribute";
@@ -158,6 +156,68 @@ pub const VARIABLE: &str = "variable";
 pub const VARIABLE_BUILTIN: &str = "variable.builtin";
 pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
+
+pub static UI_NAMES: Lazy<FoldSet<&'static str>> =
+  Lazy::new(|| [FOREGROUND, BACKGROUND].into_iter().collect());
+
+pub static SCOPE_NAMES: Lazy<FoldSet<&'static str>> = Lazy::new(|| {
+  [
+    ATTRIBUTE,
+    BOOLEAN,
+    CARRIAGE_RETURN,
+    COMMENT,
+    COMMENT_DOCUMENTATION,
+    CONSTANT,
+    CONSTANT_BUILTIN,
+    CONSTRUCTOR,
+    CONSTRUCTOR_BUILTIN,
+    EMBEDDED,
+    ERROR,
+    ESCAPE,
+    FUNCTION,
+    FUNCTION_BUILTIN,
+    KEYWORD,
+    MARKUP,
+    MARKUP_BOLD,
+    MARKUP_HEADING,
+    MARKUP_ITALIC,
+    MARKUP_LINK,
+    MARKUP_LINK_URL,
+    MARKUP_LIST,
+    MARKUP_LIST_CHECKED,
+    MARKUP_LIST_NUMBERED,
+    MARKUP_LIST_UNCHECKED,
+    MARKUP_LIST_UNNUMBERED,
+    MARKUP_QUOTE,
+    MARKUP_RAW,
+    MARKUP_RAW_BLOCK,
+    MARKUP_RAW_INLINE,
+    MARKUP_STRIKETHROUGH,
+    MODULE,
+    NUMBER,
+    OPERATOR,
+    PROPERTY,
+    PROPERTY_BUILTIN,
+    PUNCTUATION,
+    PUNCTUATION_BRACKET,
+    PUNCTUATION_DELIMITER,
+    PUNCTUATION_SPECIAL,
+    STRING,
+    STRING_ESCAPE,
+    STRING_REGEXP,
+    STRING_SPECIAL,
+    STRING_SPECIAL_SYMBOL,
+    TAG,
+    TYPE,
+    TYPE_BUILTIN,
+    VARIABLE,
+    VARIABLE_BUILTIN,
+    VARIABLE_MEMBER,
+    VARIABLE_PARAMETER,
+  ]
+  .into_iter()
+  .collect()
+});
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
@@ -251,11 +311,7 @@ fn parse_colors(
   colorscheme: &toml::Table,
   palette: &FoldMap<CompactString, Color>,
 ) -> TheResult<FoldMap<CompactString, Color>> {
-  let plain_colors = [FOREGROUND, BACKGROUND]
-    .into_iter()
-    .collect::<FoldSet<&str>>();
-
-  let err = |k: &str| {
+  let failure = |k: &str| {
     Err(TheErr::LoadColorSchemeFailed(
       format!("ui.{}", k).to_compact_string(),
     ))
@@ -266,18 +322,19 @@ fn parse_colors(
     && let Some(ui_table) = ui.as_table()
   {
     for (key, val) in ui_table.iter() {
-      if plain_colors.contains(key.as_str()) {
-        if val.is_str() {
-          let value = val.as_str().unwrap();
-          let value = match palette.get(value) {
-            Some(code) => *code,
-            None => parse_code(value, "ui.", key)?,
-          };
-          let id = format!("ui.{}", key).to_compact_string();
-          result.insert(id, value);
-        } else {
-          return err(key);
-        }
+      if !UI_NAMES.contains(key.as_str()) {
+        return failure(key);
+      }
+      if val.is_str() {
+        let value = val.as_str().unwrap();
+        let value = match palette.get(value) {
+          Some(code) => *code,
+          None => parse_code(value, "ui.", key)?,
+        };
+        let id = format!("ui.{}", key).to_compact_string();
+        result.insert(id, value);
+      } else {
+        return failure(key);
       }
     }
   }
@@ -393,9 +450,13 @@ fn parse_highlights(
           // trace!("lang_key:{:?}, lang_value:{:?}", lang_key, lang_value);
           let lang_value_table = lang_value.as_table().unwrap();
           for (attr_key, attr_value) in lang_value_table.iter() {
+            let id_key = format!("scope.{}.{}", attr_key, lang_key);
+            if !SCOPE_NAMES.contains(attr_key.as_str()) {
+              return Err(failure(&id_key));
+            }
             if attr_value.is_table() {
               let (id, hl) = parse_highlight_as_table(
-                &format!("{}.{}", attr_key, lang_key),
+                &id_key,
                 attr_value.as_table().unwrap(),
                 palette,
                 colors,
@@ -403,35 +464,40 @@ fn parse_highlights(
               result.insert(id, hl);
             } else if attr_value.is_str() {
               let (id, hl) = parse_highlight_as_str(
-                &format!("{}.{}", attr_key, lang_key),
+                &id_key,
                 attr_value.as_str().unwrap(),
                 palette,
                 colors,
               )?;
               result.insert(id, hl);
             } else {
-              return Err(failure(key));
+              return Err(failure(&id_key));
             }
           }
         }
-      } else if value.is_table() {
-        let (id, hl) = parse_highlight_as_table(
-          key,
-          value.as_table().unwrap(),
-          palette,
-          colors,
-        )?;
-        result.insert(id, hl);
-      } else if value.is_str() {
-        let (id, hl) = parse_highlight_as_str(
-          key,
-          value.as_str().unwrap(),
-          palette,
-          colors,
-        )?;
-        result.insert(id, hl);
       } else {
-        return Err(failure(key));
+        if !SCOPE_NAMES.contains(key.as_str()) {
+          return Err(failure(key));
+        }
+        if value.is_table() {
+          let (id, hl) = parse_highlight_as_table(
+            key,
+            value.as_table().unwrap(),
+            palette,
+            colors,
+          )?;
+          result.insert(id, hl);
+        } else if value.is_str() {
+          let (id, hl) = parse_highlight_as_str(
+            key,
+            value.as_str().unwrap(),
+            palette,
+            colors,
+          )?;
+          result.insert(id, hl);
+        } else {
+          return Err(failure(key));
+        }
       }
     }
   }

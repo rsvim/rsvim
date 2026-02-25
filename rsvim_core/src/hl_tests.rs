@@ -455,4 +455,19 @@ attribute = "#zxcvas"
     let cs = ColorScheme::from_toml("failed1", colorscheme_table);
     assert!(cs.is_err());
   }
+
+  #[test]
+  fn failed2() {
+    let payload: &str = r##"
+[scope]
+attribute = "white"
+
+[scope.source.rust]
+rustsrcour = "#ffffff"
+"##;
+
+    let colorscheme_table = payload.parse::<toml::Table>().unwrap();
+    let cs = ColorScheme::from_toml("failed2", colorscheme_table);
+    assert!(cs.is_err());
+  }
 }
