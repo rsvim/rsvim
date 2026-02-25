@@ -1,4 +1,97 @@
 //! Highlight and ColorScheme.
+//!
+//! ColorScheme is defined by a toml config file, which references the theme
+//! configuration of the [helix](https://github.com/helix-editor/helix) editor.
+//!
+//! A colorscheme config file has 3 sections: scope, ui and palette:
+//!
+//! ```toml
+//! [scope]
+//! attribute = "white"
+//! boolean = { fg = "yellow", bold = true }
+//! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
+//! keyword = { fg = "#ffffff", bg = "green", italic = true }
+//!
+//! [scope.source.ruby]
+//! boolean = "red"
+//!
+//! [ui]
+//! background = "#000000"
+//!
+//! [palette]
+//! # white = "#ffffff"
+//! black = "#000000"
+//! yellow = "#ffff00"
+//! green = "#00ff00"
+//!
+//! # Never used
+//! grey = "#c0c0c0"
+//! ```
+//!
+//! `scope` section defines syntax highlightings for programming languages, the
+//! value of a scope item can have two formats:
+//!
+//! - A string defines the foreground text color for that syntax highlighting,
+//!   it accepts either ANSI color name, such as "white", "yellow", etc. Or RGB
+//!   color code, such as "#ffffff", "#ffff00", etc.
+//! - A toml table with below optional attributes:
+//!   - `fg`: a string value indicates the foreground text color (ANSI/RGB), it
+//!     uses `ui.foreground` if been omitted.
+//!   - `bg`: a string value indicates the background text color (ANSI/RGB), it
+//!     uses `ui.background` if been omitted.
+//!   - `bold`: a boolean value indicates whether the text is bold, by default
+//!     it is `false`.
+//!   - `italic`: a boolean value indicates whether text is italic, by default
+//!     it is `false`.
+//!   - `underlined`: a boolean value indicates whether text is underlined, by
+//!     default it is `false`.
+//!
+//! You can overwrite highlightings for specific languages by adding a
+//! `scope.source.{lang}` subsection. The `source.{lang}` part should match the
+//! tree-sitter grammar `grammars.0.scope` field inside the `tree-sitter.json`
+//! config.
+//!
+//! For example in
+//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby), the
+//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
+//! is:
+//!
+//! ```json
+//! {
+//!   "grammars": [
+//!     {
+//!       "name": "ruby",
+//!       "camelcase": "Ruby",
+//!       "scope": "source.ruby",
+//!       "path": ".",
+//!       "file-types": [
+//!         "rb"
+//!       ],
+//!       "highlights": "queries/highlights.scm",
+//!       "tags": "queries/tags.scm",
+//!       "injection-regex": "ruby"
+//!     }
+//!   ],
+//!   ...
+//! }
+//! ```
+//!
+//! To overwrite highlightings for ruby in your colorscheme, you need to add a
+//! subsection `scope.source.ruby`, the `source.ruby` matches the
+//! line `"scope": "source.ruby"` in the `tree-sitter.json` file.
+//!
+//!
+//! `ui` section defines other UI highlightings such as common foreground and
+//! background text colors. There're some default configs:
+//!
+//! - `ui.foreground`: uses `white` by default.
+//! - `ui.background`: uses `black` by default.
+//!
+//! `palette` section is a helper section for defining `scope` and `ui` section
+//! more easily. By adding a `key=value` pair in palette section, you can use
+//! the `key` as a color name in `scope` and `ui` section, syntax highlighting
+//! parser will lookup for the real color `value` behind the `key` when loading
+//! the colorscheme config.
 
 use crate::prelude::*;
 use compact_str::CompactString;
