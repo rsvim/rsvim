@@ -623,7 +623,7 @@ pub static DEFAULT_COLORSCHEME: Lazy<ColorScheme> = Lazy::new(|| {
     operator = "yellow"
     string = "magenta"
     tag = "magenta"
-    type = "green"
+    "type" = "green"
     variable = "cyan"
   };
   ColorScheme::from_toml(DEFAULT, config).unwrap()
