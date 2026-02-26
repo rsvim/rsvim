@@ -250,8 +250,7 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{prefix}{key}").to_compact_string(),
-        format!("{:?}", s).to_compact_string(),
+        format!("{prefix}{key}={:?}", s).to_compact_string(),
       )
     })
   };
@@ -276,8 +275,7 @@ fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   } else {
     Color::try_from(s).map_err(|_e| {
       TheErr::LoadColorSchemeFailed(
-        format!("{prefix}{key}").to_compact_string(),
-        format!("{:?}", s).to_compact_string(),
+        format!("{prefix}{key}={:?}", s).to_compact_string(),
       )
     })
   }
@@ -298,8 +296,7 @@ fn parse_palette(
         }
         None => {
           return Err(TheErr::LoadColorSchemeFailed(
-            format!("palette.{}", key).to_compact_string(),
-            format!("{:?}", value).to_compact_string(),
+            format!("palette.{}={:?}", key, value).to_compact_string(),
           ));
         }
       }
@@ -319,8 +316,7 @@ fn parse_colors(
     for (key, value) in ui_table.iter() {
       if !UI_NAMES.contains(key.as_str()) {
         return Err(TheErr::LoadColorSchemeFailed(
-          format!("ui.{}", key).to_compact_string(),
-          format!("{:?}", value).to_compact_string(),
+          format!("ui.{}={:?}", key, value).to_compact_string(),
         ));
       }
       if value.is_str() {
@@ -333,8 +329,7 @@ fn parse_colors(
         result.insert(id, value);
       } else {
         return Err(TheErr::LoadColorSchemeFailed(
-          format!("ui.{}", key).to_compact_string(),
-          format!("{:?}", value).to_compact_string(),
+          format!("ui.{}={:?}", key, value).to_compact_string(),
         ));
       }
     }
@@ -355,8 +350,7 @@ fn parse_hl_as_table(
     match value.get(x) {
       Some(x_value) => {
         let x_value = x_value.as_str().ok_or(TheErr::LoadColorSchemeFailed(
-          id.clone(),
-          format!("{:?}", x_value).to_compact_string(),
+          format!("{}={:?}", id, x_value).to_compact_string(),
         ))?;
         match palette.get(x_value) {
           Some(x) => Ok(Some(*x)),
@@ -374,8 +368,7 @@ fn parse_hl_as_table(
     match value.get(x) {
       Some(x_value) => {
         Ok(x_value.as_bool().ok_or(TheErr::LoadColorSchemeFailed(
-          id.clone(),
-          format!("{:?}", x_value).to_compact_string(),
+          format!("{}={:?}", id, x_value).to_compact_string(),
         ))?)
       }
       None => Ok(false),
@@ -452,8 +445,7 @@ fn parse_highlights(
             let k = format!("{}.{}", key_per_lang, lang);
             if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
               return Err(TheErr::LoadColorSchemeFailed(
-                k.to_compact_string(),
-                format!("{:?}", value_per_lang).to_compact_string(),
+                format!("{}={:?}", k, value_per_lang).to_compact_string(),
               ));
             }
             if value_per_lang.is_table() {
@@ -474,8 +466,7 @@ fn parse_highlights(
               result.insert(id, hl);
             } else {
               return Err(TheErr::LoadColorSchemeFailed(
-                k.to_compact_string(),
-                format!("{:?}", value_per_lang).to_compact_string(),
+                format!("{}={:?}", k, value_per_lang).to_compact_string(),
               ));
             }
           }
@@ -483,8 +474,7 @@ fn parse_highlights(
       } else {
         if !SCOPE_NAMES.contains(key.as_str()) {
           return Err(TheErr::LoadColorSchemeFailed(
-            key.to_compact_string(),
-            format!("{:?}", value).to_compact_string(),
+            format!("{}={:?}", key, value).to_compact_string(),
           ));
         }
         if value.is_table() {
@@ -497,8 +487,7 @@ fn parse_highlights(
           result.insert(id, hl);
         } else {
           return Err(TheErr::LoadColorSchemeFailed(
-            key.to_compact_string(),
-            format!("{:?}", value).to_compact_string(),
+            format!("{}={:?}", key, value).to_compact_string(),
           ));
         }
       }

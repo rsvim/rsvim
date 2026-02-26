@@ -1,27 +1,27 @@
 [workspace]
-members = ["rsvim_core", "rsvim_cli"]
+members = ["rsvim_cli", "rsvim_core"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.2"
-edition = "2024"
-rust-version = "1.89.0"
 authors = ["Lin Rongbin <linrongbin16@outlook.com>"]
-repository = "https://github.com/rsvim/rsvim"
-readme = "README.md"
-homepage = "https://rsvim.github.io/"
-documentation = "https://rsvim.github.io/"
-license = "Vim"
-keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
 categories = ["text-editors"]
+documentation = "https://rsvim.github.io/"
+edition = "2024"
 exclude = [".DS_Store"]
+homepage = "https://rsvim.github.io/"
+keywords = ["editor", "neovim", "terminal", "text-editor", "vim"]
+license = "Vim"
+readme = "README.md"
+repository = "https://github.com/rsvim/rsvim"
+rust-version = "1.89.0"
+version = "0.1.2"
 
 [workspace.dependencies]
 rsvim_core = { version = "0.1.2", path = "./rsvim_core" }
 
 # anyhow = "1"
-ascii = "1.1"
 arcstr = { version = "1.2", features = ["std"] }
+ascii = "1.1"
 assert_fs = "1.1"
 async-trait = "0.1"
 bitflags = "2.11"
@@ -51,23 +51,23 @@ lru = "0.16"
 mimalloc-safe = "0.1"
 normpath = "1.5"
 num-traits = "0.2"
-oxc_resolver = "11.17"
 once_cell = { version = "1.21", features = ["parking_lot"] }
+oxc_resolver = "11.17"
 parking_lot = "0.12"
+paste = "1.0"
 path-absolutize = "3.1"
 postcard = { version = "1.1", default-features = false, features = ["use-std"] }
-paste = "1.0"
 # rand = "0.8.5"
 regex = "1.12"
 ropey = { version = "1.6", default-features = false }
 serde = { version = "1", features = ["derive"] }
-# serde_json = "1.0"
+# serde_json = "1"
 snmalloc-rs = "0.3"
 strum = "0.27"
 strum_macros = "0.27"
 taffy = "0.9"
-tikv-jemallocator = "0.6"
 thiserror = "2"
+tikv-jemallocator = "0.6"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
@@ -83,8 +83,8 @@ toml = { version = "1.0", features = ["fast_hash"] }
 # ] }
 tree-sitter = "0.26"
 tree-sitter-loader = "0.26"
-tree-sitter-rust = "0.24"
 tree-sitter-md = "0.5"
+tree-sitter-rust = "0.24"
 tree-sitter-toml-ng = "0.7"
 unicode-width = "0.2"
 # url = "2.5.7"
@@ -96,16 +96,16 @@ unicode-width = "0.2"
 # deno_core: https://github.com/denoland/deno_core/blob/0.362.0/Cargo.toml
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.50.3/Cargo.toml
 
-swc_core = "=57.0.0"
 swc_atoms = "=9.0.0"
 swc_common = "=18.0.1"
 swc_config = "=3.1.2"
 swc_config_macro = "=1.0.1"
+swc_core = "=57.0.0"
 swc_ecma_ast = "=20.0.1"
 swc_ecma_codegen = "=23.0.0"
 swc_ecma_codegen_macros = "=2.0.2"
-swc_ecma_loader = "=18.0.0"
 swc_ecma_lexer = "=33.0.0"
+swc_ecma_loader = "=18.0.0"
 swc_ecma_parser = "=34.0.0"
 swc_ecma_transforms_base = { version = "=37.0.0", features = [
   "inline-helpers",
@@ -139,12 +139,12 @@ opt-level = 1
 
 # Nightly
 [profile.nightly]
-inherits = "release"
 debug = true
+inherits = "release"
 
 # Release
 [profile.release]
-lto = true
 codegen-units = 1
+lto = true
 opt-level = "s"
 strip = true

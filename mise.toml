@@ -1,17 +1,19 @@
 [tools]
 rust = "latest"
-"cargo:sccache" = "latest"
+
 "cargo:cargo-nextest" = "latest"
-"cargo:cargo-watch" = "latest"
 "cargo:cargo-release" = "latest"
+"cargo:cargo-watch" = "latest"
 "cargo:git-cliff" = "latest"
+"cargo:sccache" = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:typos-cli" = "latest"
 
-python = "latest"
-
 node = "latest"
-"npm:prettier" = "latest"
-"npm:typescript" = "latest"
+
 "npm:browser-sync" = "latest"
 "npm:markdownlint" = "latest"
+"npm:prettier" = "latest"
+"npm:typescript" = "latest"
+
+python = "latest"

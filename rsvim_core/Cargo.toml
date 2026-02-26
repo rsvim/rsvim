@@ -1,18 +1,18 @@
 [package]
-name = "rsvim_core"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
 authors.workspace = true
-repository.workspace = true
-readme.workspace = true
-homepage.workspace = true
-documentation.workspace = true
-license.workspace = true
-keywords.workspace = true
 categories.workspace = true
-exclude.workspace = true
 description = "The core library for RSVIM text editor."
+documentation.workspace = true
+edition.workspace = true
+exclude.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "rsvim_core"
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [lib]
 doctest = false
@@ -26,8 +26,8 @@ unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
 # anyhow = { workspace = true }
-ascii = { workspace = true }
 arcstr = { workspace = true, features = ["std"] }
+ascii = { workspace = true }
 async-trait = { workspace = true }
 compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
@@ -51,14 +51,14 @@ log = { workspace = true, features = [
 lru = { workspace = true }
 normpath = { workspace = true }
 num-traits = { workspace = true }
-oxc_resolver = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
+oxc_resolver = { workspace = true }
 parking_lot = { workspace = true }
+paste = { workspace = true }
 path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
-paste = { workspace = true }
 ropey = { workspace = true, default-features = false }
 serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
@@ -71,8 +71,8 @@ tokio-util = { workspace = true, features = ["full"] }
 toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
 tree-sitter-loader = { workspace = true }
-tree-sitter-rust = { workspace = true }
 tree-sitter-md = { workspace = true }
+tree-sitter-rust = { workspace = true }
 tree-sitter-toml-ng = { workspace = true }
 # url = { workspace = true }
 # zstd = { workspace = true }
@@ -86,8 +86,8 @@ swc_config_macro = { workspace = true }
 swc_ecma_ast = { workspace = true }
 swc_ecma_codegen = { workspace = true }
 swc_ecma_codegen_macros = { workspace = true }
-swc_ecma_loader = { workspace = true }
 swc_ecma_lexer = { workspace = true }
+swc_ecma_loader = { workspace = true }
 swc_ecma_parser = { workspace = true }
 swc_ecma_transforms_base = { workspace = true, features = ["inline-helpers"] }
 swc_ecma_transforms_classes = { workspace = true }
