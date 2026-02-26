@@ -49,13 +49,11 @@ log = { workspace = true, features = [
   "release_max_level_error",
 ] }
 lru = { workspace = true }
-normpath = { workspace = true }
 num-traits = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 oxc_resolver = { workspace = true }
 parking_lot = { workspace = true }
 paste = { workspace = true }
-path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
@@ -64,6 +62,7 @@ serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
+sugar_path = { workspace = true }
 taffy = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }

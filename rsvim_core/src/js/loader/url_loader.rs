@@ -16,7 +16,6 @@
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
-// use path_absolutize::Absolutize;
 // use std::fs;
 // use std::path::Path;
 // use std::path::PathBuf;

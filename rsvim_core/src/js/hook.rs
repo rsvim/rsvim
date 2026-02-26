@@ -11,9 +11,9 @@ use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::util::paths;
-use normpath::PathExt;
 use std::cell::RefCell;
 use std::rc::Rc;
+use sugar_path::SugarPath;
 
 /// Called during `Module::instantiate_module`, see:
 /// - Rusty V8 API:
@@ -80,8 +80,8 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   meta.create_data_property(scope, key.into(), value.into());
 
   // `import.meta.dirname`
-  let filepath = Path::new(&filename).normalize().unwrap();
-  let dirname = paths::parent_or_remain(&filepath);
+  let filepath = Path::new(&filename).normalize();
+  let dirname = paths::parent_or_remain(filepath.as_path());
   let key = v8::String::new(scope, "dirname").unwrap();
   let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
   meta.create_data_property(scope, key.into(), value.into());

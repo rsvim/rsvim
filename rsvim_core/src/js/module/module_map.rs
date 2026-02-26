@@ -249,17 +249,15 @@ impl ModuleMap {
     &self,
     path: &str,
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
-    use normpath::PathExt;
+    use sugar_path::SugarPath;
 
     self.by_path.iter().find(|(k, _v)| {
       Path::new(k)
         .normalize()
-        .unwrap()
-        .ends_with(Path::new(path).normalize().unwrap())
+        .ends_with(Path::new(path).normalize())
         || Path::new(path)
           .normalize()
-          .unwrap()
-          .ends_with(Path::new(*k).normalize().unwrap())
+          .ends_with(Path::new(*k).normalize())
     })
   }
 

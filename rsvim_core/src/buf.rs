@@ -21,13 +21,13 @@ use crate::syntax::Syntax;
 use crate::syntax::SyntaxManager;
 use compact_str::ToCompactString;
 use opt::*;
-use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
+use sugar_path::SugarPath;
 use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
@@ -247,16 +247,7 @@ impl BufferManager {
     canvas_size: U16Size,
     filename: &Path,
   ) -> TheResult<BufferId> {
-    let abs_filename = match filename.absolutize() {
-      Ok(abs_filename) => abs_filename.to_path_buf(),
-      Err(e) => {
-        trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
-        return Err(TheErr::NormalizePathFailed(
-          filename.to_string_lossy().to_compact_string(),
-          e,
-        ));
-      }
-    };
+    let abs_filename = filename.absolutize().to_path_buf();
 
     debug_assert!(
       !self
