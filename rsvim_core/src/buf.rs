@@ -25,7 +25,6 @@ use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
-use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
@@ -53,7 +52,7 @@ pub struct Buffer {
 
   // file
   filename: Option<PathBuf>,
-  filename_extension: Option<CompactString>,
+  file_extension: Option<CompactString>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
@@ -78,7 +77,7 @@ impl Buffer {
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
-    filename_extension: Option<CompactString>,
+    file_extension: Option<CompactString>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
@@ -89,7 +88,7 @@ impl Buffer {
       id: BufferId::next(),
       text,
       filename,
-      filename_extension,
+      file_extension,
       absolute_filename,
       metadata,
       last_sync_time,
@@ -123,12 +122,12 @@ impl Buffer {
     &self.filename
   }
 
-  pub fn filename_extension(&self) -> &Option<CompactString> {
-    &self.filename_extension
+  pub fn file_extension(&self) -> &Option<CompactString> {
+    &self.file_extension
   }
 
   pub fn set_filename(&mut self, filename: Option<PathBuf>) {
-    self.filename_extension = filename
+    self.file_extension = filename
       .as_ref()
       .and_then(|f| f.extension())
       .map(|e| e.to_string_lossy().to_compact_string());
