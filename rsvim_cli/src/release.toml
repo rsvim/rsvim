@@ -1,6 +1,4 @@
 allow-branch = ["main"]
-shared-version = true
-tag = false
 pre-release-hook = [
   "git-cliff",
   "-o",
@@ -8,4 +6,6 @@ pre-release-hook = [
   "--tag",
   "{{version}}",
 ]
+shared-version = true
+tag = false
 tag-message = "chore(release): {{version}}"
