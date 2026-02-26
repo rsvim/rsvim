@@ -43,6 +43,7 @@ impl Widgetable for WindowContent {
     let actual_shape = self.actual_shape();
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
+    let file_extension = buffer.filename_extension();
     let viewport = self.viewport.upgrade().unwrap();
 
     viewport.draw(buffer.text(), &actual_shape, canvas);

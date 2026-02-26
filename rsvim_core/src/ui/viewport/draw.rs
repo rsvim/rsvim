@@ -5,6 +5,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
+use compact_str::CompactString;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -12,6 +13,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   actual_shape: &U16Rect,
+  file_extension: &Option<CompactString>,
   canvas: &mut Canvas,
 ) {
   // If size is zero, exit.
