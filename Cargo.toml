@@ -1,5 +1,5 @@
 [workspace]
-members = ["rsvim_core", "rsvim_cli"]
+members = ["rsvim_cli", "rsvim_core"]
 resolver = "3"
 
 [workspace.package]
@@ -9,7 +9,7 @@ documentation = "https://rsvim.github.io/"
 edition = "2024"
 exclude = [".DS_Store"]
 homepage = "https://rsvim.github.io/"
-keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
+keywords = ["editor", "neovim", "terminal", "text-editor", "vim"]
 license = "Vim"
 readme = "README.md"
 repository = "https://github.com/rsvim/rsvim"
