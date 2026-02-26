@@ -530,6 +530,19 @@ impl ColorScheme {
     })
   }
 
+  /// A ColorScheme can be defined with a json file.
+  pub fn from_toml(name: &str, colorscheme: toml::Table) -> TheResult<Self> {
+    let palette = parse_palette(&colorscheme)?;
+    let colors = parse_colors(&colorscheme, &palette)?;
+    let highlights = parse_highlights(&colorscheme, &colors, &palette)?;
+
+    Ok(Self {
+      name: name.to_compact_string(),
+      colors,
+      highlights,
+    })
+  }
+
   pub fn name(&self) -> &CompactString {
     &self.name
   }
