@@ -713,7 +713,13 @@ impl Viewport {
     self.lines.is_empty()
   }
 
-  pub fn draw(&self, text: &Text, actual_shape: &U16Rect, canvas: &mut Canvas) {
+  pub fn draw(
+    &self,
+    text: &Text,
+    actual_shape: &U16Rect,
+    language: Option<&str>,
+    canvas: &mut Canvas,
+  ) {
     draw::draw(self, text, actual_shape, canvas);
   }
 }
