@@ -381,15 +381,14 @@ impl BufferManager {
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) = self.syntax_manager.get_lang_by_ext(&ext)
+      && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
     {
       trace!(
         "Load syntax by file ext:{:?} lang:{:?}",
         file_extension,
         lang.name()
       );
-      let highlight_query =
-        self.syntax_manager.get_highlight_query_by_ext(&ext);
+      let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
         Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),

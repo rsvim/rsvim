@@ -12,7 +12,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   actual_shape: &U16Rect,
-  language: Option<&str>,
+  _language: Option<&str>,
   canvas: &mut Canvas,
 ) {
   // If size is zero, exit.
