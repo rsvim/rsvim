@@ -74,7 +74,7 @@ pub enum SyntaxEdit {
 
 pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
-pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 
 /// Buffer syntax.
 pub struct Syntax {
@@ -107,6 +107,8 @@ pub struct Syntax {
   // then starts the next new task.
   parsing: bool,
 }
+
+arc_mutex_ptr!(Syntax);
 
 impl Debug for Syntax {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
