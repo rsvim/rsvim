@@ -180,10 +180,9 @@ impl Insert {
       if buffer.syntax().is_some() {
         let rope = buffer.text().rope().clone();
         let editing_version = buffer.editing_version();
-        let syn = buffer.syntax().unwrap();
-        let mut syn = lock!(syn);
         debug_assert!(syn_delete.is_some());
-        syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+        let syn = buffer.syntax().unwrap();
+        lock!(syn).add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
           payload: rope,
           input: syn_delete.unwrap(),
           version: editing_version,
@@ -287,10 +286,9 @@ impl Insert {
     if buffer.syntax().is_some() {
       let rope = buffer.text().rope().clone();
       let editing_version = buffer.editing_version();
-      let syn = buffer.syntax().unwrap();
-      let mut syn = lock!(syn);
       debug_assert!(syn_insert.is_some());
-      syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+      let syn = buffer.syntax().unwrap();
+      lock!(syn).add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
         payload: rope,
         input: syn_insert.unwrap(),
         version: editing_version,

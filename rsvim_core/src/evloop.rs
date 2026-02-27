@@ -505,14 +505,12 @@ impl EventLoop {
   }
 
   fn _add_pending_syntax_edit(&self, buf: BufferArc) {
-    let mut buf = lock!(buf);
+    let buf = lock!(buf);
     if buf.syntax().is_some() {
       let payload = buf.text().rope().clone();
       let version = buf.editing_version();
-      buf
-        .syntax_mut()
-        .as_mut()
-        .unwrap()
+      let syn = buf.syntax().unwrap();
+      lock!(syn)
         .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
       chan::send_to_master(
         self.master_tx.clone(),
