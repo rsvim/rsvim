@@ -376,7 +376,7 @@ impl BufferManager {
   fn load_syntax_by_file_ext(
     &self,
     file_extension: &Option<CompactString>,
-  ) -> TheResult<Option<Syntax>> {
+  ) -> TheResult<Option<SyntaxArc>> {
     if let Some(ext) = file_extension
       && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
     {
@@ -387,7 +387,7 @@ impl BufferManager {
       );
       let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
-        Ok(syntax) => Ok(Some(syntax)),
+        Ok(syntax) => Ok(Some(Syntax::to_arc(syntax))),
         Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
