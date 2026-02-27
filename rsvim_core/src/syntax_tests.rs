@@ -127,10 +127,11 @@ mod tests_buffer_editing {
       let payload = buf.text().rope().to_string();
       assert_eq!(format!("Hello, World{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
-      let syn_editing_version =
-        buf.syntax().as_ref().unwrap().editing_version();
+      let syn = buf.syntax().unwrap();
+      let syn = lock!(syn);
+      let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = syn.tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -220,10 +221,11 @@ mod tests_buffer_editing {
       let payload = buf.text().rope().to_string();
       assert_eq!(format!("HelloWorld{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
-      let syn_editing_version =
-        buf.syntax().as_ref().unwrap().editing_version();
+      let syn = buf.syntax().unwrap();
+      let syn = lock!(syn);
+      let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = syn.tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
