@@ -291,7 +291,8 @@ impl Normal {
         if buffer.syntax().is_some() {
           let rope = buffer.text().rope().clone();
           let editing_version = buffer.editing_version();
-          let syn = buffer.syntax_mut().as_mut().unwrap();
+          let syn = buffer.syntax().unwrap();
+          let mut syn = lock!(syn);
           debug_assert!(syn_insert.is_some());
           syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
             payload: rope,
