@@ -720,6 +720,6 @@ impl Viewport {
     language: Option<&str>,
     canvas: &mut Canvas,
   ) {
-    draw::draw(self, text, actual_shape, canvas);
+    draw::draw(self, text, actual_shape, language, canvas);
   }
 }
