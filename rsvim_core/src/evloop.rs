@@ -790,8 +790,7 @@ impl EventLoop {
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffer_manager).get(&req.buffer_id) {
-            let mut buf = lock!(buf);
-
+            let buf = lock!(buf);
             let syn = buf.syntax();
 
             // Early quit if any below conditions are met:
@@ -801,7 +800,7 @@ impl EventLoop {
             let (has_no_syntax, syntax_is_parsing, syntax_has_pending_edits) = {
               let has_no_syntax = syn.is_none();
               let (syntax_is_parsing, syntax_has_pending_edits) = match syn {
-                Some(syn) => {
+                Some(ref syn) => {
                   let syn = lock!(syn);
                   let syntax_is_parsing = syn.is_parsing();
                   let syntax_has_pending_edits = syn.pending_is_empty();
