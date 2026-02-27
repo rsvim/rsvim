@@ -3,6 +3,7 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
+use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
@@ -76,8 +77,14 @@ pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 
+// SyntaxId starts from 1
+structural_id_impl!(usize, SyntaxId, 1);
+
 /// Buffer syntax.
 pub struct Syntax {
+  // ID
+  id: SyntaxId,
+
   // Highlight query
   highlight_query: Option<Query>,
 
@@ -113,6 +120,7 @@ arc_mutex_ptr!(Syntax);
 impl Debug for Syntax {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Syntax")
+      .field("id", &self.id)
       .field(
         "tree",
         if self.tree.is_some() {
@@ -144,6 +152,7 @@ impl Syntax {
     };
 
     Ok(Self {
+      id: SyntaxId::next(),
       highlight_query,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
@@ -152,6 +161,10 @@ impl Syntax {
       pending: vec![],
       parsing: false,
     })
+  }
+
+  pub fn id(&self) -> SyntaxId {
+    self.id
   }
 
   pub fn tree(&self) -> &Option<Tree> {
