@@ -165,6 +165,11 @@ impl Syntax {
     self.id
   }
 
+  /// Language (filetype)
+  pub fn language(&self) -> &Option<CompactString> {
+    &self.language
+  }
+
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
   }
