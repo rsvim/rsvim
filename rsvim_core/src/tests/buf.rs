@@ -19,7 +19,8 @@ pub fn make_buffer_from_lines(
     rpb.append(line);
   }
   let rp = rpb.finish();
-  let buf = Buffer::_new(opts, terminal_size, rp, None, None, None, None, None);
+  let buf =
+    Buffer::_new(opts, terminal_size, rp, None, None, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
@@ -31,6 +32,7 @@ pub fn make_empty_buffer(
     opts,
     terminal_size,
     Rope::new(),
+    None,
     None,
     None,
     None,

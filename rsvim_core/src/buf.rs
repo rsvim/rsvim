@@ -25,7 +25,6 @@ use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
-use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
@@ -330,6 +329,7 @@ impl BufferManager {
       *self.global_local_options(),
       canvas_size,
       Rope::new(),
+      None,
       None,
       None,
       None,
