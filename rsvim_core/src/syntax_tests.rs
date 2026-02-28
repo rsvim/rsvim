@@ -454,7 +454,7 @@ mod tests_buffer_editing {
         payload
       );
       let buf_editing_version = buf.editing_version();
-      let syn = buf.syntax().unwrap();
+      let syn = buf.syntax().as_ref().unwrap();
       let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = syn.tree();
