@@ -98,7 +98,7 @@ pub struct Syntax {
   // Syntax parser
   parser: SyntaxParserArc,
 
-  // Optional language name
+  // Language name, i.e. filetype
   language_name: Option<CompactString>,
 
   // Pending edits that waiting for parsing
