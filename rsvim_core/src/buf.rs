@@ -19,6 +19,7 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxManager;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -52,6 +53,7 @@ pub struct Buffer {
 
   // file
   filename: Option<PathBuf>,
+  file_extension: Option<CompactString>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
@@ -76,6 +78,7 @@ impl Buffer {
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
+    file_extension: Option<CompactString>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
@@ -86,6 +89,7 @@ impl Buffer {
       id: BufferId::next(),
       text,
       filename,
+      file_extension,
       absolute_filename,
       metadata,
       last_sync_time,
@@ -117,6 +121,10 @@ impl Buffer {
 
   pub fn filename(&self) -> &Option<PathBuf> {
     &self.filename
+  }
+
+  pub fn file_extension(&self) -> &Option<CompactString> {
+    &self.file_extension
   }
 
   pub fn set_filename(&mut self, filename: Option<PathBuf>) {
