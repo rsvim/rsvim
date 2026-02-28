@@ -186,6 +186,9 @@ pub fn draw(
 
   // If buffer has no more lines, or even the buffer/viewport is empty. Render
   // empty spaces to left parts of the window content.
+  //
+  // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
+  // part as well.
   while row_idx < height {
     let cells = std::iter::repeat_n(' ', width as usize)
       .map(Cell::from)
