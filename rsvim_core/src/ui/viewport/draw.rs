@@ -23,9 +23,9 @@ pub fn draw(
     return;
   }
 
-  let query_cursor = match syntax {
-    Some(syn) => {
-      let mut qcursor = QueryCursor::new();
+  let _query_cursor = match syntax {
+    Some(_syn) => {
+      let qcursor = QueryCursor::new();
       Some(qcursor)
     }
     None => None,
