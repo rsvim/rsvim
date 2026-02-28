@@ -833,7 +833,7 @@ impl EventLoop {
               let (parsed_tree, parsed_editing_version) =
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
-              // If the buffer and its syntax still exist
+              // If the buffer and its syntax remains the same
               if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
