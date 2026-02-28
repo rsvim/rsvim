@@ -843,7 +843,7 @@ impl EventLoop {
             let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {
-              let (parsed_tree, parsed_editing_version) =
+              let (parsed_tree, parsed_editing_version, highlight_capture) =
                 syntax::parse_and_query(
                   syn_parser,
                   syn_tree,
@@ -859,6 +859,7 @@ impl EventLoop {
                   if syn.id() == syn_id {
                     syn.set_tree(parsed_tree);
                     syn.set_editing_version(parsed_editing_version);
+                    syn.set_highlight_capture(highlight_capture);
                     syn.set_is_parsing(false);
                   }
 

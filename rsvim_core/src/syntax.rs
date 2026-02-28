@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 //! Tree-sitter based syntax engine.
 
-use tree_sitter::QueryCursor;
-use tree_sitter::StreamingIterator;
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
@@ -19,6 +17,8 @@ use tree_sitter::LanguageError;
 use tree_sitter::Parser;
 use tree_sitter::Point;
 use tree_sitter::Query;
+use tree_sitter::QueryCursor;
+use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -80,6 +80,32 @@ pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 pub type SyntaxQueryArc = Arc<Query>;
 
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+/// Line (row) index and byte (column) index (2D)
+pub struct SyntaxQueryCaptureKey(usize, usize);
+
+#[derive(Debug)]
+pub struct SyntaxQueryCapture {
+  start_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range>,
+  end_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range>,
+}
+
+arc_ptr!(SyntaxQueryCapture);
+
+impl SyntaxQueryCapture {
+  pub fn start_captures(
+    &self,
+  ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
+    &self.start_captures
+  }
+
+  pub fn end_captures(
+    &self,
+  ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
+    &self.end_captures
+  }
+}
+
 // SyntaxId starts from 1.
 structural_id_impl!(usize, SyntaxId, 1);
 
@@ -89,6 +115,7 @@ pub struct Syntax {
 
   // Highlight query
   highlight_query: Option<SyntaxQueryArc>,
+  highlight_capture: Option<SyntaxQueryCaptureArc>,
 
   // Parsed syntax tree
   tree: Option<Tree>,
@@ -146,13 +173,16 @@ impl Syntax {
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
     let highlight_query = match highlight_query {
-      Some(source) => Query::new(lang, source).map(|q| Some(Arc::new(q))).unwrap_or(None),
+      Some(source) => Query::new(lang, source)
+        .map(|q| Some(Arc::new(q)))
+        .unwrap_or(None),
       None => None,
     };
 
     Ok(Self {
       id: SyntaxId::next(),
       highlight_query,
+      highlight_capture: None,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
@@ -172,6 +202,17 @@ impl Syntax {
 
   pub fn highlight_query(&self) -> &Option<SyntaxQueryArc> {
     &self.highlight_query
+  }
+
+  pub fn highlight_capture(&self) -> &Option<SyntaxQueryCaptureArc> {
+    &self.highlight_capture
+  }
+
+  pub fn set_highlight_capture(
+    &mut self,
+    value: Option<SyntaxQueryCaptureArc>,
+  ) {
+    self.highlight_capture = value;
   }
 
   pub fn tree(&self) -> &Option<Tree> {
@@ -554,32 +595,36 @@ pub fn parse(
   (tree, editing_version, last_payload)
 }
 
-    /// Here is a really trade-off, I mean we have two solutions when querying
-    /// syntax highlight colors for a buffer:
-    ///
-    /// 1. Execute the `QueryCursor::matches` on each viewport/window on every
-    ///    TUI frame.
-    ///    - Pros: The viewport is only a very small part compared with the
-    ///      whole buffer, it gives us smaller problem scale and shorter 
-    ///      response time.
-    ///    - Cons: The `QueryCursor::matches` needs to pass the buffer text
-    ///      payload as a `&[u8]` (i.e. `&str`) type. But we are using `Rope` as
-    ///      our text backend, which means we will have to convert (part of) the
-    ///      text to a `String` via something like `to_string` API, which leads
-    ///      to massive memory allocation on each frame.
-    /// 2. Execute the `QueryCursor::matches` on the whole buffer when syntax
-    ///    parser just finishes its parsing.
-    ///    - Pros: Both syntax parsing and highlight querying are done in 
-    ///      background job, the CPU workload of TUI rendering on every frame is
-    ///      reduced, it gives us better performance.
-    ///    - Cons: The `QueryCursor::matches` runs longer because the problem
-    ///      scale becomes larger, since we are querying the whole buffer,
-    ///      instead of a window/viewport. This leads to longer response time,
-    ///      i.e. for a very big buffer, user will wait longer time to get the
-    ///      latest highlights after some editings.
-pub fn query(tree: &Option<Tree>, text_payload: &Option<String>, highlight_query: &Option<SyntaxQueryArc>) -> () {
+/// Here is a really trade-off, I mean we have two solutions when querying
+/// syntax highlight colors for a buffer:
+///
+/// 1. Execute the `QueryCursor::matches` on each viewport/window on every
+///    TUI frame.
+///    - Pros: The viewport is only a very small part compared with the
+///      whole buffer, it gives us smaller problem scale and shorter
+///      response time.
+///    - Cons: The `QueryCursor::matches` needs to pass the buffer text
+///      payload as a `&[u8]` (i.e. `&str`) type. But we are using `Rope` as
+///      our text backend, which means we will have to convert (part of) the
+///      text to a `String` via something like `to_string` API, which leads
+///      to massive memory allocation on each frame.
+/// 2. Execute the `QueryCursor::matches` on the whole buffer when syntax
+///    parser just finishes its parsing.
+///    - Pros: Both syntax parsing and highlight querying are done in
+///      background job, the CPU workload of TUI rendering on every frame is
+///      reduced, it gives us better performance.
+///    - Cons: The `QueryCursor::matches` runs longer because the problem
+///      scale becomes larger, since we are querying the whole buffer,
+///      instead of a window/viewport. This leads to longer response time,
+///      i.e. for a very big buffer, user will wait longer time to get the
+///      latest highlights after some editings.
+pub fn query(
+  tree: &Option<Tree>,
+  text_payload: &Option<String>,
+  highlight_query: &Option<SyntaxQueryArc>,
+) -> Option<SyntaxQueryCaptureArc> {
   let mut query_cursor = QueryCursor::new();
-  let _highlight_captures = if let Some(syn_tree) = tree
+  if let Some(syn_tree) = tree
     && let Some(syn_highlight_query) = highlight_query
     && let Some(text_payload) = text_payload
   {
@@ -587,29 +632,34 @@ pub fn query(tree: &Option<Tree>, text_payload: &Option<String>, highlight_query
     let mut matches = query_cursor.matches(
       syn_highlight_query,
       syn_tree.root_node(),
-      text_payload.as_bytes()
+      text_payload.as_bytes(),
     );
-    let mut start_captures: FoldMap<(usize, usize), tree_sitter::Range> =
+    let mut start_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> =
       FoldMap::new();
-    let mut end_captures: FoldMap<(usize, usize), tree_sitter::Range> =
+    let mut end_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> =
       FoldMap::new();
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let idx = cap.index;
-        let rng = cap.node.range();
-        trace!("Captured highlight {}:{:?}", idx, rng);
-        let start_key = (rng.start_point.row, rng.start_point.column);
-        let end_key = (rng.end_point.row, rng.end_point.column);
+        let ran = cap.node.range();
+        trace!("Captured highlight {}:{:?}", idx, ran);
+        let start_key =
+          SyntaxQueryCaptureKey(ran.start_point.row, ran.start_point.column);
+        let end_key =
+          SyntaxQueryCaptureKey(ran.end_point.row, ran.end_point.column);
         debug_assert!(!start_captures.contains_key(&start_key));
         debug_assert!(!end_captures.contains_key(&end_key));
-        start_captures.insert(start_key, rng);
-        end_captures.insert(end_key, rng);
+        start_captures.insert(start_key, ran);
+        end_captures.insert(end_key, ran);
       }
     }
-    Some((start_captures, end_captures))
+    Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture {
+      start_captures,
+      end_captures,
+    }))
   } else {
     None
-}
+  }
 }
 
 pub async fn parse_and_query(
@@ -617,8 +667,9 @@ pub async fn parse_and_query(
   old_tree: Option<Tree>,
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
-) -> (Option<Tree>, isize) {
+) -> (Option<Tree>, isize, Option<SyntaxQueryCaptureArc>) {
   let (tree, editing_version, text_payload) =
     parse(parser, old_tree, pending_edits);
-  (tree, editing_version)
+  let highlight_capture = query(&tree, &text_payload, &highlight_query);
+  (tree, editing_version, highlight_capture)
 }
