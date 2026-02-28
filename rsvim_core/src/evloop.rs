@@ -793,29 +793,35 @@ impl EventLoop {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffer_manager).get(&req.buffer_id) {
             let buf = lock!(buf);
-            let syn = buf.syntax();
 
             // Early quit if any below conditions are met:
             // 1. Has no syntax
             // 2. Syntax is parsing
             // 3. Syntax has no pending edits
             let (has_no_syntax, syntax_is_parsing, syntax_has_pending_edits) = {
+              let syn = buf.syntax();
               let has_no_syntax = syn.is_none();
-              let (syntax_is_parsing, syntax_has_pending_edits) = match syn {
-                Some(ref syn) => {
-                  let syn = lock!(syn);
-                  let syntax_is_parsing = syn.is_parsing();
-                  let syntax_has_pending_edits = syn.pending_is_empty();
-                  (syntax_is_parsing, syntax_has_pending_edits)
-                }
-                None => (false, false),
-              };
+              let syntax_is_parsing =
+                syn.as_ref().map(|s| s.is_parsing()).unwrap_or(false);
+              let syntax_has_pending_edits =
+                syn.as_ref().map(|s| s.pending_is_empty()).unwrap_or(false);
               (has_no_syntax, syntax_is_parsing, syntax_has_pending_edits)
             };
 
+            // Early quit.
             if has_no_syntax || syntax_is_parsing || !syntax_has_pending_edits {
               return;
             }
+
+            let (syn_id, pending_edits, syn_parser, syn_tree) = {
+              let syn = buf.syntax_mut().as_mut().unwrap();
+              syn.set_is_parsing(true);
+              let syn_id = syn.id();
+              let pending_edits = syn.drain_pending(..).collect_vec();
+              let syn_parser = syn.parser();
+              let syn_tree = syn.tree().clone();
+              (syn_id, pending_edits, syn_parser, syn_tree)
+            };
 
             // release lock on the buffer
             drop(buf);
@@ -824,25 +830,13 @@ impl EventLoop {
             let master_tx = self.master_tx.clone();
 
             self.detached_tracker.spawn(async move {
-              let (syn_id, pending_edits, syn_parser, syn_tree) = {
-                let syn = syn.unwrap();
-                let mut syn = lock!(syn);
-                syn.set_is_parsing(true);
-                let syn_id = syn.id();
-                let pending_edits = syn.drain_pending(..).collect_vec();
-                let syn_parser = syn.parser();
-                let syn_tree = syn.tree().clone();
-                (syn_id, pending_edits, syn_parser, syn_tree)
-              };
-
               let (parsed_tree, parsed_editing_version) =
                 syntax::parse(syn_parser, syn_tree, pending_edits).await;
 
               // If the buffer and its syntax still remains the same
               if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
-                let buf = lock!(buf);
-                if let Some(syn) = buf.syntax() {
-                  let mut syn = lock!(syn);
+                let mut buf = lock!(buf);
+                if let Some(syn) = buf.syntax_mut() {
                   if syn.id() == syn_id {
                     syn.set_tree(parsed_tree);
                     syn.set_editing_version(parsed_editing_version);
