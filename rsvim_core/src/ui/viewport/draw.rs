@@ -1,7 +1,5 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
-use tree_sitter::QueryCursor;
-
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::syntax::Syntax;
@@ -9,6 +7,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
+use tree_sitter::QueryCursor;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
@@ -24,12 +23,42 @@ pub fn draw(
     return;
   }
 
-  let query_cursor = match syntax {
-    Some(syn) => {
-      let mut qcursor = QueryCursor::new();
-      Some(qcursor)
-    }
-    None => None,
+  let query_cursor_matches = if let Some(syn) = syntax
+    && let Some(syn_highlight_query) = syn.highlight_query()
+    && let Some(syn_tree) = syn.tree()
+    && viewport.end_line_idx() > viewport.start_line_idx()
+  {
+    // If has syntax and viewport has lines (i.e. not empty)
+    let mut qcursor = QueryCursor::new();
+    // First byte
+    let absolute_start_byte_idx = {
+      let first_line = viewport.lines().first().unwrap();
+      let first_row = first_line.1.rows().first().unwrap();
+      let (start_line_idx, start_char_idx) =
+        (*first_line.0, first_row.1.start_char_idx());
+      let absolute_start_char_idx =
+        text.to_absolute_char_idx(start_line_idx, start_char_idx);
+      text.rope().char_to_byte(absolute_start_char_idx)
+    };
+    // Last byte
+    let absolute_end_byte_idx = {
+      let last_line = viewport.lines().last().unwrap();
+      let last_row = last_line.1.rows().last().unwrap();
+      let (last_line_idx, end_char_idx) =
+        (*last_line.0, last_row.1.end_char_idx());
+      let absolute_end_char_idx =
+        text.to_absolute_char_idx(last_line_idx, end_char_idx);
+      text
+        .rope()
+        .try_char_to_byte(absolute_end_char_idx)
+        .unwrap_or(text.rope().len_bytes())
+    };
+    qcursor.set_byte_range(absolute_start_byte_idx..absolute_end_byte_idx);
+    let mut qmatches =
+      qcursor.matches(&syn_highlight_query, syn_tree.root_node(), b"" as &[u8]);
+    Some((qcursor, qmatches))
+  } else {
+    None
   };
 
   let upos: U16Pos = actual_shape.min().into();

@@ -167,6 +167,10 @@ impl Syntax {
     &self.filetype
   }
 
+  pub fn highlight_query(&self) -> &Option<Query> {
+    &self.highlight_query
+  }
+
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
   }
