@@ -24,20 +24,12 @@ pub fn draw(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
-  // If viewport has no lines.
-  // WARNING: Don't quit `draw` method here, let's the bottom part handle this
-  // empty viewport use case.
-  //
-  // if viewport.end_line_idx() <= viewport.start_line_idx() {
-  //   trace!("Draw viewport, viewport is empty");
-  //   return;
-  // }
-
   let mut row_idx = 0_u16;
   let mut line_idx = viewport.start_line_idx();
 
   let mut buflines = text.rope().lines_at(line_idx);
 
+  // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
     debug_assert!(row_idx < height);
 
