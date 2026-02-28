@@ -52,10 +52,10 @@ pub struct Buffer {
 
   // file
   filename: Option<PathBuf>,
+  file_extension: Option<CompactString>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  filetype: Option<CompactString>,
 
   // undo manager
   undo: Undo,
@@ -77,10 +77,10 @@ impl Buffer {
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
+    file_extension: Option<CompactString>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
-    filetype: Option<CompactString>,
     syntax: Option<Syntax>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
@@ -88,10 +88,10 @@ impl Buffer {
       id: BufferId::next(),
       text,
       filename,
+      file_extension,
       absolute_filename,
       metadata,
       last_sync_time,
-      filetype,
       undo: Undo::new(100),
       syntax,
       editing_version: 0,
