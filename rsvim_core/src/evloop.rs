@@ -813,13 +813,14 @@ impl EventLoop {
               return;
             }
 
-            let (pending_edits, syn_parser, syn_tree) = {
+            let (pending_edits, syn_id, syn_parser, syn_tree) = {
               let syn = buf.syntax_mut().as_mut().unwrap();
               syn.set_is_parsing(true);
+              let syn_id = syn.id();
               let pending_edits = syn.drain_pending(..).collect_vec();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
-              (pending_edits, syn_parser, syn_tree)
+              (pending_edits, syn_id, syn_parser, syn_tree)
             };
 
             // release lock on the buffer
@@ -836,9 +837,11 @@ impl EventLoop {
               if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
-                  syn.set_tree(parsed_tree);
-                  syn.set_editing_version(parsed_editing_version);
-                  syn.set_is_parsing(false);
+                  if syn.id() == syn_id {
+                    syn.set_tree(parsed_tree);
+                    syn.set_editing_version(parsed_editing_version);
+                    syn.set_is_parsing(false);
+                  }
 
                   // If buffer already has more pending editings, trigger next
                   // parsing immediately.
