@@ -1,5 +1,7 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
+use tree_sitter::QueryCursor;
+
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::syntax::Syntax;
@@ -12,7 +14,7 @@ use std::convert::From;
 pub fn draw(
   viewport: &Viewport,
   text: &Text,
-  _syntax: &Option<Syntax>,
+  syntax: &Option<Syntax>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -21,6 +23,14 @@ pub fn draw(
     trace!("Draw viewport, actual shape is zero");
     return;
   }
+
+  let query_cursor = match syntax {
+    Some(syn) => {
+      let mut qcursor = QueryCursor::new();
+      Some(qcursor)
+    }
+    None => None,
+  };
 
   let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();
