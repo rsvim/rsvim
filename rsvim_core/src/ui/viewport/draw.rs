@@ -54,7 +54,7 @@ pub fn draw(
         .unwrap_or(text.rope().len_bytes())
     };
     qcursor.set_byte_range(absolute_start_byte_idx..absolute_end_byte_idx);
-    let mut qmatches =
+    let qmatches =
       qcursor.matches(&syn_highlight_query, syn_tree.root_node(), b"" as &[u8]);
     Some((qcursor, qmatches))
   } else {
