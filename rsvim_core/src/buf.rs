@@ -18,7 +18,6 @@ use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
-use crate::syntax::SyntaxArc;
 use crate::syntax::SyntaxManager;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -62,7 +61,7 @@ pub struct Buffer {
   undo: Undo,
 
   // syntax parser
-  syntax: Option<SyntaxArc>,
+  syntax: Option<Syntax>,
 
   // Text editing version
   editing_version: isize,
@@ -82,7 +81,7 @@ impl Buffer {
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
-    syntax: Option<SyntaxArc>,
+    syntax: Option<Syntax>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -167,11 +166,15 @@ impl Buffer {
     &mut self.undo
   }
 
-  pub fn syntax(&self) -> Option<SyntaxArc> {
-    self.syntax.clone()
+  pub fn syntax(&self) -> &Option<Syntax> {
+    &self.syntax
   }
 
-  pub fn set_syntax(&mut self, value: Option<SyntaxArc>) {
+  pub fn syntax_mut(&mut self) -> &mut Option<Syntax> {
+    &mut self.syntax
+  }
+
+  pub fn set_syntax(&mut self, value: Option<Syntax>) {
     self.syntax = value;
   }
 
