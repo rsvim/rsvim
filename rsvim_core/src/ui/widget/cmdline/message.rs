@@ -46,7 +46,7 @@ impl Widgetable for CmdlineMessage {
       let cmdline_text = lock!(cmdline_text);
       let viewport = self.viewport.upgrade().unwrap();
 
-      viewport.draw(cmdline_text.message(), &actual_shape, canvas);
+      viewport.draw(cmdline_text.message(), &None, &actual_shape, canvas);
     }
   }
 }

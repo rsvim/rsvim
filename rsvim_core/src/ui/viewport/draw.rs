@@ -2,6 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
@@ -11,6 +12,7 @@ use std::convert::From;
 pub fn draw(
   viewport: &Viewport,
   text: &Text,
+  _syntax: &Option<Syntax>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
