@@ -286,12 +286,16 @@ impl BufferManager {
     let buf = if existed {
       self.read_file(canvas_size, filename, &abs_filename)?
     } else {
-      let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+      let file_extension = filename
+        .extension()
+        .map(|e| e.to_string_lossy().to_compact_string());
+      let syntax = self.load_syntax_by_file_ext(&file_extension)?;
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
         Rope::new(),
         Some(filename.to_path_buf()),
+        file_extension,
         Some(abs_filename.clone()),
         None,
         None,
@@ -370,26 +374,20 @@ impl BufferManager {
 
   fn load_syntax_by_file_ext(
     &self,
-    file_extension: Option<&OsStr>,
+    file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) =
-        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+      && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
     {
       trace!(
         "Load syntax by file ext:{:?} lang:{:?}",
         file_extension,
         lang.name()
       );
-      let highlight_query = self
-        .syntax_manager
-        .get_highlight_query_by_ext(&ext.to_string_lossy());
+      let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxFailed(
-          ext.to_string_lossy().to_compact_string(),
-          e,
-        )),
+        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
@@ -417,13 +415,17 @@ impl BufferManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
-          let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+          let file_extension = filename
+            .extension()
+            .map(|e| e.to_string_lossy().to_compact_string());
+          let syntax = self.load_syntax_by_file_ext(&file_extension)?;
 
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
             rope,
             Some(filename.to_path_buf()),
+            file_extension,
             Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),
