@@ -1,7 +1,5 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
-use tree_sitter::QueryCursor;
-
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::syntax::Syntax;
@@ -9,6 +7,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
+use tree_sitter::QueryCursor;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
