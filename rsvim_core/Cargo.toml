@@ -80,6 +80,7 @@ tree-sitter-toml-ng = { workspace = true }
 # NOTE: Javascript dependencies {
 
 swc_atoms = { workspace = true }
+swc_bundler = { workspace = true }
 swc_common = { workspace = true }
 swc_config = { workspace = true }
 swc_config_macro = { workspace = true }
@@ -100,10 +101,9 @@ swc_ecma_transforms_typescript = { workspace = true }
 swc_ecma_utils = { workspace = true }
 swc_ecma_visit = { workspace = true }
 swc_eq_ignore_macros = { workspace = true }
-# swc_bundler = { workspace = true }
-# swc_graph_analyzer = { workspace = true }
+swc_graph_analyzer = { workspace = true }
 swc_macros_common = { workspace = true }
-# swc_sourcemap = { workspace = true }
+swc_sourcemap = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
 
