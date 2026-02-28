@@ -292,12 +292,13 @@ impl Normal {
           let rope = buffer.text().rope().clone();
           let editing_version = buffer.editing_version();
           debug_assert!(syn_insert.is_some());
-          let syn = buffer.syntax().unwrap();
-          lock!(syn).add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
-            payload: rope,
-            input: syn_insert.unwrap(),
-            version: editing_version,
-          }));
+          buffer.syntax_mut().as_mut().unwrap().add_pending(
+            SyntaxEdit::Update(SyntaxEditUpdate {
+              payload: rope,
+              input: syn_insert.unwrap(),
+              version: editing_version,
+            }),
+          );
           chan::send_to_master(
             data_access.master_tx.clone(),
             MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
