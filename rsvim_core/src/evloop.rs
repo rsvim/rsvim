@@ -792,7 +792,7 @@ impl EventLoop {
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffer_manager).get(&req.buffer_id) {
-            let buf = lock!(buf);
+            let mut buf = lock!(buf);
 
             // Early quit if any below conditions are met:
             // 1. Has no syntax
