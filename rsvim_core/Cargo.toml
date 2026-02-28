@@ -22,6 +22,15 @@ doctest = false
 # `cargo +nightly miri nextest run -p rsvim_core -F unicode_lines --no-default-features`
 default = ["simd", "unicode_lines"]
 simd = ["ropey/simd"]
+typescript = [
+  "dep:swc_common",
+  "dep:swc_config",
+  "dep:swc_ecma_ast",
+  "dep:swc_ecma_codegen",
+  "dep:swc_ecma_parser",
+  "dep:swc_ecma_transforms_base",
+  "dep:swc_ecma_transforms_typescript",
+]
 unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
@@ -79,33 +88,16 @@ tree-sitter-toml-ng = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
-swc_atoms = { workspace = true }
-swc_common = { workspace = true }
-swc_config = { workspace = true }
-swc_config_macro = { workspace = true }
-swc_ecma_ast = { workspace = true }
-swc_ecma_codegen = { workspace = true }
-swc_ecma_codegen_macros = { workspace = true }
-swc_ecma_lexer = { workspace = true }
-swc_ecma_loader = { workspace = true }
-swc_ecma_parser = { workspace = true }
-swc_ecma_transforms_base = { workspace = true, features = ["inline-helpers"] }
-swc_ecma_transforms_classes = { workspace = true }
-swc_ecma_transforms_compat = { workspace = true }
-swc_ecma_transforms_macros = { workspace = true }
-swc_ecma_transforms_optimization = { workspace = true }
-swc_ecma_transforms_proposal = { workspace = true }
-swc_ecma_transforms_react = { workspace = true }
-swc_ecma_transforms_typescript = { workspace = true }
-swc_ecma_utils = { workspace = true }
-swc_ecma_visit = { workspace = true }
-swc_eq_ignore_macros = { workspace = true }
-# swc_bundler = { workspace = true }
-# swc_graph_analyzer = { workspace = true }
-swc_macros_common = { workspace = true }
+swc_common = { workspace = true, optional = true }
+swc_config = { workspace = true, optional = true }
+swc_ecma_ast = { workspace = true, optional = true }
+swc_ecma_codegen = { workspace = true, optional = true }
+swc_ecma_parser = { workspace = true, optional = true }
+swc_ecma_transforms_base = { workspace = true, optional = true, features = [
+  "inline-helpers",
+] }
+swc_ecma_transforms_typescript = { workspace = true, optional = true }
 # swc_sourcemap = { workspace = true }
-swc_trace_macro = { workspace = true }
-swc_visit = { workspace = true }
 
 v8 = { workspace = true, default-features = false, features = [
   "use_custom_libcxx",
