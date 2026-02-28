@@ -721,6 +721,6 @@ impl Viewport {
     syntax: &Option<Syntax>,
     canvas: &mut Canvas,
   ) {
-    draw::draw(self, text, actual_shape, language, canvas);
+    draw::draw(self, text, actual_shape, syntax, canvas);
   }
 }
