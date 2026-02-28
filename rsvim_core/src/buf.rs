@@ -19,12 +19,12 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxManager;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
-use std::ffi::OsStr;
 use std::fs::Metadata;
 use std::path::Path;
 use std::path::PathBuf;
@@ -52,6 +52,7 @@ pub struct Buffer {
 
   // file
   filename: Option<PathBuf>,
+  file_extension: Option<CompactString>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
@@ -76,6 +77,7 @@ impl Buffer {
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
+    file_extension: Option<CompactString>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
@@ -86,6 +88,7 @@ impl Buffer {
       id: BufferId::next(),
       text,
       filename,
+      file_extension,
       absolute_filename,
       metadata,
       last_sync_time,
@@ -117,6 +120,10 @@ impl Buffer {
 
   pub fn filename(&self) -> &Option<PathBuf> {
     &self.filename
+  }
+
+  pub fn file_extension(&self) -> &Option<CompactString> {
+    &self.file_extension
   }
 
   pub fn set_filename(&mut self, filename: Option<PathBuf>) {
@@ -278,12 +285,16 @@ impl BufferManager {
     let buf = if existed {
       self.read_file(canvas_size, filename, &abs_filename)?
     } else {
-      let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+      let file_extension = filename
+        .extension()
+        .map(|e| e.to_string_lossy().to_compact_string());
+      let syntax = self.load_syntax_by_file_ext(&file_extension)?;
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
         Rope::new(),
         Some(filename.to_path_buf()),
+        file_extension,
         Some(abs_filename.clone()),
         None,
         None,
@@ -318,6 +329,7 @@ impl BufferManager {
       *self.global_local_options(),
       canvas_size,
       Rope::new(),
+      None,
       None,
       None,
       None,
@@ -362,26 +374,20 @@ impl BufferManager {
 
   fn load_syntax_by_file_ext(
     &self,
-    file_extension: Option<&OsStr>,
+    file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) =
-        self.syntax_manager.get_lang_by_ext(&ext.to_string_lossy())
+      && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
     {
       trace!(
         "Load syntax by file ext:{:?} lang:{:?}",
         file_extension,
         lang.name()
       );
-      let highlight_query = self
-        .syntax_manager
-        .get_highlight_query_by_ext(&ext.to_string_lossy());
+      let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxFailed(
-          ext.to_string_lossy().to_compact_string(),
-          e,
-        )),
+        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
@@ -409,13 +415,17 @@ impl BufferManager {
           let rope = rope_builder.finish();
           trace!("Read {} bytes from file {:?}", data.len(), filename);
 
-          let syntax = self.load_syntax_by_file_ext(filename.extension())?;
+          let file_extension = filename
+            .extension()
+            .map(|e| e.to_string_lossy().to_compact_string());
+          let syntax = self.load_syntax_by_file_ext(&file_extension)?;
 
           Ok(Buffer::_new(
             *self.global_local_options(),
             canvas_size,
             rope,
             Some(filename.to_path_buf()),
+            file_extension,
             Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),

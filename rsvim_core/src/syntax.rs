@@ -3,6 +3,7 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
+use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use parking_lot::Mutex;
@@ -74,10 +75,15 @@ pub enum SyntaxEdit {
 
 pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
-pub type SyntaxMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+
+// SyntaxId starts from 1.
+structural_id_impl!(usize, SyntaxId, 1);
 
 /// Buffer syntax.
 pub struct Syntax {
+  id: SyntaxId,
+
   // Highlight query
   highlight_query: Option<Query>,
 
@@ -91,8 +97,8 @@ pub struct Syntax {
   // Syntax parser
   parser: SyntaxParserArc,
 
-  // Optional language name
-  language_name: Option<CompactString>,
+  // Filetype, i.e. language name
+  filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
@@ -120,7 +126,7 @@ impl Debug for Syntax {
         },
       )
       .field("editing_version", &self.editing_version)
-      .field("language_name", &self.language_name)
+      .field("filetype", &self.filetype)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
       .finish()
@@ -132,7 +138,7 @@ impl Syntax {
     lang: &Language,
     highlight_query: Option<&String>,
   ) -> Result<Self, LanguageError> {
-    let language_name = lang.name().map(|name| name.to_compact_string());
+    let filetype = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
@@ -142,14 +148,23 @@ impl Syntax {
     };
 
     Ok(Self {
+      id: SyntaxId::next(),
       highlight_query,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
-      language_name,
+      filetype,
       pending: vec![],
       parsing: false,
     })
+  }
+
+  pub fn id(&self) -> SyntaxId {
+    self.id
+  }
+
+  pub fn filetype(&self) -> &Option<CompactString> {
+    &self.filetype
   }
 
   pub fn tree(&self) -> &Option<Tree> {
