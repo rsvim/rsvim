@@ -20,7 +20,7 @@ doctest = false
 [features]
 # NOTE: When running miri, disable default features ('simd'), only enable 'unicode_lines' feature:
 # `cargo +nightly miri nextest run -p rsvim_core -F unicode_lines --no-default-features`
-default = ["simd", "unicode_lines"]
+default = ["simd", "unicode_lines", "typescript"]
 simd = ["ropey/simd"]
 typescript = [
   "dep:swc_common",
