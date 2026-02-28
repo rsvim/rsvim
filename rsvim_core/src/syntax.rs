@@ -91,8 +91,8 @@ pub struct Syntax {
   // Syntax parser
   parser: SyntaxParserArc,
 
-  // Optional language name
-  language_name: Option<CompactString>,
+  // Filetype, i.e. language name
+  filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
   pending: Vec<SyntaxEdit>,
@@ -120,7 +120,7 @@ impl Debug for Syntax {
         },
       )
       .field("editing_version", &self.editing_version)
-      .field("language_name", &self.language_name)
+      .field("filetype", &self.filetype)
       .field("pending", &self.pending)
       .field("parsing", &self.parsing)
       .finish()
@@ -132,7 +132,7 @@ impl Syntax {
     lang: &Language,
     highlight_query: Option<&String>,
   ) -> Result<Self, LanguageError> {
-    let language_name = lang.name().map(|name| name.to_compact_string());
+    let filetype = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
     parser.set_language(lang)?;
     let parser = Arc::new(Mutex::new(parser));
@@ -146,7 +146,7 @@ impl Syntax {
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
       parser,
-      language_name,
+      filetype,
       pending: vec![],
       parsing: false,
     })
