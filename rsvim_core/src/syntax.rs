@@ -159,6 +159,10 @@ impl Syntax {
     })
   }
 
+  pub fn id(&self) -> SyntaxId {
+    self.id
+  }
+
   pub fn filetype(&self) -> &Option<CompactString> {
     &self.filetype
   }
