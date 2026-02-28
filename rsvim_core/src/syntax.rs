@@ -115,8 +115,6 @@ pub struct Syntax {
   parsing: bool,
 }
 
-arc_mutex_ptr!(Syntax);
-
 impl Debug for Syntax {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Syntax")
