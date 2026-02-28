@@ -83,8 +83,10 @@ pub type SyntaxQueryArc = Arc<Query>;
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 /// Line (row) index and byte (column) index (2D)
 pub struct SyntaxQueryCaptureKey(usize, usize);
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxQueryCaptureValue {
-  pub index: usize,
+  pub index: u32,
   pub range: tree_sitter::Range,
 }
 
@@ -99,13 +101,13 @@ arc_ptr!(SyntaxQueryCapture);
 impl SyntaxQueryCapture {
   pub fn start_nodes(
     &self,
-  ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
+  ) -> &FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> {
     &self.start_nodes
   }
 
   pub fn end_nodes(
     &self,
-  ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
+  ) -> &FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> {
     &self.end_nodes
   }
 }
