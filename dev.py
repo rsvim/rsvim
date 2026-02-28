@@ -224,7 +224,7 @@ class Miri(Cmd):
             job = ""
         else:
             job = f" -j {args.job[0]}"
-        cmd = f"cargo +nightly miri nextest run{job} -F unicode_lines --no-default-features -p rsvim_core"
+        cmd = f"cargo +nightly miri nextest run{job} -F unicode_lines -F typescript --no-default-features -p rsvim_core"
         run(cmd)
 
 
