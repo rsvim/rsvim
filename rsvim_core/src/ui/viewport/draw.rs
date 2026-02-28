@@ -79,6 +79,7 @@ pub fn draw(
     }
     Some((start_captures, end_captures))
   } else {
+    trace!("tree_sitter capture: None");
     None
   };
 
