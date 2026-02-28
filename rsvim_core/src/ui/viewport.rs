@@ -5,6 +5,7 @@ pub mod sync;
 
 use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::opt::WindowOptions;
 use litemap::LiteMap;
@@ -717,7 +718,7 @@ impl Viewport {
     &self,
     text: &Text,
     actual_shape: &U16Rect,
-    language: Option<&str>,
+    syntax: &Option<Syntax>,
     canvas: &mut Canvas,
   ) {
     draw::draw(self, text, actual_shape, language, canvas);

@@ -2,6 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
@@ -12,7 +13,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   actual_shape: &U16Rect,
-  _language: Option<&str>,
+  _syntax: &Option<Syntax>,
   canvas: &mut Canvas,
 ) {
   // If size is zero, exit.
