@@ -128,7 +128,6 @@ mod tests_buffer_editing {
       assert_eq!(format!("Hello, World{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn = buf.syntax().unwrap();
-      let syn = lock!(syn);
       let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = syn.tree();
@@ -222,7 +221,6 @@ mod tests_buffer_editing {
       assert_eq!(format!("HelloWorld{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn = buf.syntax().unwrap();
-      let syn = lock!(syn);
       let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = syn.tree();
@@ -308,7 +306,6 @@ mod tests_buffer_editing {
       assert_eq!(format!("use std::sync::Arc;{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
       let syn = buf.syntax().unwrap();
-      let syn = lock!(syn);
       let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = syn.tree();
@@ -458,7 +455,6 @@ mod tests_buffer_editing {
       );
       let buf_editing_version = buf.editing_version();
       let syn = buf.syntax().unwrap();
-      let syn = lock!(syn);
       let syn_editing_version = syn.editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
       let syn_tree = syn.tree();
