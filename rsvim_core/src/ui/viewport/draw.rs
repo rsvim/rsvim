@@ -23,7 +23,7 @@ pub fn draw(
     return;
   }
 
-  let query_cursor_matches = if let Some(syn) = syntax
+  let _query_cursor_matches = if let Some(syn) = syntax
     && let Some(syn_highlight_query) = syn.highlight_query()
     && let Some(syn_tree) = syn.tree()
     && viewport.end_line_idx() > viewport.start_line_idx()
