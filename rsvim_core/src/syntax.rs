@@ -83,26 +83,30 @@ pub type SyntaxQueryArc = Arc<Query>;
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 /// Line (row) index and byte (column) index (2D)
 pub struct SyntaxQueryCaptureKey(usize, usize);
+pub struct SyntaxQueryCaptureValue {
+  pub index: usize,
+  pub range: tree_sitter::Range,
+}
 
 #[derive(Debug)]
 pub struct SyntaxQueryCapture {
-  start_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range>,
-  end_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range>,
+  start_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue>,
+  end_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue>,
 }
 
 arc_ptr!(SyntaxQueryCapture);
 
 impl SyntaxQueryCapture {
-  pub fn start_captures(
+  pub fn start_nodes(
     &self,
   ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
-    &self.start_captures
+    &self.start_nodes
   }
 
-  pub fn end_captures(
+  pub fn end_nodes(
     &self,
   ) -> &FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> {
-    &self.end_captures
+    &self.end_nodes
   }
 }
 
@@ -634,28 +638,32 @@ pub fn query(
       syn_tree.root_node(),
       text_payload.as_bytes(),
     );
-    let mut start_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> =
-      FoldMap::new();
-    let mut end_captures: FoldMap<SyntaxQueryCaptureKey, tree_sitter::Range> =
+    let mut start_nodes: FoldMap<
+      SyntaxQueryCaptureKey,
+      SyntaxQueryCaptureValue,
+    > = FoldMap::new();
+    let mut end_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> =
       FoldMap::new();
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
-        let idx = cap.index;
-        let ran = cap.node.range();
-        trace!("Captured highlight {}:{:?}", idx, ran);
-        let start_key =
-          SyntaxQueryCaptureKey(ran.start_point.row, ran.start_point.column);
+        let index = cap.index;
+        let range = cap.node.range();
+        trace!("Captured highlight {}:{:?}", index, range);
+        let start_key = SyntaxQueryCaptureKey(
+          range.start_point.row,
+          range.start_point.column,
+        );
         let end_key =
-          SyntaxQueryCaptureKey(ran.end_point.row, ran.end_point.column);
-        debug_assert!(!start_captures.contains_key(&start_key));
-        debug_assert!(!end_captures.contains_key(&end_key));
-        start_captures.insert(start_key, ran);
-        end_captures.insert(end_key, ran);
+          SyntaxQueryCaptureKey(range.end_point.row, range.end_point.column);
+        debug_assert!(!start_nodes.contains_key(&start_key));
+        debug_assert!(!end_nodes.contains_key(&end_key));
+        start_nodes.insert(start_key, SyntaxQueryCaptureValue { index, range });
+        end_nodes.insert(end_key, SyntaxQueryCaptureValue { index, range });
       }
     }
     Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture {
-      start_captures,
-      end_captures,
+      start_nodes,
+      end_nodes,
     }))
   } else {
     None
