@@ -206,8 +206,8 @@ impl Syntax {
     &self.filetype
   }
 
-  pub fn highlight_query(&self) -> &Option<SyntaxQueryArc> {
-    &self.highlight_query
+  pub fn highlight_query(&self) -> Option<SyntaxQueryArc> {
+    self.highlight_query.clone()
   }
 
   pub fn highlight_capture(&self) -> &Option<SyntaxQueryCaptureArc> {
