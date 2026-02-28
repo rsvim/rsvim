@@ -469,7 +469,7 @@ pub async fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
-) -> (Option<Tree>, isize) {
+) -> (Option<Tree>, isize, Option<String>) {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
@@ -490,6 +490,8 @@ pub async fn parse(
     debug_assert!(new_count <= 1);
   }
 
+  let mut last_payload: Option<String> = None;
+
   if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
   {
     match &pending_edits[0] {
@@ -506,6 +508,7 @@ pub async fn parse(
             .unwrap_or("None".to_string()),
           editing_version
         );
+        last_payload = Some(payload);
       }
       _ => unreachable!(),
     }
@@ -542,7 +545,18 @@ pub async fn parse(
         .unwrap_or("None".to_string()),
       editing_version
     );
+    last_payload = Some(payload);
   }
 
+  (tree, editing_version, last_payload)
+}
+
+pub async fn parse_and_query(
+  parser: Arc<Mutex<Parser>>,
+  old_tree: Option<Tree>,
+  pending_edits: Vec<SyntaxEdit>,
+) -> (Option<Tree>, isize) {
+  let (tree, editing_version, text_payload) =
+    parse(parser, old_tree, pending_edits).await;
   (tree, editing_version)
 }
