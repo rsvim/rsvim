@@ -127,7 +127,7 @@ swc_sourcemap = "=10.0.2"
 swc_trace_macro = "=2.0.2"
 swc_visit = "=2.0.1"
 
-v8 = { version = "=146.0.0", default-features = false, features = [
+v8 = { version = "=146.1.0", default-features = false, features = [
   "use_custom_libcxx",
 ] }
 
