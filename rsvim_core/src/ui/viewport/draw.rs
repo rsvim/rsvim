@@ -7,14 +7,12 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
-use tree_sitter::QueryCursor;
-use tree_sitter::StreamingIterator;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
   text: &Text,
-  syntax: &Option<Syntax>,
+  _syntax: &Option<Syntax>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -23,65 +21,6 @@ pub fn draw(
     trace!("Draw viewport, actual shape is zero");
     return;
   }
-
-  let mut query_cursor = QueryCursor::new();
-  let _highlight_captures = if let Some(syn) = syntax
-    && let Some(syn_highlight_query) = syn.highlight_query()
-    && let Some(syn_tree) = syn.tree()
-    && viewport.end_line_idx() > viewport.start_line_idx()
-  {
-    // If has syntax and viewport has lines (i.e. not empty)
-    // First byte
-    let absolute_start_byte_idx = {
-      let first_line = viewport.lines().first().unwrap();
-      let first_row = first_line.1.rows().first().unwrap();
-      let (start_line_idx, start_char_idx) =
-        (*first_line.0, first_row.1.start_char_idx());
-      let absolute_start_char_idx =
-        text.to_absolute_char_idx(start_line_idx, start_char_idx);
-      text.rope().char_to_byte(absolute_start_char_idx)
-    };
-    // Last byte
-    let absolute_end_byte_idx = {
-      let last_line = viewport.lines().last().unwrap();
-      let last_row = last_line.1.rows().last().unwrap();
-      let (last_line_idx, end_char_idx) =
-        (*last_line.0, last_row.1.end_char_idx());
-      let absolute_end_char_idx =
-        text.to_absolute_char_idx(last_line_idx, end_char_idx);
-      text
-        .rope()
-        .try_char_to_byte(absolute_end_char_idx)
-        .unwrap_or(text.rope().len_bytes())
-    };
-    query_cursor.set_byte_range(absolute_start_byte_idx..absolute_end_byte_idx);
-    let mut matches = query_cursor.matches(
-      syn_highlight_query,
-      syn_tree.root_node(),
-      b"" as &[u8],
-    );
-    let mut start_captures: FoldMap<(usize, usize), tree_sitter::Range> =
-      FoldMap::new();
-    let mut end_captures: FoldMap<(usize, usize), tree_sitter::Range> =
-      FoldMap::new();
-    while let Some(mat) = matches.next() {
-      for cap in mat.captures {
-        let idx = cap.index;
-        let rng = cap.node.range();
-        trace!("tree_sitter capture, {}:{:?}", idx, rng);
-        let start_key = (rng.start_point.row, rng.start_point.column);
-        let end_key = (rng.end_point.row, rng.end_point.column);
-        debug_assert!(!start_captures.contains_key(&start_key));
-        debug_assert!(!end_captures.contains_key(&end_key));
-        start_captures.insert(start_key, rng);
-        end_captures.insert(end_key, rng);
-      }
-    }
-    Some((start_captures, end_captures))
-  } else {
-    trace!("tree_sitter capture: None");
-    None
-  };
 
   let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();

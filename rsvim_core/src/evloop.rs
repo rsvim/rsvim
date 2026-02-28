@@ -813,14 +813,27 @@ impl EventLoop {
               return;
             }
 
-            let (pending_edits, syn_id, syn_parser, syn_tree) = {
+            let (
+              pending_edits,
+              syn_id,
+              syn_parser,
+              syn_tree,
+              syn_highlight_query,
+            ) = {
               let syn = buf.syntax_mut().as_mut().unwrap();
               syn.set_is_parsing(true);
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending(..).collect_vec();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
-              (pending_edits, syn_id, syn_parser, syn_tree)
+              let syn_highlight_query = syn.highlight_query().clone();
+              (
+                pending_edits,
+                syn_id,
+                syn_parser,
+                syn_tree,
+                syn_highlight_query,
+              )
             };
 
             // release lock on the buffer
@@ -831,8 +844,13 @@ impl EventLoop {
 
             self.detached_tracker.spawn(async move {
               let (parsed_tree, parsed_editing_version) =
-                syntax::parse_and_query(syn_parser, syn_tree, pending_edits)
-                  .await;
+                syntax::parse_and_query(
+                  syn_parser,
+                  syn_tree,
+                  syn_highlight_query,
+                  pending_edits,
+                )
+                .await;
 
               // If the buffer and its syntax remains the same
               if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
