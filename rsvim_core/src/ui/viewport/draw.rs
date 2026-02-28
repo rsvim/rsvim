@@ -23,13 +23,13 @@ pub fn draw(
     return;
   }
 
-  let _query_cursor_matches = if let Some(syn) = syntax
+  let mut query_cursor = QueryCursor::new();
+  let _query_matches = if let Some(syn) = syntax
     && let Some(syn_highlight_query) = syn.highlight_query()
     && let Some(syn_tree) = syn.tree()
     && viewport.end_line_idx() > viewport.start_line_idx()
   {
     // If has syntax and viewport has lines (i.e. not empty)
-    let mut qcursor = QueryCursor::new();
     // First byte
     let absolute_start_byte_idx = {
       let first_line = viewport.lines().first().unwrap();
@@ -53,10 +53,13 @@ pub fn draw(
         .try_char_to_byte(absolute_end_char_idx)
         .unwrap_or(text.rope().len_bytes())
     };
-    qcursor.set_byte_range(absolute_start_byte_idx..absolute_end_byte_idx);
-    let qmatches =
-      qcursor.matches(&syn_highlight_query, syn_tree.root_node(), b"" as &[u8]);
-    Some((qcursor, qmatches))
+    query_cursor.set_byte_range(absolute_start_byte_idx..absolute_end_byte_idx);
+    let qmatches = query_cursor.matches(
+      syn_highlight_query,
+      syn_tree.root_node(),
+      b"" as &[u8],
+    );
+    Some(qmatches)
   } else {
     None
   };
