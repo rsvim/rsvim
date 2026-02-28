@@ -17,7 +17,10 @@ rust-version = "1.89.0"
 version = "0.1.2"
 
 [workspace.dependencies]
-rsvim_core = { version = "0.1.2", path = "./rsvim_core" }
+rsvim_core = { version = "0.1.2", path = "./rsvim_core", default-features = false, features = [
+  "simd",
+  "unicode_lines",
+] }
 
 # anyhow = "1"
 arcstr = { version = "1.2", features = ["std"] }

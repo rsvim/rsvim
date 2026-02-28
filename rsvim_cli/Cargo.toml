@@ -15,13 +15,17 @@ rust-version.workspace = true
 version.workspace = true
 
 [features]
-default = []
+default = ["typescript"]
 jemalloc = ["dep:tikv-jemallocator"]
 mimalloc = ["dep:mimalloc-safe"]
 snmalloc = ["dep:snmalloc-rs"]
+typescript = ["rsvim_core/typescript"]
 
 [dependencies]
-rsvim_core = { workspace = true }
+rsvim_core = { workspace = true, default-features = false, features = [
+  "simd",
+  "unicode_lines",
+] }
 
 log = { workspace = true, features = [
   "max_level_trace",
