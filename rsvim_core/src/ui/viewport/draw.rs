@@ -2,15 +2,18 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
+use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
+use tree_sitter::QueryCursor;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
   text: &Text,
+  syntax: &Option<Syntax>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -20,24 +23,24 @@ pub fn draw(
     return;
   }
 
+  let _query_cursor = match syntax {
+    Some(_syn) => {
+      let qcursor = QueryCursor::new();
+      Some(qcursor)
+    }
+    None => None,
+  };
+
   let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();
   let width = actual_shape.width();
-
-  // If viewport has no lines.
-  // WARNING: Don't quit `draw` method here, let's the bottom part handle this
-  // empty viewport use case.
-  //
-  // if viewport.end_line_idx() <= viewport.start_line_idx() {
-  //   trace!("Draw viewport, viewport is empty");
-  //   return;
-  // }
 
   let mut row_idx = 0_u16;
   let mut line_idx = viewport.start_line_idx();
 
   let mut buflines = text.rope().lines_at(line_idx);
 
+  // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
     debug_assert!(row_idx < height);
 
@@ -194,6 +197,9 @@ pub fn draw(
 
   // If buffer has no more lines, or even the buffer/viewport is empty. Render
   // empty spaces to left parts of the window content.
+  //
+  // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
+  // part as well.
   while row_idx < height {
     let cells = std::iter::repeat_n(' ', width as usize)
       .map(Cell::from)

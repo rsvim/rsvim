@@ -46,7 +46,7 @@ impl Widgetable for CmdlineInput {
       let cmdline_text = lock!(cmdline_text);
       let viewport = self.viewport.upgrade().unwrap();
 
-      viewport.draw(cmdline_text.input(), &actual_shape, canvas);
+      viewport.draw(cmdline_text.input(), &None, &actual_shape, canvas);
     }
   }
 }
