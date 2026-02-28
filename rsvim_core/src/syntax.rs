@@ -152,6 +152,10 @@ impl Syntax {
     })
   }
 
+  pub fn filetype(&self) -> &Option<CompactString> {
+    &self.filetype
+  }
+
   pub fn tree(&self) -> &Option<Tree> {
     &self.tree
   }
