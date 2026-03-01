@@ -81,7 +81,7 @@ pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 pub type SyntaxQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// Line (row) index and byte (column) index (2D)
+/// Line (row) index and column (byte) index.
 pub struct SyntaxQueryCaptureKey(usize, usize);
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -90,25 +90,20 @@ pub struct SyntaxQueryCaptureValue {
   pub range: tree_sitter::Range,
 }
 
+pub type SyntaxQueryCaptureMap =
+  FoldMap<SyntaxQueryCaptureKey, Vec<SyntaxQueryCaptureValue>>;
+
 #[derive(Debug)]
 pub struct SyntaxQueryCapture {
-  start_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue>,
-  end_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue>,
+  // Maps start_point to all its captured nodes.
+  nodes: SyntaxQueryCaptureMap,
 }
 
 arc_ptr!(SyntaxQueryCapture);
 
 impl SyntaxQueryCapture {
-  pub fn start_nodes(
-    &self,
-  ) -> &FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> {
-    &self.start_nodes
-  }
-
-  pub fn end_nodes(
-    &self,
-  ) -> &FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> {
-    &self.end_nodes
+  pub fn nodes(&self) -> &SyntaxQueryCaptureMap {
+    &self.nodes
   }
 }
 
@@ -640,33 +635,24 @@ pub fn query(
       syn_tree.root_node(),
       text_payload.as_bytes(),
     );
-    let mut start_nodes: FoldMap<
-      SyntaxQueryCaptureKey,
-      SyntaxQueryCaptureValue,
-    > = FoldMap::new();
-    let mut end_nodes: FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> =
-      FoldMap::new();
+    let mut nodes: SyntaxQueryCaptureMap = FoldMap::new();
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let index = cap.index;
         let range = cap.node.range();
         trace!("Captured highlight {}:{:?}", index, range);
-        let start_key = SyntaxQueryCaptureKey(
+        let key = SyntaxQueryCaptureKey(
           range.start_point.row,
           range.start_point.column,
         );
-        let end_key =
-          SyntaxQueryCaptureKey(range.end_point.row, range.end_point.column);
-        debug_assert!(!start_nodes.contains_key(&start_key));
-        debug_assert!(!end_nodes.contains_key(&end_key));
-        start_nodes.insert(start_key, SyntaxQueryCaptureValue { index, range });
-        end_nodes.insert(end_key, SyntaxQueryCaptureValue { index, range });
+        nodes.entry(key).or_insert(vec![]);
+        nodes
+          .get_mut(&key)
+          .unwrap()
+          .push(SyntaxQueryCaptureValue { index, range });
       }
     }
-    Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture {
-      start_nodes,
-      end_nodes,
-    }))
+    Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture { nodes }))
   } else {
     None
   }
