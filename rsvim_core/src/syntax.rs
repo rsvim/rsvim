@@ -90,18 +90,19 @@ pub struct SyntaxQueryCaptureValue {
   pub range: tree_sitter::Range,
 }
 
+pub type SyntaxQueryCaptureMap =
+  FoldMap<SyntaxQueryCaptureKey, Vec<SyntaxQueryCaptureValue>>;
+
 #[derive(Debug)]
 pub struct SyntaxQueryCapture {
   // Maps start_point to all its captured nodes.
-  nodes: FoldMap<SyntaxQueryCaptureKey, Vec<SyntaxQueryCaptureValue>>,
+  nodes: SyntaxQueryCaptureMap,
 }
 
 arc_ptr!(SyntaxQueryCapture);
 
 impl SyntaxQueryCapture {
-  pub fn nodes(
-    &self,
-  ) -> &FoldMap<SyntaxQueryCaptureKey, SyntaxQueryCaptureValue> {
+  pub fn nodes(&self) -> &SyntaxQueryCaptureMap {
     &self.nodes
   }
 }
@@ -634,10 +635,7 @@ pub fn query(
       syn_tree.root_node(),
       text_payload.as_bytes(),
     );
-    let mut nodes: FoldMap<
-      SyntaxQueryCaptureKey,
-      Vec<SyntaxQueryCaptureValue>,
-    > = FoldMap::new();
+    let mut nodes: SyntaxQueryCaptureMap = FoldMap::new();
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let index = cap.index;
@@ -647,9 +645,7 @@ pub fn query(
           range.start_point.row,
           range.start_point.column,
         );
-        if !nodes.contains_key(&key) {
-          nodes.insert(key, vec![]);
-        }
+        nodes.entry(key).or_insert(vec![]);
         nodes
           .get_mut(&key)
           .unwrap()
