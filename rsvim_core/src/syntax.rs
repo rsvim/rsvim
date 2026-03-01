@@ -81,7 +81,7 @@ pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
 pub type SyntaxQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// Line (byte) index and column (byte) index.
+/// Line (row) index and column (byte) index.
 pub struct SyntaxQueryCaptureKey(usize, usize);
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
