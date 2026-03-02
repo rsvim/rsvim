@@ -11,8 +11,8 @@ use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::syntax;
-use crate::syntax::SyntaxEdit;
-use crate::syntax::SyntaxEditUpdate;
+use crate::syntax::SynEdit;
+use crate::syntax::SynEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
@@ -293,7 +293,7 @@ impl Normal {
           let editing_version = buffer.editing_version();
           let syn = buffer.syntax_mut().as_mut().unwrap();
           debug_assert!(syn_insert.is_some());
-          syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+          syn.add_pending(SynEdit::Update(SynEditUpdate {
             payload: rope,
             input: syn_insert.unwrap(),
             version: editing_version,
