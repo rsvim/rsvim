@@ -197,7 +197,6 @@ impl Buffer {
   }
 }
 
-#[allow(dead_code)]
 #[derive(Debug)]
 /// The manager for all normal (file) buffers.
 ///
@@ -215,6 +214,7 @@ pub struct BufferManager {
   // Syntax manager
   syntax_manager: SyntaxManager,
 
+  #[allow(dead_code)]
   // ColorScheme manager
   colorscheme_manager: ColorSchemeManager,
 }

@@ -1,12 +1,24 @@
-#![allow(dead_code)]
 //! Tree-sitter based syntax engine.
+
+pub mod edit;
+pub mod query;
 
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use edit::SyntaxEdit;
+use edit::SyntaxEditNew;
+use edit::SyntaxEditUpdate;
 use parking_lot::Mutex;
+use query::SyntaxQueryArc;
+use query::SyntaxQueryCapture;
+use query::SyntaxQueryCaptureArc;
+use query::SyntaxQueryCaptureKey;
+use query::SyntaxQueryCaptureMap;
+use query::SyntaxQueryCaptureValue;
+use query::SyntaxQueryCaptureWk;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::ops::Range;
@@ -23,89 +35,9 @@ use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-#[derive(Clone)]
-pub struct SyntaxEditNew {
-  pub payload: Rope,
-  pub version: isize,
-}
-
-impl Debug for SyntaxEditNew {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxEditNew")
-      .field(
-        "payload",
-        &self
-          .payload
-          .get_line(0)
-          .map(|l| l.to_string())
-          .unwrap_or("".to_string()),
-      )
-      .field("version", &self.version)
-      .finish()
-  }
-}
-
-#[derive(Clone)]
-pub struct SyntaxEditUpdate {
-  pub payload: Rope,
-  pub input: InputEdit,
-  pub version: isize,
-}
-
-impl Debug for SyntaxEditUpdate {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxEditUpdate")
-      .field(
-        "payload",
-        &self
-          .payload
-          .get_line(0)
-          .map(|l| l.to_string())
-          .unwrap_or("".to_string()),
-      )
-      .field("input", &self.input)
-      .field("version", &self.version)
-      .finish()
-  }
-}
-
-#[derive(Debug, Clone)]
-pub enum SyntaxEdit {
-  New(SyntaxEditNew),
-  Update(SyntaxEditUpdate),
-}
-
 pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
-pub type SyntaxQueryArc = Arc<Query>;
-
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// Line (row) index and column (byte) index.
-pub struct SyntaxQueryCaptureKey(usize, usize);
-
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub struct SyntaxQueryCaptureValue {
-  pub index: u32,
-  pub range: tree_sitter::Range,
-}
-
-pub type SyntaxQueryCaptureMap =
-  FoldMap<SyntaxQueryCaptureKey, Vec<SyntaxQueryCaptureValue>>;
-
-#[derive(Debug)]
-pub struct SyntaxQueryCapture {
-  // Maps start_point to all its captured nodes.
-  nodes: SyntaxQueryCaptureMap,
-}
-
-arc_ptr!(SyntaxQueryCapture);
-
-impl SyntaxQueryCapture {
-  pub fn nodes(&self) -> &SyntaxQueryCaptureMap {
-    &self.nodes
-  }
-}
 
 // SyntaxId starts from 1.
 structural_id_impl!(usize, SyntaxId, 1);
@@ -641,7 +573,7 @@ pub fn query(
         let index = cap.index;
         let range = cap.node.range();
         trace!("Captured highlight {}:{:?}", index, range);
-        let key = SyntaxQueryCaptureKey(
+        let key = SyntaxQueryCaptureKey::new(
           range.start_point.row,
           range.start_point.column,
         );
@@ -649,10 +581,10 @@ pub fn query(
         nodes
           .get_mut(&key)
           .unwrap()
-          .push(SyntaxQueryCaptureValue { index, range });
+          .push(SyntaxQueryCaptureValue::new(index, range));
       }
     }
-    Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture { nodes }))
+    Some(SyntaxQueryCapture::to_arc(SyntaxQueryCapture::new(nodes)))
   } else {
     None
   }
