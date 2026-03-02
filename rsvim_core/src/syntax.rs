@@ -9,6 +9,7 @@ use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 pub use edit::SynEdit;
+pub use edit::SynEditNew;
 pub use edit::SynEditUpdate;
 use parking_lot::Mutex;
 pub use query::SynCapture;
