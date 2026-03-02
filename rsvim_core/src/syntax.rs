@@ -18,7 +18,6 @@ use query::SyntaxQueryCaptureArc;
 use query::SyntaxQueryCaptureKey;
 use query::SyntaxQueryCaptureMap;
 use query::SyntaxQueryCaptureValue;
-use query::SyntaxQueryCaptureWk;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::ops::Range;
