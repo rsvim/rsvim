@@ -28,8 +28,8 @@ use crate::state::StateDataAccess;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
 use crate::syntax;
-use crate::syntax::SyntaxEdit;
-use crate::syntax::SyntaxEditNew;
+use crate::syntax::SynEdit;
+use crate::syntax::SynEditNew;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -513,7 +513,7 @@ impl EventLoop {
         .syntax_mut()
         .as_mut()
         .unwrap()
-        .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
+        .add_pending(SynEdit::New(SynEditNew { payload, version }));
       chan::send_to_master(
         self.master_tx.clone(),
         MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {

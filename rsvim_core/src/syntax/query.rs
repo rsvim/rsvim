@@ -5,16 +5,16 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use tree_sitter::Query;
 
-pub type SyntaxQueryArc = Arc<Query>;
+pub type SynQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 /// Line (row) index and column (byte) index.
-pub struct SyntaxQueryCaptureKey {
+pub struct SynCaptureKey {
   row: usize,
   column: usize,
 }
 
-impl SyntaxQueryCaptureKey {
+impl SynCaptureKey {
   pub fn new(row: usize, column: usize) -> Self {
     Self { row, column }
   }
@@ -29,12 +29,12 @@ impl SyntaxQueryCaptureKey {
 }
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub struct SyntaxQueryCaptureValue {
+pub struct SynCaptureValue {
   index: u32,
   range: tree_sitter::Range,
 }
 
-impl SyntaxQueryCaptureValue {
+impl SynCaptureValue {
   pub fn new(index: u32, range: tree_sitter::Range) -> Self {
     Self { index, range }
   }
@@ -48,23 +48,22 @@ impl SyntaxQueryCaptureValue {
   }
 }
 
-pub type SyntaxQueryCaptureMap =
-  FoldMap<SyntaxQueryCaptureKey, Vec<SyntaxQueryCaptureValue>>;
+pub type SynCaptureMap = FoldMap<SynCaptureKey, Vec<SynCaptureValue>>;
 
 #[derive(Debug)]
-pub struct SyntaxQueryCapture {
+pub struct SynCapture {
   // Maps start_point to all its captured nodes.
-  nodes: SyntaxQueryCaptureMap,
+  nodes: SynCaptureMap,
 }
 
-arc_ptr!(SyntaxQueryCapture);
+arc_ptr!(SynCapture);
 
-impl SyntaxQueryCapture {
-  pub fn new(nodes: SyntaxQueryCaptureMap) -> Self {
+impl SynCapture {
+  pub fn new(nodes: SynCaptureMap) -> Self {
     Self { nodes }
   }
 
-  pub fn nodes(&self) -> &SyntaxQueryCaptureMap {
+  pub fn nodes(&self) -> &SynCaptureMap {
     &self.nodes
   }
 }
