@@ -18,10 +18,7 @@ version.workspace = true
 doctest = false
 
 [features]
-# NOTE: When running miri, disable default features ('simd'), only enable 'unicode_lines' feature:
-# `cargo +nightly miri nextest run -p rsvim_core --no-default-features`
-default = ["simd"]
-simd = ["ropey/simd"]
+default = []
 
 [dependencies]
 # anyhow = { workspace = true }
@@ -58,9 +55,7 @@ path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
-ropey = { workspace = true, default-features = false, features = [
-  "unicode_lines",
-] }
+ropey = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
 strum = { workspace = true }

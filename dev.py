@@ -442,7 +442,7 @@ if __name__ == "__main__":
         Clippy(subparsers),
         Document(subparsers),
         Format(subparsers),
-        Miri(subparsers),
+        # Miri(subparsers), # We no longer support miri testings
         Npm(subparsers),
         Release(subparsers),
         Test(subparsers),
