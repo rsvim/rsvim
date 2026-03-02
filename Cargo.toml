@@ -140,6 +140,7 @@ opt-level = 1
 # Nightly
 [profile.nightly]
 debug = true
+debug-assertions = true
 inherits = "release"
 
 # Release
