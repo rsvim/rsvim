@@ -8,16 +8,16 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-pub use edit::SynEdit;
-pub use edit::SynEditNew;
-pub use edit::SynEditUpdate;
+pub use edit::SyntaxEdit;
+pub use edit::SyntaxEditNew;
+pub use edit::SyntaxEditUpdate;
 use parking_lot::Mutex;
-pub use query::SynCapture;
-pub use query::SynCaptureArc;
-pub use query::SynCaptureKey;
-pub use query::SynCaptureMap;
-pub use query::SynCaptureValue;
-pub use query::SynQueryArc;
+pub use query::SyntaxCapture;
+pub use query::SyntaxCaptureArc;
+pub use query::SyntaxCaptureKey;
+pub use query::SyntaxCaptureMap;
+pub use query::SyntaxCaptureValue;
+pub use query::SyntaxQueryArc;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::ops::Range;
@@ -46,8 +46,8 @@ pub struct Syntax {
   id: SyntaxId,
 
   // Highlight query
-  highlight_query: Option<SynQueryArc>,
-  highlight_capture: Option<SynCaptureArc>,
+  highlight_query: Option<SyntaxQueryArc>,
+  highlight_capture: Option<SyntaxCaptureArc>,
 
   // Parsed syntax tree
   tree: Option<Tree>,
@@ -63,7 +63,7 @@ pub struct Syntax {
   filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
-  pending: Vec<SynEdit>,
+  pending: Vec<SyntaxEdit>,
 
   // Whether the parser is already parsing the buffer text in a background
   // task. If true, it means the `parser` is parsing in a background task.
@@ -132,15 +132,15 @@ impl Syntax {
     &self.filetype
   }
 
-  pub fn highlight_query(&self) -> Option<SynQueryArc> {
+  pub fn highlight_query(&self) -> Option<SyntaxQueryArc> {
     self.highlight_query.clone()
   }
 
-  pub fn highlight_capture(&self) -> Option<SynCaptureArc> {
+  pub fn highlight_capture(&self) -> Option<SyntaxCaptureArc> {
     self.highlight_capture.clone()
   }
 
-  pub fn set_highlight_capture(&mut self, value: Option<SynCaptureArc>) {
+  pub fn set_highlight_capture(&mut self, value: Option<SyntaxCaptureArc>) {
     self.highlight_capture = value;
   }
 
@@ -180,11 +180,14 @@ impl Syntax {
     self.pending.len()
   }
 
-  pub fn add_pending(&mut self, value: SynEdit) {
+  pub fn add_pending(&mut self, value: SyntaxEdit) {
     self.pending.push(value);
   }
 
-  pub fn drain_pending<R>(&mut self, range: R) -> std::vec::Drain<'_, SynEdit>
+  pub fn drain_pending<R>(
+    &mut self,
+    range: R,
+  ) -> std::vec::Drain<'_, SyntaxEdit>
   where
     R: std::ops::RangeBounds<usize>,
   {
@@ -438,7 +441,7 @@ pub fn make_input_edit_by_insert(
 pub fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
-  pending_edits: Vec<SynEdit>,
+  pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<String>) {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
@@ -448,13 +451,13 @@ pub fn parse(
     let mut new_count: usize = 0;
     for (i, edit) in pending_edits.iter().enumerate() {
       match edit {
-        SynEdit::New(_) => {
+        SyntaxEdit::New(_) => {
           debug_assert_eq!(i, 0);
           debug_assert_eq!(new_count, 0);
           new_count += 1;
           debug_assert_eq!(new_count, 1);
         }
-        SynEdit::Update(_) => {}
+        SyntaxEdit::Update(_) => {}
       }
     }
     debug_assert!(new_count <= 1);
@@ -462,9 +465,10 @@ pub fn parse(
 
   let mut last_payload: Option<String> = None;
 
-  if !pending_edits.is_empty() && matches!(pending_edits[0], SynEdit::New(_)) {
+  if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
+  {
     match &pending_edits[0] {
-      SynEdit::New(new) => {
+      SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
@@ -483,21 +487,21 @@ pub fn parse(
     }
   }
 
-  let mut last_update: Option<&SynEditUpdate> = None;
+  let mut last_update: Option<&SyntaxEditUpdate> = None;
   for (i, edit) in pending_edits.iter().enumerate() {
-    if matches!(edit, SynEdit::New(_)) {
+    if matches!(edit, SyntaxEdit::New(_)) {
       debug_assert_eq!(i, 0);
       continue;
     }
     match edit {
-      SynEdit::Update(update) => {
+      SyntaxEdit::Update(update) => {
         debug_assert!(tree.is_some());
         if let Some(ref mut tree1) = tree {
           tree1.edit(&update.input);
         }
         last_update = Some(update);
       }
-      SynEdit::New(_) => unreachable!(),
+      SyntaxEdit::New(_) => unreachable!(),
     }
   }
 
@@ -546,8 +550,8 @@ pub fn parse(
 pub fn query(
   tree: &Option<Tree>,
   text_payload: &Option<String>,
-  highlight_query: &Option<SynQueryArc>,
-) -> Option<SynCaptureArc> {
+  highlight_query: &Option<SyntaxQueryArc>,
+) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
     && let Some(syn_highlight_query) = highlight_query
@@ -559,22 +563,24 @@ pub fn query(
       syn_tree.root_node(),
       text_payload.as_bytes(),
     );
-    let mut nodes: SynCaptureMap = FoldMap::new();
+    let mut nodes: SyntaxCaptureMap = FoldMap::new();
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let index = cap.index;
         let range = cap.node.range();
         trace!("Captured highlight {}:{:?}", index, range);
-        let key =
-          SynCaptureKey::new(range.start_point.row, range.start_point.column);
+        let key = SyntaxCaptureKey::new(
+          range.start_point.row,
+          range.start_point.column,
+        );
         nodes.entry(key).or_insert(vec![]);
         nodes
           .get_mut(&key)
           .unwrap()
-          .push(SynCaptureValue::new(index, range));
+          .push(SyntaxCaptureValue::new(index, range));
       }
     }
-    Some(SynCapture::to_arc(SynCapture::new(nodes)))
+    Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))
   } else {
     None
   }
@@ -583,9 +589,9 @@ pub fn query(
 pub async fn parse_and_query(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
-  highlight_query: Option<SynQueryArc>,
-  pending_edits: Vec<SynEdit>,
-) -> (Option<Tree>, isize, Option<SynCaptureArc>) {
+  highlight_query: Option<SyntaxQueryArc>,
+  pending_edits: Vec<SyntaxEdit>,
+) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (tree, editing_version, text_payload) =
     parse(parser, old_tree, pending_edits);
   let highlight_capture = query(&tree, &text_payload, &highlight_query);

@@ -11,8 +11,8 @@ use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::syntax;
-use crate::syntax::SynEdit;
-use crate::syntax::SynEditUpdate;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditUpdate;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use compact_str::CompactString;
@@ -182,7 +182,7 @@ impl Insert {
         let editing_version = buffer.editing_version();
         let syn = buffer.syntax_mut().as_mut().unwrap();
         debug_assert!(syn_delete.is_some());
-        syn.add_pending(SynEdit::Update(SynEditUpdate {
+        syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
           payload: rope,
           input: syn_delete.unwrap(),
           version: editing_version,
@@ -288,7 +288,7 @@ impl Insert {
       let editing_version = buffer.editing_version();
       let syn = buffer.syntax_mut().as_mut().unwrap();
       debug_assert!(syn_insert.is_some());
-      syn.add_pending(SynEdit::Update(SynEditUpdate {
+      syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
         payload: rope,
         input: syn_insert.unwrap(),
         version: editing_version,

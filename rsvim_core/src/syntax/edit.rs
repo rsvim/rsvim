@@ -5,12 +5,12 @@ use std::fmt::Debug;
 use tree_sitter::InputEdit;
 
 #[derive(Clone)]
-pub struct SynEditNew {
+pub struct SyntaxEditNew {
   pub payload: Rope,
   pub version: isize,
 }
 
-impl Debug for SynEditNew {
+impl Debug for SyntaxEditNew {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxEditNew")
       .field(
@@ -27,13 +27,13 @@ impl Debug for SynEditNew {
 }
 
 #[derive(Clone)]
-pub struct SynEditUpdate {
+pub struct SyntaxEditUpdate {
   pub payload: Rope,
   pub input: InputEdit,
   pub version: isize,
 }
 
-impl Debug for SynEditUpdate {
+impl Debug for SyntaxEditUpdate {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxEditUpdate")
       .field(
@@ -51,7 +51,7 @@ impl Debug for SynEditUpdate {
 }
 
 #[derive(Debug, Clone)]
-pub enum SynEdit {
-  New(SynEditNew),
-  Update(SynEditUpdate),
+pub enum SyntaxEdit {
+  New(SyntaxEditNew),
+  Update(SyntaxEditUpdate),
 }
