@@ -39,10 +39,10 @@ const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_SNAPSHOT: &[u8] =
   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
-static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
-  let version_info =
+static RSVIM_VERSION_TAGS: Lazy<FoldMap<String, String>> = Lazy::new(|| {
+  let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  let version_info = version_info
+  version_tags
     .split("\n")
     .map(|line| {
       let key_value = line.split("=").collect::<Vec<&str>>();
@@ -50,18 +50,21 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       let value = key_value[1].trim();
       (key.to_string(), value.to_string())
     })
-    .collect::<FoldMap<String, String>>();
-  let git_commit = match version_info.get("git_commit") {
+    .collect::<FoldMap<String, String>>()
+});
+
+static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
+  let git_commit = match RSVIM_VERSION_TAGS.get("git_commit") {
     Some(git_commit) => format!("{}, ", git_commit),
     None => "".to_string(),
   };
   let binary_version = format!(
     "{} {} ({}{}, {})",
     env!("CARGO_BIN_NAME"),
-    version_info["version"],
+    RSVIM_VERSION_TAGS["version"],
     git_commit,
-    version_info["profile"],
-    version_info["host"]
+    RSVIM_VERSION_TAGS["profile"],
+    RSVIM_VERSION_TAGS["host"]
   );
   let features = {
     let typescript = if cfg!(feature = "typescript") {
@@ -88,7 +91,8 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       }
     )
   };
-  let swc_core_version = format!("swc_core: {}", version_info["swc_core"]);
+  let swc_core_version =
+    format!("swc_core: {}", RSVIM_VERSION_TAGS["swc_core"]);
   format!(
     "{}\n{}\n{}\n{}\n",
     binary_version,
