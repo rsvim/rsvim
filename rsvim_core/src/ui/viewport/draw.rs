@@ -1,6 +1,7 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
 use crate::buf::text::Text;
+use crate::hl::ColorScheme;
 use crate::prelude::*;
 use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
@@ -13,6 +14,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   _syntax: &Option<Syntax>,
+  _colorscheme: &Option<ColorScheme>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
