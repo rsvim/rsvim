@@ -75,8 +75,8 @@ jobs:
           rm rsvim${{ env.BIN_EXT }}
           cargo build --no-default-features --release
           mv target/release/rsvim${{ env.BIN_EXT }} .
-          tar -czvf rsvim-min-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
-          7z a rsvim-min-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
+          tar -czvf mini-rsvim-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
+          7z a mini-rsvim-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
       - name: Create New Release
         uses: ncipollo/release-action@v1
         with:
@@ -89,5 +89,5 @@ jobs:
           artifacts: |
             rsvim-${{ matrix.target }}.tar.gz
             rsvim-${{ matrix.target }}.zip
-            rsvim-min-${{ matrix.target }}.tar.gz
-            rsvim-min-${{ matrix.target }}.zip
+            mini-rsvim-${{ matrix.target }}.tar.gz
+            mini-rsvim-${{ matrix.target }}.zip
