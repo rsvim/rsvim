@@ -27,7 +27,6 @@ use once_cell::sync::Lazy;
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
-use rsvim_core::js::v8_version;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 use std::time::SystemTime;
@@ -81,15 +80,14 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       cfg!(feature = "typescript"),
     )
   };
-  let v8_version = format!("v8: {}", v8_version());
   if typescript_enabled {
     let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
     format!(
       "{}\n{}\n{}\n{}",
-      binary_version, features, v8_version, swc_core_version
+      binary_version, features, version_tags["v8"], swc_core_version
     )
   } else {
-    format!("{}\n{}\n{}", binary_version, features, v8_version)
+    format!("{}\n{}\n{}", binary_version, features, version_tags["v8"])
   }
 });
 

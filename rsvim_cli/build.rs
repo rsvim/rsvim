@@ -1,5 +1,6 @@
 use git2::Repository;
 use rsvim_core::js::JsRuntimeForSnapshot;
+use rsvim_core::js::v8_version;
 use std::path::Path;
 
 // pub const LOG: &str = "[RSVIM]";
@@ -67,14 +68,17 @@ fn version() {
       None
     }
   };
+  let v8_version = v8_version();
 
   println!(
-    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, swc_core:{:?}",
-    version, profile, host, git_commit, swc_core
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
+    version, profile, host, git_commit, v8_version, swc_core
   );
 
-  let mut resolved =
-    format!("version={}\nprofile={}\nhost={}\n", version, profile, host);
+  let mut resolved = format!(
+    "version={}\nprofile={}\nhost={}\nv8={}\n",
+    version, profile, host, v8_version
+  );
   if let Some(git_commit) = git_commit {
     resolved = format!("{}git_commit={}\n", resolved, git_commit);
   }
