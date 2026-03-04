@@ -305,7 +305,7 @@ impl BufferManager {
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
       let syntax = self.load_syntax_by_file_ext(&file_extension)?;
-      let colorscheme = self.colorscheme_manager.get(&self.colorscheme_name);
+      let colorscheme = self.colorscheme_manager.get(&self.color_name);
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -343,7 +343,7 @@ impl BufferManager {
   pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let colorscheme = self.colorscheme_manager.get(&self.colorscheme_name);
+    let colorscheme = self.colorscheme_manager.get(&self.color_name);
     let buf = Buffer::_new(
       *self.global_local_options(),
       canvas_size,
@@ -439,8 +439,7 @@ impl BufferManager {
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
           let syntax = self.load_syntax_by_file_ext(&file_extension)?;
-          let colorscheme =
-            self.colorscheme_manager.get(&self.colorscheme_name);
+          let colorscheme = self.colorscheme_manager.get(&self.color_name);
 
           Ok(Buffer::_new(
             *self.global_local_options(),
