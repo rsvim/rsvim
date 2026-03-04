@@ -504,7 +504,7 @@ mod tests_buffer_editing {
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
         state_ops::CursorInsertPayload::Text(
-          "  println!(\"Hello World!\"".to_compact_string(),
+          "  println!(\"Hello, World!\"".to_compact_string(),
         ),
       )),
       MockOperation::Operation(state_ops::Operation::CursorInsert(
