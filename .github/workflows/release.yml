@@ -72,7 +72,6 @@ jobs:
           mv target/release/rsvim${{ env.BIN_EXT }} .
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
           7z a rsvim-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
-          rm target/release/rsvim${{ env.BIN_EXT }}
           cargo build --no-default-features --release
           mv target/release/rsvim${{ env.BIN_EXT }} .
           tar -czvf rsvim-min-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}

@@ -186,7 +186,7 @@ class Test(Cmd):
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
         if all_features:
-            cmd = f"{cmd} -F icudata -F typescript -F wasm"
+            cmd = f"{cmd} --all-features"
         if len(name) == 0:
             cmd = f"{cmd} --all"
         else:
