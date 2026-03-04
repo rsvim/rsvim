@@ -571,6 +571,7 @@ pub fn query(
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let index = cap.index;
+        let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
         trace!("Captured highlight {}:{:?}", index, range);
         let key = SyntaxCaptureKey::new(
@@ -581,7 +582,7 @@ pub fn query(
         nodes
           .get_mut(&key)
           .unwrap()
-          .push(SyntaxCaptureValue::new(index, range));
+          .push(SyntaxCaptureValue::new(name.to_compact_string(), range));
       }
     }
     Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))

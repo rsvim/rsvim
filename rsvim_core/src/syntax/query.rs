@@ -1,6 +1,7 @@
 //! Syntax query.
 
 use crate::prelude::*;
+use compact_str::CompactString;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tree_sitter::Query;
@@ -28,19 +29,19 @@ impl SyntaxCaptureKey {
   }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
-  index: u32,
+  name: CompactString,
   range: tree_sitter::Range,
 }
 
 impl SyntaxCaptureValue {
-  pub fn new(index: u32, range: tree_sitter::Range) -> Self {
-    Self { index, range }
+  pub fn new(name: CompactString, range: tree_sitter::Range) -> Self {
+    Self { name, range }
   }
 
-  pub fn index(&self) -> u32 {
-    self.index
+  pub fn name(&self) -> &CompactString {
+    &self.name
   }
 
   pub fn range(&self) -> &tree_sitter::Range {
