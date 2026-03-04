@@ -128,7 +128,15 @@ jobs:
     name: Build
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022, windows-11-arm]
+        include:
+          - profile: --release
+            feature: --all-features
+          - profile: --release
+            feature: --no-default-features
+          - profile: --profile nightly
+            feature: --all-features
+          - profile: --profile nightly
+            feature: --no-default-features
     runs-on: ubuntu-22.04
     steps:
       - uses: Swatinem/rust-cache@v2
@@ -136,7 +144,5 @@ jobs:
       - name: Install Rust
         run: rustup component add clippy
       - uses: actions/checkout@v6
-      - name: Build Release
-        run: cargo build --release
-      - name: Build Nightly
-        run: cargo build --profile nightly
+      - name: Build
+        run: cargo build ${{ matrix.feature }} ${{ matrix.profile }}
