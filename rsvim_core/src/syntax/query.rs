@@ -31,13 +31,22 @@ impl SyntaxCaptureKey {
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
+  index: u32,
   name: CompactString,
   range: tree_sitter::Range,
 }
 
 impl SyntaxCaptureValue {
-  pub fn new(name: CompactString, range: tree_sitter::Range) -> Self {
-    Self { name, range }
+  pub fn new(
+    index: u32,
+    name: CompactString,
+    range: tree_sitter::Range,
+  ) -> Self {
+    Self { index, name, range }
+  }
+
+  pub fn index(&self) -> u32 {
+    self.index
   }
 
   pub fn name(&self) -> &CompactString {

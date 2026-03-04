@@ -582,10 +582,11 @@ pub fn query(
           range.start_point.column,
         );
         nodes.entry(key).or_insert(vec![]);
-        nodes
-          .get_mut(&key)
-          .unwrap()
-          .push(SyntaxCaptureValue::new(name.to_compact_string(), range));
+        nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
+          index,
+          name.to_compact_string(),
+          range,
+        ));
       }
     }
     Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))
