@@ -83,14 +83,15 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       cfg!(feature = "typescript"),
     )
   };
+  let v8_version = format!("v8: {}", version_tags["v8"]);
   if typescript_enabled {
     let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
     format!(
       "{}\n{}\n{}\n{}",
-      binary_version, features, version_tags["v8"], swc_core_version
+      binary_version, features, v8_version, swc_core_version
     )
   } else {
-    format!("{}\n{}\n{}", binary_version, features, version_tags["v8"])
+    format!("{}\n{}\n{}", binary_version, features, v8_version)
   }
 });
 
