@@ -27,6 +27,7 @@ use once_cell::sync::Lazy;
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
+use rsvim_core::js::v8_version;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 use std::time::SystemTime;
@@ -34,19 +35,67 @@ use std::time::UNIX_EPOCH;
 use tokio::time::Instant;
 
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
-const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
 
 const RSVIM_SNAPSHOT: &[u8] =
   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
 static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
-  const VERSION: &str = "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION}";
-
-  let pkg_version =
+  let version_info =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  VERSION
-    .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
-    .replace(RSVIM_PKG_VERSION, pkg_version)
+  let version_info = version_info
+    .split("\n")
+    .map(|line| {
+      let key_value = line.split("=").collect::<Vec<&str>>();
+      let key = key_value[0].trim();
+      let value = key_value[1].trim();
+      (key.to_string(), value.to_string())
+    })
+    .collect::<FoldMap<String, String>>();
+  let git_commit = match version_info.get("git_commit") {
+    Some(git_commit) => format!("{}, ", git_commit),
+    None => "".to_string(),
+  };
+  let binary_version = format!(
+    "{} {} ({}{}, {})",
+    env!("CARGO_BIN_NAME"),
+    version_info["version"],
+    git_commit,
+    version_info["profile"],
+    version_info["host"]
+  );
+  let features = {
+    let typescript = if cfg!(feature = "typescript") {
+      "typescript"
+    } else {
+      ""
+    };
+    let wasm = if cfg!(feature = "wasm") { "wasm" } else { "" };
+    let icudata = if cfg!(feature = "icudata") {
+      "icudata"
+    } else {
+      ""
+    };
+    let features = vec![typescript, wasm, icudata]
+      .into_iter()
+      .filter(|f| !f.is_empty())
+      .collect::<Vec<&str>>();
+    format!(
+      "features: {}",
+      if features.is_empty() {
+        "none".to_string()
+      } else {
+        features.join(", ")
+      }
+    )
+  };
+  let swc_core_version = format!("swc_core: {}", version_info["swc_core"]);
+  format!(
+    "{}\n{}\n{}\n{}\n",
+    binary_version,
+    features,
+    v8_version(),
+    swc_core_version
+  )
 });
 
 // --headless (experimental)  Run in headless mode without TUI

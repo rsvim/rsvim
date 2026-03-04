@@ -1,6 +1,5 @@
 use git2::Repository;
 use rsvim_core::js::JsRuntimeForSnapshot;
-use rsvim_core::js::v8_version;
 use std::path::Path;
 
 // pub const LOG: &str = "[RSVIM]";
@@ -40,11 +39,11 @@ fn version() {
       let id = commit.id();
       let id = id.to_string();
       println!("{LOG} Git id:{:?}", id);
-      Some(id[0..8].to_string())
+      id[0..8].to_string()
     }
     Err(e) => {
       println!("{LOG} Git error:{:?}", e);
-      None
+      "".to_string()
     }
   };
 
@@ -56,19 +55,16 @@ fn version() {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let core = deps["swc_core"].as_str();
         println!("{LOG} Swc core:{:?}", core);
-        Some(format!(
-          "swc_core {}",
-          core.unwrap().trim_start_matches("=")
-        ))
+        core.unwrap().trim_start_matches("=").to_string()
       }
       Err(e) => {
         println!("{LOG} Parse Cargo.toml error:{:?}", e);
-        None
+        "".to_string()
       }
     },
     Err(e) => {
       println!("{LOG} Read Cargo.toml error:{:?}", e);
-      None
+      "".to_string()
     }
   };
 
@@ -77,18 +73,9 @@ fn version() {
     version, profile, host, git_commit, swc_core
   );
 
-  let git_commit = match git_commit {
-    Some(git_commit) => format!("{}, ", git_commit),
-    None => "".to_string(),
-  };
-  let v8 = format!("\nv8 {}", v8_version());
-  let swc_core = match swc_core {
-    Some(swc) => format!("\n{}", swc),
-    None => "".to_string(),
-  };
   let resolved = format!(
-    "{} ({}{}, {}){}{}",
-    version, git_commit, profile, host, v8, swc_core
+    "version={}\ngit_commit={}\nprofile={}\nhost={}\nswc_core={}\n",
+    version, git_commit, profile, host, swc_core
   );
 
   let output_path =
