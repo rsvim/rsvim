@@ -545,7 +545,7 @@ mod tests_buffer_editing {
       let payload = buf.text().rope().to_string();
       assert_eq!(
         format!(
-          "use std::sync::Arc;{buf_eol}fn main() {{{buf_eol}  println!(\"Hello, World\");{buf_eol}}}{buf_eol}"
+          "use std::sync::Arc;{buf_eol}fn main() {{{buf_eol}  println!(\"你好，世界！\");{buf_eol}}}{buf_eol}"
         ),
         payload
       );
