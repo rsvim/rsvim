@@ -181,6 +181,10 @@ impl Buffer {
     self.syntax = value;
   }
 
+  pub fn colorscheme(&self) -> &Option<ColorScheme> {
+    &self.colorscheme
+  }
+
   /// Text edit versioning
   pub fn editing_version(&self) -> isize {
     self.editing_version
