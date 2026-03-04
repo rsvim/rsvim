@@ -161,6 +161,7 @@ class Test(Cmd):
             aliases=[self._alias],
             help="cargo test",
         )
+        self.test_parser.add_argument("-F", "--all-features", action="store_true")
         self.test_parser.add_argument(
             "-l", "--list", action="store_true", dest="list_test"
         )
@@ -176,14 +177,16 @@ class Test(Cmd):
         if args.list_test:
             self.list()
         else:
-            self.test(args.name)
+            self.test(args.name, args.all_features)
 
-    def test(self, name) -> None:
+    def test(self, name, all_features) -> None:
         sccache()
         rustflags()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
+        if all_features:
+            cmd = f"{cmd} -F icudata -F typescript -F wasm"
         if len(name) == 0:
             cmd = f"{cmd} --all"
         else:
@@ -243,6 +246,9 @@ class Build(Cmd):
         )
         self.build_parser.add_argument("-v", "--verbose", action="store_true")
         self.build_parser.add_argument("-F", "--features", action="append")
+        self.build_parser.add_argument(
+            "-NF", "--no-default-features", action="store_true"
+        )
         self.build_parser.add_argument("-r", "--release", action="store_true")
         self.build_parser.add_argument("-n", "--nightly", action="store_true")
 
@@ -262,6 +268,8 @@ class Build(Cmd):
             cmd = f"{cmd} --profile nightly"
         if args.verbose:
             cmd = f"{cmd} -vv"
+        if args.no_default_features:
+            cmd = f"{cmd} --no-default-features"
         if isinstance(args.features, list) and len(args.features) > 0:
             feat = ",".join(args.features)
             cmd = f"{cmd} -F {feat}"
