@@ -110,6 +110,10 @@ impl Syntax {
         .unwrap_or(None),
       None => None,
     };
+    trace!(
+      "capture names:{:?}",
+      highlight_query.as_ref().map(|hq| hq.capture_names())
+    );
 
     Ok(Self {
       id: SyntaxId::next(),
@@ -567,17 +571,22 @@ pub fn query(
     while let Some(mat) = matches.next() {
       for cap in mat.captures {
         let index = cap.index;
+        let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
-        trace!("Captured highlight {}:{:?}", index, range);
+        trace!(
+          "Captured highlight {}: name:{:?}, range:{:?}",
+          index, name, range
+        );
         let key = SyntaxCaptureKey::new(
           range.start_point.row,
           range.start_point.column,
         );
         nodes.entry(key).or_insert(vec![]);
-        nodes
-          .get_mut(&key)
-          .unwrap()
-          .push(SyntaxCaptureValue::new(index, range));
+        nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
+          index,
+          name.to_compact_string(),
+          range,
+        ));
       }
     }
     Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))
