@@ -49,7 +49,6 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
     })
     .map(|line| {
       let key_value = line.split("=").collect::<Vec<&str>>();
-      println!("line:{:?},key_value:{:?}", line, key_value);
       let key = key_value[0].trim();
       let value = key_value[1].trim();
       (key.to_string(), value.to_string())
