@@ -47,6 +47,7 @@ pub struct Syntax {
 
   // Highlight query
   highlight_query: Option<SyntaxQueryArc>,
+  highlight_query_index: Option<Vec<usize>>,
   highlight_capture: Option<SyntaxCaptureArc>,
 
   // Parsed syntax tree
@@ -110,10 +111,14 @@ impl Syntax {
         .unwrap_or(None),
       None => None,
     };
+    let highlight_query_index = highlight_query
+      .as_ref()
+      .map(|hq| Vec::with_capacity(hq.capture_names().len()));
 
     Ok(Self {
       id: SyntaxId::next(),
       highlight_query,
+      highlight_query_index,
       highlight_capture: None,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
