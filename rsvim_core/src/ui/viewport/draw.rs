@@ -4,6 +4,7 @@ use crate::buf::text::Text;
 use crate::hl::ColorScheme;
 use crate::prelude::*;
 use crate::syntax::Syntax;
+use crate::syntax::SyntaxCaptureKey;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
@@ -13,8 +14,8 @@ use std::convert::From;
 pub fn draw(
   viewport: &Viewport,
   text: &Text,
-  _syntax: &Option<Syntax>,
-  _colorscheme: &Option<ColorScheme>,
+  syntax: &Option<Syntax>,
+  colorscheme: &Option<ColorScheme>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -126,23 +127,44 @@ pub fn draw(
             //   the `好` char, the following 1 cell is `""` empty string.
 
             if unicode_width > 0 {
-              let cells = if unicode_width > 1 {
+              if let Some(syntax) = syntax
+                && let Some(syn_highlight_capture) = syntax.highlight_capture()
+                && let Some(_colorscheme) = colorscheme
+              {
+                let byte_idx = text.rope().char_to_byte(char_idx);
+                let cap_key = SyntaxCaptureKey::new(line_idx, byte_idx);
+                if syn_highlight_capture
+                  .as_ref()
+                  .nodes()
+                  .contains_key(&cap_key)
+                {
+                  let cap_hls = syn_highlight_capture
+                    .as_ref()
+                    .nodes()
+                    .get(&cap_key)
+                    .unwrap();
+                  trace!(
+                    "captured highlight key:{:?}, highlights:{:?}",
+                    cap_key, cap_hls
+                  );
+                }
+              }
+
+              let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
+              if unicode_width > 1 {
                 let cell = Cell::with_symbol(unicode_symbol);
                 // Unicode width > 1
-                let mut v = vec![cell];
-                v.extend(
+                let mut cells = vec![cell];
+                cells.extend(
                   std::iter::repeat_n(Cell::empty(), unicode_width - 1)
                     .collect::<Vec<Cell>>(),
                 );
-                v
+                canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
                 let cell = Cell::with_symbol(unicode_symbol);
                 // Unicode width = 1
-                vec![cell]
+                canvas.frame_mut().set_cell(cell_upos, cell);
               };
-
-              let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-              canvas.frame_mut().set_cells_at(cell_upos, cells);
 
               col_idx += unicode_width as u16;
             }
