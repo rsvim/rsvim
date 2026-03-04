@@ -68,7 +68,7 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
   let (features, typescript_enabled) = {
     (
       format!(
-        "features: {}typescript {}wasm {}icudata",
+        "features: {}typescript {}wasm {}icudata {}jemalloc {}mimalloc {}snmalloc",
         if cfg!(feature = "typescript") {
           "+"
         } else {
@@ -76,6 +76,9 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
         },
         if cfg!(feature = "wasm") { "+" } else { "-" },
         if cfg!(feature = "icudata") { "+" } else { "-" },
+        if cfg!(feature = "jemalloc") { "+" } else { "-" },
+        if cfg!(feature = "mimalloc") { "+" } else { "-" },
+        if cfg!(feature = "snmalloc") { "+" } else { "-" },
       ),
       cfg!(feature = "typescript"),
     )
