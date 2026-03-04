@@ -14,6 +14,8 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
+use crate::hl;
+use crate::hl::ColorScheme;
 use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
@@ -63,6 +65,9 @@ pub struct Buffer {
   // syntax parser
   syntax: Option<Syntax>,
 
+  // colorscheme/highlight
+  colorscheme: Option<ColorScheme>,
+
   // Text editing version
   editing_version: isize,
 }
@@ -82,6 +87,7 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
     syntax: Option<Syntax>,
+    colorscheme: Option<ColorScheme>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -94,6 +100,7 @@ impl Buffer {
       last_sync_time,
       undo: Undo::new(100),
       syntax,
+      colorscheme,
       editing_version: 0,
     }
   }
@@ -217,6 +224,9 @@ pub struct BufferManager {
   #[allow(dead_code)]
   // ColorScheme manager
   colorscheme_manager: ColorSchemeManager,
+
+  // Default colorscheme name
+  color_name: CompactString,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -229,6 +239,7 @@ impl BufferManager {
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager: SyntaxManager::new(),
       colorscheme_manager: ColorSchemeManager::new(),
+      color_name: hl::DEFAULT.to_compact_string(),
     }
   }
 
@@ -289,6 +300,7 @@ impl BufferManager {
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
       let syntax = self.load_syntax_by_file_ext(&file_extension)?;
+      let colorscheme = self.colorscheme_manager.get(&self.color_name);
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -299,6 +311,7 @@ impl BufferManager {
         None,
         None,
         syntax,
+        colorscheme.cloned(),
       )
     };
 
@@ -545,6 +558,19 @@ impl BufferManager {
 
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
     self.global_local_options = *options;
+  }
+
+  pub fn color_name(&self) -> &CompactString {
+    &self.color_name
+  }
+
+  pub fn set_color_name(&mut self, color: &str) -> TheResult<()> {
+    if self.colorscheme_manager.contains_key(color) {
+      self.color_name = color.to_compact_string();
+      Ok(())
+    } else {
+      Err(TheErr::ColorSchemeNotFound(color.to_compact_string()))
+    }
   }
 }
 // Options }
