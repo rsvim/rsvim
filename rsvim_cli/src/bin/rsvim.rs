@@ -67,29 +67,16 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
     version_tags["host"]
   );
   let (features, typescript_enabled) = {
-    let typescript = if cfg!(feature = "typescript") {
-      "typescript"
-    } else {
-      ""
-    };
-    let wasm = if cfg!(feature = "wasm") { "wasm" } else { "" };
-    let icudata = if cfg!(feature = "icudata") {
-      "icudata"
-    } else {
-      ""
-    };
-    let features = vec![typescript, wasm, icudata]
-      .into_iter()
-      .filter(|f| !f.is_empty())
-      .collect::<Vec<&str>>();
     (
       format!(
-        "features: {}",
-        if features.is_empty() {
-          "none".to_string()
+        "features: {}typescript {}wasm {}icudata",
+        if cfg!(feature = "typescript") {
+          "+"
         } else {
-          features.join(", ")
-        }
+          "-"
+        },
+        if cfg!(feature = "wasm") { "+" } else { "-" },
+        if cfg!(feature = "icudata") { "+" } else { "-" },
       ),
       cfg!(feature = "typescript"),
     )

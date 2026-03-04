@@ -39,11 +39,11 @@ fn version() {
       let id = commit.id();
       let id = id.to_string();
       println!("{LOG} Git id:{:?}", id);
-      id[0..8].to_string()
+      Some(id[0..8].to_string())
     }
     Err(e) => {
       println!("{LOG} Git error:{:?}", e);
-      "".to_string()
+      None
     }
   };
 
@@ -55,16 +55,16 @@ fn version() {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let core = deps["swc_core"].as_str();
         println!("{LOG} Swc core:{:?}", core);
-        core.unwrap().trim_start_matches("=").to_string()
+        Some(core.unwrap().trim_start_matches("=").to_string())
       }
       Err(e) => {
         println!("{LOG} Parse Cargo.toml error:{:?}", e);
-        "".to_string()
+        None
       }
     },
     Err(e) => {
       println!("{LOG} Read Cargo.toml error:{:?}", e);
-      "".to_string()
+      None
     }
   };
 
@@ -73,10 +73,14 @@ fn version() {
     version, profile, host, git_commit, swc_core
   );
 
-  let resolved = format!(
-    "version={}\ngit_commit={}\nprofile={}\nhost={}\nswc_core={}\n",
-    version, git_commit, profile, host, swc_core
-  );
+  let mut resolved =
+    format!("version={}\nprofile={}\nhost={}\n", version, profile, host);
+  if let Some(git_commit) = git_commit {
+    resolved = format!("{}git_commit={}\n", resolved, git_commit);
+  }
+  if let Some(swc_core) = swc_core {
+    resolved = format!("{}swc_core={}\n", resolved, swc_core);
+  }
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
