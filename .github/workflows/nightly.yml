@@ -75,12 +75,15 @@ jobs:
           rustup component add rust-src clippy
       - name: Cargo Build
         run: |
-          cargo build --profile nightly
-      - name: Create Artifact
-        run: |
+          cargo build --all-features --profile nightly
           mv target/nightly/rsvim${{ env.BIN_EXT }} .
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
           7z a rsvim-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
+          rm target/nightly/rsvim${{ env.BIN_EXT }}
+          cargo build --no-default-features --profile nightly
+          mv target/nightly/rsvim${{ env.BIN_EXT }} ./rsvim-min${{ env.BIN_EXT }}
+          tar -czvf rsvim-min-${{ matrix.target }}.tar.gz rsvim-min${{ env.BIN_EXT }}
+          7z a rsvim-min-${{ matrix.target }}.zip rsvim-min${{ env.BIN_EXT }}
       - name: Create New Release
         uses: ncipollo/release-action@v1
         with:
@@ -96,3 +99,5 @@ jobs:
           artifacts: |
             rsvim-${{ matrix.target }}.tar.gz
             rsvim-${{ matrix.target }}.zip
+            rsvim-min-${{ matrix.target }}.tar.gz
+            rsvim-min-${{ matrix.target }}.zip
