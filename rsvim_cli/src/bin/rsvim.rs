@@ -42,7 +42,7 @@ const RSVIM_SNAPSHOT: &[u8] =
 static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
   let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  let mut version_tags = version_tags
+  let version_tags = version_tags
     .split("\n")
     .filter(|line| {
       !line.is_empty() && line.split("=").collect::<Vec<&str>>().len() == 2
