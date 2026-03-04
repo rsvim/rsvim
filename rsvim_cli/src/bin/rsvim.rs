@@ -44,8 +44,12 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
   let version_tags = version_tags
     .split("\n")
+    .filter(|line| {
+      !line.is_empty() && line.split("=").collect::<Vec<&str>>().len() == 2
+    })
     .map(|line| {
       let key_value = line.split("=").collect::<Vec<&str>>();
+      println!("line:{:?},key_value:{:?}", line, key_value);
       let key = key_value[0].trim();
       let value = key_value[1].trim();
       (key.to_string(), value.to_string())
@@ -88,13 +92,11 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       }
     )
   };
+  let v8_version = format!("v8: {}", v8_version());
   let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
   format!(
     "{}\n{}\n{}\n{}\n",
-    binary_version,
-    features,
-    v8_version(),
-    swc_core_version
+    binary_version, features, v8_version, swc_core_version
   )
 });
 
