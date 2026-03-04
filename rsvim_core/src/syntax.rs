@@ -574,7 +574,7 @@ pub fn query(
         let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
         trace!(
-          "Captured highlight {}: name:{}, range:{:?}",
+          "Captured highlight {}: name:{:?}, range:{:?}",
           index, name, range
         );
         let key = SyntaxCaptureKey::new(
