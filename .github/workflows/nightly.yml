@@ -79,6 +79,7 @@ jobs:
           mv target/nightly/rsvim${{ env.BIN_EXT }} .
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
           7z a rsvim-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
+          rm rsvim${{ env.BIN_EXT }}
           cargo build --no-default-features --profile nightly
           mv target/nightly/rsvim${{ env.BIN_EXT }} .
           tar -czvf rsvim-min-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
