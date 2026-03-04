@@ -19,6 +19,7 @@ doctest = false
 
 [features]
 default = ["typescript", "wasm", "icudata"]
+icudata = ["dep:deno_core_icudata"]
 typescript = [
   "dep:swc_atoms",
   "dep:swc_bundler",
@@ -135,6 +136,7 @@ swc_sourcemap = { workspace = true, optional = true }
 swc_trace_macro = { workspace = true, optional = true }
 swc_visit = { workspace = true, optional = true }
 
+deno_core_icudata = { workspace = true, optional = true }
 v8 = { workspace = true, default-features = false, features = [
   "use_custom_libcxx",
 ] }
