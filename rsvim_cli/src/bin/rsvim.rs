@@ -42,7 +42,7 @@ const RSVIM_SNAPSHOT: &[u8] =
 static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
   let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  let version_tags = version_tags
+  let mut version_tags = version_tags
     .split("\n")
     .filter(|line| {
       !line.is_empty() && line.split("=").collect::<Vec<&str>>().len() == 2
@@ -66,7 +66,7 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
     version_tags["profile"],
     version_tags["host"]
   );
-  let features = {
+  let (features, typescript_enabled) = {
     let typescript = if cfg!(feature = "typescript") {
       "typescript"
     } else {
@@ -82,21 +82,28 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
       .into_iter()
       .filter(|f| !f.is_empty())
       .collect::<Vec<&str>>();
-    format!(
-      "features: {}",
-      if features.is_empty() {
-        "none".to_string()
-      } else {
-        features.join(", ")
-      }
+    (
+      format!(
+        "features: {}",
+        if features.is_empty() {
+          "none".to_string()
+        } else {
+          features.join(", ")
+        }
+      ),
+      cfg!(feature = "typescript"),
     )
   };
   let v8_version = format!("v8: {}", v8_version());
-  let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
-  format!(
-    "{}\n{}\n{}\n{}\n",
-    binary_version, features, v8_version, swc_core_version
-  )
+  if typescript_enabled {
+    let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
+    format!(
+      "{}\n{}\n{}\n{}",
+      binary_version, features, v8_version, swc_core_version
+    )
+  } else {
+    format!("{}\n{}\n{}", binary_version, features, v8_version)
+  }
 });
 
 // --headless (experimental)  Run in headless mode without TUI
