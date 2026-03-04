@@ -18,7 +18,7 @@ version.workspace = true
 doctest = false
 
 [features]
-default = ["typescript", "wasm", "icudata"]
+default = []
 icudata = ["dep:deno_core_icudata"]
 typescript = [
   "dep:swc_atoms",
