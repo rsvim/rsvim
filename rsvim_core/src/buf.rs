@@ -566,7 +566,7 @@ impl BufferManager {
   }
 
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
-    self.global_local_options = options.clone();
+    self.global_local_options = *options;
   }
 
   pub fn color_name(&self) -> &CompactString {
