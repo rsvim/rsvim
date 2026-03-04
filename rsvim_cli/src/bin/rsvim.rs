@@ -34,19 +34,65 @@ use std::time::UNIX_EPOCH;
 use tokio::time::Instant;
 
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
-const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
 
 const RSVIM_SNAPSHOT: &[u8] =
   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
 static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
-  const VERSION: &str = "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION}";
-
-  let pkg_version =
+  let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  VERSION
-    .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
-    .replace(RSVIM_PKG_VERSION, pkg_version)
+  let version_tags = version_tags
+    .split("\n")
+    .filter(|line| {
+      !line.is_empty() && line.split("=").collect::<Vec<&str>>().len() == 2
+    })
+    .map(|line| {
+      let key_value = line.split("=").collect::<Vec<&str>>();
+      let key = key_value[0].trim();
+      let value = key_value[1].trim();
+      (key.to_string(), value.to_string())
+    })
+    .collect::<FoldMap<String, String>>();
+  let git_commit = match version_tags.get("git_commit") {
+    Some(git_commit) => format!("{}, ", git_commit),
+    None => "".to_string(),
+  };
+  let binary_version = format!(
+    "{} {} ({}{}, {})",
+    env!("CARGO_BIN_NAME"),
+    version_tags["version"],
+    git_commit,
+    version_tags["profile"],
+    version_tags["host"]
+  );
+  let (features, typescript_enabled) = {
+    (
+      format!(
+        "features: {}typescript {}wasm {}icudata {}jemalloc {}mimalloc {}snmalloc",
+        if cfg!(feature = "typescript") {
+          "+"
+        } else {
+          "-"
+        },
+        if cfg!(feature = "wasm") { "+" } else { "-" },
+        if cfg!(feature = "icudata") { "+" } else { "-" },
+        if cfg!(feature = "jemalloc") { "+" } else { "-" },
+        if cfg!(feature = "mimalloc") { "+" } else { "-" },
+        if cfg!(feature = "snmalloc") { "+" } else { "-" },
+      ),
+      cfg!(feature = "typescript"),
+    )
+  };
+  let v8_version = format!("v8: {}", version_tags["v8"]);
+  if typescript_enabled {
+    let swc_core_version = format!("swc_core: {}", version_tags["swc_core"]);
+    format!(
+      "{}\n{}\n{}\n{}",
+      binary_version, features, v8_version, swc_core_version
+    )
+  } else {
+    format!("{}\n{}\n{}", binary_version, features, v8_version)
+  }
 });
 
 // --headless (experimental)  Run in headless mode without TUI
