@@ -40,6 +40,9 @@ pub enum TheErr {
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
 
+  #[error("ColorScheme `{0}` not found.")]
+  ColorSchemeNotFound(CompactString),
+
   #[error("Undo commit `{0}` not exist.")]
   UndoCommitNotExist(usize),
 
