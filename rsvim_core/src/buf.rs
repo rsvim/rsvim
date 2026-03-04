@@ -14,7 +14,6 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::hl;
 use crate::hl::ColorScheme;
 use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
@@ -33,6 +32,9 @@ use std::path::PathBuf;
 use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
+
+// Default options
+pub const COLOR_NAME: &str = crate::hl::DEFAULT;
 
 // BufferId starts from 1.
 structural_id_impl!(i32, BufferId, 1);
@@ -228,8 +230,8 @@ pub struct BufferManager {
   // ColorScheme manager
   colorscheme_manager: ColorSchemeManager,
 
-  // Default colorscheme name
-  colorscheme_name: CompactString,
+  // Current global-local colorscheme name
+  color_name: CompactString,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -242,7 +244,7 @@ impl BufferManager {
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager: SyntaxManager::new(),
       colorscheme_manager: ColorSchemeManager::new(),
-      colorscheme_name: hl::DEFAULT.to_compact_string(),
+      color_name: COLOR_NAME.to_compact_string(),
     }
   }
 
@@ -565,19 +567,19 @@ impl BufferManager {
   }
 
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
-    self.global_local_options = *options;
+    self.global_local_options = options.clone();
   }
 
-  pub fn colorscheme_name(&self) -> &CompactString {
-    &self.colorscheme_name
+  pub fn color_name(&self) -> &CompactString {
+    &self.color_name
   }
 
-  pub fn set_colorscheme_name(&mut self, color: &str) -> TheResult<()> {
-    if self.colorscheme_manager.contains_key(color) {
-      self.colorscheme_name = color.to_compact_string();
+  pub fn set_color_name(&mut self, color_name: &str) -> TheResult<()> {
+    if self.colorscheme_manager.contains_key(color_name) {
+      self.color_name = color_name.to_compact_string();
       Ok(())
     } else {
-      Err(TheErr::ColorSchemeNotFound(color.to_compact_string()))
+      Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
     }
   }
 }

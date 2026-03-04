@@ -8,6 +8,8 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 pub use file_encoding::*;
 pub use file_format::*;
 
@@ -21,7 +23,7 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_family = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
-#[derive(Debug, Copy, Clone, derive_builder::Builder)]
+#[derive(Debug, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = EXPAND_TAB)]
