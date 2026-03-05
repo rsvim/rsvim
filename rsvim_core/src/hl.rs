@@ -12,9 +12,6 @@
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
 //!
-//! [scope.source.ruby]
-//! attribute = "red"
-//!
 //! [ui]
 //! background = "#000000"
 //!
@@ -48,37 +45,6 @@
 //!     it is `false`.
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
-//!
-//! You can overwrite highlightings for specific languages by adding a
-//! `[scope.source.{lang}]` section. The `{lang}` should match the grammar name
-//! inside a `tree-sitter.json` grammar config.
-//!
-//! For example in
-//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby),
-//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
-//! grammar name is `"ruby"`:
-//!
-//! ```json
-//! {
-//!   "grammars": [
-//!     {
-//!       "name": "ruby",
-//!       "camelcase": "Ruby",
-//!       "scope": "source.ruby",
-//!       "path": ".",
-//!       "file-types": [
-//!         "rb"
-//!       ],
-//!       "highlights": "queries/highlights.scm",
-//!       "tags": "queries/tags.scm",
-//!       "injection-regex": "ruby"
-//!     }
-//!   ],
-//!   ...
-//! }
-//! ```
-//!
-//! In this case, you need to add `[scope.source.ruby]` section for ruby.
 //!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
@@ -434,64 +400,24 @@ fn parse_highlights(
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
-  if let Some(scope) = colorscheme.get("scope")
-    && let Some(scope_table) = scope.as_table()
-  {
-    for (key, value) in scope_table.iter() {
-      if key.as_str() == "source" {
-        let source_table = value.as_table().unwrap();
-        for (lang, value_per_lang) in source_table.iter() {
-          let scope_table_per_lang = value_per_lang.as_table().unwrap();
-          for (key_per_lang, value_per_lang) in scope_table_per_lang.iter() {
-            let k = format!("{}.{}", key_per_lang, lang);
-            if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
-              return Err(TheErr::LoadColorSchemeFailed(
-                format!("{}={:?}", k, value_per_lang).to_compact_string(),
-              ));
-            }
-            if value_per_lang.is_table() {
-              let (id, hl) = parse_hl_as_table(
-                &k,
-                value_per_lang.as_table().unwrap(),
-                palette,
-                colors,
-              )?;
-              result.insert(id, hl);
-            } else if value_per_lang.is_str() {
-              let (id, hl) = parse_hl_as_str(
-                &k,
-                value_per_lang.as_str().unwrap(),
-                palette,
-                colors,
-              )?;
-              result.insert(id, hl);
-            } else {
-              return Err(TheErr::LoadColorSchemeFailed(
-                format!("{}={:?}", k, value_per_lang).to_compact_string(),
-              ));
-            }
-          }
-        }
-      } else {
-        if !SCOPE_NAMES.contains(key.as_str()) {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("{}={:?}", key, value).to_compact_string(),
-          ));
-        }
-        if value.is_table() {
-          let (id, hl) =
-            parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
-          result.insert(id, hl);
-        } else if value.is_str() {
-          let (id, hl) =
-            parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
-          result.insert(id, hl);
-        } else {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("{}={:?}", key, value).to_compact_string(),
-          ));
-        }
-      }
+  for (key, value) in colorscheme.iter() {
+    if !SCOPE_NAMES.contains(key.as_str()) {
+      return Err(TheErr::LoadColorSchemeFailed(
+        format!("{}={:?}", key, value).to_compact_string(),
+      ));
+    }
+    if value.is_table() {
+      let (id, hl) =
+        parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
+      result.insert(id, hl);
+    } else if value.is_str() {
+      let (id, hl) =
+        parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
+      result.insert(id, hl);
+    } else {
+      return Err(TheErr::LoadColorSchemeFailed(
+        format!("{}={:?}", key, value).to_compact_string(),
+      ));
     }
   }
 
