@@ -86,11 +86,11 @@
 //! - `ui.foreground`: uses `white` by default.
 //! - `ui.background`: uses `black` by default.
 //!
-//! `palette` section is a helper section for defining `scope` and `ui` section
-//! more easily. By adding a `key=value` pair in palette section, you can use
-//! the `key` as a color name in `scope` and `ui` section, syntax highlighting
-//! parser will lookup for the real color `value` behind the `key` when loading
-//! the colorscheme config.
+//! `palette` section is a helper section for defining `[scope]` and `[ui]`
+//! section more easily. By adding a `key=value` pair in palette section, you
+//! can use the `key` as a color name in `[scope]` and `[ui]` section, syntax
+//! highlighting parser will lookup for the real color `value` behind the `key`
+//! when loading the colorscheme config.
 
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -347,13 +347,11 @@ fn parse_hl_as_table(
   palette: &FoldMap<CompactString, Color>,
   colors: &FoldMap<CompactString, Color>,
 ) -> TheResult<(CompactString, Highlight)> {
-  let id = format!("scope.{}", key).to_compact_string();
-
   let parse_color = |x, fallback| -> TheResult<Option<Color>> {
     match value.get(x) {
       Some(x_value) => {
         let x_value = x_value.as_str().ok_or(TheErr::LoadColorSchemeFailed(
-          format!("{}={:?}", id, x_value).to_compact_string(),
+          format!("{}={:?}", key, x_value).to_compact_string(),
         ))?;
         match palette.get(x_value) {
           Some(x) => Ok(Some(*x)),
@@ -371,7 +369,7 @@ fn parse_hl_as_table(
     match value.get(x) {
       Some(x_value) => {
         Ok(x_value.as_bool().ok_or(TheErr::LoadColorSchemeFailed(
-          format!("{}={:?}", id, x_value).to_compact_string(),
+          format!("{}={:?}", key, x_value).to_compact_string(),
         ))?)
       }
       None => Ok(false),
@@ -394,13 +392,13 @@ fn parse_hl_as_table(
   }
 
   let hl = Highlight {
-    id: id.clone(),
+    id: key.to_compact_string(),
     fg,
     bg,
     attr,
   };
-  trace!("id:{:?},hl:{:?}", id, hl);
-  Ok((id, hl))
+  trace!("id:{:?},hl:{:?}", key, hl);
+  Ok((key.to_compact_string(), hl))
 }
 
 fn parse_hl_as_str(
