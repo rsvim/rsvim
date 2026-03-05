@@ -467,25 +467,21 @@ impl ColorScheme {
     &self.highlights
   }
 
-  pub fn resolve_highlight_fg(&self, id: &str) -> Option<&Color> {
+  pub fn resolve_color(&self, id: &str, fallback: &str) -> Option<Color> {
     self.assert_id(id);
-    match self.highlights.get(id) {
-      Some(hl) => match hl.fg {
-        Some(color) => Some(&color),
-        None => self.colors.get("ui.foreground"),
-      },
-      None => self.colors.get("ui.foreground"),
-    }
-  }
-
-  pub fn resolve_highlight_bg(&self, id: &str) -> Option<&Color> {
-    self.assert_id(id);
-    match self.highlights.get(id) {
-      Some(hl) => match hl.bg {
-        Some(color) => Some(&color),
-        None => self.colors.get("ui.background"),
-      },
-      None => self.colors.get("ui.background"),
+    if SCOPE_NAMES.contains(id) {
+      match self.highlights.get(id) {
+        Some(hl) => match hl.fg {
+          Some(color) => Some(color),
+          None => self.colors.get(fallback).copied(),
+        },
+        None => self.colors.get(fallback).copied(),
+      }
+    } else {
+      match self.colors.get(id) {
+        Some(color) => Some(*color),
+        None => self.colors.get(fallback).copied(),
+      }
     }
   }
 }
