@@ -471,7 +471,7 @@ impl ColorScheme {
     self.assert_id(id);
     match self.highlights.get(id) {
       Some(hl) => match hl.fg {
-        Some(color) => Some(color),
+        Some(color) => Some(&color),
         None => self.colors.get("ui.foreground"),
       },
       None => self.colors.get("ui.foreground"),
@@ -482,7 +482,7 @@ impl ColorScheme {
     self.assert_id(id);
     match self.highlights.get(id) {
       Some(hl) => match hl.bg {
-        Some(color) => Some(color),
+        Some(color) => Some(&color),
         None => self.colors.get("ui.background"),
       },
       None => self.colors.get("ui.background"),
