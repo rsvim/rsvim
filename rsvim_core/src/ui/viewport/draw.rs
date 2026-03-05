@@ -146,6 +146,9 @@ pub fn draw(
                     "captured highlight key:{:?}, highlights:{:?}",
                     cap_key, cap_hls
                   );
+                  for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
+                    trace!("captured highlight [{}]:{:?}", cap_i, cap_hl);
+                  }
                 }
               }
 
