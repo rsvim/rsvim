@@ -562,7 +562,7 @@ impl ColorScheme {
     debug_assert!(!id.starts_with("."));
     debug_assert!(!id.ends_with("."));
 
-    let mut i = id;
+    let mut i = &id;
     loop {
       if let Some(hl) = self.highlights.get(i) {
         return Some(hl);
