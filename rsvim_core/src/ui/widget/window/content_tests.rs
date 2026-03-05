@@ -1976,17 +1976,18 @@ mod tests_syntax_highlight_nowrap {
 
     let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
-    tmpfile.write_str(
-      r###"
+    tmpfile
+      .write_str(
+        r###"
 use std::sync::Arc;
 fn main() {
   println!("Hello, World!");
 }
       "###,
-    );
+      )
+      .unwrap();
 
     let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
-
     let buffer = make_buffer_from_tmpfile_and_syntax(
       terminal_size,
       buf_opts,

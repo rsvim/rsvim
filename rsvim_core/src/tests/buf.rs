@@ -7,7 +7,10 @@ use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::hl::ColorScheme;
 use crate::prelude::*;
+use crate::syntax;
 use crate::syntax::Syntax;
+use crate::syntax::SyntaxEdit;
+use crate::syntax::SyntaxEditNew;
 use assert_fs::NamedTempFile;
 use compact_str::ToCompactString;
 use path_absolutize::Absolutize;
@@ -118,8 +121,31 @@ pub fn make_syntax_and_colorscheme(
   let file_extension = filename
     .extension()
     .map(|e| e.to_string_lossy().to_compact_string());
-  let syntax = buffer_manager
+  let mut syn = buffer_manager
     ._load_syntax_by_file_ext(&file_extension)
     .unwrap()
     .unwrap();
+
+  let filename = tmpfile.path();
+  let absolute_filename = filename.absolutize().unwrap();
+  let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
+
+  let mut text_rope_builder: RopeBuilder = RopeBuilder::new();
+  text_rope_builder.append(&file_content);
+  let text_rope = text_rope_builder.finish();
+  let syn_parser = syn.parser();
+  let (syn_tree, _editing_version, text_payload) = syntax::parse(
+    syn_parser,
+    None,
+    vec![SyntaxEdit::New(SyntaxEditNew {
+      payload: text_rope.clone(),
+      version: 0,
+    })],
+  );
+  let syn_capture =
+    syntax::query(&syn_tree, &text_payload, &syn.highlight_query());
+  syn.set_highlight_capture(syn_capture);
+
+  let colorscheme = buffer_manager.colorscheme().cloned().unwrap();
+  (syn, colorscheme)
 }
