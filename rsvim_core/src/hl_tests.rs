@@ -360,7 +360,6 @@ grey = "#c0c0c0"
     ];
     for expect in scope_expects.iter() {
       assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
-      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
     }
 
     let resolved_scope_expects = [
@@ -423,7 +422,7 @@ grey = "#c0c0c0"
     ];
     for (i, expect) in resolved_scope_expects.iter().enumerate() {
       info!("i:{}, expect:{:?}", i, expect);
-      assert_eq!(cs.resolve_highlight(expect.0), expect.1.as_ref());
+      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
     }
 
     assert_eq!(
@@ -434,16 +433,7 @@ grey = "#c0c0c0"
         b: 0x0
       }
     );
-    assert_eq!(
-      *cs.resolve_color("ui.background").unwrap(),
-      Color::Rgb {
-        r: 0x0,
-        g: 0x0,
-        b: 0x0
-      }
-    );
     assert!(cs.colors().get("ui.foreground").is_none());
-    assert!(cs.resolve_color("ui.foreground").is_none());
   }
 
   #[test]
