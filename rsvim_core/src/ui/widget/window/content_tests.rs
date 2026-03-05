@@ -5,6 +5,7 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
+use crate::tests::buf::make_buffer_from_lines_with_all_opts;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
@@ -1952,6 +1953,50 @@ mod tests_wrap_linebreak_startcol {
       "换行选项都不 ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+}
+
+#[cfg(test)]
+mod tests_draw_highlight_nowrap {
+  use super::*;
+
+  #[test]
+  fn new1() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
+
+    let buffer = make_buffer_from_lines_with_all_opts(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "          ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
