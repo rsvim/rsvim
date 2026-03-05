@@ -113,4 +113,13 @@ pub fn make_syntax_and_colorscheme(
   tmpfile: &NamedTempFile,
 ) -> (Syntax, ColorScheme) {
   let buffer_manager = BufferManager::new();
+
+  let filename = tmpfile.path();
+  let file_extension = filename
+    .extension()
+    .map(|e| e.to_string_lossy().to_compact_string());
+  let syntax = buffer_manager
+    ._load_syntax_by_file_ext(&file_extension)
+    .unwrap()
+    .unwrap();
 }
