@@ -3,16 +3,16 @@
 //! ColorScheme is defined by a toml config file, which references the theme
 //! configuration of the [helix](https://github.com/helix-editor/helix) editor.
 //!
-//! A colorscheme config file has 3 sections: scope, ui and palette:
+//! A colorscheme config file has 3 sections: syntax, ui and palette:
 //!
 //! ```toml
-//! [scope]
+//! # syntax
 //! attribute = "white"
 //! boolean = { fg = "yellow", bold = true }
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
 //!
-//! [scope.source.ruby]
+//! [syntax.source.ruby]
 //! attribute = "red"
 //!
 //! [ui]
@@ -28,12 +28,15 @@
 //! grey = "#c0c0c0"
 //! ```
 //!
-//! `scope` section defines syntax highlightings for programming languages, the
-//! value of a scope item can have two formats:
+//! `syntax` section doesn't explicitly defines a `[syntax]` section like
+//! `[ui]` or `[palette]`, it actually comes from the
+//! [tree-sitter highlght names](https://github.com/tree-sitter/tree-sitter/blob/cf302b07d1cae984068b7eb44a6e44529566a8c9/crates/highlight/src/highlight.rs#L30).
+//! It defines syntax highlightings for programming languages, the value of a
+//! syntax highlight can have two formats:
 //!
-//! - A string defines the foreground text color for that syntax highlighting,
-//!   it accepts either ANSI color name, such as "white", "yellow", etc. Or RGB
-//!   color code, such as "#ffffff", "#ffff00", etc.
+//! - A string defines the foreground text color for the highlighting, it
+//!   accepts either ANSI color name (such as "white", "yellow", etc) or RGB
+//!   color code (such as "#ffffff", "#ffff00", etc).
 //! - A toml table with below optional attributes:
 //!   - `fg`: a string value indicates the foreground text color (ANSI/RGB), it
 //!     uses `ui.foreground` if been omitted.
@@ -618,6 +621,10 @@ fn default_colorscheme() -> ColorScheme {
     tag = "magenta"
     "type" = "green"
     variable = "cyan"
+
+    [ui]
+    foreground = "white"
+    background = "black"
   };
   ColorScheme::from_toml(DEFAULT, config).unwrap()
 }
