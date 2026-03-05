@@ -58,10 +58,11 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
   let lines = file_content.split("\n").collect::<Vec<&str>>();
 
+  let buf_eol = opts.end_of_line();
   for (i, line) in lines.iter().enumerate() {
     trace!("[{}]:{:?}", i, line);
     rpb.append(line);
-    rpb.append("\n");
+    rpb.append(&format!("{}", buf_eol));
   }
   let rp = rpb.finish();
   let file_extension = filename
