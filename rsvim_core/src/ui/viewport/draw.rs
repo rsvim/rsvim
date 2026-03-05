@@ -129,7 +129,7 @@ pub fn draw(
             if unicode_width > 0 {
               if let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
-                && let Some(_colorscheme) = colorscheme
+                && let Some(colorscheme) = colorscheme
               {
                 let cap_key = SyntaxCaptureKey::new(line_idx, char_idx);
                 if syn_highlight_capture
@@ -147,7 +147,12 @@ pub fn draw(
                     cap_key, cap_hls
                   );
                   for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
-                    trace!("captured highlight [{}]:{:?}", cap_i, cap_hl);
+                    let resolved_hl =
+                      colorscheme.resolve_highlight(cap_hl.name());
+                    trace!(
+                      "captured highlight-[{}], captured:{:?}, resolved:{:?}",
+                      cap_i, cap_hl, resolved_hl
+                    );
                   }
                 }
               }
