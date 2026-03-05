@@ -112,4 +112,5 @@ pub fn make_buffers_manager(
 pub fn make_syntax_and_colorscheme(
   tmpfile: &NamedTempFile,
 ) -> (Syntax, ColorScheme) {
+  let buffer_manager = BufferManager::new();
 }
