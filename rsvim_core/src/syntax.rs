@@ -6,6 +6,8 @@ pub mod query;
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
+use crate::syntax::query::SyntaxCapturePoint;
+use crate::syntax::query::SyntaxCaptureRange;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 pub use edit::SyntaxEdit;
@@ -531,6 +533,20 @@ pub fn parse(
   (tree, editing_version, last_rope, last_payload)
 }
 
+fn convert_ts_byte(rope: &Rope, byte_idx: usize) -> usize {
+  debug_assert!(rope.try_byte_to_char(byte_idx).is_ok());
+  rope.byte_to_char(byte_idx)
+}
+
+fn convert_ts_point(rope: &Rope, point: &tree_sitter::Point) -> (usize, usize) {
+  let line_idx = point.row;
+  debug_assert!(rope.get_line(line_idx).is_some());
+  let line = rope.line(line_idx);
+  debug_assert!(line.try_byte_to_char(point.column).is_ok());
+  let char_idx = line.byte_to_char(point.column);
+  (line_idx, char_idx)
+}
+
 /// Here is a really trade-off, I mean we have two solutions when querying
 /// syntax highlight colors for a buffer:
 ///
@@ -583,15 +599,37 @@ pub fn query(
           "Captured highlight {}: name:{:?}, range:{:?}",
           index, name, range
         );
-        let key = SyntaxCaptureKey::new(
-          range.start_point.row,
-          range.start_point.column,
+        debug_assert!(text_rope.get_line(range.start_point.row).is_some());
+        debug_assert!(
+          text_rope
+            .line(range.start_point.row)
+            .try_byte_to_char(range.start_point.column)
+            .is_ok()
         );
+        let (start_line_idx, start_char_idx) =
+          convert_ts_point(text_rope, &range.start_point);
+        let key = SyntaxCaptureKey::new(start_line_idx, start_char_idx);
         nodes.entry(key).or_insert(vec![]);
+        let absolute_start_char_idx =
+          convert_ts_byte(text_rope, range.start_byte);
+        let absolute_end_char_idx = convert_ts_byte(text_rope, range.end_byte);
+        let (end_line_idx, end_char_idx) =
+          convert_ts_point(text_rope, &range.end_point);
         nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
           index,
           name.to_compact_string(),
-          range,
+          SyntaxCaptureRange {
+            start_char: absolute_start_char_idx,
+            end_char: absolute_end_char_idx,
+            start_point: SyntaxCapturePoint {
+              line_idx: start_line_idx,
+              char_idx: start_char_idx,
+            },
+            end_point: SyntaxCapturePoint {
+              line_idx: end_line_idx,
+              char_idx: end_char_idx,
+            },
+          },
         ));
       }
     }
