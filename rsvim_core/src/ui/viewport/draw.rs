@@ -145,7 +145,7 @@ pub fn draw(
                   trace!("captured highlight, {:?}:{:?}", cap_key, cap_hls);
                   for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
                     let resolved_hl =
-                      colorscheme.resolve_highlight(cap_hl.name());
+                      colorscheme.highlights().get(cap_hl.name());
                     trace!(
                       "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                       cap_i, cap_hl, resolved_hl
