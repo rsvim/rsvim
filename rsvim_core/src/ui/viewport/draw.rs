@@ -131,8 +131,7 @@ pub fn draw(
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && let Some(_colorscheme) = colorscheme
               {
-                let byte_idx = text.rope().char_to_byte(char_idx);
-                let cap_key = SyntaxCaptureKey::new(line_idx, byte_idx);
+                let cap_key = SyntaxCaptureKey::new(line_idx, char_idx);
                 if syn_highlight_capture
                   .as_ref()
                   .nodes()
