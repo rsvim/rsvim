@@ -528,7 +528,6 @@ pub type ColorSchemeManagerIter<'a> =
 
 fn default_colorscheme() -> ColorScheme {
   let config = toml::toml! {
-    [scope]
     boolean = "magenta"
     comment = "cyan"
     constant = "magenta"
