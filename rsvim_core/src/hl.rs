@@ -67,6 +67,7 @@ use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
 pub const DEFAULT: &str = "default";
+pub const RESET_COLOR: Color = Color::Reset;
 
 // "ui."
 pub const FOREGROUND: &str = "foreground";
@@ -454,55 +455,37 @@ impl ColorScheme {
     &self.colors
   }
 
-  pub fn resolve_color(&self, id: &str) -> Option<&Color> {
+  fn assert_id(&self, id: &str) {
     debug_assert!(!id.is_empty());
     debug_assert!(!id.trim().is_empty());
     debug_assert_eq!(id.trim(), id);
     debug_assert!(!id.starts_with("."));
     debug_assert!(!id.ends_with("."));
-
-    let mut i = id;
-    loop {
-      if let Some(color) = self.colors.get(i) {
-        return Some(color);
-      }
-      match i.rfind(".") {
-        Some(pos) => {
-          i = &i[..pos];
-          if i.is_empty() {
-            return None;
-          }
-        }
-        None => return None,
-      }
-    }
   }
 
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
 
-  pub fn resolve_highlight(&self, id: &str) -> Option<&Highlight> {
-    debug_assert!(!id.is_empty());
-    debug_assert!(!id.trim().is_empty());
-    debug_assert_eq!(id.trim(), id);
-    debug_assert!(!id.starts_with("."));
-    debug_assert!(!id.ends_with("."));
+  pub fn resolve_highlight_fg(&self, id: &str) -> Option<&Color> {
+    self.assert_id(id);
+    match self.highlights.get(id) {
+      Some(hl) => match hl.fg {
+        Some(color) => Some(color),
+        None => self.colors.get("ui.foreground"),
+      },
+      None => self.colors.get("ui.foreground"),
+    }
+  }
 
-    let mut i = id;
-    loop {
-      if let Some(hl) = self.highlights.get(i) {
-        return Some(hl);
-      }
-      match i.rfind(".") {
-        Some(pos) => {
-          i = &i[..pos];
-          if i.is_empty() {
-            return None;
-          }
-        }
-        None => return None,
-      }
+  pub fn resolve_highlight_bg(&self, id: &str) -> Option<&Color> {
+    self.assert_id(id);
+    match self.highlights.get(id) {
+      Some(hl) => match hl.bg {
+        Some(color) => Some(color),
+        None => self.colors.get("ui.background"),
+      },
+      None => self.colors.get("ui.background"),
     }
   }
 }
