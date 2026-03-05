@@ -1978,12 +1978,11 @@ mod tests_syntax_highlight_nowrap {
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
-        r###"
-use std::sync::Arc;
+        r###"use std::sync::Arc;
 fn main() {
   println!("Hello, World!");
 }
-      "###,
+"###,
       )
       .unwrap();
 
@@ -1996,13 +1995,13 @@ fn main() {
       colorscheme,
     );
     let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
+      "use std::s",
+      "fn main() ",
+      "  println!",
+      "}         ",
+      "          ",
+      "          ",
+      "          ",
       "          ",
       "          ",
       "          ",
