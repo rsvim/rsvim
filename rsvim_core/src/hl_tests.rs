@@ -18,25 +18,25 @@ mod parse_toml {
     assert!(cs.colors().get("ui.background").is_none());
     assert!(cs.colors().get("ui.foreground").is_none());
 
-    assert!(cs.highlights().get("scope.boolean").is_some());
-    assert!(cs.highlights().get("scope.boolean").unwrap().bg.is_none());
+    assert!(cs.highlights().get("boolean").is_some());
+    assert!(cs.highlights().get("boolean").unwrap().bg.is_none());
     assert_eq!(
-      cs.highlights().get("scope.boolean").unwrap().fg,
+      cs.highlights().get("boolean").unwrap().fg,
       Some(Color::Magenta)
     );
     assert_eq!(
-      cs.highlights().get("scope.boolean").unwrap().attr,
+      cs.highlights().get("boolean").unwrap().attr,
       Attributes::none()
     );
 
-    assert!(cs.highlights().get("scope.variable").is_some());
-    assert!(cs.highlights().get("scope.variable").unwrap().bg.is_none());
+    assert!(cs.highlights().get("variable").is_some());
+    assert!(cs.highlights().get("variable").unwrap().bg.is_none());
     assert_eq!(
-      cs.highlights().get("scope.variable").unwrap().fg,
+      cs.highlights().get("variable").unwrap().fg,
       Some(Color::Cyan)
     );
     assert_eq!(
-      cs.highlights().get("scope.variable").unwrap().attr,
+      cs.highlights().get("variable").unwrap().attr,
       Attributes::none()
     );
   }
@@ -46,7 +46,6 @@ mod parse_toml {
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
 comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
@@ -71,9 +70,9 @@ grey = "#c0c0c0"
 
     let scope_expects = [
       (
-        "scope.attribute",
+        "attribute",
         Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
+          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -84,9 +83,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "scope.boolean",
+        "boolean",
         Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
+          id: "boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -100,11 +99,11 @@ grey = "#c0c0c0"
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("scope.carriage-return", None),
+      ("carriage-return", None),
       (
-        "scope.comment",
+        "comment",
         Some(Highlight {
-          id: "scope.comment".to_compact_string(),
+          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -122,9 +121,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "scope.keyword",
+        "keyword",
         Some(Highlight {
-          id: "scope.keyword".to_compact_string(),
+          id: "keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -159,7 +158,6 @@ grey = "#c0c0c0"
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
 comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
@@ -176,9 +174,9 @@ background = "#000000"
 
     let scope_expects = [
       (
-        "scope.attribute",
+        "attribute",
         Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
+          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -189,9 +187,9 @@ background = "#000000"
         }),
       ),
       (
-        "scope.boolean",
+        "boolean",
         Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
+          id: "boolean".to_compact_string(),
           fg: Some(Color::Yellow),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -201,11 +199,11 @@ background = "#000000"
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("scope.carriage-return", None),
+      ("carriage-return", None),
       (
-        "scope.comment",
+        "comment",
         Some(Highlight {
-          id: "scope.comment".to_compact_string(),
+          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -223,9 +221,9 @@ background = "#000000"
         }),
       ),
       (
-        "scope.keyword",
+        "keyword",
         Some(Highlight {
-          id: "scope.keyword".to_compact_string(),
+          id: "keyword".to_compact_string(),
           fg: Some(Color::Red),
           bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
@@ -259,17 +257,10 @@ background = "#000000"
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "white"
 boolean = { fg = "yellow", bold = true }
 comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 keyword = { fg = "#ffffff", bg = "green", italic = true }
-
-[scope.source.ruby]
-attribute = "red"
-
-[scope.source.c]
-boolean = "red"
 
 [ui]
 background = "#000000"
@@ -290,9 +281,9 @@ grey = "#c0c0c0"
 
     let scope_expects = [
       (
-        "scope.attribute",
+        "attribute",
         Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
+          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -303,9 +294,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "scope.boolean",
+        "boolean",
         Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
+          id: "boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -319,11 +310,11 @@ grey = "#c0c0c0"
           attr: Attributes::none().with(Attribute::Bold),
         }),
       ),
-      ("scope.carriage-return", None),
+      ("carriage-return", None),
       (
-        "scope.comment",
+        "comment",
         Some(Highlight {
-          id: "scope.comment".to_compact_string(),
+          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -341,9 +332,9 @@ grey = "#c0c0c0"
         }),
       ),
       (
-        "scope.keyword",
+        "keyword",
         Some(Highlight {
-          id: "scope.keyword".to_compact_string(),
+          id: "keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -359,69 +350,6 @@ grey = "#c0c0c0"
       ),
     ];
     for expect in scope_expects.iter() {
-      assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
-    }
-
-    let resolved_scope_expects = [
-      (
-        "scope.attribute.ruby",
-        Some(Highlight {
-          id: "scope.attribute.ruby".to_compact_string(),
-          fg: Some(Color::Red),
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0x0,
-            b: 0x0,
-          }),
-          attr: Attributes::none(),
-        }),
-      ),
-      (
-        "scope.attribute.c",
-        Some(Highlight {
-          id: "scope.attribute".to_compact_string(),
-          fg: Some(Color::White),
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0x0,
-            b: 0x0,
-          }),
-          attr: Attributes::none(),
-        }),
-      ),
-      (
-        "scope.boolean.ruby",
-        Some(Highlight {
-          id: "scope.boolean".to_compact_string(),
-          fg: Some(Color::Rgb {
-            r: 0xff,
-            g: 0xff,
-            b: 0x0,
-          }),
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0x0,
-            b: 0x0,
-          }),
-          attr: Attributes::none().with(Attribute::Bold),
-        }),
-      ),
-      (
-        "scope.boolean.c",
-        Some(Highlight {
-          id: "scope.boolean.c".to_compact_string(),
-          fg: Some(Color::Red),
-          bg: Some(Color::Rgb {
-            r: 0x0,
-            g: 0x0,
-            b: 0x0,
-          }),
-          attr: Attributes::none(),
-        }),
-      ),
-    ];
-    for (i, expect) in resolved_scope_expects.iter().enumerate() {
-      info!("i:{}, expect:{:?}", i, expect);
       assert_eq!(cs.highlights().get(expect.0), expect.1.as_ref());
     }
 
@@ -441,7 +369,6 @@ grey = "#c0c0c0"
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "#zxcvas"
 "##;
 
@@ -458,10 +385,7 @@ attribute = "#zxcvas"
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "white"
-
-[scope.source.rust]
 rustsrcour = "#ffffff"
 "##;
 
@@ -478,7 +402,6 @@ rustsrcour = "#ffffff"
     test_log_init();
 
     let payload: &str = r##"
-[scope]
 attribute = "beijing"
 "##;
 
