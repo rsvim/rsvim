@@ -5,13 +5,17 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
-use crate::tests::buf::make_buffer_from_lines_with_all_opts;
+use crate::tests::buf::make_buffer_from_tmpfile_and_syntax;
 use crate::tests::buf::make_empty_buffer;
+use crate::tests::buf::make_syntax_and_colorscheme;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::make_canvas;
 use crate::tests::viewport::make_viewport;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use assert_fs::NamedTempFile;
+use assert_fs::prelude::FileTouch;
+use assert_fs::prelude::FileWriteStr;
 
 #[cfg(test)]
 mod tests_nowrap {
@@ -1959,7 +1963,7 @@ mod tests_wrap_linebreak_startcol {
 }
 
 #[cfg(test)]
-mod tests_draw_highlight_nowrap {
+mod tests_syntax_highlight_nowrap {
   use super::*;
 
   #[test]
@@ -1970,18 +1974,25 @@ mod tests_draw_highlight_nowrap {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
-    let buffer = make_buffer_from_lines_with_all_opts(
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile.write_str(
+      r###"
+use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+      "###,
+    );
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+
+    let buffer = make_buffer_from_tmpfile_and_syntax(
       terminal_size,
       buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
+      &tmpfile,
+      syntax,
+      colorscheme,
     );
     let expect = vec![
       "Hello, RSV",

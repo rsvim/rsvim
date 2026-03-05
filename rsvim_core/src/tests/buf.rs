@@ -8,11 +8,12 @@ use crate::buf::opt::BufferOptions;
 use crate::hl::ColorScheme;
 use crate::prelude::*;
 use crate::syntax::Syntax;
+use assert_fs::NamedTempFile;
 use compact_str::ToCompactString;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
-use std::path::PathBuf;
+use tokio::time::Instant;
 
 pub fn make_buffer_from_lines(
   terminal_size: U16Size,
@@ -39,15 +40,21 @@ pub fn make_buffer_from_lines(
   Buffer::to_arc(buf)
 }
 
-pub fn make_buffer_from_lines_and_syntax(
+pub fn make_buffer_from_tmpfile_and_syntax(
   terminal_size: U16Size,
   opts: BufferOptions,
-  lines: Vec<&str>,
-  filename: PathBuf,
+  tmpfile: &NamedTempFile,
   syntax: Syntax,
   colorscheme: ColorScheme,
 ) -> BufferArc {
   let mut rpb: RopeBuilder = RopeBuilder::new();
+
+  let filename = tmpfile.path();
+  let absolute_filename = filename.absolutize().unwrap();
+  let metadata = std::fs::metadata(&absolute_filename).unwrap();
+  let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
+  let lines = file_content.split("\n").collect::<Vec<&str>>();
+
   for line in lines.iter() {
     rpb.append(line);
   }
@@ -60,11 +67,11 @@ pub fn make_buffer_from_lines_and_syntax(
     opts,
     terminal_size,
     rp,
-    Some(filename),
+    Some(filename.to_path_buf()),
     file_extension,
     Some(absolute_filename),
-    None,
-    None,
+    Some(metadata),
+    Some(Instant::now()),
     Some(syntax),
     Some(colorscheme),
   );
@@ -100,4 +107,9 @@ pub fn make_buffers_manager(
     bm._add_buffer(buf.clone());
   }
   BufferManager::to_arc(bm)
+}
+
+pub fn make_syntax_and_colorscheme(
+  tmpfile: &NamedTempFile,
+) -> (Syntax, ColorScheme) {
 }
