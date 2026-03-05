@@ -134,7 +134,7 @@ pub fn make_syntax_and_colorscheme(
   text_rope_builder.append(&file_content);
   let text_rope = text_rope_builder.finish();
   let syn_parser = syn.parser();
-  let (syn_tree, _editing_version, text_payload) = syntax::parse(
+  let (syn_tree, _editing_version, text_rope, text_payload) = syntax::parse(
     syn_parser,
     None,
     vec![SyntaxEdit::New(SyntaxEditNew {
@@ -143,7 +143,7 @@ pub fn make_syntax_and_colorscheme(
     })],
   );
   let syn_capture =
-    syntax::query(&syn_tree, &text_payload, &syn.highlight_query());
+    syntax::query(&syn_tree, &text_rope, &text_payload, &syn.highlight_query());
   syn.set_highlight_capture(syn_capture);
 
   let colorscheme = buffer_manager.colorscheme().cloned().unwrap();

@@ -11,36 +11,53 @@ pub type SyntaxQueryArc = Arc<Query>;
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 /// Line (row) index and column (byte) index.
 pub struct SyntaxCaptureKey {
-  row: usize,
-  column: usize,
+  line_idx: usize,
+  char_idx: usize,
 }
 
 impl SyntaxCaptureKey {
-  pub fn new(row: usize, column: usize) -> Self {
-    Self { row, column }
+  pub fn new(line_idx: usize, char_idx: usize) -> Self {
+    Self { line_idx, char_idx }
   }
 
-  pub fn row(&self) -> usize {
-    self.row
+  pub fn line_idx(&self) -> usize {
+    self.line_idx
   }
 
-  pub fn column(&self) -> usize {
-    self.column
+  pub fn char_idx(&self) -> usize {
+    self.char_idx
   }
+}
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub struct SyntaxCapturePoint {
+  pub line_idx: usize,
+  pub char_idx: usize,
+}
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+/// Convert [`tree_sitter::Range`] based bytes indexing into [`ropey::Rope`]
+/// based chars indexing, i.e. use [`ropey::Rope::byte_to_char`] API to
+/// transform byte index to char index.
+pub struct SyntaxCaptureRange {
+  pub start_char: usize,
+  pub end_char: usize,
+  pub start_point: SyntaxCapturePoint,
+  pub end_point: SyntaxCapturePoint,
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
   index: u32,
   name: CompactString,
-  range: tree_sitter::Range,
+  range: SyntaxCaptureRange,
 }
 
 impl SyntaxCaptureValue {
   pub fn new(
     index: u32,
     name: CompactString,
-    range: tree_sitter::Range,
+    range: SyntaxCaptureRange,
   ) -> Self {
     Self { index, name, range }
   }
@@ -53,7 +70,7 @@ impl SyntaxCaptureValue {
     &self.name
   }
 
-  pub fn range(&self) -> &tree_sitter::Range {
+  pub fn range(&self) -> &SyntaxCaptureRange {
     &self.range
   }
 }

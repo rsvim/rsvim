@@ -446,7 +446,7 @@ pub fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
-) -> (Option<Tree>, isize, Option<String>) {
+) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
@@ -467,6 +467,7 @@ pub fn parse(
     debug_assert!(new_count <= 1);
   }
 
+  let mut last_rope: Option<Rope> = None;
   let mut last_payload: Option<String> = None;
 
   if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
@@ -485,6 +486,7 @@ pub fn parse(
             .unwrap_or("None".to_string()),
           editing_version
         );
+        last_rope = Some(new.payload.clone());
         last_payload = Some(payload);
       }
       _ => unreachable!(),
@@ -522,10 +524,11 @@ pub fn parse(
         .unwrap_or("None".to_string()),
       editing_version
     );
+    last_rope = Some(last_update.payload.clone());
     last_payload = Some(payload);
   }
 
-  (tree, editing_version, last_payload)
+  (tree, editing_version, last_rope, last_payload)
 }
 
 /// Here is a really trade-off, I mean we have two solutions when querying
@@ -553,14 +556,17 @@ pub fn parse(
 ///      latest highlights after some editings.
 pub fn query(
   tree: &Option<Tree>,
+  text_rope: &Option<Rope>,
   text_payload: &Option<String>,
   highlight_query: &Option<SyntaxQueryArc>,
 ) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
     && let Some(syn_highlight_query) = highlight_query
+    && let Some(text_rope) = text_rope
     && let Some(text_payload) = text_payload
   {
+    debug_assert_eq!(&text_rope.to_string(), text_payload);
     query_cursor.set_byte_range(0..usize::MAX);
     let mut matches = query_cursor.matches(
       syn_highlight_query,
@@ -601,8 +607,9 @@ pub async fn parse_and_query(
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
-  let (tree, editing_version, text_payload) =
+  let (tree, editing_version, text_rope, text_payload) =
     parse(parser, old_tree, pending_edits);
-  let highlight_capture = query(&tree, &text_payload, &highlight_query);
+  let highlight_capture =
+    query(&tree, &text_rope, &text_payload, &highlight_query);
   (tree, editing_version, highlight_capture)
 }
