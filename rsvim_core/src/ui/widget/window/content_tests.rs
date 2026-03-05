@@ -1978,7 +1978,11 @@ mod tests_syntax_highlight_nowrap {
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
-        "use std::sync::Arc;\nfn main() {\nprintln!(\"Hello, World!\");\n}\n",
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
       )
       .unwrap();
 
