@@ -61,6 +61,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   for (i, line) in lines.iter().enumerate() {
     trace!("[{}]:{:?}", i, line);
     rpb.append(line);
+    rpb.append("\n");
   }
   let rp = rpb.finish();
   let file_extension = filename
