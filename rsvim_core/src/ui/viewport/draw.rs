@@ -142,15 +142,12 @@ pub fn draw(
                     .nodes()
                     .get(&cap_key)
                     .unwrap();
-                  trace!(
-                    "captured highlight key:{:?}, highlights:{:?}",
-                    cap_key, cap_hls
-                  );
+                  trace!("captured highlight, {:?}:{:?}", cap_key, cap_hls);
                   for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
                     let resolved_hl =
                       colorscheme.resolve_highlight(cap_hl.name());
                     trace!(
-                      "captured highlight-[{}], captured:{:?}, resolved:{:?}",
+                      "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                       cap_i, cap_hl, resolved_hl
                     );
                   }
