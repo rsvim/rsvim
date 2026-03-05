@@ -6,6 +6,8 @@ pub mod query;
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
+use crate::syntax::query::SyntaxCapturePoint;
+use crate::syntax::query::SyntaxCaptureRange;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 pub use edit::SyntaxEdit;
@@ -446,7 +448,7 @@ pub fn parse(
   parser: Arc<Mutex<Parser>>,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
-) -> (Option<Tree>, isize, Option<String>) {
+) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
   let mut parser = lock!(parser);
   let mut tree = old_tree;
   let mut editing_version = INVALID_EDITING_VERSION;
@@ -467,6 +469,7 @@ pub fn parse(
     debug_assert!(new_count <= 1);
   }
 
+  let mut last_rope: Option<Rope> = None;
   let mut last_payload: Option<String> = None;
 
   if !pending_edits.is_empty() && matches!(pending_edits[0], SyntaxEdit::New(_))
@@ -485,6 +488,7 @@ pub fn parse(
             .unwrap_or("None".to_string()),
           editing_version
         );
+        last_rope = Some(new.payload.clone());
         last_payload = Some(payload);
       }
       _ => unreachable!(),
@@ -522,10 +526,25 @@ pub fn parse(
         .unwrap_or("None".to_string()),
       editing_version
     );
+    last_rope = Some(last_update.payload.clone());
     last_payload = Some(payload);
   }
 
-  (tree, editing_version, last_payload)
+  (tree, editing_version, last_rope, last_payload)
+}
+
+fn convert_ts_byte(rope: &Rope, byte_idx: usize) -> usize {
+  debug_assert!(rope.try_byte_to_char(byte_idx).is_ok());
+  rope.byte_to_char(byte_idx)
+}
+
+fn convert_ts_point(rope: &Rope, point: &tree_sitter::Point) -> (usize, usize) {
+  let line_idx = point.row;
+  debug_assert!(rope.get_line(line_idx).is_some());
+  let line = rope.line(line_idx);
+  debug_assert!(line.try_byte_to_char(point.column).is_ok());
+  let char_idx = line.byte_to_char(point.column);
+  (line_idx, char_idx)
 }
 
 /// Here is a really trade-off, I mean we have two solutions when querying
@@ -553,14 +572,17 @@ pub fn parse(
 ///      latest highlights after some editings.
 pub fn query(
   tree: &Option<Tree>,
+  text_rope: &Option<Rope>,
   text_payload: &Option<String>,
   highlight_query: &Option<SyntaxQueryArc>,
 ) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
     && let Some(syn_highlight_query) = highlight_query
+    && let Some(text_rope) = text_rope
     && let Some(text_payload) = text_payload
   {
+    debug_assert_eq!(&text_rope.to_string(), text_payload);
     query_cursor.set_byte_range(0..usize::MAX);
     let mut matches = query_cursor.matches(
       syn_highlight_query,
@@ -577,15 +599,37 @@ pub fn query(
           "Captured highlight {}: name:{:?}, range:{:?}",
           index, name, range
         );
-        let key = SyntaxCaptureKey::new(
-          range.start_point.row,
-          range.start_point.column,
+        debug_assert!(text_rope.get_line(range.start_point.row).is_some());
+        debug_assert!(
+          text_rope
+            .line(range.start_point.row)
+            .try_byte_to_char(range.start_point.column)
+            .is_ok()
         );
+        let (start_line_idx, start_char_idx) =
+          convert_ts_point(text_rope, &range.start_point);
+        let key = SyntaxCaptureKey::new(start_line_idx, start_char_idx);
         nodes.entry(key).or_insert(vec![]);
+        let absolute_start_char_idx =
+          convert_ts_byte(text_rope, range.start_byte);
+        let absolute_end_char_idx = convert_ts_byte(text_rope, range.end_byte);
+        let (end_line_idx, end_char_idx) =
+          convert_ts_point(text_rope, &range.end_point);
         nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
           index,
           name.to_compact_string(),
-          range,
+          SyntaxCaptureRange {
+            start_char: absolute_start_char_idx,
+            end_char: absolute_end_char_idx,
+            start_point: SyntaxCapturePoint {
+              line_idx: start_line_idx,
+              char_idx: start_char_idx,
+            },
+            end_point: SyntaxCapturePoint {
+              line_idx: end_line_idx,
+              char_idx: end_char_idx,
+            },
+          },
         ));
       }
     }
@@ -601,8 +645,9 @@ pub async fn parse_and_query(
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
-  let (tree, editing_version, text_payload) =
+  let (tree, editing_version, text_rope, text_payload) =
     parse(parser, old_tree, pending_edits);
-  let highlight_capture = query(&tree, &text_payload, &highlight_query);
+  let highlight_capture =
+    query(&tree, &text_rope, &text_payload, &highlight_query);
   (tree, editing_version, highlight_capture)
 }

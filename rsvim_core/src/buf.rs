@@ -77,8 +77,8 @@ pub struct Buffer {
 arc_mutex_ptr!(Buffer);
 
 impl Buffer {
-  /// NOTE: This API should not be used to create new buffer, please use [`BufferManager`] APIs to
-  /// manage buffer instances.
+  /// NOTE: This API should not be used to create new buffer, please use
+  /// [`BufferManager`] APIs to manage buffer instances.
   pub fn _new(
     opts: BufferOptions,
     canvas_size: U16Size,
@@ -304,8 +304,8 @@ impl BufferManager {
       let file_extension = filename
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
-      let syntax = self.load_syntax_by_file_ext(&file_extension)?;
-      let colorscheme = self.colorscheme_manager.get(&self.color_name);
+      let syntax = self._load_syntax_by_file_ext(&file_extension)?;
+      let colorscheme = self.colorscheme();
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -343,7 +343,7 @@ impl BufferManager {
   pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let colorscheme = self.colorscheme_manager.get(&self.color_name);
+    let colorscheme = self.colorscheme();
     let buf = Buffer::_new(
       *self.global_local_options(),
       canvas_size,
@@ -392,7 +392,9 @@ impl BufferManager {
     buf_id
   }
 
-  fn load_syntax_by_file_ext(
+  /// NOTE: This API should never be used by external logic, it is been exposed
+  /// as `pub` API just for testing purpose.
+  pub fn _load_syntax_by_file_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
@@ -438,8 +440,8 @@ impl BufferManager {
           let file_extension = filename
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
-          let syntax = self.load_syntax_by_file_ext(&file_extension)?;
-          let colorscheme = self.colorscheme_manager.get(&self.color_name);
+          let syntax = self._load_syntax_by_file_ext(&file_extension)?;
+          let colorscheme = self.colorscheme();
 
           Ok(Buffer::_new(
             *self.global_local_options(),
@@ -580,6 +582,10 @@ impl BufferManager {
     } else {
       Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
     }
+  }
+
+  pub fn colorscheme(&self) -> Option<&ColorScheme> {
+    self.colorscheme_manager.get(&self.color_name)
   }
 }
 // Options }

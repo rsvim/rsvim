@@ -5,12 +5,17 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
+use crate::tests::buf::make_buffer_from_tmpfile_and_syntax;
 use crate::tests::buf::make_empty_buffer;
+use crate::tests::buf::make_syntax_and_colorscheme;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::make_canvas;
 use crate::tests::viewport::make_viewport;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use assert_fs::NamedTempFile;
+use assert_fs::prelude::FileTouch;
+use assert_fs::prelude::FileWriteStr;
 
 #[cfg(test)]
 mod tests_nowrap {
@@ -1952,6 +1957,57 @@ mod tests_wrap_linebreak_startcol {
       "换行选项都不 ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+}
+
+#[cfg(test)]
+mod tests_syntax_highlight_nowrap {
+  use super::*;
+
+  #[test]
+  fn new1() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "fn main() ",
+      "  println!",
+      "}         ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
