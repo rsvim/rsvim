@@ -414,6 +414,10 @@ fn parse_highlights(
           format!("{}={:?}", key, value).to_compact_string(),
         ));
       }
+    } else if key.as_str() != "ui" && key.as_str() != "palette" {
+      return Err(TheErr::LoadColorSchemeFailed(
+        format!("{}={:?}", key, value).to_compact_string(),
+      ));
     }
   }
 
