@@ -178,10 +178,7 @@ pub fn draw(
                 }
               }
 
-              let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-              if unicode_width > 1 {
-                let mut cell = Cell::with_symbol(unicode_symbol);
-
+              let set_hl = |cell: &mut Cell| {
                 if let Some(colorscheme_hl) = last_colorscheme_hl
                   && let Some(ref hl_capture) = last_hl_capture
                   && cap_point >= hl_capture.range.start_point
@@ -195,6 +192,12 @@ pub fn draw(
                   }
                   cell.set_attr(colorscheme_hl.attr);
                 }
+              };
+
+              let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
+              if unicode_width > 1 {
+                let mut cell = Cell::with_symbol(unicode_symbol);
+                set_hl(&mut cell);
 
                 // Unicode width > 1
                 let mut cells = vec![cell];
@@ -205,20 +208,7 @@ pub fn draw(
                 canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
-
-                if let Some(colorscheme_hl) = last_colorscheme_hl
-                  && let Some(ref hl_capture) = last_hl_capture
-                  && cap_point >= hl_capture.range.start_point
-                  && cap_point < hl_capture.range.end_point
-                {
-                  if let Some(fg) = colorscheme_hl.fg {
-                    cell.set_fg(fg);
-                  }
-                  if let Some(bg) = colorscheme_hl.bg {
-                    cell.set_bg(bg);
-                  }
-                  cell.set_attr(colorscheme_hl.attr);
-                }
+                set_hl(&mut cell);
 
                 // Unicode width = 1
                 canvas.frame_mut().set_cell(cell_upos, cell);
