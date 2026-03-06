@@ -14,9 +14,10 @@ mod parse_toml {
   fn default1() {
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
+    info!("cs:{:?}", cs);
 
-    assert!(cs.colors().get("ui.background").is_none());
-    assert!(cs.colors().get("ui.foreground").is_none());
+    assert!(cs.colors().get("ui.background").is_some());
+    assert!(cs.colors().get("ui.foreground").is_some());
 
     assert!(cs.highlights().get("boolean").is_some());
     assert!(cs.highlights().get("boolean").unwrap().bg.is_none());
