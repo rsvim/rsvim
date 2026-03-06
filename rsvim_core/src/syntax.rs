@@ -6,20 +6,13 @@ pub mod query;
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
-use crate::syntax::query::SyntaxCapturePoint;
-use crate::syntax::query::SyntaxCaptureRange;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 pub use edit::SyntaxEdit;
 pub use edit::SyntaxEditNew;
 pub use edit::SyntaxEditUpdate;
 use parking_lot::Mutex;
-pub use query::SyntaxCapture;
-pub use query::SyntaxCaptureArc;
-pub use query::SyntaxCaptureKey;
-pub use query::SyntaxCaptureMap;
-pub use query::SyntaxCaptureValue;
-pub use query::SyntaxQueryArc;
+pub use query::*;
 use ropey::Rope;
 use std::fmt::Debug;
 use std::ops::Range;
@@ -608,29 +601,50 @@ pub fn query(
         );
         let (start_line_idx, start_char_idx) =
           convert_ts_point(text_rope, &range.start_point);
-        let key = SyntaxCaptureKey::new(start_line_idx, start_char_idx);
-        nodes.entry(key).or_insert(vec![]);
+        let key = SyntaxCapturePoint {
+          line_idx: start_line_idx,
+          char_idx: start_char_idx,
+        };
+        nodes.entry(key).or_insert(SyntaxCaptureMultipleValues {
+          values: vec![],
+          max_end_char: None,
+          max_end_point: None,
+        });
         let absolute_start_char_idx =
           convert_ts_byte(text_rope, range.start_byte);
         let absolute_end_char_idx = convert_ts_byte(text_rope, range.end_byte);
         let (end_line_idx, end_char_idx) =
           convert_ts_point(text_rope, &range.end_point);
-        nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
+        let end_point = SyntaxCapturePoint {
+          line_idx: end_line_idx,
+          char_idx: end_char_idx,
+        };
+        let val = nodes.get_mut(&key).unwrap();
+        val.values.push(SyntaxCaptureValue {
           index,
-          name.to_compact_string(),
-          SyntaxCaptureRange {
+          name: name.to_compact_string(),
+          range: SyntaxCaptureRange {
             start_char: absolute_start_char_idx,
             end_char: absolute_end_char_idx,
             start_point: SyntaxCapturePoint {
               line_idx: start_line_idx,
               char_idx: start_char_idx,
             },
-            end_point: SyntaxCapturePoint {
-              line_idx: end_line_idx,
-              char_idx: end_char_idx,
-            },
+            end_point,
           },
-        ));
+        });
+        val.max_end_char = Some(
+          val
+            .max_end_char
+            .map(|c| std::cmp::max(c, absolute_end_char_idx))
+            .unwrap_or(absolute_end_char_idx),
+        );
+        val.max_end_point = Some(
+          val
+            .max_end_point
+            .map(|p| std::cmp::max(p, end_point))
+            .unwrap_or(end_point),
+        );
       }
     }
     Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))

@@ -38,9 +38,9 @@ futures = "0.3"
 geo = "0.32"
 git2 = "0.20"
 # heed = "0.20.5"
-icu = { version = "2" }
+icu = "2"
 itertools = "0.14"
-jiff = { version = "0.2" }
+jiff = "0.2"
 lexopt = "0.3"
 litemap = "0.8"
 log = { version = "0.4", features = [
@@ -64,7 +64,7 @@ serde = { version = "1", features = ["derive"] }
 # serde_json = "1"
 snmalloc-rs = "0.3"
 strum = "0.28"
-strum_macros = "0.27"
+strum_macros = "0.28"
 taffy = "0.9"
 thiserror = "2"
 tikv-jemallocator = "0.6"

@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use compact_str::CompactString;
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tree_sitter::Query;
@@ -9,33 +10,28 @@ use tree_sitter::Query;
 pub type SyntaxQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// Line (row) index and column (byte) index.
-pub struct SyntaxCaptureKey {
-  line_idx: usize,
-  char_idx: usize,
-}
-
-impl SyntaxCaptureKey {
-  pub fn new(line_idx: usize, char_idx: usize) -> Self {
-    Self { line_idx, char_idx }
-  }
-
-  pub fn line_idx(&self) -> usize {
-    self.line_idx
-  }
-
-  pub fn char_idx(&self) -> usize {
-    self.char_idx
-  }
-}
-
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCapturePoint {
   pub line_idx: usize,
   pub char_idx: usize,
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+impl Ord for SyntaxCapturePoint {
+  fn cmp(&self, other: &Self) -> Ordering {
+    match self.line_idx.cmp(&other.line_idx) {
+      Ordering::Equal => self.char_idx.cmp(&other.char_idx),
+      Ordering::Greater => Ordering::Greater,
+      Ordering::Less => Ordering::Less,
+    }
+  }
+}
+
+impl PartialOrd for SyntaxCapturePoint {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Convert [`tree_sitter::Range`] based bytes indexing into [`ropey::Rope`]
 /// based chars indexing, i.e. use [`ropey::Rope::byte_to_char`] API to
 /// transform byte index to char index.
@@ -46,36 +42,22 @@ pub struct SyntaxCaptureRange {
   pub end_point: SyntaxCapturePoint,
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
-  index: u32,
-  name: CompactString,
-  range: SyntaxCaptureRange,
+  pub index: u32,
+  pub name: CompactString,
+  pub range: SyntaxCaptureRange,
 }
 
-impl SyntaxCaptureValue {
-  pub fn new(
-    index: u32,
-    name: CompactString,
-    range: SyntaxCaptureRange,
-  ) -> Self {
-    Self { index, name, range }
-  }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn name(&self) -> &CompactString {
-    &self.name
-  }
-
-  pub fn range(&self) -> &SyntaxCaptureRange {
-    &self.range
-  }
+#[derive(Debug, Clone)]
+pub struct SyntaxCaptureMultipleValues {
+  pub values: Vec<SyntaxCaptureValue>,
+  pub max_end_char: Option<usize>,
+  pub max_end_point: Option<SyntaxCapturePoint>,
 }
 
-pub type SyntaxCaptureMap = FoldMap<SyntaxCaptureKey, Vec<SyntaxCaptureValue>>;
+pub type SyntaxCaptureMap =
+  FoldMap<SyntaxCapturePoint, SyntaxCaptureMultipleValues>;
 
 #[derive(Debug)]
 pub struct SyntaxCapture {

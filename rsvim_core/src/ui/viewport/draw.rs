@@ -2,14 +2,17 @@
 
 use crate::buf::text::Text;
 use crate::hl::ColorScheme;
+use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
-use crate::syntax::SyntaxCaptureKey;
+use crate::syntax::SyntaxCapturePoint;
+use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
 
+#[allow(unused)]
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
@@ -33,6 +36,9 @@ pub fn draw(
   let mut line_idx = viewport.start_line_idx();
 
   let mut buflines = text.rope().lines_at(line_idx);
+
+  let mut last_colorscheme_hl: Option<Highlight> = None;
+  let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -127,36 +133,59 @@ pub fn draw(
             //   the `好` char, the following 1 cell is `""` empty string.
 
             if unicode_width > 0 {
+              let cap_point = SyntaxCapturePoint { line_idx, char_idx };
+
               if let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && let Some(colorscheme) = colorscheme
-              {
-                let cap_key = SyntaxCaptureKey::new(line_idx, char_idx);
-                if syn_highlight_capture
+                && syn_highlight_capture
                   .as_ref()
                   .nodes()
-                  .contains_key(&cap_key)
-                {
-                  let cap_hls = syn_highlight_capture
-                    .as_ref()
-                    .nodes()
-                    .get(&cap_key)
-                    .unwrap();
-                  trace!("captured highlight, {:?}:{:?}", cap_key, cap_hls);
-                  for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
-                    let resolved_hl =
-                      colorscheme.highlights().get(cap_hl.name());
+                  .contains_key(&cap_point)
+              {
+                let hl_caps = syn_highlight_capture
+                  .as_ref()
+                  .nodes()
+                  .get(&cap_point)
+                  .unwrap();
+                trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
+                for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
+                  if let Some(hl) = colorscheme.highlights().get(&hl_cap.name) {
                     trace!(
                       "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
-                      cap_i, cap_hl, resolved_hl
+                      i_cap, hl_cap, hl
                     );
+                    let fg = colorscheme.resolve_fg(&hl.fg);
+                    let bg = colorscheme.resolve_bg(&hl.bg);
+                    last_colorscheme_hl = Some(Highlight {
+                      fg: Some(fg),
+                      bg: Some(bg),
+                      attr: hl.attr,
+                    });
+                    last_hl_capture = Some(hl_cap.clone());
+                    break;
                   }
                 }
               }
 
+              let set_hl = |cell: &mut Cell| {
+                if let Some(colorscheme_hl) = last_colorscheme_hl
+                  && let Some(ref hl_capture) = last_hl_capture
+                  && cap_point >= hl_capture.range.start_point
+                  && cap_point < hl_capture.range.end_point
+                {
+                  cell.set_fg(colorscheme_hl.fg.unwrap());
+                  cell.set_bg(colorscheme_hl.bg.unwrap());
+                  cell.set_attr(colorscheme_hl.attr);
+                  trace!("render cell:{:?}", cell);
+                }
+              };
+
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let cell = Cell::with_symbol(unicode_symbol);
+                let mut cell = Cell::with_symbol(unicode_symbol);
+                set_hl(&mut cell);
+
                 // Unicode width > 1
                 let mut cells = vec![cell];
                 cells.extend(
@@ -165,7 +194,9 @@ pub fn draw(
                 );
                 canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
-                let cell = Cell::with_symbol(unicode_symbol);
+                let mut cell = Cell::with_symbol(unicode_symbol);
+                set_hl(&mut cell);
+
                 // Unicode width = 1
                 canvas.frame_mut().set_cell(cell_upos, cell);
               };

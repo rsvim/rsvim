@@ -161,7 +161,6 @@ class Test(Cmd):
             aliases=[self._alias],
             help="cargo test",
         )
-        self.test_parser.add_argument("-F", "--all-features", action="store_true")
         self.test_parser.add_argument(
             "-NF", "--no-default-features", action="store_true"
         )
@@ -180,18 +179,16 @@ class Test(Cmd):
         if args.list_test:
             self.list()
         else:
-            self.test(args.name, args.all_features, args.no_default_features)
+            self.test(args.name, args.no_default_features)
 
-    def test(self, name, all_features, no_default_features) -> None:
+    def test(self, name, no_default_features) -> None:
         sccache()
         rustflags()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
 
-        if all_features:
-            cmd = f"{cmd} --all-features"
-        elif no_default_features:
+        if no_default_features:
             cmd = f"{cmd} --no-default-features"
 
         if len(name) == 0:

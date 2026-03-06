@@ -4,6 +4,8 @@ pub mod cell;
 pub mod cursor;
 
 #[cfg(test)]
+mod cell_tests;
+#[cfg(test)]
 mod cursor_tests;
 
 use crate::prelude::*;

@@ -189,11 +189,9 @@ pub static SCOPE_NAMES: Lazy<FoldSet<&'static str>> = Lazy::new(|| {
   .collect()
 });
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
-  pub id: CompactString,
-
   /// Foreground color.
   pub fg: Option<Color>,
 
@@ -358,12 +356,7 @@ fn parse_hl_as_table(
     attr.set(Attribute::Underlined);
   }
 
-  let hl = Highlight {
-    id: key.to_compact_string(),
-    fg,
-    bg,
-    attr,
-  };
+  let hl = Highlight { fg, bg, attr };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -382,12 +375,7 @@ fn parse_hl_as_str(
   let bg = colors.get("ui.background").copied();
   let attr = Attributes::none();
 
-  let hl = Highlight {
-    id: key.to_compact_string(),
-    fg,
-    bg,
-    attr,
-  };
+  let hl = Highlight { fg, bg, attr };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -454,46 +442,32 @@ impl ColorScheme {
     &self.colors
   }
 
-  fn assert_id(&self, id: &str) {
-    debug_assert!(!id.is_empty());
-    debug_assert!(!id.trim().is_empty());
-    debug_assert_eq!(id.trim(), id);
-    debug_assert!(!id.starts_with("."));
-    debug_assert!(!id.ends_with("."));
-  }
-
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
 
-  pub fn resolve_color(&self, id: &str, fallback: &str) -> Option<&Color> {
-    self.assert_id(id);
-    if SCOPE_NAMES.contains(id) {
-      match self.highlights.get(id) {
-        Some(hl) => match hl.fg {
-          Some(ref color) => Some(color),
-          None => self.colors.get(fallback),
-        },
-        None => self.colors.get(fallback),
-      }
-    } else {
-      match self.colors.get(id) {
-        Some(color) => Some(color),
-        None => self.colors.get(fallback),
-      }
-    }
+  pub fn resolve(&self, color: &Option<Color>, fallback: &str) -> Color {
+    color.unwrap_or(self.colors.get(fallback).copied().unwrap_or(Color::Reset))
   }
 
-  pub fn resolve_attributes(&self, id: &str) -> Option<&Attributes> {
-    self.assert_id(id);
-    if SCOPE_NAMES.contains(id) {
-      match self.highlights.get(id) {
-        Some(hl) => Some(&hl.attr),
-        None => None,
-      }
-    } else {
-      None
-    }
+  pub fn resolve_fg(&self, fg: &Option<Color>) -> Color {
+    fg.unwrap_or(
+      self
+        .colors
+        .get("ui.foreground")
+        .copied()
+        .unwrap_or(Color::Reset),
+    )
+  }
+
+  pub fn resolve_bg(&self, bg: &Option<Color>) -> Color {
+    bg.unwrap_or(
+      self
+        .colors
+        .get("ui.background")
+        .copied()
+        .unwrap_or(Color::Reset),
+    )
   }
 }
 
