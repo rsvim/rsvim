@@ -21,14 +21,12 @@ impl Ord for SyntaxCapturePoint {
       Ordering::Less
     } else if self.line_idx > other.line_idx {
       Ordering::Greater
+    } else if self.char_idx < other.char_idx {
+      Ordering::Less
+    } else if self.char_idx > other.char_idx {
+      Ordering::Greater
     } else {
-      if self.char_idx < other.char_idx {
-        Ordering::Less
-      } else if self.char_idx > other.char_idx {
-        Ordering::Greater
-      } else {
-        Ordering::Equal
-      }
+      Ordering::Equal
     }
   }
 }
