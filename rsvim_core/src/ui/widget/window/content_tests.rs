@@ -16,6 +16,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use crossterm::style::Color;
 
 #[cfg(test)]
 mod tests_nowrap {
@@ -2010,22 +2011,23 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
-    for (i, col) in row0.iter().enumerate() {
-      info!("row [0,{}]:{:?}", i, col);
+    let mut has_highlight_color = false;
+    for i in 0..4 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
     }
-    let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
-    for (i, col) in row1.iter().enumerate() {
-      info!("row [1,{}]:{:?}", i, col);
-    }
-    let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
-    for (i, col) in row2.iter().enumerate() {
-      info!("row [2,{}]:{:?}", i, col);
-    }
-    let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
-    for (i, col) in row3.iter().enumerate() {
-      info!("row [3,{}]:{:?}", i, col);
-    }
+    assert!(has_highlight_color);
   }
 
   #[test]
@@ -2072,22 +2074,23 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
-    for (i, col) in row0.iter().enumerate() {
-      info!("row [0,{}]:{:?}", i, col);
+    let mut has_highlight_color = false;
+    for i in 0..4 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
     }
-    let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
-    for (i, col) in row1.iter().enumerate() {
-      info!("row [1,{}]:{:?}", i, col);
-    }
-    let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
-    for (i, col) in row2.iter().enumerate() {
-      info!("row [2,{}]:{:?}", i, col);
-    }
-    let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
-    for (i, col) in row3.iter().enumerate() {
-      info!("row [3,{}]:{:?}", i, col);
-    }
+    assert!(has_highlight_color);
   }
 
   #[test]
@@ -2134,12 +2137,23 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{i},{}]:{:?}", j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
       }
     }
+    assert!(has_highlight_color);
   }
 
   #[test]
@@ -2186,10 +2200,20 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{i},{}]:{:?}", j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
       }
     }
   }
