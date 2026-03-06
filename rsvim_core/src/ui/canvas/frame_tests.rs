@@ -7,6 +7,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
+use itertools::Itertools;
 
 #[test]
 fn pos2range1() {
@@ -293,8 +294,15 @@ fn set_cells_at1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
-    let actual = frame
-      .set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
+    let actual = frame.set_cells_at(
+      input.0,
+      input
+        .1
+        .chars()
+        .map(Cell::with_char)
+        .collect_vec()
+        .into_iter(),
+    );
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
     assert!(actual.len() == input.1.len());
   }
