@@ -19,11 +19,7 @@ doctest = false
 
 [features]
 default = []
-locale = [
-  "dep:deno_core_icudata",
-  "jiff/tzdb-bundle-always",
-  "icu/compiled_data",
-]
+icudata = ["dep:deno_core_icudata", "icu/compiled_data"]
 typescript = [
   "dep:swc_atoms",
   "dep:swc_bundler",
@@ -53,6 +49,7 @@ typescript = [
   "dep:swc_trace_macro",
   "dep:swc_visit",
 ]
+tzdata = ["jiff/tzdb-bundle-always"]
 wasm = []
 
 [dependencies]

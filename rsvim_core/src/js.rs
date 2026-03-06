@@ -96,7 +96,7 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   static V8_INIT: Once = Once::new();
 
   V8_INIT.call_once(move || {
-    #[cfg(feature = "locale")]
+    #[cfg(feature = "icudata")]
     {
       v8::icu::set_common_data_77(deno_core_icudata::ICU_DATA).unwrap();
     }
