@@ -11,7 +11,6 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use crossterm::style::Attributes;
-use crossterm::style::Color;
 use std::convert::From;
 
 #[allow(unused)]
