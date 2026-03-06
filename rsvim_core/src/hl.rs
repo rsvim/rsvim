@@ -454,14 +454,6 @@ impl ColorScheme {
     &self.colors
   }
 
-  fn assert_id(&self, id: &str) {
-    debug_assert!(!id.is_empty());
-    debug_assert!(!id.trim().is_empty());
-    debug_assert_eq!(id.trim(), id);
-    debug_assert!(!id.starts_with("."));
-    debug_assert!(!id.ends_with("."));
-  }
-
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
