@@ -105,7 +105,7 @@ pub fn draw(
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.into_iter());
+            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
           col_idx += start_fills;
         }
 
@@ -218,7 +218,7 @@ pub fn draw(
                 }
                 canvas
                   .frame_mut()
-                  .set_cells_at(cell_upos, cells_buffer.into_iter());
+                  .set_cells_at(cell_upos, cells_buffer.clone().into_iter());
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
@@ -255,7 +255,7 @@ pub fn draw(
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.into_iter());
+            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
           col_idx += left_length;
         }
 
@@ -272,7 +272,7 @@ pub fn draw(
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.into_iter());
+            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
 
           col_idx += end_fills;
         }
@@ -302,7 +302,7 @@ pub fn draw(
     let cells_upos = point!(upos.x(), row_idx + upos.y());
     canvas
       .frame_mut()
-      .set_cells_at(cells_upos, cells_buffer.into_iter());
+      .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
     row_idx += 1;
   }
 }
