@@ -211,7 +211,7 @@ pub fn draw(
                 set_hl(&mut cell);
 
                 cells_buffer.push(cell);
-                for i in 0..(unicode_width - 1) {
+                for _i in 0..(unicode_width - 1) {
                   let mut cell = Cell::empty();
                   set_hl(&mut cell);
                   cells_buffer.push(cell);
