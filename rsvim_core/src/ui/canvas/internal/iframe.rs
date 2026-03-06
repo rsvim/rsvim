@@ -2,6 +2,8 @@
 
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
+use bumpalo::Bump;
+use bumpalo::collections::Vec as BumpVec;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -9,27 +11,62 @@ use compact_str::CompactString;
 #[cfg(test)]
 use compact_str::ToCompactString;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// Internal implementation for `Iframe`.
-pub struct Iframe {
+pub struct Iframe<'a> {
   size: U16Size,
-  cells: Vec<Cell>,
+  bump: Bump,
+  cells: BumpVec<'a, Cell>,
 
   /// Indicate what rows of the frame is dirty.
   ///
   /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
   /// TUI screen instead of the rows inside UI widget window.
-  dirty_rows: Vec<bool>,
+  dirty_rows: BumpVec<'a, bool>,
+}
+
+impl<'a> Clone for Iframe<'a> {
+  fn clone(&self) -> Self {
+    let bump = Bump::with_capacity(self.bump.allocated_bytes());
+    let mut cells = BumpVec::new_in(&bump);
+    cells.clone_from_slice(&self.cells);
+    let mut dirty_rows = BumpVec::new_in(&bump);
+    dirty_rows.clone_from_slice(&self.dirty_rows);
+    Self {
+      size: self.size,
+      bump,
+      cells,
+      dirty_rows,
+    }
+  }
+
+  fn clone_from(&mut self, source: &Self)
+  where
+    Self: [const] std::marker::Destruct,
+  {
+  }
 }
 
 impl Iframe {
   /// Make new frame.
   pub fn new(size: U16Size) -> Self {
     let n = size.height() as usize * size.width() as usize;
+    let bump = Bump::with_capacity(
+      n * std::mem::size_of::<Cell>() + n * std::mem::size_of::<bool>(),
+    );
+    let mut cells = BumpVec::new_in(&bump);
+    for _i in 0..n {
+      cells.push(Cell::default());
+    }
+    let mut dirty_rows = BumpVec::new_in(&bump);
+    for _i in 0..(size.height() as usize) {
+      dirty_rows.push(false);
+    }
     Iframe {
       size,
-      cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      bump,
+      cells,
+      dirty_rows,
     }
   }
 

@@ -42,8 +42,10 @@ pub fn draw(
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
-  // Try to allocate only once for each draw.
-  let bump = Bump::with_capacity((height as usize) * (width as usize));
+  // Try to allocate only once for each draw, in bytes not item count.
+  let bump = Bump::with_capacity(
+    (height as usize) * (width as usize) * std::mem::size_of::<Cell>(),
+  );
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
