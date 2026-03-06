@@ -2811,6 +2811,7 @@ dependencies = [
  "regex",
  "ropey",
  "serde",
+ "smallvec",
  "strum",
  "strum_macros",
  "swc_atoms",
