@@ -445,6 +445,30 @@ impl ColorScheme {
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
+
+  pub fn resolve(&self, color: &Option<Color>, fallback: &str) -> Color {
+    color.unwrap_or(self.colors.get(fallback).copied().unwrap_or(Color::Reset))
+  }
+
+  pub fn resolve_fg(&self, fg: &Option<Color>) -> Color {
+    fg.unwrap_or(
+      self
+        .colors
+        .get("ui.foreground")
+        .copied()
+        .unwrap_or(Color::Reset),
+    )
+  }
+
+  pub fn resolve_bg(&self, bg: &Option<Color>) -> Color {
+    bg.unwrap_or(
+      self
+        .colors
+        .get("ui.background")
+        .copied()
+        .unwrap_or(Color::Reset),
+    )
+  }
 }
 
 #[derive(Debug)]
