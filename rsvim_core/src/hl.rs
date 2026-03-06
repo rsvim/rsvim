@@ -483,6 +483,18 @@ impl ColorScheme {
       }
     }
   }
+
+  pub fn resolve_attributes(&self, id: &str) -> Option<&Attributes> {
+    self.assert_id(id);
+    if SCOPE_NAMES.contains(id) {
+      match self.highlights.get(id) {
+        Some(hl) => Some(&hl.attr),
+        None => None,
+      }
+    } else {
+      None
+    }
+  }
 }
 
 #[derive(Debug)]
