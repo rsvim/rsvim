@@ -16,6 +16,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use crossterm::style::Color;
 
 #[cfg(test)]
 mod tests_nowrap {
@@ -1967,7 +1968,7 @@ mod tests_syntax_highlight_nowrap {
   use super::*;
 
   #[test]
-  fn new1() {
+  fn new_nowrap1() {
     test_log_init();
 
     let terminal_size = size!(10, 10);
@@ -2010,5 +2011,211 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
+    for i in 0..4 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
+    }
+    assert!(has_highlight_color);
+  }
+
+  #[test]
+  fn new_nowrap2() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("你好，世界！");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "fn main() ",
+      "  println!",
+      "}         ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
+    for i in 0..4 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
+    }
+    assert!(has_highlight_color);
+  }
+
+  #[test]
+  fn new_wrap3() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "ync::Arc; ",
+      "fn main() ",
+      "{         ",
+      "  println!",
+      "(\"Hello, W",
+      "orld!\");  ",
+      "}         ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
+    for i in 0..10 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{i},{}]:{:?}", j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
+    }
+    assert!(has_highlight_color);
+  }
+
+  #[test]
+  fn new_wrap4() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("你好，世界！");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "ync::Arc; ",
+      "fn main() ",
+      "{         ",
+      "  println!",
+      "(\"你好，世",
+      "界！\");   ",
+      "}         ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    let mut has_highlight_color = false;
+    for i in 0..10 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{i},{}]:{:?}", j, col);
+        if *col.fg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if *col.bg() != Color::Reset {
+          has_highlight_color = true;
+        }
+        if !col.attrs().is_empty() {
+          has_highlight_color = true;
+        }
+      }
+    }
+    assert!(has_highlight_color);
   }
 }

@@ -9,7 +9,7 @@ fn default1() {
   assert_eq!(c.symbol(), "");
   assert_eq!(c.fg(), &Color::Reset);
   assert_eq!(c.bg(), &Color::Reset);
-  assert_eq!(c.attr(), &Attributes::default());
+  assert_eq!(c.attrs(), &Attributes::default());
 }
 
 #[test]
@@ -27,8 +27,8 @@ fn new1() {
   assert_eq!(c1.fg(), c2.fg());
   assert_eq!(c1.bg(), &Color::Reset);
   assert_eq!(c1.bg(), c2.bg());
-  assert_eq!(c1.attr(), &Attributes::default());
-  assert_eq!(c1.attr(), c2.attr());
+  assert_eq!(c1.attrs(), &Attributes::default());
+  assert_eq!(c1.attrs(), c2.attrs());
 }
 
 #[test]

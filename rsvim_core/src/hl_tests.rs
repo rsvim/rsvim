@@ -31,7 +31,7 @@ mod parse_toml {
       Some(Color::Magenta)
     );
     assert_eq!(
-      cs.highlights().get("boolean").unwrap().attr,
+      cs.highlights().get("boolean").unwrap().attrs,
       Attributes::none()
     );
 
@@ -46,7 +46,7 @@ mod parse_toml {
       Some(Color::Cyan)
     );
     assert_eq!(
-      cs.highlights().get("variable").unwrap().attr,
+      cs.highlights().get("variable").unwrap().attrs,
       Attributes::none()
     );
   }
@@ -88,7 +88,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none(),
+          attrs: Attributes::none(),
         }),
       ),
       (
@@ -104,7 +104,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none().with(Attribute::Bold),
+          attrs: Attributes::none().with(Attribute::Bold),
         }),
       ),
       ("carriage-return", None),
@@ -121,7 +121,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none()
+          attrs: Attributes::none()
             .with(Attribute::Bold)
             .with(Attribute::Italic)
             .with(Attribute::Underlined),
@@ -140,7 +140,7 @@ grey = "#c0c0c0"
             g: 0xff,
             b: 0x0,
           }),
-          attr: Attributes::none().with(Attribute::Italic),
+          attrs: Attributes::none().with(Attribute::Italic),
         }),
       ),
     ];
@@ -188,7 +188,7 @@ background = "#000000"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none(),
+          attrs: Attributes::none(),
         }),
       ),
       (
@@ -200,7 +200,7 @@ background = "#000000"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none().with(Attribute::Bold),
+          attrs: Attributes::none().with(Attribute::Bold),
         }),
       ),
       ("carriage-return", None),
@@ -217,7 +217,7 @@ background = "#000000"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none()
+          attrs: Attributes::none()
             .with(Attribute::Bold)
             .with(Attribute::Italic)
             .with(Attribute::Underlined),
@@ -228,7 +228,7 @@ background = "#000000"
         Some(Highlight {
           fg: Some(Color::Red),
           bg: Some(Color::Green),
-          attr: Attributes::none().with(Attribute::Italic),
+          attrs: Attributes::none().with(Attribute::Italic),
         }),
       ),
     ];
@@ -291,7 +291,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none(),
+          attrs: Attributes::none(),
         }),
       ),
       (
@@ -307,7 +307,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none().with(Attribute::Bold),
+          attrs: Attributes::none().with(Attribute::Bold),
         }),
       ),
       ("carriage-return", None),
@@ -324,7 +324,7 @@ grey = "#c0c0c0"
             g: 0x0,
             b: 0x0,
           }),
-          attr: Attributes::none()
+          attrs: Attributes::none()
             .with(Attribute::Bold)
             .with(Attribute::Italic)
             .with(Attribute::Underlined),
@@ -343,7 +343,7 @@ grey = "#c0c0c0"
             g: 0xff,
             b: 0x0,
           }),
-          attr: Attributes::none().with(Attribute::Italic),
+          attrs: Attributes::none().with(Attribute::Italic),
         }),
       ),
     ];

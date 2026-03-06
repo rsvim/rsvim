@@ -16,7 +16,7 @@ pub struct Cell {
   bg: Color,
 
   // Attributes: underline, bold, italic, etc.
-  attr: Attributes,
+  attrs: Attributes,
 }
 
 impl Cell {
@@ -61,13 +61,13 @@ impl Cell {
   }
 
   /// Get attributes.
-  pub fn attr(&self) -> &Attributes {
-    &self.attr
+  pub fn attrs(&self) -> &Attributes {
+    &self.attrs
   }
 
   /// Set attributes.
-  pub fn set_attr(&mut self, value: Attributes) {
-    self.attr = value;
+  pub fn set_attrs(&mut self, value: Attributes) {
+    self.attrs = value;
   }
 }
 
@@ -84,13 +84,13 @@ impl Cell {
     symbol: CompactString,
     fg: Color,
     bg: Color,
-    attr: Attributes,
+    attrs: Attributes,
   ) -> Self {
     Cell {
       symbol,
       fg,
       bg,
-      attr,
+      attrs,
     }
   }
 
@@ -100,7 +100,7 @@ impl Cell {
       symbol: " ".to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attr: Attributes::default(),
+      attrs: Attributes::default(),
     }
   }
 
@@ -110,7 +110,7 @@ impl Cell {
       symbol: CompactString::const_new(""),
       fg: Color::Reset,
       bg: Color::Reset,
-      attr: Attributes::default(),
+      attrs: Attributes::default(),
     }
   }
 
@@ -119,7 +119,7 @@ impl Cell {
       symbol: c.to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
-      attr: Attributes::default(),
+      attrs: Attributes::default(),
     }
   }
 
@@ -128,7 +128,7 @@ impl Cell {
       symbol: s,
       fg: Color::Reset,
       bg: Color::Reset,
-      attr: Attributes::default(),
+      attrs: Attributes::default(),
     }
   }
 }

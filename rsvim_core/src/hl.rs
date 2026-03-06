@@ -127,67 +127,74 @@ pub const VARIABLE_BUILTIN: &str = "variable.builtin";
 pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 
-pub static UI_NAMES: Lazy<FoldSet<&'static str>> =
-  Lazy::new(|| [FOREGROUND, BACKGROUND].into_iter().collect());
+pub static UI_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
+  Lazy::new(|| {
+    [FOREGROUND, BACKGROUND]
+      .into_iter()
+      .map(|i| (i, i))
+      .collect()
+  });
 
-pub static SCOPE_NAMES: Lazy<FoldSet<&'static str>> = Lazy::new(|| {
-  [
-    ATTRIBUTE,
-    BOOLEAN,
-    CARRIAGE_RETURN,
-    COMMENT,
-    COMMENT_DOCUMENTATION,
-    CONSTANT,
-    CONSTANT_BUILTIN,
-    CONSTRUCTOR,
-    CONSTRUCTOR_BUILTIN,
-    EMBEDDED,
-    ERROR,
-    ESCAPE,
-    FUNCTION,
-    FUNCTION_BUILTIN,
-    KEYWORD,
-    MARKUP,
-    MARKUP_BOLD,
-    MARKUP_HEADING,
-    MARKUP_ITALIC,
-    MARKUP_LINK,
-    MARKUP_LINK_URL,
-    MARKUP_LIST,
-    MARKUP_LIST_CHECKED,
-    MARKUP_LIST_NUMBERED,
-    MARKUP_LIST_UNCHECKED,
-    MARKUP_LIST_UNNUMBERED,
-    MARKUP_QUOTE,
-    MARKUP_RAW,
-    MARKUP_RAW_BLOCK,
-    MARKUP_RAW_INLINE,
-    MARKUP_STRIKETHROUGH,
-    MODULE,
-    NUMBER,
-    OPERATOR,
-    PROPERTY,
-    PROPERTY_BUILTIN,
-    PUNCTUATION,
-    PUNCTUATION_BRACKET,
-    PUNCTUATION_DELIMITER,
-    PUNCTUATION_SPECIAL,
-    STRING,
-    STRING_ESCAPE,
-    STRING_REGEXP,
-    STRING_SPECIAL,
-    STRING_SPECIAL_SYMBOL,
-    TAG,
-    TYPE,
-    TYPE_BUILTIN,
-    VARIABLE,
-    VARIABLE_BUILTIN,
-    VARIABLE_MEMBER,
-    VARIABLE_PARAMETER,
-  ]
-  .into_iter()
-  .collect()
-});
+pub static SCOPE_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
+  Lazy::new(|| {
+    [
+      ATTRIBUTE,
+      BOOLEAN,
+      CARRIAGE_RETURN,
+      COMMENT,
+      COMMENT_DOCUMENTATION,
+      CONSTANT,
+      CONSTANT_BUILTIN,
+      CONSTRUCTOR,
+      CONSTRUCTOR_BUILTIN,
+      EMBEDDED,
+      ERROR,
+      ESCAPE,
+      FUNCTION,
+      FUNCTION_BUILTIN,
+      KEYWORD,
+      MARKUP,
+      MARKUP_BOLD,
+      MARKUP_HEADING,
+      MARKUP_ITALIC,
+      MARKUP_LINK,
+      MARKUP_LINK_URL,
+      MARKUP_LIST,
+      MARKUP_LIST_CHECKED,
+      MARKUP_LIST_NUMBERED,
+      MARKUP_LIST_UNCHECKED,
+      MARKUP_LIST_UNNUMBERED,
+      MARKUP_QUOTE,
+      MARKUP_RAW,
+      MARKUP_RAW_BLOCK,
+      MARKUP_RAW_INLINE,
+      MARKUP_STRIKETHROUGH,
+      MODULE,
+      NUMBER,
+      OPERATOR,
+      PROPERTY,
+      PROPERTY_BUILTIN,
+      PUNCTUATION,
+      PUNCTUATION_BRACKET,
+      PUNCTUATION_DELIMITER,
+      PUNCTUATION_SPECIAL,
+      STRING,
+      STRING_ESCAPE,
+      STRING_REGEXP,
+      STRING_SPECIAL,
+      STRING_SPECIAL_SYMBOL,
+      TAG,
+      TYPE,
+      TYPE_BUILTIN,
+      VARIABLE,
+      VARIABLE_BUILTIN,
+      VARIABLE_MEMBER,
+      VARIABLE_PARAMETER,
+    ]
+    .into_iter()
+    .map(|i| (i, i))
+    .collect()
+  });
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
@@ -199,7 +206,7 @@ pub struct Highlight {
   pub bg: Option<Color>,
 
   /// Attributes: underlined, bold, italic, etc.
-  pub attr: Attributes,
+  pub attrs: Attributes,
 }
 
 #[derive(Debug, Clone)]
@@ -282,7 +289,7 @@ fn parse_colors(
     && let Some(ui_table) = ui.as_table()
   {
     for (key, value) in ui_table.iter() {
-      if !UI_NAMES.contains(key.as_str()) {
+      if !UI_NAMES.contains_key(key.as_str()) {
         return Err(TheErr::LoadColorSchemeFailed(
           format!("ui.{}={:?}", key, value).to_compact_string(),
         ));
@@ -345,18 +352,18 @@ fn parse_hl_as_table(
   let italic = parse_bool("italic")?;
   let underlined = parse_bool("underlined")?;
 
-  let mut attr = Attributes::none();
+  let mut attrs = Attributes::none();
   if bold {
-    attr.set(Attribute::Bold);
+    attrs.set(Attribute::Bold);
   }
   if italic {
-    attr.set(Attribute::Italic);
+    attrs.set(Attribute::Italic);
   }
   if underlined {
-    attr.set(Attribute::Underlined);
+    attrs.set(Attribute::Underlined);
   }
 
-  let hl = Highlight { fg, bg, attr };
+  let hl = Highlight { fg, bg, attrs };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -373,9 +380,9 @@ fn parse_hl_as_str(
   };
 
   let bg = colors.get("ui.background").copied();
-  let attr = Attributes::none();
+  let attrs = Attributes::none();
 
-  let hl = Highlight { fg, bg, attr };
+  let hl = Highlight { fg, bg, attrs };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -388,7 +395,7 @@ fn parse_highlights(
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
   for (key, value) in colorscheme.iter() {
-    if SCOPE_NAMES.contains(key.as_str()) {
+    if SCOPE_NAMES.contains_key(key.as_str()) {
       if value.is_table() {
         let (id, hl) =
           parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
