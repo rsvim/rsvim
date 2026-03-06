@@ -11,7 +11,7 @@ use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use std::convert::From;
 
-#[allow(unused_variables)]
+#[allow(unused)]
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
