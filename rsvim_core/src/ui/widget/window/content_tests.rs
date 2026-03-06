@@ -1975,7 +1975,7 @@ mod tests_syntax_highlight_nowrap {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2011,23 +2011,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_highlight_color = false;
-    for i in 0..4 {
+    let mut has_reset_color = false;
+    for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if *col.bg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if !col.attrs().is_empty() {
-          has_highlight_color = true;
+        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
+          has_reset_color = true;
         }
       }
     }
-    assert!(has_highlight_color);
+    assert!(!has_reset_color);
   }
 
   #[test]
@@ -2038,7 +2032,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2074,23 +2068,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_highlight_color = false;
-    for i in 0..4 {
+    let mut has_reset_color = false;
+    for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if *col.bg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if !col.attrs().is_empty() {
-          has_highlight_color = true;
+        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
+          has_reset_color = true;
         }
       }
     }
-    assert!(has_highlight_color);
+    assert!(!has_reset_color);
   }
 
   #[test]
@@ -2101,7 +2089,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2137,23 +2125,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_highlight_color = false;
+    let mut has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
-        info!("row [{i},{}]:{:?}", j, col);
-        if *col.fg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if *col.bg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if !col.attrs().is_empty() {
-          has_highlight_color = true;
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
+          has_reset_color = true;
         }
       }
     }
-    assert!(has_highlight_color);
+    assert!(!has_reset_color);
   }
 
   #[test]
@@ -2164,7 +2146,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2200,22 +2182,16 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_highlight_color = false;
+    let mut has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
-        info!("row [{i},{}]:{:?}", j, col);
-        if *col.fg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if *col.bg() != Color::Reset {
-          has_highlight_color = true;
-        }
-        if !col.attrs().is_empty() {
-          has_highlight_color = true;
+        info!("row [{},{}]:{:?}", i, j, col);
+        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
+          has_reset_color = true;
         }
       }
     }
-    assert!(has_highlight_color);
+    assert!(!has_reset_color);
   }
 }

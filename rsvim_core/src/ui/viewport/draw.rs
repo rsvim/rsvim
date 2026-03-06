@@ -10,9 +10,9 @@ use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
+use crossterm::style::Attributes;
 use std::convert::From;
 
-#[allow(unused)]
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
@@ -39,6 +39,14 @@ pub fn draw(
 
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
+
+  let set_bg = |cell: &mut Cell| {
+    if let Some(colorscheme) = colorscheme {
+      cell.set_fg(colorscheme.ui_foreground());
+      cell.set_bg(colorscheme.ui_background());
+      cell.set_attrs(Attributes::none());
+    }
+  };
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -84,9 +92,13 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          let cells = std::iter::repeat_n('>', start_fills as usize)
+          let mut cells = std::iter::repeat_n('>', start_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
+          for cell in cells.iter_mut() {
+            set_bg(cell);
+          }
+
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += start_fills;
@@ -177,14 +189,17 @@ pub fn draw(
                   cell.set_fg(colorscheme_hl.fg.unwrap());
                   cell.set_bg(colorscheme_hl.bg.unwrap());
                   cell.set_attrs(colorscheme_hl.attrs);
-                  trace!("render cell:{:?}", cell);
+                } else if let Some(colorscheme) = colorscheme {
+                  cell.set_fg(colorscheme.ui_foreground());
+                  cell.set_bg(colorscheme.ui_background());
+                  cell.set_attrs(Attributes::none());
                 }
+                trace!("set_hl:{:?}", cell);
               };
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let mut cell = Cell::with_symbol(unicode_symbol);
-                set_hl(&mut cell);
+                let cell = Cell::with_symbol(unicode_symbol);
 
                 // Unicode width > 1
                 let mut cells = vec![cell];
@@ -192,6 +207,9 @@ pub fn draw(
                   std::iter::repeat_n(Cell::empty(), unicode_width - 1)
                     .collect::<Vec<Cell>>(),
                 );
+                for cell in cells.iter_mut() {
+                  set_hl(cell);
+                }
                 canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
@@ -218,9 +236,13 @@ pub fn draw(
 
         if width > occupied_length {
           let left_length = width - occupied_length;
-          let cells = std::iter::repeat_n(' ', left_length as usize)
+          let mut cells = std::iter::repeat_n(' ', left_length as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
+          for cell in cells.iter_mut() {
+            set_bg(cell);
+          }
+
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += left_length;
@@ -228,9 +250,13 @@ pub fn draw(
 
         // Render end fills.
         if end_fills > 0 {
-          let cells = std::iter::repeat_n('<', end_fills as usize)
+          let mut cells = std::iter::repeat_n('<', end_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
+          for cell in cells.iter_mut() {
+            set_bg(cell);
+          }
+
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
 
@@ -251,9 +277,13 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    let cells = std::iter::repeat_n(' ', width as usize)
+    let mut cells = std::iter::repeat_n(' ', width as usize)
       .map(Cell::from)
       .collect::<Vec<_>>();
+    for cell in cells.iter_mut() {
+      set_bg(cell);
+    }
+
     let cells_upos = point!(upos.x(), row_idx + upos.y());
     canvas.frame_mut().set_cells_at(cells_upos, cells);
     row_idx += 1;
