@@ -467,7 +467,7 @@ impl ColorScheme {
   ) -> Option<Color> {
     match hl {
       Some(hl) => match hl.bg {
-        Some(fg) => Some(fg),
+        Some(bg) => Some(bg),
         None => self.colors.get(fallback).copied(),
       },
       None => self.colors.get(fallback).copied(),
