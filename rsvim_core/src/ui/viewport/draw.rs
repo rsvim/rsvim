@@ -1,5 +1,7 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
+use crossterm::style::Color;
+
 use crate::buf::text::Text;
 use crate::hl::ColorScheme;
 use crate::hl::Highlight;
@@ -155,21 +157,23 @@ pub fn draw(
                       "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                       i_cap, hl_cap, hl
                     );
-                    let fg = match hl.fg {
-                      Some(fg) => Some(fg),
-                      None => {
-                        colorscheme.colors().get("ui.foreground").copied()
-                      }
-                    };
-                    let bg = match hl.bg {
-                      Some(bg) => Some(bg),
-                      None => {
-                        colorscheme.colors().get("ui.background").copied()
-                      }
-                    };
+                    let fg = hl.fg.unwrap_or(
+                      colorscheme
+                        .colors()
+                        .get("ui.foreground")
+                        .copied()
+                        .unwrap_or(Color::Reset),
+                    );
+                    let bg = hl.bg.unwrap_or(
+                      colorscheme
+                        .colors()
+                        .get("ui.background")
+                        .copied()
+                        .unwrap_or(Color::Reset),
+                    );
                     last_colorscheme_hl = Some(Highlight {
-                      fg,
-                      bg,
+                      fg: Some(fg),
+                      bg: Some(bg),
                       attr: hl.attr,
                     });
                     last_hl_capture = Some(hl_cap.clone());
@@ -184,12 +188,8 @@ pub fn draw(
                   && cap_point >= hl_capture.range.start_point
                   && cap_point < hl_capture.range.end_point
                 {
-                  if let Some(fg) = colorscheme_hl.fg {
-                    cell.set_fg(fg);
-                  }
-                  if let Some(bg) = colorscheme_hl.bg {
-                    cell.set_bg(bg);
-                  }
+                  cell.set_fg(colorscheme_hl.fg.unwrap());
+                  cell.set_bg(colorscheme_hl.bg.unwrap());
                   cell.set_attr(colorscheme_hl.attr);
                 }
               };
