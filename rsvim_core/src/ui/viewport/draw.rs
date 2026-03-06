@@ -10,8 +10,9 @@ use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
+use bumpalo::Bump;
+use bumpalo::collections::Vec as BumpaloVec;
 use crossterm::style::Attributes;
-use smallvec::SmallVec;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -41,7 +42,9 @@ pub fn draw(
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
-  let mut cells_buffer: SmallVec<[Cell; 80]> = SmallVec::new();
+  // Try to allocate only once for each draw.
+  let bump = Bump::with_capacity((height as usize) * (width as usize));
+  let mut cells_buffer: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
