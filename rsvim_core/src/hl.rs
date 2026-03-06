@@ -464,20 +464,20 @@ impl ColorScheme {
     &self.highlights
   }
 
-  pub fn resolve_color(&self, id: &str, fallback: &str) -> Option<Color> {
+  pub fn resolve_color(&self, id: &str, fallback: &str) -> Option<&Color> {
     self.assert_id(id);
     if SCOPE_NAMES.contains(id) {
       match self.highlights.get(id) {
         Some(hl) => match hl.fg {
-          Some(color) => Some(color),
-          None => self.colors.get(fallback).copied(),
+          Some(ref color) => Some(color),
+          None => self.colors.get(fallback),
         },
-        None => self.colors.get(fallback).copied(),
+        None => self.colors.get(fallback),
       }
     } else {
       match self.colors.get(id) {
-        Some(color) => Some(*color),
-        None => self.colors.get(fallback).copied(),
+        Some(color) => Some(color),
+        None => self.colors.get(fallback),
       }
     }
   }
