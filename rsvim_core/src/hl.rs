@@ -374,8 +374,6 @@ fn parse_hl_as_str(
   palette: &FoldMap<CompactString, Color>,
   colors: &FoldMap<CompactString, Color>,
 ) -> TheResult<(CompactString, Highlight)> {
-  let id = format!("scope.{}", key).to_compact_string();
-
   let fg = match palette.get(value) {
     Some(fg) => Some(*fg),
     None => Some(parse_color(value, "scope.", key)?),
@@ -385,13 +383,13 @@ fn parse_hl_as_str(
   let attr = Attributes::none();
 
   let hl = Highlight {
-    id: id.clone(),
+    id: key.to_compact_string(),
     fg,
     bg,
     attr,
   };
-  trace!("id:{:?},hl:{:?}", id, hl);
-  Ok((id, hl))
+  trace!("id:{:?},hl:{:?}", key, hl);
+  Ok((key.to_compact_string(), hl))
 }
 
 fn parse_highlights(

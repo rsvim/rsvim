@@ -12,6 +12,8 @@ mod parse_toml {
 
   #[test]
   fn default1() {
+    test_log_init();
+
     let cs_manager = ColorSchemeManager::new();
     let cs = cs_manager.get(DEFAULT).unwrap();
     info!("cs:{:?}", cs);
