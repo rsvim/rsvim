@@ -9,6 +9,8 @@ use crate::syntax::SyntaxCapturePoint;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
+use crossterm::style::Attributes;
+use crossterm::style::Color;
 use std::convert::From;
 
 #[allow(unused)]
@@ -36,7 +38,7 @@ pub fn draw(
 
   let mut buflines = text.rope().lines_at(line_idx);
 
-  let mut last_hl: Option<&Highlight> = None;
+  let mut last_hl: Option<Highlight> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -154,7 +156,13 @@ pub fn draw(
                         "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                         cap_i, cap_hl, hl
                       );
-                      last_hl = Some(hl);
+                      let fg = colorscheme.resolve_fg(hl, "ui.foreground");
+                      let bg = colorscheme.resolve_bg(hl, "ui.background");
+                      last_hl = Some(Highlight {
+                        fg,
+                        bg,
+                        attr: hl.attr,
+                      });
                       break;
                     }
                   }
