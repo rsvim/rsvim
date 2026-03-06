@@ -83,7 +83,6 @@ grey = "#c0c0c0"
       (
         "attribute",
         Some(Highlight {
-          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -96,7 +95,6 @@ grey = "#c0c0c0"
       (
         "boolean",
         Some(Highlight {
-          id: "boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -114,7 +112,6 @@ grey = "#c0c0c0"
       (
         "comment",
         Some(Highlight {
-          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -134,7 +131,6 @@ grey = "#c0c0c0"
       (
         "keyword",
         Some(Highlight {
-          id: "keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -187,7 +183,6 @@ background = "#000000"
       (
         "attribute",
         Some(Highlight {
-          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -200,7 +195,6 @@ background = "#000000"
       (
         "boolean",
         Some(Highlight {
-          id: "boolean".to_compact_string(),
           fg: Some(Color::Yellow),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -214,7 +208,6 @@ background = "#000000"
       (
         "comment",
         Some(Highlight {
-          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -234,7 +227,6 @@ background = "#000000"
       (
         "keyword",
         Some(Highlight {
-          id: "keyword".to_compact_string(),
           fg: Some(Color::Red),
           bg: Some(Color::Green),
           attr: Attributes::none().with(Attribute::Italic),
@@ -294,7 +286,6 @@ grey = "#c0c0c0"
       (
         "attribute",
         Some(Highlight {
-          id: "attribute".to_compact_string(),
           fg: Some(Color::White),
           bg: Some(Color::Rgb {
             r: 0x0,
@@ -307,7 +298,6 @@ grey = "#c0c0c0"
       (
         "boolean",
         Some(Highlight {
-          id: "boolean".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
@@ -325,7 +315,6 @@ grey = "#c0c0c0"
       (
         "comment",
         Some(Highlight {
-          id: "comment".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xc0,
             g: 0xc0,
@@ -345,7 +334,6 @@ grey = "#c0c0c0"
       (
         "keyword",
         Some(Highlight {
-          id: "keyword".to_compact_string(),
           fg: Some(Color::Rgb {
             r: 0xff,
             g: 0xff,
