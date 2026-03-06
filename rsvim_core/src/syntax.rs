@@ -16,7 +16,6 @@ pub use edit::SyntaxEditUpdate;
 use parking_lot::Mutex;
 pub use query::SyntaxCapture;
 pub use query::SyntaxCaptureArc;
-pub use query::SyntaxCaptureKey;
 pub use query::SyntaxCaptureMap;
 pub use query::SyntaxCaptureValue;
 pub use query::SyntaxQueryArc;
