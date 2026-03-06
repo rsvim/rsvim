@@ -1,7 +1,6 @@
 use super::hl::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
