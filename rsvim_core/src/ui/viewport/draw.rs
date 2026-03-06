@@ -44,7 +44,7 @@ pub fn draw(
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
-      cell.set_fg(Color::Reset);
+      cell.set_fg(colorscheme.ui_foreground());
       cell.set_bg(colorscheme.ui_background());
       cell.set_attrs(Attributes::none());
     }
