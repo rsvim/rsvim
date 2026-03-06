@@ -39,7 +39,7 @@ impl PartialOrd for SyntaxCapturePoint {
   }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Convert [`tree_sitter::Range`] based bytes indexing into [`ropey::Rope`]
 /// based chars indexing, i.e. use [`ropey::Rope::byte_to_char`] API to
 /// transform byte index to char index.
@@ -50,17 +50,22 @@ pub struct SyntaxCaptureRange {
   pub end_point: SyntaxCapturePoint,
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
   pub index: u32,
   pub name: CompactString,
   pub range: SyntaxCaptureRange,
-  pub max_end_char: usize,
-  pub max_end_point: SyntaxCapturePoint,
+}
+
+#[derive(Debug, Clone)]
+pub struct SyntaxCaptureMultipleValues {
+  pub values: Vec<SyntaxCaptureValue>,
+  pub max_end_char: Option<usize>,
+  pub max_end_point: Option<SyntaxCapturePoint>,
 }
 
 pub type SyntaxCaptureMap =
-  FoldMap<SyntaxCapturePoint, Vec<SyntaxCaptureValue>>;
+  FoldMap<SyntaxCapturePoint, SyntaxCaptureMultipleValues>;
 
 #[derive(Debug)]
 pub struct SyntaxCapture {
