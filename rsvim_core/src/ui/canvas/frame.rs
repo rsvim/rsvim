@@ -184,20 +184,24 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I)
+  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I) -> Vec<Cell>
   where
     I: ExactSizeIterator<Item = Cell>,
   {
-    self.iframe.set_cells_at(pos, cells);
+    self.iframe.set_cells_at(pos, cells)
   }
 
   /// Try set (replace) cells at a range, non-panic version of
   /// [`set_cells_at`](Frame::set_cells_at).
-  pub fn try_set_cells_at<I>(&mut self, pos: U16Pos, cells: I)
+  pub fn try_set_cells_at<I>(
+    &mut self,
+    pos: U16Pos,
+    cells: I,
+  ) -> Option<Vec<Cell>>
   where
     I: ExactSizeIterator<Item = Cell>,
   {
-    self.iframe.try_set_cells_at(pos, cells);
+    self.iframe.try_set_cells_at(pos, cells)
   }
 
   /// Set (replace) empty cells at a range.
