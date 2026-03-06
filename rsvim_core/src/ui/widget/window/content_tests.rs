@@ -2216,5 +2216,6 @@ fn main() {
         }
       }
     }
+    assert!(has_highlight_color);
   }
 }
