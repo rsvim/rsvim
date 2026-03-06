@@ -607,17 +607,20 @@ pub fn query(
         );
         let (start_line_idx, start_char_idx) =
           convert_ts_point(text_rope, &range.start_point);
-        let key = SyntaxCaptureKey::new(start_line_idx, start_char_idx);
+        let key = SyntaxCapturePoint {
+          line_idx: start_line_idx,
+          char_idx: start_char_idx,
+        };
         nodes.entry(key).or_insert(vec![]);
         let absolute_start_char_idx =
           convert_ts_byte(text_rope, range.start_byte);
         let absolute_end_char_idx = convert_ts_byte(text_rope, range.end_byte);
         let (end_line_idx, end_char_idx) =
           convert_ts_point(text_rope, &range.end_point);
-        nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue::new(
+        nodes.get_mut(&key).unwrap().push(SyntaxCaptureValue {
           index,
-          name.to_compact_string(),
-          SyntaxCaptureRange {
+          name: name.to_compact_string(),
+          range: SyntaxCaptureRange {
             start_char: absolute_start_char_idx,
             end_char: absolute_end_char_idx,
             start_point: SyntaxCapturePoint {
@@ -629,7 +632,12 @@ pub fn query(
               char_idx: end_char_idx,
             },
           },
-        ));
+          max_end_char: 0,
+          max_end_point: SyntaxCapturePoint {
+            line_idx: end_line_idx,
+            char_idx: end_char_idx,
+          },
+        });
       }
     }
     Some(SyntaxCapture::to_arc(SyntaxCapture::new(nodes)))
