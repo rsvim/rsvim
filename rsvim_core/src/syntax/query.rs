@@ -10,27 +10,6 @@ use tree_sitter::Query;
 pub type SyntaxQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// Line (row) index and column (byte) index.
-pub struct SyntaxCaptureKey {
-  line_idx: usize,
-  char_idx: usize,
-}
-
-impl SyntaxCaptureKey {
-  pub fn new(line_idx: usize, char_idx: usize) -> Self {
-    Self { line_idx, char_idx }
-  }
-
-  pub fn line_idx(&self) -> usize {
-    self.line_idx
-  }
-
-  pub fn char_idx(&self) -> usize {
-    self.char_idx
-  }
-}
-
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCapturePoint {
   pub line_idx: usize,
   pub char_idx: usize,
@@ -56,19 +35,7 @@ impl Ord for SyntaxCapturePoint {
 
 impl PartialOrd for SyntaxCapturePoint {
   fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-    if self.line_idx < other.line_idx {
-      Some(Ordering::Less)
-    } else if self.line_idx > other.line_idx {
-      Some(Ordering::Greater)
-    } else {
-      if self.char_idx < other.char_idx {
-        Some(Ordering::Less)
-      } else if self.char_idx > other.char_idx {
-        Some(Ordering::Greater)
-      } else {
-        Some(Ordering::Equal)
-      }
-    }
+    Some(self.cmp(other))
   }
 }
 
@@ -85,38 +52,15 @@ pub struct SyntaxCaptureRange {
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCaptureValue {
-  index: u32,
-  name: CompactString,
-  range: SyntaxCaptureRange,
-  max_end_char: usize,
-  max_end_point: SyntaxCapturePoint,
+  pub index: u32,
+  pub name: CompactString,
+  pub range: SyntaxCaptureRange,
+  pub max_end_char: usize,
+  pub max_end_point: SyntaxCapturePoint,
 }
 
-impl SyntaxCaptureValue {
-  pub fn new(
-    index: u32,
-    name: CompactString,
-    range: SyntaxCaptureRange,
-    max_end_char: usize,
-    max_end_point: SyntaxCapturePoint,
-  ) -> Self {
-    Self { index, name, range }
-  }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn name(&self) -> &CompactString {
-    &self.name
-  }
-
-  pub fn range(&self) -> &SyntaxCaptureRange {
-    &self.range
-  }
-}
-
-pub type SyntaxCaptureMap = FoldMap<SyntaxCaptureKey, Vec<SyntaxCaptureValue>>;
+pub type SyntaxCaptureMap =
+  FoldMap<SyntaxCapturePoint, Vec<SyntaxCaptureValue>>;
 
 #[derive(Debug)]
 pub struct SyntaxCapture {
