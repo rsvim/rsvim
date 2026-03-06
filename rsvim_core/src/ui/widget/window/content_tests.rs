@@ -2019,4 +2019,58 @@ fn main() {
     let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
     info!("row-3:{:?}", row3);
   }
+
+  #[test]
+  fn new2() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("你好，世界！");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "fn main() ",
+      "  println!",
+      "}         ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
+    info!("row-0:{:?}", row0);
+    let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
+    info!("row-1:{:?}", row1);
+    let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
+    info!("row-2:{:?}", row2);
+    let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
+    info!("row-3:{:?}", row3);
+  }
 }
