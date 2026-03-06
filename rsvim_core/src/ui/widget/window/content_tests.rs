@@ -2089,4 +2089,108 @@ fn main() {
       info!("row [3,{}]:{:?}", i, col);
     }
   }
+
+  #[test]
+  fn new_wrap3() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "ync::Arc; ",
+      "fn main() ",
+      "{         ",
+      "  println!",
+      "(\"Hello, ",
+      "World!\");",
+      "}         ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    for i in 0..10 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{i},{}]:{:?}", j, col);
+      }
+    }
+  }
+
+  #[test]
+  fn new_wrap4() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowOptionsBuilder::default().build().unwrap();
+
+    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("你好，世界！");
+}
+"###,
+      )
+      .unwrap();
+
+    let (syntax, colorscheme) = make_syntax_and_colorscheme(&tmpfile);
+    let buffer = make_buffer_from_tmpfile_and_syntax(
+      terminal_size,
+      buf_opts,
+      &tmpfile,
+      syntax,
+      colorscheme,
+    );
+    let expect = vec![
+      "use std::s",
+      "ync::Arc; ",
+      "fn main() ",
+      "{         ",
+      "  println!",
+      "(\"你好， ",
+      "世界！\");",
+      "}         ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+    for i in 0..10 {
+      let row = actual.frame().get_cells_at(point!(0, i), 10);
+      for (j, col) in row.iter().enumerate() {
+        info!("row [{i},{}]:{:?}", j, col);
+      }
+    }
+  }
 }
