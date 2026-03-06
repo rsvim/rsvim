@@ -12,6 +12,7 @@ use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
+use std::iter::ExactSizeIterator;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -183,18 +184,20 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
-    self.iframe.set_cells_at(pos, cells)
+  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I)
+  where
+    I: ExactSizeIterator<Item = Cell>,
+  {
+    self.iframe.set_cells_at(pos, cells);
   }
 
   /// Try set (replace) cells at a range, non-panic version of
   /// [`set_cells_at`](Frame::set_cells_at).
-  pub fn try_set_cells_at(
-    &mut self,
-    pos: U16Pos,
-    cells: Vec<Cell>,
-  ) -> Option<Vec<Cell>> {
-    self.iframe.try_set_cells_at(pos, cells)
+  pub fn try_set_cells_at<I>(&mut self, pos: U16Pos, cells: I)
+  where
+    I: ExactSizeIterator<Item = Cell>,
+  {
+    self.iframe.try_set_cells_at(pos, cells);
   }
 
   /// Set (replace) empty cells at a range.
@@ -202,18 +205,14 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
+  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
     self.iframe.set_empty_cells_at(pos, n)
   }
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Frame::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(
-    &mut self,
-    pos: U16Pos,
-    n: usize,
-  ) -> Option<Vec<Cell>> {
-    self.iframe.try_set_empty_cells_at(pos, n)
+  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
+    self.iframe.try_set_empty_cells_at(pos, n);
   }
 
   /// Get dirty rows.
