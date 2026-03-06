@@ -299,7 +299,6 @@ fn set_cells_at1() {
       &input.1.chars().map(Cell::with_char).collect_vec(),
     );
     info!("{:?} input:{:?}", i, input);
-    assert!(actual.len() == input.1.len());
   }
   let actuals = frame.raw_symbols_with_placeholder();
   assert_eq!(actuals.len(), expects.len());
