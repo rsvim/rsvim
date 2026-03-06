@@ -72,6 +72,8 @@ pub const RESET_COLOR: Color = Color::Reset;
 // "ui."
 pub const FOREGROUND: &str = "foreground";
 pub const BACKGROUND: &str = "background";
+pub const UI_FOREGROUND: &str = "ui.foreground";
+pub const UI_BACKGROUND: &str = "ui.background";
 
 // "scope."
 pub const ATTRIBUTE: &str = "attribute";
@@ -334,8 +336,8 @@ fn parse_hl_as_table(
     }
   };
 
-  let fg = parse_color("fg", "ui.foreground")?;
-  let bg = parse_color("bg", "ui.background")?;
+  let fg = parse_color("fg", UI_FOREGROUND)?;
+  let bg = parse_color("bg", UI_BACKGROUND)?;
 
   let parse_bool = |x| -> TheResult<bool> {
     match value.get(x) {
@@ -379,7 +381,7 @@ fn parse_hl_as_str(
     None => Some(parse_color(value, "scope.", key)?),
   };
 
-  let bg = colors.get("ui.background").copied();
+  let bg = colors.get(UI_BACKGROUND).copied();
   let attrs = Attributes::none();
 
   let hl = Highlight { fg, bg, attrs };
@@ -457,24 +459,28 @@ impl ColorScheme {
     color.unwrap_or(self.colors.get(fallback).copied().unwrap_or(Color::Reset))
   }
 
+  pub fn ui_foreground(&self) -> Color {
+    self
+      .colors
+      .get(UI_FOREGROUND)
+      .copied()
+      .unwrap_or(Color::Reset)
+  }
+
+  pub fn ui_background(&self) -> Color {
+    self
+      .colors
+      .get(UI_BACKGROUND)
+      .copied()
+      .unwrap_or(Color::Reset)
+  }
+
   pub fn resolve_fg(&self, fg: &Option<Color>) -> Color {
-    fg.unwrap_or(
-      self
-        .colors
-        .get("ui.foreground")
-        .copied()
-        .unwrap_or(Color::Reset),
-    )
+    fg.unwrap_or(self.ui_foreground())
   }
 
   pub fn resolve_bg(&self, bg: &Option<Color>) -> Color {
-    bg.unwrap_or(
-      self
-        .colors
-        .get("ui.background")
-        .copied()
-        .unwrap_or(Color::Reset),
-    )
+    bg.unwrap_or(self.ui_background())
   }
 }
 
