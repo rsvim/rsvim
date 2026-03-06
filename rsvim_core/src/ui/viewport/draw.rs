@@ -2,12 +2,15 @@
 
 use crate::buf::text::Text;
 use crate::hl::ColorScheme;
+use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxCaptureKey;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
+use crossterm::style::Attributes;
+use crossterm::style::Color;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -33,6 +36,11 @@ pub fn draw(
   let mut line_idx = viewport.start_line_idx();
 
   let mut buflines = text.rope().lines_at(line_idx);
+
+  let mut hl: Option<&Highlight> = None;
+  let mut fg: Option<&Color> = None;
+  let mut bg: Option<&Color> = None;
+  let mut attrs: Option<&Attributes> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {

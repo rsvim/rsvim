@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use compact_str::CompactString;
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tree_sitter::Query;
@@ -35,6 +36,42 @@ pub struct SyntaxCapturePoint {
   pub char_idx: usize,
 }
 
+impl Ord for SyntaxCapturePoint {
+  fn cmp(&self, other: &Self) -> Ordering {
+    if self.line_idx < other.line_idx {
+      Ordering::Less
+    } else if self.line_idx > other.line_idx {
+      Ordering::Greater
+    } else {
+      if self.char_idx < other.char_idx {
+        Ordering::Less
+      } else if self.char_idx > other.char_idx {
+        Ordering::Greater
+      } else {
+        Ordering::Equal
+      }
+    }
+  }
+}
+
+impl PartialOrd for SyntaxCapturePoint {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    if self.line_idx < other.line_idx {
+      Some(Ordering::Less)
+    } else if self.line_idx > other.line_idx {
+      Some(Ordering::Greater)
+    } else {
+      if self.char_idx < other.char_idx {
+        Some(Ordering::Less)
+      } else if self.char_idx > other.char_idx {
+        Some(Ordering::Greater)
+      } else {
+        Some(Ordering::Equal)
+      }
+    }
+  }
+}
+
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 /// Convert [`tree_sitter::Range`] based bytes indexing into [`ropey::Rope`]
 /// based chars indexing, i.e. use [`ropey::Rope::byte_to_char`] API to
@@ -51,6 +88,8 @@ pub struct SyntaxCaptureValue {
   index: u32,
   name: CompactString,
   range: SyntaxCaptureRange,
+  max_end_char: usize,
+  max_end_point: SyntaxCapturePoint,
 }
 
 impl SyntaxCaptureValue {
@@ -58,6 +97,8 @@ impl SyntaxCaptureValue {
     index: u32,
     name: CompactString,
     range: SyntaxCaptureRange,
+    max_end_char: usize,
+    max_end_point: SyntaxCapturePoint,
   ) -> Self {
     Self { index, name, range }
   }
