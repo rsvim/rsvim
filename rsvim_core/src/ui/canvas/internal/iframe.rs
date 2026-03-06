@@ -3,16 +3,13 @@
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
 use std::iter::ExactSizeIterator;
-use std::iter::IntoIterator;
 use std::ops::Range;
-use std::vec::Splice;
 
 #[cfg(test)]
 use compact_str::CompactString;
 #[cfg(test)]
 use compact_str::ToCompactString;
 use itertools::Itertools;
-use litemap::store::StoreIntoIterator;
 
 #[derive(Debug, Clone)]
 /// Internal implementation for `Iframe`.
