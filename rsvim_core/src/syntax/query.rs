@@ -17,16 +17,10 @@ pub struct SyntaxCapturePoint {
 
 impl Ord for SyntaxCapturePoint {
   fn cmp(&self, other: &Self) -> Ordering {
-    if self.line_idx < other.line_idx {
-      Ordering::Less
-    } else if self.line_idx > other.line_idx {
-      Ordering::Greater
-    } else if self.char_idx < other.char_idx {
-      Ordering::Less
-    } else if self.char_idx > other.char_idx {
-      Ordering::Greater
+    if self.line_idx != other.line_idx {
+      self.line_idx.cmp(&other.line_idx)
     } else {
-      Ordering::Equal
+      self.char_idx.cmp(&other.char_idx)
     }
   }
 }
