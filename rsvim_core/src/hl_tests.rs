@@ -22,7 +22,11 @@ mod parse_toml {
     assert!(cs.colors().get("ui.foreground").is_some());
 
     assert!(cs.highlights().get("boolean").is_some());
-    assert!(cs.highlights().get("boolean").unwrap().bg.is_none());
+    info!("boolean:{:?}", cs.highlights().get("boolean"));
+    assert_eq!(
+      cs.highlights().get("boolean").unwrap().bg,
+      Some(Color::Black)
+    );
     assert_eq!(
       cs.highlights().get("boolean").unwrap().fg,
       Some(Color::Magenta)
@@ -33,7 +37,11 @@ mod parse_toml {
     );
 
     assert!(cs.highlights().get("variable").is_some());
-    assert!(cs.highlights().get("variable").unwrap().bg.is_none());
+    info!("variable:{:?}", cs.highlights().get("variable"));
+    assert_eq!(
+      cs.highlights().get("variable").unwrap().bg,
+      Some(Color::Black)
+    );
     assert_eq!(
       cs.highlights().get("variable").unwrap().fg,
       Some(Color::Cyan)
