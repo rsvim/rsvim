@@ -11,7 +11,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use bumpalo::Bump;
-use bumpalo::collections::Vec as BumpaloVec;
+use bumpalo::collections::Vec as BumpVec;
 use crossterm::style::Attributes;
 use std::convert::From;
 
@@ -97,7 +97,7 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          let mut cells: BumpVec<Cell> = BumpVec::new_in(&bump);
           std::iter::repeat_n('>', start_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
             set_bg(&mut cell);
@@ -206,7 +206,7 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+                let mut cells: BumpVec<Cell> = BumpVec::new_in(&bump);
 
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
@@ -245,7 +245,7 @@ pub fn draw(
           (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          let mut cells: BumpVec<Cell> = BumpVec::new_in(&bump);
 
           let left_length = width - occupied_length;
           std::iter::repeat_n(' ', left_length as usize).for_each(|ch| {
@@ -263,7 +263,7 @@ pub fn draw(
 
         // Render end fills.
         if end_fills > 0 {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          let mut cells: BumpVec<Cell> = BumpVec::new_in(&bump);
 
           std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
@@ -293,7 +293,7 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+    let mut cells: BumpVec<Cell> = BumpVec::new_in(&bump);
 
     std::iter::repeat_n(' ', width as usize).for_each(|ch| {
       let mut cell = Cell::from(ch);
