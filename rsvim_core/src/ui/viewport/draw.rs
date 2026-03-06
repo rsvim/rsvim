@@ -5,7 +5,7 @@ use crate::hl::ColorScheme;
 use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
-use crate::syntax::SyntaxCaptureKey;
+use crate::syntax::SyntaxCapturePoint;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
@@ -139,7 +139,7 @@ pub fn draw(
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && let Some(colorscheme) = colorscheme
               {
-                let cap_key = SyntaxCaptureKey::new(line_idx, char_idx);
+                let cap_key = SyntaxCapturePoint { line_idx, char_idx };
                 if syn_highlight_capture
                   .as_ref()
                   .nodes()
@@ -151,9 +151,9 @@ pub fn draw(
                     .get(&cap_key)
                     .unwrap();
                   trace!("captured highlight, {:?}:{:?}", cap_key, cap_hls);
-                  for (cap_i, cap_hl) in cap_hls.iter().enumerate() {
+                  for (cap_i, cap_hl) in cap_hls.values.iter().enumerate() {
                     let resolved_hl =
-                      colorscheme.highlights().get(cap_hl.name());
+                      colorscheme.highlights().get(&cap_hl.name);
                     trace!(
                       "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                       cap_i, cap_hl, resolved_hl
