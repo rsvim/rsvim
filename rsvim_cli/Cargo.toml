@@ -15,9 +15,9 @@ rust-version.workspace = true
 version.workspace = true
 
 [features]
-default = ["typescript", "wasm", "icudata"]
-icudata = ["rsvim_core/icudata"]
+default = ["typescript", "wasm", "locale"]
 jemalloc = ["dep:tikv-jemallocator"]
+locale = ["rsvim_core/locale"]
 mimalloc = ["dep:mimalloc-safe"]
 snmalloc = ["dep:snmalloc-rs"]
 typescript = ["rsvim_core/typescript"]

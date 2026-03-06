@@ -19,7 +19,7 @@ doctest = false
 
 [features]
 default = []
-icudata = [
+locale = [
   "dep:deno_core_icudata",
   "jiff/tzdb-bundle-always",
   "icu/compiled_data",
