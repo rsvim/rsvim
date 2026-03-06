@@ -274,11 +274,7 @@ impl Iframe {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_empty_cells_at(
-    &mut self,
-    pos: U16Pos,
-    n: usize,
-  ) -> Option<Vec<Cell>> {
+  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
     self.set_cells_at(pos, vec![Cell::empty(); n].into_iter())
   }
 
