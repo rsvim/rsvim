@@ -9,7 +9,6 @@ use std::ops::Range;
 use compact_str::CompactString;
 #[cfg(test)]
 use compact_str::ToCompactString;
-use itertools::Itertools;
 
 #[derive(Debug, Clone)]
 /// Internal implementation for `Iframe`.
@@ -264,7 +263,7 @@ impl Iframe {
       //   pos.y(),
       //   end_at.y() + 1
       // );
-      Some(self.cells.splice(range, cells).collect_vec())
+      Some(self.cells.splice(range, cells).collect())
     } else {
       None
     }
