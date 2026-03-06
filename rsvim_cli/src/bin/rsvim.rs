@@ -3,22 +3,15 @@
 //! See [rsvim_core] for more details.
 
 #[cfg(all(
-  feature = "snmalloc",
-  not(any(feature = "mimalloc", feature = "jemalloc"))
-))]
-#[global_allocator]
-static ALLOC: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
-
-#[cfg(all(
   feature = "mimalloc",
-  not(any(feature = "snmalloc", feature = "jemalloc"))
+  not(any(feature = "jemalloc"))
 ))]
 #[global_allocator]
 static GLOBAL: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 
 #[cfg(all(
   feature = "jemalloc",
-  not(any(target_env = "msvc", feature = "mimalloc", feature = "snmalloc"))
+  not(any(target_env = "msvc", feature = "mimalloc"))
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
