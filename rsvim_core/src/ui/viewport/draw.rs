@@ -189,12 +189,12 @@ pub fn draw(
                   cell.set_fg(colorscheme_hl.fg.unwrap());
                   cell.set_bg(colorscheme_hl.bg.unwrap());
                   cell.set_attrs(colorscheme_hl.attrs);
-                  trace!("set_hl:{:?}", cell);
                 } else if let Some(colorscheme) = colorscheme {
                   cell.set_fg(colorscheme.ui_foreground());
                   cell.set_bg(colorscheme.ui_background());
                   cell.set_attrs(Attributes::none());
                 }
+                trace!("set_hl:{:?}", cell);
               };
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
