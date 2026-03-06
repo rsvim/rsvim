@@ -6,6 +6,7 @@ use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxCapturePoint;
+use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
@@ -36,7 +37,8 @@ pub fn draw(
 
   let mut buflines = text.rope().lines_at(line_idx);
 
-  let mut last_hl: Option<Highlight> = None;
+  let mut last_colorscheme_hl: Option<Highlight> = None;
+  let mut last_captured_hl: Option<&SyntaxCaptureValue> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -166,11 +168,12 @@ pub fn draw(
                           colorscheme.colors().get("ui.background").copied()
                         }
                       };
-                      last_hl = Some(Highlight {
+                      last_colorscheme_hl = Some(Highlight {
                         fg,
                         bg,
                         attr: hl.attr,
                       });
+                      last_captured_hl = Some(cap_hl);
                       break;
                     }
                   }
