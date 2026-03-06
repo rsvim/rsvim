@@ -227,11 +227,11 @@ impl Iframe {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I) -> Option<Vec<Cell>>
+  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I) -> Vec<Cell>
   where
     I: ExactSizeIterator<Item = Cell>,
   {
-    self.try_set_cells_at(pos, cells)
+    self.try_set_cells_at(pos, cells).unwrap()
   }
 
   /// Try set (replace) cells at a range, non-panic version of
