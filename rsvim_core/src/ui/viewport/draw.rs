@@ -253,7 +253,9 @@ pub fn draw(
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, cells_buffer.into_iter();
+          canvas
+            .frame_mut()
+            .set_cells_at(cells_upos, cells_buffer.into_iter());
           col_idx += left_length;
         }
 
@@ -261,16 +263,16 @@ pub fn draw(
         if end_fills > 0 {
           cells_buffer.clear();
 
-          std::iter::repeat_n('<', end_fills as usize)
-            .for_each(|ch| {
-              let mut cell = Cell::from(ch);
-              set_bg(&mut cell);
-              cells_buffer.push(cell);
-            });
+          std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
+            let mut cell = Cell::from(ch);
+            set_bg(&mut cell);
+            cells_buffer.push(cell);
+          });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos,
-            cells_buffer.into_iter());
+          canvas
+            .frame_mut()
+            .set_cells_at(cells_upos, cells_buffer.into_iter());
 
           col_idx += end_fills;
         }
@@ -291,15 +293,16 @@ pub fn draw(
   while row_idx < height {
     cells_buffer.clear();
 
-    std::iter::repeat_n(' ', width as usize)
-      .for_each(|ch| {
-        let mut cell = Cell::from(ch);
-        set_bg(&mut cell);
-        cells_buffer.push(cell);
-      });
+    std::iter::repeat_n(' ', width as usize).for_each(|ch| {
+      let mut cell = Cell::from(ch);
+      set_bg(&mut cell);
+      cells_buffer.push(cell);
+    });
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
-    canvas.frame_mut().set_cells_at(cells_upos, cells_buffer.into_iter());
+    canvas
+      .frame_mut()
+      .set_cells_at(cells_upos, cells_buffer.into_iter());
     row_idx += 1;
   }
 }
