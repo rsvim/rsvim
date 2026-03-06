@@ -2,10 +2,7 @@
 //!
 //! See [rsvim_core] for more details.
 
-#[cfg(all(
-  feature = "mimalloc",
-  not(any(feature = "jemalloc"))
-))]
+#[cfg(all(feature = "mimalloc", not(any(feature = "jemalloc"))))]
 #[global_allocator]
 static GLOBAL: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 
