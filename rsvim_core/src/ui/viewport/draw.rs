@@ -44,7 +44,6 @@ pub fn draw(
 
   // Try to allocate only once for each draw.
   let bump = Bump::with_capacity((height as usize) * (width as usize));
-  let mut cells_buffer: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
@@ -98,17 +97,17 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          cells_buffer.clear();
+          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
           std::iter::repeat_n('>', start_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
             set_bg(&mut cell);
-            cells_buffer.push(cell);
+            cells.push(cell);
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
+            .set_cells_at(cells_upos, cells.clone().into_iter());
           col_idx += start_fills;
         }
 
@@ -207,21 +206,21 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                cells_buffer.clear();
+                let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
 
-                cells_buffer.push(cell);
+                cells.push(cell);
                 for _i in 0..(unicode_width - 1) {
                   let mut cell = Cell::empty();
                   set_hl(&mut cell);
-                  cells_buffer.push(cell);
+                  cells.push(cell);
                 }
                 canvas
                   .frame_mut()
-                  .set_cells_at(cell_upos, cells_buffer.clone().into_iter());
+                  .set_cells_at(cell_upos, cells.clone().into_iter());
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
@@ -246,36 +245,36 @@ pub fn draw(
           (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
-          cells_buffer.clear();
+          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
           let left_length = width - occupied_length;
           std::iter::repeat_n(' ', left_length as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
             set_bg(&mut cell);
-            cells_buffer.push(cell);
+            cells.push(cell);
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
+            .set_cells_at(cells_upos, cells.clone().into_iter());
           col_idx += left_length;
         }
 
         // Render end fills.
         if end_fills > 0 {
-          cells_buffer.clear();
+          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
           std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
             set_bg(&mut cell);
-            cells_buffer.push(cell);
+            cells.push(cell);
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
+            .set_cells_at(cells_upos, cells.clone().into_iter());
 
           col_idx += end_fills;
         }
@@ -294,18 +293,18 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    cells_buffer.clear();
+    let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
 
     std::iter::repeat_n(' ', width as usize).for_each(|ch| {
       let mut cell = Cell::from(ch);
       set_bg(&mut cell);
-      cells_buffer.push(cell);
+      cells.push(cell);
     });
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
     canvas
       .frame_mut()
-      .set_cells_at(cells_upos, cells_buffer.clone().into_iter());
+      .set_cells_at(cells_upos, cells.clone().into_iter());
     row_idx += 1;
   }
 }
