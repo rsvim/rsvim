@@ -38,7 +38,7 @@ pub fn draw(
   let mut buflines = text.rope().lines_at(line_idx);
 
   let mut last_colorscheme_hl: Option<Highlight> = None;
-  let mut last_hl_capture: Option<&SyntaxCaptureValue> = None;
+  let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -133,22 +133,23 @@ pub fn draw(
             //   the `好` char, the following 1 cell is `""` empty string.
 
             if unicode_width > 0 {
+              let cap_point = SyntaxCapturePoint { line_idx, char_idx };
+
               if let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && let Some(colorscheme) = colorscheme
               {
-                let cap_key = SyntaxCapturePoint { line_idx, char_idx };
                 if syn_highlight_capture
                   .as_ref()
                   .nodes()
-                  .contains_key(&cap_key)
+                  .contains_key(&cap_point)
                 {
                   let hl_caps = syn_highlight_capture
                     .as_ref()
                     .nodes()
-                    .get(&cap_key)
+                    .get(&cap_point)
                     .unwrap();
-                  trace!("captured highlight, {:?}:{:?}", cap_key, hl_caps);
+                  trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
                   for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
                     if let Some(hl) = colorscheme.highlights().get(&hl_cap.name)
                     {
@@ -173,7 +174,7 @@ pub fn draw(
                         bg,
                         attr: hl.attr,
                       });
-                      last_hl_capture = Some(hl_cap);
+                      last_hl_capture = Some(hl_cap.clone());
                       break;
                     }
                   }
@@ -182,7 +183,22 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let cell = Cell::with_symbol(unicode_symbol);
+                let mut cell = Cell::with_symbol(unicode_symbol);
+
+                if let Some(colorscheme_hl) = last_colorscheme_hl
+                  && let Some(hl_capture) = last_hl_capture
+                  && cap_point >= hl_capture.range.start_point
+                  && cap_point < hl_capture.range.end_point
+                {
+                  if let Some(fg) = colorscheme_hl.fg {
+                    cell.set_fg(fg);
+                  }
+                  if let Some(bg) = colorscheme_hl.bg {
+                    cell.set_bg(bg);
+                  }
+                  cell.set_attr(colorscheme_hl.attr);
+                }
+
                 // Unicode width > 1
                 let mut cells = vec![cell];
                 cells.extend(
@@ -191,7 +207,22 @@ pub fn draw(
                 );
                 canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
-                let cell = Cell::with_symbol(unicode_symbol);
+                let mut cell = Cell::with_symbol(unicode_symbol);
+
+                if let Some(colorscheme_hl) = last_colorscheme_hl
+                  && let Some(hl_capture) = last_hl_capture
+                  && cap_point >= hl_capture.range.start_point
+                  && cap_point < hl_capture.range.end_point
+                {
+                  if let Some(fg) = colorscheme_hl.fg {
+                    cell.set_fg(fg);
+                  }
+                  if let Some(bg) = colorscheme_hl.bg {
+                    cell.set_bg(bg);
+                  }
+                  cell.set_attr(colorscheme_hl.attr);
+                }
+
                 // Unicode width = 1
                 canvas.frame_mut().set_cell(cell_upos, cell);
               };
