@@ -1975,7 +1975,7 @@ mod tests_syntax_highlight_nowrap {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2032,7 +2032,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2089,7 +2089,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -2146,7 +2146,7 @@ fn main() {
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().build().unwrap();
 
-    let tmpfile = assert_fs::NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
