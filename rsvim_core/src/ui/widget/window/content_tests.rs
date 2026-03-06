@@ -2011,8 +2011,12 @@ fn main() {
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
     let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
+    info!("row-0:{:?}", row0);
     let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
+    info!("row-1:{:?}", row1);
     let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
+    info!("row-2:{:?}", row2);
     let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
+    info!("row-3:{:?}", row3);
   }
 }
