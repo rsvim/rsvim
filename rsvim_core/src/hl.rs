@@ -6,14 +6,11 @@
 //! A colorscheme config file has 3 sections: scope, ui and palette:
 //!
 //! ```toml
-//! [scope]
+//! # scope
 //! attribute = "white"
 //! boolean = { fg = "yellow", bold = true }
 //! comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlined = true }
 //! keyword = { fg = "#ffffff", bg = "green", italic = true }
-//!
-//! [scope.source.ruby]
-//! attribute = "red"
 //!
 //! [ui]
 //! background = "#000000"
@@ -28,12 +25,15 @@
 //! grey = "#c0c0c0"
 //! ```
 //!
-//! `scope` section defines syntax highlightings for programming languages, the
-//! value of a scope item can have two formats:
+//! `scope` section doesn't explicitly defines a `[scope]` section like
+//! `[ui]` or `[palette]`, it actually comes from the
+//! [tree-sitter highlght names](https://github.com/tree-sitter/tree-sitter/blob/cf302b07d1cae984068b7eb44a6e44529566a8c9/crates/highlight/src/highlight.rs#L30).
+//! It defines syntax highlightings for programming languages, the value of a
+//! highlight can have two formats:
 //!
-//! - A string defines the foreground text color for that syntax highlighting,
-//!   it accepts either ANSI color name, such as "white", "yellow", etc. Or RGB
-//!   color code, such as "#ffffff", "#ffff00", etc.
+//! - A string defines the foreground text color for the highlighting, it
+//!   accepts either ANSI color name (such as "white", "yellow", etc) or RGB
+//!   color code (such as "#ffffff", "#ffff00", etc).
 //! - A toml table with below optional attributes:
 //!   - `fg`: a string value indicates the foreground text color (ANSI/RGB), it
 //!     uses `ui.foreground` if been omitted.
@@ -46,48 +46,17 @@
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
 //!
-//! You can overwrite highlightings for specific languages by adding a
-//! `[scope.source.{lang}]` section. The `{lang}` should match the grammar name
-//! inside a `tree-sitter.json` grammar config.
-//!
-//! For example in
-//! [tree-sitter-ruby](https://github.com/tree-sitter/tree-sitter-ruby),
-//! [`tree-sitter.json`](https://github.com/tree-sitter/tree-sitter-ruby/blob/master/tree-sitter.json)
-//! grammar name is `"ruby"`:
-//!
-//! ```json
-//! {
-//!   "grammars": [
-//!     {
-//!       "name": "ruby",
-//!       "camelcase": "Ruby",
-//!       "scope": "source.ruby",
-//!       "path": ".",
-//!       "file-types": [
-//!         "rb"
-//!       ],
-//!       "highlights": "queries/highlights.scm",
-//!       "tags": "queries/tags.scm",
-//!       "injection-regex": "ruby"
-//!     }
-//!   ],
-//!   ...
-//! }
-//! ```
-//!
-//! In this case, you need to add `[scope.source.ruby]` section for ruby.
-//!
 //! `ui` section defines other UI highlightings such as common foreground and
 //! background text colors. There're some default configs:
 //!
 //! - `ui.foreground`: uses `white` by default.
 //! - `ui.background`: uses `black` by default.
 //!
-//! `palette` section is a helper section for defining `scope` and `ui` section
-//! more easily. By adding a `key=value` pair in palette section, you can use
-//! the `key` as a color name in `scope` and `ui` section, syntax highlighting
-//! parser will lookup for the real color `value` behind the `key` when loading
-//! the colorscheme config.
+//! `palette` section is a helper section for defining `[scope]` and `[ui]`
+//! section more easily. By adding a `key=value` pair in palette section, you
+//! can use the `key` as a color name in `[scope]` and `[ui]` section, syntax
+//! highlighting parser will lookup for the real color `value` behind the `key`
+//! when loading the colorscheme config.
 
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -98,6 +67,7 @@ use crossterm::style::Color;
 use once_cell::sync::Lazy;
 
 pub const DEFAULT: &str = "default";
+pub const RESET_COLOR: Color = Color::Reset;
 
 // "ui."
 pub const FOREGROUND: &str = "foreground";
@@ -344,13 +314,11 @@ fn parse_hl_as_table(
   palette: &FoldMap<CompactString, Color>,
   colors: &FoldMap<CompactString, Color>,
 ) -> TheResult<(CompactString, Highlight)> {
-  let id = format!("scope.{}", key).to_compact_string();
-
   let parse_color = |x, fallback| -> TheResult<Option<Color>> {
     match value.get(x) {
       Some(x_value) => {
         let x_value = x_value.as_str().ok_or(TheErr::LoadColorSchemeFailed(
-          format!("{}={:?}", id, x_value).to_compact_string(),
+          format!("{}={:?}", key, x_value).to_compact_string(),
         ))?;
         match palette.get(x_value) {
           Some(x) => Ok(Some(*x)),
@@ -368,7 +336,7 @@ fn parse_hl_as_table(
     match value.get(x) {
       Some(x_value) => {
         Ok(x_value.as_bool().ok_or(TheErr::LoadColorSchemeFailed(
-          format!("{}={:?}", id, x_value).to_compact_string(),
+          format!("{}={:?}", key, x_value).to_compact_string(),
         ))?)
       }
       None => Ok(false),
@@ -391,13 +359,13 @@ fn parse_hl_as_table(
   }
 
   let hl = Highlight {
-    id: id.clone(),
+    id: key.to_compact_string(),
     fg,
     bg,
     attr,
   };
-  trace!("id:{:?},hl:{:?}", id, hl);
-  Ok((id, hl))
+  trace!("id:{:?},hl:{:?}", key, hl);
+  Ok((key.to_compact_string(), hl))
 }
 
 fn parse_hl_as_str(
@@ -406,8 +374,6 @@ fn parse_hl_as_str(
   palette: &FoldMap<CompactString, Color>,
   colors: &FoldMap<CompactString, Color>,
 ) -> TheResult<(CompactString, Highlight)> {
-  let id = format!("scope.{}", key).to_compact_string();
-
   let fg = match palette.get(value) {
     Some(fg) => Some(*fg),
     None => Some(parse_color(value, "scope.", key)?),
@@ -417,13 +383,13 @@ fn parse_hl_as_str(
   let attr = Attributes::none();
 
   let hl = Highlight {
-    id: id.clone(),
+    id: key.to_compact_string(),
     fg,
     bg,
     attr,
   };
-  trace!("id:{:?},hl:{:?}", id, hl);
-  Ok((id, hl))
+  trace!("id:{:?},hl:{:?}", key, hl);
+  Ok((key.to_compact_string(), hl))
 }
 
 fn parse_highlights(
@@ -433,64 +399,25 @@ fn parse_highlights(
 ) -> TheResult<FoldMap<CompactString, Highlight>> {
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
-  if let Some(scope) = colorscheme.get("scope")
-    && let Some(scope_table) = scope.as_table()
-  {
-    for (key, value) in scope_table.iter() {
-      if key.as_str() == "source" {
-        let source_table = value.as_table().unwrap();
-        for (lang, value_per_lang) in source_table.iter() {
-          let scope_table_per_lang = value_per_lang.as_table().unwrap();
-          for (key_per_lang, value_per_lang) in scope_table_per_lang.iter() {
-            let k = format!("{}.{}", key_per_lang, lang);
-            if !SCOPE_NAMES.contains(key_per_lang.as_str()) {
-              return Err(TheErr::LoadColorSchemeFailed(
-                format!("{}={:?}", k, value_per_lang).to_compact_string(),
-              ));
-            }
-            if value_per_lang.is_table() {
-              let (id, hl) = parse_hl_as_table(
-                &k,
-                value_per_lang.as_table().unwrap(),
-                palette,
-                colors,
-              )?;
-              result.insert(id, hl);
-            } else if value_per_lang.is_str() {
-              let (id, hl) = parse_hl_as_str(
-                &k,
-                value_per_lang.as_str().unwrap(),
-                palette,
-                colors,
-              )?;
-              result.insert(id, hl);
-            } else {
-              return Err(TheErr::LoadColorSchemeFailed(
-                format!("{}={:?}", k, value_per_lang).to_compact_string(),
-              ));
-            }
-          }
-        }
+  for (key, value) in colorscheme.iter() {
+    if SCOPE_NAMES.contains(key.as_str()) {
+      if value.is_table() {
+        let (id, hl) =
+          parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
+        result.insert(id, hl);
+      } else if value.is_str() {
+        let (id, hl) =
+          parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
+        result.insert(id, hl);
       } else {
-        if !SCOPE_NAMES.contains(key.as_str()) {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("{}={:?}", key, value).to_compact_string(),
-          ));
-        }
-        if value.is_table() {
-          let (id, hl) =
-            parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
-          result.insert(id, hl);
-        } else if value.is_str() {
-          let (id, hl) =
-            parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
-          result.insert(id, hl);
-        } else {
-          return Err(TheErr::LoadColorSchemeFailed(
-            format!("{}={:?}", key, value).to_compact_string(),
-          ));
-        }
+        return Err(TheErr::LoadColorSchemeFailed(
+          format!("{}={:?}", key, value).to_compact_string(),
+        ));
       }
+    } else if key.as_str() != "ui" && key.as_str() != "palette" {
+      return Err(TheErr::LoadColorSchemeFailed(
+        format!("{}={:?}", key, value).to_compact_string(),
+      ));
     }
   }
 
@@ -527,55 +454,45 @@ impl ColorScheme {
     &self.colors
   }
 
-  pub fn resolve_color(&self, id: &str) -> Option<&Color> {
+  fn assert_id(&self, id: &str) {
     debug_assert!(!id.is_empty());
     debug_assert!(!id.trim().is_empty());
     debug_assert_eq!(id.trim(), id);
     debug_assert!(!id.starts_with("."));
     debug_assert!(!id.ends_with("."));
-
-    let mut i = id;
-    loop {
-      if let Some(color) = self.colors.get(i) {
-        return Some(color);
-      }
-      match i.rfind(".") {
-        Some(pos) => {
-          i = &i[..pos];
-          if i.is_empty() {
-            return None;
-          }
-        }
-        None => return None,
-      }
-    }
   }
 
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
 
-  pub fn resolve_highlight(&self, id: &str) -> Option<&Highlight> {
-    debug_assert!(!id.is_empty());
-    debug_assert!(!id.trim().is_empty());
-    debug_assert_eq!(id.trim(), id);
-    debug_assert!(!id.starts_with("."));
-    debug_assert!(!id.ends_with("."));
+  pub fn resolve_color(&self, id: &str, fallback: &str) -> Option<&Color> {
+    self.assert_id(id);
+    if SCOPE_NAMES.contains(id) {
+      match self.highlights.get(id) {
+        Some(hl) => match hl.fg {
+          Some(ref color) => Some(color),
+          None => self.colors.get(fallback),
+        },
+        None => self.colors.get(fallback),
+      }
+    } else {
+      match self.colors.get(id) {
+        Some(color) => Some(color),
+        None => self.colors.get(fallback),
+      }
+    }
+  }
 
-    let mut i = id;
-    loop {
-      if let Some(hl) = self.highlights.get(i) {
-        return Some(hl);
+  pub fn resolve_attributes(&self, id: &str) -> Option<&Attributes> {
+    self.assert_id(id);
+    if SCOPE_NAMES.contains(id) {
+      match self.highlights.get(id) {
+        Some(hl) => Some(&hl.attr),
+        None => None,
       }
-      match i.rfind(".") {
-        Some(pos) => {
-          i = &i[..pos];
-          if i.is_empty() {
-            return None;
-          }
-        }
-        None => return None,
-      }
+    } else {
+      None
     }
   }
 }
@@ -601,7 +518,6 @@ pub type ColorSchemeManagerIter<'a> =
 
 fn default_colorscheme() -> ColorScheme {
   let config = toml::toml! {
-    [scope]
     boolean = "magenta"
     comment = "cyan"
     constant = "magenta"
@@ -618,6 +534,10 @@ fn default_colorscheme() -> ColorScheme {
     tag = "magenta"
     "type" = "green"
     variable = "cyan"
+
+    [ui]
+    foreground = "white"
+    background = "black"
   };
   ColorScheme::from_toml(DEFAULT, config).unwrap()
 }

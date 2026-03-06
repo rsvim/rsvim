@@ -19,7 +19,11 @@ doctest = false
 
 [features]
 default = []
-icudata = ["dep:deno_core_icudata"]
+icudata = [
+  "dep:deno_core_icudata",
+  "jiff/tzdb-bundle-always",
+  "icu/compiled_data",
+]
 typescript = [
   "dep:swc_atoms",
   "dep:swc_bundler",
@@ -66,9 +70,9 @@ fern = { workspace = true }
 foldhash = { workspace = true }
 futures = { workspace = true }
 geo = { workspace = true }
-icu = { workspace = true, features = ["compiled_data"] }
+icu = { workspace = true }
 itertools = { workspace = true }
-jiff = { workspace = true, features = ["tzdb-bundle-always"] }
+jiff = { workspace = true }
 lexopt = { workspace = true }
 litemap = { workspace = true }
 log = { workspace = true, features = [
