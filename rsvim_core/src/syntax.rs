@@ -626,8 +626,7 @@ pub fn query(
           line_idx: end_line_idx,
           char_idx: end_char_idx,
         };
-
-        let mut val = nodes.get_mut(&key).unwrap();
+        let val = nodes.get_mut(&key).unwrap();
         val.values.push(SyntaxCaptureValue {
           index,
           name: name.to_compact_string(),
