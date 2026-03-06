@@ -218,9 +218,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.16.0"
+version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
+checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
 dependencies = [
  "allocator-api2",
 ]
@@ -2782,6 +2782,7 @@ dependencies = [
  "assert_fs",
  "async-trait",
  "bitflags",
+ "bumpalo",
  "compact_str 0.9.0",
  "crossterm",
  "deno_core_icudata",

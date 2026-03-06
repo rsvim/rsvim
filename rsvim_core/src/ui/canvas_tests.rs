@@ -151,7 +151,7 @@ fn _next_same_cell_in_row1() {
 
   can
     .frame_mut()
-    .set_cells_at(point!(0, 0), vec![Cell::with_char('A'); 20]);
+    .set_cells_at(point!(0, 0), vec![Cell::with_char('A'); 20].into_iter());
   for i in 0..10 {
     let actual = can._next_same_cell_in_row(0, i);
     info!("1-{:?} actual:{:?}", i, actual);
@@ -173,7 +173,8 @@ fn _next_same_cell_in_row2() {
     point!(3, 5),
     (0..9)
       .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>(),
+      .collect::<Vec<_>>()
+      .into_iter(),
   );
   let chars = (0_u8..9_u8)
     .map(|i| int2letter(i).to_compact_string())
@@ -233,7 +234,8 @@ fn _next_same_cell_in_row3() {
     point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>(),
+      .collect::<Vec<_>>()
+      .into_iter(),
   );
   let mut char_index = 0_u8;
   info!(
@@ -278,7 +280,8 @@ fn _make_printable_shader1() {
     point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>(),
+      .collect::<Vec<_>>()
+      .into_iter(),
   );
   let col = 2;
   let row = 3;
@@ -310,7 +313,8 @@ fn diff1() {
     point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>(),
+      .collect::<Vec<_>>()
+      .into_iter(),
   );
   let actual1 = can._dirty_marks_diff();
   let actual2 = can._brute_force_diff();

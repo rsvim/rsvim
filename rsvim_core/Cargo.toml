@@ -57,6 +57,7 @@ wasm = []
 arcstr = { workspace = true, features = ["std"] }
 ascii = { workspace = true }
 async-trait = { workspace = true }
+bumpalo = { workspace = true, features = ["collections"] }
 compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
 derive_builder = { workspace = true }

@@ -12,6 +12,7 @@ use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
+use std::iter::ExactSizeIterator;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -183,17 +184,23 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
+  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I) -> Vec<Cell>
+  where
+    I: ExactSizeIterator<Item = Cell>,
+  {
     self.iframe.set_cells_at(pos, cells)
   }
 
   /// Try set (replace) cells at a range, non-panic version of
   /// [`set_cells_at`](Frame::set_cells_at).
-  pub fn try_set_cells_at(
+  pub fn try_set_cells_at<I>(
     &mut self,
     pos: U16Pos,
-    cells: Vec<Cell>,
-  ) -> Option<Vec<Cell>> {
+    cells: I,
+  ) -> Option<Vec<Cell>>
+  where
+    I: ExactSizeIterator<Item = Cell>,
+  {
     self.iframe.try_set_cells_at(pos, cells)
   }
 
