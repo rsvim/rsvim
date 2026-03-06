@@ -68,14 +68,14 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
   let (features, typescript_enabled) = {
     (
       format!(
-        "features: {}typescript {}wasm {}icudata {}jemalloc {}mimalloc {}snmalloc",
+        "features: {}locale {}typescript {}wasm {}jemalloc {}mimalloc {}snmalloc",
+        if cfg!(feature = "locale") { "+" } else { "-" },
         if cfg!(feature = "typescript") {
           "+"
         } else {
           "-"
         },
         if cfg!(feature = "wasm") { "+" } else { "-" },
-        if cfg!(feature = "icudata") { "+" } else { "-" },
         if cfg!(feature = "jemalloc") { "+" } else { "-" },
         if cfg!(feature = "mimalloc") { "+" } else { "-" },
         if cfg!(feature = "snmalloc") { "+" } else { "-" },
