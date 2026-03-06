@@ -2011,13 +2011,21 @@ fn main() {
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
     let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
-    info!("row-0:{:?}", row0);
+    for (i, col) in row0.iter().enumerate() {
+      info!("row [0,{}]:{:?}", i, col);
+    }
     let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
-    info!("row-1:{:?}", row1);
+    for (i, col) in row1.iter().enumerate() {
+      info!("row [1,{}]:{:?}", i, col);
+    }
     let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
-    info!("row-2:{:?}", row2);
+    for (i, col) in row2.iter().enumerate() {
+      info!("row [2,{}]:{:?}", i, col);
+    }
     let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
-    info!("row-3:{:?}", row3);
+    for (i, col) in row3.iter().enumerate() {
+      info!("row [3,{}]:{:?}", i, col);
+    }
   }
 
   #[test]
@@ -2065,12 +2073,20 @@ fn main() {
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
     let row0 = actual.frame().get_cells_at(point!(0, 0), 10);
-    info!("row-0:{:?}", row0);
+    for (i, col) in row0.iter().enumerate() {
+      info!("row [0,{}]:{:?}", i, col);
+    }
     let row1 = actual.frame().get_cells_at(point!(0, 1), 10);
-    info!("row-1:{:?}", row1);
+    for (i, col) in row1.iter().enumerate() {
+      info!("row [1,{}]:{:?}", i, col);
+    }
     let row2 = actual.frame().get_cells_at(point!(0, 2), 10);
-    info!("row-2:{:?}", row2);
+    for (i, col) in row2.iter().enumerate() {
+      info!("row [2,{}]:{:?}", i, col);
+    }
     let row3 = actual.frame().get_cells_at(point!(0, 3), 10);
-    info!("row-3:{:?}", row3);
+    for (i, col) in row3.iter().enumerate() {
+      info!("row [3,{}]:{:?}", i, col);
+    }
   }
 }
