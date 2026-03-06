@@ -402,23 +402,20 @@ fn parse_highlights(
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
   for (key, value) in colorscheme.iter() {
-    if !SCOPE_NAMES.contains(key.as_str()) {
-      return Err(TheErr::LoadColorSchemeFailed(
-        format!("{}={:?}", key, value).to_compact_string(),
-      ));
-    }
-    if value.is_table() {
-      let (id, hl) =
-        parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
-      result.insert(id, hl);
-    } else if value.is_str() {
-      let (id, hl) =
-        parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
-      result.insert(id, hl);
-    } else {
-      return Err(TheErr::LoadColorSchemeFailed(
-        format!("{}={:?}", key, value).to_compact_string(),
-      ));
+    if SCOPE_NAMES.contains(key.as_str()) {
+      if value.is_table() {
+        let (id, hl) =
+          parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
+        result.insert(id, hl);
+      } else if value.is_str() {
+        let (id, hl) =
+          parse_hl_as_str(key, value.as_str().unwrap(), palette, colors)?;
+        result.insert(id, hl);
+      } else {
+        return Err(TheErr::LoadColorSchemeFailed(
+          format!("{}={:?}", key, value).to_compact_string(),
+        ));
+      }
     }
   }
 
