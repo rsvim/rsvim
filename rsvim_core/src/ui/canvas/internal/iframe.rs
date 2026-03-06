@@ -226,23 +226,17 @@ impl Iframe {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at<I>(&mut self, pos: U16Pos, cells: I) -> Vec<Cell>
-  where
-    I: ExactSizeIterator<Item = Cell>,
-  {
-    self.try_set_cells_at(pos, cells).unwrap()
+  pub fn set_cells_at(&mut self, pos: U16Pos, cells: &[Cell]) {
+    self.try_set_cells_at(pos, cells).unwrap();
   }
 
-  /// Try set (replace) cells at a range, non-panic version of
+  /// Try copy cells at a range, non-panic version of
   /// [`set_cells_at`](Iframe::set_cells_at).
-  pub fn try_set_cells_at<I>(
+  pub fn try_set_cells_at(
     &mut self,
     pos: U16Pos,
-    cells: I,
-  ) -> Option<Vec<Cell>>
-  where
-    I: ExactSizeIterator<Item = Cell>,
-  {
+    cells: &[Cell],
+  ) -> Option<()> {
     let range = self.pos2range(pos, cells.len());
     // trace!(
     //   "try set cells at range:{:?}, cells len:{:?}",
@@ -263,7 +257,8 @@ impl Iframe {
       //   pos.y(),
       //   end_at.y() + 1
       // );
-      Some(self.cells.splice(range, cells).collect())
+      self.cells[range].clone_from_slice(cells);
+      Some(())
     } else {
       None
     }
@@ -280,12 +275,8 @@ impl Iframe {
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Iframe::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(
-    &mut self,
-    pos: U16Pos,
-    n: usize,
-  ) -> Option<Vec<Cell>> {
-    self.try_set_cells_at(pos, vec![Cell::empty(); n].into_iter())
+  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
+    self.try_set_cells_at(pos, &vec![Cell::empty(); n])
   }
 
   /// Get dirty rows.
