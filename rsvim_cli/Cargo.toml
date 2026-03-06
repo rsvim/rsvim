@@ -19,7 +19,6 @@ default = ["icudata", "tzdata", "typescript", "wasm"]
 icudata = ["rsvim_core/icudata"]
 jemalloc = ["dep:tikv-jemallocator"]
 mimalloc = ["dep:mimalloc-safe"]
-snmalloc = ["dep:snmalloc-rs"]
 typescript = ["rsvim_core/typescript"]
 tzdata = ["rsvim_core/tzdata"]
 wasm = ["rsvim_core/wasm"]
@@ -33,7 +32,6 @@ log = { workspace = true, features = [
 ] }
 mimalloc-safe = { workspace = true, optional = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
-snmalloc-rs = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["full"] }
 # zstd = { workspace = true }
 

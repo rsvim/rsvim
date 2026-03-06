@@ -2,23 +2,13 @@
 //!
 //! See [rsvim_core] for more details.
 
-#[cfg(all(
-  feature = "snmalloc",
-  not(any(feature = "mimalloc", feature = "jemalloc"))
-))]
-#[global_allocator]
-static ALLOC: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
-
-#[cfg(all(
-  feature = "mimalloc",
-  not(any(feature = "snmalloc", feature = "jemalloc"))
-))]
+#[cfg(all(feature = "mimalloc", not(any(feature = "jemalloc"))))]
 #[global_allocator]
 static GLOBAL: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 
 #[cfg(all(
   feature = "jemalloc",
-  not(any(target_env = "msvc", feature = "mimalloc", feature = "snmalloc"))
+  not(any(target_env = "msvc", feature = "mimalloc"))
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -68,8 +58,7 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
   let (features, typescript_enabled) = {
     (
       format!(
-        "features: {}typescript {}wasm {}icudata {}tzdata {}jemalloc {}mimalloc
-        {}snmalloc",
+        "features: {}typescript {}wasm {}icudata {}tzdata {}jemalloc {}mimalloc",
         if cfg!(feature = "typescript") {
           "+"
         } else {
@@ -80,7 +69,6 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
         if cfg!(feature = "tzdata") { "+" } else { "-" },
         if cfg!(feature = "jemalloc") { "+" } else { "-" },
         if cfg!(feature = "mimalloc") { "+" } else { "-" },
-        if cfg!(feature = "snmalloc") { "+" } else { "-" },
       ),
       cfg!(feature = "typescript"),
     )
