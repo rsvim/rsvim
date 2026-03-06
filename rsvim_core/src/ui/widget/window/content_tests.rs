@@ -1967,7 +1967,7 @@ mod tests_syntax_highlight_nowrap {
   use super::*;
 
   #[test]
-  fn new1() {
+  fn new_nowrap1() {
     test_log_init();
 
     let terminal_size = size!(10, 10);
@@ -2029,7 +2029,7 @@ fn main() {
   }
 
   #[test]
-  fn new2() {
+  fn new_nowrap2() {
     test_log_init();
 
     let terminal_size = size!(10, 10);
