@@ -209,14 +209,18 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
+  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
     self.iframe.set_empty_cells_at(pos, n)
   }
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Frame::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
-    self.iframe.try_set_empty_cells_at(pos, n);
+  pub fn try_set_empty_cells_at(
+    &mut self,
+    pos: U16Pos,
+    n: usize,
+  ) -> Option<Vec<Cell>> {
+    self.iframe.try_set_empty_cells_at(pos, n)
   }
 
   /// Get dirty rows.
