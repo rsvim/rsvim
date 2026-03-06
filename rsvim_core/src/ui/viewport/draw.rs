@@ -9,10 +9,9 @@ use crate::syntax::SyntaxCapturePoint;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
-use crossterm::style::Attributes;
-use crossterm::style::Color;
 use std::convert::From;
 
+#[allow(unused_variables)]
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
@@ -37,10 +36,7 @@ pub fn draw(
 
   let mut buflines = text.rope().lines_at(line_idx);
 
-  let mut hl: Option<&Highlight> = None;
-  let mut fg: Option<&Color> = None;
-  let mut bg: Option<&Color> = None;
-  let mut attrs: Option<&Attributes> = None;
+  let mut last_hl: Option<&Highlight> = None;
 
   // If viewport is empty (i.e. no lines), it skips this part.
   while line_idx < viewport.end_line_idx() {
@@ -152,12 +148,15 @@ pub fn draw(
                     .unwrap();
                   trace!("captured highlight, {:?}:{:?}", cap_key, cap_hls);
                   for (cap_i, cap_hl) in cap_hls.values.iter().enumerate() {
-                    let resolved_hl =
-                      colorscheme.highlights().get(&cap_hl.name);
-                    trace!(
-                      "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
-                      cap_i, cap_hl, resolved_hl
-                    );
+                    if let Some(hl) = colorscheme.highlights().get(&cap_hl.name)
+                    {
+                      trace!(
+                        "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
+                        cap_i, cap_hl, hl
+                      );
+                      last_hl = Some(hl);
+                      break;
+                    }
                   }
                 }
               }
