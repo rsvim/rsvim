@@ -177,6 +177,7 @@ pub fn draw(
                   cell.set_fg(colorscheme_hl.fg.unwrap());
                   cell.set_bg(colorscheme_hl.bg.unwrap());
                   cell.set_attr(colorscheme_hl.attr);
+                  trace!("render cell:{:?}", cell);
                 }
               };
 
