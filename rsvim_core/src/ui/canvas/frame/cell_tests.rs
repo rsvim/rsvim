@@ -7,9 +7,9 @@ use crossterm::style::Color;
 fn default1() {
   let c = Cell::default();
   assert_eq!(c.symbol(), "");
-  assert_eq!(c.fg(), Color::Reset);
-  assert_eq!(c.bg(), Color::Reset);
-  assert_eq!(c.attr(), Attributes::default());
+  assert_eq!(c.fg(), &Color::Reset);
+  assert_eq!(c.bg(), &Color::Reset);
+  assert_eq!(c.attr(), &Attributes::default());
 }
 
 #[test]
@@ -23,11 +23,11 @@ fn new1() {
   let c2 = Cell::default();
   assert_eq!(c1.symbol(), " ");
   assert_eq!(c2.symbol(), "");
-  assert_eq!(c1.fg(), Color::Reset);
+  assert_eq!(c1.fg(), &Color::Reset);
   assert_eq!(c1.fg(), c2.fg());
-  assert_eq!(c1.bg(), Color::Reset);
+  assert_eq!(c1.bg(), &Color::Reset);
   assert_eq!(c1.bg(), c2.bg());
-  assert_eq!(c1.attr(), Attributes::default());
+  assert_eq!(c1.attr(), &Attributes::default());
   assert_eq!(c1.attr(), c2.attr());
 }
 
