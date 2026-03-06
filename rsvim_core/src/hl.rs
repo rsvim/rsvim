@@ -189,11 +189,9 @@ pub static SCOPE_NAMES: Lazy<FoldSet<&'static str>> = Lazy::new(|| {
   .collect()
 });
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Highlight style, including colors and attributes.
 pub struct Highlight {
-  pub id: CompactString,
-
   /// Foreground color.
   pub fg: Option<Color>,
 
@@ -358,12 +356,7 @@ fn parse_hl_as_table(
     attr.set(Attribute::Underlined);
   }
 
-  let hl = Highlight {
-    id: key.to_compact_string(),
-    fg,
-    bg,
-    attr,
-  };
+  let hl = Highlight { fg, bg, attr };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -382,12 +375,7 @@ fn parse_hl_as_str(
   let bg = colors.get("ui.background").copied();
   let attr = Attributes::none();
 
-  let hl = Highlight {
-    id: key.to_compact_string(),
-    fg,
-    bg,
-    attr,
-  };
+  let hl = Highlight { fg, bg, attr };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -456,6 +444,34 @@ impl ColorScheme {
 
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
+  }
+
+  pub fn resolve_fg(
+    &self,
+    hl: &Option<Highlight>,
+    fallback: &str,
+  ) -> Option<Color> {
+    match hl {
+      Some(hl) => match hl.fg {
+        Some(fg) => Some(fg),
+        None => self.colors.get(fallback).copied(),
+      },
+      None => self.colors.get(fallback).copied(),
+    }
+  }
+
+  pub fn resolve_bg(
+    &self,
+    hl: &Option<Highlight>,
+    fallback: &str,
+  ) -> Option<Color> {
+    match hl {
+      Some(hl) => match hl.bg {
+        Some(fg) => Some(fg),
+        None => self.colors.get(fallback).copied(),
+      },
+      None => self.colors.get(fallback).copied(),
+    }
   }
 }
 
