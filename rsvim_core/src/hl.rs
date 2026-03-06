@@ -445,20 +445,6 @@ impl ColorScheme {
   pub fn highlights(&self) -> &FoldMap<CompactString, Highlight> {
     &self.highlights
   }
-
-  pub fn resolve_fg(&self, hl: &Highlight, fallback: &str) -> Option<Color> {
-    match hl.fg {
-      Some(fg) => Some(fg),
-      None => self.colors.get(fallback).copied(),
-    }
-  }
-
-  pub fn resolve_bg(&self, hl: &Highlight, fallback: &str) -> Option<Color> {
-    match hl.bg {
-      Some(bg) => Some(bg),
-      None => self.colors.get(fallback).copied(),
-    }
-  }
 }
 
 #[derive(Debug)]

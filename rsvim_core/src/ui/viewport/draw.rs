@@ -156,8 +156,20 @@ pub fn draw(
                         "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
                         cap_i, cap_hl, hl
                       );
-                      let fg = colorscheme.resolve_fg(hl, "ui.foreground");
-                      let bg = colorscheme.resolve_bg(hl, "ui.background");
+                      let resolve_fg = || match hl.fg {
+                        Some(fg) => Some(fg),
+                        None => {
+                          colorscheme.colors().get("ui.foreground").copied()
+                        }
+                      };
+                      let resolve_bg = || match hl.bg {
+                        Some(bg) => Some(bg),
+                        None => {
+                          colorscheme.colors().get("ui.background").copied()
+                        }
+                      };
+                      let fg = resolve_fg();
+                      let bg = resolve_bg();
                       last_hl = Some(Highlight {
                         fg,
                         bg,
