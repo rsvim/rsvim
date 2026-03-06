@@ -206,7 +206,7 @@ pub struct Highlight {
   pub bg: Option<Color>,
 
   /// Attributes: underlined, bold, italic, etc.
-  pub attr: Attributes,
+  pub attrs: Attributes,
 }
 
 #[derive(Debug, Clone)]
@@ -352,18 +352,18 @@ fn parse_hl_as_table(
   let italic = parse_bool("italic")?;
   let underlined = parse_bool("underlined")?;
 
-  let mut attr = Attributes::none();
+  let mut attrs = Attributes::none();
   if bold {
-    attr.set(Attribute::Bold);
+    attrs.set(Attribute::Bold);
   }
   if italic {
-    attr.set(Attribute::Italic);
+    attrs.set(Attribute::Italic);
   }
   if underlined {
-    attr.set(Attribute::Underlined);
+    attrs.set(Attribute::Underlined);
   }
 
-  let hl = Highlight { fg, bg, attr };
+  let hl = Highlight { fg, bg, attrs };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
@@ -380,9 +380,9 @@ fn parse_hl_as_str(
   };
 
   let bg = colors.get("ui.background").copied();
-  let attr = Attributes::none();
+  let attrs = Attributes::none();
 
-  let hl = Highlight { fg, bg, attr };
+  let hl = Highlight { fg, bg, attrs };
   trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }

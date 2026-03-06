@@ -160,7 +160,7 @@ pub fn draw(
                     last_colorscheme_hl = Some(Highlight {
                       fg: Some(fg),
                       bg: Some(bg),
-                      attr: hl.attr,
+                      attrs: hl.attrs,
                     });
                     last_hl_capture = Some(hl_cap.clone());
                     break;
@@ -176,7 +176,7 @@ pub fn draw(
                 {
                   cell.set_fg(colorscheme_hl.fg.unwrap());
                   cell.set_bg(colorscheme_hl.bg.unwrap());
-                  cell.set_attr(colorscheme_hl.attr);
+                  cell.set_attrs(colorscheme_hl.attrs);
                   trace!("render cell:{:?}", cell);
                 }
               };
