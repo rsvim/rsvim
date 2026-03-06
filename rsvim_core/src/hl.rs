@@ -135,7 +135,7 @@ pub static UI_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
       .collect()
   });
 
-pub static SCOPE_NAMES: Lazy<FoldSet<&'static str, &'static str>> =
+pub static SCOPE_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
   Lazy::new(|| {
     [
       ATTRIBUTE,
@@ -289,7 +289,7 @@ fn parse_colors(
     && let Some(ui_table) = ui.as_table()
   {
     for (key, value) in ui_table.iter() {
-      if !UI_NAMES.contains(key.as_str()) {
+      if !UI_NAMES.contains_key(key.as_str()) {
         return Err(TheErr::LoadColorSchemeFailed(
           format!("ui.{}={:?}", key, value).to_compact_string(),
         ));
@@ -395,7 +395,7 @@ fn parse_highlights(
   let mut result: FoldMap<CompactString, Highlight> = FoldMap::new();
 
   for (key, value) in colorscheme.iter() {
-    if SCOPE_NAMES.contains(key.as_str()) {
+    if SCOPE_NAMES.contains_key(key.as_str()) {
       if value.is_table() {
         let (id, hl) =
           parse_hl_as_table(key, value.as_table().unwrap(), palette, colors)?;
