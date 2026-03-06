@@ -2,7 +2,6 @@
 
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
-use std::iter::ExactSizeIterator;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -269,13 +268,17 @@ impl Iframe {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
-    self.set_cells_at(pos, vec![Cell::empty(); n].into_iter())
+  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
+    self.set_cells_at(pos, &vec![Cell::empty(); n])
   }
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Iframe::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
+  pub fn try_set_empty_cells_at(
+    &mut self,
+    pos: U16Pos,
+    n: usize,
+  ) -> Option<()> {
     self.try_set_cells_at(pos, &vec![Cell::empty(); n])
   }
 
