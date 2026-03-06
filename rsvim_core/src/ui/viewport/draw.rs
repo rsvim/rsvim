@@ -13,7 +13,6 @@ use crate::ui::viewport::Viewport;
 use crossterm::style::Attributes;
 use std::convert::From;
 
-#[allow(unused)]
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
   viewport: &Viewport,
