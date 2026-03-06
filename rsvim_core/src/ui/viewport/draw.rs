@@ -199,8 +199,7 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let mut cell = Cell::with_symbol(unicode_symbol);
-                set_hl(&mut cell);
+                let cell = Cell::with_symbol(unicode_symbol);
 
                 // Unicode width > 1
                 let mut cells = vec![cell];
@@ -208,6 +207,9 @@ pub fn draw(
                   std::iter::repeat_n(Cell::empty(), unicode_width - 1)
                     .collect::<Vec<Cell>>(),
                 );
+                for cell in cells.iter_mut() {
+                  set_hl(cell);
+                }
                 canvas.frame_mut().set_cells_at(cell_upos, cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
