@@ -138,45 +138,42 @@ pub fn draw(
               if let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && let Some(colorscheme) = colorscheme
-              {
-                if syn_highlight_capture
+                && syn_highlight_capture
                   .as_ref()
                   .nodes()
                   .contains_key(&cap_point)
-                {
-                  let hl_caps = syn_highlight_capture
-                    .as_ref()
-                    .nodes()
-                    .get(&cap_point)
-                    .unwrap();
-                  trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
-                  for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
-                    if let Some(hl) = colorscheme.highlights().get(&hl_cap.name)
-                    {
-                      trace!(
-                        "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
-                        i_cap, hl_cap, hl
-                      );
-                      let fg = match hl.fg {
-                        Some(fg) => Some(fg),
-                        None => {
-                          colorscheme.colors().get("ui.foreground").copied()
-                        }
-                      };
-                      let bg = match hl.bg {
-                        Some(bg) => Some(bg),
-                        None => {
-                          colorscheme.colors().get("ui.background").copied()
-                        }
-                      };
-                      last_colorscheme_hl = Some(Highlight {
-                        fg,
-                        bg,
-                        attr: hl.attr,
-                      });
-                      last_hl_capture = Some(hl_cap.clone());
-                      break;
-                    }
+              {
+                let hl_caps = syn_highlight_capture
+                  .as_ref()
+                  .nodes()
+                  .get(&cap_point)
+                  .unwrap();
+                trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
+                for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
+                  if let Some(hl) = colorscheme.highlights().get(&hl_cap.name) {
+                    trace!(
+                      "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
+                      i_cap, hl_cap, hl
+                    );
+                    let fg = match hl.fg {
+                      Some(fg) => Some(fg),
+                      None => {
+                        colorscheme.colors().get("ui.foreground").copied()
+                      }
+                    };
+                    let bg = match hl.bg {
+                      Some(bg) => Some(bg),
+                      None => {
+                        colorscheme.colors().get("ui.background").copied()
+                      }
+                    };
+                    last_colorscheme_hl = Some(Highlight {
+                      fg,
+                      bg,
+                      attr: hl.attr,
+                    });
+                    last_hl_capture = Some(hl_cap.clone());
+                    break;
                   }
                 }
               }
@@ -186,7 +183,7 @@ pub fn draw(
                 let mut cell = Cell::with_symbol(unicode_symbol);
 
                 if let Some(colorscheme_hl) = last_colorscheme_hl
-                  && let Some(hl_capture) = last_hl_capture
+                  && let Some(ref hl_capture) = last_hl_capture
                   && cap_point >= hl_capture.range.start_point
                   && cap_point < hl_capture.range.end_point
                 {
@@ -210,7 +207,7 @@ pub fn draw(
                 let mut cell = Cell::with_symbol(unicode_symbol);
 
                 if let Some(colorscheme_hl) = last_colorscheme_hl
-                  && let Some(hl_capture) = last_hl_capture
+                  && let Some(ref hl_capture) = last_hl_capture
                   && cap_point >= hl_capture.range.start_point
                   && cap_point < hl_capture.range.end_point
                 {
