@@ -3,6 +3,7 @@ use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use itertools::Itertools;
 
 fn int2letter(i: u8) -> char {
   (i + 65) as char
@@ -151,7 +152,7 @@ fn _next_same_cell_in_row1() {
 
   can
     .frame_mut()
-    .set_cells_at(point!(0, 0), vec![Cell::with_char('A'); 20].into_iter());
+    .set_cells_at(point!(0, 0), &vec![Cell::with_char('A'); 20]);
   for i in 0..10 {
     let actual = can._next_same_cell_in_row(0, i);
     info!("1-{:?} actual:{:?}", i, actual);
@@ -171,10 +172,7 @@ fn _next_same_cell_in_row2() {
 
   can.frame_mut().set_cells_at(
     point!(3, 5),
-    (0..9)
-      .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>()
-      .into_iter(),
+    &(0..9).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
   let chars = (0_u8..9_u8)
     .map(|i| int2letter(i).to_compact_string())
