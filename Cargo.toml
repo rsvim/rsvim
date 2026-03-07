@@ -26,7 +26,7 @@ assert_fs = "1.1"
 async-trait = "0.1"
 bitflags = "2.11"
 # bytes = { version = "1" }
-bumpalo = { version = "3.20", features = ["collections"] }
+# bumpalo = { version = "3.20", features = ["collections"] }
 compact_str = "0.9"
 crossterm = { version = "0.29", features = ["event-stream"] }
 derive_builder = "0.20"
