@@ -230,10 +230,7 @@ fn _next_same_cell_in_row3() {
 
   can.frame_mut().set_cells_at(
     point!(2, 3),
-    (0..4)
-      .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>()
-      .into_iter(),
+    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
   let mut char_index = 0_u8;
   info!(
@@ -276,10 +273,7 @@ fn _make_printable_shader1() {
 
   can.frame_mut().set_cells_at(
     point!(2, 3),
-    (0..4)
-      .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>()
-      .into_iter(),
+    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
   let col = 2;
   let row = 3;
@@ -309,10 +303,7 @@ fn diff1() {
 
   can.frame_mut().set_cells_at(
     point!(2, 3),
-    (0..4)
-      .map(|i| Cell::with_char(int2letter(i)))
-      .collect::<Vec<_>>()
-      .into_iter(),
+    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
   let actual1 = can._dirty_marks_diff();
   let actual2 = can._brute_force_diff();
