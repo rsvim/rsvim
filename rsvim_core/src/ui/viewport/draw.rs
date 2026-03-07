@@ -10,8 +10,6 @@ use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
-use bumpalo::Bump;
-use bumpalo::collections::Vec as BumpaloVec;
 use crossterm::style::Attributes;
 use std::convert::From;
 
@@ -42,8 +40,7 @@ pub fn draw(
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
-  // Try to allocate only once for each draw.
-  let bump = Bump::with_capacity((height as usize) * (width as usize));
+  let mut cells: Vec<Cell> = Vec::with_capacity(width as usize);
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
@@ -97,7 +94,7 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          cells.clear();
           std::iter::repeat_n('>', start_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
             set_bg(&mut cell);
@@ -105,9 +102,7 @@ pub fn draw(
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas
-            .frame_mut()
-            .set_cells_at(cells_upos, cells.clone().into_iter());
+          canvas.frame_mut().set_cells_at(cells_upos, &cells);
           col_idx += start_fills;
         }
 
@@ -206,7 +201,7 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+                cells.clear();
 
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
@@ -218,9 +213,7 @@ pub fn draw(
                   set_hl(&mut cell);
                   cells.push(cell);
                 }
-                canvas
-                  .frame_mut()
-                  .set_cells_at(cell_upos, cells.clone().into_iter());
+                canvas.frame_mut().set_cells_at(cell_upos, &cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
@@ -245,7 +238,7 @@ pub fn draw(
           (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          cells.clear();
 
           let left_length = width - occupied_length;
           std::iter::repeat_n(' ', left_length as usize).for_each(|ch| {
@@ -255,15 +248,13 @@ pub fn draw(
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas
-            .frame_mut()
-            .set_cells_at(cells_upos, cells.clone().into_iter());
+          canvas.frame_mut().set_cells_at(cells_upos, &cells);
           col_idx += left_length;
         }
 
         // Render end fills.
         if end_fills > 0 {
-          let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+          cells.clear();
 
           std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
             let mut cell = Cell::from(ch);
@@ -272,9 +263,7 @@ pub fn draw(
           });
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas
-            .frame_mut()
-            .set_cells_at(cells_upos, cells.clone().into_iter());
+          canvas.frame_mut().set_cells_at(cells_upos, &cells);
 
           col_idx += end_fills;
         }
@@ -293,7 +282,7 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    let mut cells: BumpaloVec<Cell> = BumpaloVec::new_in(&bump);
+    cells.clear();
 
     std::iter::repeat_n(' ', width as usize).for_each(|ch| {
       let mut cell = Cell::from(ch);
@@ -302,9 +291,7 @@ pub fn draw(
     });
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
-    canvas
-      .frame_mut()
-      .set_cells_at(cells_upos, cells.clone().into_iter());
+    canvas.frame_mut().set_cells_at(cells_upos, &cells);
     row_idx += 1;
   }
 }
