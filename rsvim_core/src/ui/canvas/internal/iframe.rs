@@ -291,7 +291,8 @@ impl Iframe {
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty_rows(&mut self) {
-    self.dirty_rows = vec![false; self.size.height() as usize];
+    debug_assert_eq!(self.dirty_rows.len(), self.size.height() as usize);
+    self.dirty_rows.fill(false);
   }
 }
 
