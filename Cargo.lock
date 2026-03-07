@@ -2782,7 +2782,6 @@ dependencies = [
  "assert_fs",
  "async-trait",
  "bitflags",
- "bumpalo",
  "compact_str 0.9.0",
  "crossterm",
  "deno_core_icudata",
