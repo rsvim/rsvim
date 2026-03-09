@@ -91,9 +91,10 @@ impl Canvas {
   pub fn prev_cursor(&self) -> &Cursor {
     self.prev_frame.cursor()
   }
+}
 
-  // Previous frame }
-
+// Shade {
+impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
@@ -184,10 +185,10 @@ impl Canvas {
   /// Shade cells and append results into shader vector.
   pub fn _shade_cells(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
     if self.size() == self.prev_size() {
-      // When terminal size remains the same, use dirty-marks diff-algorithm.
+      // When terminal size doesn't change, use dirty-marks diff-algorithm.
       self._dirty_marks_diff(shader_commands);
     } else {
-      // When terminal size remains the same, use brute-force diff-algorithm.
+      // When terminal size changes, use brute-force diff-algorithm.
       self._brute_force_diff(shader_commands)
     }
   }
@@ -280,10 +281,11 @@ impl Canvas {
     }
   }
 
-  /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
-  /// widgets.
+  /// Dirty marks diff-algorithm, it only iterates on the area that has been
+  /// marked as dirty by UI widgets.
   ///
-  /// This algorithm is more performant when the whole terminal size remains unchanged.
+  /// This algorithm is more performant when the whole terminal size remains
+  /// unchanged.
   pub fn _dirty_marks_diff(
     &mut self,
     shader_commands: &mut Vec<ShaderCommand>,
@@ -321,6 +323,7 @@ impl Canvas {
     }
   }
 }
+// Shade }
 
 #[derive(Debug, Clone)]
 /// Shader command enums.
@@ -378,7 +381,7 @@ pub enum ShaderCommand {
   TerminalSetSize(crossterm::terminal::SetSize),
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 /// The rendering updates on each draw, returns from [`Canvas::shade`] method.
 ///
 /// It's simply a collection of [`ShaderCommand`].
