@@ -294,11 +294,11 @@ fn set_cells_at1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
+    info!("{:?} input:{:?}", i, input);
     frame.set_cells_at(
       input.0,
       &input.1.chars().map(Cell::with_char).collect_vec(),
     );
-    info!("{:?} input:{:?}", i, input);
   }
   let actuals = frame.raw_symbols_with_placeholder();
   assert_eq!(actuals.len(), expects.len());

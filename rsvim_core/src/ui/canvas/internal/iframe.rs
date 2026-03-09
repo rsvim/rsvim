@@ -253,12 +253,18 @@ impl Iframe {
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      for row in pos.y()..(end_at.y() + 1) {
-        // trace!("try set dirty rows at row:{:?}", row);
-        if (row as usize) < self.dirty_rows.len() {
-          self.dirty_rows[row as usize] = true;
-        }
-      }
+      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
+      debug_assert!(((end_at.y() + 1) as usize) <= self.dirty_rows.len());
+      self.dirty_rows[(pos.y() as usize)..((end_at.y() + 1) as usize)]
+        .fill(true);
+
+      // for row in pos.y()..(end_at.y() + 1) {
+      //   // trace!("try set dirty rows at row:{:?}", row);
+      //
+      //   // if (row as usize) < self.dirty_rows.len() {
+      //   self.dirty_rows[row as usize] = true;
+      //   // }
+      // }
       // trace!(
       //   "try set cells dirty at row range:{:?}-{:?}",
       //   pos.y(),
