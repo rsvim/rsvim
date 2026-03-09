@@ -11,6 +11,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use crossterm::style::Attributes;
+use smallvec::SmallVec;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -39,8 +40,6 @@ pub fn draw(
 
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
-
-  let mut cells: Vec<Cell> = Vec::with_capacity(width as usize);
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
@@ -94,15 +93,15 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          cells.clear();
-          std::iter::repeat_n('>', start_fills as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+          let mut cell = Cell::from('>');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            start_fills as usize,
+          );
           col_idx += start_fills;
         }
 
@@ -201,7 +200,8 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                cells.clear();
+                let mut cells: SmallVec<[Cell; 32]> =
+                  SmallVec::with_capacity(unicode_width);
 
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
