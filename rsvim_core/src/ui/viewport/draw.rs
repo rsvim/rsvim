@@ -279,16 +279,13 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    cells.clear();
-
-    std::iter::repeat_n(' ', width as usize).for_each(|ch| {
-      let mut cell = Cell::from(ch);
-      set_bg(&mut cell);
-      cells.push(cell);
-    });
+    let mut cell = Cell::from(' ');
+    set_bg(&mut cell);
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
-    canvas.frame_mut().set_cells_at(cells_upos, &cells);
+    canvas
+      .frame_mut()
+      .set_n_cells_at(cells_upos, cell, width as usize);
     row_idx += 1;
   }
 }
