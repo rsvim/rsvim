@@ -97,7 +97,7 @@ impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
-    let mut shader_commands: Vec<ShaderCommand> = Vec::with_capacity(
+    let mut shaders: Vec<ShaderCommand> = Vec::with_capacity(
       (self.size().height() as usize) * (self.size().width() as usize),
     );
 
@@ -108,31 +108,31 @@ impl Canvas {
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
     if !self.cursor().hidden() {
-      shader_commands
-        .insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
     }
 
     // For cells, it needs extra save and restore cursor position
-    self._shade_cells(&mut shader_commands);
+    self._shade_cells(&mut shaders);
     let saved_cursor_pos = self.cursor().pos();
 
     // Revert hide cursor.
     if !self.cursor().hidden() {
-      shader_commands.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+      shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
     }
 
-    shader_commands.push(ShaderCommand::CursorMoveTo(
-      crossterm::cursor::MoveTo(saved_cursor_pos.x(), saved_cursor_pos.y()),
-    ));
+    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+      saved_cursor_pos.x(),
+      saved_cursor_pos.y(),
+    )));
 
     // For cursor
     let mut cursor_shaders = self._shade_cursor();
-    shader_commands.append(&mut cursor_shaders);
+    shaders.append(&mut cursor_shaders);
 
     // Finish shade.
     self._shade_done();
 
-    Shader::new(shader_commands)
+    Shader::new(shaders)
   }
 
   /// Shade done.
