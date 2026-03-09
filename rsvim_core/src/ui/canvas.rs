@@ -272,10 +272,9 @@ impl Canvas {
           let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let shader_commands =
-              self._make_printable_shaders(row, col, col_end_at);
-            shader_commands.push(shader_commands.0);
-            shader_commands.push(shader_commands.1);
+            let shaders = self._make_printable_shaders(row, col, col_end_at);
+            shader_commands.push(shaders.0);
+            shader_commands.push(shaders.1);
             col = col_end_at;
           }
         }
@@ -312,10 +311,10 @@ impl Canvas {
             let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let shader_commands =
+              let shaders =
                 self._make_printable_shaders(row as u16, col, col_end_at);
-              shader_commands.push(shader_commands.0);
-              shader_commands.push(shader_commands.1);
+              shader_commands.push(shaders.0);
+              shader_commands.push(shaders.1);
               col = col_end_at;
             }
           }
