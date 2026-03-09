@@ -323,12 +323,15 @@ fn diff1() {
   ));
   assert!(matches!(
     actual1[1],
-    ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
-    &actual1[1]
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual1[1]
   {
-    assert_eq!(*contents, "ABCD".to_string());
+    assert_eq!(contents.to_string(), "ABCD".to_string());
   }
   assert_eq!(actual2.len(), 2);
   assert!(matches!(
@@ -337,11 +340,14 @@ fn diff1() {
   ));
   assert!(matches!(
     actual2[1],
-    ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
-    &actual2[1]
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual2[1]
   {
-    assert_eq!(*contents, "ABCD".to_string());
+    assert_eq!(contents.to_string(), "ABCD".to_string());
   }
 }
