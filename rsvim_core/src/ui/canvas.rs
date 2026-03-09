@@ -97,38 +97,42 @@ impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
-    // For cells, it needs extra save and restore cursor position
-    let mut shaders = self._shade_cells();
-    let saved_cursor_pos = self.cursor().pos();
+    let mut shader_commands: Vec<ShaderCommand> = Vec::with_capacity(
+      (self.size().height() as usize) * (self.size().width() as usize),
+    );
 
-    // On Windows Terminal, flushing shaders without hiding cursor makes the
-    // cursor twinkling/jumping while refreshing the TUI screen.
+    // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
+    //
+    // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
+    // the cursor twinkling/jumping while refreshing the TUI screen.
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
-
-    if !shaders.is_empty() {
-      if !self.cursor().hidden() {
-        shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
-      }
-
-      if !self.cursor().hidden() {
-        shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
-      }
+    if !self.cursor().hidden() {
+      shader_commands
+        .insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
     }
 
-    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      saved_cursor_pos.x(),
-      saved_cursor_pos.y(),
-    )));
+    // For cells, it needs extra save and restore cursor position
+    self._shade_cells(&mut shader_commands);
+    let saved_cursor_pos = self.cursor().pos();
+
+    // Revert hide cursor.
+    if !self.cursor().hidden() {
+      shader_commands.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+    }
+
+    shader_commands.push(ShaderCommand::CursorMoveTo(
+      crossterm::cursor::MoveTo(saved_cursor_pos.x(), saved_cursor_pos.y()),
+    ));
 
     // For cursor
     let mut cursor_shaders = self._shade_cursor();
-    shaders.append(&mut cursor_shaders);
+    shader_commands.append(&mut cursor_shaders);
 
     // Finish shade.
     self._shade_done();
 
-    Shader::new(shaders)
+    Shader::new(shader_commands)
   }
 
   /// Shade done.
@@ -180,13 +184,13 @@ impl Canvas {
   }
 
   /// Shade cells and append results into shader vector.
-  pub fn _shade_cells(&mut self) -> Vec<ShaderCommand> {
+  pub fn _shade_cells(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
     if self.size() == self.prev_size() {
       // When terminal size remains the same, use dirty-marks diff-algorithm.
-      self._dirty_marks_diff()
+      self._dirty_marks_diff(shader_commands);
     } else {
       // When terminal size remains the same, use brute-force diff-algorithm.
-      self._brute_force_diff()
+      self._brute_force_diff(shader_commands)
     }
   }
 
@@ -244,12 +248,12 @@ impl Canvas {
   ///
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
-  pub fn _brute_force_diff(&mut self) -> Vec<ShaderCommand> {
+  pub fn _brute_force_diff(
+    &mut self,
+    shader_commands: &mut Vec<ShaderCommand>,
+  ) {
     let size = self.size();
     trace!("brute force diff, size:{:?}", size);
-
-    let mut shaders =
-      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
     if !self.frame().is_zero_sized() {
       for row in 0..size.height() {
@@ -270,27 +274,25 @@ impl Canvas {
           if col_end_at > col {
             let shader_commands =
               self._make_printable_shaders(row, col, col_end_at);
-            shaders.push(shader_commands.0);
-            shaders.push(shader_commands.1);
+            shader_commands.push(shader_commands.0);
+            shader_commands.push(shader_commands.1);
             col = col_end_at;
           }
         }
       }
     }
-
-    shaders
   }
 
   /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
   /// widgets.
   ///
   /// This algorithm is more performant when the whole terminal size remains unchanged.
-  pub fn _dirty_marks_diff(&mut self) -> Vec<ShaderCommand> {
+  pub fn _dirty_marks_diff(
+    &mut self,
+    shader_commands: &mut Vec<ShaderCommand>,
+  ) {
     let size = self.size();
     trace!("dirty marks diff, size:{:?}", size);
-
-    let mut shaders =
-      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
     if !self.frame().is_zero_sized() {
       for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
@@ -312,15 +314,14 @@ impl Canvas {
             if col_end_at > col {
               let shader_commands =
                 self._make_printable_shaders(row as u16, col, col_end_at);
-              shaders.push(shader_commands.0);
-              shaders.push(shader_commands.1);
+              shader_commands.push(shader_commands.0);
+              shader_commands.push(shader_commands.1);
               col = col_end_at;
             }
           }
         }
       }
     }
-    shaders
   }
 }
 
