@@ -378,7 +378,7 @@ pub enum ShaderCommand {
   TerminalSetSize(crossterm::terminal::SetSize),
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 /// The rendering updates on each draw, returns from [`Canvas::shade`] method.
 ///
 /// It's simply a collection of [`ShaderCommand`].
