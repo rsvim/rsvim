@@ -91,9 +91,10 @@ impl Canvas {
   pub fn prev_cursor(&self) -> &Cursor {
     self.prev_frame.cursor()
   }
+}
 
-  // Previous frame }
-
+// Shade {
+impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
@@ -321,6 +322,7 @@ impl Canvas {
     }
   }
 }
+// Shade }
 
 #[derive(Debug, Clone)]
 /// Shader command enums.
