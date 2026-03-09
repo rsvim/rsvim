@@ -304,8 +304,10 @@ fn diff1() {
     point!(2, 3),
     &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
-  let actual1 = can._dirty_marks_diff();
-  let actual2 = can._brute_force_diff();
+  let mut actual1 = vec![];
+  let mut actual2 = vec![];
+  can._dirty_marks_diff(&mut actual1);
+  can._brute_force_diff(&mut actual2);
   info!("dirty marks:{:?}", actual1);
   info!("brute force:{:?}", actual2);
   assert_eq!(actual1.len(), 2);
