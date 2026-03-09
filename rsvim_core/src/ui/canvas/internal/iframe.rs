@@ -229,6 +229,7 @@ impl Iframe {
     self.try_set_cells_at(pos, cells).unwrap();
   }
 
+  /// Set `n` cells repeatedly start at a position.
   pub fn set_n_cells_at(&mut self, pos: U16Pos, cell: Cell, n: usize) {
     self.try_set_n_cells_at(pos, cell, n).unwrap();
   }
@@ -267,6 +268,7 @@ impl Iframe {
     }
   }
 
+  /// Try set `n` cells repeatedly start at a position.
   pub fn try_set_n_cells_at(
     &mut self,
     pos: U16Pos,
@@ -286,25 +288,6 @@ impl Iframe {
     } else {
       None
     }
-  }
-
-  /// Set (replace) empty cells at a range.
-  ///
-  /// # Panics
-  ///
-  /// If any positions of `cells` is outside of frame shape.
-  pub fn set_n_empty_cells_at(&mut self, pos: U16Pos, n: usize) {
-    self.set_n_cells_at(pos, Cell::empty(), n)
-  }
-
-  /// Try set (replace) empty cells at a range, non-panic version of
-  /// [`set_empty_cells_at`](Iframe::set_empty_cells_at).
-  pub fn try_set_n_empty_cells_at(
-    &mut self,
-    pos: U16Pos,
-    n: usize,
-  ) -> Option<()> {
-    self.try_set_n_cells_at(pos, Cell::empty(), n)
   }
 
   /// Get dirty rows.
