@@ -126,8 +126,7 @@ impl Canvas {
     )));
 
     // For cursor
-    let mut cursor_shaders = self._shade_cursor();
-    shaders.append(&mut cursor_shaders);
+    self._shade_cursor(&mut shaders);
 
     // Finish shade.
     self._shade_done();
@@ -144,43 +143,42 @@ impl Canvas {
   }
 
   /// Shade cursor and append results into shader vector.
-  pub fn _shade_cursor(&mut self) -> Vec<ShaderCommand> {
+  pub fn _shade_cursor(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
-    let mut shader = vec![];
 
     // If cursor is changed.
     if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
-          shader.push(ShaderCommand::CursorEnableBlinking(
+          shader_commands.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
-          shader.push(ShaderCommand::CursorDisableBlinking(
+          shader_commands.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
         }
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
-          shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+          shader_commands
+            .push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+          shader_commands
+            .push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if cursor.style() != prev_cursor.style() {
-        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
+        shader_commands
+          .push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
-        shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-          cursor.pos().x(),
-          cursor.pos().y(),
-        )));
+        shader_commands.push(ShaderCommand::CursorMoveTo(
+          crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y()),
+        ));
       }
     }
-
-    shader
   }
 
   /// Shade cells and append results into shader vector.

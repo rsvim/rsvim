@@ -23,14 +23,16 @@ fn _shade_cursor1() {
 
   let cursor1 = Cursor::default();
   can.frame_mut().set_cursor(cursor1);
-  let actual1 = can._shade_cursor();
+  let mut actual1 = vec![];
+  can._shade_cursor(&mut actual1);
   can._shade_done();
   assert!(actual1.is_empty());
 
   let cursor2 =
     Cursor::new(point!(3, 7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
-  let actual2 = can._shade_cursor();
+  let mut actual2 = vec![];
+  can._shade_cursor(&mut actual2);
   can._shade_done();
   info!("actual2:{:?}", actual2);
   assert!(!actual2.is_empty());
@@ -94,7 +96,8 @@ fn _shade_cursor1() {
   let cursor3 =
     Cursor::new(point!(4, 5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
-  let actual3 = can._shade_cursor();
+  let mut actual3 = vec![];
+  can._shade_cursor(&mut actual3);
   can._shade_done();
   info!("actual3:{:?}", actual3);
   assert_eq!(actual3.len(), 3);
