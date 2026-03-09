@@ -297,7 +297,7 @@ fn _make_printable_shader1() {
     crossterm::style::PrintStyledContent(contents),
   ) = &shaders.1
   {
-    assert_eq!(contents.to_string(), "ABCD".to_string());
+    assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
 }
 
@@ -331,7 +331,7 @@ fn diff1() {
     crossterm::style::PrintStyledContent(contents),
   ) = &actual1[1]
   {
-    assert_eq!(contents.to_string(), "ABCD".to_string());
+    assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
   assert_eq!(actual2.len(), 2);
   assert!(matches!(
@@ -348,6 +348,6 @@ fn diff1() {
     crossterm::style::PrintStyledContent(contents),
   ) = &actual2[1]
   {
-    assert_eq!(contents.to_string(), "ABCD".to_string());
+    assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
 }
