@@ -112,7 +112,7 @@ impl Canvas {
       }
 
       if !self.cursor().hidden() {
-        shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+        shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
       }
     }
 
