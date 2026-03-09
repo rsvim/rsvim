@@ -289,12 +289,15 @@ fn _make_printable_shader1() {
   ));
   assert!(matches!(
     shaders.1,
-    ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
-    &shaders.1
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &shaders.1
   {
-    assert_eq!(*contents, "ABCD".to_string());
+    assert_eq!(contents.to_string(), "ABCD".to_string());
   }
 }
 
