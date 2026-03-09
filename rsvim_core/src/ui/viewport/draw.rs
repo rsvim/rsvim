@@ -206,13 +206,12 @@ pub fn draw(
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
-
                 cells.push(cell);
-                for _i in 0..(unicode_width - 1) {
-                  let mut cell = Cell::empty();
-                  set_hl(&mut cell);
-                  cells.push(cell);
-                }
+
+                let mut cell = Cell::empty();
+                set_hl(&mut cell);
+                cells.resize(unicode_width, cell);
+
                 canvas.frame_mut().set_cells_at(cell_upos, &cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
@@ -238,33 +237,31 @@ pub fn draw(
           (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
-          cells.clear();
-
           let left_length = width - occupied_length;
-          std::iter::repeat_n(' ', left_length as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+
+          let mut cell = Cell::from(' ');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            left_length as usize,
+          );
           col_idx += left_length;
         }
 
         // Render end fills.
         if end_fills > 0 {
-          cells.clear();
-
-          std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+          let mut cell = Cell::from('<');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
-
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            end_fills as usize,
+          );
           col_idx += end_fills;
         }
         debug_assert_eq!(width, col_idx);
