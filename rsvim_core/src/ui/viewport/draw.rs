@@ -11,6 +11,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
 use crossterm::style::Attributes;
+use smallvec::SmallVec;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -39,8 +40,6 @@ pub fn draw(
 
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
-
-  let mut cells: Vec<Cell> = Vec::with_capacity(width as usize);
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
@@ -94,15 +93,15 @@ pub fn draw(
 
         // Render start fills.
         if start_fills > 0 {
-          cells.clear();
-          std::iter::repeat_n('>', start_fills as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+          let mut cell = Cell::from('>');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            start_fills as usize,
+          );
           col_idx += start_fills;
         }
 
@@ -201,18 +200,18 @@ pub fn draw(
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               if unicode_width > 1 {
-                cells.clear();
+                let mut cells: SmallVec<[Cell; 32]> =
+                  SmallVec::with_capacity(unicode_width);
 
                 // Unicode width > 1
                 let mut cell = Cell::with_symbol(unicode_symbol);
                 set_hl(&mut cell);
-
                 cells.push(cell);
-                for _i in 0..(unicode_width - 1) {
-                  let mut cell = Cell::empty();
-                  set_hl(&mut cell);
-                  cells.push(cell);
-                }
+
+                let mut cell = Cell::empty();
+                set_hl(&mut cell);
+                cells.resize(unicode_width, cell);
+
                 canvas.frame_mut().set_cells_at(cell_upos, &cells);
               } else {
                 let mut cell = Cell::with_symbol(unicode_symbol);
@@ -238,33 +237,31 @@ pub fn draw(
           (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
-          cells.clear();
-
           let left_length = width - occupied_length;
-          std::iter::repeat_n(' ', left_length as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+
+          let mut cell = Cell::from(' ');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            left_length as usize,
+          );
           col_idx += left_length;
         }
 
         // Render end fills.
         if end_fills > 0 {
-          cells.clear();
-
-          std::iter::repeat_n('<', end_fills as usize).for_each(|ch| {
-            let mut cell = Cell::from(ch);
-            set_bg(&mut cell);
-            cells.push(cell);
-          });
+          let mut cell = Cell::from('<');
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, &cells);
-
+          canvas.frame_mut().set_n_cells_at(
+            cells_upos,
+            cell,
+            end_fills as usize,
+          );
           col_idx += end_fills;
         }
         debug_assert_eq!(width, col_idx);
@@ -282,16 +279,13 @@ pub fn draw(
   // NOTE: If the viewport is empty (i.e. it has no lines), it goes to this
   // part as well.
   while row_idx < height {
-    cells.clear();
-
-    std::iter::repeat_n(' ', width as usize).for_each(|ch| {
-      let mut cell = Cell::from(ch);
-      set_bg(&mut cell);
-      cells.push(cell);
-    });
+    let mut cell = Cell::from(' ');
+    set_bg(&mut cell);
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
-    canvas.frame_mut().set_cells_at(cells_upos, &cells);
+    canvas
+      .frame_mut()
+      .set_n_cells_at(cells_upos, cell, width as usize);
     row_idx += 1;
   }
 }
