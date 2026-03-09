@@ -104,7 +104,6 @@ impl Iframe {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
-    self.cells.fill(Cell::default());
     self.dirty_rows.resize(size.height() as usize, true);
     self.dirty_rows.fill(true);
     old_size
