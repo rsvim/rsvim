@@ -194,7 +194,9 @@ impl Canvas {
     }
   }
 
-  /// Find next same cell in current row of frame. NOTE: row is y, col is x.
+  /// Find next same cell in current row of frame.
+  ///
+  /// NOTE: row is y, col is x.
   ///
   /// # Returns
   ///

@@ -221,8 +221,6 @@ impl Iframe {
 
   /// Set cells at a range.
   ///
-  /// Returns old cells.
-  ///
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
@@ -231,6 +229,10 @@ impl Iframe {
   }
 
   /// Set `n` cells repeatedly start at a position.
+  ///
+  /// # Panics
+  ///
+  /// If any positions of `cells` is outside of frame shape.
   pub fn set_n_cells_at(&mut self, pos: U16Pos, cell: Cell, n: usize) {
     self.try_set_n_cells_at(pos, cell, n).unwrap();
   }
@@ -269,7 +271,8 @@ impl Iframe {
     }
   }
 
-  /// Try set `n` cells repeatedly start at a position.
+  /// Try set `n` cells repeatedly start at a position, non-panic version of
+  /// [`set_n_cells_at`](Iframe::set_n_cells_at).
   pub fn try_set_n_cells_at(
     &mut self,
     pos: U16Pos,
