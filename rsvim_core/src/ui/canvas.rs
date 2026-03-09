@@ -108,7 +108,7 @@ impl Canvas {
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
     if !self.cursor().hidden() {
-      shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      shaders.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
     }
 
     // For cells, it needs extra save and restore cursor position
