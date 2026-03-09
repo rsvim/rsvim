@@ -1,6 +1,7 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
 use crate::buf::text::Text;
+use crate::buf::unicode::char_is_whitespace;
 use crate::hl::ColorScheme;
 use crate::hl::Highlight;
 use crate::prelude::*;
@@ -44,7 +45,7 @@ pub fn draw(
 
   let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
-      if cell.symbol().chars().any(char::is_whitespace) {
+      if cell.symbol().chars().any(char_is_whitespace) {
         cell.set_fg(Color::Reset);
       } else {
         cell.set_fg(colorscheme.ui_foreground());
@@ -192,7 +193,7 @@ pub fn draw(
                   && cap_point >= hl_capture.range.start_point
                   && cap_point < hl_capture.range.end_point
                 {
-                  if cell.symbol().chars().any(char::is_whitespace) {
+                  if cell.symbol().chars().any(char_is_whitespace) {
                     cell.set_fg(Color::Reset);
                     cell.set_attrs(Attributes::none());
                   } else {
@@ -201,7 +202,7 @@ pub fn draw(
                   }
                   cell.set_bg(colorscheme_hl.bg.unwrap());
                 } else if let Some(colorscheme) = colorscheme {
-                  if cell.symbol().chars().any(char::is_whitespace) {
+                  if cell.symbol().chars().any(char_is_whitespace) {
                     cell.set_fg(Color::Reset);
                   } else {
                     cell.set_fg(colorscheme.ui_foreground());

@@ -5,7 +5,9 @@ use crate::buf::opt::FileFormatOption;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use icu::properties::CodePointMapData;
+use icu::properties::CodePointSetData;
 use icu::properties::props::EastAsianWidth;
+use icu::properties::props::WhiteSpace;
 use std::fmt;
 
 /// The formatter for ASCII control code in [`AsciiChar`], helps implement the
@@ -146,4 +148,9 @@ pub fn str_symbols(opt: &BufferOptions, s: &str) -> CompactString {
       init_symbol
     },
   )
+}
+
+/// Whether a unicode char is whitespace.
+pub fn char_is_whitespace(c: char) -> bool {
+  CodePointSetData::new::<WhiteSpace>().contains(c)
 }

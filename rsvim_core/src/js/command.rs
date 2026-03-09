@@ -10,6 +10,7 @@ mod attr_tests;
 #[cfg(test)]
 mod opt_tests;
 
+use crate::buf::unicode::char_is_whitespace;
 use crate::chan::ExCommandReq;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
@@ -184,7 +185,7 @@ impl CommandManager {
     context.current_buffer_id(req.current_buf_id);
     context.current_window_id(req.current_win_id);
 
-    let (mut name, body) = match req.payload.find(char::is_whitespace) {
+    let (mut name, body) = match req.payload.find(char_is_whitespace) {
       Some(pos) => {
         let name = req.payload.get(0..pos).unwrap().trim().to_compact_string();
         let body = req.payload.get(pos..).unwrap().to_compact_string();
@@ -234,7 +235,7 @@ impl CommandManager {
       let name = self.aliases.get(&name).unwrap_or(&name).clone();
       debug_assert!(self.commands.contains_key(&name));
       let args = body
-        .split_whitespace()
+        .split(char_is_whitespace)
         .map(|a| a.to_compact_string())
         .collect_vec();
       context.args(args);
