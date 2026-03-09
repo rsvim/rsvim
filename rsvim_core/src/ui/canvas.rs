@@ -301,7 +301,8 @@ impl Canvas {
     let _prev_size = self.prev_size();
     trace!("dirty marks diff, size:{:?}", size);
 
-    let mut shaders = vec![];
+    let mut shaders =
+      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
     if !frame.is_zero_sized() {
       for (row, dirty) in frame.dirty_rows().iter().enumerate() {
