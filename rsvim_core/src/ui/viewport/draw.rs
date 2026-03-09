@@ -10,7 +10,6 @@ use crate::syntax::SyntaxCaptureValue;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
-use compact_str::CompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use smallvec::SmallVec;
@@ -43,16 +42,13 @@ pub fn draw(
   let mut last_colorscheme_hl: Option<Highlight> = None;
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
-  let set_bg_only = |cell: &mut Cell| {
+  let set_bg = |cell: &mut Cell| {
     if let Some(colorscheme) = colorscheme {
-      cell.set_fg(Color::Reset);
-      cell.set_bg(colorscheme.ui_background());
-      cell.set_attrs(Attributes::none());
-    }
-  };
-  let set_both_fg_and_bg = |cell: &mut Cell| {
-    if let Some(colorscheme) = colorscheme {
-      cell.set_fg(colorscheme.ui_foreground());
+      if cell.symbol().chars().any(char::is_whitespace) {
+        cell.set_fg(Color::Reset);
+      } else {
+        cell.set_fg(colorscheme.ui_foreground());
+      }
       cell.set_bg(colorscheme.ui_background());
       cell.set_attrs(Attributes::none());
     }
@@ -103,7 +99,7 @@ pub fn draw(
         // Render start fills.
         if start_fills > 0 {
           let mut cell = Cell::from('>');
-          set_both_fg_and_bg(&mut cell);
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_n_cells_at(
@@ -196,7 +192,7 @@ pub fn draw(
                   && cap_point >= hl_capture.range.start_point
                   && cap_point < hl_capture.range.end_point
                 {
-                  if cell.symbol() == CompactString::new(" ") {
+                  if cell.symbol().chars().any(char::is_whitespace) {
                     cell.set_fg(Color::Reset);
                     cell.set_attrs(Attributes::none());
                   } else {
@@ -205,7 +201,11 @@ pub fn draw(
                   }
                   cell.set_bg(colorscheme_hl.bg.unwrap());
                 } else if let Some(colorscheme) = colorscheme {
-                  cell.set_fg(Color::Reset);
+                  if cell.symbol().chars().any(char::is_whitespace) {
+                    cell.set_fg(Color::Reset);
+                  } else {
+                    cell.set_fg(colorscheme.ui_foreground());
+                  }
                   cell.set_bg(colorscheme.ui_background());
                   cell.set_attrs(Attributes::none());
                 }
@@ -254,7 +254,7 @@ pub fn draw(
           let left_length = width - occupied_length;
 
           let mut cell = Cell::from(' ');
-          set_bg_only(&mut cell);
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_n_cells_at(
@@ -268,7 +268,7 @@ pub fn draw(
         // Render end fills.
         if end_fills > 0 {
           let mut cell = Cell::from('<');
-          set_both_fg_and_bg(&mut cell);
+          set_bg(&mut cell);
 
           let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_n_cells_at(
@@ -294,7 +294,7 @@ pub fn draw(
   // part as well.
   while row_idx < height {
     let mut cell = Cell::from(' ');
-    set_bg_only(&mut cell);
+    set_bg(&mut cell);
 
     let cells_upos = point!(upos.x(), row_idx + upos.y());
     canvas

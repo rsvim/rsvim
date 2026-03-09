@@ -237,7 +237,7 @@ impl Canvas {
       .collect::<Vec<_>>()
       .join("");
     let new_fg = new_cells[0].fg();
-    let new_bg = new_cells[0].fg();
+    let new_bg = new_cells[0].bg();
     let new_attrs = new_cells[0].attrs();
     let mut new_contents = new_contents.with(*new_fg).on(*new_bg);
     if new_attrs.has(Attribute::Bold) {
