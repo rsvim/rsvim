@@ -281,11 +281,11 @@ impl Iframe {
     let range = self.pos2range(pos, n);
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
-      for row in pos.y()..(end_at.y() + 1) {
-        if (row as usize) < self.dirty_rows.len() {
-          self.dirty_rows[row as usize] = true;
-        }
-      }
+      let end_at_y =
+        std::cmp::min(end_at.y() as usize + 1, self.dirty_rows.len());
+      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
+      debug_assert!(end_at_y <= self.dirty_rows.len());
+      self.dirty_rows[(pos.y() as usize)..end_at_y].fill(true);
       self.cells[range].fill(cell);
       Some(())
     } else {
