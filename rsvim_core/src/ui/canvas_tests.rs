@@ -23,14 +23,16 @@ fn _shade_cursor1() {
 
   let cursor1 = Cursor::default();
   can.frame_mut().set_cursor(cursor1);
-  let actual1 = can._shade_cursor();
+  let mut actual1 = vec![];
+  can._shade_cursor(&mut actual1);
   can._shade_done();
   assert!(actual1.is_empty());
 
   let cursor2 =
     Cursor::new(point!(3, 7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
-  let actual2 = can._shade_cursor();
+  let mut actual2 = vec![];
+  can._shade_cursor(&mut actual2);
   can._shade_done();
   info!("actual2:{:?}", actual2);
   assert!(!actual2.is_empty());
@@ -94,7 +96,8 @@ fn _shade_cursor1() {
   let cursor3 =
     Cursor::new(point!(4, 5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
-  let actual3 = can._shade_cursor();
+  let mut actual3 = vec![];
+  can._shade_cursor(&mut actual3);
   can._shade_done();
   info!("actual3:{:?}", actual3);
   assert_eq!(actual3.len(), 3);
@@ -280,17 +283,16 @@ fn _make_printable_shader1() {
   let col_end_at = can._next_same_cell_in_row(row, col);
   let shaders = can._make_printable_shaders(row, col, col_end_at);
   info!("shader:{:?}", shaders);
-  assert_eq!(shaders.len(), 2);
   assert!(matches!(
-    shaders[0],
+    shaders.0,
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
   ));
   assert!(matches!(
-    shaders[1],
+    shaders.1,
     ShaderCommand::StylePrintString(crossterm::style::Print(_))
   ));
   if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
-    &shaders[1]
+    &shaders.1
   {
     assert_eq!(*contents, "ABCD".to_string());
   }
@@ -305,8 +307,10 @@ fn diff1() {
     point!(2, 3),
     &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
-  let actual1 = can._dirty_marks_diff();
-  let actual2 = can._brute_force_diff();
+  let mut actual1 = vec![];
+  let mut actual2 = vec![];
+  can._dirty_marks_diff(&mut actual1);
+  can._brute_force_diff(&mut actual2);
   info!("dirty marks:{:?}", actual1);
   info!("brute force:{:?}", actual2);
   assert_eq!(actual1.len(), 2);

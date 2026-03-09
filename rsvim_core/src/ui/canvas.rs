@@ -97,42 +97,41 @@ impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
-    let mut shader = Shader::new();
+    let mut shaders = Vec::with_capacity(
+      (self.size().height() as usize) * (self.size().width() as usize),
+    );
 
-    // For cells, it needs extra save and restore cursor position
-    let mut cells_shaders = self._shade_cells();
-    let saved_cursor_pos = self.cursor().pos();
-
-    // On Windows Terminal, flushing shaders without hiding cursor makes the
-    // cursor twinkling/jumping while refreshing the TUI screen.
+    // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
+    //
+    // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
+    // the cursor twinkling/jumping while refreshing the TUI screen.
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
-
-    if !cells_shaders.is_empty() {
-      if !self.cursor().hidden() {
-        shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
-      }
-
-      shader.append(&mut cells_shaders);
-
-      if !self.cursor().hidden() {
-        shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
-      }
+    if !self.cursor().hidden() {
+      shaders.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
     }
 
-    shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+    // For cells, it needs extra save and restore cursor position
+    self._shade_cells(&mut shaders);
+    let saved_cursor_pos = self.cursor().pos();
+
+    // Revert hide cursor.
+    if !self.cursor().hidden() {
+      shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+    }
+
+    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
       saved_cursor_pos.x(),
       saved_cursor_pos.y(),
     )));
 
     // For cursor
-    let mut cursor_shaders = self._shade_cursor();
-    shader.append(&mut cursor_shaders);
+    self._shade_cursor(&mut shaders);
 
     // Finish shade.
     self._shade_done();
 
-    shader
+    Shader::new(shaders)
   }
 
   /// Shade done.
@@ -144,57 +143,58 @@ impl Canvas {
   }
 
   /// Shade cursor and append results into shader vector.
-  pub fn _shade_cursor(&mut self) -> Vec<ShaderCommand> {
+  pub fn _shade_cursor(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
-    let mut shader = vec![];
 
     // If cursor is changed.
     if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
-          shader.push(ShaderCommand::CursorEnableBlinking(
+          shader_commands.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
-          shader.push(ShaderCommand::CursorDisableBlinking(
+          shader_commands.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
         }
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
-          shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+          shader_commands
+            .push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+          shader_commands
+            .push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if cursor.style() != prev_cursor.style() {
-        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
+        shader_commands
+          .push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
-        shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-          cursor.pos().x(),
-          cursor.pos().y(),
-        )));
+        shader_commands.push(ShaderCommand::CursorMoveTo(
+          crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y()),
+        ));
       }
     }
-
-    shader
   }
 
   /// Shade cells and append results into shader vector.
-  pub fn _shade_cells(&mut self) -> Vec<ShaderCommand> {
+  pub fn _shade_cells(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
     if self.size() == self.prev_size() {
       // When terminal size remains the same, use dirty-marks diff-algorithm.
-      self._dirty_marks_diff()
+      self._dirty_marks_diff(shader_commands);
     } else {
       // When terminal size remains the same, use brute-force diff-algorithm.
-      self._brute_force_diff()
+      self._brute_force_diff(shader_commands)
     }
   }
 
-  /// Find next same cell in current row of frame. NOTE: row is y, col is x.
+  /// Find next same cell in current row of frame.
+  ///
+  /// NOTE: row is y, col is x.
   ///
   /// # Returns
   ///
@@ -222,12 +222,9 @@ impl Canvas {
     row: u16,
     start_col: u16,
     end_col: u16,
-  ) -> Vec<ShaderCommand> {
-    let frame = self.frame();
-    let mut shaders = Vec::new();
-
+  ) -> (ShaderCommand, ShaderCommand) {
     debug_assert!(end_col > start_col);
-    let new_cells = frame.get_cells_at(
+    let new_cells = self.frame().get_cells_at(
       point!(start_col, row),
       end_col as usize - start_col as usize,
     );
@@ -236,13 +233,12 @@ impl Canvas {
       .map(|c| c.symbol().clone())
       .collect::<Vec<_>>()
       .join("");
-    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      start_col, row,
-    )));
-    shaders.push(ShaderCommand::StylePrintString(crossterm::style::Print(
-      new_contents.to_string(),
-    )));
-    shaders
+    (
+      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(start_col, row)),
+      ShaderCommand::StylePrintString(crossterm::style::Print(
+        new_contents.to_string(),
+      )),
+    )
   }
 
   /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
@@ -250,23 +246,21 @@ impl Canvas {
   ///
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
-  pub fn _brute_force_diff(&mut self) -> Vec<ShaderCommand> {
-    let frame = self.frame();
+  pub fn _brute_force_diff(
+    &mut self,
+    shader_commands: &mut Vec<ShaderCommand>,
+  ) {
     let size = self.size();
-    let prev_frame = self.prev_frame();
-    let _prev_size = self.prev_size();
     trace!("brute force diff, size:{:?}", size);
 
-    let mut shaders = vec![];
-
-    if !frame.is_zero_sized() {
+    if !self.frame().is_zero_sized() {
       for row in 0..size.height() {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
           let pos: U16Pos = point!(col, row);
-          let cell = frame.get_cell(pos);
-          let prev_cell = prev_frame.get_cell(pos);
+          let cell = self.frame().get_cell(pos);
+          let prev_cell = self.prev_frame().get_cell(pos);
           if cell == prev_cell {
             col += 1;
             continue;
@@ -276,40 +270,36 @@ impl Canvas {
           let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let mut print_shaders =
-              self._make_printable_shaders(row, col, col_end_at);
-            shaders.append(&mut print_shaders);
+            let shaders = self._make_printable_shaders(row, col, col_end_at);
+            shader_commands.push(shaders.0);
+            shader_commands.push(shaders.1);
             col = col_end_at;
           }
         }
       }
     }
-
-    shaders
   }
 
   /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
   /// widgets.
   ///
   /// This algorithm is more performant when the whole terminal size remains unchanged.
-  pub fn _dirty_marks_diff(&mut self) -> Vec<ShaderCommand> {
-    let frame = self.frame();
+  pub fn _dirty_marks_diff(
+    &mut self,
+    shader_commands: &mut Vec<ShaderCommand>,
+  ) {
     let size = self.size();
-    let prev_frame = self.prev_frame();
-    let _prev_size = self.prev_size();
     trace!("dirty marks diff, size:{:?}", size);
 
-    let mut shaders = vec![];
-
-    if !frame.is_zero_sized() {
-      for (row, dirty) in frame.dirty_rows().iter().enumerate() {
+    if !self.frame().is_zero_sized() {
+      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
         if row < size.height() as usize && *dirty {
           let mut col = 0_u16;
           while col < size.width() {
             // Skip unchanged columns
             let pos: U16Pos = point!(col, row as u16);
-            let cell = frame.get_cell(pos);
-            let prev_cell = prev_frame.get_cell(pos);
+            let cell = self.frame().get_cell(pos);
+            let prev_cell = self.prev_frame().get_cell(pos);
             if cell == prev_cell {
               col += 1;
               continue;
@@ -319,17 +309,16 @@ impl Canvas {
             let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let mut print_shaders =
+              let shaders =
                 self._make_printable_shaders(row as u16, col, col_end_at);
-              shaders.append(&mut print_shaders);
+              shader_commands.push(shaders.0);
+              shader_commands.push(shaders.1);
               col = col_end_at;
             }
           }
         }
       }
     }
-
-    shaders
   }
 }
 
@@ -399,18 +388,8 @@ pub struct Shader {
 
 impl Shader {
   /// Make new shader.
-  pub fn new() -> Self {
-    Shader { commands: vec![] }
-  }
-
-  /// Push a shader command.
-  pub fn push(&mut self, command: ShaderCommand) {
-    self.commands.push(command)
-  }
-
-  /// Append a vector of shader commands.
-  pub fn append(&mut self, commands: &mut Vec<ShaderCommand>) {
-    self.commands.append(commands);
+  pub fn new(commands: Vec<ShaderCommand>) -> Self {
+    Shader { commands }
   }
 
   /// Get an iterator of the collection.
