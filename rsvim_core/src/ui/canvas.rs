@@ -8,6 +8,8 @@ mod frame_tests;
 
 use crate::prelude::*;
 use crossterm;
+use crossterm::style::Attribute;
+use crossterm::style::Stylize;
 pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
@@ -234,11 +236,27 @@ impl Canvas {
       .map(|c| c.symbol().clone())
       .collect::<Vec<_>>()
       .join("");
+    let new_fg = new_cells[0].fg();
+    let new_bg = new_cells[0].fg();
+    let new_attrs = new_cells[0].attrs();
+    let mut new_contents = new_contents.with(*new_fg).on(*new_bg);
+    if new_attrs.has(Attribute::Bold) {
+      new_contents = new_contents.bold();
+    }
+    if new_attrs.has(Attribute::Dim) {
+      new_contents = new_contents.dim();
+    }
+    if new_attrs.has(Attribute::Italic) {
+      new_contents = new_contents.italic();
+    }
+    if new_attrs.has(Attribute::Underlined) {
+      new_contents = new_contents.underlined();
+    }
     (
       ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(start_col, row)),
-      ShaderCommand::StylePrintString(crossterm::style::Print(
-        new_contents.to_string(),
-      )),
+      ShaderCommand::StylePrintStyledContentString(
+        crossterm::style::PrintStyledContent(new_contents),
+      ),
     )
   }
 
