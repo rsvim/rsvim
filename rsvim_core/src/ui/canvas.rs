@@ -97,7 +97,7 @@ impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
-    let mut shaders: Vec<ShaderCommand> = Vec::with_capacity(
+    let mut shaders = Vec::with_capacity(
       (self.size().height() as usize) * (self.size().width() as usize),
     );
 
