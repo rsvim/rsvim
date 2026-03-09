@@ -97,10 +97,8 @@ impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
-    let mut shader = Shader::new();
-
     // For cells, it needs extra save and restore cursor position
-    let mut cells_shaders = self._shade_cells();
+    let mut shaders = self._shade_cells();
     let saved_cursor_pos = self.cursor().pos();
 
     // On Windows Terminal, flushing shaders without hiding cursor makes the
@@ -108,31 +106,29 @@ impl Canvas {
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
 
-    if !cells_shaders.is_empty() {
+    if !shaders.is_empty() {
       if !self.cursor().hidden() {
-        shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+        shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
       }
-
-      shader.append(&mut cells_shaders);
 
       if !self.cursor().hidden() {
         shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
       }
     }
 
-    shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
       saved_cursor_pos.x(),
       saved_cursor_pos.y(),
     )));
 
     // For cursor
     let mut cursor_shaders = self._shade_cursor();
-    shader.append(&mut cursor_shaders);
+    shaders.append(&mut cursor_shaders);
 
     // Finish shade.
     self._shade_done();
 
-    shader
+    Shader::new(shaders)
   }
 
   /// Shade done.
@@ -224,12 +220,9 @@ impl Canvas {
     row: u16,
     start_col: u16,
     end_col: u16,
-  ) -> Vec<ShaderCommand> {
-    let frame = self.frame();
-    let mut shaders = Vec::new();
-
+  ) -> (ShaderCommand, ShaderCommand) {
     debug_assert!(end_col > start_col);
-    let new_cells = frame.get_cells_at(
+    let new_cells = self.frame().get_cells_at(
       point!(start_col, row),
       end_col as usize - start_col as usize,
     );
@@ -238,13 +231,12 @@ impl Canvas {
       .map(|c| c.symbol().clone())
       .collect::<Vec<_>>()
       .join("");
-    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      start_col, row,
-    )));
-    shaders.push(ShaderCommand::StylePrintString(crossterm::style::Print(
-      new_contents.to_string(),
-    )));
-    shaders
+    (
+      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(start_col, row)),
+      ShaderCommand::StylePrintString(crossterm::style::Print(
+        new_contents.to_string(),
+      )),
+    )
   }
 
   /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
@@ -253,23 +245,20 @@ impl Canvas {
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
   pub fn _brute_force_diff(&mut self) -> Vec<ShaderCommand> {
-    let frame = self.frame();
     let size = self.size();
-    let prev_frame = self.prev_frame();
-    let _prev_size = self.prev_size();
     trace!("brute force diff, size:{:?}", size);
 
     let mut shaders =
       Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
-    if !frame.is_zero_sized() {
+    if !self.frame().is_zero_sized() {
       for row in 0..size.height() {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
           let pos: U16Pos = point!(col, row);
-          let cell = frame.get_cell(pos);
-          let prev_cell = prev_frame.get_cell(pos);
+          let cell = self.frame().get_cell(pos);
+          let prev_cell = self.prev_frame().get_cell(pos);
           if cell == prev_cell {
             col += 1;
             continue;
@@ -279,9 +268,10 @@ impl Canvas {
           let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let mut print_shaders =
+            let shader_commands =
               self._make_printable_shaders(row, col, col_end_at);
-            shaders.append(&mut print_shaders);
+            shaders.push(shader_commands.0);
+            shaders.push(shader_commands.1);
             col = col_end_at;
           }
         }
@@ -296,24 +286,21 @@ impl Canvas {
   ///
   /// This algorithm is more performant when the whole terminal size remains unchanged.
   pub fn _dirty_marks_diff(&mut self) -> Vec<ShaderCommand> {
-    let frame = self.frame();
     let size = self.size();
-    let prev_frame = self.prev_frame();
-    let _prev_size = self.prev_size();
     trace!("dirty marks diff, size:{:?}", size);
 
     let mut shaders =
       Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
-    if !frame.is_zero_sized() {
-      for (row, dirty) in frame.dirty_rows().iter().enumerate() {
+    if !self.frame().is_zero_sized() {
+      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
         if row < size.height() as usize && *dirty {
           let mut col = 0_u16;
           while col < size.width() {
             // Skip unchanged columns
             let pos: U16Pos = point!(col, row as u16);
-            let cell = frame.get_cell(pos);
-            let prev_cell = prev_frame.get_cell(pos);
+            let cell = self.frame().get_cell(pos);
+            let prev_cell = self.prev_frame().get_cell(pos);
             if cell == prev_cell {
               col += 1;
               continue;
@@ -323,16 +310,16 @@ impl Canvas {
             let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let mut print_shaders =
+              let shader_commands =
                 self._make_printable_shaders(row as u16, col, col_end_at);
-              shaders.append(&mut print_shaders);
+              shaders.push(shader_commands.0);
+              shaders.push(shader_commands.1);
               col = col_end_at;
             }
           }
         }
       }
     }
-
     shaders
   }
 }
@@ -403,18 +390,8 @@ pub struct Shader {
 
 impl Shader {
   /// Make new shader.
-  pub fn new() -> Self {
-    Shader { commands: vec![] }
-  }
-
-  /// Push a shader command.
-  pub fn push(&mut self, command: ShaderCommand) {
-    self.commands.push(command)
-  }
-
-  /// Append a vector of shader commands.
-  pub fn append(&mut self, commands: &mut Vec<ShaderCommand>) {
-    self.commands.append(commands);
+  pub fn new(commands: Vec<ShaderCommand>) -> Self {
+    Shader { commands }
   }
 
   /// Get an iterator of the collection.
