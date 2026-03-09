@@ -259,7 +259,8 @@ impl Canvas {
     let _prev_size = self.prev_size();
     trace!("brute force diff, size:{:?}", size);
 
-    let mut shaders = vec![];
+    let mut shaders =
+      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
 
     if !frame.is_zero_sized() {
       for row in 0..size.height() {
