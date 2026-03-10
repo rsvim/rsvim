@@ -212,6 +212,10 @@ impl Canvas {
       let pos: U16Pos = point!(col_end_at, row);
       let cell2 = frame.get_cell(pos);
       let prev_cell2 = prev_frame.get_cell(pos);
+      trace!(
+        "[{:>2},{:>2}] cell:{:?}, prev:{:?}",
+        row, col_end_at, cell2, prev_cell2
+      );
       if cell2 == prev_cell2 {
         break;
       }
@@ -253,7 +257,7 @@ impl Canvas {
       new_contents = new_contents.underlined();
     }
     trace!(
-      "row,col:{:>2},{:>2}-{:>2}, content:{} ({:?})",
+      "[{:>2},{:>2}-{:>2}], content:{} ({:?})",
       row,
       start_col,
       end_col,
