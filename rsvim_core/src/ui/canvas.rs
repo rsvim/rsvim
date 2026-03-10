@@ -13,6 +13,7 @@ use crossterm::style::Stylize;
 pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
+use itertools::Itertools;
 use std::fmt::Debug;
 use std::slice::Iter;
 
@@ -146,7 +147,7 @@ impl Canvas {
   }
 
   /// Shade cursor and append results into shader vector.
-  pub fn _shade_cursor(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
+  pub fn _shade_cursor(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
 
@@ -154,30 +155,30 @@ impl Canvas {
     if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
-          shader_commands.push(ShaderCommand::CursorEnableBlinking(
+          output_shaders.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
-          shader_commands.push(ShaderCommand::CursorDisableBlinking(
+          output_shaders.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
         }
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
-          shader_commands
+          output_shaders
             .push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          shader_commands
+          output_shaders
             .push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if cursor.style() != prev_cursor.style() {
-        shader_commands
+        output_shaders
           .push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
-        shader_commands.push(ShaderCommand::CursorMoveTo(
+        output_shaders.push(ShaderCommand::CursorMoveTo(
           crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y()),
         ));
       }
@@ -185,13 +186,13 @@ impl Canvas {
   }
 
   /// Shade cells and append results into shader vector.
-  pub fn _shade_cells(&mut self, shader_commands: &mut Vec<ShaderCommand>) {
+  pub fn _shade_cells(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     if self.size() == self.prev_size() {
       // When terminal size doesn't change, use dirty-marks diff-algorithm.
-      self._dirty_marks_diff(shader_commands);
+      self._dirty_marks_diff(output_shaders);
     } else {
       // When terminal size changes, use brute-force diff-algorithm.
-      self._brute_force_diff(shader_commands)
+      self._brute_force_diff(output_shaders)
     }
   }
 
@@ -230,47 +231,57 @@ impl Canvas {
     row: u16,
     start_col: u16,
     end_col: u16,
-  ) -> (ShaderCommand, ShaderCommand) {
+    output_shaders: &mut Vec<ShaderCommand>,
+  ) {
     debug_assert!(end_col > start_col);
     let new_cells = self.frame().get_cells_at(
       point!(start_col, row),
       end_col as usize - start_col as usize,
     );
-    let new_contents = new_cells
-      .iter()
-      .map(|c| c.symbol().clone())
-      .collect::<Vec<_>>()
-      .join("");
-    let new_fg = new_cells[0].fg();
-    let new_bg = new_cells[0].bg();
-    let new_attrs = new_cells[0].attrs();
-    let mut new_contents = new_contents.with(*new_fg).on(*new_bg);
-    if new_attrs.has(Attribute::Bold) {
-      new_contents = new_contents.bold();
+    output_shaders.push(ShaderCommand::CursorMoveTo(
+      crossterm::cursor::MoveTo(start_col, row),
+    ));
+
+    let mut last_i: usize = 0;
+    for (i, cell) in new_cells.iter().enumerate() {
+      let last_cell = &new_cells[last_i];
+      if *cell.fg() != *last_cell.fg()
+        || *cell.bg() != *last_cell.bg()
+        || cell.attrs() != last_cell.attrs()
+      {
+        let contents = new_cells[last_i..i].iter().map(|c| c.symbol()).join("");
+        let fg = new_cells[last_i].fg();
+        let bg = new_cells[last_i].bg();
+        let attrs = new_cells[last_i].attrs();
+        let mut contents = contents.with(*fg).on(*bg);
+        if attrs.has(Attribute::Bold) {
+          contents = contents.bold();
+        }
+        if attrs.has(Attribute::Dim) {
+          contents = contents.dim();
+        }
+        if attrs.has(Attribute::Italic) {
+          contents = contents.italic();
+        }
+        if attrs.has(Attribute::Underlined) {
+          contents = contents.underlined();
+        }
+        trace!(
+          "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
+          row,
+          start_col,
+          end_col,
+          last_i,
+          i,
+          contents.content(),
+          contents.style()
+        );
+        output_shaders.push(ShaderCommand::StylePrintStyledContentString(
+          crossterm::style::PrintStyledContent(contents),
+        ));
+        last_i = i;
+      }
     }
-    if new_attrs.has(Attribute::Dim) {
-      new_contents = new_contents.dim();
-    }
-    if new_attrs.has(Attribute::Italic) {
-      new_contents = new_contents.italic();
-    }
-    if new_attrs.has(Attribute::Underlined) {
-      new_contents = new_contents.underlined();
-    }
-    trace!(
-      "[{:>2},{:>2}-{:>2}], content:{} ({:?})",
-      row,
-      start_col,
-      end_col,
-      new_contents.content(),
-      new_contents.style()
-    );
-    (
-      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(start_col, row)),
-      ShaderCommand::StylePrintStyledContentString(
-        crossterm::style::PrintStyledContent(new_contents),
-      ),
-    )
   }
 
   /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
@@ -278,10 +289,7 @@ impl Canvas {
   ///
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
-  pub fn _brute_force_diff(
-    &mut self,
-    shader_commands: &mut Vec<ShaderCommand>,
-  ) {
+  pub fn _brute_force_diff(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     let size = self.size();
     trace!("brute force diff, size:{:?}", size);
 
@@ -302,9 +310,7 @@ impl Canvas {
           let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let shaders = self._make_printable_shaders(row, col, col_end_at);
-            shader_commands.push(shaders.0);
-            shader_commands.push(shaders.1);
+            self._make_printable_shaders(row, col, col_end_at, output_shaders);
             col = col_end_at;
           }
         }
@@ -317,10 +323,7 @@ impl Canvas {
   ///
   /// This algorithm is more performant when the whole terminal size remains
   /// unchanged.
-  pub fn _dirty_marks_diff(
-    &mut self,
-    shader_commands: &mut Vec<ShaderCommand>,
-  ) {
+  pub fn _dirty_marks_diff(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     let size = self.size();
     trace!("dirty marks diff, size:{:?}", size);
 
@@ -342,10 +345,12 @@ impl Canvas {
             let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let shaders =
-                self._make_printable_shaders(row as u16, col, col_end_at);
-              shader_commands.push(shaders.0);
-              shader_commands.push(shaders.1);
+              self._make_printable_shaders(
+                row as u16,
+                col,
+                col_end_at,
+                output_shaders,
+              );
               col = col_end_at;
             }
           }
