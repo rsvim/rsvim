@@ -827,13 +827,10 @@ fn main() {
     // After running
     {
       let shaders = match event_loop.writer {
-        StdoutWriterValue::DevNullWriter(w) => w.shaders(),
+        StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
         _ => unreachable!(),
       };
-      info!(
-        "shaders:{:?}",
-        syn_tree.as_ref().unwrap().root_node().to_string()
-      );
+      info!("shaders:{:?}", shaders);
     }
 
     Ok(())
