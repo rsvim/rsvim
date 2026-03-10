@@ -6,10 +6,13 @@ use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::canvas::Shader;
+use crate::ui::canvas::ShaderCommand;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
+use itertools::Itertools;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -671,6 +674,7 @@ mod tests_buffer_editing {
 
 #[cfg(test)]
 mod tests_buffer_scrolling {
+
   use super::*;
 
   #[tokio::test]
@@ -830,7 +834,24 @@ fn main() {
         StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
         _ => unreachable!(),
       };
-      info!("shaders:{:?}", shaders);
+      let text_shaders = shaders
+        .iter()
+        .map(|shader| {
+          let shader_commands = shader
+            .iter()
+            .filter(|cmd| {
+              matches!(
+                cmd,
+                ShaderCommand::StylePrintStyledContentString(_)
+                  | ShaderCommand::StylePrintString(_)
+              )
+            })
+            .cloned()
+            .collect_vec();
+          Shader::new(shader_commands)
+        })
+        .collect_vec();
+      info!("text_shaders:{:?}", text_shaders);
     }
 
     Ok(())
