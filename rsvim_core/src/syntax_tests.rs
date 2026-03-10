@@ -1094,55 +1094,55 @@ Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.tx
     event_loop.shutdown()?;
 
     // After running
-    {
-      // let shaders = match event_loop.writer {
-      //   StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
-      //   _ => unreachable!(),
-      // };
-      // let text_shaders = shaders
-      //   .iter()
-      //   .map(|shader| {
-      //     let shader_commands = shader
-      //       .iter()
-      //       .filter(|cmd| {
-      //         matches!(
-      //           cmd,
-      //           ShaderCommand::StylePrintStyledContentString(_)
-      //             | ShaderCommand::StylePrintString(_)
-      //         )
-      //       })
-      //       .cloned()
-      //       .collect_vec();
-      //     Shader::new(shader_commands)
-      //   })
-      //   .collect_vec();
-      // for (i, text_shader) in text_shaders.iter().enumerate() {
-      //   info!("shader [{}]", i);
-      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
-      //     if let ShaderCommand::StylePrintStyledContentString(content) =
-      //       shader_cmd
-      //     {
-      //       info!("{:>2}: {}", j, content.0.content(),);
-      //     } else {
-      //       unreachable!();
-      //     }
-      //   }
-      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
-      //     match shader_cmd {
-      //       ShaderCommand::StylePrintStyledContentString(content) => {
-      //         info!(
-      //           "shader [{},{}]:{:?} ({:?})",
-      //           i,
-      //           j,
-      //           content.0.content(),
-      //           content.0.style()
-      //         );
-      //       }
-      //       _ => unreachable!(),
-      //     }
-      //   }
-      // }
-    }
+    {}
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn rust1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("rust1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
+      )
+      .unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {}
 
     Ok(())
   }
