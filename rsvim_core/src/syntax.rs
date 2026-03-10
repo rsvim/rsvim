@@ -1,19 +1,13 @@
 //! Tree-sitter based syntax engine.
 
-pub mod edit;
-pub mod query;
-
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-pub use edit::SyntaxEdit;
-pub use edit::SyntaxEditNew;
-pub use edit::SyntaxEditUpdate;
 use parking_lot::Mutex;
-pub use query::*;
 use ropey::Rope;
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
 use std::sync::Arc;
@@ -32,6 +26,128 @@ const INVALID_EDITING_VERSION: isize = -1;
 pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
 pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+
+#[derive(Clone)]
+pub struct SyntaxEditNew {
+  pub payload: Rope,
+  pub version: isize,
+}
+
+impl Debug for SyntaxEditNew {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditNew")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("version", &self.version)
+      .finish()
+  }
+}
+
+#[derive(Clone)]
+pub struct SyntaxEditUpdate {
+  pub payload: Rope,
+  pub input: InputEdit,
+  pub version: isize,
+}
+
+impl Debug for SyntaxEditUpdate {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxEditUpdate")
+      .field(
+        "payload",
+        &self
+          .payload
+          .get_line(0)
+          .map(|l| l.to_string())
+          .unwrap_or("".to_string()),
+      )
+      .field("input", &self.input)
+      .field("version", &self.version)
+      .finish()
+  }
+}
+
+#[derive(Debug, Clone)]
+pub enum SyntaxEdit {
+  New(SyntaxEditNew),
+  Update(SyntaxEditUpdate),
+}
+
+pub type SyntaxQueryArc = Arc<Query>;
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub struct SyntaxCapturePoint {
+  pub line_idx: usize,
+  pub char_idx: usize,
+}
+
+impl Ord for SyntaxCapturePoint {
+  fn cmp(&self, other: &Self) -> Ordering {
+    match self.line_idx.cmp(&other.line_idx) {
+      Ordering::Equal => self.char_idx.cmp(&other.char_idx),
+      Ordering::Greater => Ordering::Greater,
+      Ordering::Less => Ordering::Less,
+    }
+  }
+}
+
+impl PartialOrd for SyntaxCapturePoint {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// Convert [`tree_sitter::Range`] based bytes indexing into [`ropey::Rope`]
+/// based chars indexing, i.e. use [`ropey::Rope::byte_to_char`] API to
+/// transform byte index to char index.
+pub struct SyntaxCaptureRange {
+  pub start_char: usize,
+  pub end_char: usize,
+  pub start_point: SyntaxCapturePoint,
+  pub end_point: SyntaxCapturePoint,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SyntaxCaptureValue {
+  pub index: u32,
+  pub name: CompactString,
+  pub range: SyntaxCaptureRange,
+}
+
+#[derive(Debug, Clone)]
+pub struct SyntaxCaptureMultipleValues {
+  pub values: Vec<SyntaxCaptureValue>,
+  pub max_end_char: Option<usize>,
+  pub max_end_point: Option<SyntaxCapturePoint>,
+}
+
+pub type SyntaxCaptureMap =
+  FoldMap<SyntaxCapturePoint, SyntaxCaptureMultipleValues>;
+
+#[derive(Debug)]
+pub struct SyntaxCapture {
+  // Maps start_point to all its captured nodes.
+  nodes: SyntaxCaptureMap,
+}
+
+arc_ptr!(SyntaxCapture);
+
+impl SyntaxCapture {
+  pub fn new(nodes: SyntaxCaptureMap) -> Self {
+    Self { nodes }
+  }
+
+  pub fn nodes(&self) -> &SyntaxCaptureMap {
+    &self.nodes
+  }
+}
 
 // SyntaxId starts from 1.
 structural_id_impl!(usize, SyntaxId, 1);
@@ -353,6 +469,8 @@ impl SyntaxManager {
   }
 }
 // Language and queries }
+
+pub struct SyntaxLoadOptions {}
 
 // Load and build {
 impl SyntaxManager {
