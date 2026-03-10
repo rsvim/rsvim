@@ -73,7 +73,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022, windows-11-arm]
+        os: [ubuntu-22.04-arm, macos-15-intel, windows-11-arm]
     runs-on: ${{ matrix.os }}
     env:
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
@@ -88,26 +88,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Test
         run: cargo test --color=never --workspace
-  unit_test_no_default_features:
-    name: Unit Test (--no-default-features)
-    strategy:
-      matrix:
-        os: [ubuntu-22.04]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: Swatinem/rust-cache@v2
-      - uses: davidlattimore/wild-action@latest
+      - name: Test (--no-default-features)
         if: ${{ contains(matrix.os, 'ubuntu') }}
-      - name: Install Rust
-        run: rustup component add clippy
-      - uses: actions/checkout@v6
-      - name: Test
         run: cargo test --no-default-features --color=never --workspace
   test_coverage:
     name: Test Coverage
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022, windows-11-arm]
+        os: [ubuntu-22.04, macos-15, windows-2022]
     runs-on: ${{ matrix.os }}
     env:
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
@@ -148,12 +136,9 @@ jobs:
       - name: Install Rust
         run: rustup component add clippy
       - uses: actions/checkout@v6
+      - name: Build (--profile nightly)
+        run: cargo build --profile nightly
       - name: Build (--release)
         run: cargo build --release
       - name: Build (--release --no-default-features)
         run: cargo build --no-default-features --release
-      - uses: actions/checkout@v6
-      - name: Build (--profile nightly)
-        run: cargo build --profile nightly
-      - name: Build (--profile nightly --no-default-features)
-        run: cargo build --no-default-features --profile nightly
