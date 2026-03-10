@@ -35,6 +35,9 @@ pub enum MasterMessage {
 
   /// Ask master to parse text for a syntax editing.
   SyntaxEditReq(SyntaxEditReq),
+
+  /// Response master for syntax parsing complete.
+  SyntaxEditResp(SyntaxEditResp),
 }
 
 #[derive(Debug)]
@@ -79,6 +82,11 @@ pub struct FsWriteReq {
 
 #[derive(Debug)]
 pub struct SyntaxEditReq {
+  pub buffer_id: BufferId,
+}
+
+#[derive(Debug)]
+pub struct SyntaxEditResp {
   pub buffer_id: BufferId,
 }
 

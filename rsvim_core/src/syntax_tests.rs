@@ -1,11 +1,18 @@
 use super::syntax::*;
 use crate::cli::CliOptions;
 use crate::cli::SpecialCliOptions;
+use crate::evloop::writer::StdoutWriterValue;
 use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::canvas::Shader;
+use crate::ui::canvas::ShaderCommand;
+use assert_fs::NamedTempFile;
+use assert_fs::prelude::FileTouch;
+use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
+use itertools::Itertools;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -659,6 +666,218 @@ mod tests_buffer_editing {
         syn_tree.as_ref().unwrap().root_node().to_string(),
         "(source_file (use_declaration argument: (scoped_identifier path: (scoped_identifier path: (identifier) name: (identifier)) name: (identifier))) (function_item name: (identifier) parameters: (parameters) body: (block (macro_invocation macro: (identifier) (token_tree (string_literal (string_content)) (MISSING \")\"))))))"
       );
+    }
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests_buffer_scrolling {
+
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn rust1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 30_u16;
+    let terminal_rows = 20_u16;
+    let mocked_ops = vec![
+      MockOperation::SleepFor(Duration::from_millis(1000)),
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 11))),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
+    ];
+
+    let tmpfile = NamedTempFile::new("rust1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+    r###"use git2::Repository;
+use rsvim_core::js::JsRuntimeForSnapshot;
+use rsvim_core::js::v8_version;
+use std::path::Path;
+
+// pub const LOG: &str = "[RSVIM]";
+pub const LOG: &str = "cargo:warning=[RSVIM]";
+
+fn version() {
+  let profile_env = std::env::var("PROFILE").unwrap_or("debug".to_string());
+  let opt_level_env = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
+  let debug_env = std::env::var("DEBUG").unwrap_or("0".to_string());
+  let host = std::env::var("HOST").unwrap_or("unknown".to_string());
+  println!(
+    "{LOG} Env profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    profile_env, opt_level_env, debug_env, host
+  );
+
+  let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+  let version = env!("CARGO_PKG_VERSION").to_string();
+
+  // profile
+  let is_release_profile = profile_env == "release"
+    && (opt_level_env == "s" || opt_level_env == "z")
+    && debug_env != "true";
+  let profile = if is_release_profile {
+    "release".to_string()
+  } else if profile_env == "release" {
+    "nightly".to_string()
+  } else {
+    profile_env.clone()
+  };
+
+  // git commit
+  let git_commit = match Repository::open(&workspace_dir) {
+    Ok(repo) => {
+      let head = repo.head().unwrap();
+      let oid = head.target().unwrap();
+      let commit = repo.find_commit(oid).unwrap();
+      let id = commit.id();
+      let id = id.to_string();
+      println!("{LOG} Git id:{:?}", id);
+      Some(id[0..8].to_string())
+    }
+    Err(e) => {
+      println!("{LOG} Git error:{:?}", e);
+      None
+    }
+  };
+
+  // swc core
+  let swc_core = match std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
+  {
+    Ok(manifest) => match manifest.parse::<toml::Table>() {
+      Ok(parsed_manifest) => {
+        let deps = &parsed_manifest["workspace"]["dependencies"];
+        let core = deps["swc_core"].as_str();
+        println!("{LOG} Swc core:{:?}", core);
+        Some(core.unwrap().trim_start_matches("=").to_string())
+      }
+      Err(e) => {
+        println!("{LOG} Parse Cargo.toml error:{:?}", e);
+        None
+      }
+    },
+    Err(e) => {
+      println!("{LOG} Read Cargo.toml error:{:?}", e);
+      None
+    }
+  };
+  let v8_version = v8_version();
+
+  println!(
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
+    version, profile, host, git_commit, v8_version, swc_core
+  );
+
+  let mut resolved = format!(
+    "version={}\nprofile={}\nhost={}\nv8={}\n",
+    version, profile, host, v8_version
+  );
+  if let Some(git_commit) = git_commit {
+    resolved = format!("{}git_commit={}\n", resolved, git_commit);
+  }
+  if let Some(swc_core) = swc_core {
+    resolved = format!("{}swc_core={}\n", resolved, swc_core);
+  }
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
+  println!("{LOG} Writing version into {:?}...", output_path.as_path());
+
+  std::fs::write(output_path.as_path(), resolved.as_bytes()).unwrap();
+}
+
+fn snapshot() {
+  let js_runtime = JsRuntimeForSnapshot::new();
+  let snapshot = js_runtime.create_snapshot();
+  let snapshot = Box::from(&snapshot);
+  let mut vec = Vec::with_capacity(snapshot.len());
+  vec.extend_from_slice(&snapshot);
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_SNAPSHOT.BIN");
+  println!("{LOG} Writing snapshot into {:?}...", output_path.as_path());
+  std::fs::write(output_path.as_path(), vec.into_boxed_slice()).unwrap();
+}
+
+fn main() {
+  version();
+  snapshot();
+}
+"###).unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let shaders = match event_loop.writer {
+        StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
+        _ => unreachable!(),
+      };
+      let text_shaders = shaders
+        .iter()
+        .map(|shader| {
+          let shader_commands = shader
+            .iter()
+            .filter(|cmd| {
+              matches!(
+                cmd,
+                ShaderCommand::StylePrintStyledContentString(_)
+                  | ShaderCommand::StylePrintString(_)
+              )
+            })
+            .cloned()
+            .collect_vec();
+          Shader::new(shader_commands)
+        })
+        .collect_vec();
+      for (i, text_shader) in text_shaders.iter().enumerate() {
+        info!("shader [{}]", i);
+        for (j, shader_cmd) in text_shader.iter().enumerate() {
+          if let ShaderCommand::StylePrintStyledContentString(content) =
+            shader_cmd
+          {
+            info!("{:>2}: {}", j, content.0.content(),);
+          } else {
+            unreachable!();
+          }
+        }
+        for (j, shader_cmd) in text_shader.iter().enumerate() {
+          match shader_cmd {
+            ShaderCommand::StylePrintStyledContentString(content) => {
+              info!(
+                "shader [{},{}]:{:?} ({:?})",
+                i,
+                j,
+                content.0.content(),
+                content.0.style()
+              );
+            }
+            _ => unreachable!(),
+          }
+        }
+      }
     }
 
     Ok(())

@@ -867,16 +867,26 @@ impl EventLoop {
                   // parsing immediately.
                   if !syn.pending_is_empty() {
                     chan::send_to_master(
-                      master_tx,
+                      master_tx.clone(),
                       MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
                         buffer_id: buf.id(),
                       }),
                     );
                   }
                 }
+                // Notify syntax parsing/query is completed
+                chan::send_to_master(
+                  master_tx,
+                  MasterMessage::SyntaxEditResp(chan::SyntaxEditResp {
+                    buffer_id: buf.id(),
+                  }),
+                );
               }
             });
           }
+        }
+        MasterMessage::SyntaxEditResp(resp) => {
+          trace!("Recv SyntaxEditResp:{:?}", resp.buffer_id);
         }
       }
     }

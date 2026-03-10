@@ -351,12 +351,16 @@ fn parse_hl_as_table(
   };
 
   let bold = parse_bool("bold")?;
+  let dim = parse_bool("dim")?;
   let italic = parse_bool("italic")?;
   let underlined = parse_bool("underlined")?;
 
   let mut attrs = Attributes::none();
   if bold {
     attrs.set(Attribute::Bold);
+  }
+  if dim {
+    attrs.set(Attribute::Dim);
   }
   if italic {
     attrs.set(Attribute::Italic);
