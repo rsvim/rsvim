@@ -9,7 +9,6 @@ mod frame_tests;
 use crate::prelude::*;
 use crossterm;
 use crossterm::style::Attribute;
-use crossterm::style::StyledContent;
 use crossterm::style::Stylize;
 pub use frame::cell::*;
 pub use frame::cursor::*;
