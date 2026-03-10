@@ -674,7 +674,6 @@ mod tests_buffer_editing {
 
 #[cfg(test)]
 mod tests_buffer_scrolling {
-
   use super::*;
 
   #[tokio::test]
@@ -879,6 +878,361 @@ fn main() {
         }
       }
     }
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests_buffer_viewing {
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn markdown1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("markdown1.md").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+    r###"<p align="center">
+  <img alt="logo.svg" src="https://raw.githubusercontent.com/rsvim/assets/main/logo/RSVIM-logo.svg" />
+</p>
+
+<p align="center">
+The VIM editor reinvented in Rust+TypeScript.
+</p>
+
+<p align="center">
+  <a href="https://crates.io/crates/rsvim"><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim" /></a>
+  <a href="https://www.npmjs.com/package/@rsvim/types"><img alt="rsvim" src="https://img.shields.io/npm/v/%40rsvim%2Ftypes" /></a>
+  <a href="https://docs.rs/rsvim_core/latest/"><img alt="rsvim_core" src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs" /></a>
+  <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>
+  <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>
+  <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim" /></a>
+  <a href="https://discord.gg/5KtRUCAByB"><img alt="discord" src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord" /></a>
+</p>
+
+> [!CAUTION]
+>
+> _**This project is still in very early stage of development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
+
+## About
+
+RSVIM is an open source terminal based text editor, built from scratch with [Rust](https://www.rust-lang.org/), [Tokio](https://tokio.rs/) and [V8](https://v8.dev/) javascript engine. It strives to be highly extensible by following main features, concepts, philosophy of ([Neo](https://neovim.io/))[Vim](https://www.vim.org/), while also to be:
+
+- A fast editor that fully utilizes all CPU cores and never freezes.
+- A powerful TUI engine that provides widgets, event handlers, layouts, etc.
+- A consistent JavaScript-based runtime with built-in support for TypeScript.
+- An editing service that allows multiple users to access remotely and work together.
+- A text processing tool that integrates with shell environment.
+
+## Installation
+
+Please download prebuilt executables in [releases](https://github.com/rsvim/rsvim/releases) page, or build with cargo:
+
+```bash
+cargo install --locked rsvim
+```
+
+To get latest updates, build with git source on `main` branch:
+
+```bash
+cargo install --locked rsvim --git https://github.com/rsvim/rsvim.git --branch main
+```
+
+## Get Started
+
+Please check out [Documentation](https://rsvim.github.io/) for more details!
+
+## Contribution
+
+Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
+
+Road map and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
+
+## Credits
+
+Some source code are studied from following projects for implementing the initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
+
+- **[dune](https://github.com/aalykiot/dune)**: A hobby runtime for JavaScript and TypeScript 🚀.
+- **[deno](https://github.com/denoland/deno)**: A modern runtime for JavaScript and TypeScript.
+
+## Supporting the Project
+
+If you like RSVIM, please consider sponsoring it. Your support encourages contributors and maintainers of this project, and other fees or efforts spent on it.
+
+- [GitHub Sponsor](https://github.com/sponsors/rsvim)
+- [Open Collective](https://opencollective.com/rsvim)
+
+## License
+
+Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.txt).
+"###).unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      // let shaders = match event_loop.writer {
+      //   StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
+      //   _ => unreachable!(),
+      // };
+      // let text_shaders = shaders
+      //   .iter()
+      //   .map(|shader| {
+      //     let shader_commands = shader
+      //       .iter()
+      //       .filter(|cmd| {
+      //         matches!(
+      //           cmd,
+      //           ShaderCommand::StylePrintStyledContentString(_)
+      //             | ShaderCommand::StylePrintString(_)
+      //         )
+      //       })
+      //       .cloned()
+      //       .collect_vec();
+      //     Shader::new(shader_commands)
+      //   })
+      //   .collect_vec();
+      // for (i, text_shader) in text_shaders.iter().enumerate() {
+      //   info!("shader [{}]", i);
+      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
+      //     if let ShaderCommand::StylePrintStyledContentString(content) =
+      //       shader_cmd
+      //     {
+      //       info!("{:>2}: {}", j, content.0.content(),);
+      //     } else {
+      //       unreachable!();
+      //     }
+      //   }
+      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
+      //     match shader_cmd {
+      //       ShaderCommand::StylePrintStyledContentString(content) => {
+      //         info!(
+      //           "shader [{},{}]:{:?} ({:?})",
+      //           i,
+      //           j,
+      //           content.0.content(),
+      //           content.0.style()
+      //         );
+      //       }
+      //       _ => unreachable!(),
+      //     }
+      //   }
+      // }
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn html1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("html1.html").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+    r###"<html>
+  <body>
+    <h1>Hello, World!</h1>
+  </body>
+
+  <p align="center">
+    <img
+      alt="logo.svg"
+      src="https://raw.githubusercontent.com/rsvim/assets/main/logo/RSVIM-logo.svg"
+    />
+  </p>
+
+  <p align="center">The VIM editor reinvented in Rust+TypeScript.</p>
+
+  <p align="center">
+    <a href="https://crates.io/crates/rsvim"
+      ><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim"
+    /></a>
+    <a href="https://www.npmjs.com/package/@rsvim/types"
+      ><img alt="rsvim" src="https://img.shields.io/npm/v/%40rsvim%2Ftypes"
+    /></a>
+    <a href="https://docs.rs/rsvim_core/latest/"
+      ><img
+        alt="rsvim_core"
+        src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs"
+    /></a>
+    <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"
+      ><img
+        alt="release.yml"
+        src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml"
+    /></a>
+    <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"
+      ><img
+        alt="ci.yml"
+        src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci"
+    /></a>
+    <a href="https://app.codecov.io/gh/rsvim/rsvim"
+      ><img
+        alt="codecov"
+        src="https://img.shields.io/codecov/c/github/rsvim/rsvim"
+    /></a>
+    <a href="https://discord.gg/5KtRUCAByB"
+      ><img
+        alt="discord"
+        src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord"
+    /></a>
+  </p>
+</html>
+"###).unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {}
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn rust1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("rust1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"use std::sync::Arc;
+fn main() {
+  println!("Hello, World!");
+}
+"###,
+      )
+      .unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {}
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn c1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("c1.c").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"#include <stdio.h>
+int main() {
+  printf("Hello, World!\n");
+  return 0;
+}
+"###,
+      )
+      .unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {}
 
     Ok(())
   }

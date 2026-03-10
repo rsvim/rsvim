@@ -227,6 +227,12 @@ impl SyntaxManager {
 
     let language_bindings = [
       (
+        "c",
+        tree_sitter_c::LANGUAGE,
+        Some(tree_sitter_c::HIGHLIGHT_QUERY),
+        vec!["c", "h"],
+      ),
+      (
         "rust",
         tree_sitter_rust::LANGUAGE,
         Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
@@ -243,6 +249,12 @@ impl SyntaxManager {
         tree_sitter_toml_ng::LANGUAGE,
         Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
         vec!["toml"],
+      ),
+      (
+        "html",
+        tree_sitter_html::LANGUAGE,
+        Some(tree_sitter_html::HIGHLIGHTS_QUERY),
+        vec!["html", "htm"],
       ),
     ];
 
@@ -588,10 +600,10 @@ pub fn query(
         let index = cap.index;
         let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
-        // trace!(
-        //   "Captured highlight {}: name:{:?}, range:{:?}",
-        //   index, name, range
-        // );
+        trace!(
+          "Captured highlight {}: name:{:?}, range:{:?}",
+          index, name, range
+        );
         debug_assert!(text_rope.get_line(range.start_point.row).is_some());
         debug_assert!(
           text_rope

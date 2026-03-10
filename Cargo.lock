@@ -2847,6 +2847,8 @@ dependencies = [
  "tokio-util",
  "toml",
  "tree-sitter",
+ "tree-sitter-c",
+ "tree-sitter-html",
  "tree-sitter-loader",
  "tree-sitter-md",
  "tree-sitter-rust",
@@ -4260,6 +4262,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-sitter-c"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a3aad8f0129083a59fe8596157552d2bb7148c492d44c21558d68ca1c722707"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
 name = "tree-sitter-highlight"
 version = "0.26.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4269,6 +4281,16 @@ dependencies = [
  "streaming-iterator",
  "thiserror",
  "tree-sitter",
+]
+
+[[package]]
+name = "tree-sitter-html"
+version = "0.23.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "261b708e5d92061ede329babaaa427b819329a9d427a1d710abb0f67bbef63ee"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
 ]
 
 [[package]]
