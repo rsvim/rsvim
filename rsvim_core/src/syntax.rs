@@ -600,10 +600,10 @@ pub fn query(
         let index = cap.index;
         let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
-        // trace!(
-        //   "Captured highlight {}: name:{:?}, range:{:?}",
-        //   index, name, range
-        // );
+        trace!(
+          "Captured highlight {}: name:{:?}, range:{:?}",
+          index, name, range
+        );
         debug_assert!(text_rope.get_line(range.start_point.row).is_some());
         debug_assert!(
           text_rope
