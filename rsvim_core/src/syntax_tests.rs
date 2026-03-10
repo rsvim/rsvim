@@ -1146,4 +1146,53 @@ fn main() {
 
     Ok(())
   }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn c1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 50_u16;
+    let terminal_rows = 40_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+
+    let tmpfile = NamedTempFile::new("c1.c").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+        r###"#include <stdio.h>
+int main() {
+  printf("Hello, World!\n");
+  return 0;
+}
+"###,
+      )
+      .unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![tmpfile.path().to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {}
+
+    Ok(())
+  }
 }
