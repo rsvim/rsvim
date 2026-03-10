@@ -9,6 +9,7 @@ mod frame_tests;
 use crate::prelude::*;
 use crossterm;
 use crossterm::style::Attribute;
+use crossterm::style::StyledContent;
 use crossterm::style::Stylize;
 pub use frame::cell::*;
 pub use frame::cursor::*;
@@ -242,36 +243,44 @@ impl Canvas {
       crossterm::cursor::MoveTo(start_col, row),
     ));
 
-    let mut last_i: usize = 0;
+    let get_content = |start_idx: usize, end_idx: usize| -> StyledContent {
+      let contents = new_cells[start_idx..end_idx]
+        .iter()
+        .map(|c| c.symbol())
+        .join("");
+      let fg = new_cells[start_idx].fg();
+      let bg = new_cells[start_idx].bg();
+      let attrs = new_cells[start_idx].attrs();
+      let mut contents = contents.with(*fg).on(*bg);
+      if attrs.has(Attribute::Bold) {
+        contents = contents.bold();
+      }
+      if attrs.has(Attribute::Dim) {
+        contents = contents.dim();
+      }
+      if attrs.has(Attribute::Italic) {
+        contents = contents.italic();
+      }
+      if attrs.has(Attribute::Underlined) {
+        contents = contents.underlined();
+      }
+      contents
+    };
+
+    let mut start_i: usize = 0;
     for (i, cell) in new_cells.iter().enumerate() {
-      let last_cell = &new_cells[last_i];
-      if *cell.fg() != *last_cell.fg()
-        || *cell.bg() != *last_cell.bg()
-        || cell.attrs() != last_cell.attrs()
+      let start_cell = &new_cells[start_i];
+      if *cell.fg() != *start_cell.fg()
+        || *cell.bg() != *start_cell.bg()
+        || cell.attrs() != start_cell.attrs()
       {
-        let contents = new_cells[last_i..i].iter().map(|c| c.symbol()).join("");
-        let fg = new_cells[last_i].fg();
-        let bg = new_cells[last_i].bg();
-        let attrs = new_cells[last_i].attrs();
-        let mut contents = contents.with(*fg).on(*bg);
-        if attrs.has(Attribute::Bold) {
-          contents = contents.bold();
-        }
-        if attrs.has(Attribute::Dim) {
-          contents = contents.dim();
-        }
-        if attrs.has(Attribute::Italic) {
-          contents = contents.italic();
-        }
-        if attrs.has(Attribute::Underlined) {
-          contents = contents.underlined();
-        }
+        let contents = get_content(start_i, i);
         trace!(
           "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
           row,
           start_col,
           end_col,
-          last_i,
+          start_i,
           i,
           contents.content(),
           contents.style()
@@ -279,8 +288,24 @@ impl Canvas {
         output_shaders.push(ShaderCommand::StylePrintStyledContentString(
           crossterm::style::PrintStyledContent(contents),
         ));
-        last_i = i;
+        start_i = i;
       }
+    }
+    if start_i < new_cells.len() {
+      let contents = get_content(start_i, new_cells.len());
+      trace!(
+        "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
+        row,
+        start_col,
+        end_col,
+        start_i,
+        new_cells.len(),
+        contents.content(),
+        contents.style()
+      );
+      output_shaders.push(ShaderCommand::StylePrintStyledContentString(
+        crossterm::style::PrintStyledContent(contents),
+      ));
     }
   }
 
