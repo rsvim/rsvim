@@ -227,6 +227,12 @@ impl SyntaxManager {
 
     let language_bindings = [
       (
+        "c",
+        tree_sitter_c::LANGUAGE,
+        Some(tree_sitter_c::HIGHLIGHT_QUERY),
+        vec!["c", "h"],
+      ),
+      (
         "rust",
         tree_sitter_rust::LANGUAGE,
         Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
