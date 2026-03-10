@@ -252,6 +252,14 @@ impl Canvas {
     if new_attrs.has(Attribute::Underlined) {
       new_contents = new_contents.underlined();
     }
+    trace!(
+      "row,col:{},{}-{}, content:{:?}({:?})",
+      row,
+      start_col,
+      end_col,
+      new_contents.content(),
+      new_contents.style()
+    );
     (
       ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(start_col, row)),
       ShaderCommand::StylePrintStyledContentString(
