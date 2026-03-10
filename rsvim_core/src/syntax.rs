@@ -482,12 +482,12 @@ pub struct SyntaxLoadOptions {}
 // Load and build {
 impl SyntaxManager {
   /// Load tree-sitter grammar in async.
-  pub async fn async_load(force_rebuild: bool) -> TheResult<()> {
+  pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
     Ok(())
   }
 
   /// Load tree-sitter grammar in sync.
-  pub fn load(force_rebuild: bool) -> TheResult<()> {
+  pub fn load(_force_rebuild: bool) -> TheResult<()> {
     Ok(())
   }
 }
