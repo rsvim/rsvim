@@ -281,21 +281,22 @@ fn _make_printable_shader1() {
   let col = 2;
   let row = 3;
   let col_end_at = can._next_same_cell_in_row(row, col);
-  let shaders = can._make_printable_shaders(row, col, col_end_at);
+  let mut shaders = vec![];
+  can._make_printable_shaders(row, col, col_end_at, &mut shaders);
   info!("shader:{:?}", shaders);
   assert!(matches!(
-    shaders.0,
+    shaders[0],
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
   ));
   assert!(matches!(
-    shaders.1,
+    shaders[1],
     ShaderCommand::StylePrintStyledContentString(
       crossterm::style::PrintStyledContent(_)
     )
   ));
   if let ShaderCommand::StylePrintStyledContentString(
     crossterm::style::PrintStyledContent(contents),
-  ) = &shaders.1
+  ) = &shaders[1]
   {
     assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
