@@ -214,10 +214,10 @@ impl Canvas {
       let cell = frame.get_cell(pos);
       let prev_cell = prev_frame.get_cell(pos);
       let cell_equal = cell == prev_cell;
-      trace!(
-        "[{:>2},{:>2}] cell:{:?}, prev:{:?}, equal:{}",
-        row, col_end_at, cell, prev_cell, cell_equal
-      );
+      // trace!(
+      //   "[{:>2},{:>2}] cell:{:?}, prev:{:?}, equal:{}",
+      //   row, col_end_at, cell, prev_cell, cell_equal
+      // );
       if cell_equal {
         break;
       }
