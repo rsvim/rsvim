@@ -691,7 +691,7 @@ mod tests_buffer_scrolling {
     let terminal_rows = 20_u16;
     let mocked_ops = vec![
       MockOperation::SleepFor(Duration::from_millis(1000)),
-      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 8))),
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 11))),
       MockOperation::SleepFor(Duration::from_millis(500)),
     ];
 
