@@ -687,10 +687,11 @@ mod tests_buffer_scrolling {
     // Prepare $RSVIM_CONFIG/rsvim.js
     let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-    let terminal_cols = 10_u16;
-    let terminal_rows = 10_u16;
+    let terminal_cols = 30_u16;
+    let terminal_rows = 20_u16;
     let mocked_ops = vec![
-      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 10))),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 3))),
       MockOperation::SleepFor(Duration::from_millis(500)),
     ];
 
@@ -851,7 +852,22 @@ fn main() {
           Shader::new(shader_commands)
         })
         .collect_vec();
-      info!("text_shaders:{:?}", text_shaders);
+      for (i, text_shader) in text_shaders.iter().enumerate() {
+        for (j, shader_cmd) in text_shader.iter().enumerate() {
+          match shader_cmd {
+            ShaderCommand::StylePrintStyledContentString(content) => {
+              info!(
+                "shader [{},{}]:{:?} ({:?})",
+                i,
+                j,
+                content.0.content(),
+                content.0.style()
+              );
+            }
+            _ => unreachable!(),
+          }
+        }
+      }
     }
 
     Ok(())
