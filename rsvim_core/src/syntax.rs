@@ -310,7 +310,19 @@ impl Syntax {
   }
 }
 
+#[derive(Debug, Clone)]
+pub struct SyntaxGeneratedParser {
+  pub repo_path: PathBuf,
+  pub out_path: Option<PathBuf>,
+  pub grammar_path: Option<PathBuf>,
+  pub abi_version: usize,
+  pub generate_parser: bool,
+  pub optimizations: tree_sitter_generate::OptLevel,
+}
+
 pub struct SyntaxManager {
+  generated_parsers: FoldMap<CompactString, SyntaxGeneratedParser>,
+
   languages: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
 

@@ -101,7 +101,6 @@ tokio-util = { workspace = true, features = ["full"] }
 toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
 tree-sitter-c = { workspace = true }
-tree-sitter-generate = { workspace = true }
 tree-sitter-html = { workspace = true }
 tree-sitter-loader = { workspace = true, default-features = false }
 tree-sitter-md = { workspace = true }
