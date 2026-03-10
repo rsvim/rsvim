@@ -244,6 +244,12 @@ impl SyntaxManager {
         Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
         vec!["toml"],
       ),
+      (
+        "html",
+        tree_sitter_html::LANGUAGE,
+        Some(tree_sitter_html::HIGHLIGHT_QUERY_BLOCK),
+        vec!["html"],
+      ),
     ];
 
     for lang_binding in language_bindings {

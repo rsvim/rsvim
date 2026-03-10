@@ -83,6 +83,7 @@ toml = { version = "1.0", features = ["fast_hash"] }
 #   "parking_lot",
 # ] }
 tree-sitter = "0.26"
+tree-sitter-html = "0.23"
 tree-sitter-loader = "0.26"
 tree-sitter-md = "0.5"
 tree-sitter-rust = "0.24"
