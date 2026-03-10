@@ -18,7 +18,7 @@ mod parse_toml {
     info!("cs:{:?}", cs);
 
     assert!(cs.colors().get("ui.background").is_some());
-    assert!(cs.colors().get("ui.foreground").is_some());
+    assert!(cs.colors().get("ui.text").is_some());
 
     assert!(cs.highlights().get("boolean").is_some());
     info!("boolean:{:?}", cs.highlights().get("boolean"));
@@ -156,7 +156,7 @@ grey = "#c0c0c0"
         b: 0x0
       }
     );
-    assert!(cs.colors().get("ui.foreground").is_none());
+    assert!(cs.colors().get("ui.text").is_none());
   }
 
   #[test]
@@ -170,7 +170,7 @@ comment = { fg = "#c0c0c0", bg = "#000000", bold = true, italic = true, underlin
 keyword = { fg = "red", bg = "green", italic = true }
 
 [ui]
-foreground = "#fff"
+text = "#fff"
 background = "#000000"
 "##;
 
@@ -245,7 +245,7 @@ background = "#000000"
       }
     );
     assert_eq!(
-      *cs.colors().get("ui.foreground").unwrap(),
+      *cs.colors().get("ui.text").unwrap(),
       Color::Rgb {
         r: 0xff,
         g: 0xff,
@@ -359,7 +359,7 @@ grey = "#c0c0c0"
         b: 0x0
       }
     );
-    assert!(cs.colors().get("ui.foreground").is_none());
+    assert!(cs.colors().get("ui.text").is_none());
   }
 
   #[test]
@@ -417,7 +417,7 @@ attribute = "beijing"
 
     let payload: &str = r##"
 [ui]
-foreground = { fg = "white" }
+text = { fg = "white" }
 "##;
 
     let colorscheme_table = payload.parse::<toml::Table>().unwrap();

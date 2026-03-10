@@ -31,12 +31,12 @@
 //! It defines syntax highlightings for programming languages, the value of a
 //! highlight can have two formats:
 //!
-//! - A string defines the foreground text color for the highlighting, it
-//!   accepts either ANSI color name (such as "white", "yellow", etc) or RGB
-//!   color code (such as "#ffffff", "#ffff00", etc).
+//! - A string defines the text color for the highlighting, it accepts either
+//!   ANSI color name (such as "white", "yellow", etc) or RGB color code (such
+//!   as "#ffffff", "#ffff00", etc).
 //! - A toml table with below optional attributes:
 //!   - `fg`: a string value indicates the foreground text color (ANSI/RGB), it
-//!     uses `ui.foreground` if been omitted.
+//!     uses `ui.text` if been omitted.
 //!   - `bg`: a string value indicates the background text color (ANSI/RGB), it
 //!     uses `ui.background` if been omitted.
 //!   - `bold`: a boolean value indicates whether the text is bold, by default
@@ -46,10 +46,10 @@
 //!   - `underlined`: a boolean value indicates whether text is underlined, by
 //!     default it is `false`.
 //!
-//! `ui` section defines other UI highlightings such as common foreground and
-//! background text colors. There're some default configs:
+//! `ui` section defines other UI highlightings such as common text colors and
+//! background colors. There're some default configs:
 //!
-//! - `ui.foreground`: uses `white` by default.
+//! - `ui.text`: uses `white` by default.
 //! - `ui.background`: uses `black` by default.
 //!
 //! `palette` section is a helper section for defining `[scope]` and `[ui]`
@@ -70,9 +70,9 @@ pub const DEFAULT: &str = "default";
 pub const RESET_COLOR: Color = Color::Reset;
 
 // "ui."
-pub const FOREGROUND: &str = "foreground";
+pub const TEXT: &str = "text";
 pub const BACKGROUND: &str = "background";
-pub const UI_FOREGROUND: &str = "ui.foreground";
+pub const UI_TEXT: &str = "ui.text";
 pub const UI_BACKGROUND: &str = "ui.background";
 
 // "scope."
@@ -130,12 +130,7 @@ pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 
 pub static UI_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
-  Lazy::new(|| {
-    [FOREGROUND, BACKGROUND]
-      .into_iter()
-      .map(|i| (i, i))
-      .collect()
-  });
+  Lazy::new(|| [TEXT, BACKGROUND].into_iter().map(|i| (i, i)).collect());
 
 pub static SCOPE_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
   Lazy::new(|| {
@@ -336,7 +331,7 @@ fn parse_hl_as_table(
     }
   };
 
-  let fg = parse_color("fg", UI_FOREGROUND)?;
+  let fg = parse_color("fg", UI_TEXT)?;
   let bg = parse_color("bg", UI_BACKGROUND)?;
 
   let parse_bool = |x| -> TheResult<bool> {
@@ -463,12 +458,8 @@ impl ColorScheme {
     color.unwrap_or(self.colors.get(fallback).copied().unwrap_or(Color::Reset))
   }
 
-  pub fn ui_foreground(&self) -> Color {
-    self
-      .colors
-      .get(UI_FOREGROUND)
-      .copied()
-      .unwrap_or(Color::Reset)
+  pub fn ui_text(&self) -> Color {
+    self.colors.get(UI_TEXT).copied().unwrap_or(Color::Reset)
   }
 
   pub fn ui_background(&self) -> Color {
@@ -480,7 +471,7 @@ impl ColorScheme {
   }
 
   pub fn resolve_fg(&self, fg: &Option<Color>) -> Color {
-    fg.unwrap_or(self.ui_foreground())
+    fg.unwrap_or(self.ui_text())
   }
 
   pub fn resolve_bg(&self, bg: &Option<Color>) -> Color {
@@ -533,7 +524,7 @@ fn default_colorscheme() -> ColorScheme {
     variable = "cyan"
 
     [ui]
-    foreground = "white"
+    text = "white"
     background = "black"
   };
   ColorScheme::from_toml(DEFAULT, config).unwrap()
