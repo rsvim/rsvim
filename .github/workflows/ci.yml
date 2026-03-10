@@ -129,6 +129,9 @@ jobs:
           verbose: true
   build:
     name: Build
+    strategy:
+      matrix:
+        profile: ["--release", "--profile nightly"]
     runs-on: ubuntu-22.04
     steps:
       - uses: Swatinem/rust-cache@v2
@@ -136,9 +139,7 @@ jobs:
       - name: Install Rust
         run: rustup component add clippy
       - uses: actions/checkout@v6
-      - name: Build (--profile nightly)
-        run: cargo build --profile nightly
-      - name: Build (--release)
-        run: cargo build --release
-      - name: Build (--release --no-default-features)
-        run: cargo build --no-default-features --release
+      - name: Build
+        run: cargo build ${{ matrix.profile }}
+      - name: Build (--no-default-features)
+        run: cargo build --no-default-features ${{ matrix.profile }}
