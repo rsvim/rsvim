@@ -355,7 +355,17 @@ impl SyntaxManager {
 // Language and queries }
 
 // Load and build {
-impl SyntaxManager {}
+impl SyntaxManager {
+  /// Load tree-sitter grammar in async.
+  pub async fn async_load(force_rebuild: bool) -> TheResult<()> {
+    Ok(())
+  }
+
+  /// Load tree-sitter grammar in sync.
+  pub fn load(force_rebuild: bool) -> TheResult<()> {
+    Ok(())
+  }
+}
 // Load and build }
 
 impl Default for SyntaxManager {
