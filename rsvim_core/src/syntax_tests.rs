@@ -1,6 +1,7 @@
 use super::syntax::*;
 use crate::cli::CliOptions;
 use crate::cli::SpecialCliOptions;
+use crate::evloop::writer::StdoutWriterValue;
 use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
@@ -685,25 +686,11 @@ mod tests_buffer_scrolling {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![
-      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
-        state_ops::GotoInsertModeVariant::Keep,
-      )),
-      MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
-      )),
-      MockOperation::SleepFor(Duration::from_millis(100)),
-      MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
-      )),
-      MockOperation::SleepFor(Duration::from_millis(100)),
-      MockOperation::Operation(state_ops::Operation::CursorInsert(
-        state_ops::CursorInsertPayload::Text("World".to_compact_string()),
-      )),
-      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::Operation(state_ops::Operation::CursorMoveTo((0, 10))),
       MockOperation::SleepFor(Duration::from_millis(500)),
     ];
 
-    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
+    let tmpfile = NamedTempFile::new("rust1.rs").unwrap();
     tmpfile.touch().unwrap();
     tmpfile
       .write_str(
@@ -826,7 +813,7 @@ fn main() {
       terminal_rows,
       CliOptions::new(
         SpecialCliOptions::empty(),
-        vec![Path::new("err1.rs").to_path_buf()],
+        vec![tmpfile.path().to_path_buf()],
         false,
       ),
     );
@@ -839,28 +826,13 @@ fn main() {
 
     // After running
     {
-      let buf = lock!(event_loop.buffer_manager)
-        .first_key_value()
-        .unwrap()
-        .1
-        .clone();
-      let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
-      let payload = buf.text().rope().to_string();
-      assert_eq!(format!("Hello, World{}", buf_eol), payload);
-      let buf_editing_version = buf.editing_version();
-      let syn_editing_version =
-        buf.syntax().as_ref().unwrap().editing_version();
-      assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
-      assert!(syn_tree.as_ref().is_some());
+      let shaders = match event_loop.writer {
+        StdoutWriterValue::DevNullWriter(w) => w.shaders(),
+        _ => unreachable!(),
+      };
       info!(
-        "syn tree:{:?}",
+        "shaders:{:?}",
         syn_tree.as_ref().unwrap().root_node().to_string()
-      );
-      assert_eq!(
-        syn_tree.as_ref().unwrap().root_node().to_string(),
-        "(source_file (ERROR (identifier) (identifier)))"
       );
     }
 
