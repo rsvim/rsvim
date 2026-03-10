@@ -354,6 +354,12 @@ impl SyntaxManager {
 }
 // Language and queries }
 
+// Load and build {
+impl SyntaxManager {
+
+}
+// Load and build }
+
 impl Default for SyntaxManager {
   fn default() -> Self {
     Self::new()
