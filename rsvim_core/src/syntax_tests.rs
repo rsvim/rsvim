@@ -853,6 +853,16 @@ fn main() {
         })
         .collect_vec();
       for (i, text_shader) in text_shaders.iter().enumerate() {
+        info!("shader [{}]", i);
+        for (j, shader_cmd) in text_shader.iter().enumerate() {
+          if let ShaderCommand::StylePrintStyledContentString(content) =
+            shader_cmd
+          {
+            info!("{:>2}: {}", j, content.0.content(),);
+          } else {
+            unreachable!();
+          }
+        }
         for (j, shader_cmd) in text_shader.iter().enumerate() {
           match shader_cmd {
             ShaderCommand::StylePrintStyledContentString(content) => {
