@@ -105,10 +105,10 @@ impl Syntax {
         .unwrap_or(None),
       None => None,
     };
-    trace!(
-      "capture names:{:?}",
-      highlight_query.as_ref().map(|hq| hq.capture_names())
-    );
+    // trace!(
+    //   "capture names:{:?}",
+    //   highlight_query.as_ref().map(|hq| hq.capture_names())
+    // );
 
     Ok(Self {
       id: SyntaxId::next(),
@@ -473,14 +473,14 @@ pub fn parse(
         let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = new.version;
-        trace!(
-          "Parsed new tree:{:?}, editing_version:{:?}",
-          tree
-            .clone()
-            .map(|t| t.root_node().to_string())
-            .unwrap_or("None".to_string()),
-          editing_version
-        );
+        // trace!(
+        //   "Parsed new tree:{:?}, editing_version:{:?}",
+        //   tree
+        //     .clone()
+        //     .map(|t| t.root_node().to_string())
+        //     .unwrap_or("None".to_string()),
+        //   editing_version
+        // );
         last_rope = Some(new.payload.clone());
         last_payload = Some(payload);
       }
@@ -511,14 +511,14 @@ pub fn parse(
     let new_tree = parser.parse(&payload, tree.as_ref());
     tree = new_tree;
     editing_version = last_update.version;
-    trace!(
-      "Parsed update tree:{:?}, editing_version:{:?}",
-      tree
-        .clone()
-        .map(|t| t.root_node().to_string())
-        .unwrap_or("None".to_string()),
-      editing_version
-    );
+    // trace!(
+    //   "Parsed update tree:{:?}, editing_version:{:?}",
+    //   tree
+    //     .clone()
+    //     .map(|t| t.root_node().to_string())
+    //     .unwrap_or("None".to_string()),
+    //   editing_version
+    // );
     last_rope = Some(last_update.payload.clone());
     last_payload = Some(payload);
   }
@@ -588,10 +588,10 @@ pub fn query(
         let index = cap.index;
         let name = syn_highlight_query.capture_names()[index as usize];
         let range = cap.node.range();
-        trace!(
-          "Captured highlight {}: name:{:?}, range:{:?}",
-          index, name, range
-        );
+        // trace!(
+        //   "Captured highlight {}: name:{:?}, range:{:?}",
+        //   index, name, range
+        // );
         debug_assert!(text_rope.get_line(range.start_point.row).is_some());
         debug_assert!(
           text_rope

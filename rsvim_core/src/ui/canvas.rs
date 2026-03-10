@@ -253,7 +253,7 @@ impl Canvas {
       new_contents = new_contents.underlined();
     }
     trace!(
-      "row,col:{},{}-{}, content:{:?}({:?})",
+      "row,col:{},{}-{}, content:{} ({:?})",
       row,
       start_col,
       end_col,
