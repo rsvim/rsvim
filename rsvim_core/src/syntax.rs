@@ -310,19 +310,14 @@ impl Syntax {
   }
 }
 
-#[derive(Debug, Clone)]
-pub struct SyntaxGeneratedParser {
-  pub repo_path: PathBuf,
-  pub out_path: Option<PathBuf>,
-  pub grammar_path: Option<PathBuf>,
-  pub abi_version: usize,
-  pub generate_parser: bool,
-  pub optimizations: tree_sitter_generate::OptLevel,
-}
+// #[derive(Debug, Clone)]
+// pub struct SyntaxBuiltParser {
+//   pub grammar_path: PathBuf,
+//   pub library_path: PathBuf,
+// }
 
 pub struct SyntaxManager {
-  generated_parsers: FoldMap<CompactString, SyntaxGeneratedParser>,
-
+  // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
 
