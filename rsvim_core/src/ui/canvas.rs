@@ -243,7 +243,7 @@ impl Canvas {
       crossterm::cursor::MoveTo(start_col, row),
     ));
 
-    let get_content = |start_idx: usize, end_idx: usize| -> StyledContent {
+    let get_content = |start_idx, end_idx| {
       let contents = new_cells[start_idx..end_idx]
         .iter()
         .map(|c| c.symbol())
