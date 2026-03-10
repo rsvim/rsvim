@@ -247,8 +247,8 @@ impl SyntaxManager {
       (
         "html",
         tree_sitter_html::LANGUAGE,
-        Some(tree_sitter_html::HIGHLIGHT_QUERY_BLOCK),
-        vec!["html"],
+        Some(tree_sitter_html::HIGHLIGHTS_QUERY),
+        vec!["html", "htm"],
       ),
     ];
 
