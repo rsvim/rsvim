@@ -873,15 +873,14 @@ impl EventLoop {
                       }),
                     );
                   }
-
-                  // Notify syntax parsing/query is completed
-                  chan::send_to_master(
-                    master_tx,
-                    MasterMessage::SyntaxEditResp(chan::SyntaxEditResp {
-                      buffer_id: buf.id(),
-                    }),
-                  );
                 }
+                // Notify syntax parsing/query is completed
+                chan::send_to_master(
+                  master_tx,
+                  MasterMessage::SyntaxEditResp(chan::SyntaxEditResp {
+                    buffer_id: buf.id(),
+                  }),
+                );
               }
             });
           }
