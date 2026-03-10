@@ -91,8 +91,8 @@ jobs:
       - name: Test (--no-default-features)
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: cargo test --no-default-features --color=never --workspace
-  test_coverage:
-    name: Test Coverage
+  unit_test_coverage:
+    name: Unit Test with Coverage
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-15, windows-2022]
