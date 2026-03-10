@@ -48,7 +48,7 @@ pub fn draw(
       if cell.symbol().chars().any(char_is_whitespace) {
         cell.set_fg(Color::Reset);
       } else {
-        cell.set_fg(colorscheme.ui_foreground());
+        cell.set_fg(colorscheme.ui_text());
       }
       cell.set_bg(colorscheme.ui_background());
       cell.set_attrs(Attributes::none());
@@ -205,7 +205,7 @@ pub fn draw(
                   if cell.symbol().chars().any(char_is_whitespace) {
                     cell.set_fg(Color::Reset);
                   } else {
-                    cell.set_fg(colorscheme.ui_foreground());
+                    cell.set_fg(colorscheme.ui_text());
                   }
                   cell.set_bg(colorscheme.ui_background());
                   cell.set_attrs(Attributes::none());
