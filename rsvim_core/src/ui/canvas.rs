@@ -212,11 +212,12 @@ impl Canvas {
       let pos: U16Pos = point!(col_end_at, row);
       let cell2 = frame.get_cell(pos);
       let prev_cell2 = prev_frame.get_cell(pos);
+      let cell_equals = cell2 == prev_cell2;
       trace!(
-        "[{:>2},{:>2}] cell:{:?}, prev:{:?}",
-        row, col_end_at, cell2, prev_cell2
+        "[{:>2},{:>2}] cell:{:?}, prev:{:?}, equal:{}",
+        row, col_end_at, cell2, prev_cell2, cell_equals
       );
-      if cell2 == prev_cell2 {
+      if cell_equals {
         break;
       }
       col_end_at += 1;
