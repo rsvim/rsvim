@@ -5,6 +5,9 @@ use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use assert_fs::NamedTempFile;
+use assert_fs::prelude::FileTouch;
+use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
 use std::time::Duration;
 
@@ -658,6 +661,206 @@ mod tests_buffer_editing {
       assert_eq!(
         syn_tree.as_ref().unwrap().root_node().to_string(),
         "(source_file (use_declaration argument: (scoped_identifier path: (scoped_identifier path: (identifier) name: (identifier)) name: (identifier))) (function_item name: (identifier) parameters: (parameters) body: (block (macro_invocation macro: (identifier) (token_tree (string_literal (string_content)) (MISSING \")\"))))))"
+      );
+    }
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests_buffer_scrolling {
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn rust1() -> IoResult<()> {
+    test_log_init();
+
+    let src: &str = r#""#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![
+      MockOperation::Operation(state_ops::Operation::GotoInsertMode(
+        state_ops::GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("Hello".to_compact_string()),
+      )),
+      MockOperation::SleepFor(Duration::from_millis(100)),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text(", ".to_compact_string()),
+      )),
+      MockOperation::SleepFor(Duration::from_millis(100)),
+      MockOperation::Operation(state_ops::Operation::CursorInsert(
+        state_ops::CursorInsertPayload::Text("World".to_compact_string()),
+      )),
+      MockOperation::Operation(state_ops::Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(500)),
+    ];
+
+    let tmpfile = NamedTempFile::new("new1.rs").unwrap();
+    tmpfile.touch().unwrap();
+    tmpfile
+      .write_str(
+    r###"use git2::Repository;
+use rsvim_core::js::JsRuntimeForSnapshot;
+use rsvim_core::js::v8_version;
+use std::path::Path;
+
+// pub const LOG: &str = "[RSVIM]";
+pub const LOG: &str = "cargo:warning=[RSVIM]";
+
+fn version() {
+  let profile_env = std::env::var("PROFILE").unwrap_or("debug".to_string());
+  let opt_level_env = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
+  let debug_env = std::env::var("DEBUG").unwrap_or("0".to_string());
+  let host = std::env::var("HOST").unwrap_or("unknown".to_string());
+  println!(
+    "{LOG} Env profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    profile_env, opt_level_env, debug_env, host
+  );
+
+  let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+  let version = env!("CARGO_PKG_VERSION").to_string();
+
+  // profile
+  let is_release_profile = profile_env == "release"
+    && (opt_level_env == "s" || opt_level_env == "z")
+    && debug_env != "true";
+  let profile = if is_release_profile {
+    "release".to_string()
+  } else if profile_env == "release" {
+    "nightly".to_string()
+  } else {
+    profile_env.clone()
+  };
+
+  // git commit
+  let git_commit = match Repository::open(&workspace_dir) {
+    Ok(repo) => {
+      let head = repo.head().unwrap();
+      let oid = head.target().unwrap();
+      let commit = repo.find_commit(oid).unwrap();
+      let id = commit.id();
+      let id = id.to_string();
+      println!("{LOG} Git id:{:?}", id);
+      Some(id[0..8].to_string())
+    }
+    Err(e) => {
+      println!("{LOG} Git error:{:?}", e);
+      None
+    }
+  };
+
+  // swc core
+  let swc_core = match std::fs::read_to_string(workspace_dir.join("Cargo.toml"))
+  {
+    Ok(manifest) => match manifest.parse::<toml::Table>() {
+      Ok(parsed_manifest) => {
+        let deps = &parsed_manifest["workspace"]["dependencies"];
+        let core = deps["swc_core"].as_str();
+        println!("{LOG} Swc core:{:?}", core);
+        Some(core.unwrap().trim_start_matches("=").to_string())
+      }
+      Err(e) => {
+        println!("{LOG} Parse Cargo.toml error:{:?}", e);
+        None
+      }
+    },
+    Err(e) => {
+      println!("{LOG} Read Cargo.toml error:{:?}", e);
+      None
+    }
+  };
+  let v8_version = v8_version();
+
+  println!(
+    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
+    version, profile, host, git_commit, v8_version, swc_core
+  );
+
+  let mut resolved = format!(
+    "version={}\nprofile={}\nhost={}\nv8={}\n",
+    version, profile, host, v8_version
+  );
+  if let Some(git_commit) = git_commit {
+    resolved = format!("{}git_commit={}\n", resolved, git_commit);
+  }
+  if let Some(swc_core) = swc_core {
+    resolved = format!("{}swc_core={}\n", resolved, swc_core);
+  }
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
+  println!("{LOG} Writing version into {:?}...", output_path.as_path());
+
+  std::fs::write(output_path.as_path(), resolved.as_bytes()).unwrap();
+}
+
+fn snapshot() {
+  let js_runtime = JsRuntimeForSnapshot::new();
+  let snapshot = js_runtime.create_snapshot();
+  let snapshot = Box::from(&snapshot);
+  let mut vec = Vec::with_capacity(snapshot.len());
+  vec.extend_from_slice(&snapshot);
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_SNAPSHOT.BIN");
+  println!("{LOG} Writing snapshot into {:?}...", output_path.as_path());
+  std::fs::write(output_path.as_path(), vec.into_boxed_slice()).unwrap();
+}
+
+fn main() {
+  version();
+  snapshot();
+}
+"###).unwrap();
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(
+        SpecialCliOptions::empty(),
+        vec![Path::new("err1.rs").to_path_buf()],
+        false,
+      ),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buf = lock!(event_loop.buffer_manager)
+        .first_key_value()
+        .unwrap()
+        .1
+        .clone();
+      let buf = lock!(buf);
+      let buf_eol = buf.options().end_of_line();
+      let payload = buf.text().rope().to_string();
+      assert_eq!(format!("Hello, World{}", buf_eol), payload);
+      let buf_editing_version = buf.editing_version();
+      let syn_editing_version =
+        buf.syntax().as_ref().unwrap().editing_version();
+      assert_eq!(buf_editing_version, syn_editing_version);
+      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      assert!(syn_tree.as_ref().is_some());
+      info!(
+        "syn tree:{:?}",
+        syn_tree.as_ref().unwrap().root_node().to_string()
+      );
+      assert_eq!(
+        syn_tree.as_ref().unwrap().root_node().to_string(),
+        "(source_file (ERROR (identifier) (identifier)))"
       );
     }
 
