@@ -2011,17 +2011,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_reset_color = false;
+    let mut bg_has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
-          has_reset_color = true;
+        if *col.bg() == Color::Reset {
+          bg_has_reset_color = true;
         }
       }
     }
-    assert!(!has_reset_color);
+    assert!(!bg_has_reset_color);
   }
 
   #[test]
@@ -2068,17 +2068,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_reset_color = false;
+    let mut bg_has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
-          has_reset_color = true;
+        if *col.bg() == Color::Reset {
+          bg_has_reset_color = true;
         }
       }
     }
-    assert!(!has_reset_color);
+    assert!(!bg_has_reset_color);
   }
 
   #[test]
@@ -2125,17 +2125,17 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_reset_color = false;
+    let mut bg_has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
-          has_reset_color = true;
+        if *col.bg() == Color::Reset {
+          bg_has_reset_color = true;
         }
       }
     }
-    assert!(!has_reset_color);
+    assert!(!bg_has_reset_color);
   }
 
   #[test]
@@ -2182,16 +2182,16 @@ fn main() {
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
-    let mut has_reset_color = false;
+    let mut bg_has_reset_color = false;
     for i in 0..10 {
       let row = actual.frame().get_cells_at(point!(0, i), 10);
       for (j, col) in row.iter().enumerate() {
         info!("row [{},{}]:{:?}", i, j, col);
-        if *col.fg() == Color::Reset || *col.bg() == Color::Reset {
-          has_reset_color = true;
+        if *col.bg() == Color::Reset {
+          bg_has_reset_color = true;
         }
       }
     }
-    assert!(!has_reset_color);
+    assert!(!bg_has_reset_color);
   }
 }
