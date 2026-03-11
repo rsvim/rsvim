@@ -712,7 +712,7 @@ impl Text {
     );
 
     // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
       line_idx_after_inserted,
@@ -859,7 +859,7 @@ impl Text {
     );
 
     // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
       line_idx_after_deleted,
