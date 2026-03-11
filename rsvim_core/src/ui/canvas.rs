@@ -317,26 +317,28 @@ impl Canvas {
     let size = self.size();
     trace!("brute force diff, size:{:?}", size);
 
-    if !self.frame().is_zero_sized() {
-      for row in 0..size.height() {
-        let mut col = 0_u16;
-        while col < size.width() {
-          // Skip unchanged columns
-          let pos: U16Pos = point!(col, row);
-          let cell = self.frame().get_cell(pos);
-          let prev_cell = self.prev_frame().get_cell(pos);
-          if cell == prev_cell {
-            col += 1;
-            continue;
-          }
+    if self.frame().is_zero_sized() {
+      return;
+    }
 
-          // Find the continuously changed parts by iterating over columns
-          let col_end_at = self._next_same_cell_in_row(row, col);
+    for row in 0..size.height() {
+      let mut col = 0_u16;
+      while col < size.width() {
+        // Skip unchanged columns
+        let pos: U16Pos = point!(col, row);
+        let cell = self.frame().get_cell(pos);
+        let prev_cell = self.prev_frame().get_cell(pos);
+        if cell == prev_cell {
+          col += 1;
+          continue;
+        }
 
-          if col_end_at > col {
-            self._make_printable_shaders(row, col, col_end_at, output_shaders);
-            col = col_end_at;
-          }
+        // Find the continuously changed parts by iterating over columns
+        let col_end_at = self._next_same_cell_in_row(row, col);
+
+        if col_end_at > col {
+          self._make_printable_shaders(row, col, col_end_at, output_shaders);
+          col = col_end_at;
         }
       }
     }
@@ -351,32 +353,34 @@ impl Canvas {
     let size = self.size();
     trace!("dirty marks diff, size:{:?}", size);
 
-    if !self.frame().is_zero_sized() {
-      for (row, dirty) in self.frame().dirty_marks().iter().enumerate() {
-        if row < size.height() as usize && *dirty {
-          let mut col = 0_u16;
-          while col < size.width() {
-            // Skip unchanged columns
-            let pos: U16Pos = point!(col, row as u16);
-            let cell = self.frame().get_cell(pos);
-            let prev_cell = self.prev_frame().get_cell(pos);
-            if cell == prev_cell {
-              col += 1;
-              continue;
-            }
+    if self.frame().is_zero_sized() {
+      return;
+    }
 
-            // Find the continuously changed parts by iterating over columns
-            let col_end_at = self._next_same_cell_in_row(row as u16, col);
+    for (row, dirty) in self.frame().dirty_marks().iter().enumerate() {
+      if row < size.height() as usize && *dirty {
+        let mut col = 0_u16;
+        while col < size.width() {
+          // Skip unchanged columns
+          let pos: U16Pos = point!(col, row as u16);
+          let cell = self.frame().get_cell(pos);
+          let prev_cell = self.prev_frame().get_cell(pos);
+          if cell == prev_cell {
+            col += 1;
+            continue;
+          }
 
-            if col_end_at > col {
-              self._make_printable_shaders(
-                row as u16,
-                col,
-                col_end_at,
-                output_shaders,
-              );
-              col = col_end_at;
-            }
+          // Find the continuously changed parts by iterating over columns
+          let col_end_at = self._next_same_cell_in_row(row as u16, col);
+
+          if col_end_at > col {
+            self._make_printable_shaders(
+              row as u16,
+              col,
+              col_end_at,
+              output_shaders,
+            );
+            col = col_end_at;
           }
         }
       }
