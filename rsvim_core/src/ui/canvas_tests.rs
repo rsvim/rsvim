@@ -259,10 +259,12 @@ fn diff2() {
   for (i, act) in actual.iter().enumerate() {
     info!("diff2 [{}]:{:?}", i, act);
   }
-  assert_eq!(actual.len(), 2);
+  assert_eq!(actual.len(), 6);
+
+  // section-1
   assert!(matches!(
     actual[0],
-    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(2, 3))
   ));
   assert!(matches!(
     actual[1],
@@ -275,5 +277,41 @@ fn diff2() {
   ) = &actual[1]
   {
     assert_eq!(contents.content().to_string(), "ABCD".to_string());
+  }
+
+  // section-2
+  assert!(matches!(
+    actual[0],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(8, 5))
+  ));
+  assert!(matches!(
+    actual[1],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[1]
+  {
+    assert_eq!(contents.content().to_string(), "FG".to_string());
+  }
+
+  // section-3
+  assert!(matches!(
+    actual[0],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(0, 6))
+  ));
+  assert!(matches!(
+    actual[1],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[1]
+  {
+    assert_eq!(contents.content().to_string(), "HI".to_string());
   }
 }
