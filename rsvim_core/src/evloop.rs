@@ -109,7 +109,7 @@ pub struct EventLoop {
   /// calculations, they will be cancelled when editor exit.
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
-  pub exit_code: i32,
+  pub exit_code: Option<i32>,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
@@ -161,7 +161,7 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* exit_code */ i32,
+    /* exit_code */ Option<i32>,
     (
       /* master_tx */ UnboundedSender<MasterMessage>,
       /* master_rx */ UnboundedReceiver<MasterMessage>,
@@ -255,7 +255,7 @@ impl EventLoop {
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
-      0,
+      None,
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
@@ -699,7 +699,7 @@ impl EventLoop {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Recv ExitReq:{:?}", req.exit_code);
-          self.exit_code = req.exit_code;
+          self.exit_code = Some(req.exit_code);
           self.cancellation_token.cancel();
         }
         MasterMessage::TimeoutReq(req) => {
@@ -915,7 +915,7 @@ impl EventLoop {
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
-  pub async fn run(&mut self) -> IoResult<()> {
+  pub async fn run(&mut self) -> IoResult<i32> {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
@@ -943,14 +943,14 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code.unwrap())
   }
 
   #[cfg(test)]
   pub async fn run_with_mock_events(
     &mut self,
     mut reader: MockEventReader,
-  ) -> IoResult<()> {
+  ) -> IoResult<i32> {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
@@ -977,14 +977,14 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code.unwrap())
   }
 
   #[cfg(test)]
   pub async fn run_with_mock_operations(
     &mut self,
     mut reader: MockOperationReader,
-  ) -> IoResult<()> {
+  ) -> IoResult<i32> {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
@@ -1008,6 +1008,6 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code.unwrap())
   }
 }
