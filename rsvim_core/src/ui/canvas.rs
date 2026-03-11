@@ -196,37 +196,7 @@ impl Canvas {
     }
   }
 
-  /// Find next same cell in current row of frame.
-  ///
-  /// NOTE: row is y, col is x.
-  ///
-  /// # Returns
-  ///
-  /// 1. The column number if found the same cell, column number started from 0.
-  /// 2. The end column index on the row if not found, i.e. the width of current frame.
-  pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
-    let frame = self.frame();
-    let prev_frame = self.prev_frame();
-
-    let mut col_end_at = col;
-    while col_end_at < frame.size().width() {
-      let pos: U16Pos = point!(col_end_at, row);
-      let cell = frame.get_cell(pos);
-      let prev_cell = prev_frame.get_cell(pos);
-      let cell_equal = cell == prev_cell;
-      // trace!(
-      //   "[{:>2},{:>2}] cell:{:?}, prev:{:?}, equal:{}",
-      //   row, col_end_at, cell, prev_cell, cell_equal
-      // );
-      if cell_equal {
-        break;
-      }
-      col_end_at += 1;
-    }
-    col_end_at
-  }
-
-  pub fn _make_printable_shaders(
+  pub fn _make_consequential_shaders(
     &self,
     row: u16,
     start_col: u16,
@@ -322,7 +292,12 @@ impl Canvas {
     }
 
     for row in 0..size.height() {
-      self._make_printable_shaders(row, 0_u16, size.width(), output_shaders);
+      self._make_consequential_shaders(
+        row,
+        0_u16,
+        size.width(),
+        output_shaders,
+      );
     }
   }
 
@@ -366,7 +341,7 @@ impl Canvas {
             } else {
               // Render a consequential range of cells.
               if dirty_pos.x() > start_dirty_pos_unwrap.x() {
-                self._make_printable_shaders(
+                self._make_consequential_shaders(
                   dirty_pos.y(),
                   start_dirty_pos_unwrap.x(),
                   dirty_pos.x(),
