@@ -142,8 +142,8 @@ impl Canvas {
   pub fn _shade_done(&mut self) {
     // Save current frame.
     self.prev_frame.clone_from(&self.frame);
-    // Reset the `dirty` fields.
-    self.frame.reset_dirty_rows();
+    // Reset all dirty marks.
+    self.frame.reset_dirty_marks();
   }
 
   /// Shade cursor and append results into shader vector.
@@ -196,37 +196,7 @@ impl Canvas {
     }
   }
 
-  /// Find next same cell in current row of frame.
-  ///
-  /// NOTE: row is y, col is x.
-  ///
-  /// # Returns
-  ///
-  /// 1. The column number if found the same cell, column number started from 0.
-  /// 2. The end column index on the row if not found, i.e. the width of current frame.
-  pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
-    let frame = self.frame();
-    let prev_frame = self.prev_frame();
-
-    let mut col_end_at = col;
-    while col_end_at < frame.size().width() {
-      let pos: U16Pos = point!(col_end_at, row);
-      let cell = frame.get_cell(pos);
-      let prev_cell = prev_frame.get_cell(pos);
-      let cell_equal = cell == prev_cell;
-      // trace!(
-      //   "[{:>2},{:>2}] cell:{:?}, prev:{:?}, equal:{}",
-      //   row, col_end_at, cell, prev_cell, cell_equal
-      // );
-      if cell_equal {
-        break;
-      }
-      col_end_at += 1;
-    }
-    col_end_at
-  }
-
-  pub fn _make_printable_shaders(
+  pub fn _make_consequential_shaders(
     &self,
     row: u16,
     start_col: u16,
@@ -245,7 +215,13 @@ impl Canvas {
     let get_content = |start_idx, end_idx| {
       let contents = new_cells[start_idx..end_idx]
         .iter()
-        .map(|c| c.symbol())
+        .map(|c| {
+          if c.symbol().is_empty() {
+            " "
+          } else {
+            c.symbol()
+          }
+        })
         .join("");
       let fg = new_cells[start_idx].fg();
       let bg = new_cells[start_idx].bg();
@@ -317,28 +293,17 @@ impl Canvas {
     let size = self.size();
     trace!("brute force diff, size:{:?}", size);
 
-    if !self.frame().is_zero_sized() {
-      for row in 0..size.height() {
-        let mut col = 0_u16;
-        while col < size.width() {
-          // Skip unchanged columns
-          let pos: U16Pos = point!(col, row);
-          let cell = self.frame().get_cell(pos);
-          let prev_cell = self.prev_frame().get_cell(pos);
-          if cell == prev_cell {
-            col += 1;
-            continue;
-          }
+    if self.frame().is_zero_sized() {
+      return;
+    }
 
-          // Find the continuously changed parts by iterating over columns
-          let col_end_at = self._next_same_cell_in_row(row, col);
-
-          if col_end_at > col {
-            self._make_printable_shaders(row, col, col_end_at, output_shaders);
-            col = col_end_at;
-          }
-        }
-      }
+    for row in 0..size.height() {
+      self._make_consequential_shaders(
+        row,
+        0_u16,
+        size.width(),
+        output_shaders,
+      );
     }
   }
 
@@ -351,35 +316,70 @@ impl Canvas {
     let size = self.size();
     trace!("dirty marks diff, size:{:?}", size);
 
-    if !self.frame().is_zero_sized() {
-      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
-        if row < size.height() as usize && *dirty {
-          let mut col = 0_u16;
-          while col < size.width() {
-            // Skip unchanged columns
-            let pos: U16Pos = point!(col, row as u16);
-            let cell = self.frame().get_cell(pos);
-            let prev_cell = self.prev_frame().get_cell(pos);
-            if cell == prev_cell {
-              col += 1;
-              continue;
-            }
+    if self.frame().is_zero_sized() {
+      return;
+    }
 
-            // Find the continuously changed parts by iterating over columns
-            let col_end_at = self._next_same_cell_in_row(row as u16, col);
+    let n = (size.height() as usize) * (size.width() as usize);
+    let mut start_idx: Option<u32> = None;
+    let mut start_pos: Option<U16Pos> = None;
+    let mut last_idx: Option<u32> = None;
+    let mut last_pos: Option<U16Pos> = None;
+    for idx in self.frame().dirty_marks().iter() {
+      if (idx as usize) < n {
+        let pos = self.frame().idx2pos(idx as usize);
+        trace!(
+          "dirty idx:{:?},pos:{:?}, start idx:{:?},pos:{:?}",
+          idx, pos, start_idx, start_pos
+        );
+        if start_idx.is_none() && start_pos.is_none() {
+          start_idx = Some(idx);
+          start_pos = Some(pos);
+        } else {
+          debug_assert!(start_idx.is_some());
+          debug_assert!(start_pos.is_some());
+          debug_assert!(last_idx.is_some());
+          debug_assert!(last_pos.is_some());
 
-            if col_end_at > col {
-              self._make_printable_shaders(
-                row as u16,
-                col,
-                col_end_at,
-                output_shaders,
-              );
-              col = col_end_at;
+          if let Some(start_pos_unwrap) = start_pos
+            && let Some(last_idx) = last_idx
+            && let Some(last_pos) = last_pos
+          {
+            // On the same row and column is consequential.
+            if start_pos_unwrap.y() == pos.y()
+              && last_pos.y() == pos.y()
+              && last_idx + 1 == idx
+            {
+              // Do nothing and continue iterating dirty marks.
+            } else {
+              // Render a consequential range of cells.
+              if last_pos.x() > start_pos_unwrap.x() {
+                self._make_consequential_shaders(
+                  start_pos_unwrap.y(),
+                  start_pos_unwrap.x(),
+                  last_pos.x() + 1,
+                  output_shaders,
+                );
+                start_idx = Some(idx);
+                start_pos = Some(pos);
+              }
             }
           }
         }
+        last_idx = Some(idx);
+        last_pos = Some(pos);
       }
+    }
+    if let Some(start_pos) = start_pos
+      && let Some(last_pos) = last_pos
+      && last_pos.x() > start_pos.x()
+    {
+      self._make_consequential_shaders(
+        start_pos.y(),
+        start_pos.x(),
+        last_pos.x() + 1,
+        output_shaders,
+      );
     }
   }
 }

@@ -12,6 +12,7 @@ use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
+use roaring::RoaringBitmap;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -210,16 +211,17 @@ impl Frame {
     self.iframe.try_set_n_cells_at(pos, cell, n)
   }
 
-  /// Get dirty rows.
-  pub fn dirty_rows(&self) -> &Vec<bool> {
-    self.iframe.dirty_rows()
+  /// Get dirty marks.
+  pub fn dirty_marks(&self) -> &RoaringBitmap {
+    self.iframe.dirty_marks()
   }
 
-  /// Reset/clean all dirty components.
+  /// Reset/clean all dirty marks.
   ///
-  /// NOTE: This method should be called after current frame flushed to terminal device.
-  pub fn reset_dirty_rows(&mut self) {
-    self.iframe.reset_dirty_rows()
+  /// NOTE: This method should be called after current frame flushed to
+  /// terminal device.
+  pub fn reset_dirty_marks(&mut self) {
+    self.iframe.reset_dirty_marks()
   }
 
   /// Get cursor.

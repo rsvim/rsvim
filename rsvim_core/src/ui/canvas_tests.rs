@@ -1,8 +1,6 @@
 use super::canvas::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
 use itertools::Itertools;
 
 fn int2letter(i: u8) -> char {
@@ -149,128 +147,7 @@ fn _shade_cursor1() {
 }
 
 #[test]
-fn _next_same_cell_in_row1() {
-  test_log_init();
-  let mut can = Canvas::new(size!(10, 10));
-
-  can
-    .frame_mut()
-    .set_cells_at(point!(0, 0), &vec![Cell::with_char('A'); 20]);
-  for i in 0..10 {
-    let actual = can._next_same_cell_in_row(0, i);
-    info!("1-{:?} actual:{:?}", i, actual);
-    assert_eq!(actual, 10);
-  }
-  for i in 0..10 {
-    let actual = can._next_same_cell_in_row(1, i);
-    info!("2-{:?} actual:{:?}", i, actual);
-    assert_eq!(actual, 10);
-  }
-}
-
-#[test]
-fn _next_same_cell_in_row2() {
-  test_log_init();
-  let mut can = Canvas::new(size!(10, 10));
-
-  can.frame_mut().set_cells_at(
-    point!(3, 5),
-    &(0..9).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
-  );
-  let chars = (0_u8..9_u8)
-    .map(|i| int2letter(i).to_compact_string())
-    .collect::<Vec<_>>();
-  info!(
-    "frame:{:?}",
-    can
-      .frame()
-      .raw_symbols()
-      .iter()
-      .map(|cs| cs
-        .iter()
-        .map(CompactString::to_string)
-        .collect::<Vec<_>>()
-        .join(""))
-      .collect::<Vec<_>>()
-  );
-  for col in 0..10 {
-    for row in 0..10 {
-      let actual = can._next_same_cell_in_row(row, col);
-      info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
-      if !(5..7).contains(&row) {
-        assert_eq!(actual, col);
-      } else if row == 5 && (3..10).contains(&col) {
-        assert_eq!(actual, 10);
-        info!(
-          "chars:{:?}, symbol:{:?}",
-          chars,
-          can.frame().get_cell(point!(col, row)).symbol()
-        );
-        assert!(
-          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
-        );
-      } else if row == 6 && (0..2).contains(&col) {
-        assert_eq!(actual, 2);
-        info!(
-          "chars:{:?}, symbol:{:?}",
-          chars,
-          can.frame().get_cell(point!(col, row)).symbol()
-        );
-        assert!(
-          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
-        );
-      } else {
-        assert_eq!(actual, col);
-      }
-    }
-  }
-}
-
-#[test]
-fn _next_same_cell_in_row3() {
-  test_log_init();
-  let mut can = Canvas::new(size!(10, 10));
-
-  can.frame_mut().set_cells_at(
-    point!(2, 3),
-    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
-  );
-  let mut char_index = 0_u8;
-  info!(
-    "frame:{:?}",
-    can
-      .frame()
-      .raw_symbols()
-      .iter()
-      .map(|cs| cs
-        .iter()
-        .map(CompactString::to_string)
-        .collect::<Vec<_>>()
-        .join(""))
-      .collect::<Vec<_>>()
-  );
-  for col in 0..10 {
-    for row in 0..10 {
-      let actual = can._next_same_cell_in_row(row, col);
-      info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
-      if row != 3 {
-        assert_eq!(actual, col);
-      } else if (2..6).contains(&col) {
-        assert_eq!(actual, 6);
-        assert_eq!(
-          int2letter(char_index).to_compact_string(),
-          can.frame().get_cell(point!(col, row)).symbol()
-        );
-        char_index += 1;
-      } else {
-        assert_eq!(actual, col);
-      }
-    }
-  }
-}
-
-#[test]
-fn _make_printable_shader1() {
+fn _make_consequential_shaders1() {
   test_log_init();
   let mut can = Canvas::new(size!(10, 10));
 
@@ -280,9 +157,8 @@ fn _make_printable_shader1() {
   );
   let col = 2;
   let row = 3;
-  let col_end_at = can._next_same_cell_in_row(row, col);
   let mut shaders = vec![];
-  can._make_printable_shaders(row, col, col_end_at, &mut shaders);
+  can._make_consequential_shaders(row, col, col + 4, &mut shaders);
   info!("shader:{:?}", shaders);
   assert!(matches!(
     shaders[0],
@@ -334,7 +210,7 @@ fn diff1() {
   {
     assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
-  assert_eq!(actual2.len(), 2);
+  assert!(actual2.len() > 10);
   assert!(matches!(
     actual2[0],
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
@@ -349,6 +225,93 @@ fn diff1() {
     crossterm::style::PrintStyledContent(contents),
   ) = &actual2[1]
   {
+    assert_eq!(contents.content().to_string(), "          ".to_string());
+  }
+  assert!(matches!(
+    actual2[7],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual2[7]
+  {
+    assert_eq!(contents.content().to_string(), "  ABCD    ".to_string());
+  }
+}
+
+#[test]
+fn diff2() {
+  test_log_init();
+  let mut can = Canvas::new(size!(10, 10));
+
+  can.frame_mut().set_cells_at(
+    point!(2, 3),
+    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
+  );
+  can.frame_mut().set_cells_at(
+    point!(8, 5),
+    &(5..9).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
+  );
+  let mut actual = vec![];
+  can._dirty_marks_diff(&mut actual);
+  for (i, act) in actual.iter().enumerate() {
+    info!("diff2 [{}]:{:?}", i, act);
+  }
+  assert_eq!(actual.len(), 6);
+
+  // section-1
+  assert!(matches!(
+    actual[0],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(2, 3))
+  ));
+  assert!(matches!(
+    actual[1],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[1]
+  {
     assert_eq!(contents.content().to_string(), "ABCD".to_string());
+  }
+
+  // section-2
+  assert!(matches!(
+    actual[2],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(8, 5))
+  ));
+  assert!(matches!(
+    actual[3],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[3]
+  {
+    assert_eq!(contents.content().to_string(), "FG".to_string());
+  }
+
+  // section-3
+  assert!(matches!(
+    actual[4],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(0, 6))
+  ));
+  assert!(matches!(
+    actual[5],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[5]
+  {
+    assert_eq!(contents.content().to_string(), "HI".to_string());
   }
 }

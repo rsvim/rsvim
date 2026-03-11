@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
+use roaring::RoaringBitmap;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -15,11 +16,11 @@ pub struct Iframe {
   size: U16Size,
   cells: Vec<Cell>,
 
-  /// Indicate what rows of the frame is dirty.
+  /// Indicate which cells in the frame is dirty.
   ///
-  /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
-  /// TUI screen instead of the rows inside UI widget window.
-  dirty_rows: Vec<bool>,
+  /// NOTE: This is for fast locating changed parts inside the terminal device,
+  /// and avoid rendering the whole terminal in each frame.
+  dirty_marks: RoaringBitmap,
 }
 
 impl Iframe {
@@ -29,7 +30,7 @@ impl Iframe {
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      dirty_marks: RoaringBitmap::new(),
     }
   }
 
@@ -104,8 +105,6 @@ impl Iframe {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
-    self.dirty_rows.resize(size.height() as usize, true);
-    self.dirty_rows.fill(true);
     old_size
   }
 
@@ -169,7 +168,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_rows[pos.y() as usize] = true;
+      self.dirty_marks.insert(index as u32);
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
@@ -251,18 +250,15 @@ impl Iframe {
     //   self.cells.len()
     // );
     if self.contains_range(&range) {
-      let end_at = self.idx2pos(range.end);
-      let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_rows.len());
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
-      debug_assert!(end_at_y <= self.dirty_rows.len());
-      self.dirty_rows[(pos.y() as usize)..end_at_y].fill(true);
       // trace!(
       //   "try set cells dirty at row range:{:?}-{:?}",
       //   pos.y(),
       //   end_at.y() + 1
       // );
+      self
+        .dirty_marks
+        .insert_range((range.start as u32)..(range.end as u32));
       self.cells[range].clone_from_slice(cells);
       Some(())
     } else {
@@ -280,12 +276,9 @@ impl Iframe {
   ) -> Option<()> {
     let range = self.pos2range(pos, n);
     if self.contains_range(&range) {
-      let end_at = self.idx2pos(range.end);
-      let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_rows.len());
-      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
-      debug_assert!(end_at_y <= self.dirty_rows.len());
-      self.dirty_rows[(pos.y() as usize)..end_at_y].fill(true);
+      self
+        .dirty_marks
+        .insert_range((range.start as u32)..(range.end as u32));
       self.cells[range].fill(cell);
       Some(())
     } else {
@@ -293,17 +286,17 @@ impl Iframe {
     }
   }
 
-  /// Get dirty rows.
-  pub fn dirty_rows(&self) -> &Vec<bool> {
-    &self.dirty_rows
+  /// Get dirty marks.
+  pub fn dirty_marks(&self) -> &RoaringBitmap {
+    &self.dirty_marks
   }
 
-  /// Reset/clean all dirty components.
+  /// Reset/clean all dirty marks.
   ///
-  /// NOTE: This method should be called after current frame flushed to terminal device.
-  pub fn reset_dirty_rows(&mut self) {
-    debug_assert_eq!(self.dirty_rows.len(), self.size.height() as usize);
-    self.dirty_rows.fill(false);
+  /// NOTE: This method should be called after current frame flushed to
+  /// terminal device.
+  pub fn reset_dirty_marks(&mut self) {
+    self.dirty_marks.clear();
   }
 }
 
