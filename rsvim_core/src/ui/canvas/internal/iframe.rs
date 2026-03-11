@@ -168,7 +168,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_cells[pos.y() as usize] = true;
+      self.dirty_cells.insert(index as u32);
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
@@ -250,19 +250,16 @@ impl Iframe {
     //   self.cells.len()
     // );
     if self.contains_range(&range) {
-      let end_at = self.idx2pos(range.end);
-      let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_cells.len());
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      debug_assert!((pos.y() as usize) < self.dirty_cells.len());
-      debug_assert!(end_at_y <= self.dirty_cells.len());
-      self.dirty_cells[(pos.y() as usize)..end_at_y].fill(true);
       // trace!(
       //   "try set cells dirty at row range:{:?}-{:?}",
       //   pos.y(),
       //   end_at.y() + 1
       // );
       self.cells[range].clone_from_slice(cells);
+      self
+        .dirty_cells
+        .insert_range((range.start as u32)..(range.end as u32));
       Some(())
     } else {
       None
