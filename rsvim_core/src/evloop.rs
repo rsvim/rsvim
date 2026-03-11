@@ -915,7 +915,7 @@ impl EventLoop {
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
-  pub async fn run(&mut self) -> IoResult<()> {
+  pub async fn run(&mut self) -> IoResult<i32> {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
@@ -943,14 +943,14 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code)
   }
 
   #[cfg(test)]
   pub async fn run_with_mock_events(
     &mut self,
     mut reader: MockEventReader,
-  ) -> IoResult<()> {
+  ) -> IoResult<i32> {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
@@ -977,14 +977,14 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code)
   }
 
   #[cfg(test)]
   pub async fn run_with_mock_operations(
     &mut self,
     mut reader: MockOperationReader,
-  ) -> IoResult<()> {
+  ) -> IoResult<i32> {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
@@ -1008,6 +1008,6 @@ impl EventLoop {
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
-    Ok(())
+    Ok(self.exit_code)
   }
 }

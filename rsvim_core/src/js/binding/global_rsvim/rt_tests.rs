@@ -26,19 +26,17 @@ async fn test_exit1() -> IoResult<()> {
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
-  {
-    assert_eq!(event_loop.exit_code, 0);
-  }
+  {}
 
   event_loop.initialize()?;
-  event_loop
+  let exit_code = event_loop
     .run_with_mock_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
   // After running
   {
-    assert_eq!(event_loop.exit_code, 0);
+    assert_eq!(exit_code, 0);
   }
 
   Ok(())
@@ -66,19 +64,17 @@ async fn test_exit2() -> IoResult<()> {
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
-  {
-    assert_eq!(event_loop.exit_code, 0);
-  }
+  {}
 
   event_loop.initialize()?;
-  event_loop
+  let exit_code = event_loop
     .run_with_mock_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
   // After running
   {
-    assert_eq!(event_loop.exit_code, -1);
+    assert_eq!(exit_code, -1);
   }
 
   Ok(())
