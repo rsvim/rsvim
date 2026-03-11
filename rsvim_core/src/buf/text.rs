@@ -572,6 +572,7 @@ impl Text {
 
 // Edit {
 impl Text {
+  #[allow(dead_code)]
   /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
   /// helps the cursor motion.
   fn append_eol_at_end_if_not_exist(&mut self) {
