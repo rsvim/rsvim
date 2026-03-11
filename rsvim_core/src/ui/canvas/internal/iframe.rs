@@ -256,10 +256,10 @@ impl Iframe {
       //   pos.y(),
       //   end_at.y() + 1
       // );
-      self.cells[range].clone_from_slice(cells);
       self
         .dirty_cells
         .insert_range((range.start as u32)..(range.end as u32));
+      self.cells[range].clone_from_slice(cells);
       Some(())
     } else {
       None
