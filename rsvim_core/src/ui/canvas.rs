@@ -321,8 +321,6 @@ impl Canvas {
         < (size.height() as usize) * (size.width() as usize)
       {
         let dirty_pos = self.frame().idx2pos(dirty_index as usize);
-        let dirty_row = dirty_pos.y();
-        let dirty_col = dirty_pos.x();
         if start_dirty_index.is_none() && start_dirty_pos.is_none() {
           start_dirty_index = Some(dirty_index);
           start_dirty_pos = Some(dirty_pos);
