@@ -957,6 +957,7 @@ impl EventLoop {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
           if is_ctrl_d(&event) {
+            self.exit_code = Some(0);
             break;
           }
           self.process_event(event).await;
