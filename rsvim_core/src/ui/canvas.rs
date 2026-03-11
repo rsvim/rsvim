@@ -328,10 +328,10 @@ impl Canvas {
     for idx in self.frame().dirty_marks().iter() {
       if (idx as usize) < n {
         let pos = self.frame().idx2pos(idx as usize);
-        trace!(
-          "dirty idx:{:?},pos:{:?}, start idx:{:?},pos:{:?}",
-          idx, pos, start_idx, start_pos
-        );
+        // trace!(
+        //   "dirty idx:{:?},pos:{:?}, start idx:{:?},pos:{:?}",
+        //   idx, pos, start_idx, start_pos
+        // );
         if start_idx.is_none() && start_pos.is_none() {
           start_idx = Some(idx);
           start_pos = Some(pos);
