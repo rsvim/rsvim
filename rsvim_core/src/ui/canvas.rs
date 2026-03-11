@@ -142,8 +142,8 @@ impl Canvas {
   pub fn _shade_done(&mut self) {
     // Save current frame.
     self.prev_frame.clone_from(&self.frame);
-    // Reset the `dirty` fields.
-    self.frame.reset_dirty_rows();
+    // Reset all dirty marks.
+    self.frame.reset_dirty_marks();
   }
 
   /// Shade cursor and append results into shader vector.
