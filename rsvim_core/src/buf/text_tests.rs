@@ -327,7 +327,7 @@ mod tests_ropey {
   use super::*;
 
   #[test]
-  fn null_rope() {
+  fn null() {
     test_log_init();
 
     let rope = RopeBuilder::new().finish();
@@ -350,7 +350,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn empty_rope() {
+  fn empty() {
     test_log_init();
 
     let rope = Rope::from_str("");
@@ -373,7 +373,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn empty_eol_rope() {
+  fn empty_eol() {
     test_log_init();
 
     let rope = Rope::from_str("\n");
@@ -396,7 +396,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn one_line_without_eol_rope() {
+  fn one_line_without_eol() {
     test_log_init();
 
     let rope = Rope::from_str("Hello, World!");
@@ -419,7 +419,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn one_line_with_eol_rope() {
+  fn one_line_with_eol() {
     test_log_init();
 
     let rope = Rope::from_str("Hello, World!\n");
@@ -442,7 +442,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn two_line_without_eol_rope() {
+  fn two_line_without_eol() {
     test_log_init();
 
     let rope = Rope::from_str("Hello,\nWorld!");
@@ -465,7 +465,7 @@ mod tests_ropey {
   }
 
   #[test]
-  fn two_line_with_eol_rope() {
+  fn two_line_with_eol() {
     test_log_init();
 
     let rope = Rope::from_str("Hello,\nWorld!\n");
