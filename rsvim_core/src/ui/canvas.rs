@@ -215,7 +215,13 @@ impl Canvas {
     let get_content = |start_idx, end_idx| {
       let contents = new_cells[start_idx..end_idx]
         .iter()
-        .map(|c| c.symbol())
+        .map(|c| {
+          if c.symbol().is_empty() {
+            " "
+          } else {
+            c.symbol()
+          }
+        })
         .join("");
       let fg = new_cells[start_idx].fg();
       let bg = new_cells[start_idx].bg();
@@ -314,48 +320,66 @@ impl Canvas {
       return;
     }
 
-    let mut start_dirty_index: Option<u32> = None;
-    let mut start_dirty_pos: Option<U16Pos> = None;
-    for dirty_index in self.frame().dirty_marks().iter() {
-      if (dirty_index as usize)
-        < (size.height() as usize) * (size.width() as usize)
-      {
-        let dirty_pos = self.frame().idx2pos(dirty_index as usize);
+    let n = (size.height() as usize) * (size.width() as usize);
+    let mut start_idx: Option<u32> = None;
+    let mut start_pos: Option<U16Pos> = None;
+    let mut last_idx: Option<u32> = None;
+    let mut last_pos: Option<U16Pos> = None;
+    for idx in self.frame().dirty_marks().iter() {
+      if (idx as usize) < n {
+        let pos = self.frame().idx2pos(idx as usize);
         trace!(
           "dirty idx:{:?},pos:{:?}, start idx:{:?},pos:{:?}",
-          dirty_index, dirty_pos, start_dirty_index, start_dirty_pos
+          idx, pos, start_idx, start_pos
         );
-        if start_dirty_index.is_none() && start_dirty_pos.is_none() {
-          start_dirty_index = Some(dirty_index);
-          start_dirty_pos = Some(dirty_pos);
+        if start_idx.is_none() && start_pos.is_none() {
+          start_idx = Some(idx);
+          start_pos = Some(pos);
         } else {
-          debug_assert!(start_dirty_index.is_some());
-          debug_assert!(start_dirty_pos.is_some());
+          debug_assert!(start_idx.is_some());
+          debug_assert!(start_pos.is_some());
+          debug_assert!(last_idx.is_some());
+          debug_assert!(last_pos.is_some());
 
-          if let Some(start_dirty_pos_unwrap) = start_dirty_pos
-            && let Some(start_dirty_index_unwrap) = start_dirty_index
+          if let Some(start_pos_unwrap) = start_pos
+            && let Some(last_idx) = last_idx
+            && let Some(last_pos) = last_pos
           {
             // On the same row and column is consequential.
-            if start_dirty_pos_unwrap.y() == dirty_pos.y()
-              && dirty_index == start_dirty_index_unwrap + 1
+            if start_pos_unwrap.y() == pos.y()
+              && last_pos.y() == pos.y()
+              && last_idx + 1 == idx
             {
               // Do nothing and continue iterating dirty marks.
             } else {
               // Render a consequential range of cells.
-              if dirty_pos.x() > start_dirty_pos_unwrap.x() {
+              if pos.x() > start_pos_unwrap.x() {
                 self._make_consequential_shaders(
-                  dirty_pos.y(),
-                  start_dirty_pos_unwrap.x(),
-                  dirty_pos.x(),
+                  start_pos_unwrap.y(),
+                  start_pos_unwrap.x(),
+                  last_pos.x() + 1,
                   output_shaders,
                 );
-                start_dirty_index = Some(dirty_index);
-                start_dirty_pos = Some(dirty_pos);
+                start_idx = Some(idx);
+                start_pos = Some(pos);
               }
             }
           }
         }
+        last_idx = Some(idx);
+        last_pos = Some(pos);
       }
+    }
+    if let Some(start_pos) = start_pos
+      && let Some(last_pos) = last_pos
+      && last_pos.x() > start_pos.x()
+    {
+      self._make_consequential_shaders(
+        start_pos.y(),
+        start_pos.x(),
+        last_pos.x() + 1,
+        output_shaders,
+      );
     }
   }
 }

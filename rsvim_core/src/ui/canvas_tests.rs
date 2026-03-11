@@ -210,7 +210,7 @@ fn diff1() {
   {
     assert_eq!(contents.content().to_string(), "ABCD".to_string());
   }
-  assert_eq!(actual2.len(), 2);
+  assert!(actual2.len() > 10);
   assert!(matches!(
     actual2[0],
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
@@ -225,6 +225,18 @@ fn diff1() {
     crossterm::style::PrintStyledContent(contents),
   ) = &actual2[1]
   {
-    assert_eq!(contents.content().to_string(), "ABCD".to_string());
+    assert_eq!(contents.content().to_string(), "          ".to_string());
+  }
+  assert!(matches!(
+    actual2[7],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual2[7]
+  {
+    assert_eq!(contents.content().to_string(), "  ABCD    ".to_string());
   }
 }
