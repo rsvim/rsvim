@@ -322,28 +322,168 @@ fn last_char1_mac() {
   }
 }
 
-#[test]
-fn null_rope() {
-  test_log_init();
+#[cfg(test)]
+mod tests_ropey {
+  use super::*;
 
-  let rope = RopeBuilder::new().finish();
-  info!(
-    "rope:{:?}, len_lines:{}, len_chars:{}",
-    rope.to_string(),
-    rope.len_lines(),
-    rope.len_chars()
-  );
-}
+  #[test]
+  fn null_rope() {
+    test_log_init();
 
-#[test]
-fn empty_rope() {
-  test_log_init();
+    let rope = RopeBuilder::new().finish();
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
 
-  let rope = Rope::from_str("");
-  info!(
-    "rope:{:?}, len_lines:{}, len_chars:{}",
-    rope.to_string(),
-    rope.len_lines(),
-    rope.len_chars()
-  );
+  #[test]
+  fn empty_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn empty_eol_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn one_line_without_eol_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello, World!");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn one_line_with_eol_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello, World!\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn two_line_without_eol_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello,\nWorld!");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn two_line_with_eol_rope() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello,\nWorld!\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
 }
