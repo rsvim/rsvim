@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
+use roaring::RoaringBitmap;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -19,7 +20,7 @@ pub struct Iframe {
   ///
   /// NOTE: This is for fast locating changed parts inside the terminal device,
   /// and avoid rendering the whole terminal in each frame.
-  dirty_cells: Vec<bool>,
+  dirty_cells: RoaringBitmap,
 }
 
 impl Iframe {
@@ -29,7 +30,7 @@ impl Iframe {
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_cells: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      dirty_cells: RoaringBitmap::new(),
     }
   }
 
@@ -104,8 +105,6 @@ impl Iframe {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
-    self.dirty_cells.resize(size.height() as usize, true);
-    self.dirty_cells.fill(true);
     old_size
   }
 
