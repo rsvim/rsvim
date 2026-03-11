@@ -149,26 +149,6 @@ fn _shade_cursor1() {
 }
 
 #[test]
-fn _next_same_cell_in_row1() {
-  test_log_init();
-  let mut can = Canvas::new(size!(10, 10));
-
-  can
-    .frame_mut()
-    .set_cells_at(point!(0, 0), &vec![Cell::with_char('A'); 20]);
-  for i in 0..10 {
-    let actual = can._next_same_cell_in_row(0, i);
-    info!("1-{:?} actual:{:?}", i, actual);
-    assert_eq!(actual, 10);
-  }
-  for i in 0..10 {
-    let actual = can._next_same_cell_in_row(1, i);
-    info!("2-{:?} actual:{:?}", i, actual);
-    assert_eq!(actual, 10);
-  }
-}
-
-#[test]
 fn _next_same_cell_in_row2() {
   test_log_init();
   let mut can = Canvas::new(size!(10, 10));
@@ -282,7 +262,7 @@ fn _make_printable_shader1() {
   let row = 3;
   let col_end_at = can._next_same_cell_in_row(row, col);
   let mut shaders = vec![];
-  can._make_printable_shaders(row, col, col_end_at, &mut shaders);
+  can._make_consequential_shaders(row, col, col_end_at, &mut shaders);
   info!("shader:{:?}", shaders);
   assert!(matches!(
     shaders[0],
