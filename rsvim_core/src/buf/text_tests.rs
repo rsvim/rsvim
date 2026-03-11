@@ -4,6 +4,7 @@ use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ropey::Rope;
+use ropey::RopeBuilder;
 
 #[test]
 fn last_char1_unix() {
@@ -319,4 +320,30 @@ fn last_char1_mac() {
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
   }
+}
+
+#[test]
+fn null_rope() {
+  test_log_init();
+
+  let rope = RopeBuilder::new().finish();
+  info!(
+    "rope:{:?}, len_lines:{}, len_chars:{}",
+    rope.to_string(),
+    rope.len_lines(),
+    rope.len_chars()
+  );
+}
+
+#[test]
+fn empty_rope() {
+  test_log_init();
+
+  let rope = Rope::from_str("");
+  info!(
+    "rope:{:?}, len_lines:{}, len_chars:{}",
+    rope.to_string(),
+    rope.len_lines(),
+    rope.len_chars()
+  );
 }
