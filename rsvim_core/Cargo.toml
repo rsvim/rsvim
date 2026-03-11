@@ -88,6 +88,7 @@ path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
+roaring = { workspace = true }
 ropey = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
