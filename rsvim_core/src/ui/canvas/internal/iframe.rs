@@ -276,12 +276,9 @@ impl Iframe {
   ) -> Option<()> {
     let range = self.pos2range(pos, n);
     if self.contains_range(&range) {
-      let end_at = self.idx2pos(range.end);
-      let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_cells.len());
-      debug_assert!((pos.y() as usize) < self.dirty_cells.len());
-      debug_assert!(end_at_y <= self.dirty_cells.len());
-      self.dirty_cells[(pos.y() as usize)..end_at_y].fill(true);
+      self
+        .dirty_cells
+        .insert_range((range.start as u32)..(range.end as u32));
       self.cells[range].fill(cell);
       Some(())
     } else {
