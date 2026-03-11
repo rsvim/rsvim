@@ -15,11 +15,11 @@ pub struct Iframe {
   size: U16Size,
   cells: Vec<Cell>,
 
-  /// Indicate what rows of the frame is dirty.
+  /// Indicate which cells in the frame is dirty.
   ///
-  /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
-  /// TUI screen instead of the rows inside UI widget window.
-  dirty_rows: Vec<bool>,
+  /// NOTE: This is for fast locating changed parts inside the terminal device,
+  /// and avoid rendering the whole terminal in each frame.
+  dirty_cells: Vec<bool>,
 }
 
 impl Iframe {
@@ -29,7 +29,7 @@ impl Iframe {
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      dirty_cells: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
     }
   }
 
@@ -104,8 +104,8 @@ impl Iframe {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
-    self.dirty_rows.resize(size.height() as usize, true);
-    self.dirty_rows.fill(true);
+    self.dirty_cells.resize(size.height() as usize, true);
+    self.dirty_cells.fill(true);
     old_size
   }
 
@@ -169,7 +169,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_rows[pos.y() as usize] = true;
+      self.dirty_cells[pos.y() as usize] = true;
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
@@ -253,11 +253,11 @@ impl Iframe {
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_rows.len());
+        std::cmp::min(end_at.y() as usize + 1, self.dirty_cells.len());
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
-      debug_assert!(end_at_y <= self.dirty_rows.len());
-      self.dirty_rows[(pos.y() as usize)..end_at_y].fill(true);
+      debug_assert!((pos.y() as usize) < self.dirty_cells.len());
+      debug_assert!(end_at_y <= self.dirty_cells.len());
+      self.dirty_cells[(pos.y() as usize)..end_at_y].fill(true);
       // trace!(
       //   "try set cells dirty at row range:{:?}-{:?}",
       //   pos.y(),
@@ -282,10 +282,10 @@ impl Iframe {
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       let end_at_y =
-        std::cmp::min(end_at.y() as usize + 1, self.dirty_rows.len());
-      debug_assert!((pos.y() as usize) < self.dirty_rows.len());
-      debug_assert!(end_at_y <= self.dirty_rows.len());
-      self.dirty_rows[(pos.y() as usize)..end_at_y].fill(true);
+        std::cmp::min(end_at.y() as usize + 1, self.dirty_cells.len());
+      debug_assert!((pos.y() as usize) < self.dirty_cells.len());
+      debug_assert!(end_at_y <= self.dirty_cells.len());
+      self.dirty_cells[(pos.y() as usize)..end_at_y].fill(true);
       self.cells[range].fill(cell);
       Some(())
     } else {
@@ -295,15 +295,15 @@ impl Iframe {
 
   /// Get dirty rows.
   pub fn dirty_rows(&self) -> &Vec<bool> {
-    &self.dirty_rows
+    &self.dirty_cells
   }
 
   /// Reset/clean all dirty components.
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty_rows(&mut self) {
-    debug_assert_eq!(self.dirty_rows.len(), self.size.height() as usize);
-    self.dirty_rows.fill(false);
+    debug_assert_eq!(self.dirty_cells.len(), self.size.height() as usize);
+    self.dirty_cells.fill(false);
   }
 }
 
