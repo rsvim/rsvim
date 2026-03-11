@@ -352,7 +352,7 @@ impl Canvas {
     trace!("dirty marks diff, size:{:?}", size);
 
     if !self.frame().is_zero_sized() {
-      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
+      for (row, dirty) in self.frame().dirty_marks().iter().enumerate() {
         if row < size.height() as usize && *dirty {
           let mut col = 0_u16;
           while col < size.width() {

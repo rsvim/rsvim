@@ -20,7 +20,7 @@ pub struct Iframe {
   ///
   /// NOTE: This is for fast locating changed parts inside the terminal device,
   /// and avoid rendering the whole terminal in each frame.
-  dirty_cells: RoaringBitmap,
+  dirty_marks: RoaringBitmap,
 }
 
 impl Iframe {
@@ -30,7 +30,7 @@ impl Iframe {
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_cells: RoaringBitmap::new(),
+      dirty_marks: RoaringBitmap::new(),
     }
   }
 
@@ -168,7 +168,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_cells.insert(index as u32);
+      self.dirty_marks.insert(index as u32);
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
@@ -257,7 +257,7 @@ impl Iframe {
       //   end_at.y() + 1
       // );
       self
-        .dirty_cells
+        .dirty_marks
         .insert_range((range.start as u32)..(range.end as u32));
       self.cells[range].clone_from_slice(cells);
       Some(())
@@ -277,7 +277,7 @@ impl Iframe {
     let range = self.pos2range(pos, n);
     if self.contains_range(&range) {
       self
-        .dirty_cells
+        .dirty_marks
         .insert_range((range.start as u32)..(range.end as u32));
       self.cells[range].fill(cell);
       Some(())
@@ -286,17 +286,17 @@ impl Iframe {
     }
   }
 
-  /// Get dirty rows.
-  pub fn dirty_rows(&self) -> &Vec<bool> {
-    &self.dirty_cells
+  /// Get dirty marks.
+  pub fn dirty_marks(&self) -> &RoaringBitmap {
+    &self.dirty_marks
   }
 
-  /// Reset/clean all dirty components.
+  /// Reset/clean all dirty marks.
   ///
-  /// NOTE: This method should be called after current frame flushed to terminal device.
-  pub fn reset_dirty_rows(&mut self) {
-    debug_assert_eq!(self.dirty_cells.len(), self.size.height() as usize);
-    self.dirty_cells.fill(false);
+  /// NOTE: This method should be called after current frame flushed to
+  /// terminal device.
+  pub fn reset_dirty_marks(&mut self) {
+    self.dirty_marks.clear();
   }
 }
 
