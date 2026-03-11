@@ -240,3 +240,34 @@ fn diff1() {
     assert_eq!(contents.content().to_string(), "  ABCD    ".to_string());
   }
 }
+
+#[test]
+fn diff2() {
+  test_log_init();
+  let mut can = Canvas::new(size!(10, 10));
+
+  can.frame_mut().set_cells_at(
+    point!(2, 3),
+    &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
+  );
+  let mut actual = vec![];
+  can._dirty_marks_diff(&mut actual);
+  info!("dirty marks:{:?}", actual);
+  assert_eq!(actual.len(), 2);
+  assert!(matches!(
+    actual[0],
+    ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
+  ));
+  assert!(matches!(
+    actual[1],
+    ShaderCommand::StylePrintStyledContentString(
+      crossterm::style::PrintStyledContent(_)
+    )
+  ));
+  if let ShaderCommand::StylePrintStyledContentString(
+    crossterm::style::PrintStyledContent(contents),
+  ) = &actual[1]
+  {
+    assert_eq!(contents.content().to_string(), "ABCD".to_string());
+  }
+}
