@@ -281,36 +281,36 @@ fn diff2() {
 
   // section-2
   assert!(matches!(
-    actual[0],
+    actual[2],
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(8, 5))
   ));
   assert!(matches!(
-    actual[1],
+    actual[3],
     ShaderCommand::StylePrintStyledContentString(
       crossterm::style::PrintStyledContent(_)
     )
   ));
   if let ShaderCommand::StylePrintStyledContentString(
     crossterm::style::PrintStyledContent(contents),
-  ) = &actual[1]
+  ) = &actual[3]
   {
     assert_eq!(contents.content().to_string(), "FG".to_string());
   }
 
   // section-3
   assert!(matches!(
-    actual[0],
+    actual[4],
     ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(0, 6))
   ));
   assert!(matches!(
-    actual[1],
+    actual[5],
     ShaderCommand::StylePrintStyledContentString(
       crossterm::style::PrintStyledContent(_)
     )
   ));
   if let ShaderCommand::StylePrintStyledContentString(
     crossterm::style::PrintStyledContent(contents),
-  ) = &actual[1]
+  ) = &actual[5]
   {
     assert_eq!(contents.content().to_string(), "HI".to_string());
   }
