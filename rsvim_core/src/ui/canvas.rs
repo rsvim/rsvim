@@ -322,25 +322,7 @@ impl Canvas {
     }
 
     for row in 0..size.height() {
-      let mut col = 0_u16;
-      while col < size.width() {
-        // Skip unchanged columns
-        let pos: U16Pos = point!(col, row);
-        let cell = self.frame().get_cell(pos);
-        let prev_cell = self.prev_frame().get_cell(pos);
-        if cell == prev_cell {
-          col += 1;
-          continue;
-        }
-
-        // Find the continuously changed parts by iterating over columns
-        let col_end_at = self._next_same_cell_in_row(row, col);
-
-        if col_end_at > col {
-          self._make_printable_shaders(row, col, col_end_at, output_shaders);
-          col = col_end_at;
-        }
-      }
+      self._make_printable_shaders(row, 0_u16, size.width(), output_shaders);
     }
   }
 
@@ -357,30 +339,43 @@ impl Canvas {
       return;
     }
 
-    for (row, dirty) in self.frame().dirty_marks().iter().enumerate() {
-      if row < size.height() as usize && *dirty {
-        let mut col = 0_u16;
-        while col < size.width() {
-          // Skip unchanged columns
-          let pos: U16Pos = point!(col, row as u16);
-          let cell = self.frame().get_cell(pos);
-          let prev_cell = self.prev_frame().get_cell(pos);
-          if cell == prev_cell {
-            col += 1;
-            continue;
-          }
+    let mut start_dirty_index: Option<u32> = None;
+    let mut start_dirty_pos: Option<U16Pos> = None;
+    for dirty_index in self.frame().dirty_marks().iter() {
+      if (dirty_index as usize)
+        < (size.height() as usize) * (size.width() as usize)
+      {
+        let dirty_pos = self.frame().idx2pos(dirty_index as usize);
+        let dirty_row = dirty_pos.y();
+        let dirty_col = dirty_pos.x();
+        if start_dirty_index.is_none() && start_dirty_pos.is_none() {
+          start_dirty_index = Some(dirty_index);
+          start_dirty_pos = Some(dirty_pos);
+        } else {
+          debug_assert!(start_dirty_index.is_some());
+          debug_assert!(start_dirty_pos.is_some());
 
-          // Find the continuously changed parts by iterating over columns
-          let col_end_at = self._next_same_cell_in_row(row as u16, col);
-
-          if col_end_at > col {
-            self._make_printable_shaders(
-              row as u16,
-              col,
-              col_end_at,
-              output_shaders,
-            );
-            col = col_end_at;
+          if let Some(start_dirty_pos_unwrap) = start_dirty_pos
+            && let Some(start_dirty_index_unwrap) = start_dirty_index
+          {
+            // On the same row and column is consequential.
+            if start_dirty_pos_unwrap.y() == dirty_pos.y()
+              && dirty_index == start_dirty_index_unwrap + 1
+            {
+              // Do nothing and continue iterating dirty marks.
+            } else {
+              // Render a consequential range of cells.
+              if dirty_pos.x() > start_dirty_pos_unwrap.x() {
+                self._make_printable_shaders(
+                  dirty_pos.y(),
+                  start_dirty_pos_unwrap.x(),
+                  dirty_pos.x(),
+                  output_shaders,
+                );
+                start_dirty_index = Some(dirty_index);
+                start_dirty_pos = Some(dirty_pos);
+              }
+            }
           }
         }
       }
