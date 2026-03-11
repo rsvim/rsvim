@@ -250,9 +250,15 @@ fn diff2() {
     point!(2, 3),
     &(0..4).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
   );
+  can.frame_mut().set_cells_at(
+    point!(8, 5),
+    &(5..9).map(|i| Cell::with_char(int2letter(i))).collect_vec(),
+  );
   let mut actual = vec![];
   can._dirty_marks_diff(&mut actual);
-  info!("dirty marks:{:?}", actual);
+  for (i, act) in actual.iter().enumerate() {
+    info!("diff2 [{}]:{:?}", i, act);
+  }
   assert_eq!(actual.len(), 2);
   assert!(matches!(
     actual[0],

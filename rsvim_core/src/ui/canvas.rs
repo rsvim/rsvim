@@ -353,7 +353,7 @@ impl Canvas {
               // Do nothing and continue iterating dirty marks.
             } else {
               // Render a consequential range of cells.
-              if pos.x() > start_pos_unwrap.x() {
+              if last_pos.x() > start_pos_unwrap.x() {
                 self._make_consequential_shaders(
                   start_pos_unwrap.y(),
                   start_pos_unwrap.x(),
