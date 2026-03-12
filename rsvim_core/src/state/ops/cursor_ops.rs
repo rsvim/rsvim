@@ -590,7 +590,7 @@ pub fn cursor_insert(
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move_include_eol(tree, id, text, op);
+  cursor_move(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
@@ -639,7 +639,7 @@ pub fn cursor_delete(
     cursor_char_idx_after_deleted,
     cursor_line_idx_after_deleted,
   ));
-  cursor_move_include_eol(tree, id, text, op);
+  cursor_move(tree, id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
