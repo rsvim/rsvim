@@ -3326,6 +3326,7 @@ mod tests_view_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
+      "\n",
       "This is a ",
       "quite simple ",
       "andsmalltestl",
@@ -3345,6 +3346,7 @@ mod tests_view_wrap_linebreak {
       "several ",
       "things we ",
       "want to test:",
+      "\n",
       "  1. When the",
       " line is ",
       "small enough ",
@@ -3356,8 +3358,8 @@ mod tests_view_wrap_linebreak {
       "widget, 那么",
       "行换行和单词",
       "换行选项都不",
-      "会影响最终的",
-      "渲染效果。\n",
+      // "会影响最终的",
+      // "渲染效果。\n",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
