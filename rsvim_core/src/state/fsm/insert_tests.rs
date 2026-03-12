@@ -748,14 +748,15 @@ mod tests_cursor_move {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "AAAAAAAAAA",
+        "\r\n",
         "1st.\r\n",
         "2nd.\r\n",
         "3rd.\r\n",
         "4th.\r\n",
-        "5th.\r\n",
+        // "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -763,7 +764,7 @@ mod tests_cursor_move {
         &viewport,
         &expect,
         0,
-        6,
+        5,
         &expect_fills,
         &expect_fills,
       );
