@@ -328,8 +328,6 @@ pub fn raw_cursor_viewport_move_to(
     debug_assert!(bufline.len_chars() >= char_idx);
     if bufline.len_chars() == 0 {
       debug_assert_eq!(char_idx, 0_usize);
-    } else {
-      debug_assert!(bufline.len_chars() >= char_idx);
     }
   }
 
