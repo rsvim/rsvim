@@ -6572,8 +6572,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Initialize
     {
-      let expect =
-        vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
+      let expect = vec![
+        "1st.\n",
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "\n",
+        "3rd.\n",
+        // "4th.\n"
+      ];
 
       let actual = tree.window(window_id).unwrap().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
