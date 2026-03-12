@@ -266,24 +266,31 @@ impl CursorViewport {
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
-      let target_is_eol = text.is_eol(line_idx, char_idx);
+      let target_last_char = text.last_char_idx_on_line_exclude_eol(line_idx);
+      let target_is_eol =
+        target_last_char.map(|c| c < char_idx).unwrap_or(false);
       if target_is_eol {
-        // The target cursor is eol, and it doesn't have a space to put in the viewport, it
-        // indicates:
-        //
-        // 1. The window must be `wrap=true`
-        // 2. The viewport must contains `line_idx+1`.
-        // 3. The target cursor position is out of viewport.
-        //
-        // The cursor will be put in the position `(next line, 0-column)`.
+        // The target cursor char index is either end-of-line or next to the
+        // last char of the line (if this line doesn't has an end-of-line).
 
-        let next_line_idx = line_idx + 1;
-        debug_assert!(viewport.lines().contains_key(&next_line_idx));
-        let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
-        debug_assert!(next_line_viewport.rows().first().is_some());
+        let (row_idx, row_viewport) = line_viewport.rows().last().unwrap();
+        let mut row_start_width =
+          text.width_before(line_idx, row_viewport.start_char_idx());
+
+        // Subtract `start_filled_cols` if the row is the first row in the line.
         let (first_row_idx, _first_row_viewport) =
-          next_line_viewport.rows().first().unwrap();
-        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+          line_viewport.rows().first().unwrap();
+        if first_row_idx == row_idx {
+          debug_assert!(row_start_width >= line_viewport.start_filled_cols());
+          row_start_width -= line_viewport.start_filled_cols();
+        };
+
+        let char_start_width =
+          text.width_until(line_idx, target_last_char.unwrap());
+        let mut col_idx = (char_start_width - row_start_width) as u16;
+        let mut row_idx = *row_idx;
+
+        CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
       } else {
         debug_assert!(line_viewport.rows().first().is_some());
         let (first_row_idx, _first_row_viewport) =
