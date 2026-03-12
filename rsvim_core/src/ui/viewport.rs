@@ -287,10 +287,9 @@ impl CursorViewport {
 
         let char_start_width =
           text.width_until(line_idx, target_last_char.unwrap());
-        let mut col_idx = (char_start_width - row_start_width) as u16;
-        let mut row_idx = *row_idx;
+        let col_idx = (char_start_width - row_start_width) as u16;
 
-        CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+        CursorViewport::new(line_idx, char_idx, *row_idx, col_idx)
       } else {
         debug_assert!(line_viewport.rows().first().is_some());
         let (first_row_idx, _first_row_viewport) =
