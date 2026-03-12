@@ -465,6 +465,77 @@ fn _update_viewport_after_text_changed(
   );
 }
 
+/// High-level cursor move operation, exclude end-of-line ("\r\n" and "\n").
+/// This is used by normal mode.
+///
+/// It moves the cursor and possibly scroll the widget (window/cmdline) it
+/// belongs to, just like user's behavior.
+pub fn cursor_move_exclude_eol(
+  tree: &mut Tree,
+  id: NodeId,
+  text: &Text,
+  op: Operation,
+) {
+  let viewport = tree.editable_viewport(id);
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+
+  // Only move cursor when it is different from current cursor.
+  let (target_cursor_char, target_cursor_line, move_direction) =
+    normalize_to_cursor_move_to_exclude_eol(
+      text,
+      op,
+      cursor_viewport.char_idx(),
+      cursor_viewport.line_idx(),
+    );
+
+  let search_direction = _to_viewport_search_direction(move_direction);
+
+  let new_viewport: Option<ViewportArc> = {
+    let (start_line, start_column) = viewport.search_anchor(
+      search_direction,
+      tree.editable_options(id),
+      text,
+      &tree.editable_actual_shape(id).size(),
+      target_cursor_line,
+      target_cursor_char,
+    );
+
+    // First try window scroll.
+    if start_line != viewport.start_line_idx()
+      || start_column != viewport.start_column_idx()
+    {
+      raw_viewport_scroll_to(
+        tree,
+        id,
+        &viewport,
+        text,
+        Operation::WindowScrollTo((start_column, start_line)),
+      )
+    } else {
+      None
+    }
+  };
+
+  // Then move cursor.
+  let new_viewport = new_viewport.unwrap_or(viewport);
+
+  let new_cursor_viewport = raw_cursor_viewport_move_to(
+    tree,
+    id,
+    &new_viewport,
+    text,
+    Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+  );
+
+  debug_assert!(tree.cursor_id().is_some());
+  tree
+    .cursor_move_position_to(
+      new_cursor_viewport.column_idx() as isize,
+      new_cursor_viewport.row_idx() as isize,
+    )
+    .unwrap();
+}
+
 /// High-level cursor move operation.
 ///
 /// This API will move the cursor (and possibly scroll the window/cmdline it
