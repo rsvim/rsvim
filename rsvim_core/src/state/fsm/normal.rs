@@ -213,7 +213,7 @@ impl Normal {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
         let op = Operation::CursorMoveRightBy(1);
-        cursor_ops::cursor_move(
+        cursor_ops::cursor_move_include_eol(
           &mut tree,
           current_window_id,
           buffer.text(),
@@ -227,7 +227,7 @@ impl Normal {
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
         let op = Operation::CursorMoveRightBy(usize::MAX);
-        cursor_ops::cursor_move(
+        cursor_ops::cursor_move_include_eol(
           &mut tree,
           current_window_id,
           buffer.text(),
@@ -331,7 +331,7 @@ impl Normal {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(
+    cursor_ops::cursor_move_include_eol(
       &mut tree,
       current_window_id,
       buffer.text(),

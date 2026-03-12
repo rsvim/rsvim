@@ -537,38 +537,28 @@ pub fn cursor_move_exclude_eol(
     .unwrap();
 }
 
-/// High-level cursor move operation.
+/// High-level cursor move operation, include end-of-line ("\r\n" and "\n").
+/// This is used by insert mode.
 ///
-/// This API will move the cursor (and possibly scroll the window/cmdline it
-/// belongs to), as if the user is operating the editor (for example, using
-/// `jk` to go up/down to view a very large file).
-pub fn cursor_move(
+/// It moves the cursor and possibly scroll the widget (window/cmdline) it
+/// belongs to, just like user's behavior.
+pub fn cursor_move_include_eol(
   tree: &mut Tree,
   id: NodeId,
   text: &Text,
   op: Operation,
-  include_eol: bool,
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
 
   // Only move cursor when it is different from current cursor.
-  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
-  {
+  let (target_cursor_char, target_cursor_line, move_direction) =
     normalize_cursor_move_to_include_eol(
       text,
       op,
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
-    )
-  } else {
-    normalize_cursor_move_to_exclude_eol(
-      text,
-      op,
-      cursor_viewport.char_idx(),
-      cursor_viewport.line_idx(),
-    )
-  };
+    );
 
   let search_direction = _to_viewport_search_direction(move_direction);
 
@@ -658,7 +648,7 @@ pub fn cursor_insert(
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move(tree, id, text, op, true);
+  cursor_move_include_eol(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
@@ -707,7 +697,7 @@ pub fn cursor_delete(
     cursor_char_idx_after_deleted,
     cursor_line_idx_after_deleted,
   ));
-  cursor_move(tree, id, text, op, true);
+  cursor_move_include_eol(tree, id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }

@@ -318,7 +318,7 @@ impl Insert {
     buffer.undo_mut().commit();
 
     let op = Operation::CursorMoveBy((-1, 0));
-    cursor_ops::cursor_move(
+    cursor_ops::cursor_move_include_eol(
       &mut tree,
       current_window_id,
       buffer.text(),
@@ -365,7 +365,7 @@ impl Insert {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(
+    cursor_ops::cursor_move_include_eol(
       &mut tree,
       current_window_id,
       buffer.text(),
