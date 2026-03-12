@@ -25,22 +25,22 @@ fn last_char1_unix() {
     assert!(!text.is_eol(1, 4));
     assert!(text.is_eol(1, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = Text::last_char_idx_on_rope_line(text.rope(), 0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = Text::last_char_idx_on_rope_line_no_eol(text.rope(), 0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual3 = text.last_char_on_line(1);
+    let actual3 = Text::last_char_idx_on_rope_line(text.rope(), 1);
     assert!(actual3.is_some());
     assert_eq!(actual3.unwrap(), 5);
     assert_eq!(text.rope().line(1).char(5), '\r');
 
-    let actual4 = text.last_char_on_line_no_eol(1);
+    let actual4 = Text::last_char_idx_on_rope_line_no_eol(text.rope(), 1);
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
@@ -52,12 +52,12 @@ fn last_char1_unix() {
 
     assert!(!text.is_eol(0, 4));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -71,12 +71,12 @@ fn last_char1_unix() {
     assert!(text.is_eol(0, 5));
     assert!(text.is_eol(0, 6));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 6);
     assert_eq!(text.rope().line(0).char(6), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -89,12 +89,12 @@ fn last_char1_unix() {
     assert!(!text.is_eol(0, 4));
     assert!(text.is_eol(0, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\r');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -118,12 +118,12 @@ fn last_char1_win() {
     assert!(!text.is_eol(0, 4));
     assert!(text.is_eol(0, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -135,12 +135,12 @@ fn last_char1_win() {
 
     assert!(!text.is_eol(0, 4));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -157,22 +157,22 @@ fn last_char1_win() {
     assert!(text.is_eol(1, 5));
     assert!(text.is_eol(1, 6));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 6);
     assert_eq!(text.rope().line(0).char(6), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual3 = text.last_char_on_line(1);
+    let actual3 = text.last_char_idx_on_rope_line(1);
     assert!(actual3.is_some());
     assert_eq!(actual3.unwrap(), 6);
     assert_eq!(text.rope().line(1).char(6), '\n');
 
-    let actual4 = text.last_char_on_line_no_eol(1);
+    let actual4 = text.last_char_idx_on_rope_line_no_eol(1);
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
@@ -185,12 +185,12 @@ fn last_char1_win() {
     assert!(!text.is_eol(0, 4));
     assert!(text.is_eol(0, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\r');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -214,12 +214,12 @@ fn last_char1_mac() {
     assert!(!text.is_eol(0, 4));
     assert!(text.is_eol(0, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -231,12 +231,12 @@ fn last_char1_mac() {
 
     assert!(!text.is_eol(0, 4));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -252,22 +252,22 @@ fn last_char1_mac() {
     assert!(!text.is_eol(1, 4));
     assert!(text.is_eol(1, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 6);
     assert_eq!(text.rope().line(0).char(6), '\n');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual3 = text.last_char_on_line(1);
+    let actual3 = text.last_char_idx_on_rope_line(1);
     assert!(actual3.is_some());
     assert_eq!(actual3.unwrap(), 5);
     assert_eq!(text.rope().line(1).char(5), '\r');
 
-    let actual4 = text.last_char_on_line_no_eol(1);
+    let actual4 = text.last_char_idx_on_rope_line_no_eol(1);
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
@@ -280,12 +280,12 @@ fn last_char1_mac() {
     assert!(!text.is_eol(0, 4));
     assert!(text.is_eol(0, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\r');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
@@ -300,22 +300,22 @@ fn last_char1_mac() {
     assert!(!text.is_eol(1, 4));
     assert!(text.is_eol(1, 5));
 
-    let actual1 = text.last_char_on_line(0);
+    let actual1 = text.last_char_idx_on_rope_line(0);
     assert!(actual1.is_some());
     assert_eq!(actual1.unwrap(), 5);
     assert_eq!(text.rope().line(0).char(5), '\r');
 
-    let actual2 = text.last_char_on_line_no_eol(0);
+    let actual2 = text.last_char_idx_on_rope_line_no_eol(0);
     assert!(actual2.is_some());
     assert_eq!(actual2.unwrap(), 4);
     assert_eq!(text.rope().line(0).char(4), 'o');
 
-    let actual3 = text.last_char_on_line(1);
+    let actual3 = text.last_char_idx_on_rope_line(1);
     assert!(actual3.is_some());
     assert_eq!(actual3.unwrap(), 5);
     assert_eq!(text.rope().line(1).char(5), '\r');
 
-    let actual4 = text.last_char_on_line_no_eol(1);
+    let actual4 = text.last_char_idx_on_rope_line_no_eol(1);
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
