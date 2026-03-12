@@ -1743,12 +1743,13 @@ mod tests_raw_window_scroll_y_by {
         " widget, ",
         "there're ",
         "multiple cases:",
+        "\n",
         "     * The ",
         "extra parts are",
         " been truncated",
         " if both line-",
         "wrap and word-",
-        "wrap options ",
+        // "wrap options ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
