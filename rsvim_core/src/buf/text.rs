@@ -224,7 +224,7 @@ impl Text {
     is_crlf || is_cr_or_lf
   }
 
-  /// Get last char index on line.
+  /// Get last char index on line, include invisible end-of-line chars.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is empty.
   pub fn last_char_on_line_include_eol(
