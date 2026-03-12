@@ -1701,6 +1701,7 @@ mod tests_view_wrap_nolinebreak {
       "1st.\n",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
+      "\n",
       "3rd.\n",
       "4th.\n",
       "5th.\n",
@@ -1709,15 +1710,13 @@ mod tests_view_wrap_nolinebreak {
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
     let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
       lock!(buf).text(),
       &actual,
       &expect,
       0,
-      5,
+      4,
       &expect_fills,
       &expect_fills,
     );
