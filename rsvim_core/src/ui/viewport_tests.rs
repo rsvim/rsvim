@@ -3402,6 +3402,7 @@ mod tests_view_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
+      "\n",
       "This is a ",
       "quite simple ",
       "andsmalltestl",
@@ -3421,6 +3422,7 @@ mod tests_view_wrap_linebreak {
       "several ",
       "things we ",
       "want to test:",
+      "\n",
       "  1. When the",
       " line is ",
       "small enough ",
@@ -3430,8 +3432,8 @@ mod tests_view_wrap_linebreak {
       "window ",
       "content ",
       "widget, 那么",
-      "行换行和单词",
-      "换行选项都不",
+      // "行换行和单词",
+      // "换行选项都不",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
@@ -3526,6 +3528,7 @@ mod tests_view_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
+      "\n",
       "This is a ",
       "quite simple ",
       "and small ",
@@ -3534,7 +3537,7 @@ mod tests_view_wrap_linebreak {
       "contains ",
       "several ",
       "things we ",
-      "want to test:",
+      // "want to test:",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
@@ -3581,6 +3584,7 @@ mod tests_view_wrap_linebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
+      "\n",
       "s is a ",
       "quite ",
       "simple and",
@@ -3589,7 +3593,7 @@ mod tests_view_wrap_linebreak_startcol {
       ".\n",
       " still it ",
       "contains ",
-      "several ",
+      // "several ",
     ];
 
     let (mut tree, window_id) =
