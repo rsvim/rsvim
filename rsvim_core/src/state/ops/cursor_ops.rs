@@ -317,7 +317,13 @@ pub fn raw_cursor_viewport_move_to(
 
   let bufline = text.rope().line(line_idx);
 
-  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
+  let char_idx = std::cmp::min(
+    char_idx,
+    text
+      .last_char_idx_on_line_exclude_eol(line_idx)
+      .unwrap_or(0)
+      + 1,
+  );
   debug_assert!(bufline.len_chars() >= char_idx);
 
   if bufline.len_chars() == 0 {
