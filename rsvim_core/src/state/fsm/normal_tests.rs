@@ -372,7 +372,7 @@ mod tests_raw_cursor_move_x_by {
 
     let stateful = Normal::default();
     stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(12));
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(9));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
