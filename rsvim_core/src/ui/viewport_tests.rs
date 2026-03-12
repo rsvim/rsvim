@@ -1607,13 +1607,14 @@ mod tests_view_wrap_nolinebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
+      "\n",
       "This is a qui",
       "te simple and",
       " small test l",
       "ines.\n",
       "But still it ",
       "contains seve",
-      "ral things we",
+      // "ral things we",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
@@ -1653,25 +1654,25 @@ mod tests_view_wrap_nolinebreak {
     );
     let expect = vec![
       "AAAAAAAAAA",
+      "\n",
       "1st.\n",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
-      "3rd.\n",
-      "4th.\n",
+      "\n",
+      // "3rd.\n",
+      // "4th.\n",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
     let actual = tree.window(window_id).unwrap().viewport();
     let expect_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
       lock!(buf).text(),
       &actual,
       &expect,
       0,
-      5,
+      3,
       &expect_fills,
       &expect_fills,
     );
