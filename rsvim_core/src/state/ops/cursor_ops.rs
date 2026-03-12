@@ -139,7 +139,7 @@ fn _normalize_move_to(
 /// 1. ``
 ///
 /// The only line is an empty line.
-pub fn normalize_to_cursor_move_to_exclude_eol(
+pub fn normalize_cursor_move_to_exclude_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
@@ -161,7 +161,7 @@ pub fn normalize_to_cursor_move_to_exclude_eol(
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
 /// eol.
-pub fn normalize_to_cursor_move_to_include_eol(
+pub fn normalize_cursor_move_to_include_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
@@ -182,7 +182,7 @@ pub fn normalize_to_cursor_move_to_include_eol(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
-pub fn normalize_to_window_scroll_by(
+pub fn normalize_window_scroll_by(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -203,7 +203,7 @@ pub fn normalize_to_window_scroll_by(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollTo((x,y))`.
-pub fn normalize_to_window_scroll_to(
+pub fn normalize_window_scroll_to(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -482,7 +482,7 @@ pub fn cursor_move_exclude_eol(
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) =
-    normalize_to_cursor_move_to_exclude_eol(
+    normalize_cursor_move_to_exclude_eol(
       text,
       op,
       cursor_viewport.char_idx(),
@@ -555,14 +555,14 @@ pub fn cursor_move(
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
   {
-    normalize_to_cursor_move_to_include_eol(
+    normalize_cursor_move_to_include_eol(
       text,
       op,
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
     )
   } else {
-    normalize_to_cursor_move_to_exclude_eol(
+    normalize_cursor_move_to_exclude_eol(
       text,
       op,
       cursor_viewport.char_idx(),

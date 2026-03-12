@@ -354,7 +354,7 @@ impl Normal {
     use crate::state::ops::cursor_ops::CursorMoveDirection;
 
     let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_to_cursor_move_to_exclude_eol(
+      cursor_ops::normalize_cursor_move_to_exclude_eol(
         text,
         op,
         cursor_viewport.char_idx(),
@@ -423,7 +423,7 @@ impl Normal {
     };
     let buffer = lock!(buffer);
 
-    let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
+    let (start_column, start_line) = cursor_ops::normalize_window_scroll_to(
       op,
       viewport.start_column_idx(),
       viewport.start_line_idx(),
