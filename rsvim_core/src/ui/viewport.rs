@@ -174,7 +174,11 @@ impl CursorViewport {
   }
 
   /// Create cursor viewport with the top-left corner position from the window viewport.
-  pub fn from_top_left(viewport: &Viewport, text: &Text) -> Self {
+  pub fn from_top_left(
+    viewport: &Viewport,
+    text: &Text,
+    size: &U16Size,
+  ) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
       return Self::new(0, 0, 0, 0);
@@ -210,7 +214,7 @@ impl CursorViewport {
     }
 
     let char_idx = first_row.start_char_idx();
-    Self::from_position(viewport, text, line_idx, char_idx)
+    Self::from_position(viewport, text, size, line_idx, char_idx)
   }
 
   /// Create cursor viewport with specified position (buffer's line/char index) from the window
@@ -222,6 +226,7 @@ impl CursorViewport {
   pub fn from_position(
     viewport: &Viewport,
     text: &Text,
+    size: &U16Size,
     line_idx: usize,
     char_idx: usize,
   ) -> Self {
@@ -290,8 +295,18 @@ impl CursorViewport {
 
         let char_start_width =
           text.width_until(line_idx, target_last_char.unwrap());
-        let col_idx = (char_start_width - row_start_width) as u16;
-        CursorViewport::new(line_idx, char_idx, *row_idx, col_idx)
+        let mut col_idx = (char_start_width - row_start_width) as u16;
+        let mut row_idx = *row_idx;
+
+        // If column index >= widget's width, we simply put it to the beginning
+        // of the next row.
+        if col_idx >= size.width() {
+          debug_assert!(row_idx + 1 < size.height());
+          row_idx += 1;
+          col_idx = 0;
+        }
+
+        CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
       } else {
         // Otherwise, this line must be empty. Put the cursor at the beginning
         // of the row in the target line.

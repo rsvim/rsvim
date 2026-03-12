@@ -272,10 +272,16 @@ fn _update_cursor_viewport(
   cursor_line: usize,
   cursor_char: usize,
 ) -> CursorViewportArc {
+  let actual_shape = tree.editable_actual_shape(id);
   // New cursor position
-  let new_cursor_viewport = CursorViewport::to_arc(
-    CursorViewport::from_position(viewport, text, cursor_line, cursor_char),
-  );
+  let new_cursor_viewport =
+    CursorViewport::to_arc(CursorViewport::from_position(
+      viewport,
+      text,
+      &actual_shape.size(),
+      cursor_line,
+      cursor_char,
+    ));
 
   tree.set_editable_cursor_viewport(id, new_cursor_viewport.clone());
 

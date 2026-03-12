@@ -97,11 +97,13 @@ fn search_viewport(
     start_line,
     start_column,
   );
+  let actual_shape = tree.editable_actual_shape(window_id);
   tree.set_editable_cursor_viewport(
     window_id,
     CursorViewport::to_arc(CursorViewport::from_position(
       &viewport,
       buf.text(),
+      &actual_shape.size(),
       target_cursor_line,
       target_cursor_char,
     )),
