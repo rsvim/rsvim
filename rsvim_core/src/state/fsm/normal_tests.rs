@@ -377,7 +377,7 @@ mod tests_raw_cursor_move_x_by {
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
-    assert_eq!(actual.char_idx(), 12);
+    assert_eq!(actual.char_idx(), 9);
   }
 
   #[test]

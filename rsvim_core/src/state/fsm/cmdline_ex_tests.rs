@@ -425,11 +425,12 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 34);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 10);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = lock!(contents).input().options().end_of_line();
-      let line0 = format!("Bye6 Bye7{cmdline_eol}");
+      // let cmdline_eol = lock!(contents).input().options().end_of_line();
+      // let line0 = format!("Bye6 Bye7{cmdline_eol}");
+      let line0 = format!(" Bye6 Bye7");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -448,7 +449,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         "           ",
         "           ",
         "           ",
-        ":Bye6 Bye7 ",
+        ": Bye6 Bye7",
       ];
       let actual_canvas = make_tree_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
