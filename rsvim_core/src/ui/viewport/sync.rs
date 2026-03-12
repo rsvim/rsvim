@@ -85,7 +85,7 @@ fn _end_char_and_prefills(
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
     let next_to_last_visible_char =
-      text.last_char_on_line_no_eol(l).unwrap_or(0_usize) + 1;
+      text.last_char_idx_on_line_no_eol(l).unwrap_or(0_usize) + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -241,7 +241,7 @@ fn proc_line_wrap_nolinebreak(
           debug_assert!(bufline.len_chars() > 0);
           if end_char
             > text
-              .last_char_on_line_no_eol(current_line)
+              .last_char_idx_on_line_no_eol(current_line)
               .unwrap_or(0_usize)
           {
             break;
@@ -589,7 +589,7 @@ fn proc_line_wrap_linebreak(
           debug_assert!(bufline.len_chars() > 0);
           if end_char
             > text
-              .last_char_on_line_no_eol(current_line)
+              .last_char_idx_on_line_no_eol(current_line)
               .unwrap_or(0_usize)
           {
             break;
@@ -701,7 +701,7 @@ mod detail {
     let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
     if target_is_eol {
       target_cursor_width =
-        match text.last_char_on_line_no_eol(target_cursor_line) {
+        match text.last_char_idx_on_line_no_eol(target_cursor_line) {
           Some(last_visible_char) => {
             text.width_before(target_cursor_line, last_visible_char)
           }
@@ -1107,7 +1107,7 @@ mod wrap_detail {
 
     debug_assert!(text.rope().get_line(target_cursor_line).is_some());
     let last_char = text
-      .last_char_on_line(target_cursor_line) // Also consider eol.
+      .last_char_idx_on_line(target_cursor_line) // Also consider eol.
       .unwrap_or(0_usize);
 
     let (
@@ -1704,7 +1704,7 @@ pub fn search_anchor_downward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_on_line(target_cursor_line)
+      .last_char_idx_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1928,7 +1928,7 @@ pub fn search_anchor_upward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_on_line(target_cursor_line)
+      .last_char_idx_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -2109,7 +2109,7 @@ pub fn search_anchor_leftward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_on_line(target_cursor_line)
+      .last_char_idx_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -2273,7 +2273,7 @@ pub fn search_anchor_rightward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_on_line(target_cursor_line)
+      .last_char_idx_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
