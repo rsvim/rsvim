@@ -218,7 +218,6 @@ impl Normal {
           current_window_id,
           buffer.text(),
           op,
-          true,
         );
       }
       GotoInsertModeVariant::NewLine => {
@@ -232,7 +231,6 @@ impl Normal {
           current_window_id,
           buffer.text(),
           op,
-          true,
         );
         let eol =
           CompactString::new(format!("{}", buffer.options().end_of_line()));
@@ -331,12 +329,11 @@ impl Normal {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move_include_eol(
+    cursor_ops::cursor_move_exclude_eol(
       &mut tree,
       current_window_id,
       buffer.text(),
       op,
-      false,
     );
     State::Normal(Normal::default())
   }

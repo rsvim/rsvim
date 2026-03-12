@@ -318,12 +318,11 @@ impl Insert {
     buffer.undo_mut().commit();
 
     let op = Operation::CursorMoveBy((-1, 0));
-    cursor_ops::cursor_move_include_eol(
+    cursor_ops::cursor_move_exclude_eol(
       &mut tree,
       current_window_id,
       buffer.text(),
       op,
-      false,
     );
 
     if cfg!(debug_assertions) {
@@ -370,7 +369,6 @@ impl Insert {
       current_window_id,
       buffer.text(),
       op,
-      true,
     );
 
     State::Insert(Insert::default())

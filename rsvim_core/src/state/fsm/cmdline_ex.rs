@@ -212,7 +212,6 @@ impl CmdlineEx {
       cmdline_id,
       contents.input(),
       op,
-      true,
     );
 
     State::CmdlineEx(CmdlineEx::default())
