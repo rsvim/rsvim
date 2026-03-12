@@ -581,7 +581,7 @@ impl Text {
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
     match self.rope.get_char(last_char_on_buf) {
       Some(_c) => {
-        let c_is_eol = Self::is_eol_on_rope(self.rope, last_char_on_buf);
+        let c_is_eol = Self::is_eol_on_rope(self.rope(), last_char_on_buf);
         // Only append eol when the whole text rope doesn't have it at end.
         if !c_is_eol {
           self
