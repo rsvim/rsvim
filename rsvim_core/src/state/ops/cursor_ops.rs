@@ -318,9 +318,9 @@ pub fn raw_cursor_viewport_move_to(
   let char_idx = std::cmp::min(
     char_idx,
     if include_eol {
-      text.last_char_on_line(line_idx).unwrap_or(0)
+      text.last_char_on_line(line_idx).unwrap_or(0) + 1
     } else {
-      text.last_char_on_line_no_eol(line_idx).unwrap_or(0)
+      text.last_char_on_line_no_eol(line_idx).unwrap_or(0) + 1
     },
   );
 
@@ -330,7 +330,7 @@ pub fn raw_cursor_viewport_move_to(
     if bufline.len_chars() == 0 {
       debug_assert_eq!(char_idx, 0_usize);
     } else {
-      debug_assert!(bufline.len_chars() > char_idx);
+      debug_assert!(bufline.len_chars() >= char_idx);
     }
   }
 
