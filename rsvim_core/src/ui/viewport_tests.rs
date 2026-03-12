@@ -6683,17 +6683,17 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 20, 1, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 20, 2, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        1,
+        2,
         5,
         &expect_start_fills,
         &expect_end_fills,
