@@ -2220,7 +2220,7 @@ mod tests_raw_window_scroll_x_by {
     // Scroll-3
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "\n", ""];
+      let expect = vec!["", "", "c", "d\n", "e"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
