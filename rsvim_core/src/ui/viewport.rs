@@ -288,8 +288,8 @@ impl CursorViewport {
           row_start_width -= line_viewport.start_filled_cols();
         };
 
-        let char_start_width = text
-          .width_before(line_idx, text.rope().line(line_idx).len_chars() - 1);
+        let char_start_width =
+          text.width_until(line_idx, target_last_char.unwrap()) + 1;
         let col_idx = (char_start_width - row_start_width) as u16;
         CursorViewport::new(line_idx, char_idx, *row_idx, col_idx)
       } else {
