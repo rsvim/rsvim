@@ -1704,8 +1704,9 @@ pub fn search_anchor_downward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -1928,8 +1929,9 @@ pub fn search_anchor_upward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -2109,8 +2111,9 @@ pub fn search_anchor_leftward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -2273,8 +2276,9 @@ pub fn search_anchor_rightward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
