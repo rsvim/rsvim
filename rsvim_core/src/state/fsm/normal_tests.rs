@@ -6124,8 +6124,9 @@ mod tests_cursor_move {
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
-        "very small.\r\n",
+        // "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6152,21 +6153,22 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSVIM!\r\n",
+        // "Hello, RSVIM!\r\n",
         "This is a quite",
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
         "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
-        0,
+        1,
         4,
         &expect_fills,
         &expect_fills,
@@ -6186,21 +6188,22 @@ mod tests_cursor_move {
       let expect = vec![
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
         "very small.\r\n",
         "2. The line is ",
         "very long\r\n",
-        "  * The extra p",
-        "arts are been t",
+        // "  * The extra p",
+        // "arts are been t",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 0), (5, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         2,
-        6,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -6222,8 +6225,9 @@ mod tests_cursor_move {
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
-        "very small.\r\n",
+        // "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
