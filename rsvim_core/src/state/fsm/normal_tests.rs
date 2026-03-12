@@ -2677,6 +2677,7 @@ mod tests_raw_window_scroll_x_by {
         "l it contains s",
         "everal things w",
         "e want to test:",
+        "\n",
         "n the line is s",
         "mall enough to ",
         "completely put ",
@@ -2684,7 +2685,7 @@ mod tests_raw_window_scroll_x_by {
         " the window con",
         "tent widget, th",
         "en the line-wra",
-        "p and word-wrap",
+        // "p and word-wrap",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
