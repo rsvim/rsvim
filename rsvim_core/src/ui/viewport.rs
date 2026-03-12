@@ -284,6 +284,29 @@ impl CursorViewport {
         let (first_row_idx, _first_row_viewport) =
           next_line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      } else if text
+        .rope()
+        .get_line(line_idx)
+        .map(|line| line.len_chars() == char_idx)
+        .unwrap_or(false)
+      {
+        let (row_idx, row_viewport) = line_viewport.rows().last().unwrap();
+
+        let mut row_start_width =
+          text.width_before(line_idx, row_viewport.start_char_idx());
+
+        // Subtract `start_filled_cols` if the row is the first row in the line.
+        let (first_row_idx, _first_row_viewport) =
+          line_viewport.rows().first().unwrap();
+        if first_row_idx == row_idx {
+          debug_assert!(row_start_width >= line_viewport.start_filled_cols());
+          row_start_width -= line_viewport.start_filled_cols();
+        };
+
+        let char_start_width = text
+          .width_before(line_idx, text.rope().line(line_idx).len_chars() - 1);
+        let col_idx = (char_start_width - row_start_width) as u16;
+        CursorViewport::new(line_idx, char_idx, *row_idx, col_idx)
       } else {
         debug_assert!(line_viewport.rows().first().is_some());
         let (first_row_idx, _first_row_viewport) =
