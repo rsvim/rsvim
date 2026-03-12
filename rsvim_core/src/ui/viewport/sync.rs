@@ -854,7 +854,8 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_is_eol =
+      text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
     let target_cursor_width = text
       .width_until(target_cursor_line, target_cursor_char)
       + if target_is_eol { 1 } else { 0 }; // For eol, add extra 1 column.
