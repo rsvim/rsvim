@@ -485,6 +485,7 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 }
 
 impl Text {
+  #[allow(dead_code)]
   #[cfg(not(test))]
   fn dbg_print_textline_absolutely(
     &mut self,
@@ -494,6 +495,7 @@ impl Text {
   ) {
   }
 
+  #[allow(dead_code)]
   #[cfg(test)]
   fn dbg_print_textline_absolutely(
     &mut self,
