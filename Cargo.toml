@@ -142,6 +142,9 @@ v8 = { version = "=146.3.0", default-features = false, features = [
 [profile.dev.package.v8]
 opt-level = 1
 
+[profile.dev]
+opt-level = 0
+
 # Nightly
 [profile.nightly]
 debug = true
