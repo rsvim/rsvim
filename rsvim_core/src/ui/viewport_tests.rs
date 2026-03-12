@@ -1980,9 +1980,10 @@ mod tests_view_wrap_nolinebreak_eol {
       "But still ",
       "it contain",
       "s several.",
+      "\r\n",
       "  1. When ",
       "the line i",
-      "s small en",
+      // "s small en",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);

@@ -239,11 +239,10 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
+          let last_char_on_line = text
+            .last_char_idx_on_line_include_eol(current_line)
+            .unwrap_or(0);
+          if end_char > last_char_on_line {
             break;
           }
 
@@ -587,11 +586,10 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
+          let last_char_on_line = text
+            .last_char_idx_on_line_include_eol(current_line)
+            .unwrap_or(0_usize);
+          if end_char > last_char_on_line {
             break;
           }
 
