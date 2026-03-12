@@ -204,28 +204,28 @@ impl Text {
     is_crlf || is_cr_or_lf
   }
 
-  // Same logic with `is_eol_on_rope_line`, except the `absolute_char_idx`
-  // parameter is absolute on whole rope.
+  // // Same logic with `is_eol_on_rope_line`, except the `absolute_char_idx`
+  // // parameter is absolute on whole rope.
+  // //
+  // // NOTE: The parameter `absolute_char_idx` is absolute char index on whole
+  // // rope text.
+  // pub fn is_eol_on_rope(rope: &Rope, absolute_char_idx: usize) -> bool {
+  //   let len_chars = rope.len_chars();
   //
-  // NOTE: The parameter `absolute_char_idx` is absolute char index on whole
-  // rope text.
-  pub fn is_eol_on_rope(rope: &Rope, absolute_char_idx: usize) -> bool {
-    let len_chars = rope.len_chars();
-
-    let is_crlf = len_chars >= 2
-      && absolute_char_idx >= len_chars - 2
-      && absolute_char_idx < len_chars
-      && format!("{}{}", rope.char(len_chars - 2), rope.char(len_chars - 1))
-        == EndOfLineOption::Crlf.to_compact_string();
-    let is_cr_or_lf = len_chars >= 1
-      && absolute_char_idx == len_chars - 1
-      && (format!("{}", rope.char(len_chars - 1))
-        == EndOfLineOption::Cr.to_compact_string()
-        || format!("{}", rope.char(len_chars - 1))
-          == EndOfLineOption::Lf.to_compact_string());
-
-    is_crlf || is_cr_or_lf
-  }
+  //   let is_crlf = len_chars >= 2
+  //     && absolute_char_idx >= len_chars - 2
+  //     && absolute_char_idx < len_chars
+  //     && format!("{}{}", rope.char(len_chars - 2), rope.char(len_chars - 1))
+  //       == EndOfLineOption::Crlf.to_compact_string();
+  //   let is_cr_or_lf = len_chars >= 1
+  //     && absolute_char_idx == len_chars - 1
+  //     && (format!("{}", rope.char(len_chars - 1))
+  //       == EndOfLineOption::Cr.to_compact_string()
+  //       || format!("{}", rope.char(len_chars - 1))
+  //         == EndOfLineOption::Lf.to_compact_string());
+  //
+  //   is_crlf || is_cr_or_lf
+  // }
 
   /// Get last char index on line.
   ///
