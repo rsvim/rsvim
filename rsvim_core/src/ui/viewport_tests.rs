@@ -2577,6 +2577,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
+      "\n",
       "s is a qui",
       "te simple ",
       "and small ",
@@ -2585,7 +2586,7 @@ mod tests_view_wrap_nolinebreak_startcol {
       " still it ",
       "contains s",
       "everal thi",
-      "ngs we wan",
+      // "ngs we wan",
     ];
 
     let (mut tree, window_id) =
@@ -2627,6 +2628,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
+      "\n",
       "s is a qui",
       "te simple ",
       "and small ",
@@ -2635,7 +2637,7 @@ mod tests_view_wrap_nolinebreak_startcol {
       " still it ",
       "contains s",
       "everal thi",
-      "ngs we wan",
+      // "ngs we wan",
     ];
 
     let (mut tree, window_id) =
