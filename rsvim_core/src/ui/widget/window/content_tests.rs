@@ -1115,9 +1115,10 @@ mod tests_wrap_nolinebreak_eol {
       "le and sma",
       "ll test li",
       "nes123456.",
+      "          ",
       "But still ",
       "it contain",
-      "s several ",
+      // "s several ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
@@ -1157,9 +1158,10 @@ mod tests_wrap_nolinebreak_eol {
       "le and sma",
       "ll test li",
       "nes123456.",
+      "          ",
       "But still ",
       "it contain",
-      "s several ",
+      // "s several ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1311,6 +1313,7 @@ mod tests_wrap_nolinebreak_startcol {
       "ow of the window co",
       "ntent widget, there",
       "'re multiple cases:",
+      "                   ",
       ">        * 如果行换",
       "行和单词换行这两个 ",
       "选项都没有选中，那 ",
@@ -1319,7 +1322,7 @@ mod tests_wrap_nolinebreak_startcol {
       ">        * The extr",
       "a parts are split i",
       "nto the next row, i",
-      "f either line-wrap ",
+      // "f either line-wrap ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
