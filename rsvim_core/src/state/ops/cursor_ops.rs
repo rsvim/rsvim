@@ -442,6 +442,7 @@ fn _update_viewport_after_text_changed(
   tree: &mut Tree,
   id: NodeId,
   text: &Text,
+  include_eol: bool,
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
@@ -472,6 +473,7 @@ fn _update_viewport_after_text_changed(
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
     )),
+    include_eol,
   );
 }
 
@@ -545,6 +547,7 @@ pub fn cursor_move(
     &new_viewport,
     text,
     Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    include_eol,
   );
 
   debug_assert!(tree.cursor_id().is_some());
@@ -587,7 +590,7 @@ pub fn cursor_insert(
     text.insert(cursor_line_idx, cursor_char_idx, payload);
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
+  _update_viewport_after_text_changed(tree, id, text, true);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -634,7 +637,7 @@ pub fn cursor_delete(
   maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
+  _update_viewport_after_text_changed(tree, id, text, true);
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
     maybe_new_cursor_position.unwrap();
 
