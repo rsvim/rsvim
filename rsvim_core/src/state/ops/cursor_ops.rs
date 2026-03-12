@@ -44,32 +44,32 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
   }
 }
 
-/// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-fn _normalize_move_by(
-  op: Operation,
-  cursor_char_idx: usize,
-  cursor_line_idx: usize,
-) -> (isize, isize, CursorMoveDirection) {
-  match op {
-    Operation::CursorMoveLeftBy(n) => {
-      (-(n as isize), 0, CursorMoveDirection::Left)
-    }
-    Operation::CursorMoveRightBy(n) => {
-      (n as isize, 0, CursorMoveDirection::Right)
-    }
-    Operation::CursorMoveUpBy(n) => (0, -(n as isize), CursorMoveDirection::Up),
-    Operation::CursorMoveDownBy(n) => {
-      (0, n as isize, CursorMoveDirection::Down)
-    }
-    Operation::CursorMoveTo((x, y)) => {
-      let x = (x as isize) - (cursor_char_idx as isize);
-      let y = (y as isize) - (cursor_line_idx as isize);
-      (x, y, _cursor_direction(x, y))
-    }
-    Operation::CursorMoveBy((x, y)) => (x, y, _cursor_direction(x, y)),
-    _ => unreachable!(),
-  }
-}
+// /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
+// fn _normalize_move_by(
+//   op: Operation,
+//   cursor_char_idx: usize,
+//   cursor_line_idx: usize,
+// ) -> (isize, isize, CursorMoveDirection) {
+//   match op {
+//     Operation::CursorMoveLeftBy(n) => {
+//       (-(n as isize), 0, CursorMoveDirection::Left)
+//     }
+//     Operation::CursorMoveRightBy(n) => {
+//       (n as isize, 0, CursorMoveDirection::Right)
+//     }
+//     Operation::CursorMoveUpBy(n) => (0, -(n as isize), CursorMoveDirection::Up),
+//     Operation::CursorMoveDownBy(n) => {
+//       (0, n as isize, CursorMoveDirection::Down)
+//     }
+//     Operation::CursorMoveTo((x, y)) => {
+//       let x = (x as isize) - (cursor_char_idx as isize);
+//       let y = (y as isize) - (cursor_line_idx as isize);
+//       (x, y, _cursor_direction(x, y))
+//     }
+//     Operation::CursorMoveBy((x, y)) => (x, y, _cursor_direction(x, y)),
+//     _ => unreachable!(),
+//   }
+// }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
 fn _normalize_move_to(
