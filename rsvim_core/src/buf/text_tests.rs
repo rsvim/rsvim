@@ -172,7 +172,7 @@ fn last_char1_win() {
     assert_eq!(actual3.unwrap(), 6);
     assert_eq!(text.rope().line(1).char(6), '\n');
 
-    let actual4 = text.last_char_idx_on_rope_line_no_eol(1);
+    let actual4 = Text::last_char_idx_on_rope_line_no_eol(text.rope(), 1);
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
