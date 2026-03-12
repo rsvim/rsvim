@@ -302,6 +302,7 @@ pub fn raw_cursor_viewport_move_to(
   viewport: &Viewport,
   text: &Text,
   cursor_move_to_op: Operation,
+  include_eol: bool,
 ) -> CursorViewportArc {
   debug_assert!(matches!(cursor_move_to_op, Operation::CursorMoveTo((_, _))));
   let (char_idx, line_idx) = match cursor_move_to_op {

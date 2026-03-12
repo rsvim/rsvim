@@ -180,7 +180,7 @@ impl Text {
   // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
   // library since we heavily rely on it, and cannot do anything without it. But anyway it works
   // great, so let's keep it.
-  fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
+  pub fn is_eol_on_rope_line(line: &RopeSlice, char_idx: usize) -> bool {
     let len_chars = line.len_chars();
 
     // The eol detection logic (NOTE: We don't check the file format option):
@@ -204,21 +204,24 @@ impl Text {
     is_crlf || is_cr_or_lf
   }
 
-  // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
-  fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
-    let r = &self.rope;
-    let len_chars = r.len_chars();
+  // Same logic with `is_eol_on_rope_line`, except the `absolute_char_idx`
+  // parameter is absolute on whole rope.
+  //
+  // NOTE: The parameter `absolute_char_idx` is absolute char index on whole
+  // rope text.
+  pub fn is_eol_on_rope(rope: &Rope, absolute_char_idx: usize) -> bool {
+    let len_chars = rope.len_chars();
 
     let is_crlf = len_chars >= 2
-      && char_idx >= len_chars - 2
-      && char_idx < len_chars
-      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1))
+      && absolute_char_idx >= len_chars - 2
+      && absolute_char_idx < len_chars
+      && format!("{}{}", rope.char(len_chars - 2), rope.char(len_chars - 1))
         == EndOfLineOption::Crlf.to_compact_string();
     let is_cr_or_lf = len_chars >= 1
-      && char_idx == len_chars - 1
-      && (format!("{}", r.char(len_chars - 1))
+      && absolute_char_idx == len_chars - 1
+      && (format!("{}", rope.char(len_chars - 1))
         == EndOfLineOption::Cr.to_compact_string()
-        || format!("{}", r.char(len_chars - 1))
+        || format!("{}", rope.char(len_chars - 1))
           == EndOfLineOption::Lf.to_compact_string());
 
     is_crlf || is_cr_or_lf
@@ -255,10 +258,10 @@ impl Text {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
           let mut c = last_char;
-          while c > 0 && self._is_eol_on_line(&line, c) {
+          while c > 0 && Self::is_eol_on_rope_line(&line, c) {
             c = c.saturating_sub(1);
           }
-          if self._is_eol_on_line(&line, c) {
+          if Self::is_eol_on_rope_line(&line, c) {
             None
           } else {
             Some(c)
@@ -270,10 +273,12 @@ impl Text {
     }
   }
 
+  pub fn last_char_on_viewport_line(&self, line_idx: usize) {}
+
   /// Whether the `line_idx`/`char_idx` is eol (end-of-line).
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
-      Some(line) => self._is_eol_on_line(&line, char_idx),
+      Some(line) => Self::is_eol_on_rope_line(&line, char_idx),
       None => false,
     }
   }
@@ -582,7 +587,7 @@ impl Text {
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
     match self.rope.get_char(last_char_on_buf) {
       Some(_c) => {
-        let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
+        let c_is_eol = Self::is_eol_on_rope(&self.rope, last_char_on_buf);
         // Only append eol when the whole text rope doesn't have it at end.
         if !c_is_eol {
           self
