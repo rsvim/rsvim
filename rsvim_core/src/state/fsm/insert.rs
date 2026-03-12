@@ -264,6 +264,19 @@ impl Insert {
       cursor_char_idx_after: cursor_absolute_char_idx_after,
     });
     buffer.increase_editing_version();
+    trace!(
+      "after,cursor_line:{},cursor_char:{},absolute_cursor_char:{},absolute_char:{}",
+      cursor_line_idx_after,
+      cursor_char_idx_after,
+      buffer
+        .text()
+        .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after),
+      cursor_ops::cursor_absolute_char_idx(
+        &tree,
+        current_window_id,
+        buffer.text(),
+      )
+    );
     debug_assert_eq!(
       buffer
         .text()

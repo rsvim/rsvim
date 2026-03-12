@@ -180,7 +180,7 @@ impl Text {
   // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
   // library since we heavily rely on it, and cannot do anything without it. But anyway it works
   // great, so let's keep it.
-  fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
+  pub fn is_eol_on_rope_line(line: &RopeSlice, char_idx: usize) -> bool {
     let len_chars = line.len_chars();
 
     // The eol detection logic (NOTE: We don't check the file format option):
@@ -204,25 +204,28 @@ impl Text {
     is_crlf || is_cr_or_lf
   }
 
-  // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
-  fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
-    let r = &self.rope;
-    let len_chars = r.len_chars();
-
-    let is_crlf = len_chars >= 2
-      && char_idx >= len_chars - 2
-      && char_idx < len_chars
-      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1))
-        == EndOfLineOption::Crlf.to_compact_string();
-    let is_cr_or_lf = len_chars >= 1
-      && char_idx == len_chars - 1
-      && (format!("{}", r.char(len_chars - 1))
-        == EndOfLineOption::Cr.to_compact_string()
-        || format!("{}", r.char(len_chars - 1))
-          == EndOfLineOption::Lf.to_compact_string());
-
-    is_crlf || is_cr_or_lf
-  }
+  // // Same logic with `is_eol_on_rope_line`, except the `absolute_char_idx`
+  // // parameter is absolute on whole rope.
+  // //
+  // // NOTE: The parameter `absolute_char_idx` is absolute char index on whole
+  // // rope text.
+  // pub fn is_eol_on_rope(rope: &Rope, absolute_char_idx: usize) -> bool {
+  //   let len_chars = rope.len_chars();
+  //
+  //   let is_crlf = len_chars >= 2
+  //     && absolute_char_idx >= len_chars - 2
+  //     && absolute_char_idx < len_chars
+  //     && format!("{}{}", rope.char(len_chars - 2), rope.char(len_chars - 1))
+  //       == EndOfLineOption::Crlf.to_compact_string();
+  //   let is_cr_or_lf = len_chars >= 1
+  //     && absolute_char_idx == len_chars - 1
+  //     && (format!("{}", rope.char(len_chars - 1))
+  //       == EndOfLineOption::Cr.to_compact_string()
+  //       || format!("{}", rope.char(len_chars - 1))
+  //         == EndOfLineOption::Lf.to_compact_string());
+  //
+  //   is_crlf || is_cr_or_lf
+  // }
 
   /// Get last char index on line.
   ///
@@ -255,10 +258,10 @@ impl Text {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
           let mut c = last_char;
-          while c > 0 && self._is_eol_on_line(&line, c) {
+          while c > 0 && Self::is_eol_on_rope_line(&line, c) {
             c = c.saturating_sub(1);
           }
-          if self._is_eol_on_line(&line, c) {
+          if Self::is_eol_on_rope_line(&line, c) {
             None
           } else {
             Some(c)
@@ -273,7 +276,7 @@ impl Text {
   /// Whether the `line_idx`/`char_idx` is eol (end-of-line).
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
-      Some(line) => self._is_eol_on_line(&line, char_idx),
+      Some(line) => Self::is_eol_on_rope_line(&line, char_idx),
       None => false,
     }
   }
@@ -478,6 +481,7 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 }
 
 impl Text {
+  #[allow(dead_code)]
   #[cfg(not(test))]
   fn dbg_print_textline_absolutely(
     &mut self,
@@ -487,6 +491,7 @@ impl Text {
   ) {
   }
 
+  #[allow(dead_code)]
   #[cfg(test)]
   fn dbg_print_textline_absolutely(
     &mut self,
@@ -572,43 +577,44 @@ impl Text {
 
 // Edit {
 impl Text {
-  /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
-  /// helps the cursor motion.
-  fn append_eol_at_end_if_not_exist(&mut self) {
-    let eol = self.options().end_of_line();
-
-    let buffer_len_chars = self.rope.len_chars();
-    let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-    match self.rope.get_char(last_char_on_buf) {
-      Some(_c) => {
-        let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
-        // Only append eol when the whole text rope doesn't have it at end.
-        if !c_is_eol {
-          self
-            .rope_mut()
-            .insert(buffer_len_chars, eol.to_compact_string().as_str());
-          let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
-          self.retain_cached_lines(|line_idx| *line_idx < inserted_line_idx);
-          self.dbg_print_textline_absolutely(
-            inserted_line_idx,
-            buffer_len_chars,
-            "Eol appended(non-empty)",
-          );
-        }
-      }
-      None => {
-        self
-          .rope_mut()
-          .insert(0_usize, eol.to_compact_string().as_str());
-        self.clear_cached_lines();
-        self.dbg_print_textline_absolutely(
-          0_usize,
-          buffer_len_chars,
-          "Eol appended(empty)",
-        );
-      }
-    }
-  }
+  // #[allow(dead_code)]
+  // /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
+  // /// helps the cursor motion.
+  // fn append_eol_at_end_if_not_exist(&mut self) {
+  //   let eol = self.options().end_of_line();
+  //
+  //   let buffer_len_chars = self.rope.len_chars();
+  //   let last_char_on_buf = buffer_len_chars.saturating_sub(1);
+  //   match self.rope.get_char(last_char_on_buf) {
+  //     Some(_c) => {
+  //       let c_is_eol = Self::is_eol_on_rope(&self.rope, last_char_on_buf);
+  //       // Only append eol when the whole text rope doesn't have it at end.
+  //       if !c_is_eol {
+  //         self
+  //           .rope_mut()
+  //           .insert(buffer_len_chars, eol.to_compact_string().as_str());
+  //         let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
+  //         self.retain_cached_lines(|line_idx| *line_idx < inserted_line_idx);
+  //         self.dbg_print_textline_absolutely(
+  //           inserted_line_idx,
+  //           buffer_len_chars,
+  //           "Eol appended(non-empty)",
+  //         );
+  //       }
+  //     }
+  //     None => {
+  //       self
+  //         .rope_mut()
+  //         .insert(0_usize, eol.to_compact_string().as_str());
+  //       self.clear_cached_lines();
+  //       self.dbg_print_textline_absolutely(
+  //         0_usize,
+  //         buffer_len_chars,
+  //         "Eol appended(empty)",
+  //       );
+  //     }
+  //   }
+  // }
 
   /// Convert 2-dimensional `(line_idx, char_idx)` into 1-dimensional absolute
   /// `char_idx`.
@@ -712,7 +718,7 @@ impl Text {
     );
 
     // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
       line_idx_after_inserted,
@@ -859,7 +865,7 @@ impl Text {
     );
 
     // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // self.append_eol_at_end_if_not_exist();
 
     self.dbg_print_textline(
       line_idx_after_deleted,

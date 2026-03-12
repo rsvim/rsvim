@@ -397,6 +397,7 @@ impl Normal {
       &viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+      false,
     );
 
     tree

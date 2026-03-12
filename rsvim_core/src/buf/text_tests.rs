@@ -4,6 +4,7 @@ use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ropey::Rope;
+use ropey::RopeBuilder;
 
 #[test]
 fn last_char1_unix() {
@@ -318,5 +319,171 @@ fn last_char1_mac() {
     assert!(actual4.is_some());
     assert_eq!(actual4.unwrap(), 4);
     assert_eq!(text.rope().line(1).char(4), 'd');
+  }
+}
+
+#[cfg(test)]
+mod tests_ropey {
+  use super::*;
+
+  #[test]
+  fn null() {
+    test_log_init();
+
+    let rope = RopeBuilder::new().finish();
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn empty() {
+    test_log_init();
+
+    let rope = Rope::from_str("");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn empty_eol() {
+    test_log_init();
+
+    let rope = Rope::from_str("\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn one_line_without_eol() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello, World!");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn one_line_with_eol() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello, World!\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn two_line_without_eol() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello,\nWorld!");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
+  }
+
+  #[test]
+  fn two_line_with_eol() {
+    test_log_init();
+
+    let rope = Rope::from_str("Hello,\nWorld!\n");
+    info!(
+      "rope:{:?}, len_lines:{}, len_chars:{}, len_bytes:{}",
+      rope.to_string(),
+      rope.len_lines(),
+      rope.len_chars(),
+      rope.len_bytes(),
+    );
+    for (l, line) in rope.lines().enumerate() {
+      info!(
+        "line [{}]:{:?}, len_chars:{}, len_bytes:{}",
+        l,
+        line.to_string(),
+        line.len_chars(),
+        line.len_bytes(),
+      );
+    }
   }
 }

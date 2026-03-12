@@ -272,10 +272,16 @@ fn _update_cursor_viewport(
   cursor_line: usize,
   cursor_char: usize,
 ) -> CursorViewportArc {
+  let actual_shape = tree.editable_actual_shape(id);
   // New cursor position
-  let new_cursor_viewport = CursorViewport::to_arc(
-    CursorViewport::from_position(viewport, text, cursor_line, cursor_char),
-  );
+  let new_cursor_viewport =
+    CursorViewport::to_arc(CursorViewport::from_position(
+      viewport,
+      text,
+      &actual_shape.size(),
+      cursor_line,
+      cursor_char,
+    ));
 
   tree.set_editable_cursor_viewport(id, new_cursor_viewport.clone());
 
@@ -302,6 +308,7 @@ pub fn raw_cursor_viewport_move_to(
   viewport: &Viewport,
   text: &Text,
   cursor_move_to_op: Operation,
+  include_eol: bool,
 ) -> CursorViewportArc {
   debug_assert!(matches!(cursor_move_to_op, Operation::CursorMoveTo((_, _))));
   let (char_idx, line_idx) = match cursor_move_to_op {
@@ -314,15 +321,23 @@ pub fn raw_cursor_viewport_move_to(
   debug_assert!(line_idx < viewport.end_line_idx());
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let bufline = text.rope().line(line_idx);
+  let char_idx = std::cmp::min(
+    char_idx,
+    if include_eol {
+      text.last_char_on_line(line_idx).unwrap_or(0) + 1
+    } else {
+      text.last_char_on_line_no_eol(line_idx).unwrap_or(0) + 1
+    },
+  );
 
-  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
-  debug_assert!(bufline.len_chars() >= char_idx);
-
-  if bufline.len_chars() == 0 {
-    debug_assert_eq!(char_idx, 0_usize);
-  } else {
-    debug_assert!(bufline.len_chars() > char_idx);
+  if cfg!(debug_assertions) {
+    let bufline = text.rope().line(line_idx);
+    debug_assert!(bufline.len_chars() >= char_idx);
+    if bufline.len_chars() == 0 {
+      debug_assert_eq!(char_idx, 0_usize);
+    } else {
+      debug_assert!(bufline.len_chars() >= char_idx);
+    }
   }
 
   // let new_cursor_viewport =
@@ -432,6 +447,7 @@ fn _update_viewport_after_text_changed(
   tree: &mut Tree,
   id: NodeId,
   text: &Text,
+  include_eol: bool,
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
@@ -462,6 +478,7 @@ fn _update_viewport_after_text_changed(
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
     )),
+    include_eol,
   );
 }
 
@@ -535,6 +552,7 @@ pub fn cursor_move(
     &new_viewport,
     text,
     Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    include_eol,
   );
 
   debug_assert!(tree.cursor_id().is_some());
@@ -577,7 +595,7 @@ pub fn cursor_insert(
     text.insert(cursor_line_idx, cursor_char_idx, payload);
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
+  _update_viewport_after_text_changed(tree, id, text, true);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -624,7 +642,7 @@ pub fn cursor_delete(
   maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, id, text);
+  _update_viewport_after_text_changed(tree, id, text, true);
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
     maybe_new_cursor_position.unwrap();
 
