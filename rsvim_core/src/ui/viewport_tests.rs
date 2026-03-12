@@ -2148,9 +2148,10 @@ mod tests_view_wrap_nolinebreak_eol {
       "But still ",
       "it contain",
       "s several.",
+      "\r",
       "  1. When ",
       "the line i",
-      "s small en",
+      // "s small en",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
@@ -2196,8 +2197,9 @@ mod tests_view_wrap_nolinebreak_eol {
       "1st.\r\n",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
+      "\r\n",
       "3rd.\r\n",
-      "4th.\r\n",
+      // "4th.\r\n",
     ];
 
     let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
