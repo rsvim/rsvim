@@ -2289,11 +2289,11 @@ mod tests_view_wrap_nolinebreak_eol {
     );
     let expect = vec![
       "AAAAAAAAAA",
-      "\r\n",
+      "\r",
       "1st.\r",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
-      "\r\n",
+      "\r",
       // "3rd.\r",
       // "4th.\r",
     ];
