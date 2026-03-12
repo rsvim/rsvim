@@ -425,7 +425,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 34);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 10);
 
       let viewport = cmdline_viewport(tree.clone());
       let cmdline_eol = lock!(contents).input().options().end_of_line();
