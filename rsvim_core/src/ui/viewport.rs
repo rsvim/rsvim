@@ -289,7 +289,7 @@ impl CursorViewport {
         };
 
         let char_start_width =
-          text.width_until(line_idx, target_last_char.unwrap()) + 1;
+          text.width_until(line_idx, target_last_char.unwrap());
         let col_idx = (char_start_width - row_start_width) as u16;
         CursorViewport::new(line_idx, char_idx, *row_idx, col_idx)
       } else {
