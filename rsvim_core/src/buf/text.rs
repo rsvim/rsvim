@@ -227,7 +227,7 @@ impl Text {
   /// Get last char index on line, include invisible end-of-line chars.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is empty.
-  pub fn last_char_on_line_include_eol(
+  pub fn last_char_idx_on_line_include_eol(
     &self,
     line_idx: usize,
   ) -> Option<usize> {
@@ -253,12 +253,12 @@ impl Text {
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
-  pub fn last_char_on_line_exclude_eol(
+  pub fn last_char_idx_on_line_exclude_eol(
     &self,
     line_idx: usize,
   ) -> Option<usize> {
     match self.rope.get_line(line_idx) {
-      Some(line) => match self.last_char_on_line_include_eol(line_idx) {
+      Some(line) => match self.last_char_idx_on_line_include_eol(line_idx) {
         Some(last_char) => {
           let mut c = last_char;
           while c > 0 && Self::is_eol_on_rope_line(&line, c) {

@@ -149,7 +149,7 @@ pub fn normalize_cursor_move_to_exclude_eol(
     _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
-  let x = match text.last_char_on_line_exclude_eol(y) {
+  let x = match text.last_char_idx_on_line_exclude_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
@@ -171,7 +171,7 @@ pub fn normalize_cursor_move_to_include_eol(
     _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
-  let x = match text.last_char_on_line_exclude_eol(y) {
+  let x = match text.last_char_idx_on_line_exclude_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char + 1), // For include eol, allow extra 1 eol char.
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
