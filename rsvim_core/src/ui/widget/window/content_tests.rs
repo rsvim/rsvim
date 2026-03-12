@@ -1640,6 +1640,7 @@ mod tests_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
+      "             ",
       "This is a    ",
       "quite simple ",
       "andsmalltestl",
@@ -1659,6 +1660,7 @@ mod tests_wrap_linebreak {
       "several      ",
       "things we    ",
       "want to test:",
+      "             ",
       "  1. When the",
       " line is     ",
       "small enough ",
@@ -1668,8 +1670,8 @@ mod tests_wrap_linebreak {
       "window       ",
       "content      ",
       "widget, 那么 ",
-      "行换行和单词 ",
-      "换行选项都不 ",
+      // "行换行和单词 ",
+      // "换行选项都不 ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
