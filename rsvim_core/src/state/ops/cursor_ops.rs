@@ -45,7 +45,7 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-pub fn normalize_to_cursor_move_by(
+fn _normalize_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -72,7 +72,7 @@ pub fn normalize_to_cursor_move_by(
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
-pub fn normalize_to_cursor_move_to(
+fn _normalize_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -145,7 +145,7 @@ pub fn normalize_to_cursor_move_to_exclude_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) =
-    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_on_line_exclude_eol(y) {
@@ -167,7 +167,7 @@ pub fn normalize_to_cursor_move_to_include_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) =
-    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_on_line_exclude_eol(y) {
