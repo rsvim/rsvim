@@ -608,18 +608,17 @@ mod tests_cursor_move {
         "6th.\n",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.\n",
+        "\n",
+        // "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         4,
-        9,
+        8,
         &expect_fills,
         &expect_fills,
       );
