@@ -207,12 +207,7 @@ impl CmdlineEx {
     let contents = data_access.cmdline_text.clone();
     let contents = lock!(contents);
 
-    cursor_ops::cursor_move_include_eol(
-      &mut tree,
-      cmdline_id,
-      contents.input(),
-      op,
-    );
+    cursor_ops::cursor_move(&mut tree, cmdline_id, contents.input(), op, true);
 
     State::CmdlineEx(CmdlineEx::default())
   }

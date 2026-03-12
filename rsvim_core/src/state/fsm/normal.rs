@@ -213,11 +213,12 @@ impl Normal {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
         let op = Operation::CursorMoveRightBy(1);
-        cursor_ops::cursor_move_include_eol(
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
           op,
+          true,
         );
       }
       GotoInsertModeVariant::NewLine => {
@@ -226,11 +227,12 @@ impl Normal {
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
         let op = Operation::CursorMoveRightBy(usize::MAX);
-        cursor_ops::cursor_move_include_eol(
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
           op,
+          true,
         );
         let eol =
           CompactString::new(format!("{}", buffer.options().end_of_line()));
@@ -329,11 +331,12 @@ impl Normal {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move_exclude_eol(
+    cursor_ops::cursor_move(
       &mut tree,
       current_window_id,
       buffer.text(),
       op,
+      false,
     );
     State::Normal(Normal::default())
   }
