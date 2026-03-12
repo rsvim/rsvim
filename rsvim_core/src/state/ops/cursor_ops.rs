@@ -44,8 +44,9 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
   }
 }
 
+#[allow(dead_code)]
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-pub fn normalize_to_cursor_move_by(
+fn _normalize_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -72,7 +73,7 @@ pub fn normalize_to_cursor_move_by(
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
-pub fn normalize_to_cursor_move_to(
+fn _normalize_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -138,17 +139,17 @@ pub fn normalize_to_cursor_move_to(
 /// 1. ``
 ///
 /// The only line is an empty line.
-pub fn normalize_to_cursor_move_to_exclude_eol(
+pub fn normalize_cursor_move_to_exclude_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) =
-    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
-  let x = match text.last_char_on_line_no_eol(y) {
+  let x = match text.last_char_idx_on_line_exclude_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
@@ -160,17 +161,17 @@ pub fn normalize_to_cursor_move_to_exclude_eol(
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
 /// eol.
-pub fn normalize_to_cursor_move_to_include_eol(
+pub fn normalize_cursor_move_to_include_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) =
-    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
-  let x = match text.last_char_on_line_no_eol(y) {
+  let x = match text.last_char_idx_on_line_exclude_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char + 1), // For include eol, allow extra 1 eol char.
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
@@ -181,7 +182,7 @@ pub fn normalize_to_cursor_move_to_include_eol(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
-pub fn normalize_to_window_scroll_by(
+pub fn normalize_window_scroll_by(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -202,7 +203,7 @@ pub fn normalize_to_window_scroll_by(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollTo((x,y))`.
-pub fn normalize_to_window_scroll_to(
+pub fn normalize_window_scroll_to(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -467,9 +468,12 @@ fn _update_viewport_after_text_changed(
 
 /// High-level cursor move operation.
 ///
-/// This API will move the cursor (and possibly scroll the window/cmdline it
-/// belongs to), as if the user is operating the editor (for example, using
-/// `jk` to go up/down to view a very large file).
+/// The parameter `include_eol` indicates whether the cursor can move to
+/// end-of-line ("\r\n" and "\n"). Usually this parameter is been set to `true`
+/// when used by normal mode, set to `false` when used by insert mode.
+///
+/// It moves the cursor and possibly scroll the widget (window/cmdline) it
+/// belongs to, just like user's behavior.
 pub fn cursor_move(
   tree: &mut Tree,
   id: NodeId,
@@ -483,14 +487,14 @@ pub fn cursor_move(
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
   {
-    normalize_to_cursor_move_to_include_eol(
+    normalize_cursor_move_to_include_eol(
       text,
       op,
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
     )
   } else {
-    normalize_to_cursor_move_to_exclude_eol(
+    normalize_cursor_move_to_exclude_eol(
       text,
       op,
       cursor_viewport.char_idx(),
