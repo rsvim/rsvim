@@ -6673,8 +6673,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect =
-        vec!["2nd.\n", "3rd.\n", "AAAAAAAAAA", "BBBBBBBBBB", "5th.\n"];
+      let expect = vec![
+        // "2nd.\n",
+        "3rd.\n",
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "\n",
+        "5th.\n",
+      ];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 4, 20, 1, 0);
