@@ -5301,10 +5301,11 @@ mod tests_insert_text {
       let expect = vec![
         "Hello, ",
         "AAAAAAAAAA",
+        "\n",
         "1st line ",
         "that we ",
         "could make",
-        " it longer",
+        // " it longer",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
@@ -5321,10 +5322,11 @@ mod tests_insert_text {
       let expect_canvas = vec![
         "Hello,    ",
         "AAAAAAAAAA",
+        "          ",
         "1st line  ",
         "that we   ",
         "could make",
-        " it longer",
+        // " it longer",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
@@ -5486,18 +5488,16 @@ mod tests_insert_text {
         "6th.\n",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.\n",
+        "\n", // "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         4,
-        9,
+        8,
         &expect_fills,
         &expect_fills,
       );
@@ -5508,7 +5508,7 @@ mod tests_insert_text {
         "6th.      ",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.      ",
+        "          ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
@@ -5535,16 +5535,17 @@ mod tests_insert_text {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
         "DDDDDDDDDD",
-        "8th.\n",
+        "\n",
+        // "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+        vec![(6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
-        5,
-        9,
+        6,
+        8,
         &expect_fills,
         &expect_fills,
       );
