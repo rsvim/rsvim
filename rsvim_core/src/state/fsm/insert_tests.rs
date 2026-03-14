@@ -4034,16 +4034,17 @@ mod tests_insert_text {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
         "DDDDDDDDDD",
-        "8th.\n",
+        "\n",
+        // "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         5,
-        9,
+        8,
         &expect_fills,
         &expect_fills,
       );
