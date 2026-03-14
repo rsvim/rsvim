@@ -168,7 +168,7 @@ pub fn draw(
                   .get(&cap_point)
                   .unwrap();
                 // trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
-                for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
+                for hl_cap in hl_caps.values.iter() {
                   if let Some(hl) = colorscheme.highlights().get(&hl_cap.name) {
                     // trace!(
                     //   "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
