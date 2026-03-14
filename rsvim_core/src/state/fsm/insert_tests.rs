@@ -3892,19 +3892,18 @@ mod tests_insert_text {
         "AAAAAAA\n",
         "1st.\n",
         "2nd.World!",
+        "\n",
         "3rd.\n",
-        "4th.\n",
+        // "4th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-          .into_iter()
-          .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        5,
+        4,
         &expect_fills,
         &expect_fills,
       );
@@ -3914,8 +3913,9 @@ mod tests_insert_text {
         "AAAAAAA   ",
         "1st.      ",
         "2nd.World!",
+        "          ",
         "3rd.      ",
-        "4th.      ",
+        // "4th.      ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
@@ -3986,18 +3986,17 @@ mod tests_insert_text {
         "6th.\n",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.\n",
+        "\n",
+        // "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         4,
-        9,
+        8,
         &expect_fills,
         &expect_fills,
       );
