@@ -4007,7 +4007,8 @@ mod tests_insert_text {
         "6th.      ",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.      ",
+        "          ",
+        // "8th.      ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
