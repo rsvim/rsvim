@@ -315,15 +315,20 @@ pub fn raw_cursor_viewport_move_to(
   debug_assert!(line_idx < viewport.end_line_idx());
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let bufline = text.rope().line(line_idx);
+  let char_idx = std::cmp::min(
+    char_idx,
+    text
+      .last_char_idx_on_line_exclude_eol(line_idx)
+      .unwrap_or(0)
+      + 1,
+  );
 
-  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
-  debug_assert!(bufline.len_chars() >= char_idx);
-
-  if bufline.len_chars() == 0 {
-    debug_assert_eq!(char_idx, 0_usize);
-  } else {
-    debug_assert!(bufline.len_chars() > char_idx);
+  if cfg!(debug_assertions) {
+    let bufline = text.rope().line(line_idx);
+    debug_assert!(bufline.len_chars() >= char_idx);
+    if bufline.len_chars() == 0 {
+      debug_assert_eq!(char_idx, 0_usize);
+    }
   }
 
   // let new_cursor_viewport =
@@ -335,6 +340,26 @@ pub fn raw_cursor_viewport_move_to(
   // new_cursor_viewport
 
   _update_cursor_viewport(tree, id, viewport, text, line_idx, char_idx)
+}
+
+/// Get maximal `len_chars` on all the rope lines (no wrap), the lines range is
+/// `[start_line_idx,start_line_idx + window_height)`.
+fn _maximal_len_chars_among_no_wrap_lines_since(
+  text: &Text,
+  start_line_idx: usize,
+  window_height: u16,
+) -> usize {
+  let buffer_len_lines = text.rope().len_lines();
+
+  let mut maximal_len_chars = 0_usize;
+  let end_line_index =
+    std::cmp::min(buffer_len_lines, start_line_idx + window_height as usize);
+  for line_idx in start_line_idx..end_line_index {
+    debug_assert!(text.rope().get_line(line_idx).is_some());
+    let bufline = text.rope().line(line_idx);
+    maximal_len_chars = std::cmp::max(maximal_len_chars, bufline.len_chars());
+  }
+  maximal_len_chars
 }
 
 /// Calculate the new viewport by `Operation::WindowScroll*` operations, as if
@@ -382,12 +407,13 @@ pub fn raw_viewport_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let max_len_chars = _max_len_chars_since_line(
+  let maximal_len_chars_no_wrap = _maximal_len_chars_among_no_wrap_lines_since(
     text,
     line_idx,
     tree.editable_actual_shape(id).height(),
   );
-  let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
+  let column_idx =
+    std::cmp::min(column_idx, maximal_len_chars_no_wrap.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
@@ -408,25 +434,6 @@ pub fn raw_viewport_scroll_to(
   tree.set_editable_viewport(id, new_viewport.clone());
 
   Some(new_viewport)
-}
-
-fn _max_len_chars_since_line(
-  text: &Text,
-  mut start_line_idx: usize,
-  window_height: u16,
-) -> usize {
-  let buffer_len_lines = text.rope().len_lines();
-
-  let mut max_len_chars = 0_usize;
-  let mut i = 0_u16;
-  while i < window_height && start_line_idx < buffer_len_lines {
-    debug_assert!(text.rope().get_line(start_line_idx).is_some());
-    let bufline = text.rope().line(start_line_idx);
-    max_len_chars = std::cmp::max(max_len_chars, bufline.len_chars());
-    i += 1;
-    start_line_idx += 1;
-  }
-  max_len_chars
 }
 
 fn _update_viewport_after_text_changed(

@@ -239,11 +239,10 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
+          let last_char_on_line = text
+            .last_char_idx_on_line_include_eol(current_line)
+            .unwrap_or(0);
+          if end_char > last_char_on_line {
             break;
           }
 
@@ -587,11 +586,10 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
+          let last_char_on_line = text
+            .last_char_idx_on_line_include_eol(current_line)
+            .unwrap_or(0_usize);
+          if end_char > last_char_on_line {
             break;
           }
 
@@ -689,7 +687,7 @@ mod detail {
     }
   }
 
-  pub fn cursor_width_to_left_no_eol(
+  pub fn cursor_width_to_left(
     text: &Text,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -697,8 +695,9 @@ mod detail {
     let mut target_cursor_width =
       text.width_before(target_cursor_line, target_cursor_char);
 
-    // For eol, subtract these eol width, i.e. treat them as 0-width.
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    // For eol or line end, subtract these eol width, i.e. treat them as 0-width.
+    let target_is_eol =
+      text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
     if target_is_eol {
       target_cursor_width =
         match text.last_char_idx_on_line_exclude_eol(target_cursor_line) {
@@ -791,7 +790,7 @@ mod nowrap_detail {
       }
     }
 
-    let target_cursor_width = detail::cursor_width_to_left_no_eol(
+    let target_cursor_width = detail::cursor_width_to_left(
       text,
       target_cursor_line,
       target_cursor_char,
@@ -854,7 +853,8 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_is_eol =
+      text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
     let target_cursor_width = text
       .width_until(target_cursor_line, target_cursor_char)
       + if target_is_eol { 1 } else { 0 }; // For eol, add extra 1 column.
@@ -1149,7 +1149,7 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let target_cursor_width = detail::cursor_width_to_left_no_eol(
+    let target_cursor_width = detail::cursor_width_to_left(
       text,
       target_cursor_line,
       target_cursor_char,
@@ -1704,8 +1704,9 @@ pub fn search_anchor_downward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -1928,8 +1929,9 @@ pub fn search_anchor_upward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -2109,8 +2111,9 @@ pub fn search_anchor_leftward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {
@@ -2273,8 +2276,9 @@ pub fn search_anchor_rightward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0_usize)
+      + 1,
   );
 
   match (opts.wrap(), opts.line_break()) {

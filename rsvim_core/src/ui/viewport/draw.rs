@@ -27,7 +27,7 @@ pub fn draw(
 ) {
   // If size is zero, exit.
   if actual_shape.size().is_zero() {
-    trace!("Draw viewport, actual shape is zero");
+    // trace!("Draw viewport, actual shape is zero");
     return;
   }
 
@@ -167,13 +167,13 @@ pub fn draw(
                   .nodes()
                   .get(&cap_point)
                   .unwrap();
-                trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
-                for (i_cap, hl_cap) in hl_caps.values.iter().enumerate() {
+                // trace!("captured highlight, {:?}:{:?}", cap_point, hl_caps);
+                for hl_cap in hl_caps.values.iter() {
                   if let Some(hl) = colorscheme.highlights().get(&hl_cap.name) {
-                    trace!(
-                      "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
-                      i_cap, hl_cap, hl
-                    );
+                    // trace!(
+                    //   "resolved highlight-[{}], captured:{:?}, resolved:{:?}",
+                    //   i_cap, hl_cap, hl
+                    // );
                     let fg = colorscheme.resolve_fg(&hl.fg);
                     let bg = colorscheme.resolve_bg(&hl.bg);
                     last_colorscheme_hl = Some(Highlight {
@@ -210,7 +210,7 @@ pub fn draw(
                   cell.set_bg(colorscheme.ui_background());
                   cell.set_attrs(Attributes::none());
                 }
-                trace!("set_hl:{:?}", cell);
+                // trace!("set_hl:{:?}", cell);
               };
 
               let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());

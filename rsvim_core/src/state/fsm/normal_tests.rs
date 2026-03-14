@@ -1743,12 +1743,13 @@ mod tests_raw_window_scroll_y_by {
         " widget, ",
         "there're ",
         "multiple cases:",
+        "\n",
         "     * The ",
         "extra parts are",
         " been truncated",
         " if both line-",
         "wrap and word-",
-        "wrap options ",
+        // "wrap options ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
@@ -2677,6 +2678,7 @@ mod tests_raw_window_scroll_x_by {
         "l it contains s",
         "everal things w",
         "e want to test:",
+        "\n",
         "n the line is s",
         "mall enough to ",
         "completely put ",
@@ -2684,7 +2686,7 @@ mod tests_raw_window_scroll_x_by {
         " the window con",
         "tent widget, th",
         "en the line-wra",
-        "p and word-wrap",
+        // "p and word-wrap",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6124,8 +6126,9 @@ mod tests_cursor_move {
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
-        "very small.\r\n",
+        // "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6152,21 +6155,22 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSVIM!\r\n",
+        // "Hello, RSVIM!\r\n",
         "This is a quite",
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
         "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
-        0,
+        1,
         4,
         &expect_fills,
         &expect_fills,
@@ -6186,21 +6190,22 @@ mod tests_cursor_move {
       let expect = vec![
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
         "very small.\r\n",
         "2. The line is ",
         "very long\r\n",
-        "  * The extra p",
-        "arts are been t",
+        // "  * The extra p",
+        // "arts are been t",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 0), (5, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         2,
-        6,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -6222,8 +6227,9 @@ mod tests_cursor_move {
         " simple lines.\r\n",
         "But still it co",
         "ntains several:",
+        "\r\n",
         "1. The line is ",
-        "very small.\r\n",
+        // "very small.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6277,8 +6283,9 @@ mod tests_cursor_move {
         " simple lines.\r",
         "But still it co",
         "ntains several:",
+        "\r",
         "1. The line is ",
-        "very small.\r",
+        // "very small.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6305,21 +6312,22 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSVIM!\r",
+        // "Hello, RSVIM!\r",
         "This is a quite",
         " simple lines.\r",
         "But still it co",
         "ntains several:",
+        "\r",
         "1. The line is ",
         "very small.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
-        0,
+        1,
         4,
         &expect_fills,
         &expect_fills,
@@ -6339,21 +6347,22 @@ mod tests_cursor_move {
       let expect = vec![
         "But still it co",
         "ntains several:",
+        "\r",
         "1. The line is ",
         "very small.\r",
         "2. The line is ",
         "very long\r",
-        "  * The extra p",
-        "arts are been t",
+        // "  * The extra p",
+        // "arts are been t",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 0), (5, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         2,
-        6,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -6375,8 +6384,9 @@ mod tests_cursor_move {
         " simple lines.\r",
         "But still it co",
         "ntains several:",
+        "\r",
         "1. The line is ",
-        "very small.\r",
+        // "very small.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
