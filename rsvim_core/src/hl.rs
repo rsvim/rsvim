@@ -365,7 +365,7 @@ fn parse_hl_as_table(
   }
 
   let hl = Highlight { fg, bg, attrs };
-  trace!("id:{:?},hl:{:?}", key, hl);
+  // trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
 
@@ -384,7 +384,7 @@ fn parse_hl_as_str(
   let attrs = Attributes::none();
 
   let hl = Highlight { fg, bg, attrs };
-  trace!("id:{:?},hl:{:?}", key, hl);
+  // trace!("id:{:?},hl:{:?}", key, hl);
   Ok((key.to_compact_string(), hl))
 }
 
