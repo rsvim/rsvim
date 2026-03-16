@@ -105,40 +105,52 @@ fn nowrap_line_process(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = text.rope().line(current_line);
-  let (start_char, start_fills, end_char, end_fills) =
-    if bufline.len_chars() == 0 {
-      (0_usize, 0_usize, 0_usize, 0_usize)
-    } else {
-      match text.char_after(current_line, start_column) {
-        Some(start_char) => {
-          let start_fills = {
-            let width_before = text.width_before(current_line, start_char);
-            width_before.saturating_sub(start_column)
-          };
+  let mut start_char: usize = 0;
+  let mut end_char: usize = 0;
+  let mut start_fills: usize = 0;
+  let mut end_fills: usize = 0;
 
-          let end_width = start_column + window_width as usize;
-          let (end_char, end_fills) =
-            match text.char_at(current_line, end_width) {
-              Some(c) => _end_char_and_filled_cols(
-                text,
-                &bufline,
-                current_line,
-                c,
-                end_width,
-              ),
-              None => {
-                // If the char not found, it means the `end_width` is too long
-                // than the whole line. So the char next to the line's last
-                // char is the end char.
-                (bufline.len_chars(), 0_usize)
-              }
-            };
+  if bufline.len_chars() == 0 {
+    // If current line is empty
+    start_char = 0;
+    end_char = 0;
+    start_fills = 0;
+    end_fills = 0;
+  } else {
+    if let Some(start_column_char) = text.char_after(current_line, start_column)
+    {
+      start_char = start_column_char;
+      start_fills = {
+        let width_before = text.width_before(current_line, start_column_char);
+        width_before.saturating_sub(start_column)
+      };
 
-          (start_char, start_fills, end_char, end_fills)
-        }
-        None => (0_usize, 0_usize, 0_usize, 0_usize),
+      let end_width = start_column + window_width as usize;
+      if let Some(end_width_char) = text.char_at(current_line, end_width) {
+        let (end_c, end_f) = _end_char_and_filled_cols(
+          text,
+          &bufline,
+          current_line,
+          end_width_char,
+          end_width,
+        );
+        end_char = end_c;
+        end_fills = end_f;
+      } else {
+        // If the char not found, it means the `end_width` is too long
+        // than the whole line. So the char next to the line's last
+        // char is the end char.
+        end_char = bufline.len_chars();
+        end_fills = 0;
       }
-    };
+    } else {
+      // If current line is empty
+      start_char = 0;
+      end_char = 0;
+      start_fills = 0;
+      end_fills = 0;
+    }
+  }
 
   let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
   rows.insert(current_row, RowViewport::new(start_char..end_char));
