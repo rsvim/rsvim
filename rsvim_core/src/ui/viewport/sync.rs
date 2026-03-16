@@ -352,17 +352,18 @@ fn _part1(
 
   let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
-    // The current word is longer than current row, it needs to be put to next row.
+    // The current word is longer than current row, it needs to be put to next
+    // row.
 
     // Part-1
     // Here's the **tricky** part, there are two sub-cases in this scenario:
     // 1. For most happy cases, the word is not longer than a whole row in the
     //    window, so it can be completely put to next row.
-    // 2. For very rare cases, the word is just too long to put in an entire row
-    //    in the window. And in this case, we fallback to the no-line-break
-    //    rendering behavior, i.e. just cut the word by chars and force rendering
-    //    the word on multiple rows in the window (because otherwise there will be
-    //    never enough places to put the whole word).
+    // 2. For very rare cases, the word is just too long to put in an entire
+    //    row in the window. We have to fallback to the no-line-break rendering
+    //    behavior, i.e. just cut the word by chars and force rendering the
+    //    word on multiple rows in the window (because otherwise there will
+    //    never be enough places to put this word).
 
     if start_c_of_wd > start_char {
       // Part-1.1, simply wrapped this word to next row.
