@@ -376,7 +376,7 @@ fn _find_word_by_char(
   unreachable!()
 }
 
-/// Part-1 of the processing algorithm in [`proc_line_wrap_linebreak`].
+/// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
   words: &[&str],
   words_end_char_idx: &LiteMap<usize, usize>,
