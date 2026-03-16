@@ -1785,7 +1785,7 @@ fn search_anchor_downward_nowrap(
 
     while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
-      let (rows, _start_fills, _end_fills, _) = nowrap_line_process(
+      let (rows, _start_fills, _end_fills, _last_row) = nowrap_line_process(
         text,
         viewport_start_column,
         current_line as usize,
@@ -2431,4 +2431,177 @@ fn search_anchor_rightward_wrap(
       start_column,
     )
   }
+}
+
+// Search a new viewport anchor (`start_line`, `start_column`).
+//
+// The new viewport anchor can help cursor moves and even scrolling the buffer
+// if cursor reaches the border of the window viewport.
+//
+// Returns `(start_line, start_column)` for the new viewport.
+pub fn search(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  let buffer_len_lines = text.rope().len_lines();
+  let target_cursor_line =
+    std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    text
+      .last_char_idx_on_line_include_eol(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
+  // Cursor moves upward
+  if target_cursor_line < current_cursor_line {
+    match (opts.wrap(), opts.line_break()) {
+      (false, _) => nowrap_search_down(
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      (true, false) => wrap_nolinebreak_search_down(
+        wrap_nolinebreak_sync,
+        wrap_nolinebreak_line_process,
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      (true, true) => wrap_linebreak_search_down(
+        wrap_linebreak_sync,
+        wrap_linebreak_line_process,
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+    }
+  } else {
+    // Cursor moves downward, or just moves to left/right side. But in this
+    // algorithm, we have to moves to downward (even just for 0-lines) before
+    // moving to left/right side.
+    match (opts.wrap(), opts.line_break()) {
+      (false, _) => nowrap_search_up(
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      (true, false) => wrap_nolinebreak_search_up(
+        wrap_nolinebreak_sync,
+        wrap_nolinebreak_line_process,
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      (true, true) => wrap_linebreak_search_up(
+        wrap_linebreak_sync,
+        wrap_linebreak_line_process,
+        viewport,
+        text,
+        size,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      ),
+    }
+  }
+}
+
+fn nowrap_search_down(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_nolinebreak_search_down(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_linebreak_search_down(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn nowrap_search_up(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_nolinebreak_search_up(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_linebreak_search_up(
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
 }
