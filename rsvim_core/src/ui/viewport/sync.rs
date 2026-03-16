@@ -381,17 +381,17 @@ fn _part1(
   words: &[&str],
   words_end_char_idx: &LiteMap<usize, usize>,
   text: &Text,
-  bline: &RopeSlice,
-  l: usize,
-  c: usize,
+  buffer_line: &RopeSlice,
+  current_line: usize,
+  end_width_char: usize,
   end_width: usize,
   start_char: usize,
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) =
-    _find_word_by_char(words, words_end_char_idx, c);
+    _find_word_by_char(words, words_end_char_idx, end_width_char);
 
-  let end_c_width = text.width_before(l, end_c_of_wd);
+  let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
     // The current word is longer than current row, it needs to be put to next row.
 
@@ -409,20 +409,33 @@ fn _part1(
       // Part-1.1, simply wrapped this word to next row.
       // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-      _end_char_and_filled_cols(text, bline, l, start_c_of_wd - 1, end_width)
+      _end_char_and_filled_cols(
+        text,
+        buffer_line,
+        current_line,
+        start_c_of_wd - 1,
+        end_width,
+      )
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
       debug_assert!(start_c_of_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
-      *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
+      *last_word_is_too_long =
+        Some((wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      _end_char_and_filled_cols(text, bline, l, c, end_width)
+      _end_char_and_filled_cols(
+        text,
+        buffer_line,
+        current_line,
+        end_width_char,
+        end_width,
+      )
     }
   } else {
-    debug_assert_eq!(c + 1, end_c_of_wd);
+    debug_assert_eq!(end_width_char + 1, end_c_of_wd);
     // The current word is not long, it can be put in current row.
-    let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
+    let c_next = std::cmp::min(end_c_of_wd, buffer_line.len_chars());
     (c_next, 0_usize)
   }
 }
@@ -544,8 +557,8 @@ fn wrap_linebreak_line_process(
                 // 2. If the rest part of the word is not long and can be put in current row.
 
                 match text.char_at(current_line, end_width) {
-                  Some(c) => {
-                    if end_c_of_last_wd > c {
+                  Some(end_width_char) => {
+                    if end_c_of_last_wd > end_width_char {
                       // Part-2.1, the rest part of the word is still too long.
 
                       // Record the position (c) where we cut the words into pieces.
@@ -553,7 +566,7 @@ fn wrap_linebreak_line_process(
                         last_wd_idx,
                         start_c_of_last_wd,
                         end_c_of_last_wd,
-                        c,
+                        end_width_char,
                       ));
 
                       // If the char `c` width is greater than `end_width`, the `c` itself is
@@ -562,7 +575,7 @@ fn wrap_linebreak_line_process(
                         text,
                         &buffer_line,
                         current_line,
-                        c,
+                        end_width_char,
                         end_width,
                       )
                     } else {
@@ -575,7 +588,7 @@ fn wrap_linebreak_line_process(
                         text,
                         &buffer_line,
                         current_line,
-                        c,
+                        end_width_char,
                         end_width,
                         start_char,
                         &mut last_word_is_too_long,
