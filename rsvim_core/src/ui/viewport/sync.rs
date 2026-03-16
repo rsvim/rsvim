@@ -335,51 +335,8 @@ fn wrap_nolinebreak_sync(
   }
 }
 
-// /// Find the word index by the char index.
-// ///
-// /// Returns the word index which contains this char, and whether the char is the last char in the
-// /// word.
-// fn _find_word_by_char(
-//   words: &[&str],
-//   words_end_char: &LiteMap<usize, usize>,
-//   char_idx: usize,
-// ) -> (usize, usize, usize) {
-//   // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
-//   let mut low = 0;
-//   let mut high = words.len() - 1;
-//
-//   while low <= high {
-//     let mid = (low + high) / 2;
-//
-//     let start_char = if mid > 0 {
-//       *words_end_char.get(&(mid - 1)).unwrap()
-//     } else {
-//       0_usize
-//     };
-//     let end_char = *words_end_char.get(&mid).unwrap();
-//
-//     // trace!(
-//     //   "low:{low},high:{high},mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
-//     // );
-//     if start_char <= char_idx && end_char > char_idx {
-//       // trace!(
-//       //   "return mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
-//       // );
-//       return (mid, start_char, end_char);
-//     } else if start_char > char_idx {
-//       high = mid - 1;
-//     } else {
-//       low = mid + 1;
-//     }
-//   }
-//
-//   unreachable!()
-// }
-
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
-  // _words: &[&str],
-  // _words_end_char: &LiteMap<usize, usize>,
   words_boundary_char: &FoldMap<usize, (usize, usize)>,
   words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
@@ -535,16 +492,6 @@ fn wrap_linebreak_line_process(
         .tuple_windows()
         .map(|(i, j)| &cloned_line[i..j])
         .collect_vec();
-
-      // let words_end_char = words
-      //   .iter()
-      //   .enumerate()
-      //   .scan(cloned_start_char, |state, (i, wd)| {
-      //     *state += wd.chars().count();
-      //     Some((i, *state))
-      //   })
-      //   .collect::<LiteMap<usize, usize>>();
-
       let boundary1 = words
         .iter()
         .enumerate()
@@ -649,8 +596,6 @@ fn wrap_linebreak_line_process(
                   // Thus we can go back to *normal* algorithm just like part-1.
 
                   _part1(
-                    // &words,
-                    // &words_end_char,
                     &words_boundary_char,
                     &words_char_to_index,
                     text,
@@ -666,8 +611,6 @@ fn wrap_linebreak_line_process(
               None => {
                 // Part-1
                 _part1(
-                  // &words,
-                  // &words_end_char,
                   &words_boundary_char,
                   &words_char_to_index,
                   text,
