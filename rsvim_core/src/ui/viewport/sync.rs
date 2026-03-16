@@ -206,7 +206,7 @@ fn nowrap_sync(
   }
 }
 
-/// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
+/// Returns `rows`, `start_fills`, `end_fills`, `last_row` (in `rows`).
 fn wrap_nolinebreak_line_process(
   text: &Text,
   start_column: usize,
