@@ -368,8 +368,7 @@ fn _part1(
 
     if start_c_of_end_wd > start_char {
       // Part-1.1, simply wrapped this word to next row.
-      // Here we actually use the `start_c_of_wd` as the end char for current
-      // row.
+      // Here we use the `start_c_of_end_wd` as the end char for current row.
 
       _end_char_and_filled_cols(
         text,
@@ -379,7 +378,8 @@ fn _part1(
         end_width,
       )
     } else {
-      // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
+      // Part-1.2, cut this word and force rendering it and ignoring line-break
+      // behavior.
       debug_assert!(start_c_of_end_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long = Some((
@@ -389,7 +389,8 @@ fn _part1(
         end_width_char,
       ));
 
-      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+      // If `the width of end_width_char > end_width`, the `end_width_char`
+      // itself is the end char.
       _end_char_and_filled_cols(
         text,
         buffer_line,
