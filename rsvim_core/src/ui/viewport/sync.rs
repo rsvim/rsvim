@@ -379,7 +379,7 @@ fn _find_word_by_char(
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
   words: &[&str],
-  words_end_char_idx: &LiteMap<usize, usize>,
+  words_end_char: &LiteMap<usize, usize>,
   text: &Text,
   buffer_line: &RopeSlice,
   current_line: usize,
@@ -389,7 +389,7 @@ fn _part1(
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) =
-    _find_word_by_char(words, words_end_char_idx, end_width_char);
+    _find_word_by_char(words, words_end_char, end_width_char);
 
   let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
@@ -491,9 +491,10 @@ fn wrap_linebreak_line_process(
       .unwrap();
 
     trace!(
-      "cloned_line({}):{:?}, start_column:{}",
+      "cloned_line({}):{:?}, cloned_start_char:{}, start_column:{}",
       cloned_line.len(),
       cloned_line.as_str(),
+      cloned_start_char,
       start_column
     );
 
@@ -504,8 +505,8 @@ fn wrap_linebreak_line_process(
         .tuple_windows()
         .map(|(i, j)| &cloned_line[i..j])
         .collect();
-    // Word index => its end char index (from the first char until current word).
-    let words_end_char_idx = words
+    // Maps word index => its end char index (from the first char until current word).
+    let words_end_char = words
       .iter()
       .enumerate()
       .scan(cloned_start_char, |state, (i, wd)| {
@@ -585,7 +586,7 @@ fn wrap_linebreak_line_process(
 
                   _part1(
                     &words,
-                    &words_end_char_idx,
+                    &words_end_char,
                     text,
                     &buffer_line,
                     current_line,
@@ -600,7 +601,7 @@ fn wrap_linebreak_line_process(
                 // Part-1
                 _part1(
                   &words,
-                  &words_end_char_idx,
+                  &words_end_char,
                   text,
                   &buffer_line,
                   current_line,
