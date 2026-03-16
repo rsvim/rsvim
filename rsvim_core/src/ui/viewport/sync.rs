@@ -440,8 +440,11 @@ fn _part1(
   }
 }
 
-fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
-  window_height as usize * window_width as usize * 2 + 16
+fn _cloned_line_max_chars_width(
+  window_height: u16,
+  window_width: u16,
+) -> usize {
+  (window_height as usize + 1) * (window_width as usize + 1) + 10
 }
 
 #[allow(unused_assignments)]
@@ -479,12 +482,11 @@ fn wrap_linebreak_line_process(
     let cloned_start_char = text
       .char_before(current_line, start_column)
       .unwrap_or(0_usize);
-
     let cloned_line = text
       .clone_line(
         current_line,
         cloned_start_char,
-        _cloned_line_max_len(window_height, window_width),
+        _cloned_line_max_chars_width(window_height, window_width),
       )
       .unwrap();
 
