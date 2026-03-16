@@ -522,10 +522,10 @@ fn wrap_linebreak_line_process(
           Some(end_width_char) => {
             match last_word_is_too_long {
               Some((
-                last_word_idx,
-                start_char_of_last_word,
-                end_char_of_last_word,
-                _continued_char_of_last_word,
+                last_wd_idx,
+                start_c_of_last_wd,
+                end_c_of_last_wd,
+                _continued_c_of_last_wd,
               )) => {
                 // Part-2
                 // This is the following logic of part-1.2, you should see it
@@ -541,14 +541,14 @@ fn wrap_linebreak_line_process(
                 // 2. If the rest part of the word is not long and can be put
                 //    in current row.
 
-                if end_char_of_last_word > end_width_char {
+                if end_c_of_last_wd > end_width_char {
                   // Part-2.1, the rest part of the word is still too long.
 
                   // Record the position (c) where we cut the words into pieces.
                   last_word_is_too_long = Some((
-                    last_word_idx,
-                    start_char_of_last_word,
-                    end_char_of_last_word,
+                    last_wd_idx,
+                    start_c_of_last_wd,
+                    end_c_of_last_wd,
                     end_width_char,
                   ));
 
@@ -563,7 +563,7 @@ fn wrap_linebreak_line_process(
                   )
                 } else {
                   // Part-2.2, the rest part of the word is not long.
-                  // Thus we can go back to *normal* algorithm just like part-1.
+                  // Thus we can go back to *normal* behavior, i.e. part-1.
 
                   _part1(
                     &words_boundary_char,
