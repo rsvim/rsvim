@@ -506,8 +506,7 @@ fn wrap_linebreak_line_process(
         .map(|(i, j)| &cloned_line[i..j])
         .collect();
     // Maps word index => its end char index
-    // NOTE: The end char index of a word is from the first char until current
-    // word.
+    // NOTE: The end char index of a word is the char index in current line.
     let words_end_char = words
       .iter()
       .enumerate()
