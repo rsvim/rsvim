@@ -536,7 +536,7 @@ fn wrap_linebreak_line_process(
       debug_assert!(current_row < window_height);
       while current_row < window_height {
         let (end_char, end_f) = match text.char_at(current_line, end_width) {
-          Some(c) => {
+          Some(end_width_char) => {
             match last_word_is_too_long {
               Some((
                 last_wd_idx,
@@ -556,51 +556,41 @@ fn wrap_linebreak_line_process(
                 // 1. If the rest part of the word is still too long to put in current row.
                 // 2. If the rest part of the word is not long and can be put in current row.
 
-                match text.char_at(current_line, end_width) {
-                  Some(end_width_char) => {
-                    if end_c_of_last_wd > end_width_char {
-                      // Part-2.1, the rest part of the word is still too long.
+                if end_c_of_last_wd > end_width_char {
+                  // Part-2.1, the rest part of the word is still too long.
 
-                      // Record the position (c) where we cut the words into pieces.
-                      last_word_is_too_long = Some((
-                        last_wd_idx,
-                        start_c_of_last_wd,
-                        end_c_of_last_wd,
-                        end_width_char,
-                      ));
+                  // Record the position (c) where we cut the words into pieces.
+                  last_word_is_too_long = Some((
+                    last_wd_idx,
+                    start_c_of_last_wd,
+                    end_c_of_last_wd,
+                    end_width_char,
+                  ));
 
-                      // If the char `c` width is greater than `end_width`, the `c` itself is
-                      // the end char.
-                      _end_char_and_filled_cols(
-                        text,
-                        &buffer_line,
-                        current_line,
-                        end_width_char,
-                        end_width,
-                      )
-                    } else {
-                      // Part-2.2, the rest part of the word is not long.
-                      // Thus we can go back to *normal* algorithm just like part-1.
+                  // If the char `c` width is greater than `end_width`, the `c` itself is
+                  // the end char.
+                  _end_char_and_filled_cols(
+                    text,
+                    &buffer_line,
+                    current_line,
+                    end_width_char,
+                    end_width,
+                  )
+                } else {
+                  // Part-2.2, the rest part of the word is not long.
+                  // Thus we can go back to *normal* algorithm just like part-1.
 
-                      _part1(
-                        &words,
-                        &words_end_char_idx,
-                        text,
-                        &buffer_line,
-                        current_line,
-                        end_width_char,
-                        end_width,
-                        start_char,
-                        &mut last_word_is_too_long,
-                      )
-                    }
-                  }
-                  None => {
-                    // If the char not found, it means the `end_width` is too long than the
-                    // whole buffer line.
-                    // So the char next to the line's last char is the end char.
-                    (buffer_line.len_chars(), 0_usize)
-                  }
+                  _part1(
+                    &words,
+                    &words_end_char_idx,
+                    text,
+                    &buffer_line,
+                    current_line,
+                    end_width_char,
+                    end_width,
+                    start_char,
+                    &mut last_word_is_too_long,
+                  )
                 }
               }
               None => {
@@ -611,7 +601,7 @@ fn wrap_linebreak_line_process(
                   text,
                   &buffer_line,
                   current_line,
-                  c,
+                  end_width_char,
                   end_width,
                   start_char,
                   &mut last_word_is_too_long,
