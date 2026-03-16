@@ -77,19 +77,21 @@ fn _end_char_and_filled_cols(
 ) -> (usize, usize) {
   let c_width = text.width_until(current_line, end_width_char);
   if c_width > end_width {
-    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+    // If `the width of end_width_char > end_width`, then `end_width_char`
+    // itself is the end char. And there are possibly `end_filled_cols`.
     let c_width_before = text.width_before(current_line, end_width_char);
     (end_width_char, end_width.saturating_sub(c_width_before))
   } else {
-    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
+    // Here we use the last visible char in the line, thus avoid invisible
+    // chars like line-break ('\n').
     debug_assert!(buffer_line.len_chars() > 0);
     let next_to_last_visible_char = text
       .last_char_idx_on_line_exclude_eol(current_line)
       .unwrap_or(0_usize)
       + 1;
 
-    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
-    // char.
+    // If `the width of end_width_char <= end_width`, the char next to
+    // `end_width_char` is the end char.
     let c_next = std::cmp::min(end_width_char + 1, next_to_last_visible_char);
     (c_next, 0_usize)
   }
@@ -106,27 +108,26 @@ fn nowrap_line_process(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let buffer_line = text.rope().line(current_line);
-  let mut start_char: usize = 0;
-  let mut end_char: usize = 0;
+
+  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
+
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
   if buffer_line.len_chars() == 0 {
     // If current line is empty
-    start_char = 0;
-    end_char = 0;
+    rows.insert(current_row, RowViewport::new(0..0));
     start_fills = 0;
     end_fills = 0;
   } else {
-    if let Some(start_c) = text.char_after(current_line, start_column) {
-      start_char = start_c;
+    if let Some(start_char) = text.char_after(current_line, start_column) {
       start_fills = {
-        let width_before = text.width_before(current_line, start_c);
+        let width_before = text.width_before(current_line, start_char);
         width_before.saturating_sub(start_column)
       };
 
       let end_width = start_column + window_width as usize;
-      let (end_c, end_f) = match text.char_at(current_line, end_width) {
+      let (end_char, end_f) = match text.char_at(current_line, end_width) {
         Some(end_width_char) => _end_char_and_filled_cols(
           text,
           &buffer_line,
@@ -141,19 +142,16 @@ fn nowrap_line_process(
           (buffer_line.len_chars(), 0)
         }
       };
-      end_char = end_c;
       end_fills = end_f;
+      rows.insert(current_row, RowViewport::new(start_char..end_char));
     } else {
       // If current line is empty
-      start_char = 0;
-      end_char = 0;
       start_fills = 0;
       end_fills = 0;
+      rows.insert(current_row, RowViewport::new(0..0));
     }
   }
 
-  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
-  rows.insert(current_row, RowViewport::new(start_char..end_char));
   (rows, start_fills, end_fills, current_row)
 }
 
@@ -335,7 +333,8 @@ fn wrap_nolinebreak_sync(
   }
 }
 
-/// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
+// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
+// Returns `(end_char, end_filled_cols)`.
 fn _part1(
   words_boundary_char: &FoldMap<usize, (usize, usize)>,
   words_char_to_index: &FoldMap<usize, usize>,
@@ -347,44 +346,55 @@ fn _part1(
   start_char: usize,
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
-  let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
-  let wd_bound = words_boundary_char.get(wd_idx).unwrap();
-  let start_c_of_wd = wd_bound.0;
-  let end_c_of_wd = wd_bound.1;
+  let end_wd_idx = words_char_to_index.get(&end_width_char).unwrap();
+  let end_wd_bound = words_boundary_char.get(end_wd_idx).unwrap();
+  let start_c_of_end_wd = end_wd_bound.0;
+  let end_c_of_end_wd = end_wd_bound.1;
 
-  let end_c_width = text.width_before(current_line, end_c_of_wd);
+  let end_c_width = text.width_before(current_line, end_c_of_end_wd);
   if end_c_width > end_width {
-    // The current word is longer than current row, it needs to be put to next row.
+    // The current word is longer than current row, it needs to be put to next
+    // row.
 
     // Part-1
     // Here's the **tricky** part, there are two sub-cases in this scenario:
     // 1. For most happy cases, the word is not longer than a whole row in the
     //    window, so it can be completely put to next row.
-    // 2. For very rare cases, the word is just too long to put in an entire row
-    //    in the window. And in this case, we fallback to the no-line-break
-    //    rendering behavior, i.e. just cut the word by chars and force rendering
-    //    the word on multiple rows in the window (because otherwise there will be
-    //    never enough places to put the whole word).
+    // 2. For very rare cases, the word is just too long to put in an entire
+    //    row in the window. We have to fallback to the no-line-break rendering
+    //    behavior, i.e. just cut the word by chars and force rendering the
+    //    word on multiple rows in the window (because otherwise there will
+    //    never be enough places to put this word).
 
-    if start_c_of_wd > start_char {
+    if start_c_of_end_wd > start_char {
       // Part-1.1, simply wrapped this word to next row.
-      // Here we actually use the `start_c_of_wd` as the end char for current row.
+      // Here we use the `start_c_of_end_wd` as the end char for current row.
 
       _end_char_and_filled_cols(
         text,
         buffer_line,
         current_line,
-        start_c_of_wd - 1,
+        start_c_of_end_wd - 1,
         end_width,
       )
     } else {
-      // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
-      debug_assert!(start_c_of_wd <= start_char);
-      // Record the position (c) where we cut the words into pieces.
-      *last_word_is_too_long =
-        Some((*wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
+      // Part-1.2, cut this word and force rendering it and ignores line-break
+      // behavior.
+      debug_assert!(start_c_of_end_wd <= start_char);
+      // Save the position (`end_width_char`) where we cut the words into
+      // pieces.
+      *last_word_is_too_long = Some((
+        *end_wd_idx,
+        start_c_of_end_wd,
+        end_c_of_end_wd,
+        end_width_char,
+      ));
 
-      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+      // NOTE: Here we fallback to the same behavior of
+      // `wrap_nolinebreak_line_process`.
+      //
+      // If `the width of end_width_char > end_width`, the `end_width_char`
+      // itself is the end char.
       _end_char_and_filled_cols(
         text,
         buffer_line,
@@ -394,9 +404,9 @@ fn _part1(
       )
     }
   } else {
-    debug_assert_eq!(end_width_char + 1, end_c_of_wd);
+    debug_assert_eq!(end_width_char + 1, end_c_of_end_wd);
     // The current word is not long, it can be put in current row.
-    let c_next = std::cmp::min(end_c_of_wd, buffer_line.len_chars());
+    let c_next = std::cmp::min(end_c_of_end_wd, buffer_line.len_chars());
     (c_next, 0_usize)
   }
 }
@@ -440,7 +450,7 @@ fn wrap_linebreak_line_process(
       .clone_line(
         current_line,
         cloned_start_char,
-        (window_height as usize + 1) * (window_width as usize + 1) + 10,
+        (window_height as usize + 1) * (window_width as usize + 1) * 2 + 1,
       )
       .unwrap();
 
@@ -452,13 +462,6 @@ fn wrap_linebreak_line_process(
       start_column
     );
 
-    // // Words
-    // let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
-    //   .segment_str(&cloned_line)
-    //   .tuple_windows()
-    //   .map(|(i, j)| &cloned_line[i..j])
-    //   .collect_vec();
-
     // Maps word index => its start char index and end char index
     //
     // NOTE: The char index of a word is the char index in current line. The
@@ -467,7 +470,9 @@ fn wrap_linebreak_line_process(
       WordSegmenter::new_auto(WordBreakInvariantOptions::default())
         .segment_str(&cloned_line)
         .tuple_windows()
-        .map(|(i, j)| &cloned_line[i..j])
+        .map(|(i, j)|
+          // Words
+          &cloned_line[i..j])
         .enumerate()
         .scan(cloned_start_char, |state, (i, wd)| {
           let sc = *state;
@@ -480,9 +485,9 @@ fn wrap_linebreak_line_process(
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
-    for (word_index, word_bound) in words_boundary_char.iter() {
-      for c in word_bound.0..word_bound.1 {
-        words_char_to_index.insert(c, *word_index);
+    for (wd_index, wd_bound) in words_boundary_char.iter() {
+      for c in wd_bound.0..wd_bound.1 {
+        words_char_to_index.insert(c, *wd_index);
       }
     }
 
@@ -517,10 +522,10 @@ fn wrap_linebreak_line_process(
           Some(end_width_char) => {
             match last_word_is_too_long {
               Some((
-                last_word_idx,
-                start_char_of_last_word,
-                end_char_of_last_word,
-                _continued_char_of_last_word,
+                last_wd_idx,
+                start_c_of_last_wd,
+                end_c_of_last_wd,
+                _continued_c_of_last_wd,
               )) => {
                 // Part-2
                 // This is the following logic of part-1.2, you should see it
@@ -536,14 +541,14 @@ fn wrap_linebreak_line_process(
                 // 2. If the rest part of the word is not long and can be put
                 //    in current row.
 
-                if end_char_of_last_word > end_width_char {
+                if end_c_of_last_wd > end_width_char {
                   // Part-2.1, the rest part of the word is still too long.
 
                   // Record the position (c) where we cut the words into pieces.
                   last_word_is_too_long = Some((
-                    last_word_idx,
-                    start_char_of_last_word,
-                    end_char_of_last_word,
+                    last_wd_idx,
+                    start_c_of_last_wd,
+                    end_c_of_last_wd,
                     end_width_char,
                   ));
 
@@ -558,7 +563,7 @@ fn wrap_linebreak_line_process(
                   )
                 } else {
                   // Part-2.2, the rest part of the word is not long.
-                  // Thus we can go back to *normal* algorithm just like part-1.
+                  // Thus we can go back to *normal* behavior, i.e. part-1.
 
                   _part1(
                     &words_boundary_char,
