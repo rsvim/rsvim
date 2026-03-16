@@ -428,7 +428,7 @@ fn _part1(
       debug_assert!(start_c_of_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long =
-        Some((*wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
+        Some((wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
       _end_char_and_filled_cols(
@@ -511,7 +511,7 @@ fn wrap_linebreak_line_process(
       .tuple_windows()
       .map(|(i, j)| &cloned_line[i..j])
       .collect_vec();
-    let words_end_char_idx = words
+    let words_end_char = words
       .iter()
       .enumerate()
       .scan(cloned_start_char, |state, (i, wd)| {
@@ -550,7 +550,7 @@ fn wrap_linebreak_line_process(
     trace!("words:{:?}", words);
     trace!("words_end_char_idx:{:?}", words_end_char_idx);
     trace!("words_boundary_char:{:?}", words_boundary_char);
-    trace!("words_char_to_index:{:?}", words_char_to_indx);
+    trace!("words_char_to_index:{:?}", words_char_to_index);
 
     if let Some(mut start_char) = text.char_after(current_line, start_column) {
       start_fills = {
