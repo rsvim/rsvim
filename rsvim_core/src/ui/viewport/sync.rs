@@ -69,7 +69,8 @@ pub fn sync(
   }
 }
 
-fn _end_char_and_prefills(
+// Returns (end_char, end_filled_cols)
+fn _end_char_and_fills(
   text: &Text,
   bline: &RopeSlice,
   l: usize,
@@ -104,36 +105,35 @@ fn proc_line_nowrap(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = text.rope().line(current_line);
-  let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars()
-    == 0
-  {
-    (0_usize, 0_usize, 0_usize, 0_usize)
-  } else {
-    match text.char_after(current_line, start_column) {
-      Some(start_char) => {
-        let start_fills = {
-          let width_before = text.width_before(current_line, start_char);
-          width_before.saturating_sub(start_column)
-        };
+  let (start_char, start_fills, end_char, end_fills) =
+    if bufline.len_chars() == 0 {
+      (0_usize, 0_usize, 0_usize, 0_usize)
+    } else {
+      match text.char_after(current_line, start_column) {
+        Some(start_char) => {
+          let start_fills = {
+            let width_before = text.width_before(current_line, start_char);
+            width_before.saturating_sub(start_column)
+          };
 
-        let end_width = start_column + window_width as usize;
-        let (end_char, end_fills) = match text.char_at(current_line, end_width)
-        {
-          Some(c) => {
-            _end_char_and_prefills(text, &bufline, current_line, c, end_width)
-          }
-          None => {
-            // If the char not found, it means the `end_width` is too long than the whole line.
-            // So the char next to the line's last char is the end char.
-            (bufline.len_chars(), 0_usize)
-          }
-        };
+          let end_width = start_column + window_width as usize;
+          let (end_char, end_fills) =
+            match text.char_at(current_line, end_width) {
+              Some(c) => {
+                _end_char_and_fills(text, &bufline, current_line, c, end_width)
+              }
+              None => {
+                // If the char not found, it means the `end_width` is too long than the whole line.
+                // So the char next to the line's last char is the end char.
+                (bufline.len_chars(), 0_usize)
+              }
+            };
 
-        (start_char, start_fills, end_char, end_fills)
+          (start_char, start_fills, end_char, end_fills)
+        }
+        None => (0_usize, 0_usize, 0_usize, 0_usize),
       }
-      None => (0_usize, 0_usize, 0_usize, 0_usize),
-    }
-  };
+    };
 
   let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
   rows.insert(current_row, RowViewport::new(start_char..end_char));
@@ -221,18 +221,17 @@ fn proc_line_wrap_nolinebreak(
 
         debug_assert!(current_row < window_height);
         while current_row < window_height {
-          let (end_char, end_fills_result) = match text
-            .char_at(current_line, end_width)
-          {
-            Some(c) => {
-              _end_char_and_prefills(text, &bufline, current_line, c, end_width)
-            }
-            None => {
-              // If the char not found, it means the `end_width` is too long than the whole line.
-              // So the char next to the line's last char is the end char.
-              (bufline_len_chars, 0_usize)
-            }
-          };
+          let (end_char, end_fills_result) =
+            match text.char_at(current_line, end_width) {
+              Some(c) => {
+                _end_char_and_fills(text, &bufline, current_line, c, end_width)
+              }
+              None => {
+                // If the char not found, it means the `end_width` is too long than the whole line.
+                // So the char next to the line's last char is the end char.
+                (bufline_len_chars, 0_usize)
+              }
+            };
           end_fills = end_fills_result;
 
           rows.insert(current_row, RowViewport::new(start_char..end_char));
@@ -385,7 +384,7 @@ fn _part1(
       // Part-1.1, simply wrapped this word to next row.
       // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-      _end_char_and_prefills(text, bline, l, start_c_of_wd - 1, end_width)
+      _end_char_and_fills(text, bline, l, start_c_of_wd - 1, end_width)
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
       debug_assert!(start_c_of_wd <= start_char);
@@ -393,7 +392,7 @@ fn _part1(
       *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      _end_char_and_prefills(text, bline, l, c, end_width)
+      _end_char_and_fills(text, bline, l, c, end_width)
     }
   } else {
     debug_assert_eq!(c + 1, end_c_of_wd);
@@ -527,7 +526,7 @@ fn proc_line_wrap_linebreak(
 
                           // If the char `c` width is greater than `end_width`, the `c` itself is
                           // the end char.
-                          _end_char_and_prefills(
+                          _end_char_and_fills(
                             text,
                             &bufline,
                             current_line,
