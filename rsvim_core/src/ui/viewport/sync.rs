@@ -380,8 +380,8 @@ fn _find_word_by_char(
 fn _part1(
   words: &[&str],
   words_end_char: &LiteMap<usize, usize>,
-  words_boundary_char: &FoldMap<usize, (usize, usize)>,
-  words_char_to_index: &FoldMap<usize, usize>,
+  _words_boundary_char: &FoldMap<usize, (usize, usize)>,
+  _words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
   buffer_line: &RopeSlice,
   current_line: usize,
@@ -548,7 +548,7 @@ fn wrap_linebreak_line_process(
         Some((i, *state))
       });
     trace!("words:{:?}", words);
-    trace!("words_end_char_idx:{:?}", words_end_char_idx);
+    trace!("words_end_char:{:?}", words_end_char);
     trace!("words_boundary_char:{:?}", words_boundary_char);
     trace!("words_char_to_index:{:?}", words_char_to_index);
 
