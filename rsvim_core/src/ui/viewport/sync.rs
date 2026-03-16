@@ -378,8 +378,8 @@ fn _find_word_by_char(
 
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
-  _words: &[&str],
-  _words_end_char: &LiteMap<usize, usize>,
+  // _words: &[&str],
+  // _words_end_char: &LiteMap<usize, usize>,
   words_boundary_char: &FoldMap<usize, (usize, usize)>,
   words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
@@ -510,33 +510,62 @@ fn wrap_linebreak_line_process(
       start_column
     );
 
-    // Words
-    let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
-      .segment_str(&cloned_line)
-      .tuple_windows()
-      .map(|(i, j)| &cloned_line[i..j])
-      .collect_vec();
-    let words_end_char = words
-      .iter()
-      .enumerate()
-      .scan(cloned_start_char, |state, (i, wd)| {
-        *state += wd.chars().count();
-        Some((i, *state))
-      })
-      .collect::<LiteMap<usize, usize>>();
     // Maps word index => its start char index and end char index
+    //
     // NOTE: The char index of a word is the char index in current line. The
     // end char index is also the start char index of next word.
-    let words_boundary_char = words
-      .iter()
-      .enumerate()
-      .scan(cloned_start_char, |state, (i, wd)| {
-        let sc = *state;
-        *state += wd.chars().count();
-        let ec = *state;
-        Some((i, (sc, ec)))
-      })
-      .collect::<FoldMap<usize, (usize, usize)>>();
+    let words_boundary_char = 
+      WordSegmenter::new_auto(WordBreakInvariantOptions::default())
+        .segment_str(&cloned_line)
+        .tuple_windows()
+        .map(|(i, j)| &cloned_line[i..j])
+        .enumerate()
+        .scan(cloned_start_char, |state, (i, wd)| {
+          let sc = *state;
+          *state += wd.chars().count();
+          let ec = *state;
+          Some((i, (sc, ec)))
+        })
+        .collect::<FoldMap<usize, (usize, usize)>>();
+
+    if cfg!(debug_assertions) {
+      // Words
+      let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
+        .segment_str(&cloned_line)
+        .tuple_windows()
+        .map(|(i, j)| &cloned_line[i..j])
+        .collect_vec();
+
+      // let words_end_char = words
+      //   .iter()
+      //   .enumerate()
+      //   .scan(cloned_start_char, |state, (i, wd)| {
+      //     *state += wd.chars().count();
+      //     Some((i, *state))
+      //   })
+      //   .collect::<LiteMap<usize, usize>>();
+
+      let boundary1 = words
+        .iter()
+        .enumerate()
+        .scan(cloned_start_char, |state, (i, wd)| {
+          let sc = *state;
+          *state += wd.chars().count();
+          let ec = *state;
+          Some((i, (sc, ec)))
+        })
+        .collect::<FoldMap<usize, (usize, usize)>>()
+          debug_assert_eq!(words_boundary_char.len(), boundary1.len());
+        for (k1, v1) in words_boundary_char.iter() {
+          debug_assert!(boundary1.contains_key(k1));
+          debug_assert_eq!(v1, boundary1.get(k1).unwrap());
+        }
+        for (k2, v2) in boundary1.iter() {
+          debug_assert!(words_boundary_char.contains_key(k2));
+          debug_assert_eq!(v2, words_boundary_char.get(k2).unwrap());
+        }
+    }
+
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
@@ -545,8 +574,8 @@ fn wrap_linebreak_line_process(
         words_char_to_index.insert(c, *word_index);
       }
     }
-    trace!("words:{:?}", words);
-    trace!("words_end_char:{:?}", words_end_char);
+    // trace!("words:{:?}", words);
+    // trace!("words_end_char:{:?}", words_end_char);
     trace!("words_boundary_char:{:?}", words_boundary_char);
     trace!("words_char_to_index:{:?}", words_char_to_index);
 
@@ -620,8 +649,8 @@ fn wrap_linebreak_line_process(
                   // Thus we can go back to *normal* algorithm just like part-1.
 
                   _part1(
-                    &words,
-                    &words_end_char,
+                    // &words,
+                    // &words_end_char,
                     &words_boundary_char,
                     &words_char_to_index,
                     text,
@@ -637,8 +666,8 @@ fn wrap_linebreak_line_process(
               None => {
                 // Part-1
                 _part1(
-                  &words,
-                  &words_end_char,
+                  // &words,
+                  // &words_end_char,
                   &words_boundary_char,
                   &words_char_to_index,
                   text,
