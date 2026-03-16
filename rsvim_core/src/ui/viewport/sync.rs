@@ -82,7 +82,8 @@ fn _end_char_and_filled_cols(
     let c_width_before = text.width_before(current_line, end_width_char);
     (end_width_char, end_width.saturating_sub(c_width_before))
   } else {
-    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
+    // Otherwise we use the last visible char in the line, thus avoid invisible
+    // chars like line-break ('\n').
     debug_assert!(buffer_line.len_chars() > 0);
     let next_to_last_visible_char = text
       .last_char_idx_on_line_exclude_eol(current_line)
