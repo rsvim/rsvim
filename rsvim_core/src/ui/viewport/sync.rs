@@ -352,14 +352,6 @@ fn _part1(
   let start_c_of_wd = wd_bound.0;
   let end_c_of_wd = wd_bound.1;
 
-  // let (wd_idx, start_c_of_wd, end_c_of_wd) =
-  //   _find_word_by_char(words, words_end_char, end_width_char);
-
-  // // Find the word index by the char index.
-  // let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
-  // let start_c_of_wd = words_boundary_char.get(wd_idx).unwrap().0;
-  // let end_c_of_wd = words_boundary_char.get(wd_idx).unwrap().1;
-
   let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
     // The current word is longer than current row, it needs to be put to next row.
