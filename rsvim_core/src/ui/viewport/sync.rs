@@ -514,7 +514,7 @@ fn wrap_linebreak_line_process(
     //
     // NOTE: The char index of a word is the char index in current line. The
     // end char index is also the start char index of next word.
-    let words_boundary_char = 
+    let words_boundary_char =
       WordSegmenter::new_auto(WordBreakInvariantOptions::default())
         .segment_str(&cloned_line)
         .tuple_windows()
@@ -554,16 +554,16 @@ fn wrap_linebreak_line_process(
           let ec = *state;
           Some((i, (sc, ec)))
         })
-        .collect::<FoldMap<usize, (usize, usize)>>()
-          debug_assert_eq!(words_boundary_char.len(), boundary1.len());
-        for (k1, v1) in words_boundary_char.iter() {
-          debug_assert!(boundary1.contains_key(k1));
-          debug_assert_eq!(v1, boundary1.get(k1).unwrap());
-        }
-        for (k2, v2) in boundary1.iter() {
-          debug_assert!(words_boundary_char.contains_key(k2));
-          debug_assert_eq!(v2, words_boundary_char.get(k2).unwrap());
-        }
+        .collect::<FoldMap<usize, (usize, usize)>>();
+      debug_assert_eq!(words_boundary_char.len(), boundary1.len());
+      for (k1, v1) in words_boundary_char.iter() {
+        debug_assert!(boundary1.contains_key(k1));
+        debug_assert_eq!(v1, boundary1.get(k1).unwrap());
+      }
+      for (k2, v2) in boundary1.iter() {
+        debug_assert!(words_boundary_char.contains_key(k2));
+        debug_assert_eq!(v2, words_boundary_char.get(k2).unwrap());
+      }
     }
 
     // Maps every char index => its belonged word index.
