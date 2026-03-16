@@ -77,7 +77,8 @@ fn _end_char_and_filled_cols(
 ) -> (usize, usize) {
   let c_width = text.width_until(current_line, end_width_char);
   if c_width > end_width {
-    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+    // If the char `end_width_char` width is greater than `end_width`, then
+    // the `end_width_char` itself is the end char.
     let c_width_before = text.width_before(current_line, end_width_char);
     (end_width_char, end_width.saturating_sub(c_width_before))
   } else {
