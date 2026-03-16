@@ -46,3 +46,6 @@ git2 = { workspace = true }
 swc_core = { workspace = true }
 toml = { workspace = true, features = ["fast_hash"] }
 # zstd = { workspace = true }
+
+[lints]
+workspace = true

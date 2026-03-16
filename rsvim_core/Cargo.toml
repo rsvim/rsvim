@@ -163,3 +163,6 @@ regex = { workspace = true }
 #   "parking_lot",
 # ] }
 unicode-width = { workspace = true }
+
+[lints]
+workspace = true

@@ -138,6 +138,10 @@ v8 = { version = "=146.3.0", default-features = false, features = [
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
 
+[workspace.lints.clippy]
+collapsible_else_if = "allow"
+collapsible_if = "allow"
+
 # Debug
 [profile.dev.package.v8]
 opt-level = 1

@@ -110,14 +110,16 @@ impl Text {
     &self,
     line_idx: usize,
     start_char_idx: usize,
-    max_chars: usize,
+    max_chars_width: usize,
   ) -> Option<ArcStr> {
     match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+      Some(buffer_line) => match buffer_line.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
+          let mut w: usize = 0;
+          let mut builder = String::with_capacity(max_chars_width);
+          for c in chars_iter {
+            w += unicode::char_width(self.options(), c);
+            if w >= max_chars_width {
               return Some(ArcStr::from(builder));
             }
             builder.push(c);
@@ -134,7 +136,7 @@ impl Text {
     &self,
     line_idx: usize,
     start_char_idx: usize,
-    max_chars: usize,
+    max_chars_width: usize,
     skip_cache: bool,
   ) -> Option<ArcStr> {
     let mut cached_lines = self.cached_lines.borrow_mut();
@@ -142,35 +144,43 @@ impl Text {
     let key = CachedLinesKey {
       line_idx,
       start_char_idx,
-      max_chars,
+      max_chars: max_chars_width,
     };
 
     if skip_cache {
-      self._clone_line_impl(line_idx, start_char_idx, max_chars)
+      self._clone_line_impl(line_idx, start_char_idx, max_chars_width)
     } else {
       cached_lines
         .get_or_insert(&key, || {
-          self._clone_line_impl(line_idx, start_char_idx, max_chars)
+          self._clone_line_impl(line_idx, start_char_idx, max_chars_width)
         })
         .cloned()
     }
   }
 
-  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
-  /// for performance reason when the line is too long to clone.
+  /// Similar to [`Rope::get_line`], but collect and clone a normal string with
+  /// limited length, for performance reason when the line is too long to clone.
   pub fn clone_line(
     &self,
     line_idx: usize,
     start_char_idx: usize,
-    max_chars: usize,
+    max_chars_width: usize,
   ) -> Option<ArcStr> {
-    let result1 =
-      self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, false);
+    let result1 = self._clone_line_impl_wrap(
+      line_idx,
+      start_char_idx,
+      max_chars_width,
+      false,
+    );
 
     // Ensure cached version and non-cached version have same results.
     if cfg!(debug_assertions) {
-      let result2 =
-        self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, true);
+      let result2 = self._clone_line_impl_wrap(
+        line_idx,
+        start_char_idx,
+        max_chars_width,
+        true,
+      );
       debug_assert_eq!(result1, result2);
     }
 
