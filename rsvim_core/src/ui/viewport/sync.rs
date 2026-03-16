@@ -105,13 +105,13 @@ fn nowrap_line_process(
   _window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = text.rope().line(current_line);
+  let buffer_line = text.rope().line(current_line);
   let mut start_char: usize = 0;
   let mut end_char: usize = 0;
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
-  if bufline.len_chars() == 0 {
+  if buffer_line.len_chars() == 0 {
     // If current line is empty
     start_char = 0;
     end_char = 0;
@@ -129,7 +129,7 @@ fn nowrap_line_process(
       if let Some(end_width_c) = text.char_at(current_line, end_width) {
         let (end_c, end_f) = _end_char_and_filled_cols(
           text,
-          &bufline,
+          &buffer_line,
           current_line,
           end_width_c,
           end_width,
@@ -140,7 +140,7 @@ fn nowrap_line_process(
         // If the char not found, it means the `end_width` is too long
         // than the whole line. So the char next to the line's last
         // char is the end char.
-        end_char = bufline.len_chars();
+        end_char = buffer_line.len_chars();
         end_fills = 0;
       }
     } else {
@@ -172,30 +172,35 @@ fn nowrap_sync(
     LiteMap::with_capacity(height as usize);
 
   // Current row in the window maps to the `start_line` in the buffer.
-  let mut cur_row = 0_u16;
-  let mut cur_line = start_line;
+  let mut current_row = 0_u16;
+  let mut current_line = start_line;
 
-  if cur_line < buffer_len_lines {
+  if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
-    while cur_row < height && cur_line < buffer_len_lines {
+    while current_row < height && current_line < buffer_len_lines {
       let (rows, start_fills, end_fills, _) = nowrap_line_process(
         text,
         start_column,
-        cur_line,
-        cur_row,
+        current_line,
+        current_row,
         height,
         width,
       );
 
-      line_viewports
-        .insert(cur_line, LineViewport::new(rows, start_fills, end_fills));
+      line_viewports.insert(
+        current_line,
+        LineViewport::new(rows, start_fills, end_fills),
+      );
 
       // Go down to next row and line
-      cur_line += 1;
-      cur_row += 1;
+      current_line += 1;
+      current_row += 1;
     }
 
-    (ViewportLineRange::new(start_line..cur_line), line_viewports)
+    (
+      ViewportLineRange::new(start_line..current_line),
+      line_viewports,
+    )
   } else {
     (ViewportLineRange::default(), LiteMap::new())
   }
