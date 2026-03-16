@@ -178,7 +178,7 @@ fn nowrap_sync(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < window_height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, _) = nowrap_line_process(
+      let (rows, start_fills, end_fills, _last_row) = nowrap_line_process(
         text,
         start_column,
         current_line,
@@ -666,7 +666,7 @@ fn wrap_linebreak_sync(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, changed_current_row) =
+      let (rows, start_fills, end_fills, last_row) =
         wrap_linebreak_line_process(
           text,
           start_column,
@@ -675,7 +675,7 @@ fn wrap_linebreak_sync(
           height,
           width,
         );
-      current_row = changed_current_row;
+      current_row = last_row;
 
       line_viewports.insert(
         current_line,
