@@ -70,7 +70,7 @@ pub fn sync(
 }
 
 // Returns (end_char, end_filled_cols)
-fn _end_char_and_fills(
+fn _end_char_and_filled_cols(
   text: &Text,
   bline: &RopeSlice,
   l: usize,
@@ -119,9 +119,13 @@ fn proc_line_nowrap(
           let end_width = start_column + window_width as usize;
           let (end_char, end_fills) =
             match text.char_at(current_line, end_width) {
-              Some(c) => {
-                _end_char_and_fills(text, &bufline, current_line, c, end_width)
-              }
+              Some(c) => _end_char_and_filled_cols(
+                text,
+                &bufline,
+                current_line,
+                c,
+                end_width,
+              ),
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
@@ -223,9 +227,13 @@ fn proc_line_wrap_nolinebreak(
         while current_row < window_height {
           let (end_char, end_fills_result) =
             match text.char_at(current_line, end_width) {
-              Some(c) => {
-                _end_char_and_fills(text, &bufline, current_line, c, end_width)
-              }
+              Some(c) => _end_char_and_filled_cols(
+                text,
+                &bufline,
+                current_line,
+                c,
+                end_width,
+              ),
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
@@ -384,7 +392,7 @@ fn _part1(
       // Part-1.1, simply wrapped this word to next row.
       // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-      _end_char_and_fills(text, bline, l, start_c_of_wd - 1, end_width)
+      _end_char_and_filled_cols(text, bline, l, start_c_of_wd - 1, end_width)
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
       debug_assert!(start_c_of_wd <= start_char);
@@ -392,7 +400,7 @@ fn _part1(
       *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      _end_char_and_fills(text, bline, l, c, end_width)
+      _end_char_and_filled_cols(text, bline, l, c, end_width)
     }
   } else {
     debug_assert_eq!(c + 1, end_c_of_wd);
@@ -526,7 +534,7 @@ fn proc_line_wrap_linebreak(
 
                           // If the char `c` width is greater than `end_width`, the `c` itself is
                           // the end char.
-                          _end_char_and_fills(
+                          _end_char_and_filled_cols(
                             text,
                             &bufline,
                             current_line,
