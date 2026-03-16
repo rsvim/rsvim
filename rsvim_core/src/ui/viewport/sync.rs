@@ -473,9 +473,9 @@ fn wrap_linebreak_line_process(
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
-    for (word_index, word_bound) in words_boundary_char.iter() {
-      for c in word_bound.0..word_bound.1 {
-        words_char_to_index.insert(c, *word_index);
+    for (wd_index, wd_bound) in words_boundary_char.iter() {
+      for c in wd_bound.0..wd_bound.1 {
+        words_char_to_index.insert(c, *wd_index);
       }
     }
 
