@@ -164,12 +164,12 @@ fn nowrap_sync(
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = size.height();
-  let width = size.width();
+  let window_height = size.height();
+  let window_width = size.width();
   let buffer_len_lines = text.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> =
-    LiteMap::with_capacity(height as usize);
+    LiteMap::with_capacity(window_height as usize);
 
   // Current row in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -177,14 +177,14 @@ fn nowrap_sync(
 
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
-    while current_row < height && current_line < buffer_len_lines {
+    while current_row < window_height && current_line < buffer_len_lines {
       let (rows, start_fills, end_fills, _) = nowrap_line_process(
         text,
         start_column,
         current_line,
         current_row,
-        height,
-        width,
+        window_height,
+        window_width,
       );
 
       line_viewports.insert(
@@ -206,6 +206,7 @@ fn nowrap_sync(
   }
 }
 
+#[allow(unused_assignments)]
 /// Returns `rows`, `start_fills`, `end_fills`, `last_row` (in `rows`).
 fn wrap_nolinebreak_line_process(
   text: &Text,
@@ -217,66 +218,74 @@ fn wrap_nolinebreak_line_process(
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let buffer_line = text.rope().line(current_line);
   let mut rows: LiteMap<u16, RowViewport> =
-    LiteMap::with_capacity(buffer_line.len_chars() / (window_height as usize));
+    LiteMap::with_capacity(std::cmp::min(
+      buffer_line.len_chars() / (window_width as usize),
+      window_height as usize,
+    ));
+
+  let mut start_char: usize = 0;
+  let mut end_char: usize = 0;
+  let mut start_fills: usize = 0;
+  let mut end_fills: usize = 0;
 
   if buffer_line.len_chars() == 0 {
     // If current line is empty.
     rows.insert(current_row, RowViewport::new(0..0));
-    (rows, 0_usize, 0_usize, current_row)
+    start_fills = 0;
+    end_fills = 0;
   } else {
-    match text.char_after(current_line, start_column) {
-      Some(mut start_char) => {
-        let start_fills = {
-          let width_before = text.width_before(current_line, start_char);
-          width_before.saturating_sub(start_column)
-        };
+    if let Some(mut start_char) = text.char_after(current_line, start_column) {
+      start_fills = {
+        let width_before = text.width_before(current_line, start_char);
+        width_before.saturating_sub(start_column)
+      };
 
-        let mut end_width = start_column + window_width as usize;
-        let mut end_fills = 0_usize;
+      let mut end_width = start_column + window_width as usize;
 
-        debug_assert!(current_row < window_height);
-        while current_row < window_height {
-          let (end_char, end_fills_result) =
-            match text.char_at(current_line, end_width) {
-              Some(c) => _end_char_and_filled_cols(
-                text,
-                &buffer_line,
-                current_line,
-                c,
-                end_width,
-              ),
-              None => {
-                // If the char not found, it means the `end_width` is too long than the whole line.
-                // So the char next to the line's last char is the end char.
-                (buffer_line_len_chars, 0_usize)
-              }
-            };
-          end_fills = end_fills_result;
+      debug_assert!(current_row < window_height);
+      while current_row < window_height {
+        let (end_char, end_fills_result) =
+          match text.char_at(current_line, end_width) {
+            Some(c) => _end_char_and_filled_cols(
+              text,
+              &buffer_line,
+              current_line,
+              c,
+              end_width,
+            ),
+            None => {
+              // If the char not found, it means the `end_width` is too long than the whole line.
+              // So the char next to the line's last char is the end char.
+              (buffer_line.len_chars(), 0_usize)
+            }
+          };
+        end_fills = end_fills_result;
 
-          rows.insert(current_row, RowViewport::new(start_char..end_char));
+        rows.insert(current_row, RowViewport::new(start_char..end_char));
 
-          // Goes out of line.
-          debug_assert!(buffer_line.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
-            break;
-          }
-
-          // Prepare next row.
-          current_row += 1;
-          start_char = end_char;
-          end_width =
-            text.width_before(current_line, end_char) + window_width as usize;
+        // Goes out of line.
+        debug_assert!(buffer_line.len_chars() > 0);
+        if end_char
+          > text
+            .last_char_idx_on_line_exclude_eol(current_line)
+            .unwrap_or(0_usize)
+        {
+          break;
         }
 
-        (rows, start_fills, end_fills, current_row)
+        // Prepare next row.
+        current_row += 1;
+        start_char = end_char;
+        end_width =
+          text.width_before(current_line, end_char) + window_width as usize;
       }
-      None => (rows, 0_usize, 0_usize, current_row),
+    } else {
+      start_fills = 0;
+      end_fills = 0;
     }
   }
+
+  (rows, start_fills, end_fills, current_row)
 }
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
