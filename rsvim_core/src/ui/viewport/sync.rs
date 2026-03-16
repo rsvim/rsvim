@@ -126,15 +126,15 @@ fn nowrap_line_process(
 
       let end_width = start_column + window_width as usize;
       if let Some(end_width_c) = text.char_at(current_line, end_width) {
-        let (end_c, end_f) = _end_char_and_filled_cols(
+        let ends = _end_char_and_filled_cols(
           text,
           &bufline,
           current_line,
           end_width_c,
           end_width,
         );
-        end_char = end_c;
-        end_fills = end_f;
+        end_char = ends.0;
+        end_fills = ends.1;
       } else {
         // If the char not found, it means the `end_width` is too long
         // than the whole line. So the char next to the line's last
