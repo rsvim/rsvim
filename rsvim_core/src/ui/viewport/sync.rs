@@ -545,16 +545,18 @@ fn wrap_linebreak_line_process(
                 _continued_char_of_last_word,
               )) => {
                 // Part-2
-                // This is the following logic of part-1.2, you should see part-1 before
-                // this.
+                // This is the following logic of part-1, you should see part-1
+                // before this.
                 //
-                // If the word is too long to put in an entire row, and we cut it into
-                // pieces. In this part, we need to continue rendering the rest part of the
-                // word on current row.
+                // If the word is too long to put in an entire row, and we cut
+                // it into pieces. In this part, we need to continue rendering
+                // the rest part of the word on current row.
                 //
                 // Here we also have two sub-cases:
-                // 1. If the rest part of the word is still too long to put in current row.
-                // 2. If the rest part of the word is not long and can be put in current row.
+                // 1. If the rest part of the word is still too long to put in
+                //    current row.
+                // 2. If the rest part of the word is not long and can be put
+                //    in current row.
 
                 if end_char_of_last_word > end_width_char {
                   // Part-2.1, the rest part of the word is still too long.
