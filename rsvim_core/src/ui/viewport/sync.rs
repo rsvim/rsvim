@@ -2556,29 +2556,32 @@ fn nowrap_search_down(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
 
-  let mut current_row: u16 = 0;
-  let mut current_line: isize = viewport_start_line as isize;
+  let end_line = {
+    let mut current_row: u16 = 0;
+    let mut current_line: isize = viewport_start_line as isize;
 
-  // Start with `viewport_start_line`, iterate lines from top to bottom in the
-  // viewport.
-  while (current_row < window_height)
-    && (current_line < buffer_len_lines as isize)
-  {
-    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-      text,
-      viewport_start_column,
-      current_line as usize,
-      current_row,
-      window_height,
-      window_width,
-    );
-    current_row += rows.len() as u16;
-    current_line += 1;
-  }
+    // Start with `viewport_start_line`, iterate lines from top to bottom in the
+    // viewport.
+    while (current_row < window_height)
+      && (current_line < buffer_len_lines as isize)
+    {
+      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+        text,
+        viewport_start_column,
+        current_line as usize,
+        current_row,
+        window_height,
+        window_width,
+      );
+      current_row += rows.len() as u16;
+      current_line += 1;
+    }
+    current_line
+  };
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
   if (viewport_start_line <= target_cursor_line)
-    && (current_line > target_cursor_line as isize)
+    && (end_line > target_cursor_line as isize)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
@@ -2622,26 +2625,28 @@ fn nowrap_search_down(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
-    debug_assert!(target_cursor_line as isize >= current_line);
+    debug_assert!(target_cursor_line as isize >= end_line);
 
-    // This time, we iterate in reverse order.
-    let mut n_rows: usize = 0;
-    let mut current_line: isize = target_cursor_line as isize;
+    let start_line = {
+      // This time, we iterate in reverse order.
+      let mut n_rows: usize = 0;
+      let mut current_line: isize = target_cursor_line as isize;
 
-    while (n_rows < window_height as usize) && (current_line >= 0) {
-      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-        text,
-        viewport_start_column,
-        current_line as usize,
-        0,
-        window_height,
-        window_width,
-      );
-      n_rows += rows.len();
-      current_line -= 1;
-    }
+      while (n_rows < window_height as usize) && (current_line >= 0) {
+        let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+          text,
+          viewport_start_column,
+          current_line as usize,
+          0,
+          window_height,
+          window_width,
+        );
+        n_rows += rows.len();
+        current_line -= 1;
+      }
+      (current_line + 1) as usize
+    };
 
-    let new_start_line = (current_line + 1) as usize;
     if target_cursor_char < current_cursor_char {
       nowrap_search_left(
         sync_fn,
@@ -2650,7 +2655,7 @@ fn nowrap_search_down(
         opts,
         text,
         size,
-        new_start_line,
+        start_line,
         viewport_start_column,
         current_cursor_line,
         current_cursor_char,
@@ -2666,7 +2671,7 @@ fn nowrap_search_down(
         opts,
         text,
         size,
-        new_start_line,
+        start_line,
         viewport_start_column,
         current_cursor_line,
         current_cursor_char,
@@ -2751,6 +2756,63 @@ fn nowrap_search_left(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  if cfg!(debug_assertions) {
+    match text.char_at(target_cursor_line, new_start_column) {
+      Some(new_start_char) => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
+        target_cursor_line,
+        target_cursor_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(target_cursor_char)
+          .unwrap_or('?'),
+        new_start_column,
+        new_start_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(new_start_char)
+          .unwrap_or('?')
+      ),
+      None => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
+        target_cursor_line,
+        target_cursor_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(target_cursor_char)
+          .unwrap_or('?'),
+        new_start_column,
+      ),
+    }
+  }
+
+  let mut target_cursor_width =
+    text.width_before(target_cursor_line, target_cursor_char);
+
+  // For eol, subtract these eol width, i.e. treat them as 0-width.
+  let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+  if target_is_eol {
+    target_cursor_width =
+      match text.last_char_idx_on_line_exclude_eol(target_cursor_line) {
+        Some(last_visible_char) => {
+          text.width_before(target_cursor_line, last_visible_char)
+        }
+        None => target_cursor_width.saturating_sub(1),
+      };
+  }
+
+  let on_left_side = target_cursor_width < target_viewport_start_column;
+  if on_left_side {
+    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+    // just put the cursor at the first left char in the new viewport.
+    let start_column = target_cursor_width;
+    Some(start_column)
+  } else {
+    None
+  }
 }
 
 fn wrap_nolinebreak_search_left(
