@@ -2743,16 +2743,16 @@ fn wrap_linebreak_search_up(
 }
 
 fn nowrap_search_left(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
-  opts: &WindowOptions,
+  _sync_fn: wrap_detail::SyncFn,
+  _line_process_fn: wrap_detail::LineProcessFn,
+  _viewport: &Viewport,
+  _opts: &WindowOptions,
   text: &Text,
-  size: &U16Size,
+  _size: &U16Size,
   new_start_line: usize,
-  new_start_column: usize,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
+  mut new_start_column: usize,
+  _current_cursor_line: usize,
+  _current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2789,30 +2789,15 @@ fn nowrap_search_left(
     }
   }
 
-  let mut target_cursor_width =
-    text.width_before(target_cursor_line, target_cursor_char);
+  let target_cursor_width = text
+    .width_before(target_cursor_line, target_cursor_char)
+    .saturating_sub(1);
 
-  // For eol, subtract these eol width, i.e. treat them as 0-width.
-  let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
-  if target_is_eol {
-    target_cursor_width =
-      match text.last_char_idx_on_line_exclude_eol(target_cursor_line) {
-        Some(last_visible_char) => {
-          text.width_before(target_cursor_line, last_visible_char)
-        }
-        None => target_cursor_width.saturating_sub(1),
-      };
+  if target_cursor_width < new_start_column {
+    new_start_column = target_cursor_width;
   }
 
-  let on_left_side = target_cursor_width < target_viewport_start_column;
-  if on_left_side {
-    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
-    // just put the cursor at the first left char in the new viewport.
-    let start_column = target_cursor_width;
-    Some(start_column)
-  } else {
-    None
-  }
+  (new_start_line, new_start_column)
 }
 
 fn wrap_nolinebreak_search_left(
@@ -2848,19 +2833,65 @@ fn wrap_linebreak_search_left(
 }
 
 fn nowrap_search_right(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
-  opts: &WindowOptions,
+  _sync_fn: wrap_detail::SyncFn,
+  _line_process_fn: wrap_detail::LineProcessFn,
+  _viewport: &Viewport,
+  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
-  new_start_column: usize,
+  mut new_start_column: usize,
   current_cursor_line: usize,
   current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let window_width = size.width();
+  let new_end_column = new_start_column + window_width as usize;
+
+  if cfg!(debug_assertions) {
+    let new_start_char =
+      match text.char_at(target_cursor_line, new_start_column) {
+        Some(c) => {
+          format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c))
+        }
+        None => "None".to_string(),
+      };
+    let new_end_char = match text.char_at(target_cursor_line, new_end_column) {
+      Some(c) => {
+        format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c))
+      }
+      None => "None".to_string(),
+    };
+    trace!(
+      "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{}({:?}),new_end_column:{}({:?})",
+      target_cursor_line,
+      target_cursor_char,
+      text
+        .rope()
+        .line(target_cursor_line)
+        .get_char(target_cursor_char)
+        .unwrap_or('?'),
+      new_start_column,
+      new_start_char,
+      new_end_column,
+      new_end_char,
+    );
+  }
+
+  let out_of_line =
+    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+  // For eol or line-end, add 1 more column
+  let target_cursor_width = text
+    .width_until(target_cursor_line, target_cursor_char)
+    + if out_of_line { 1 } else { 0 };
+
+  if target_cursor_width > new_end_column {
+    new_start_column =
+      target_cursor_width.saturating_sub(window_width as usize);
+  }
+
+  (new_start_line, new_start_column)
 }
 
 fn wrap_nolinebreak_search_right(
