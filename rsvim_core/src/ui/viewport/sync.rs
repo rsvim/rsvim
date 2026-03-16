@@ -127,8 +127,9 @@ fn nowrap_line_process(
                 end_width,
               ),
               None => {
-                // If the char not found, it means the `end_width` is too long than the whole line.
-                // So the char next to the line's last char is the end char.
+                // If the char not found, it means the `end_width` is too long
+                // than the whole line. So the char next to the line's last
+                // char is the end char.
                 (bufline.len_chars(), 0_usize)
               }
             };
