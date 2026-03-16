@@ -294,12 +294,12 @@ fn wrap_nolinebreak_sync(
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = size.height();
-  let width = size.width();
+  let window_height = size.height();
+  let window_width = size.width();
   let buffer_len_lines = text.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> =
-    LiteMap::with_capacity(height as usize);
+    LiteMap::with_capacity(window_height as usize);
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -307,15 +307,15 @@ fn wrap_nolinebreak_sync(
 
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
-    while current_row < height && current_line < buffer_len_lines {
+    while current_row < window_height && current_line < buffer_len_lines {
       let (rows, start_fills, end_fills, last_row) =
         wrap_nolinebreak_line_process(
           text,
           start_column,
           current_line,
           current_row,
-          height,
-          width,
+          window_height,
+          window_width,
         );
       current_row = last_row;
 
