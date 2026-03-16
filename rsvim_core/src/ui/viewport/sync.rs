@@ -216,16 +216,14 @@ fn wrap_nolinebreak_line_process(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let buffer_line = text.rope().line(current_line);
-  let buffer_line_len_chars = buffer_line.len_chars();
+  let mut rows: LiteMap<u16, RowViewport> =
+    LiteMap::with_capacity(buffer_line.len_chars() / (window_height as usize));
 
-  if buffer_line_len_chars == 0 {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
+  if buffer_line.len_chars() == 0 {
+    // If current line is empty.
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: LiteMap<u16, RowViewport> =
-      LiteMap::with_capacity(window_height as usize);
-
     match text.char_after(current_line, start_column) {
       Some(mut start_char) => {
         let start_fills = {
