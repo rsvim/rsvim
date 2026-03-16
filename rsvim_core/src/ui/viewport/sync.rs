@@ -523,8 +523,8 @@ fn wrap_linebreak_line_process(
                 _continued_char_of_last_word,
               )) => {
                 // Part-2
-                // This is the following logic of part-1, you should see part-1
-                // before this.
+                // This is the following logic of part-1.2, you should see
+                // part-1 before this.
                 //
                 // If the word is too long to put in an entire row, and we cut
                 // it into pieces. In this part, we need to continue rendering
