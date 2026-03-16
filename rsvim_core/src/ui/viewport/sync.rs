@@ -95,7 +95,6 @@ fn _end_char_and_filled_cols(
   }
 }
 
-// #[allow(unused_assignments)]
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn nowrap_line_process(
   text: &Text,
