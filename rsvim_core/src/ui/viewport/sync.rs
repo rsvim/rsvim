@@ -431,7 +431,8 @@ fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
   window_height as usize * window_width as usize * 2 + 16
 }
 
-/// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
+#[allow(unused_assignments)]
+/// Returns `rows`, `start_fills`, `end_fills`, `last_row` (in `rows`).
 fn wrap_linebreak_line_process(
   text: &Text,
   start_column: usize,
@@ -448,9 +449,13 @@ fn wrap_linebreak_line_process(
       window_height as usize,
     ));
 
+  let mut start_fills: usize = 0;
+  let mut end_fills: usize = 0;
+
   if buffer_line.len_chars() == 0 {
     rows.insert(current_row, RowViewport::new(0..0));
-    (rows, 0_usize, 0_usize, current_row)
+    start_fills = 0;
+    end_fills = 0;
   } else {
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
@@ -495,145 +500,143 @@ fn wrap_linebreak_line_process(
       })
       .collect::<LiteMap<usize, usize>>();
 
-    match text.char_after(current_line, start_column) {
-      Some(mut start_char) => {
-        let start_fills = {
-          let width_before = text.width_before(current_line, start_char);
-          width_before.saturating_sub(start_column)
-        };
+    if let Some(mut start_char) = text.char_after(current_line, start_column) {
+      start_fills = {
+        let width_before = text.width_before(current_line, start_char);
+        width_before.saturating_sub(start_column)
+      };
 
-        let mut end_width = start_column + window_width as usize;
-        let mut end_fills = 0_usize;
+      let mut end_width = start_column + window_width as usize;
 
-        // Saved last word info, if it is too long to put in an entire row of window.
-        // The tuple is:
-        // 1. Word index.
-        // 2. Start char of the word.
-        // 3. End char of the word.
-        // 4. Continued start char index of the word (which should be continued to rendering on
-        //    current row).
-        let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> =
-          None;
+      // Saved last word info, if it is too long to put in an entire row of window.
+      // The tuple is:
+      // 1. Word index.
+      // 2. Start char of the word.
+      // 3. End char of the word.
+      // 4. Continued start char index of the word (which should be continued to rendering on
+      //    current row).
+      let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> =
+        None;
 
-        debug_assert!(current_row < window_height);
-        while current_row < window_height {
-          let (end_char, end_fills_result) =
-            match text.char_at(current_line, end_width) {
-              Some(c) => {
-                match last_word_is_too_long {
-                  Some((
-                    last_wd_idx,
-                    start_c_of_last_wd,
-                    end_c_of_last_wd,
-                    _continued_c_of_last_wd,
-                  )) => {
-                    // Part-2
-                    // This is the following logic of part-1.2, you should see part-1 before
-                    // this.
-                    //
-                    // If the word is too long to put in an entire row, and we cut it into
-                    // pieces. In this part, we need to continue rendering the rest part of the
-                    // word on current row.
-                    //
-                    // Here we also have two sub-cases:
-                    // 1. If the rest part of the word is still too long to put in current row.
-                    // 2. If the rest part of the word is not long and can be put in current row.
+      debug_assert!(current_row < window_height);
+      while current_row < window_height {
+        let (end_char, end_f) = match text.char_at(current_line, end_width) {
+          Some(c) => {
+            match last_word_is_too_long {
+              Some((
+                last_wd_idx,
+                start_c_of_last_wd,
+                end_c_of_last_wd,
+                _continued_c_of_last_wd,
+              )) => {
+                // Part-2
+                // This is the following logic of part-1.2, you should see part-1 before
+                // this.
+                //
+                // If the word is too long to put in an entire row, and we cut it into
+                // pieces. In this part, we need to continue rendering the rest part of the
+                // word on current row.
+                //
+                // Here we also have two sub-cases:
+                // 1. If the rest part of the word is still too long to put in current row.
+                // 2. If the rest part of the word is not long and can be put in current row.
 
-                    match text.char_at(current_line, end_width) {
-                      Some(c) => {
-                        if end_c_of_last_wd > c {
-                          // Part-2.1, the rest part of the word is still too long.
+                match text.char_at(current_line, end_width) {
+                  Some(c) => {
+                    if end_c_of_last_wd > c {
+                      // Part-2.1, the rest part of the word is still too long.
 
-                          // Record the position (c) where we cut the words into pieces.
-                          last_word_is_too_long = Some((
-                            last_wd_idx,
-                            start_c_of_last_wd,
-                            end_c_of_last_wd,
-                            c,
-                          ));
+                      // Record the position (c) where we cut the words into pieces.
+                      last_word_is_too_long = Some((
+                        last_wd_idx,
+                        start_c_of_last_wd,
+                        end_c_of_last_wd,
+                        c,
+                      ));
 
-                          // If the char `c` width is greater than `end_width`, the `c` itself is
-                          // the end char.
-                          _end_char_and_filled_cols(
-                            text,
-                            &buffer_line,
-                            current_line,
-                            c,
-                            end_width,
-                          )
-                        } else {
-                          // Part-2.2, the rest part of the word is not long.
-                          // Thus we can go back to *normal* algorithm just like part-1.
+                      // If the char `c` width is greater than `end_width`, the `c` itself is
+                      // the end char.
+                      _end_char_and_filled_cols(
+                        text,
+                        &buffer_line,
+                        current_line,
+                        c,
+                        end_width,
+                      )
+                    } else {
+                      // Part-2.2, the rest part of the word is not long.
+                      // Thus we can go back to *normal* algorithm just like part-1.
 
-                          _part1(
-                            &words,
-                            &words_end_char_idx,
-                            text,
-                            &buffer_line,
-                            current_line,
-                            c,
-                            end_width,
-                            start_char,
-                            &mut last_word_is_too_long,
-                          )
-                        }
-                      }
-                      None => {
-                        // If the char not found, it means the `end_width` is too long than the
-                        // whole buffer line.
-                        // So the char next to the line's last char is the end char.
-                        (buffer_line.len_chars(), 0_usize)
-                      }
+                      _part1(
+                        &words,
+                        &words_end_char_idx,
+                        text,
+                        &buffer_line,
+                        current_line,
+                        c,
+                        end_width,
+                        start_char,
+                        &mut last_word_is_too_long,
+                      )
                     }
                   }
                   None => {
-                    // Part-1
-                    _part1(
-                      &words,
-                      &words_end_char_idx,
-                      text,
-                      &buffer_line,
-                      current_line,
-                      c,
-                      end_width,
-                      start_char,
-                      &mut last_word_is_too_long,
-                    )
+                    // If the char not found, it means the `end_width` is too long than the
+                    // whole buffer line.
+                    // So the char next to the line's last char is the end char.
+                    (buffer_line.len_chars(), 0_usize)
                   }
                 }
               }
               None => {
-                // If the char not found, it means the `end_width` is too long than the whole line.
-                // So the char next to the line's last char is the end char.
-                (buffer_line.len_chars(), 0_usize)
+                // Part-1
+                _part1(
+                  &words,
+                  &words_end_char_idx,
+                  text,
+                  &buffer_line,
+                  current_line,
+                  c,
+                  end_width,
+                  start_char,
+                  &mut last_word_is_too_long,
+                )
               }
-            };
-          end_fills = end_fills_result;
-
-          rows.insert(current_row, RowViewport::new(start_char..end_char));
-
-          // Goes out of line.
-          debug_assert!(buffer_line.len_chars() > 0);
-          if end_char
-            > text
-              .last_char_idx_on_line_exclude_eol(current_line)
-              .unwrap_or(0_usize)
-          {
-            break;
+            }
           }
+          None => {
+            // If the char not found, it means the `end_width` is too long than the whole line.
+            // So the char next to the line's last char is the end char.
+            (buffer_line.len_chars(), 0_usize)
+          }
+        };
+        end_fills = end_f;
 
-          // Prepare next row.
-          current_row += 1;
-          start_char = end_char;
-          end_width =
-            text.width_before(current_line, end_char) + window_width as usize;
+        rows.insert(current_row, RowViewport::new(start_char..end_char));
+
+        // Goes out of line.
+        debug_assert!(buffer_line.len_chars() > 0);
+        if end_char
+          > text
+            .last_char_idx_on_line_exclude_eol(current_line)
+            .unwrap_or(0_usize)
+        {
+          break;
         }
 
-        (rows, start_fills, end_fills, current_row)
+        // Prepare next row.
+        current_row += 1;
+        start_char = end_char;
+        end_width =
+          text.width_before(current_line, end_char) + window_width as usize;
       }
-      None => (rows, 0_usize, 0_usize, current_row),
+    } else {
+      start_fills = 0;
+      end_fills = 0;
     }
   }
+
+  (rows, start_fills, end_fills, current_row)
 }
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
