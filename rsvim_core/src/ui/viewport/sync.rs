@@ -128,23 +128,23 @@ fn nowrap_line_process(
       };
 
       let end_width = start_column + window_width as usize;
-      if let Some(end_width_c) = text.char_at(current_line, end_width) {
-        let (end_c, end_f) = _end_char_and_filled_cols(
+      let (end_c, end_f) = match text.char_at(current_line, end_width) {
+        Some(end_width_char) => _end_char_and_filled_cols(
           text,
           &buffer_line,
           current_line,
-          end_width_c,
+          end_width_char,
           end_width,
-        );
-        end_char = end_c;
-        end_fills = end_f;
-      } else {
-        // If the char not found, it means the `end_width` is too long
-        // than the whole line. So the char next to the line's last
-        // char is the end char.
-        end_char = buffer_line.len_chars();
-        end_fills = 0;
-      }
+        ),
+        None => {
+          // If the char not found, it means the `end_width` is too long
+          // than the whole line. So the char next to the line's last
+          // char is the end char.
+          (buffer_line.len_chars(), 0)
+        }
+      };
+      end_char = end_c;
+      end_fills = end_f;
     } else {
       // If current line is empty
       start_char = 0;
@@ -245,11 +245,11 @@ fn wrap_nolinebreak_line_process(
       debug_assert!(current_row < window_height);
       while current_row < window_height {
         let (end_char, end_f) = match text.char_at(current_line, end_width) {
-          Some(c) => _end_char_and_filled_cols(
+          Some(end_width_char) => _end_char_and_filled_cols(
             text,
             &buffer_line,
             current_line,
-            c,
+            end_width_char,
             end_width,
           ),
           None => {
