@@ -467,6 +467,13 @@ fn wrap_linebreak_line_process(
       start_column
     );
 
+    // // Words
+    // let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
+    //   .segment_str(&cloned_line)
+    //   .tuple_windows()
+    //   .map(|(i, j)| &cloned_line[i..j])
+    //   .collect_vec();
+
     // Maps word index => its start char index and end char index
     //
     // NOTE: The char index of a word is the char index in current line. The
@@ -485,34 +492,6 @@ fn wrap_linebreak_line_process(
         })
         .collect::<FoldMap<usize, (usize, usize)>>();
 
-    if cfg!(debug_assertions) {
-      // Words
-      let words = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
-        .segment_str(&cloned_line)
-        .tuple_windows()
-        .map(|(i, j)| &cloned_line[i..j])
-        .collect_vec();
-      let boundary1 = words
-        .iter()
-        .enumerate()
-        .scan(cloned_start_char, |state, (i, wd)| {
-          let sc = *state;
-          *state += wd.chars().count();
-          let ec = *state;
-          Some((i, (sc, ec)))
-        })
-        .collect::<FoldMap<usize, (usize, usize)>>();
-      debug_assert_eq!(words_boundary_char.len(), boundary1.len());
-      for (k1, v1) in words_boundary_char.iter() {
-        debug_assert!(boundary1.contains_key(k1));
-        debug_assert_eq!(v1, boundary1.get(k1).unwrap());
-      }
-      for (k2, v2) in boundary1.iter() {
-        debug_assert!(words_boundary_char.contains_key(k2));
-        debug_assert_eq!(v2, words_boundary_char.get(k2).unwrap());
-      }
-    }
-
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
@@ -521,6 +500,7 @@ fn wrap_linebreak_line_process(
         words_char_to_index.insert(c, *word_index);
       }
     }
+
     // trace!("words:{:?}", words);
     // trace!("words_end_char:{:?}", words_end_char);
     // trace!("words_boundary_char:{:?}", words_boundary_char);
