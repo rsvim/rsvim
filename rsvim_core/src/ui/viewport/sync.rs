@@ -77,12 +77,12 @@ fn _end_char_and_filled_cols(
 ) -> (usize, usize) {
   let c_width = text.width_until(current_line, end_width_char);
   if c_width > end_width {
-    // If the char `end_width_char` width is greater than `end_width`, then
-    // the `end_width_char` itself is the end char.
+    // If `the width of end_width_char > end_width`, then `end_width_char`
+    // itself is the end char. And there are possibly `end_filled_cols`.
     let c_width_before = text.width_before(current_line, end_width_char);
     (end_width_char, end_width.saturating_sub(c_width_before))
   } else {
-    // Otherwise we use the last visible char in the line, thus avoid invisible
+    // Here we use the last visible char in the line, thus avoid invisible
     // chars like line-break ('\n').
     debug_assert!(buffer_line.len_chars() > 0);
     let next_to_last_visible_char = text
@@ -90,8 +90,8 @@ fn _end_char_and_filled_cols(
       .unwrap_or(0_usize)
       + 1;
 
-    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
-    // char.
+    // If `the width of end_width_char <= end_width`, the char next to
+    // `end_width_char` is the end char.
     let c_next = std::cmp::min(end_width_char + 1, next_to_last_visible_char);
     (c_next, 0_usize)
   }
@@ -108,27 +108,26 @@ fn nowrap_line_process(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let buffer_line = text.rope().line(current_line);
-  let mut start_char: usize = 0;
-  let mut end_char: usize = 0;
+
+  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
+
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
   if buffer_line.len_chars() == 0 {
     // If current line is empty
-    start_char = 0;
-    end_char = 0;
+    rows.insert(current_row, RowViewport::new(0..0));
     start_fills = 0;
     end_fills = 0;
   } else {
-    if let Some(start_c) = text.char_after(current_line, start_column) {
-      start_char = start_c;
+    if let Some(start_char) = text.char_after(current_line, start_column) {
       start_fills = {
-        let width_before = text.width_before(current_line, start_c);
+        let width_before = text.width_before(current_line, start_char);
         width_before.saturating_sub(start_column)
       };
 
       let end_width = start_column + window_width as usize;
-      let (end_c, end_f) = match text.char_at(current_line, end_width) {
+      let (end_char, end_f) = match text.char_at(current_line, end_width) {
         Some(end_width_char) => _end_char_and_filled_cols(
           text,
           &buffer_line,
@@ -143,19 +142,16 @@ fn nowrap_line_process(
           (buffer_line.len_chars(), 0)
         }
       };
-      end_char = end_c;
       end_fills = end_f;
+      rows.insert(current_row, RowViewport::new(start_char..end_char));
     } else {
       // If current line is empty
-      start_char = 0;
-      end_char = 0;
       start_fills = 0;
       end_fills = 0;
+      rows.insert(current_row, RowViewport::new(0..0));
     }
   }
 
-  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
-  rows.insert(current_row, RowViewport::new(start_char..end_char));
   (rows, start_fills, end_fills, current_row)
 }
 
