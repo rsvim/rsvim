@@ -335,51 +335,51 @@ fn wrap_nolinebreak_sync(
   }
 }
 
-/// Find the word index by the char index.
-///
-/// Returns the word index which contains this char, and whether the char is the last char in the
-/// word.
-fn _find_word_by_char(
-  words: &[&str],
-  word_end_chars_index: &LiteMap<usize, usize>,
-  char_idx: usize,
-) -> (usize, usize, usize) {
-  // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
-  let mut low = 0;
-  let mut high = words.len() - 1;
-
-  while low <= high {
-    let mid = (low + high) / 2;
-
-    let start_char_idx = if mid > 0 {
-      *word_end_chars_index.get(&(mid - 1)).unwrap()
-    } else {
-      0_usize
-    };
-    let end_char_idx = *word_end_chars_index.get(&mid).unwrap();
-
-    // trace!(
-    //   "low:{low},high:{high},mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
-    // );
-    if start_char_idx <= char_idx && end_char_idx > char_idx {
-      // trace!(
-      //   "return mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
-      // );
-      return (mid, start_char_idx, end_char_idx);
-    } else if start_char_idx > char_idx {
-      high = mid - 1;
-    } else {
-      low = mid + 1;
-    }
-  }
-
-  unreachable!()
-}
+// /// Find the word index by the char index.
+// ///
+// /// Returns the word index which contains this char, and whether the char is the last char in the
+// /// word.
+// fn _find_word_by_char(
+//   words: &[&str],
+//   word_end_chars_index: &LiteMap<usize, usize>,
+//   char_idx: usize,
+// ) -> (usize, usize, usize) {
+//   // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
+//   let mut low = 0;
+//   let mut high = words.len() - 1;
+//
+//   while low <= high {
+//     let mid = (low + high) / 2;
+//
+//     let start_char_idx = if mid > 0 {
+//       *word_end_chars_index.get(&(mid - 1)).unwrap()
+//     } else {
+//       0_usize
+//     };
+//     let end_char_idx = *word_end_chars_index.get(&mid).unwrap();
+//
+//     // trace!(
+//     //   "low:{low},high:{high},mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
+//     // );
+//     if start_char_idx <= char_idx && end_char_idx > char_idx {
+//       // trace!(
+//       //   "return mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
+//       // );
+//       return (mid, start_char_idx, end_char_idx);
+//     } else if start_char_idx > char_idx {
+//       high = mid - 1;
+//     } else {
+//       low = mid + 1;
+//     }
+//   }
+//
+//   unreachable!()
+// }
 
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
-  words: &[&str],
-  words_end_char: &LiteMap<usize, usize>,
+  words_boundary_char: &FoldMap<usize, usize>,
+  words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
   buffer_line: &RopeSlice,
   current_line: usize,
@@ -388,8 +388,10 @@ fn _part1(
   start_char: usize,
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
-  let (wd_idx, start_c_of_wd, end_c_of_wd) =
-    _find_word_by_char(words, words_end_char, end_width_char);
+  // Find the word index by the char index.
+  let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
+  let start_c_of_wd = words_boundary_char.get(wd_idx).unwrap().0;
+  let end_c_of_wd = words_boundary_char.get(wd_idx).unwrap().1;
 
   let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
@@ -421,7 +423,7 @@ fn _part1(
       debug_assert!(start_c_of_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long =
-        Some((wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
+        Some((*wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
       _end_char_and_filled_cols(
@@ -499,23 +501,26 @@ fn wrap_linebreak_line_process(
     );
 
     // Words
-    let words: Vec<&str> =
-      WordSegmenter::new_auto(WordBreakInvariantOptions::default())
-        .segment_str(&cloned_line)
-        .tuple_windows()
-        .map(|(i, j)| &cloned_line[i..j])
-        .collect();
-    // Maps word index => its end char index
-    // NOTE: The end char index of a word is the char index in current line,
-    // which is also the start char index of next word.
-    let words_end_char = words
-      .iter()
-      .enumerate()
-      .scan(cloned_start_char, |state, (i, wd)| {
-        *state += wd.chars().count();
-        Some((i, *state))
-      })
-      .collect::<LiteMap<usize, usize>>();
+    let mut words: Vec<&str> = Vec::with_capacity(cloned_line.len());
+    // Maps every char index => its belonged word index.
+    let mut words_char_to_index: FoldMap<usize, usize> =
+      FoldMap::with_capacity(cloned_line.len());
+    // Maps word index => its start char index and end char index
+    // NOTE: The char index of a word is the char index in current line. The
+    // end char index is also the start char index of next word.
+    let mut words_boundary_char: FoldMap<usize, (usize, usize)> =
+      FoldMap::with_capacity(cloned_line.len());
+    WordSegmenter::new_auto(WordBreakInvariantOptions::default())
+      .segment_str(&cloned_line)
+      .tuple_windows()
+      .for_each(|(i, j)| {
+        words.push(&cloned_line[i..j]);
+        let word_index = words.len() - 1;
+        for t in i..j {
+          words_char_to_index.insert(t, word_index);
+        }
+        words_boundary_char.insert(word_index, (i, j));
+      });
 
     if let Some(mut start_char) = text.char_after(current_line, start_column) {
       start_fills = {
@@ -587,8 +592,9 @@ fn wrap_linebreak_line_process(
                   // Thus we can go back to *normal* algorithm just like part-1.
 
                   _part1(
-                    &words,
-                    &words_end_char,
+                    // &words,
+                    &words_boundary_char,
+                    &words_char_to_index,
                     text,
                     &buffer_line,
                     current_line,
@@ -602,8 +608,9 @@ fn wrap_linebreak_line_process(
               None => {
                 // Part-1
                 _part1(
-                  &words,
-                  &words_end_char,
+                  // &words,
+                  &words_boundary_char,
+                  &words_char_to_index,
                   text,
                   &buffer_line,
                   current_line,
