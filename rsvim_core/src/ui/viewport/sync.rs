@@ -378,10 +378,10 @@ fn _find_word_by_char(
 
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
-  words: &[&str],
-  words_end_char: &LiteMap<usize, usize>,
-  _words_boundary_char: &FoldMap<usize, (usize, usize)>,
-  _words_char_to_index: &FoldMap<usize, usize>,
+  _words: &[&str],
+  _words_end_char: &LiteMap<usize, usize>,
+  words_boundary_char: &FoldMap<usize, (usize, usize)>,
+  words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
   buffer_line: &RopeSlice,
   current_line: usize,
@@ -390,8 +390,13 @@ fn _part1(
   start_char: usize,
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
-  let (wd_idx, start_c_of_wd, end_c_of_wd) =
-    _find_word_by_char(words, words_end_char, end_width_char);
+  let wd_idx = *words_char_to_index.get(&end_width_char).unwrap();
+  let wd_bound = words_boundary_char.get(wd_idx).unwrap();
+  let start_c_of_wd = wd_bound.0;
+  let end_c_of_wd = wd_bound.1;
+
+  // let (wd_idx, start_c_of_wd, end_c_of_wd) =
+  //   _find_word_by_char(words, words_end_char, end_width_char);
 
   // // Find the word index by the char index.
   // let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
@@ -428,7 +433,7 @@ fn _part1(
       debug_assert!(start_c_of_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long =
-        Some((wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
+        Some((*wd_idx, start_c_of_wd, end_c_of_wd, end_width_char));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
       _end_char_and_filled_cols(
@@ -535,19 +540,11 @@ fn wrap_linebreak_line_process(
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
-    let _ =
-      words
-        .iter()
-        .enumerate()
-        .scan(cloned_start_char, |state, (i, wd)| {
-          let sc = *state;
-          *state += wd.chars().count();
-          let ec = *state;
-          for t in sc..ec {
-            words_char_to_index.insert(t, i);
-          }
-          Some((i, *state))
-        });
+    for (word_index, word_bound) in words_boundary_char.iter() {
+      for c in word_bound.0..word_bound.1 {
+        words_char_to_index.insert(c, *word_index);
+      }
+    }
     trace!("words:{:?}", words);
     trace!("words_end_char:{:?}", words_end_char);
     trace!("words_boundary_char:{:?}", words_boundary_char);
