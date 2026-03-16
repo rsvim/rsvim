@@ -576,8 +576,8 @@ fn wrap_linebreak_line_process(
     }
     // trace!("words:{:?}", words);
     // trace!("words_end_char:{:?}", words_end_char);
-    trace!("words_boundary_char:{:?}", words_boundary_char);
-    trace!("words_char_to_index:{:?}", words_char_to_index);
+    // trace!("words_boundary_char:{:?}", words_boundary_char);
+    // trace!("words_char_to_index:{:?}", words_char_to_index);
 
     if let Some(mut start_char) = text.char_after(current_line, start_column) {
       start_fills = {
