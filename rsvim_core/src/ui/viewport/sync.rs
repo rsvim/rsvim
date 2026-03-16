@@ -378,7 +378,7 @@ fn _part1(
         end_width,
       )
     } else {
-      // Part-1.2, cut this word and force rendering it and ignoring line-break
+      // Part-1.2, cut this word and force rendering it and ignores line-break
       // behavior.
       debug_assert!(start_c_of_end_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
