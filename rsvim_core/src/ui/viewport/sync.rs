@@ -378,7 +378,7 @@ fn wrap_nolinebreak_sync(
 
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
-  words_boundary_char: &FoldMap<usize, usize>,
+  words_boundary_char: &FoldMap<usize, (usize, usize)>,
   words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
   buffer_line: &RopeSlice,
