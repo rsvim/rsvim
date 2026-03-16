@@ -973,8 +973,8 @@ mod wrap_detail {
     /* lines_viewport */ LiteMap<usize, LineViewport>,
   );
 
-  // Type alias for `proc_line_*` functions.
-  pub type ProcessLineFn = fn(
+  // Type alias for `xxx_line_process` functions.
+  pub type LineProcessFn = fn(
     /* text */ &Text,
     /* start_column */ usize,
     /* current_line */ usize,
@@ -993,7 +993,7 @@ mod wrap_detail {
   }
 
   fn find_start_char(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_cursor_line: usize,
@@ -1025,7 +1025,7 @@ mod wrap_detail {
   }
 
   fn reverse_search_start_column(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_cursor_line: usize,
@@ -1053,7 +1053,7 @@ mod wrap_detail {
 
   // For case-1
   fn to_left_1(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_viewport_start_column: usize,
@@ -1188,7 +1188,7 @@ mod wrap_detail {
   }
 
   fn to_right_1(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_viewport_start_column: usize,
@@ -1237,7 +1237,7 @@ mod wrap_detail {
   // For case-1: cannot fully contains target cursor line.
   pub fn adjust_wrap_1(
     opts: detail::AdjustOptions,
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_cursor_line: usize,
@@ -1309,7 +1309,7 @@ mod wrap_detail {
   }
 
   fn to_left_2_1(
-    _proc_fn: ProcessLineFn,
+    _proc_fn: LineProcessFn,
     text: &Text,
     _window_actual_size: &U16Size,
     target_viewport_start_column: usize,
@@ -1359,7 +1359,7 @@ mod wrap_detail {
   }
 
   fn to_right_2_1(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_viewport_start_column: usize,
@@ -1412,7 +1412,7 @@ mod wrap_detail {
   // For case-2.1: only contains target cursor line.
   pub fn adjust_wrap_2_1(
     opts: detail::AdjustOptions,
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_cursor_line: usize,
@@ -1484,7 +1484,7 @@ mod wrap_detail {
   }
 
   fn to_left_2_2(
-    _proc_fn: ProcessLineFn,
+    _proc_fn: LineProcessFn,
     text: &Text,
     _window_actual_size: &U16Size,
     target_viewport_start_column: usize,
@@ -1534,7 +1534,7 @@ mod wrap_detail {
   }
 
   fn to_right_2_2(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     lines_viewport: &LiteMap<usize, LineViewport>,
     text: &Text,
     window_actual_size: &U16Size,
@@ -1593,7 +1593,7 @@ mod wrap_detail {
   // For case-2.2: contains multiple lines, include target cursor line.
   pub fn adjust_wrap_2_2(
     opts: detail::AdjustOptions,
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     lines_viewport: &LiteMap<usize, LineViewport>,
     text: &Text,
     window_actual_size: &U16Size,
@@ -1672,7 +1672,7 @@ mod wrap_detail {
   }
 
   pub fn reverse_search_start_line(
-    proc_fn: ProcessLineFn,
+    proc_fn: LineProcessFn,
     text: &Text,
     window_actual_size: &U16Size,
     target_cursor_line: usize,
@@ -1833,7 +1833,7 @@ fn search_anchor_downward_nowrap(
 //        b) Otherwise the eol of target cursor line is not out of viewport.
 fn search_anchor_downward_wrap(
   sync_fn: wrap_detail::SyncFn,
-  proc_fn: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   text: &Text,
   window_actual_size: &U16Size,
@@ -2018,7 +2018,7 @@ fn search_anchor_upward_nowrap(
 
 fn search_anchor_upward_wrap(
   sync_fn: wrap_detail::SyncFn,
-  proc_fn: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   text: &Text,
   window_actual_size: &U16Size,
@@ -2183,7 +2183,7 @@ fn search_anchor_leftward_nowrap(
 }
 
 fn search_anchor_leftward_wrap(
-  proc_fn: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   text: &Text,
   window_actual_size: &U16Size,
@@ -2347,7 +2347,7 @@ fn search_anchor_rightward_nowrap(
 }
 
 fn search_anchor_rightward_wrap(
-  proc_fn: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   text: &Text,
   window_actual_size: &U16Size,
@@ -2535,6 +2535,8 @@ pub fn search(
 }
 
 fn nowrap_search_down(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   opts: &WindowOptions,
   text: &Text,
@@ -2544,6 +2546,135 @@ fn nowrap_search_down(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+  let window_height = size.height();
+  let window_width = size.width();
+  let buffer_len_lines = text.rope().len_lines();
+
+  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
+  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
+  // for users' eye.
+
+  let mut current_row: u16 = 0;
+  let mut current_line: isize = viewport_start_line as isize;
+
+  // Start with `viewport_start_line`, iterate lines from top to bottom in the
+  // viewport.
+  while (current_row < window_height)
+    && (current_line < buffer_len_lines as isize)
+  {
+    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+      text,
+      viewport_start_column,
+      current_line as usize,
+      current_row,
+      window_height,
+      window_width,
+    );
+    current_row += rows.len() as u16;
+    current_line += 1;
+  }
+
+  // Whether `target_cursor_line` is inside step-1 iteration result.
+  if (viewport_start_line <= target_cursor_line)
+    && (current_line > target_cursor_line as isize)
+  {
+    // Yes it contains, this means we don't have to scroll the window viewport,
+    // we can still use the `viewport_start_line` as the first line for the new
+    // viewport.
+
+    // Cursor moves to left side.
+    if target_cursor_char < current_cursor_char {
+      nowrap_search_left(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        viewport_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // Cursor moves to right side (even just for 0-chars).
+      nowrap_search_right(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        viewport_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  } else {
+    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
+    // have to do an extra reverse-iteration to find out the suitable first
+    // line for the new viewport.
+
+    debug_assert!(target_cursor_line as isize >= current_line);
+
+    // This time, we iterate in reverse order.
+    let mut n_rows: usize = 0;
+    let mut current_line: isize = target_cursor_line as isize;
+
+    while (n_rows < window_height as usize) && (current_line >= 0) {
+      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+        text,
+        viewport_start_column,
+        current_line as usize,
+        0,
+        window_height,
+        window_width,
+      );
+      n_rows += rows.len();
+      current_line -= 1;
+    }
+
+    let new_start_line = (current_line + 1) as usize;
+    if target_cursor_char < current_cursor_char {
+      nowrap_search_left(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        new_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // Cursor moves to right side (even just for 0-chars).
+      nowrap_search_right(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        new_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  }
 }
 
 fn wrap_nolinebreak_search_down(
@@ -2599,6 +2730,102 @@ fn wrap_linebreak_search_up(
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn nowrap_search_left(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_nolinebreak_search_left(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_linebreak_search_left(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn nowrap_search_right(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_nolinebreak_search_right(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  current_cursor_line: usize,
+  current_cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn wrap_linebreak_search_right(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
   current_cursor_line: usize,
   current_cursor_char: usize,
   target_cursor_line: usize,
