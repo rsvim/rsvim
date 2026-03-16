@@ -496,13 +496,12 @@ fn wrap_linebreak_line_process(
     );
 
     // Words.
-    let segmenter =
-      WordSegmenter::new_auto(WordBreakInvariantOptions::default());
-    let words: Vec<&str> = segmenter
-      .segment_str(&cloned_line)
-      .tuple_windows()
-      .map(|(i, j)| &cloned_line[i..j])
-      .collect();
+    let words: Vec<&str> =
+      WordSegmenter::new_auto(WordBreakInvariantOptions::default())
+        .segment_str(&cloned_line)
+        .tuple_windows()
+        .map(|(i, j)| &cloned_line[i..j])
+        .collect();
     // Word index => its end char index (from the first char until current word).
     let words_end_char_idx = words
       .iter()
