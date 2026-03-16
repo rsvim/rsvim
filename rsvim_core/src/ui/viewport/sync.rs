@@ -440,15 +440,18 @@ fn wrap_linebreak_line_process(
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = text.rope().line(current_line);
-  if bufline.len_chars() == 0 {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
+  let buffer_line = text.rope().line(current_line);
+
+  let mut rows: LiteMap<u16, RowViewport> =
+    LiteMap::with_capacity(std::cmp::min(
+      buffer_line.len_chars() / (window_width as usize),
+      window_height as usize,
+    ));
+
+  if buffer_line.len_chars() == 0 {
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: LiteMap<u16, RowViewport> =
-      LiteMap::with_capacity(window_height as usize);
-
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
     // performance issue when iterating on super long lines.
@@ -553,7 +556,7 @@ fn wrap_linebreak_line_process(
                           // the end char.
                           _end_char_and_filled_cols(
                             text,
-                            &bufline,
+                            &buffer_line,
                             current_line,
                             c,
                             end_width,
@@ -566,7 +569,7 @@ fn wrap_linebreak_line_process(
                             &words,
                             &words_end_char_idx,
                             text,
-                            &bufline,
+                            &buffer_line,
                             current_line,
                             c,
                             end_width,
@@ -579,7 +582,7 @@ fn wrap_linebreak_line_process(
                         // If the char not found, it means the `end_width` is too long than the
                         // whole buffer line.
                         // So the char next to the line's last char is the end char.
-                        (bufline.len_chars(), 0_usize)
+                        (buffer_line.len_chars(), 0_usize)
                       }
                     }
                   }
@@ -589,7 +592,7 @@ fn wrap_linebreak_line_process(
                       &words,
                       &words_end_char_idx,
                       text,
-                      &bufline,
+                      &buffer_line,
                       current_line,
                       c,
                       end_width,
@@ -602,7 +605,7 @@ fn wrap_linebreak_line_process(
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
-                (bufline.len_chars(), 0_usize)
+                (buffer_line.len_chars(), 0_usize)
               }
             };
           end_fills = end_fills_result;
@@ -610,7 +613,7 @@ fn wrap_linebreak_line_process(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          debug_assert!(bufline.len_chars() > 0);
+          debug_assert!(buffer_line.len_chars() > 0);
           if end_char
             > text
               .last_char_idx_on_line_exclude_eol(current_line)
