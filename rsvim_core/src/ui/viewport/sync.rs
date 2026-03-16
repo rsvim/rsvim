@@ -390,7 +390,7 @@ fn _part1(
   start_char: usize,
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
-  let wd_idx = *words_char_to_index.get(&end_width_char).unwrap();
+  let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
   let wd_bound = words_boundary_char.get(wd_idx).unwrap();
   let start_c_of_wd = wd_bound.0;
   let end_c_of_wd = wd_bound.1;
