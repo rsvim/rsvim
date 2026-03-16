@@ -381,7 +381,8 @@ fn _part1(
       // Part-1.2, cut this word and force rendering it and ignores line-break
       // behavior.
       debug_assert!(start_c_of_end_wd <= start_char);
-      // Record the position (c) where we cut the words into pieces.
+      // Save the position (`end_width_char`) where we cut the words into
+      // pieces.
       *last_word_is_too_long = Some((
         *end_wd_idx,
         start_c_of_end_wd,
@@ -389,6 +390,9 @@ fn _part1(
         end_width_char,
       ));
 
+      // NOTE: Here we fallback to the same behavior of
+      // `wrap_nolinebreak_line_process`.
+      //
       // If `the width of end_width_char > end_width`, the `end_width_char`
       // itself is the end char.
       _end_char_and_filled_cols(
