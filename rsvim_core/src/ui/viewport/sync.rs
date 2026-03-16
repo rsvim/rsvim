@@ -171,36 +171,31 @@ fn nowrap_sync(
   let mut line_viewports: LiteMap<usize, LineViewport> =
     LiteMap::with_capacity(height as usize);
 
-  // The first `current_row` in the window maps to the `start_line` in the buffer.
-  let mut current_row = 0_u16;
-  let mut current_line = start_line;
+  // Current row in the window maps to the `start_line` in the buffer.
+  let mut cur_row = 0_u16;
+  let mut cur_line = start_line;
 
-  if current_line < buffer_len_lines {
+  if cur_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
-    while current_row < height && current_line < buffer_len_lines {
+    while cur_row < height && cur_line < buffer_len_lines {
       let (rows, start_fills, end_fills, _) = nowrap_line_process(
         text,
         start_column,
-        current_line,
-        current_row,
+        cur_line,
+        cur_row,
         height,
         width,
       );
 
-      line_viewports.insert(
-        current_line,
-        LineViewport::new(rows, start_fills, end_fills),
-      );
+      line_viewports
+        .insert(cur_line, LineViewport::new(rows, start_fills, end_fills));
 
       // Go down to next row and line
-      current_line += 1;
-      current_row += 1;
+      cur_line += 1;
+      cur_row += 1;
     }
 
-    (
-      ViewportLineRange::new(start_line..current_line),
-      line_viewports,
-    )
+    (ViewportLineRange::new(start_line..cur_line), line_viewports)
   } else {
     (ViewportLineRange::default(), LiteMap::new())
   }
