@@ -117,21 +117,20 @@ fn nowrap_line_process(
     start_fills = 0;
     end_fills = 0;
   } else {
-    if let Some(start_column_char) = text.char_after(current_line, start_column)
-    {
-      start_char = start_column_char;
+    if let Some(start_column_c) = text.char_after(current_line, start_column) {
+      start_char = start_column_c;
       start_fills = {
-        let width_before = text.width_before(current_line, start_column_char);
+        let width_before = text.width_before(current_line, start_column_c);
         width_before.saturating_sub(start_column)
       };
 
       let end_width = start_column + window_width as usize;
-      if let Some(end_width_char) = text.char_at(current_line, end_width) {
+      if let Some(end_width_c) = text.char_at(current_line, end_width) {
         let (end_c, end_f) = _end_char_and_filled_cols(
           text,
           &bufline,
           current_line,
-          end_width_char,
+          end_width_c,
           end_width,
         );
         end_char = end_c;
