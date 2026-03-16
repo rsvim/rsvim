@@ -61,11 +61,11 @@ pub fn sync(
   }
 
   match (opts.wrap(), opts.line_break()) {
-    (false, _) => sync_nowrap(text, size, start_line, start_column),
+    (false, _) => nowrap_sync(text, size, start_line, start_column),
     (true, false) => {
-      sync_wrap_nolinebreak(text, size, start_line, start_column)
+      wrap_nolinebreak_sync(text, size, start_line, start_column)
     }
-    (true, true) => sync_wrap_linebreak(text, size, start_line, start_column),
+    (true, true) => wrap_linebreak_sync(text, size, start_line, start_column),
   }
 }
 
@@ -96,7 +96,7 @@ fn _end_char_and_filled_cols(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn proc_line_nowrap(
+fn nowrap_line_process(
   text: &Text,
   start_column: usize,
   current_line: usize,
@@ -145,7 +145,7 @@ fn proc_line_nowrap(
 }
 
 /// Implements [`sync`] with option `wrap=false`.
-fn sync_nowrap(
+fn nowrap_sync(
   text: &Text,
   size: &U16Size,
   start_line: usize,
@@ -165,7 +165,7 @@ fn sync_nowrap(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, _) = proc_line_nowrap(
+      let (rows, start_fills, end_fills, _) = nowrap_line_process(
         text,
         start_column,
         current_line,
@@ -194,7 +194,7 @@ fn sync_nowrap(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn proc_line_wrap_nolinebreak(
+fn wrap_nolinebreak_line_process(
   text: &Text,
   start_column: usize,
   current_line: usize,
@@ -269,7 +269,7 @@ fn proc_line_wrap_nolinebreak(
 }
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
-fn sync_wrap_nolinebreak(
+fn wrap_nolinebreak_sync(
   text: &Text,
   size: &U16Size,
   start_line: usize,
@@ -290,7 +290,7 @@ fn sync_wrap_nolinebreak(
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
       let (rows, start_fills, end_fills, changed_current_row) =
-        proc_line_wrap_nolinebreak(
+        wrap_nolinebreak_line_process(
           text,
           start_column,
           current_line,
@@ -415,7 +415,7 @@ fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn proc_line_wrap_linebreak(
+fn wrap_linebreak_line_process(
   text: &Text,
   start_column: usize,
   current_line: usize,
@@ -617,7 +617,7 @@ fn proc_line_wrap_linebreak(
 }
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
-fn sync_wrap_linebreak(
+fn wrap_linebreak_sync(
   text: &Text,
   size: &U16Size,
   start_line: usize,
@@ -638,7 +638,7 @@ fn sync_wrap_linebreak(
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
       let (rows, start_fills, end_fills, changed_current_row) =
-        proc_line_wrap_linebreak(
+        wrap_linebreak_line_process(
           text,
           start_column,
           current_line,
@@ -1724,8 +1724,8 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_downward_wrap(
-      sync_wrap_nolinebreak,
-      proc_line_wrap_nolinebreak,
+      wrap_nolinebreak_sync,
+      wrap_nolinebreak_line_process,
       viewport,
       text,
       size,
@@ -1733,8 +1733,8 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_downward_wrap(
-      sync_wrap_linebreak,
-      proc_line_wrap_linebreak,
+      wrap_linebreak_sync,
+      wrap_linebreak_line_process,
       viewport,
       text,
       size,
@@ -1772,7 +1772,7 @@ fn search_anchor_downward_nowrap(
 
     while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
-      let (rows, _start_fills, _end_fills, _) = proc_line_nowrap(
+      let (rows, _start_fills, _end_fills, _) = nowrap_line_process(
         text,
         viewport_start_column,
         current_line as usize,
@@ -1948,8 +1948,8 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_upward_wrap(
-      sync_wrap_nolinebreak,
-      proc_line_wrap_nolinebreak,
+      wrap_nolinebreak_sync,
+      wrap_nolinebreak_line_process,
       viewport,
       text,
       window_actual_size,
@@ -1957,8 +1957,8 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_upward_wrap(
-      sync_wrap_linebreak,
-      proc_line_wrap_linebreak,
+      wrap_linebreak_sync,
+      wrap_linebreak_line_process,
       viewport,
       text,
       window_actual_size,
@@ -2129,7 +2129,7 @@ pub fn search_anchor_leftward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_leftward_wrap(
-      proc_line_wrap_nolinebreak,
+      wrap_nolinebreak_line_process,
       viewport,
       text,
       window_actual_size,
@@ -2137,7 +2137,7 @@ pub fn search_anchor_leftward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_leftward_wrap(
-      proc_line_wrap_linebreak,
+      wrap_linebreak_line_process,
       viewport,
       text,
       window_actual_size,
@@ -2293,7 +2293,7 @@ pub fn search_anchor_rightward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_rightward_wrap(
-      proc_line_wrap_nolinebreak,
+      wrap_nolinebreak_line_process,
       viewport,
       text,
       window_actual_size,
@@ -2301,7 +2301,7 @@ pub fn search_anchor_rightward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_rightward_wrap(
-      proc_line_wrap_linebreak,
+      wrap_linebreak_line_process,
       viewport,
       text,
       window_actual_size,
