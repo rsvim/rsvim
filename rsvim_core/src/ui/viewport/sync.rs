@@ -465,7 +465,10 @@ fn wrap_linebreak_line_process(
       WordSegmenter::new_auto(WordBreakInvariantOptions::default())
         .segment_str(&cloned_line)
         .tuple_windows()
-        .map(|(i, j)| &cloned_line[i..j])
+        .map(|(i, j)| 
+          // Words
+          &cloned_line[i..j]
+          )
         .enumerate()
         .scan(cloned_start_char, |state, (i, wd)| {
           let sc = *state;
