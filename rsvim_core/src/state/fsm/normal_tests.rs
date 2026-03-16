@@ -2212,7 +2212,7 @@ mod tests_raw_window_scroll_x_by {
     let stateful = Normal::default();
     stateful._test_raw_window_scroll(
       &data_access,
-      Operation::WindowScrollRightBy(160),
+      Operation::WindowScrollRightBy(136),
     );
 
     let tree = data_access.tree.clone();
