@@ -113,11 +113,13 @@ impl Text {
     max_chars_width: usize,
   ) -> Option<ArcStr> {
     match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+      Some(buffer_line) => match buffer_line.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
+          let mut w: usize = 0;
           let mut builder = String::with_capacity(max_chars_width);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars_width {
+          for c in chars_iter {
+            w += unicode::char_width(self.options(), c);
+            if w >= max_chars_width {
               return Some(ArcStr::from(builder));
             }
             builder.push(c);
