@@ -168,8 +168,8 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
-  /// Get the prefix display width in of **previous** char by `char_idx`, i.e. width range is
-  /// `[0,char_idx)`.
+  /// Get the prefix display width of **previous** char by `char_idx`, i.e.
+  /// the width range is `[0,char_idx)`.
   ///
   /// NOTE: This is equivalent to `width_at(char_idx-1)`.
   ///
@@ -307,11 +307,13 @@ impl ColumnIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if the `width` is out of the line, there're below cases:
-  ///    - The line is empty.
-  ///    - The `width` is greater than the whole line's display width, thus there's no such char
-  ///      exists.
-  ///    - The `width` is 0, and the 1st (only) char is 0-width char (e.g. line-break).
+  /// 1. It returns None if the `width` is out of the line, there're several
+  ///    cases:
+  ///    - The line is empty and `width` is greater than 0.
+  ///    - The `width` is 0, and the 1st only char in the line is a 0-width
+  ///      char (e.g. line-break).
+  ///    - The `width` is greater than the whole line's display width, thus
+  ///      there's no such char exists.
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
