@@ -215,10 +215,10 @@ fn wrap_nolinebreak_line_process(
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = text.rope().line(current_line);
-  let bufline_len_chars = bufline.len_chars();
+  let buffer_line = text.rope().line(current_line);
+  let buffer_line_len_chars = buffer_line.len_chars();
 
-  if bufline_len_chars == 0 {
+  if buffer_line_len_chars == 0 {
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
@@ -242,7 +242,7 @@ fn wrap_nolinebreak_line_process(
             match text.char_at(current_line, end_width) {
               Some(c) => _end_char_and_filled_cols(
                 text,
-                &bufline,
+                &buffer_line,
                 current_line,
                 c,
                 end_width,
@@ -250,7 +250,7 @@ fn wrap_nolinebreak_line_process(
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
-                (bufline_len_chars, 0_usize)
+                (buffer_line_len_chars, 0_usize)
               }
             };
           end_fills = end_fills_result;
@@ -258,7 +258,7 @@ fn wrap_nolinebreak_line_process(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          debug_assert!(bufline.len_chars() > 0);
+          debug_assert!(buffer_line.len_chars() > 0);
           if end_char
             > text
               .last_char_idx_on_line_exclude_eol(current_line)
