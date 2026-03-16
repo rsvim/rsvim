@@ -446,7 +446,7 @@ fn wrap_linebreak_line_process(
       .clone_line(
         current_line,
         cloned_start_char,
-        (window_height as usize + 1) * (window_width as usize + 1) + 10,
+        (window_height as usize + 1) * (window_width as usize + 1) * 2 + 1,
       )
       .unwrap();
 
