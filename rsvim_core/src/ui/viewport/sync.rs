@@ -72,25 +72,27 @@ pub fn sync(
 // Returns (end_char, end_filled_cols)
 fn _end_char_and_filled_cols(
   text: &Text,
-  bline: &RopeSlice,
-  l: usize,
-  c: usize,
+  buffer_line: &RopeSlice,
+  current_line: usize,
+  end_width_char: usize,
   end_width: usize,
 ) -> (usize, usize) {
-  let c_width = text.width_until(l, c);
+  let c_width = text.width_until(current_line, end_width_char);
   if c_width > end_width {
     // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-    let c_width_before = text.width_before(l, c);
-    (c, end_width.saturating_sub(c_width_before))
+    let c_width_before = text.width_before(current_line, end_width_char);
+    (end_width_char, end_width.saturating_sub(c_width_before))
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
-    debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char =
-      text.last_char_idx_on_line_exclude_eol(l).unwrap_or(0_usize) + 1;
+    debug_assert!(buffer_line.len_chars() > 0);
+    let next_to_last_visible_char = text
+      .last_char_idx_on_line_exclude_eol(current_line)
+      .unwrap_or(0_usize)
+      + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
-    let c_next = std::cmp::min(c + 1, next_to_last_visible_char);
+    let c_next = std::cmp::min(end_width_char + 1, next_to_last_visible_char);
     (c_next, 0_usize)
   }
 }
@@ -118,10 +120,10 @@ fn nowrap_line_process(
     start_fills = 0;
     end_fills = 0;
   } else {
-    if let Some(start_column_c) = text.char_after(current_line, start_column) {
-      start_char = start_column_c;
+    if let Some(start_c) = text.char_after(current_line, start_column) {
+      start_char = start_c;
       start_fills = {
-        let width_before = text.width_before(current_line, start_column_c);
+        let width_before = text.width_before(current_line, start_c);
         width_before.saturating_sub(start_column)
       };
 
@@ -223,8 +225,6 @@ fn wrap_nolinebreak_line_process(
       window_height as usize,
     ));
 
-  let mut start_char: usize = 0;
-  let mut end_char: usize = 0;
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
@@ -244,22 +244,21 @@ fn wrap_nolinebreak_line_process(
 
       debug_assert!(current_row < window_height);
       while current_row < window_height {
-        let (end_char, end_fills_result) =
-          match text.char_at(current_line, end_width) {
-            Some(c) => _end_char_and_filled_cols(
-              text,
-              &buffer_line,
-              current_line,
-              c,
-              end_width,
-            ),
-            None => {
-              // If the char not found, it means the `end_width` is too long than the whole line.
-              // So the char next to the line's last char is the end char.
-              (buffer_line.len_chars(), 0_usize)
-            }
-          };
-        end_fills = end_fills_result;
+        let (end_char, end_f) = match text.char_at(current_line, end_width) {
+          Some(c) => _end_char_and_filled_cols(
+            text,
+            &buffer_line,
+            current_line,
+            c,
+            end_width,
+          ),
+          None => {
+            // If the char not found, it means the `end_width` is too long than the whole line.
+            // So the char next to the line's last char is the end char.
+            (buffer_line.len_chars(), 0_usize)
+          }
+        };
+        end_fills = end_f;
 
         rows.insert(current_row, RowViewport::new(start_char..end_char));
 
