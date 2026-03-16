@@ -341,7 +341,7 @@ fn wrap_nolinebreak_sync(
 /// word.
 fn _find_word_by_char(
   words: &[&str],
-  word_end_chars_index: &LiteMap<usize, usize>,
+  words_end_char: &LiteMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
   // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
@@ -351,22 +351,22 @@ fn _find_word_by_char(
   while low <= high {
     let mid = (low + high) / 2;
 
-    let start_char_idx = if mid > 0 {
-      *word_end_chars_index.get(&(mid - 1)).unwrap()
+    let start_char = if mid > 0 {
+      *words_end_char.get(&(mid - 1)).unwrap()
     } else {
       0_usize
     };
-    let end_char_idx = *word_end_chars_index.get(&mid).unwrap();
+    let end_char = *words_end_char.get(&mid).unwrap();
 
     // trace!(
     //   "low:{low},high:{high},mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
     // );
-    if start_char_idx <= char_idx && end_char_idx > char_idx {
+    if start_char <= char_idx && end_char > char_idx {
       // trace!(
       //   "return mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
       // );
-      return (mid, start_char_idx, end_char_idx);
-    } else if start_char_idx > char_idx {
+      return (mid, start_char, end_char);
+    } else if start_char > char_idx {
       high = mid - 1;
     } else {
       low = mid + 1;
@@ -378,6 +378,8 @@ fn _find_word_by_char(
 
 /// Part-1 of the processing algorithm in [`wrap_linebreak_line_process`].
 fn _part1(
+  words: &[&str],
+  words_end_char: &LiteMap<usize, usize>,
   words_boundary_char: &FoldMap<usize, (usize, usize)>,
   words_char_to_index: &FoldMap<usize, usize>,
   text: &Text,
@@ -389,12 +391,12 @@ fn _part1(
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) =
-    _find_word_by_char(words, word_end_chars_index, end_width_char);
+    _find_word_by_char(words, words_end_char, end_width_char);
 
-  // Find the word index by the char index.
-  let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
-  let start_c_of_wd = words_boundary_char.get(wd_idx).unwrap().0;
-  let end_c_of_wd = words_boundary_char.get(wd_idx).unwrap().1;
+  // // Find the word index by the char index.
+  // let wd_idx = words_char_to_index.get(&end_width_char).unwrap();
+  // let start_c_of_wd = words_boundary_char.get(wd_idx).unwrap().0;
+  // let end_c_of_wd = words_boundary_char.get(wd_idx).unwrap().1;
 
   let end_c_width = text.width_before(current_line, end_c_of_wd);
   if end_c_width > end_width {
@@ -509,17 +511,46 @@ fn wrap_linebreak_line_process(
       .tuple_windows()
       .map(|(i, j)| &cloned_line[i..j])
       .collect_vec();
-    let words_end_char = WordSegmenter::new_auto(WordBreakInvariantOptions::default())
-      .segment_str(&cloned_line)
-      .tuple_windows()
-    // Maps every char index => its belonged word index.
-    let mut words_char_to_index: FoldMap<usize, usize> =
-      FoldMap::with_capacity(cloned_line.len());
+    let words_end_char_idx = words
+      .iter()
+      .enumerate()
+      .scan(cloned_start_char, |state, (i, wd)| {
+        *state += wd.chars().count();
+        Some((i, *state))
+      })
+      .collect::<LiteMap<usize, usize>>();
     // Maps word index => its start char index and end char index
     // NOTE: The char index of a word is the char index in current line. The
     // end char index is also the start char index of next word.
-    let mut words_boundary_char: FoldMap<usize, (usize, usize)> =
+    let words_boundary_char = words
+      .iter()
+      .enumerate()
+      .scan(cloned_start_char, |state, (i, wd)| {
+        let sc = *state;
+        *state += wd.chars().count();
+        let ec = *state;
+        Some((i, (sc, ec)))
+      })
+      .collect::<FoldMap<usize, (usize, usize)>>();
+    // Maps every char index => its belonged word index.
+    let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
+    words
+      .iter()
+      .enumerate()
+      .scan(cloned_start_char, |state, (i, wd)| {
+        let sc = *state;
+        *state += wd.chars().count();
+        let ec = *state;
+        for t in sc..ec {
+          words_char_to_index.insert(t, i);
+        }
+        Some((i, *state))
+      });
+    trace!("words:{:?}", words);
+    trace!("words_end_char_idx:{:?}", words_end_char_idx);
+    trace!("words_boundary_char:{:?}", words_boundary_char);
+    trace!("words_char_to_index:{:?}", words_char_to_indx);
 
     if let Some(mut start_char) = text.char_after(current_line, start_column) {
       start_fills = {
@@ -591,7 +622,8 @@ fn wrap_linebreak_line_process(
                   // Thus we can go back to *normal* algorithm just like part-1.
 
                   _part1(
-                    // &words,
+                    &words,
+                    &words_end_char,
                     &words_boundary_char,
                     &words_char_to_index,
                     text,
@@ -607,7 +639,8 @@ fn wrap_linebreak_line_process(
               None => {
                 // Part-1
                 _part1(
-                  // &words,
+                  &words,
+                  &words_end_char,
                   &words_boundary_char,
                   &words_char_to_index,
                   text,
