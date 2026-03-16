@@ -312,8 +312,8 @@ impl ColumnIndex {
   ///    - The line is empty and `width` is greater than 0.
   ///    - The `width` is 0, and the 1st only char in the line is a 0-width
   ///      char (e.g. line-break).
-  ///    - The `width` is greater than the whole line's display width, thus there's no such char
-  ///      exists.
+  ///    - The `width` is greater than the whole line's display width, thus
+  ///      there's no such char exists.
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
