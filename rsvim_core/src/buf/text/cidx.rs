@@ -168,8 +168,8 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
-  /// Get the prefix display width in of **previous** char by `char_idx`, i.e. width range is
-  /// `[0,char_idx)`.
+  /// Get the prefix display width of **previous** char by `char_idx`, i.e.
+  /// the width range is `[0,char_idx)`.
   ///
   /// NOTE: This is equivalent to `width_at(char_idx-1)`.
   ///
