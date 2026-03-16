@@ -508,8 +508,10 @@ fn wrap_linebreak_line_process(
 
       let mut end_width = start_column + window_width as usize;
 
-      // Saved last word info, if it is too long to put in an entire row of window.
-      // The tuple is:
+      // Saved last word info, if it is too long to put in an entire row of
+      // window.
+      //
+      // This tuple is:
       // 1. Word index.
       // 2. Start char of the word.
       // 3. End char of the word.
