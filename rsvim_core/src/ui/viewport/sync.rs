@@ -498,14 +498,16 @@ fn wrap_linebreak_line_process(
       start_column
     );
 
-    // Words.
+    // Words
     let words: Vec<&str> =
       WordSegmenter::new_auto(WordBreakInvariantOptions::default())
         .segment_str(&cloned_line)
         .tuple_windows()
         .map(|(i, j)| &cloned_line[i..j])
         .collect();
-    // Maps word index => its end char index (from the first char until current word).
+    // Maps word index => its end char index
+    // NOTE: The end char index of a word is from the first char until current
+    // word.
     let words_end_char = words
       .iter()
       .enumerate()
