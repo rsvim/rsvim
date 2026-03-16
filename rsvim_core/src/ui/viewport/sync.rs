@@ -36,12 +36,10 @@ impl ViewportLineRange {
     self.end_line_idx - self.start_line_idx
   }
 
-  // Get start line index in the buffer, starts from 0.
   pub fn start_line_idx(&self) -> usize {
     self.start_line_idx
   }
 
-  // Get end line index in the buffer.
   pub fn end_line_idx(&self) -> usize {
     self.end_line_idx
   }
