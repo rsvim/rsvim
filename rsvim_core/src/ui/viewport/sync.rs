@@ -95,6 +95,7 @@ fn _end_char_and_filled_cols(
   }
 }
 
+// #[allow(unused_assignments)]
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn nowrap_line_process(
   text: &Text,
@@ -105,10 +106,10 @@ fn nowrap_line_process(
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = text.rope().line(current_line);
-  let mut start_char: usize = 0;
-  let mut end_char: usize = 0;
-  let mut start_fills: usize = 0;
-  let mut end_fills: usize = 0;
+  let start_char: usize;
+  let end_char: usize;
+  let start_fills: usize;
+  let end_fills: usize;
 
   if bufline.len_chars() == 0 {
     // If current line is empty
