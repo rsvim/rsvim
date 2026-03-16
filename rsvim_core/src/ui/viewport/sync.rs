@@ -535,18 +535,19 @@ fn wrap_linebreak_line_process(
     // Maps every char index => its belonged word index.
     let mut words_char_to_index: FoldMap<usize, usize> =
       FoldMap::with_capacity(cloned_line.len());
-    words
-      .iter()
-      .enumerate()
-      .scan(cloned_start_char, |state, (i, wd)| {
-        let sc = *state;
-        *state += wd.chars().count();
-        let ec = *state;
-        for t in sc..ec {
-          words_char_to_index.insert(t, i);
-        }
-        Some((i, *state))
-      });
+    let _ =
+      words
+        .iter()
+        .enumerate()
+        .scan(cloned_start_char, |state, (i, wd)| {
+          let sc = *state;
+          *state += wd.chars().count();
+          let ec = *state;
+          for t in sc..ec {
+            words_char_to_index.insert(t, i);
+          }
+          Some((i, *state))
+        });
     trace!("words:{:?}", words);
     trace!("words_end_char:{:?}", words_end_char);
     trace!("words_boundary_char:{:?}", words_boundary_char);
