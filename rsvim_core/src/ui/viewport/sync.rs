@@ -3023,13 +3023,12 @@ fn nowrap_search_right(
   _sync_fn: wrap_detail::SyncFn,
   _line_process_fn: wrap_detail::LineProcessFn,
   _viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
   _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
   mut new_start_column: usize,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3085,30 +3084,30 @@ fn wrap_nolinebreak_search_right(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
   new_start_column: usize,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  unimplemented!()
 }
 
 fn wrap_linebreak_search_right(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
   new_start_column: usize,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  unimplemented!()
 }
