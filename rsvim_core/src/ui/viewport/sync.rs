@@ -993,7 +993,7 @@ mod wrap_detail {
       /* sync_fn */ SyncFn,
       /* line_process_fn */ LineProcessFn,
       /* viewport */ &Viewport,
-      /* window_opts */ &WindowOptions,
+      /* opts */ &WindowOptions,
       /* text */ &Text,
       /* size */ &U16Size,
       /* new_start_line */ usize,
@@ -2478,12 +2478,13 @@ pub fn search(
   // Cursor moves upward
   if target_cursor_line < current_cursor_line {
     match (opts.wrap(), opts.line_break()) {
-      (false, _) => search_down(
+      (false, _) => search_up(
         nowrap_sync,
         nowrap_line_process,
         nowrap_search_left,
         nowrap_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -2491,12 +2492,13 @@ pub fn search(
         target_cursor_line,
         target_cursor_char,
       ),
-      (true, false) => search_down(
+      (true, false) => search_up(
         wrap_nolinebreak_sync,
         wrap_nolinebreak_line_process,
         wrap_nolinebreak_search_left,
         wrap_nolinebreak_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -2504,12 +2506,13 @@ pub fn search(
         target_cursor_line,
         target_cursor_char,
       ),
-      (true, true) => search_down(
+      (true, true) => search_up(
         wrap_linebreak_sync,
         wrap_linebreak_line_process,
         wrap_linebreak_search_left,
         wrap_linebreak_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -2523,8 +2526,13 @@ pub fn search(
     // algorithm, we have to moves to downward (even just for 0-lines) before
     // moving to left/right side.
     match (opts.wrap(), opts.line_break()) {
-      (false, _) => nowrap_search_up(
+      (false, _) => search_down(
+        nowrap_sync,
+        nowrap_line_process,
+        nowrap_search_left,
+        nowrap_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -2532,10 +2540,13 @@ pub fn search(
         target_cursor_line,
         target_cursor_char,
       ),
-      (true, false) => wrap_nolinebreak_search_up(
+      (true, false) => search_down(
         wrap_nolinebreak_sync,
         wrap_nolinebreak_line_process,
+        wrap_nolinebreak_search_left,
+        wrap_nolinebreak_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -2543,10 +2554,13 @@ pub fn search(
         target_cursor_line,
         target_cursor_char,
       ),
-      (true, true) => wrap_linebreak_search_up(
+      (true, true) => search_down(
         wrap_linebreak_sync,
         wrap_linebreak_line_process,
+        wrap_linebreak_search_left,
+        wrap_linebreak_search_right,
         viewport,
+        opts,
         text,
         size,
         current_cursor_line,
@@ -3100,7 +3114,11 @@ fn search_down(
 //   }
 // }
 
-fn nowrap_search_up(
+fn search_up(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  search_left_fn: wrap_detail::SearchFn,
+  search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
   opts: &WindowOptions,
   text: &Text,
@@ -3110,6 +3128,172 @@ fn nowrap_search_up(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+  let window_height = size.height();
+  let window_width = size.width();
+  let buffer_len_lines = text.rope().len_lines();
+
+  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
+  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
+  // for users' eye.
+
+  let (end_line, current_cursor_line_rows) = {
+    let mut current_row: u16 = 0;
+    let mut current_line: isize = viewport_start_line as isize;
+    let mut cursor_line_rows_in_viewport: Option<usize> = None;
+
+    // Start with `viewport_start_line`, iterate lines from top to bottom in the
+    // viewport.
+    while (current_row < window_height)
+      && (current_line < buffer_len_lines as isize)
+    {
+      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+        text,
+        viewport_start_column,
+        current_line as usize,
+        current_row,
+        window_height,
+        window_width,
+      );
+      if current_line == current_cursor_line as isize {
+        cursor_line_rows_in_viewport = Some(rows.len());
+      }
+      current_row += rows.len() as u16;
+      current_line += 1;
+    }
+    (current_line, cursor_line_rows_in_viewport)
+  };
+
+  // Cursor line is already in current viewport (i.e. we don't have to change
+  // `viewport_start_line` for a new viewport).
+  let cursor_is_in_current_viewport = (viewport_start_line
+    <= target_cursor_line)
+    && (end_line > target_cursor_line as isize);
+  // Cursor line is at the bottom line in current viewport.
+  let cursor_is_in_bottom_line = end_line == (target_cursor_line + 1) as isize;
+  // Cursor line is fully shown in current viewport, since our viewing
+  // algorithm support partial rendering for the bottom line.
+  let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
+  {
+    Some(current_cursor_line_rows) => {
+      match viewport.lines.get(&current_cursor_line) {
+        Some(line_viewport) => {
+          line_viewport.rows.len() == current_cursor_line_rows
+        }
+        None => false,
+      }
+    }
+    None => false,
+  };
+
+  let current_cursor_column =
+    text.width_before(current_cursor_line, current_cursor_char);
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
+
+  // Whether `target_cursor_line` is inside step-1 iteration result.
+  if cursor_is_in_current_viewport
+    && !(cursor_is_in_bottom_line && !cursor_is_fully_shown_in_current_viewport)
+  {
+    // Yes it contains, this means we don't have to scroll the window viewport,
+    // we can still use the `viewport_start_line` as the first line for the new
+    // viewport.
+
+    // Cursor moves to left side.
+    if target_cursor_column < current_cursor_column {
+      search_left_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        viewport_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // Cursor moves to right side (even just for 0-chars).
+      search_right_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        viewport_start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  } else {
+    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
+    // have to do an extra reverse-iteration to find out the suitable first
+    // line for the new viewport.
+
+    debug_assert!(target_cursor_line as isize >= end_line);
+
+    let start_line = {
+      // This time, we iterate in reverse order.
+      let mut current_row: usize = 0;
+      let mut current_line: isize = target_cursor_line as isize;
+
+      while (current_row < window_height as usize) && (current_line >= 0) {
+        let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+          text,
+          viewport_start_column,
+          current_line as usize,
+          0,
+          window_height,
+          window_width,
+        );
+        current_row += rows.len();
+        current_line -= 1;
+      }
+      (current_line + 1) as usize
+    };
+
+    if target_cursor_column < current_cursor_column {
+      // To left side
+      search_left_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // To right side
+      search_right_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        viewport_start_column,
+        current_cursor_line,
+        current_cursor_char,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  }
 }
 
 fn wrap_nolinebreak_search_up(
