@@ -2938,12 +2938,11 @@ fn nowrap_search_left(
   }
 
   let mut new_start_column = new_start_column;
-  let target_cursor_width = text
-    .width_before(target_cursor_line, target_cursor_char)
-    .saturating_sub(1);
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
 
-  if target_cursor_width < new_start_column {
-    new_start_column = target_cursor_width;
+  if target_cursor_column < new_start_column {
+    new_start_column = target_cursor_column;
   }
 
   (new_start_line, new_start_column)
