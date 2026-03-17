@@ -2561,8 +2561,8 @@ pub fn search(
 fn search_down(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
-  search_left: wrap_detail::SearchFn,
-  search_right: wrap_detail::SearchFn,
+  search_left_fn: wrap_detail::SearchFn,
+  search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
   opts: &WindowOptions,
   text: &Text,
@@ -2646,7 +2646,7 @@ fn search_down(
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2662,7 +2662,7 @@ fn search_down(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2706,7 +2706,7 @@ fn search_down(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2722,7 +2722,7 @@ fn search_down(
       )
     } else {
       // To right side
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
