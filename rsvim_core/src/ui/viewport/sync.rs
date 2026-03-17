@@ -2679,6 +2679,7 @@ fn nowrap_search_down(
     };
 
     if target_cursor_column < current_cursor_column {
+      // To left side
       nowrap_search_left(
         sync_fn,
         line_process_fn,
@@ -2694,7 +2695,7 @@ fn nowrap_search_down(
         target_cursor_char,
       )
     } else {
-      // Cursor moves to right side (even just for 0-chars).
+      // To right side
       nowrap_search_right(
         sync_fn,
         line_process_fn,
