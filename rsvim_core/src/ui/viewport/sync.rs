@@ -2965,7 +2965,8 @@ fn wrap_nolinebreak_search_left(
   let window_height = size.height();
   let window_width = size.width();
 
-  // Try preview put the target cursor line with `start_column = 0`.
+  // Try preview put the target cursor line with `start_column = 0`, start from
+  // `current_row = 0`.
   let (
     preview_target_rows,
     _preview_target_start_fills,
