@@ -141,6 +141,7 @@ v8 = { version = "=146.3.0", default-features = false, features = [
 [workspace.lints.clippy]
 collapsible_else_if = "allow"
 collapsible_if = "allow"
+nonminimal_bool = "allow"
 
 # Debug
 [profile.dev.package.v8]

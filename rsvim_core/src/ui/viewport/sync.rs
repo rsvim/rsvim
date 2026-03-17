@@ -2637,28 +2637,6 @@ fn search_down(
     None => false,
   };
 
-  // Cursor is not only at bottom line in current viewport, it is also at the
-  // right-bottom corner of the window viewport.
-  //
-  // NOTE: If cursor is in **normal** mode, we don't allow cursor goes to
-  // line-break or line end, which is fine. But if cursor is in **insert**
-  // mode, it can goes to line-break or line end, here we will have to give it
-  // 1 more column.
-  //
-  // For wrap=false, this doesn't have any impact.
-  // For wrap=true, if cursor is at the right-bottom conrner, and it happens to
-  // be a line-break or line end. We need to do some adjustments:
-  //
-  // 1. If the viewport can contain more than 1 line (i.e. the cursor line),
-  //    move `start_line` to downward for 1 more line.
-  // 2. If the viewport can only contain 1 line (i.e. the cursor line), do
-  //    nothing. We leave this case to `search_left` or `search_right`
-  //    methods to move `start_column` to right side for 1 more column.
-  let cursor_is_at_right_bottom_corner = if cursor_is_in_bottom_line {
-  } else {
-    false
-  };
-
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
@@ -2826,7 +2804,7 @@ fn search_up(
   let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
   {
     Some(current_cursor_line_rows) => {
-      match viewport.lines.get(&cursor_viewport.line_idx()) {
+      match viewport.lines().get(&cursor_viewport.line_idx()) {
         Some(line_viewport) => {
           line_viewport.rows.len() == current_cursor_line_rows
         }
