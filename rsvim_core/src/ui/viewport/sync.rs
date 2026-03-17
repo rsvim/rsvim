@@ -2896,7 +2896,7 @@ fn nowrap_search_left(
   text: &Text,
   _size: &U16Size,
   new_start_line: usize,
-  mut new_start_column: usize,
+  new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2933,6 +2933,7 @@ fn nowrap_search_left(
     }
   }
 
+  let mut new_start_column = new_start_column;
   let target_cursor_width = text
     .width_before(target_cursor_line, target_cursor_char)
     .saturating_sub(1);
@@ -2985,7 +2986,7 @@ fn nowrap_search_right(
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
-  mut new_start_column: usize,
+  new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3022,6 +3023,7 @@ fn nowrap_search_right(
     );
   }
 
+  let mut new_start_column = new_start_column;
   let out_of_line =
     text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
   // For eol or line-end, add 1 more column
