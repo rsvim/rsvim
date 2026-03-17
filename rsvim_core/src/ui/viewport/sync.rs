@@ -2397,8 +2397,8 @@ fn search_anchor_rightward_wrap(
 
   if cannot_fully_contains_target_cursor_line {
     // Case-1
-    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
-    // line.
+    // For `start_line`, force it to be `target_cursor_line`, because viewport
+    // can only contain this line (and still cannot put all of it inside).
     // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
     let start_line = target_cursor_line;
     let start_column = viewport_start_column;
@@ -2983,32 +2983,31 @@ fn wrap_nolinebreak_search_left(
 
   // Current window cannot contain the target cursor line, i.e. target cursor
   // line is just too long to be put in current window.
-  let cannot_fully_contains_target_cursor_line =
+  let cannot_completely_contain_target_cursor_line =
     preview_target_rows.len() > window_height as usize;
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let only_contains_target_cursor_line =
+  let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  if cannot_fully_contains_target_cursor_line {
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
+
+  if cannot_completely_contain_target_cursor_line {
     // Case-1
-    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
-    // line.
-    // For `start_column`, still use old `viewport.start_column_idx()` and wait to be adjusted.
+
+    // For `start_line`, force it to be `target_cursor_line`, because viewport
+    // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
-    let start_column = viewport.start_column_idx();
-    wrap_detail::adjust_wrap_1(
-      detail::AdjustOptions::no_rightward(),
-      proc_fn,
-      text,
-      window_actual_size,
-      target_cursor_line,
-      target_cursor_char,
-      start_line,
-      start_column,
-    )
-  } else if only_contains_target_cursor_line {
+
+    // For `start_column`, simply pick the smaller one between
+    // `target_cursor_column` and `new_start_column` as the new viewport
+    // `start_column`.
+    let start_column = std::cmp::min(new_start_column, target_cursor_column);
+
+    (start_line, start_column)
+  } else if exactly_contains_target_cursor_line {
     // Case-2.1
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
