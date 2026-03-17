@@ -3000,7 +3000,7 @@ fn wrap_nolinebreak_search_left(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  (0, 0)
+  unimplemented!()
 }
 
 fn wrap_linebreak_search_left(
@@ -3016,7 +3016,7 @@ fn wrap_linebreak_search_left(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  (0, 0)
+  unimplemented!()
 }
 
 fn nowrap_search_right(
