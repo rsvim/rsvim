@@ -2997,6 +2997,8 @@ fn wrap_nolinebreak_search_left(
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
   {
+    // Case-1 and Case-2
+
     // For `start_line`, force it to be `target_cursor_line`, because viewport
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
@@ -3010,24 +3012,116 @@ fn wrap_nolinebreak_search_left(
 
     (start_line, start_column)
   } else {
-    // Case-2.2
-    // For `start_line`, simply force it to be the old `viewport.start_line_idx()` because we are not
-    // going to move viewport upward/downward (only leftward/rightward). Thus the value won't
-    // change.
-    // Force `start_column` to be 0, because viewport can contains the line.
-    let start_line = viewport.start_line_idx();
-    let start_column = 0_usize;
-    wrap_detail::adjust_wrap_2_2(
-      detail::AdjustOptions::no_rightward(),
-      proc_fn,
-      viewport.lines(),
-      text,
-      window_actual_size,
-      target_cursor_line,
-      target_cursor_char,
-      start_line,
-      start_column,
-    )
+    // Case-3
+
+    // For `start_column`, force it to be 0.
+    let start_column = 0;
+
+    // For `start_line`, we have two cases:
+    // 1. If `target_cursor_char` is at right-bottom corner of the window, and
+    //    it happens to be either end-of-line or line end (i.e. out of last
+    //    visible char in cursor line). Mean while, our viewing algorithm
+    //    (`sync`) will not render eol (`\n`) in viewport. For example:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |CCCCCCCCCC|\n <- line-1
+    //    |3rd.\n    |   <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    The window width is 10, and the width of line-0 and line-1 happen to
+    //    be 20 and 10, and their eol (`\n`) don't render in the viewport.
+    //    In such case, if cursor is in **insert** mode in line-0 and char-20
+    //    (this position allow user inserts at the end of line-0), then we need
+    //    to put the cursor position at row-2 and column-0, in this example, it
+    //    is the `_` in the beginning of line-1:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |_CCCCCCCCC|\n <- line-1
+    //    |3rd.\n    |   <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    In such case, if `target_cursor_line` and `target_cursor_char` is at
+    //    right-bottom corner of the window, in this example, it is the `_` in
+    //    line-2:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |CCCCCCCCCC|\n <- line-1
+    //    |DDDDDDDDDD|_\n <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    In this example, we cannot put the target cursor at next row and
+    //    column-0. So we need to change the `start_line` to `start_line + 1`,
+    //    this would give the bottom line 1 more row to put the target cursor.
+    //
+    // 2. Otherwise we just use `new_start_line`.
+
+    let (preview_viewport_range, preview_viewport) =
+      sync_fn(text, size, new_start_line, start_column);
+
+    let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
+      match preview_viewport.last() {
+        Some((last_preview_line, last_preview_line_viewport)) => {
+          // Target cursor line is at the bottom line in preview viewport.
+          let is_bottom_line = *last_preview_line == target_cursor_line;
+
+          // Target cursor is at the right-bottom corner in current window or
+          // preview viewport.
+          let at_right_bottom = if is_bottom_line {
+            if let Some((last_preview_row, last_preview_row_viewport)) =
+              last_preview_line_viewport.rows().last()
+            {
+              // How do we detect whether target cursor is at right-bottom
+              // corner?
+              //
+              // 1. The last row of the preview viewport is not empty
+              let last_row_not_empty = last_preview_row_viewport.end_char_idx()
+                > last_preview_row_viewport.start_char_idx();
+              // 2. The end char of last row == `target_cursor_char`
+              let at_last_row =
+                last_preview_row_viewport.end_char_idx() == target_cursor_char;
+              // 3. The width of last row >= `window_width`
+              let last_row_full_width = text
+                .width_before(
+                  target_cursor_line,
+                  last_preview_row_viewport.end_char_idx(),
+                )
+                .saturating_sub(text.width_before(
+                  target_cursor_line,
+                  last_preview_row_viewport.start_char_idx(),
+                ))
+                >= window_width as usize;
+
+              last_row_not_empty && at_last_row && last_row_full_width
+            } else {
+              false
+            }
+          } else {
+            false
+          };
+          (is_bottom_line, at_right_bottom)
+        }
+        None => (false, false),
+      };
+
+    let start_line = if cursor_is_in_bottom_line && cursor_is_at_right_bottom {
+      start_line + 1
+    } else {
+      start_line
+    };
+
+    (start_line, start_column)
   }
 }
 
