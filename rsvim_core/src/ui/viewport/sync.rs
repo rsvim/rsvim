@@ -2605,6 +2605,11 @@ fn nowrap_search_down(
     None => false,
   };
 
+  let current_cursor_column =
+    text.width_before(current_cursor_line, current_cursor_char);
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
+
   // Whether `target_cursor_line` is inside step-1 iteration result.
   if cursor_is_in_current_viewport
     && !(cursor_is_in_bottom_line && !cursor_is_fully_shown_in_current_viewport)
@@ -2614,7 +2619,7 @@ fn nowrap_search_down(
     // viewport.
 
     // Cursor moves to left side.
-    if target_cursor_char < current_cursor_char {
+    if target_cursor_column < current_cursor_column {
       nowrap_search_left(
         sync_fn,
         line_process_fn,
@@ -2673,7 +2678,7 @@ fn nowrap_search_down(
       (current_line + 1) as usize
     };
 
-    if target_cursor_char < current_cursor_char {
+    if target_cursor_column < current_cursor_column {
       nowrap_search_left(
         sync_fn,
         line_process_fn,
