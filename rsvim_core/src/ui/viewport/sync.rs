@@ -2994,9 +2994,9 @@ fn wrap_nolinebreak_search_left(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if cannot_completely_contain_target_cursor_line {
-    // Case-1
-
+  if cannot_completely_contain_target_cursor_line
+    || exactly_contains_target_cursor_line
+  {
     // For `start_line`, force it to be `target_cursor_line`, because viewport
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
@@ -3009,27 +3009,6 @@ fn wrap_nolinebreak_search_left(
     // wrap_detail::adjust_wrap_2_1(...)
 
     (start_line, start_column)
-  } else if exactly_contains_target_cursor_line {
-    // Case-2.1
-
-    // For `start_line`, force it to be `target_cursor_line`, because viewport
-    // exactly contains this line.
-    let start_line = target_cursor_line;
-
-    // For `start_column`, force it to be 0, because viewport can exactly
-    // contain this line.
-    let start_column = 0_usize;
-
-    wrap_detail::adjust_wrap_2_1(
-      detail::AdjustOptions::no_rightward(),
-      proc_fn,
-      text,
-      window_actual_size,
-      target_cursor_line,
-      target_cursor_char,
-      start_line,
-      start_column,
-    )
   } else {
     // Case-2.2
     // For `start_line`, simply force it to be the old `viewport.start_line_idx()` because we are not
