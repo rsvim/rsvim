@@ -3190,9 +3190,9 @@ fn nowrap_search_right(
 fn wrap_search_right(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
+  _viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
+  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
@@ -3200,5 +3200,165 @@ fn wrap_search_right(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  unimplemented!()
+  let window_height = size.height();
+  let window_width = size.width();
+
+  // Try preview put the target cursor line with `start_column = 0`, start from
+  // `current_row = 0`.
+  let (
+    preview_target_rows,
+    _preview_target_start_fills,
+    _preview_target_end_fills,
+    _,
+  ) = line_process_fn(
+    text,
+    0,
+    target_cursor_line,
+    0_u16,
+    window_height,
+    window_width,
+  );
+
+  // Current window cannot contain the target cursor line, i.e. target cursor
+  // line is just too long to be put in current window.
+  let cannot_completely_contain_target_cursor_line =
+    preview_target_rows.len() > window_height as usize;
+
+  // Current window can exactly contain the target cursor line, i.e. target
+  // cursor line just happens to use all the rows in current window.
+  let exactly_contains_target_cursor_line =
+    preview_target_rows.len() == window_height as usize;
+
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
+
+  if cannot_completely_contain_target_cursor_line
+    || exactly_contains_target_cursor_line
+  {
+    // Case-1 and Case-2
+
+    // For `start_line`, force it to be `target_cursor_line`, because viewport
+    // can only contain this line (and still cannot put all of it inside).
+    let start_line = target_cursor_line;
+
+    // For `start_column`, simply pick the smaller one between
+    // `target_cursor_column` and `new_start_column` as the new viewport
+    // `start_column`.
+    let start_column = std::cmp::min(new_start_column, target_cursor_column);
+
+    // wrap_detail::adjust_wrap_2_1(...)
+
+    (start_line, start_column)
+  } else {
+    // Case-3
+
+    // For `start_column`, force it to be 0.
+    let start_column = 0;
+
+    // For `start_line`, we have two cases:
+    // 1. If `target_cursor_char` is at right-bottom corner of the window, and
+    //    it happens to be either end-of-line or line end (i.e. out of last
+    //    visible char in cursor line). Mean while, our viewing algorithm
+    //    (`sync`) will not render eol (`\n`) in viewport. For example:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |CCCCCCCCCC|\n <- line-1
+    //    |3rd.\n    |   <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    The window width is 10, and the width of line-0 and line-1 happen to
+    //    be 20 and 10, and their eol (`\n`) don't render in the viewport.
+    //    In such case, if cursor is in **insert** mode in line-0 and char-20
+    //    (this position allow user inserts at the end of line-0), then we need
+    //    to put the cursor position at row-2 and column-0, in this example, it
+    //    is the `_` in the beginning of line-1:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |_CCCCCCCCC|\n <- line-1
+    //    |3rd.\n    |   <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    In such case, if `target_cursor_line` and `target_cursor_char` is at
+    //    right-bottom corner of the window, in this example, it is the `_` in
+    //    line-2:
+    //
+    //    ```
+    //    +----------+
+    //    |AAAAAAAAAA|   <- line-0
+    //    |BBBBBBBBBB|\n
+    //    |CCCCCCCCCC|\n <- line-1
+    //    |DDDDDDDDDD|_\n <- line-2
+    //    +----------+
+    //    ```
+    //
+    //    In this example, we cannot put the target cursor at next row and
+    //    column-0. So we need to change the `start_line` to `start_line + 1`,
+    //    this would give the bottom line 1 more row to put the target cursor.
+    //
+    // 2. Otherwise we just use `new_start_line`.
+
+    let (_preview_viewport_range, preview_viewport) =
+      sync_fn(text, size, new_start_line, start_column);
+
+    let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
+      match preview_viewport.last() {
+        Some((last_preview_line, last_preview_line_viewport)) => {
+          // Target cursor line is at the bottom line in preview viewport.
+          let is_bottom_line = *last_preview_line == target_cursor_line;
+
+          // Target cursor is at the right-bottom corner in current window or
+          // preview viewport.
+          let at_right_bottom = if is_bottom_line {
+            if let Some((_last_preview_row, last_preview_row_viewport)) =
+              last_preview_line_viewport.rows().last()
+            {
+              // How do we detect whether target cursor is at right-bottom
+              // corner?
+              //
+              // 1. The last row of the preview viewport is not empty
+              let last_row_not_empty = last_preview_row_viewport.end_char_idx()
+                > last_preview_row_viewport.start_char_idx();
+              // 2. The end char of last row == `target_cursor_char`
+              let at_last_row =
+                last_preview_row_viewport.end_char_idx() == target_cursor_char;
+              // 3. The width of last row >= `window_width`
+              let last_row_full_width = text
+                .width_before(
+                  target_cursor_line,
+                  last_preview_row_viewport.end_char_idx(),
+                )
+                .saturating_sub(text.width_before(
+                  target_cursor_line,
+                  last_preview_row_viewport.start_char_idx(),
+                ))
+                >= window_width as usize;
+
+              last_row_not_empty && at_last_row && last_row_full_width
+            } else {
+              false
+            }
+          } else {
+            false
+          };
+          (is_bottom_line, at_right_bottom)
+        }
+        None => (false, false),
+      };
+
+    let start_line = if cursor_is_in_bottom_line && cursor_is_at_right_bottom {
+      new_start_line + 1
+    } else {
+      new_start_line
+    };
+
+    (start_line, start_column)
+  }
 }
