@@ -2476,27 +2476,31 @@ pub fn search(
       .unwrap_or(0_usize),
   );
 
-  let (sync_fn, line_process_fn, search_left_fn, search_right_fn) =
-    match (opts.wrap(), opts.line_break()) {
-      (false, _) => (
-        nowrap_sync,
-        nowrap_line_process,
-        nowrap_search_left,
-        nowrap_search_right,
-      ),
-      (true, false) => (
-        wrap_nolinebreak_sync,
-        wrap_nolinebreak_line_process,
-        wrap_nolinebreak_search_left,
-        wrap_nolinebreak_search_right,
-      ),
-      (true, true) => (
-        wrap_linebreak_sync,
-        wrap_linebreak_line_process,
-        wrap_linebreak_search_left,
-        wrap_linebreak_search_right,
-      ),
-    };
+  let (sync_fn, line_process_fn, search_left_fn, search_right_fn): (
+    wrap_detail::SyncFn,
+    wrap_detail::LineProcessFn,
+    wrap_detail::SearchFn,
+    wrap_detail::SearchFn,
+  ) = match (opts.wrap(), opts.line_break()) {
+    (false, _) => (
+      nowrap_sync,
+      nowrap_line_process,
+      nowrap_search_left,
+      nowrap_search_right,
+    ),
+    (true, false) => (
+      wrap_nolinebreak_sync,
+      wrap_nolinebreak_line_process,
+      wrap_nolinebreak_search_left,
+      wrap_nolinebreak_search_right,
+    ),
+    (true, true) => (
+      wrap_linebreak_sync,
+      wrap_linebreak_line_process,
+      wrap_linebreak_search_left,
+      wrap_linebreak_search_right,
+    ),
+  };
   if target_cursor_line < cursor_viewport.line_idx() {
     // Cursor moves upward
     search_up(
