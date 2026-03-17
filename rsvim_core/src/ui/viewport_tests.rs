@@ -67,7 +67,7 @@ pub fn update_viewport(
 }
 
 fn search_viewport(
-  direction: ViewportSearchDirection,
+  _direction: ViewportSearchDirection,
   tree: &mut Tree,
   window_id: NodeId,
   buf: BufferArc,
@@ -79,8 +79,9 @@ fn search_viewport(
   let old = tree.window(window_id).unwrap().viewport();
   let buf = lock!(buf);
   let opts = *tree.window(window_id).unwrap().options();
-  let (start_line, start_column) = old.search_anchor(
-    direction,
+  let cursor_viewport = tree.window(window_id).unwrap().cursor_viewport();
+  let (start_line, start_column) = old.search(
+    &cursor_viewport,
     &opts,
     buf.text(),
     &tree.window(window_id).unwrap().actual_shape().size(),
