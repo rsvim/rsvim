@@ -1,5 +1,6 @@
 //! Viewport internal algorithms.
 
+use super::CursorViewport;
 use super::Viewport;
 use crate::buf::text::Text;
 use crate::prelude::*;
@@ -993,13 +994,12 @@ mod wrap_detail {
       /* sync_fn */ SyncFn,
       /* line_process_fn */ LineProcessFn,
       /* viewport */ &Viewport,
+      /* cursor_viewport */ &CursorViewport,
       /* opts */ &WindowOptions,
       /* text */ &Text,
       /* size */ &U16Size,
       /* new_start_line */ usize,
       /* mut new_start_column */ usize,
-      /* current_cursor_line */ usize,
-      /* current_cursor_char */ usize,
       /* target_cursor_line */ usize,
       /* target_cursor_char */ usize,
     ) -> (/* start_line */ usize, /* start_column */ usize);
@@ -2457,11 +2457,10 @@ fn search_anchor_rightward_wrap(
 // Returns `(start_line, start_column)` for the new viewport.
 pub fn search(
   viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2476,7 +2475,7 @@ pub fn search(
   );
 
   // Cursor moves upward
-  if target_cursor_line < current_cursor_line {
+  if target_cursor_line < cursor_viewport.line_idx() {
     match (opts.wrap(), opts.line_break()) {
       (false, _) => search_up(
         nowrap_sync,
@@ -2484,11 +2483,10 @@ pub fn search(
         nowrap_search_left,
         nowrap_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2498,11 +2496,10 @@ pub fn search(
         wrap_nolinebreak_search_left,
         wrap_nolinebreak_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2512,11 +2509,10 @@ pub fn search(
         wrap_linebreak_search_left,
         wrap_linebreak_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2532,11 +2528,10 @@ pub fn search(
         nowrap_search_left,
         nowrap_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2546,11 +2541,10 @@ pub fn search(
         wrap_nolinebreak_search_left,
         wrap_nolinebreak_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2560,11 +2554,10 @@ pub fn search(
         wrap_linebreak_search_left,
         wrap_linebreak_search_right,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -2578,11 +2571,10 @@ fn search_down(
   search_left_fn: wrap_detail::SearchFn,
   search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2614,7 +2606,7 @@ fn search_down(
         window_height,
         window_width,
       );
-      if current_line == current_cursor_line as isize {
+      if current_line == cursor_viewport.line_idx() as isize {
         cursor_line_rows_in_viewport = Some(rows.len());
       }
       current_row += rows.len() as u16;
@@ -2630,12 +2622,22 @@ fn search_down(
     && (end_line > target_cursor_line as isize);
   // Cursor line is at the bottom line in current viewport.
   let cursor_is_in_bottom_line = end_line == (target_cursor_line + 1) as isize;
+  // Cursor is not only at bottom line in current viewport, it is also at the
+  // right-bottom corner of the window viewport.
+  // NOTE: If cursor is in **normal** mode, we don't allow cursor goes to
+  // line-break or line end, which is fine. But if cursor is in **insert**
+  // mode, it can goes to line-break or line end, here we will have to give it
+  // 1 more column.
+  let cursor_is_at_right_bottom_corner = if cursor_is_in_bottom_line {
+  } else {
+    false
+  };
   // Cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
   let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
   {
     Some(current_cursor_line_rows) => {
-      match viewport.lines.get(&current_cursor_line) {
+      match viewport.lines.get(&cursor_viewport.line_idx()) {
         Some(line_viewport) => {
           line_viewport.rows.len() == current_cursor_line_rows
         }
@@ -2646,7 +2648,7 @@ fn search_down(
   };
 
   let current_cursor_column =
-    text.width_before(current_cursor_line, current_cursor_char);
+    text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
@@ -2664,13 +2666,12 @@ fn search_down(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         viewport_start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2680,13 +2681,12 @@ fn search_down(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         viewport_start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2724,13 +2724,12 @@ fn search_down(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2740,13 +2739,12 @@ fn search_down(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2760,11 +2758,10 @@ fn search_up(
   search_left_fn: wrap_detail::SearchFn,
   search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  current_cursor_line: usize,
-  current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2796,7 +2793,7 @@ fn search_up(
         window_height,
         window_width,
       );
-      if current_line == current_cursor_line as isize {
+      if current_line == cursor_viewport.line_idx() as isize {
         cursor_line_rows_in_viewport = Some(rows.len());
       }
       current_row += rows.len() as u16;
@@ -2817,7 +2814,7 @@ fn search_up(
   let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
   {
     Some(current_cursor_line_rows) => {
-      match viewport.lines.get(&current_cursor_line) {
+      match viewport.lines.get(&cursor_viewport.line_idx()) {
         Some(line_viewport) => {
           line_viewport.rows.len() == current_cursor_line_rows
         }
@@ -2828,7 +2825,7 @@ fn search_up(
   };
 
   let current_cursor_column =
-    text.width_before(current_cursor_line, current_cursor_char);
+    text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
@@ -2846,13 +2843,12 @@ fn search_up(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         viewport_start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2862,13 +2858,12 @@ fn search_up(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         viewport_start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2906,13 +2901,12 @@ fn search_up(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2922,13 +2916,12 @@ fn search_up(
         sync_fn,
         line_process_fn,
         viewport,
+        cursor_viewport,
         opts,
         text,
         size,
         start_line,
         viewport_start_column,
-        current_cursor_line,
-        current_cursor_char,
         target_cursor_line,
         target_cursor_char,
       )
