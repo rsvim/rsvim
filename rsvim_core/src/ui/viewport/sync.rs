@@ -2491,14 +2491,14 @@ pub fn search(
     (true, false) => (
       wrap_nolinebreak_sync,
       wrap_nolinebreak_line_process,
-      wrap_nolinebreak_search_left,
-      wrap_nolinebreak_search_right,
+      wrap_search_left,
+      wrap_search_right,
     ),
     (true, true) => (
       wrap_linebreak_sync,
       wrap_linebreak_line_process,
-      wrap_linebreak_search_left,
-      wrap_linebreak_search_right,
+      wrap_search_left,
+      wrap_search_right,
     ),
   };
   if target_cursor_line < cursor_viewport.line_idx() {
@@ -2949,12 +2949,12 @@ fn nowrap_search_left(
   (new_start_line, new_start_column)
 }
 
-fn wrap_nolinebreak_search_left(
+fn wrap_search_left(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
+  _viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
+  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
@@ -3125,22 +3125,6 @@ fn wrap_nolinebreak_search_left(
   }
 }
 
-fn wrap_linebreak_search_left(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
-  text: &Text,
-  size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  unimplemented!()
-}
-
 fn nowrap_search_right(
   _sync_fn: wrap_detail::SyncFn,
   _line_process_fn: wrap_detail::LineProcessFn,
@@ -3203,23 +3187,7 @@ fn nowrap_search_right(
   (new_start_line, new_start_column)
 }
 
-fn wrap_nolinebreak_search_right(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
-  text: &Text,
-  size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  unimplemented!()
-}
-
-fn wrap_linebreak_search_right(
+fn wrap_search_right(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
