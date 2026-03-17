@@ -2556,9 +2556,10 @@ fn nowrap_search_down(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
 
-  let end_line = {
+  let (end_line, current_cursor_line_rows) = {
     let mut current_row: u16 = 0;
     let mut current_line: isize = viewport_start_line as isize;
+    let mut cursor_line_rows_in_viewport: Option<usize> = None;
 
     // Start with `viewport_start_line`, iterate lines from top to bottom in the
     // viewport.
@@ -2573,15 +2574,40 @@ fn nowrap_search_down(
         window_height,
         window_width,
       );
+      if current_line == current_cursor_line as isize {
+        cursor_line_rows_in_viewport = Some(rows.len());
+      }
       current_row += rows.len() as u16;
       current_line += 1;
     }
-    current_line
+    (current_line, cursor_line_rows_in_viewport)
+  };
+
+  // Cursor line is already in current viewport (i.e. we don't have to change
+  // `viewport_start_line` for a new viewport).
+  let cursor_is_in_current_viewport = (viewport_start_line
+    <= target_cursor_line)
+    && (end_line > target_cursor_line as isize);
+  // Cursor line is at the bottom line in current viewport.
+  let cursor_is_in_bottom_line = end_line == (target_cursor_line + 1) as isize;
+  // Cursor line is fully shown in current viewport, since our viewing
+  // algorithm support partial rendering for the bottom line.
+  let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
+  {
+    Some(current_cursor_line_rows) => {
+      match viewport.lines.get(&current_cursor_line) {
+        Some(line_viewport) => {
+          line_viewport.rows.len() == current_cursor_line_rows
+        }
+        None => false,
+      }
+    }
+    None => false,
   };
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
-  if (viewport_start_line <= target_cursor_line)
-    && (end_line > target_cursor_line as isize)
+  if cursor_is_in_current_viewport
+    && !(cursor_is_in_bottom_line && !cursor_is_fully_shown_in_current_viewport)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
