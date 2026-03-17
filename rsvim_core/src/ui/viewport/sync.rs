@@ -3008,8 +3008,6 @@ fn wrap_search_left(
     // `start_column`.
     let start_column = std::cmp::min(new_start_column, target_cursor_column);
 
-    // wrap_detail::adjust_wrap_2_1(...)
-
     (start_line, start_column)
   } else {
     // Case-3
@@ -3241,12 +3239,20 @@ fn wrap_search_right(
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
 
-    // For `start_column`, simply pick the smaller one between
-    // `target_cursor_column` and `new_start_column` as the new viewport
-    // `start_column`.
-    let start_column = std::cmp::min(new_start_column, target_cursor_column);
-
-    // wrap_detail::adjust_wrap_2_1(...)
+    // For `start_column`, first calculate the `target_cursor_start_column`
+    // based on the `target_cursor_column` as the end column in the window.
+    // Then simply pick the smaller one between `target_cursor_start_column`
+    // and `new_start_column` as the new viewport `start_column`.
+    let target_cursor_end_column =
+      if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
+        target_cursor_column + 1
+      } else {
+        target_cursor_column
+      };
+    let target_cursor_start_column =
+      target_cursor_end_column.saturating_sub(window_width as usize);
+    let start_column =
+      std::cmp::max(new_start_column, target_cursor_start_column);
 
     (start_line, start_column)
   } else {
