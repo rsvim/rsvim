@@ -3006,14 +3006,20 @@ fn wrap_nolinebreak_search_left(
     // `start_column`.
     let start_column = std::cmp::min(new_start_column, target_cursor_column);
 
+    // wrap_detail::adjust_wrap_2_1(...)
+
     (start_line, start_column)
   } else if exactly_contains_target_cursor_line {
     // Case-2.1
-    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
-    // line.
-    // Force `start_column` to be 0, because viewport can contains this line.
+
+    // For `start_line`, force it to be `target_cursor_line`, because viewport
+    // exactly contains this line.
     let start_line = target_cursor_line;
+
+    // For `start_column`, force it to be 0, because viewport can exactly
+    // contain this line.
     let start_column = 0_usize;
+
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::no_rightward(),
       proc_fn,
