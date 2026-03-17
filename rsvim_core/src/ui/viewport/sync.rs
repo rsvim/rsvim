@@ -3067,7 +3067,7 @@ fn wrap_nolinebreak_search_left(
     //
     // 2. Otherwise we just use `new_start_line`.
 
-    let (preview_viewport_range, preview_viewport) =
+    let (_preview_viewport_range, preview_viewport) =
       sync_fn(text, size, new_start_line, start_column);
 
     let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
@@ -3079,7 +3079,7 @@ fn wrap_nolinebreak_search_left(
           // Target cursor is at the right-bottom corner in current window or
           // preview viewport.
           let at_right_bottom = if is_bottom_line {
-            if let Some((last_preview_row, last_preview_row_viewport)) =
+            if let Some((_last_preview_row, last_preview_row_viewport)) =
               last_preview_line_viewport.rows().last()
             {
               // How do we detect whether target cursor is at right-bottom
@@ -3116,9 +3116,9 @@ fn wrap_nolinebreak_search_left(
       };
 
     let start_line = if cursor_is_in_bottom_line && cursor_is_at_right_bottom {
-      start_line + 1
+      new_start_line + 1
     } else {
-      start_line
+      new_start_line
     };
 
     (start_line, start_column)
