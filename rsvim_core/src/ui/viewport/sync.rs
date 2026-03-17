@@ -2660,10 +2660,10 @@ fn nowrap_search_down(
 
     let start_line = {
       // This time, we iterate in reverse order.
-      let mut n_rows: usize = 0;
+      let mut current_row: usize = 0;
       let mut current_line: isize = target_cursor_line as isize;
 
-      while (n_rows < window_height as usize) && (current_line >= 0) {
+      while (current_row < window_height as usize) && (current_line >= 0) {
         let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
           text,
           viewport_start_column,
@@ -2672,7 +2672,7 @@ fn nowrap_search_down(
           window_height,
           window_width,
         );
-        n_rows += rows.len();
+        current_row += rows.len();
         current_line -= 1;
       }
       (current_line + 1) as usize
