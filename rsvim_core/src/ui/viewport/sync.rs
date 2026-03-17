@@ -211,7 +211,7 @@ fn wrap_nolinebreak_line_process(
   text: &Text,
   start_column: usize,
   current_line: usize,
-  mut current_row: u16,
+  current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
@@ -222,6 +222,7 @@ fn wrap_nolinebreak_line_process(
       window_height as usize,
     ));
 
+  let mut current_row = current_row;
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
@@ -418,7 +419,7 @@ fn wrap_linebreak_line_process(
   text: &Text,
   start_column: usize,
   current_line: usize,
-  mut current_row: u16,
+  current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
@@ -430,6 +431,7 @@ fn wrap_linebreak_line_process(
       window_height as usize,
     ));
 
+  let mut current_row = current_row;
   let mut start_fills: usize = 0;
   let mut end_fills: usize = 0;
 
@@ -2474,94 +2476,60 @@ pub fn search(
       .unwrap_or(0_usize),
   );
 
-  // Cursor moves upward
-  if target_cursor_line < cursor_viewport.line_idx() {
+  let (sync_fn, line_process_fn, search_left_fn, search_right_fn) =
     match (opts.wrap(), opts.line_break()) {
-      (false, _) => search_up(
+      (false, _) => (
         nowrap_sync,
         nowrap_line_process,
         nowrap_search_left,
         nowrap_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
       ),
-      (true, false) => search_up(
+      (true, false) => (
         wrap_nolinebreak_sync,
         wrap_nolinebreak_line_process,
         wrap_nolinebreak_search_left,
         wrap_nolinebreak_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
       ),
-      (true, true) => search_up(
+      (true, true) => (
         wrap_linebreak_sync,
         wrap_linebreak_line_process,
         wrap_linebreak_search_left,
         wrap_linebreak_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
       ),
-    }
+    };
+  if target_cursor_line < cursor_viewport.line_idx() {
+    // Cursor moves upward
+    search_up(
+      sync_fn,
+      line_process_fn,
+      search_left_fn,
+      search_right_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    )
   } else {
     // Cursor moves downward, or just moves to left/right side. But in this
     // algorithm, we have to moves to downward (even just for 0-lines) before
     // moving to left/right side.
-    match (opts.wrap(), opts.line_break()) {
-      (false, _) => search_down(
-        nowrap_sync,
-        nowrap_line_process,
-        nowrap_search_left,
-        nowrap_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      (true, false) => search_down(
-        wrap_nolinebreak_sync,
-        wrap_nolinebreak_line_process,
-        wrap_nolinebreak_search_left,
-        wrap_nolinebreak_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      (true, true) => search_down(
-        wrap_linebreak_sync,
-        wrap_linebreak_line_process,
-        wrap_linebreak_search_left,
-        wrap_linebreak_search_right,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-    }
+
+    search_down(
+      sync_fn,
+      line_process_fn,
+      search_left_fn,
+      search_right_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    )
   }
 }
 
