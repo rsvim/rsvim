@@ -2933,6 +2933,7 @@ fn nowrap_search_left(
   _sync_fn: wrap_detail::SyncFn,
   _line_process_fn: wrap_detail::LineProcessFn,
   _viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
   _opts: &WindowOptions,
   text: &Text,
   _size: &U16Size,
