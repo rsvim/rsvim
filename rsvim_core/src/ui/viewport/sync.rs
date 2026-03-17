@@ -2938,8 +2938,6 @@ fn nowrap_search_left(
   _size: &U16Size,
   new_start_line: usize,
   mut new_start_column: usize,
-  _current_cursor_line: usize,
-  _current_cursor_char: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
