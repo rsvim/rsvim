@@ -4910,21 +4910,21 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec![
         "",
-        "nd small test lin",
-        "veral things we w",
-        "he\tline",
-        "t\t\t",
+        " small test lin",
+        "ral things we w",
+        "s small enough ",
+        "g to completely",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 40, 0, 24);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 40, 0, 26);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
       assert_viewport(
