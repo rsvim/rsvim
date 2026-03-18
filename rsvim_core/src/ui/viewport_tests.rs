@@ -5030,17 +5030,18 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-5
     {
-      let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
+      let expect =
+        vec!["", "t inside.\n", "", "e-wrap and word", "f either line-w"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 50, 2, 85);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 50, 2, 57);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 0), (5, 6), (6, 1)]
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
       assert_viewport(
