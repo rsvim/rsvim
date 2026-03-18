@@ -2938,8 +2938,38 @@ fn nowrap_search_left(
   }
 
   let mut new_start_column = new_start_column;
-  let target_cursor_column =
+  let mut target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
+
+  // If `target_cursor_char` is eol or line end, and now we are moving to left
+  // side. It could be something like:
+  //
+  // ```
+  //            +----------+
+  //  AAAAAAAAAA|BBBBBBBBBB|\n   <- line-0
+  //  CCCCCCCCCC|_\n       |     <- line-1
+  //  3rd.\n    |          |     <- line-2
+  //            +----------+
+  // ```
+  //
+  // Note: The cursor is at line-1, the first column.
+  // In such case, it will be better to move `start_column` to left for 1 more
+  // column, and showing the first visible char (i.e. neither eol nor line
+  // end). Then the new viewport will become something like:
+  //
+  // ```
+  //           +----------+
+  //  AAAAAAAAA|ABBBBBBBBB|B\n  <- line-0
+  //  CCCCCCCCC|C_\n      |     <- line-1
+  //  3rd.\n   |          |     <- line-2
+  //           +----------+
+  // ```
+  //
+  // Now it looks much better.
+
+  if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
+    target_cursor_column = target_cursor_column.saturating_sub(1);
+  }
 
   if target_cursor_column < new_start_column {
     new_start_column = target_cursor_column;
