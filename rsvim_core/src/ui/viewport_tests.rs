@@ -4153,7 +4153,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-3
     {
-      let expect = vec!["", "", "", "mpletely\tp", "t:\n"];
+      let expect = vec!["", "", "", "mpletely\tp", ":\n"];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 95);
