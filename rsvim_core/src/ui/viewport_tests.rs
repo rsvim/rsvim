@@ -4975,13 +4975,13 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec![
         "",
         "",
-        "o test:\n",
-        "mpletely put in",
-        "\n", // <-- cursor wants last `\n`
+        "to test:\n",
+        "ompletely put i",
+        ":\n", // <-- cursor wants last `\n`
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 46);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 45);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
