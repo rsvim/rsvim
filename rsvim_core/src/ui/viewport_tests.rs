@@ -6921,6 +6921,216 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       );
     }
   }
+
+  #[test]
+  fn new7() {
+    test_log_init();
+
+    let terminal_size = size!(15, 5);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "\t1. When the line is small enough to completely put inside.\n",
+        "\t2. When it too long to completely put:\n",
+        "\t3. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "\t4. The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+
+    // Initialize
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "imple and small t",
+        "est lines.\n",
+        "But still it cont",
+      ];
+
+      let actual = tree.window(window_id).unwrap().viewport();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        0,
+        3,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "But still it cont",
+        "ains several thin",
+        "gs we want to tes",
+        "t:\n",
+        "\t1. When",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 15, 2, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 2)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        2,
+        4,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "small\t",
+        "enough\tto",
+        "\tcompletel",
+        "y\tput",
+        "\tinside.\n",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 52);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(3, 4)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
+      info!("actual:{:?}", actual);
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        3,
+        4,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-3
+    {
+      let expect =
+        vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 24);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(4, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(4, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        4,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-4
+    {
+      let expect = vec![
+        "both\t",
+        "line-wrap\t",
+        "and\tword-w",
+        "rap\toption",
+        "s\tare",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 82, 5, 59);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(5, 5)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(5, 5)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        5,
+        6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-5
+    {
+      let expect = vec![
+        "if\t",
+        "either\tlin",
+        "e-wrap\tor",
+        "\tword-wrap",
+        "\toptions",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 82, 6, 78);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(6, 7)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(6, 2)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-6
+    {
+      let expect = vec![""];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 0, 7, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(7, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(7, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        7,
+        8,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+  }
 }
 
 mod tests_search_anchor_downward_wrap_nolinebreak_eol {
