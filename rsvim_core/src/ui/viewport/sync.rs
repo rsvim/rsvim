@@ -2520,7 +2520,6 @@ pub fn search(
     // Cursor moves downward, or just moves to left/right side. But in this
     // algorithm, we have to moves to downward (even just for 0-lines) before
     // moving to left/right side.
-
     search_down(
       sync_fn,
       line_process_fn,
