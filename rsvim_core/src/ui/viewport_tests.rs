@@ -4975,9 +4975,9 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec![
         "",
         "",
-        "",
-        "pletely\tpu",
-        "t:\n", // <-- cursor wants last `\n`
+        "o test:\n",
+        "mpletely put in",
+        "\n", // <-- cursor wants last `\n`
       ];
 
       let actual =
