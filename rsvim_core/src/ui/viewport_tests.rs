@@ -5004,13 +5004,13 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["", "", "", "", "not\tset.\n"];
+      let expect = vec!["", "", "", "", "s are not set.\n"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 100, 1, 146);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 100, 1, 84);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 1)]
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       let expect_end_fills: BTreeMap<usize, usize> =
