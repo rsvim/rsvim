@@ -5057,7 +5057,13 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-6
     {
-      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+      let expect = vec![
+        "\t1. When",
+        "\t2. When",
+        "\t3. The ",
+        "\t4. The ",
+        "", // <-- cursor wants the first column
+      ];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 7, 0, 3, 0);
@@ -5067,7 +5073,7 @@ mod tests_search_anchor_downward_nowrap {
           .into_iter()
           .collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
       assert_viewport(
