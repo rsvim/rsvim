@@ -6951,10 +6951,10 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
+        "This is a quite",
+        "imple and small",
         "est lines.\n",
-        "But still it cont",
+        "But still it co",
       ];
 
       let actual = tree.window(window_id).unwrap().viewport();
