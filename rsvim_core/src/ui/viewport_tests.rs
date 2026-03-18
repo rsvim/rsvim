@@ -6952,8 +6952,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
-        "imple and small",
-        "est lines.\n",
+        " simple and sma",
+        "ll test lines.\n",
         "But still it co",
       ];
 
@@ -6976,10 +6976,10 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
-        "But still it cont",
-        "ains several thin",
-        "gs we want to tes",
-        "t:\n",
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
         "\t1. When",
       ];
 
@@ -6989,7 +6989,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 2)].into_iter().collect();
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
