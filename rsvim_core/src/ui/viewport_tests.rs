@@ -4940,7 +4940,13 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-2
     {
-      let expect = vec!["", "", ":\n", "ly put inside.\n", ""];
+      let expect = vec![
+        "",
+        "",
+        ":\n",
+        "ly put inside.\n", // <-- cursor is at last `\n`
+        "",
+      ];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 3, 130, 0, 52);
