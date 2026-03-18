@@ -4911,7 +4911,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec![
         "",
         " small test lin",
-        "ral things we w", // <-- cursor is at last `w`
+        "ral things we w", // <-- cursor wants last `w`
         "s small enough ",
         "g to completely",
       ];
@@ -4944,7 +4944,7 @@ mod tests_search_anchor_downward_nowrap {
         "",
         "",
         ":\n",
-        "ly put inside.\n", // <-- cursor is at last `\n`
+        "ly put inside.\n", // <-- cursor wants last `\n`
         "",
       ];
 
@@ -4972,10 +4972,16 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-3
     {
-      let expect = vec!["", "", "", "pletely\tpu", "t:\n"];
+      let expect = vec![
+        "",
+        "",
+        "",
+        "pletely\tpu",
+        "t:\n", // <-- cursor wants last `\n`
+      ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 96);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 46);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
