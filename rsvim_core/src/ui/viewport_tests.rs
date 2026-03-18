@@ -4911,7 +4911,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec![
         "",
         " small test lin",
-        "ral things we w",
+        "ral things we w", // <-- cursor is at last `w`
         "s small enough ",
         "g to completely",
       ];
