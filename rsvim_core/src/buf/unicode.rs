@@ -2,6 +2,7 @@
 
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::FileFormatOption;
+use crate::prelude::*;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use icu::properties::CodePointMapData;
@@ -80,15 +81,19 @@ pub fn char_width(opt: &BufferOptions, c: char) -> usize {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
       AsciiChar::Tab => opt.tab_stop() as usize,
-      AsciiChar::LineFeed => 0,
-      AsciiChar::CarriageReturn => {
-        if opt.file_format() == FileFormatOption::Unix {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          format!("{ascii_formatter}").len()
-        } else {
-          0
-        }
-      }
+      AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+      // AsciiChar::CarriageReturn => {
+      //   if opt.file_format() == FileFormatOption::Unix {
+      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+      //     trace!(
+      //       "CarriageReturn (\r) len:{}",
+      //       format!("{ascii_formatter}").len()
+      //     );
+      //     format!("{ascii_formatter}").len()
+      //   } else {
+      //     0
+      //   }
+      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         format!("{ascii_formatter}").len()
