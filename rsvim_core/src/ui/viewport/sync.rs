@@ -2733,7 +2733,7 @@ fn search_down(
 
     if cfg!(debug_assertions) {
       let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line > viewport_last_line);
+      debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
     let start_line = {
@@ -2877,7 +2877,7 @@ fn search_up(
 
     if cfg!(debug_assertions) {
       let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line > viewport_last_line);
+      debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
     let start_line = {
