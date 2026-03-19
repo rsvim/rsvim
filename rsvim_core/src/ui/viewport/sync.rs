@@ -2609,8 +2609,8 @@ fn _if_keep_current_viewport_start_line(
   // Target cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
   let target_cursor_line_is_fully_shown_in_current_viewport =
-    if target_cursor_line_is_in_current_viewport
-      && let Some(current_cursor_line_rows) = current_cursor_line_rows
+    if let Some(current_cursor_line_rows) = current_cursor_line_rows
+      && target_cursor_line_is_in_current_viewport
     {
       let (
         preview_target_rows,
