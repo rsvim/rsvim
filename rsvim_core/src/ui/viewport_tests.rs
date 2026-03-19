@@ -5218,9 +5218,9 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec![
         "",
         "",
-        "to test:\n",
+        "to test:\r\n",
         "ompletely put i",
-        ":\n", // <-- cursor wants last `\n`
+        ":\r\n", // <-- cursor wants last `\n`
       ];
 
       let actual =
@@ -5247,7 +5247,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["", "", "", "", "s are not set.\n"];
+      let expect = vec!["", "", "", "", "s are not set.\r\n"];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 5, 100, 1, 84);
@@ -5273,8 +5273,13 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-5
     {
-      let expect =
-        vec!["", "t inside.\n", "", "e-wrap and word", "f either line-w"];
+      let expect = vec![
+        "",
+        "t inside.\r\n",
+        "",
+        "e-wrap and word",
+        "f either line-w",
+      ];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 6, 50, 2, 57);
