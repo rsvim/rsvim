@@ -2586,27 +2586,28 @@ fn search_down(
     (current_line, current_cursor_line_rows)
   };
 
-  // Cursor line is already in current viewport (i.e. we don't have to change
-  // `viewport_start_line` for a new viewport).
-  let cursor_is_in_current_viewport = (viewport_start_line
+  // Target cursor line is already in current viewport, i.e. we don't have to
+  // change `viewport_start_line` for a new viewport.
+  let target_cursor_is_in_current_viewport = (viewport_start_line
     <= target_cursor_line)
     && (end_line > target_cursor_line as isize);
-  // Cursor line is at the bottom line in current viewport.
-  let cursor_is_in_bottom_line = end_line == (target_cursor_line + 1) as isize;
-  // Cursor line is fully shown in current viewport, since our viewing
+  // Target cursor line is at the bottom line in current viewport.
+  let target_cursor_is_in_bottom_line =
+    end_line == (target_cursor_line + 1) as isize;
+  // Target cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
-  let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
-  {
-    Some(current_cursor_line_rows) => {
-      match viewport.lines.get(&cursor_viewport.line_idx()) {
-        Some(line_viewport) => {
-          line_viewport.rows.len() == current_cursor_line_rows
+  let target_cursor_is_fully_shown_in_current_viewport =
+    match current_cursor_line_rows {
+      Some(current_cursor_line_rows) => {
+        match viewport.lines.get(&cursor_viewport.line_idx()) {
+          Some(line_viewport) => {
+            line_viewport.rows.len() == current_cursor_line_rows
+          }
+          None => false,
         }
-        None => false,
       }
-    }
-    None => false,
-  };
+      None => false,
+    };
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2614,8 +2615,9 @@ fn search_down(
     text.width_before(target_cursor_line, target_cursor_char);
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
-  if cursor_is_in_current_viewport
-    && !(cursor_is_in_bottom_line && !cursor_is_fully_shown_in_current_viewport)
+  if target_cursor_is_in_current_viewport
+    && !(target_cursor_is_in_bottom_line
+      && !target_cursor_is_fully_shown_in_current_viewport)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
