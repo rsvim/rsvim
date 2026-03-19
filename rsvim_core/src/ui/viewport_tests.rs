@@ -7308,7 +7308,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "d if both line-",
         "wrap and word-w",
         "rap options are",
-        // "both\t", "line-wrap\t", "and\tword-w", "rap\toption", "s\tare",
       ];
 
       let actual =
