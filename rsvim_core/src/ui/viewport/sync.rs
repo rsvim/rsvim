@@ -3369,7 +3369,7 @@ fn wrap_search_right(
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column =
-    text.width_until(target_cursor_line, target_cursor_char);
+    text.width_before(target_cursor_line, target_cursor_char);
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
