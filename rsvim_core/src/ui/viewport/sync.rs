@@ -2562,7 +2562,7 @@ fn search_down(
   let (end_line, current_cursor_line_rows) = {
     let mut current_row: u16 = 0;
     let mut current_line: isize = viewport_start_line as isize;
-    let mut cursor_line_rows_in_viewport: Option<usize> = None;
+    let mut current_cursor_line_rows: Option<usize> = None;
 
     // Start with `viewport_start_line`, iterate lines from top to bottom in the
     // viewport.
@@ -2578,12 +2578,12 @@ fn search_down(
         window_width,
       );
       if current_line == cursor_viewport.line_idx() as isize {
-        cursor_line_rows_in_viewport = Some(rows.len());
+        current_cursor_line_rows = Some(rows.len());
       }
       current_row += rows.len() as u16;
       current_line += 1;
     }
-    (current_line, cursor_line_rows_in_viewport)
+    (current_line, current_cursor_line_rows)
   };
 
   // Cursor line is already in current viewport (i.e. we don't have to change
@@ -2739,7 +2739,7 @@ fn search_up(
   let (end_line, current_cursor_line_rows) = {
     let mut current_row: u16 = 0;
     let mut current_line: isize = viewport_start_line as isize;
-    let mut cursor_line_rows_in_viewport: Option<usize> = None;
+    let mut current_cursor_line_rows: Option<usize> = None;
 
     // Start with `viewport_start_line`, iterate lines from top to bottom in the
     // viewport.
@@ -2755,12 +2755,12 @@ fn search_up(
         window_width,
       );
       if current_line == cursor_viewport.line_idx() as isize {
-        cursor_line_rows_in_viewport = Some(rows.len());
+        current_cursor_line_rows = Some(rows.len());
       }
       current_row += rows.len() as u16;
       current_line += 1;
     }
-    (current_line, cursor_line_rows_in_viewport)
+    (current_line, current_cursor_line_rows)
   };
 
   // Cursor line is already in current viewport (i.e. we don't have to change
