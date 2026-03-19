@@ -2594,21 +2594,21 @@ fn _if_keep_current_viewport_start_line(
 
   // Target cursor line is already in current viewport, i.e. we don't have to
   // change `viewport_start_line` for a new viewport.
-  let target_cursor_is_in_current_viewport = (viewport_start_line
+  let target_cursor_line_is_in_current_viewport = (viewport_start_line
     <= target_cursor_line)
     && (end_line > target_cursor_line as isize);
 
   // Target cursor line is at the bottom line in current viewport.
-  let target_cursor_is_in_bottom_line = if target_cursor_is_in_current_viewport
-  {
-    end_line == (target_cursor_line + 1) as isize
-  } else {
-    false
-  };
+  let target_cursor_line_is_in_bottom_line =
+    if target_cursor_line_is_in_current_viewport {
+      end_line == (target_cursor_line + 1) as isize
+    } else {
+      false
+    };
 
   // Target cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
-  let target_cursor_is_fully_shown_in_current_viewport =
+  let target_cursor_line_is_fully_shown_in_current_viewport =
     match current_cursor_line_rows {
       Some(current_cursor_line_rows) => {
         match viewport.lines.get(&cursor_viewport.line_idx()) {
@@ -2622,9 +2622,9 @@ fn _if_keep_current_viewport_start_line(
     };
 
   (
-    target_cursor_is_in_current_viewport,
-    target_cursor_is_in_bottom_line,
-    target_cursor_is_fully_shown_in_current_viewport,
+    target_cursor_line_is_in_current_viewport,
+    target_cursor_line_is_in_bottom_line,
+    target_cursor_line_is_fully_shown_in_current_viewport,
   )
 }
 
@@ -2651,9 +2651,9 @@ fn search_down(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let (
-    target_cursor_is_in_current_viewport,
-    target_cursor_is_in_bottom_line,
-    target_cursor_is_fully_shown_in_current_viewport,
+    target_cursor_line_is_in_current_viewport,
+    target_cursor_line_is_in_bottom_line,
+    target_cursor_line_is_fully_shown_in_current_viewport,
   ) = _if_keep_current_viewport_start_line(
     line_process_fn,
     viewport,
@@ -2670,9 +2670,9 @@ fn search_down(
     text.width_before(target_cursor_line, target_cursor_char);
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
-  if target_cursor_is_in_current_viewport
-    && !(target_cursor_is_in_bottom_line
-      && !target_cursor_is_fully_shown_in_current_viewport)
+  if target_cursor_line_is_in_current_viewport
+    && !(target_cursor_line_is_in_bottom_line
+      && !target_cursor_line_is_fully_shown_in_current_viewport)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
@@ -2793,9 +2793,9 @@ fn search_up(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let (
-    target_cursor_is_in_current_viewport,
-    target_cursor_is_in_bottom_line,
-    target_cursor_is_fully_shown_in_current_viewport,
+    target_cursor_line_is_in_current_viewport,
+    target_cursor_line_is_in_bottom_line,
+    target_cursor_line_is_fully_shown_in_current_viewport,
   ) = _if_keep_current_viewport_start_line(
     line_process_fn,
     viewport,
@@ -2812,9 +2812,9 @@ fn search_up(
     text.width_before(target_cursor_line, target_cursor_char);
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
-  if target_cursor_is_in_current_viewport
-    && !(target_cursor_is_in_bottom_line
-      && !target_cursor_is_fully_shown_in_current_viewport)
+  if target_cursor_line_is_in_current_viewport
+    && !(target_cursor_line_is_in_bottom_line
+      && !target_cursor_line_is_fully_shown_in_current_viewport)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
