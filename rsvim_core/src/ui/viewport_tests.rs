@@ -7254,7 +7254,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 52);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
