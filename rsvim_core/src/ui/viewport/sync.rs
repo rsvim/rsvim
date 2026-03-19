@@ -2550,7 +2550,7 @@ pub fn search(
 //    be the bottom line but only part of it is shown, it could lead to some
 //    issues. For target cursor, we always try to show all of the line, except
 //    the target cursor line is just too long to put in the entire window.
-fn _if_can_keep_current_viewport_start_line(
+fn _if_keep_current_viewport_start_line(
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
@@ -2654,7 +2654,7 @@ fn search_down(
     target_cursor_is_in_current_viewport,
     target_cursor_is_in_bottom_line,
     target_cursor_is_fully_shown_in_current_viewport,
-  ) = _if_can_keep_current_viewport_start_line(
+  ) = _if_keep_current_viewport_start_line(
     line_process_fn,
     viewport,
     cursor_viewport,
@@ -2796,7 +2796,7 @@ fn search_up(
     target_cursor_is_in_current_viewport,
     target_cursor_is_in_bottom_line,
     target_cursor_is_fully_shown_in_current_viewport,
-  ) = _if_can_keep_current_viewport_start_line(
+  ) = _if_keep_current_viewport_start_line(
     line_process_fn,
     viewport,
     cursor_viewport,
