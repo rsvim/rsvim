@@ -2565,22 +2565,22 @@ fn _if_keep_current_viewport_start_line(
   let window_width = size.width();
   let buffer_len_lines = text.rope().len_lines();
   let viewport_last_line = *viewport.lines().last().unwrap().0;
-  let current_cursor_line_rows = viewport
+  let current_cursor_line_rows_len = viewport
     .lines()
     .iter()
-    .filter(|(line_idx, line_viewport)| {
+    .filter(|(line_idx, _line_viewport)| {
       **line_idx == cursor_viewport.line_idx()
     })
-    .map(|(line_idx, line_viewport)| line_viewport.rows().len())
+    .map(|(_line_idx, line_viewport)| line_viewport.rows().len())
     .collect_vec()
     .first()
     .copied();
 
   if cfg!(debug_assertions) {
-    let (end_line, current_cursor_line_rows_len) = {
+    let (end_line, rows_len) = {
       let mut current_row: u16 = 0;
       let mut current_line: isize = viewport_start_line as isize;
-      let mut current_cursor_line_rows_len: Option<usize> = None;
+      let mut rows_len: Option<usize> = None;
 
       // Start with `viewport_start_line`, iterate lines from top to bottom in the
       // viewport.
@@ -2596,15 +2596,15 @@ fn _if_keep_current_viewport_start_line(
           window_width,
         );
         if current_line == cursor_viewport.line_idx() as isize {
-          current_cursor_line_rows_len = Some(rows.len());
+          rows_len = Some(rows.len());
         }
         current_row += rows.len() as u16;
         current_line += 1;
       }
-      (current_line, current_cursor_line_rows_len)
+      (current_line, rows_len)
     };
     debug_assert_eq!(end_line, (viewport_last_line as isize) + 1);
-    debug_assert_eq!(current_cursor_line_rows, current_cursor_line_rows_len);
+    debug_assert_eq!(current_cursor_line_rows_len, rows_len);
   }
 
   // Target cursor line is already in current viewport, i.e. we don't have to
@@ -2620,7 +2620,7 @@ fn _if_keep_current_viewport_start_line(
   // Target cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
   let target_cursor_line_is_fully_shown_in_current_viewport =
-    if let Some(current_cursor_line_rows) = current_cursor_line_rows_len
+    if let Some(rows_len) = current_cursor_line_rows_len
       && target_cursor_line_is_in_current_viewport
     {
       let (
@@ -2636,7 +2636,7 @@ fn _if_keep_current_viewport_start_line(
         window_height,
         window_width,
       );
-      current_cursor_line_rows >= preview_target_rows.len()
+      rows_len >= preview_target_rows.len()
     } else {
       false
     };
