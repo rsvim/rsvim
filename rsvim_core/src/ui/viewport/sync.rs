@@ -2630,18 +2630,6 @@ fn _if_keep_current_viewport_start_line(
       false
     };
 
-  // match current_cursor_line_rows {
-  //   Some(current_cursor_line_rows) => {
-  //     match viewport.lines.get(&cursor_viewport.line_idx()) {
-  //       Some(line_viewport) => {
-  //         line_viewport.rows.len() == current_cursor_line_rows
-  //       }
-  //       None => false,
-  //     }
-  //   }
-  //   None => false,
-  // };
-
   (
     target_cursor_line_is_in_current_viewport,
     target_cursor_line_is_in_bottom_line,
