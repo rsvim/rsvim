@@ -3011,7 +3011,20 @@ fn nowrap_search_left(
   // Now it looks much better.
 
   if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
-    target_cursor_column = target_cursor_column.saturating_sub(1);
+    debug_assert!(
+      target_cursor_char
+        > text
+          .last_char_idx_on_line_exclude_eol(target_cursor_line)
+          .unwrap_or(0)
+        && target_cursor_char
+          <= text
+            .last_char_idx_on_line_exclude_eol(target_cursor_line)
+            .unwrap_or(0)
+            + 2
+    );
+    target_cursor_column = text
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0);
   }
 
   if target_cursor_column < new_start_column {
