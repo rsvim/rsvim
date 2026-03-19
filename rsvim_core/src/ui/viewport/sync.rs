@@ -2572,9 +2572,7 @@ fn _if_keep_current_viewport_start_line(
       **line_idx == cursor_viewport.line_idx()
     })
     .map(|(_line_idx, line_viewport)| line_viewport.rows().len())
-    .collect_vec()
-    .first()
-    .copied();
+    .next();
 
   if cfg!(debug_assertions) {
     let (end_line, rows_len) = {
@@ -2665,7 +2663,6 @@ fn search_down(
   let viewport_start_column = viewport.start_column_idx();
   let window_height = size.height();
   let window_width = size.width();
-  let buffer_len_lines = text.rope().len_lines();
 
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
@@ -2810,7 +2807,6 @@ fn search_up(
   let viewport_start_column = viewport.start_column_idx();
   let window_height = size.height();
   let window_width = size.width();
-  let buffer_len_lines = text.rope().len_lines();
 
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
