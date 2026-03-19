@@ -2,7 +2,6 @@
 
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::FileFormatOption;
-use crate::prelude::*;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use icu::properties::CodePointMapData;
