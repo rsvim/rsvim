@@ -2734,7 +2734,10 @@ fn search_down(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
-    debug_assert!(target_cursor_line as isize >= end_line);
+    if cfg!(debug_assertions) {
+      let viewport_last_line = *viewport.lines().last().unwrap().0;
+      debug_assert!(target_cursor_line > viewport_last_line);
+    }
 
     let start_line = {
       // This time, we iterate in reverse order.
@@ -2876,7 +2879,10 @@ fn search_up(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
-    debug_assert!(target_cursor_line as isize >= end_line);
+    if cfg!(debug_assertions) {
+      let viewport_last_line = *viewport.lines().last().unwrap().0;
+      debug_assert!(target_cursor_line > viewport_last_line);
+    }
 
     let start_line = {
       // This time, we iterate in reverse order.
