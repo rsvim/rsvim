@@ -2742,8 +2742,6 @@ fn search_down(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
-  let window_height = size.height();
-  let window_width = size.width();
 
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
@@ -2875,8 +2873,6 @@ fn search_up(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
-  let window_height = size.height();
-  let window_width = size.width();
 
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
