@@ -2536,6 +2536,98 @@ pub fn search(
   }
 }
 
+// Detect if we can keep current `viewport.start_line_idx()` unchanged, this
+// will reduce the viewport scrolls as small as we can, avoid too big jumps for
+// user eyes.
+//
+// It returns 3 booleans:
+// 1. Whether target cursor line is already in current viewport.
+// 2. Whether target cursor line is already in current viewport, and it is at
+//    the bottom/last line.
+// 3. Whether target cursor line is already in current viewport, and it is been
+//    fully shown in current viewport. Because we support the bottom line
+//    partial rendering, when option `wrap = true`, if target cursor happens to
+//    be the bottom line but only part of it is shown, it could lead to some
+//    issues. For target cursor, we always try to show all of the line, except
+//    the target cursor line is just too long to put in the entire window.
+fn _can_we_keep_current_viewport_start_line(
+  line_process_fn: wrap_detail::LineProcessFn,
+  viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
+  text: &Text,
+  size: &U16Size,
+  target_cursor_line: usize,
+  _target_cursor_char: usize,
+) -> (bool, bool, bool) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+  let window_height = size.height();
+  let window_width = size.width();
+  let buffer_len_lines = text.rope().len_lines();
+
+  let (end_line, current_cursor_line_rows) = {
+    let mut current_row: u16 = 0;
+    let mut current_line: isize = viewport_start_line as isize;
+    let mut current_cursor_line_rows: Option<usize> = None;
+
+    // Start with `viewport_start_line`, iterate lines from top to bottom in the
+    // viewport.
+    while (current_row < window_height)
+      && (current_line < buffer_len_lines as isize)
+    {
+      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+        text,
+        viewport_start_column,
+        current_line as usize,
+        current_row,
+        window_height,
+        window_width,
+      );
+      if current_line == cursor_viewport.line_idx() as isize {
+        current_cursor_line_rows = Some(rows.len());
+      }
+      current_row += rows.len() as u16;
+      current_line += 1;
+    }
+    (current_line, current_cursor_line_rows)
+  };
+
+  // Target cursor line is already in current viewport, i.e. we don't have to
+  // change `viewport_start_line` for a new viewport.
+  let target_cursor_is_in_current_viewport = (viewport_start_line
+    <= target_cursor_line)
+    && (end_line > target_cursor_line as isize);
+
+  // Target cursor line is at the bottom line in current viewport.
+  let target_cursor_is_in_bottom_line = if target_cursor_is_in_current_viewport
+  {
+    end_line == (target_cursor_line + 1) as isize
+  } else {
+    false
+  };
+
+  // Target cursor line is fully shown in current viewport, since our viewing
+  // algorithm support partial rendering for the bottom line.
+  let target_cursor_is_fully_shown_in_current_viewport =
+    match current_cursor_line_rows {
+      Some(current_cursor_line_rows) => {
+        match viewport.lines.get(&cursor_viewport.line_idx()) {
+          Some(line_viewport) => {
+            line_viewport.rows.len() == current_cursor_line_rows
+          }
+          None => false,
+        }
+      }
+      None => false,
+    };
+
+  (
+    target_cursor_is_in_current_viewport,
+    target_cursor_is_in_bottom_line,
+    target_cursor_is_fully_shown_in_current_viewport,
+  )
+}
+
 fn search_down(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
@@ -2765,27 +2857,28 @@ fn search_up(
     (current_line, current_cursor_line_rows)
   };
 
-  // Cursor line is already in current viewport (i.e. we don't have to change
-  // `viewport_start_line` for a new viewport).
-  let cursor_is_in_current_viewport = (viewport_start_line
+  // Target cursor line is already in current viewport, i.e. we don't have to
+  // change `viewport_start_line` for a new viewport.
+  let target_cursor_is_in_current_viewport = (viewport_start_line
     <= target_cursor_line)
     && (end_line > target_cursor_line as isize);
-  // Cursor line is at the bottom line in current viewport.
-  let cursor_is_in_bottom_line = end_line == (target_cursor_line + 1) as isize;
-  // Cursor line is fully shown in current viewport, since our viewing
+  // Target cursor line is at the bottom line in current viewport.
+  let target_cursor_is_in_bottom_line =
+    end_line == (target_cursor_line + 1) as isize;
+  // Target cursor line is fully shown in current viewport, since our viewing
   // algorithm support partial rendering for the bottom line.
-  let cursor_is_fully_shown_in_current_viewport = match current_cursor_line_rows
-  {
-    Some(current_cursor_line_rows) => {
-      match viewport.lines().get(&cursor_viewport.line_idx()) {
-        Some(line_viewport) => {
-          line_viewport.rows.len() == current_cursor_line_rows
+  let target_cursor_is_fully_shown_in_current_viewport =
+    match current_cursor_line_rows {
+      Some(current_cursor_line_rows) => {
+        match viewport.lines().get(&cursor_viewport.line_idx()) {
+          Some(line_viewport) => {
+            line_viewport.rows.len() == current_cursor_line_rows
+          }
+          None => false,
         }
-        None => false,
       }
-    }
-    None => false,
-  };
+      None => false,
+    };
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2793,8 +2886,9 @@ fn search_up(
     text.width_before(target_cursor_line, target_cursor_char);
 
   // Whether `target_cursor_line` is inside step-1 iteration result.
-  if cursor_is_in_current_viewport
-    && !(cursor_is_in_bottom_line && !cursor_is_fully_shown_in_current_viewport)
+  if target_cursor_is_in_current_viewport
+    && !(target_cursor_is_in_bottom_line
+      && !target_cursor_is_fully_shown_in_current_viewport)
   {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
