@@ -3369,7 +3369,7 @@ fn wrap_search_right(
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column =
-    text.width_before(target_cursor_line, target_cursor_char);
+    text.width_until(target_cursor_line, target_cursor_char);
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
@@ -3390,12 +3390,10 @@ fn wrap_search_right(
       } else {
         target_cursor_column
       };
-    let target_cursor_start_column =
-      target_cursor_end_column.saturating_sub(window_width as usize);
-    let start_column =
-      std::cmp::max(new_start_column, target_cursor_start_column);
+    let target_cursor_start_column = target_cursor_end_column
+      .saturating_sub((window_width as usize) * (window_height as usize));
 
-    (start_line, start_column)
+    (start_line, target_cursor_start_column)
   } else {
     // Case-3
 
@@ -3405,7 +3403,7 @@ fn wrap_search_right(
     // For `start_line`, we have two cases:
     // 1. If `target_cursor_char` is at right-bottom corner of the window, and
     //    it happens to be either end-of-line or line end (i.e. out of last
-    //    visible char in cursor line). Mean while, our viewing algorithm
+    //    visible char in cursor line). Meanwhile, our viewing algorithm
     //    (`sync`) will not render eol (`\n`) in viewport. For example:
     //
     //    ```

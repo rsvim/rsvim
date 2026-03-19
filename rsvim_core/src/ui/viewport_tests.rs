@@ -7246,11 +7246,11 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "small\t",
-        "enough\tto",
-        "\tcompletel",
-        "y\tput",
-        "\tinside.\n",
+        "\t1. Wh",
+        "en the line is ",
+        "small enough to",
+        " completely put",
+        " inside.\n",
       ];
 
       let actual =
