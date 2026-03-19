@@ -7303,16 +7303,16 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-4
     {
       let expect = vec![
-        "extra parts are",
-        " been truncated",
-        " if both line-w",
-        "rap and word-wr",
-        "ap options are ",
+        " extra parts ar",
+        "e been truncate",
+        "d if both line-",
+        "wrap and word-w",
+        "rap options are",
         // "both\t", "line-wrap\t", "and\tword-w", "rap\toption", "s\tare",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 82, 5, 15);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 82, 5, 14);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
