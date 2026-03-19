@@ -1,7 +1,6 @@
 //! Unicode utils.
 
 use crate::buf::opt::BufferOptions;
-use crate::buf::opt::FileFormatOption;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use icu::properties::CodePointMapData;
@@ -119,15 +118,15 @@ pub fn char_symbol(opt: &BufferOptions, c: char) -> CompactString {
       AsciiChar::Tab => {
         CompactString::from(" ".repeat(opt.tab_stop() as usize))
       }
-      AsciiChar::LineFeed => CompactString::new(""),
-      AsciiChar::CarriageReturn => {
-        if opt.file_format() == FileFormatOption::Unix {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          CompactString::from(format!("{ascii_formatter}"))
-        } else {
-          CompactString::new("")
-        }
-      }
+      AsciiChar::LineFeed | AsciiChar::CarriageReturn => CompactString::new(""),
+      // AsciiChar::CarriageReturn => {
+      //   if opt.file_format() == FileFormatOption::Unix {
+      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+      //     CompactString::from(format!("{ascii_formatter}"))
+      //   } else {
+      //     CompactString::new("")
+      //   }
+      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         CompactString::from(format!("{ascii_formatter}"))
