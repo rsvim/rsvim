@@ -3011,20 +3011,21 @@ fn nowrap_search_left(
   // Now it looks much better.
 
   if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
-    debug_assert!(
-      target_cursor_char
-        > text
-          .last_char_idx_on_line_exclude_eol(target_cursor_line)
-          .unwrap_or(0)
-        && target_cursor_char
-          <= text
-            .last_char_idx_on_line_exclude_eol(target_cursor_line)
-            .unwrap_or(0)
-            + 2
-    );
-    target_cursor_column = text
+    if cfg!(debug_assertions) {
+      if let Some(last_char_exclude_eol) =
+        text.last_char_idx_on_line_exclude_eol(target_cursor_line)
+      {
+        debug_assert!(
+          target_cursor_char > last_char_exclude_eol
+            && target_cursor_char <= last_char_exclude_eol + 2
+        );
+      }
+    }
+    let last_char_exclude_eol = text
       .last_char_idx_on_line_exclude_eol(target_cursor_line)
       .unwrap_or(0);
+    target_cursor_column =
+      text.width_before(target_cursor_line, last_char_exclude_eol);
   }
 
   if target_cursor_column < new_start_column {
