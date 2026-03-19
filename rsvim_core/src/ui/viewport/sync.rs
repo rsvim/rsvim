@@ -2658,8 +2658,6 @@ fn _if_keep_current_viewport_start_line(
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
@@ -2819,25 +2817,14 @@ fn search_down(
       debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
-    let start_line = {
-      // This time, we iterate in reverse order.
-      let mut current_row: usize = 0;
-      let mut current_line: isize = target_cursor_line as isize;
-
-      while (current_row < window_height as usize) && (current_line >= 0) {
-        let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-          text,
-          viewport_start_column,
-          current_line as usize,
-          0,
-          window_height,
-          window_width,
-        );
-        current_row += rows.len();
-        current_line -= 1;
-      }
-      (current_line + 1) as usize
-    };
+    let start_line = _reverse_search_target_cursor_line(
+      line_process_fn,
+      viewport,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
     if target_cursor_column < current_cursor_column {
       // To left side
@@ -2963,25 +2950,14 @@ fn search_up(
       debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
-    let start_line = {
-      // This time, we iterate in reverse order.
-      let mut current_row: usize = 0;
-      let mut current_line: isize = target_cursor_line as isize;
-
-      while (current_row < window_height as usize) && (current_line >= 0) {
-        let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-          text,
-          viewport_start_column,
-          current_line as usize,
-          0,
-          window_height,
-          window_width,
-        );
-        current_row += rows.len();
-        current_line -= 1;
-      }
-      (current_line + 1) as usize
-    };
+    let start_line = _reverse_search_target_cursor_line(
+      line_process_fn,
+      viewport,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
     if target_cursor_column < current_cursor_column {
       // To left side
