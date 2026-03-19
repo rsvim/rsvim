@@ -2792,56 +2792,19 @@ fn search_up(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-
-  let (end_line, current_cursor_line_rows) = {
-    let mut current_row: u16 = 0;
-    let mut current_line: isize = viewport_start_line as isize;
-    let mut current_cursor_line_rows: Option<usize> = None;
-
-    // Start with `viewport_start_line`, iterate lines from top to bottom in the
-    // viewport.
-    while (current_row < window_height)
-      && (current_line < buffer_len_lines as isize)
-    {
-      let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-        text,
-        viewport_start_column,
-        current_line as usize,
-        current_row,
-        window_height,
-        window_width,
-      );
-      if current_line == cursor_viewport.line_idx() as isize {
-        current_cursor_line_rows = Some(rows.len());
-      }
-      current_row += rows.len() as u16;
-      current_line += 1;
-    }
-    (current_line, current_cursor_line_rows)
-  };
-
-  // Target cursor line is already in current viewport, i.e. we don't have to
-  // change `viewport_start_line` for a new viewport.
-  let target_cursor_is_in_current_viewport = (viewport_start_line
-    <= target_cursor_line)
-    && (end_line > target_cursor_line as isize);
-  // Target cursor line is at the bottom line in current viewport.
-  let target_cursor_is_in_bottom_line =
-    end_line == (target_cursor_line + 1) as isize;
-  // Target cursor line is fully shown in current viewport, since our viewing
-  // algorithm support partial rendering for the bottom line.
-  let target_cursor_is_fully_shown_in_current_viewport =
-    match current_cursor_line_rows {
-      Some(current_cursor_line_rows) => {
-        match viewport.lines().get(&cursor_viewport.line_idx()) {
-          Some(line_viewport) => {
-            line_viewport.rows.len() == current_cursor_line_rows
-          }
-          None => false,
-        }
-      }
-      None => false,
-    };
+  let (
+    target_cursor_is_in_current_viewport,
+    target_cursor_is_in_bottom_line,
+    target_cursor_is_fully_shown_in_current_viewport,
+  ) = _if_can_keep_current_viewport_start_line(
+    line_process_fn,
+    viewport,
+    cursor_viewport,
+    text,
+    size,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
