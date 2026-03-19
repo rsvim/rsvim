@@ -5122,7 +5122,7 @@ mod tests_search_anchor_downward_nowrap {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!",
+        "Hello, RSVIM!\r\n",
         "This is a quite",
         "But still it co",
         "\t1. When",
