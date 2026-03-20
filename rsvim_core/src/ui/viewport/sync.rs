@@ -2989,15 +2989,12 @@ fn search_up(
   }
 }
 
-fn _find_start_column_to_leftward(
+fn _find_target_cursor_column_to_leftward(
   text: &Text,
   _size: &U16Size,
-  _new_start_line: usize,
-  new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> usize {
-  let mut new_start_column = new_start_column;
   let mut target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
@@ -3045,11 +3042,7 @@ fn _find_start_column_to_leftward(
       text.width_before(target_cursor_line, last_char_exclude_eol);
   }
 
-  if target_cursor_column < new_start_column {
-    new_start_column = target_cursor_column;
-  }
-
-  new_start_column
+  target_cursor_column
 }
 
 fn nowrap_search_left(
@@ -3098,14 +3091,17 @@ fn nowrap_search_left(
     }
   }
 
-  let new_start_column = _find_start_column_to_leftward(
+  let mut new_start_column = new_start_column;
+  let target_cursor_column = _find_target_cursor_column_to_leftward(
     text,
     size,
-    new_start_line,
-    new_start_column,
     target_cursor_line,
     target_cursor_char,
   );
+
+  if target_cursor_column < new_start_column {
+    new_start_column = target_cursor_column;
+  }
 
   (new_start_line, new_start_column)
 }
