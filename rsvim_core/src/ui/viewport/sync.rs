@@ -3407,7 +3407,6 @@ fn _find_start_column_to_rightward(
           target_cursor_line,
           last_preview_row_viewport.end_char_idx(),
         );
-
         let last_row_start_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.start_char_idx(),
