@@ -3398,28 +3398,22 @@ fn _find_start_column_to_rightward(
       let eol_or_line_end =
         text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
 
-      // Target cursor char is at right-bottom corner of window/viewport.
-      let at_right_bottom = {
-        // 2. The end char of last row == `target_cursor_char`
-        let at_last_row =
-          last_preview_row_viewport.end_char_idx() == target_cursor_char;
+      // The width of last row == `window_width`, i.e. the last row already
+      // uses all columns (full width).
+      // In such case, if the `target_cursor_char` is eol, we will need to
+      // give it 1 more column for it.
+      let last_row_is_full_width = text
+        .width_before(
+          target_cursor_line,
+          last_preview_row_viewport.end_char_idx(),
+        )
+        .saturating_sub(text.width_before(
+          target_cursor_line,
+          last_preview_row_viewport.start_char_idx(),
+        ))
+        >= window_width as usize;
 
-        // 3. The width of last row >= `window_width`
-        let last_row_full_width = text
-          .width_before(
-            target_cursor_line,
-            last_preview_row_viewport.end_char_idx(),
-          )
-          .saturating_sub(text.width_before(
-            target_cursor_line,
-            last_preview_row_viewport.start_char_idx(),
-          ))
-          >= window_width as usize;
-
-        at_last_row && last_row_full_width
-      };
-
-      if eol_or_line_end && at_right_bottom {
+      if eol_or_line_end && last_row_is_full_width {
         return new_start_column + 1;
       } else {
         return new_start_column;
@@ -3564,7 +3558,7 @@ fn wrap_search_right(
       start_line,
       target_cursor_start_column,
       target_cursor_line,
-      target_cursor_column,
+      target_cursor_char,
     );
 
     (start_line, target_cursor_start_column)
