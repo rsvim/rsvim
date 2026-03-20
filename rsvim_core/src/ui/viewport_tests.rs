@@ -7331,20 +7331,20 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-5
     {
       let expect = vec![
-        "if\t",
-        "either\tlin",
-        "e-wrap\tor",
-        "\tword-wrap",
-        "\toptions",
+        "extra parts are",
+        " split into the",
+        " next row, if e",
+        "ither line-wrap",
+        " or word-wrap o",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 82, 6, 78);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 82, 6, 15);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(6, 7)].into_iter().collect();
+        vec![(6, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(6, 2)].into_iter().collect();
+        vec![(6, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
