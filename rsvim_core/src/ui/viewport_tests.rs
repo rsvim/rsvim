@@ -7514,6 +7514,142 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       );
     }
   }
+
+  #[test]
+  fn new9() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "AAAAAAAAAA\n",
+        "BBBBBBBB\tBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\n",
+        "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n",
+        "EEEEEEEEEEEEEEE\n",
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\n",
+        "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n",
+      ],
+    );
+
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+
+    // Initialize
+    {
+      let expect = vec![
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+      ];
+
+      let actual = tree.window(window_id).unwrap().viewport();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        0,
+        2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 15, 1, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        1,
+        2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 49, 1, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        1,
+        2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-3
+    {
+      let expect = vec![
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBB\n",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 50, 1, 1);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        1,
+        2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+  }
 }
 
 mod tests_search_anchor_downward_wrap_nolinebreak_eol {
