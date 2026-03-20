@@ -50,19 +50,19 @@ impl Text {
   }
 }
 
-#[cfg(debug_assertions)]
-impl Drop for Text {
-  fn drop(&mut self) {
-    let cached_width = self.cached_width.borrow();
-    if cached_width.stats().total() > 0 {
-      trace!("|drop| cached_width {}", cached_width.stats());
-    }
-    let cached_lines = self.cached_lines.borrow();
-    if cached_lines.stats().total() > 0 {
-      trace!("|drop| cached_lines {}", cached_lines.stats());
-    }
-  }
-}
+// #[cfg(debug_assertions)]
+// impl Drop for Text {
+//   fn drop(&mut self) {
+//     let cached_width = self.cached_width.borrow();
+//     if cached_width.stats().total() > 0 {
+//       trace!("|drop| cached_width {}", cached_width.stats());
+//     }
+//     let cached_lines = self.cached_lines.borrow();
+//     if cached_lines.stats().total() > 0 {
+//       trace!("|drop| cached_lines {}", cached_lines.stats());
+//     }
+//   }
+// }
 
 // Unicode {
 impl Text {
@@ -290,6 +290,17 @@ impl Text {
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
       Some(line) => Self::is_eol_on_rope_line(&line, char_idx),
+      None => false,
+    }
+  }
+
+  /// Whether the `line_idx`/`char_idx` is eol (end-of-line), or line end.
+  pub fn is_eol_or_line_end(&self, line_idx: usize, char_idx: usize) -> bool {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        char_idx >= line.len_chars()
+          || Self::is_eol_on_rope_line(&line, char_idx)
+      }
       None => false,
     }
   }

@@ -1,7 +1,6 @@
 //! Unicode utils.
 
 use crate::buf::opt::BufferOptions;
-use crate::buf::opt::FileFormatOption;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use icu::properties::CodePointMapData;
@@ -80,15 +79,19 @@ pub fn char_width(opt: &BufferOptions, c: char) -> usize {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
       AsciiChar::Tab => opt.tab_stop() as usize,
-      AsciiChar::LineFeed => 0,
-      AsciiChar::CarriageReturn => {
-        if opt.file_format() == FileFormatOption::Unix {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          format!("{ascii_formatter}").len()
-        } else {
-          0
-        }
-      }
+      AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+      // AsciiChar::CarriageReturn => {
+      //   if opt.file_format() == FileFormatOption::Unix {
+      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+      //     trace!(
+      //       "CarriageReturn (\r) len:{}",
+      //       format!("{ascii_formatter}").len()
+      //     );
+      //     format!("{ascii_formatter}").len()
+      //   } else {
+      //     0
+      //   }
+      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         format!("{ascii_formatter}").len()
@@ -115,15 +118,15 @@ pub fn char_symbol(opt: &BufferOptions, c: char) -> CompactString {
       AsciiChar::Tab => {
         CompactString::from(" ".repeat(opt.tab_stop() as usize))
       }
-      AsciiChar::LineFeed => CompactString::new(""),
-      AsciiChar::CarriageReturn => {
-        if opt.file_format() == FileFormatOption::Unix {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          CompactString::from(format!("{ascii_formatter}"))
-        } else {
-          CompactString::new("")
-        }
-      }
+      AsciiChar::LineFeed | AsciiChar::CarriageReturn => CompactString::new(""),
+      // AsciiChar::CarriageReturn => {
+      //   if opt.file_format() == FileFormatOption::Unix {
+      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+      //     CompactString::from(format!("{ascii_formatter}"))
+      //   } else {
+      //     CompactString::new("")
+      //   }
+      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         CompactString::from(format!("{ascii_formatter}"))

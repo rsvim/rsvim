@@ -136,6 +136,7 @@ class Clippy(Cmd):
             aliases=[self._alias],
             help="cargo clippy",
         )
+        self.clippy_parser.add_argument("-v", "--verbose", action="store_true")
 
     def name(self) -> str:
         return self._name
@@ -147,6 +148,8 @@ class Clippy(Cmd):
         sccache()
         rustflags()
         cmd = "cargo clippy --workspace --all-targets"
+        if args.verbose:
+            cmd = f"{cmd} --verbose"
         run(cmd)
 
 

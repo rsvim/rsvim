@@ -584,7 +584,7 @@ impl Viewport {
   /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
   /// better user visuals).
   ///
-  /// Returns `start_line` and `start_column` for new viewport.
+  /// Returns `(start_line, start_column)` for a new viewport.
   pub fn search_anchor(
     &self,
     direction: ViewportSearchDirection,
@@ -633,6 +633,35 @@ impl Viewport {
         target_cursor_char,
       ),
     }
+  }
+
+  /// Search for a new viewport (i.e. `start_line`/`start_column`) with target
+  /// cursor line/char position, when cursor moves/scrolls.
+  ///
+  /// Returns `(start_line, start_column)` for a new viewport.
+  pub fn search(
+    &self,
+    cursor_viewport: &CursorViewport,
+    opts: &WindowOptions,
+    text: &Text,
+    size: &U16Size,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> (usize, usize) {
+    // If window is zero-sized.
+    if size.is_zero() {
+      return (0, 0);
+    }
+
+    sync::search(
+      self,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    )
   }
 
   #[cfg(not(test))]

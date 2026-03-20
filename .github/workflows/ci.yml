@@ -60,13 +60,17 @@ jobs:
         run: cargo doc --workspace
   clippy:
     name: Clippy
+    strategy:
+      matrix:
+        toolchain: [stable, 1.89.0]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
       - uses: davidlattimore/wild-action@latest
-      - name: Install Rust
-        run: |
-          rustup component add clippy
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
       - name: Clippy
         run: cargo clippy --all-targets
   unit_test:
