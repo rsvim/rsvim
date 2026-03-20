@@ -2989,7 +2989,7 @@ fn search_up(
   }
 }
 
-fn _find_target_cursor_column_to_leftward(
+fn _find_target_cursor_column_exclude_eol(
   text: &Text,
   _size: &U16Size,
   target_cursor_line: usize,
@@ -3092,7 +3092,7 @@ fn nowrap_search_left(
   }
 
   let mut new_start_column = new_start_column;
-  let target_cursor_column = _find_target_cursor_column_to_leftward(
+  let target_cursor_column = _find_target_cursor_column_exclude_eol(
     text,
     size,
     target_cursor_line,
@@ -3148,7 +3148,7 @@ fn wrap_search_left(
   let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_column = _find_target_cursor_column_to_leftward(
+  let target_cursor_column = _find_target_cursor_column_exclude_eol(
     text,
     size,
     target_cursor_line,
@@ -3164,9 +3164,49 @@ fn wrap_search_left(
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
 
-    // For `start_column`, simply pick the smaller one between
-    // `target_cursor_column` and `new_start_column` as the new viewport
-    // `start_column`.
+    // For `start_column`, it seems that we only need to pick the smaller one
+    // between `target_cursor_column` and `new_start_column`. But there is an
+    // edge case we need to consider, for example:
+    //
+    // ```
+    //           +----------+
+    // AAAAAAAAAA|AAAAAAAAAA|     <- line-0
+    //           |AAAAAAAAAA|
+    //           |AAAAAAAAA_|\n   <- Now cursor is at line-0, char-39. `start_column` is 10.
+    //           +----------+
+    //            BBBBBBBBBB      <- line-1
+    //            BBBBBBBBBB
+    //            BBBBBBBBBB
+    //            BB_\n           <- Cursor wants line-1, char-32.
+    // ```
+    //
+    // Cursor wants to move down to line-1, move left to char-32.
+    // In such case, the `new_start_column` is 10 (it is the current viewport
+    // `start_column`), the `target_cursor_column` is 32. If we simply use the
+    // smaller one between `new_start_column` and `target_cursor_column`, then
+    // the `start_column` is 10. And the viewport becomes:
+    //
+    // ```
+    //            AAAAAAAAAA     <- line-0
+    //            AAAAAAAAAA
+    //            AAAAAAAAAA
+    //            AAAAAAAAA\n    <- Previous cursor is at line-0, char-39.
+    //           +----------+
+    // BBBBBBBBBB|BBBBBBBBBB|    <- line-1
+    //           |BBBBBBBBBB|
+    //           |BB_\n     |    <- Cursor is at line-1, char-32, `start_column` is 10.
+    //           +----------+
+    // ```
+    //
+    // The looking is weird because there still are some empty columns left at
+    // the end of the last row, while at the beginning of the line, 10 `B`
+    // characters are not rendered in the viewport. The window spaces are
+    // wasted.
+    //
+    // So we try to do some more additional leftward movement on
+    // the `target_cursor_column`, to make give the new viewport can
+    // contain the `target_cursor_char`.
+
     let start_column = std::cmp::min(new_start_column, target_cursor_column);
 
     (start_line, start_column)
