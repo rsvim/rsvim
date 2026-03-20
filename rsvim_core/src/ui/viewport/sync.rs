@@ -3389,10 +3389,8 @@ fn wrap_search_right(
         target_cursor_column
       };
 
-    // For `start_column`, first calculate the `target_cursor_start_column`
-    // based on the `target_cursor_column` as the end column in the window.
-    // Then simply pick the smaller one between `target_cursor_start_column`
-    // and `new_start_column` as the new viewport `start_column`.
+    // For `start_column`, calculate the `target_cursor_start_column` based on
+    // the `target_cursor_column` as the end column in the window.
 
     let target_cursor_start_column = target_cursor_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
