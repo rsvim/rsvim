@@ -7587,8 +7587,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "\tBB",
         "BBBBBBBBBB",
+        "\tBB",
         "BBBBBBBBBB",
         "BBBBBBBBBB",
         "BBBBBBBBBB",
