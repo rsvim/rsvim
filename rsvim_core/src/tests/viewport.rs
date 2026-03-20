@@ -175,7 +175,13 @@ pub fn assert_viewport(
   for (i, e) in expect_rows.iter().enumerate() {
     info!("expect row[{}]:{:?}", i, e);
   }
-  assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+  assert_eq!(
+    expect_start_fills.len(),
+    expect_end_fills.len(),
+    "`expect_start_fills.len()` {:?} == `expect_end_fills.len()` {:?}",
+    expect_start_fills.len(),
+    expect_end_fills.len()
+  );
   for (k, start_v) in expect_start_fills.iter() {
     let end_v = expect_end_fills.get(k).unwrap();
     info!(
@@ -184,16 +190,45 @@ pub fn assert_viewport(
     );
   }
 
-  assert_eq!(actual.start_line_idx(), expect_start_line);
-  assert_eq!(actual.end_line_idx(), expect_end_line);
+  assert_eq!(
+    actual.start_line_idx(),
+    expect_start_line,
+    "`actual.start_line_idx()` {:?} == `expect_start_line` {:?}",
+    actual.start_line_idx(),
+    expect_start_line
+  );
+  assert_eq!(
+    actual.end_line_idx(),
+    expect_end_line,
+    "`actual.end_line_idx()` {:?} == `expect_end_line` {:?}",
+    actual.end_line_idx(),
+    expect_end_line
+  );
   if actual.lines().is_empty() {
-    assert!(actual.end_line_idx() <= actual.start_line_idx());
+    assert!(
+      actual.end_line_idx() <= actual.start_line_idx(),
+      "`actual.end_line_idx()` {:?} <= `actual.start_line_idx()` {:?}",
+      actual.end_line_idx(),
+      actual.start_line_idx()
+    );
   } else {
     let (first_line_idx, _first_line_viewport) =
       actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
-    assert_eq!(*first_line_idx, actual.start_line_idx());
-    assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    assert_eq!(
+      *first_line_idx,
+      actual.start_line_idx(),
+      "`*first_line_idx` {:?} == `actual.start_line_idx()` {:?}",
+      *first_line_idx,
+      actual.start_line_idx()
+    );
+    assert_eq!(
+      *last_line_idx,
+      actual.end_line_idx() - 1,
+      "`*last_line_idx` {:?} == `actual.end_line_idx() - 1` {:?}",
+      *last_line_idx,
+      actual.end_line_idx() - 1
+    );
   }
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),

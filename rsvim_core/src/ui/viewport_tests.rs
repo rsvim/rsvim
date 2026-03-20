@@ -6388,7 +6388,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         &actual,
         &expect,
         4,
-        5,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );
