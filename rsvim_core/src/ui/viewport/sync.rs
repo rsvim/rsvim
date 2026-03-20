@@ -3148,26 +3148,12 @@ fn wrap_search_left(
   let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_column =
-    text.width_before(target_cursor_line, target_cursor_char);
-
-  if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
-    if cfg!(debug_assertions) {
-      if let Some(last_char_exclude_eol) =
-        text.last_char_idx_on_line_exclude_eol(target_cursor_line)
-      {
-        debug_assert!(
-          target_cursor_char > last_char_exclude_eol
-            && target_cursor_char <= last_char_exclude_eol + 2
-        );
-      }
-    }
-    let last_char_exclude_eol = text
-      .last_char_idx_on_line_exclude_eol(target_cursor_line)
-      .unwrap_or(0);
-    target_cursor_column =
-      text.width_before(target_cursor_line, last_char_exclude_eol);
-  }
+  let target_cursor_column = _find_target_cursor_column_to_leftward(
+    text,
+    size,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
