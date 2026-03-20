@@ -3402,16 +3402,20 @@ fn _find_start_column_to_rightward(
       // uses all columns (full width).
       // In such case, if the `target_cursor_char` is eol, we will need to
       // give it 1 more column for it.
-      let last_row_is_full_width = text
-        .width_before(
+      let last_row_is_full_width = {
+        let last_row_end_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.end_char_idx(),
-        )
-        .saturating_sub(text.width_before(
+        );
+
+        let last_row_start_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.start_char_idx(),
-        ))
-        >= window_width as usize;
+        );
+        let last_row_width =
+          last_row_end_column.saturating_sub(last_row_start_column);
+        last_row_width >= window_width as usize
+      };
 
       if eol_or_line_end && last_row_is_full_width {
         return new_start_column + 1;
