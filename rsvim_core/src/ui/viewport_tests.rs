@@ -7395,7 +7395,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n",
         "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\n",
         "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n",
-        "EEEEEEEEEE\n",
+        "EEEEEEEEEEEEEEE\n",
         "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\n",
         "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n",
       ],
@@ -7433,26 +7433,26 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
-        "But still it co",
-        "ntains several ",
-        "things we want ",
-        "to test:\n",
-        "\t1. When",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB\n",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 15, 2, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 15, 1, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
+        1,
         2,
-        4,
         &expect_start_fills,
         &expect_end_fills,
       );
