@@ -3416,6 +3416,10 @@ fn _find_start_column_to_rightward(
         last_row_width >= window_width as usize
       };
 
+      // WARNING: This is very strange. This `eol_or_line_end &&
+      // last_row_is_full_width` branch actually never hits in unit tests.
+      // I think it is actually should be removed, but, let's keep it now until
+      // I am 100% sure about this.
       if eol_or_line_end && last_row_is_full_width {
         return new_start_column + 1;
       } else {
