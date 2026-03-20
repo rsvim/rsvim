@@ -7391,13 +7391,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       terminal_size,
       buf_opts,
       vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "\t1. When the line is small enough to completely put inside.\n",
-        "\t2. When it too long to completely put:\n",
-        "\t3. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "\t4. The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "AAAAAAAAAA\n",
+        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC\n",
+        "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n",
+        "EEEEEEEEEE\n",
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\n",
+        "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n",
       ],
     );
 
@@ -7407,24 +7407,24 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite",
-        " simple and sma",
-        "ll test lines.\n",
-        "But still it co",
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
       ];
 
       let actual = tree.window(window_id).unwrap().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         0,
-        3,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
