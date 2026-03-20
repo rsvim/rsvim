@@ -232,15 +232,24 @@ pub fn assert_viewport(
   }
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    actual.lines().len()
+    actual.lines().len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` {:?} == `actual.lines().len()` {:?}",
+    actual.end_line_idx() - actual.start_line_idx(),
+    actual.lines().len(),
   );
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    expect_start_fills.len()
+    expect_start_fills.len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` {:?} == `expect_start_fills.len()` {:?}",
+    actual.end_line_idx() - actual.start_line_idx(),
+    expect_start_fills.len(),
   );
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    expect_end_fills.len()
+    expect_end_fills.len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` {:?} == `expect_end_fills.len()` {:?}",
+    actual.end_line_idx() - actual.start_line_idx(),
+    expect_end_fills.len(),
   );
 
   let buflines = text.rope().lines_at(actual.start_line_idx());
