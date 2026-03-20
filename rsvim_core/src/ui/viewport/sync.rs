@@ -3542,7 +3542,6 @@ fn wrap_search_right(
     // In such case, we cannot simply use `target_cursor_end_column -
     // (window_height * window_width)` to calculate the
     // `target_cursor_start_column`.
-
     let target_cursor_end_column = target_cursor_column;
     let target_cursor_start_column = target_cursor_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
