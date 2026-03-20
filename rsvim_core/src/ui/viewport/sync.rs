@@ -2989,52 +2989,14 @@ fn search_up(
   }
 }
 
-fn nowrap_search_left(
-  _sync_fn: wrap_detail::SyncFn,
-  _line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
+fn _find_start_column_to_leftward(
   text: &Text,
   _size: &U16Size,
-  new_start_line: usize,
+  _new_start_line: usize,
   new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (usize, usize) {
-  if cfg!(debug_assertions) {
-    match text.char_at(target_cursor_line, new_start_column) {
-      Some(new_start_char) => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
-        target_cursor_line,
-        target_cursor_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        new_start_column,
-        new_start_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(new_start_char)
-          .unwrap_or('?')
-      ),
-      None => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
-        target_cursor_line,
-        target_cursor_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        new_start_column,
-      ),
-    }
-  }
-
+) -> usize {
   let mut new_start_column = new_start_column;
   let mut target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
@@ -3087,6 +3049,64 @@ fn nowrap_search_left(
     new_start_column = target_cursor_column;
   }
 
+  new_start_column
+}
+
+fn nowrap_search_left(
+  _sync_fn: wrap_detail::SyncFn,
+  _line_process_fn: wrap_detail::LineProcessFn,
+  _viewport: &Viewport,
+  _cursor_viewport: &CursorViewport,
+  _opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  if cfg!(debug_assertions) {
+    match text.char_at(target_cursor_line, new_start_column) {
+      Some(new_start_char) => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
+        target_cursor_line,
+        target_cursor_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(target_cursor_char)
+          .unwrap_or('?'),
+        new_start_column,
+        new_start_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(new_start_char)
+          .unwrap_or('?')
+      ),
+      None => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
+        target_cursor_line,
+        target_cursor_char,
+        text
+          .rope()
+          .line(target_cursor_line)
+          .get_char(target_cursor_char)
+          .unwrap_or('?'),
+        new_start_column,
+      ),
+    }
+  }
+
+  let new_start_column = _find_start_column_to_leftward(
+    text,
+    size,
+    new_start_line,
+    new_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
   (new_start_line, new_start_column)
 }
 
@@ -3134,6 +3154,24 @@ fn wrap_search_left(
 
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
+
+  if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
+    if cfg!(debug_assertions) {
+      if let Some(last_char_exclude_eol) =
+        text.last_char_idx_on_line_exclude_eol(target_cursor_line)
+      {
+        debug_assert!(
+          target_cursor_char > last_char_exclude_eol
+            && target_cursor_char <= last_char_exclude_eol + 2
+        );
+      }
+    }
+    let last_char_exclude_eol = text
+      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+      .unwrap_or(0);
+    target_cursor_column =
+      text.width_before(target_cursor_line, last_char_exclude_eol);
+  }
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
