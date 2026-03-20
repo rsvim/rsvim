@@ -3418,8 +3418,8 @@ fn _find_start_column_to_rightward(
 
       // FIXME: This is very strange. This `eol_or_line_end &&
       // last_row_is_full_width` branch actually never hits in unit tests.
-      // I think it is actually should be removed, but, let's keep it now until
-      // I am 100% sure about this.
+      // I think this should be removed, but it is not harmful, let's keep it
+      // until 100% sure about it.
       if eol_or_line_end && last_row_is_full_width {
         return new_start_column + 1;
       } else {
