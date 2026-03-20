@@ -3311,12 +3311,12 @@ fn nowrap_search_right(
   }
 
   let mut new_start_column = new_start_column;
-  let out_of_line =
+  let eol_or_line_end =
     text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
   // For eol or line-end, add 1 more column
   let target_cursor_width = text
     .width_until(target_cursor_line, target_cursor_char)
-    + if out_of_line { 1 } else { 0 };
+    + if eol_or_line_end { 1 } else { 0 };
 
   if target_cursor_width > new_end_column {
     new_start_column =
@@ -3324,6 +3324,112 @@ fn nowrap_search_right(
   }
 
   (new_start_line, new_start_column)
+}
+
+// By the formula:
+//
+// ```
+// target_cursor_start_column = target_cursor_end_column - (window_height * window_width)
+// ```
+//
+// It cannot handle the potential empty columns at the end of rows, "potential"
+// means:
+//
+// 1. Bad case: There are some empty columns. In this case, the final rendered
+//    columns of `[target_cursor_start_column,target_cursor_end_column)` (or
+//    `[target_cursor_start_column,target_cursor_char)`) will be longer than
+//    `(window_height * window_width)`, because these extra empty columns are
+//    wasted.
+// 2. Good case: There are no empty columns. In this case, the final rendered
+//    columns is exactly `(window_height * window_width)`.
+//
+// We can see the `target_cursor_start_column` can be still or larger, but
+// can never be smaller.
+//
+// This method try to use a larger `start_column`, based on the
+// `target_cursor_start_column` we calculated with above formula. It repeatedly
+// searches to rightward by `target_cursor_start_column += 1`, and check if the
+// result are better.
+fn _find_start_column_to_rightward(
+  line_process_fn: wrap_detail::LineProcessFn,
+  text: &Text,
+  size: &U16Size,
+  _new_start_line: usize,
+  new_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> usize {
+  let window_height = size.height();
+  let window_width = size.width();
+  let bufline = text.rope().line(target_cursor_line);
+  let bufline_len_char = bufline.len_chars();
+  let bufline_chars_width =
+    text.width_until(target_cursor_line, bufline_len_char);
+
+  let mut new_start_column = new_start_column;
+
+  while new_start_column < bufline_chars_width {
+    let (preview_target_rows, _preview_start_fills, _preview_end_fills, _) =
+      line_process_fn(
+        text,
+        new_start_column,
+        target_cursor_line,
+        0_u16,
+        window_height,
+        window_width,
+      );
+
+    // This method is only used when `wrap = true`, and the line is long enough
+    // that 1 single line uses the entier window/viewport.
+    debug_assert_eq!(window_height as usize, preview_target_rows.len());
+
+    let (_last_preview_row, last_preview_row_viewport) =
+      preview_target_rows.last().unwrap();
+
+    // For the last row of preview target line viewport, it the last row's
+    // `end_char > target_cursor_char`, it means now our `new_start_column` can
+    // put the `target_cursor_char` inside the window/viewport, even the
+    // `target_cursor_char` is at the right-bottom corner of the window.
+    if last_preview_row_viewport.end_char_idx() > target_cursor_char {
+      // And don't forget the eol or line end, we need to give 1 more column if
+      // the `target_cursor_char` if it is a eol of line end.
+
+      // Target cursor char is eol or line end.
+      let eol_or_line_end =
+        text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+
+      // Target cursor char is at right-bottom corner of window/viewport.
+      let at_right_bottom = {
+        // 2. The end char of last row == `target_cursor_char`
+        let at_last_row =
+          last_preview_row_viewport.end_char_idx() == target_cursor_char;
+
+        // 3. The width of last row >= `window_width`
+        let last_row_full_width = text
+          .width_before(
+            target_cursor_line,
+            last_preview_row_viewport.end_char_idx(),
+          )
+          .saturating_sub(text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.start_char_idx(),
+          ))
+          >= window_width as usize;
+
+        at_last_row && last_row_full_width
+      };
+
+      if eol_or_line_end && at_right_bottom {
+        return new_start_column + 1;
+      } else {
+        return new_start_column;
+      }
+    }
+
+    new_start_column += 1;
+  }
+
+  unreachable!()
 }
 
 fn wrap_search_right(
@@ -3391,9 +3497,65 @@ fn wrap_search_right(
 
     // For `start_column`, calculate the `target_cursor_start_column` based on
     // the `target_cursor_column` as the end column in the window.
+    //
+    // But when `wrap = true` (no matter `linebreak` is `true` or `false`),
+    // there is an edge case, that some character or word can leaves columns
+    // not fully filled at the end of a window row.
+    //
+    // When `wrap = true, linebreak = false`:
+    //
+    // Example-1.1
+    //
+    // ```
+    // +----------+
+    // |AAAAAAAA<<|   <- row-0
+    // |\tBBB.\n  |   <- row-1
+    // +----------+
+    // ```
+    //
+    // Example-1.2
+    //
+    // ```
+    // +----------+
+    // |AAAAAAAAA<|   <- row-0
+    // |你好.\n   |   <- row-1
+    // +----------+
+    // ```
+    //
+    // For example-1.1, at the end of row-0, there are 2 empty columns because
+    // the following character `\t` are rendered as 8 columns, but the 2
+    // columns at the end of row-0 is not enough for `\t`. The rendering
+    // algorithm force to put the `\t` to row-1, and leaves 2 empty columns at
+    // the end of row-0.
+    //
+    // For example-1.2, there are 1 empty column at the end of row-0, because
+    // the following character `你` are rendered as 2 columns, but the 1 column
+    // at the end of row-0 is not enough.
+    //
+    // When `wrap = true, linebreak = true`:
+    //
+    // Example-2.1
+    //
+    // ```
+    // +----------+
+    // |This is <<|   <- row-0
+    // |ours.\n   |   <- row-1
+    // +----------+
+    // ```
+    //
+    // There are 2 empty columns at the end of row-0, because the following
+    // word `ours` are rendered as 4 columns, and the rendering algorithm
+    // force to put a word in 1 row when `linebreak=true`, thus it leaves 2
+    // empty columns at the end of row-0.
 
+    // In such case, we cannot simply use `target_cursor_end_column -
+    // (window_height * window_width)` to calculate the
+    // `target_cursor_start_column`.
     let target_cursor_start_column = target_cursor_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
+
+    // We try to do some more additional rightward movement on
+    // `target_cursor_start_column`, to keep
 
     (start_line, target_cursor_start_column)
   } else {
