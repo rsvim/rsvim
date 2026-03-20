@@ -3486,6 +3486,15 @@ fn wrap_search_right(
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
 
+    // If `target_cursor_char` is a eol or line end, we move to right for 1
+    // more column to allow the invisible eol or line end.
+    let target_cursor_end_column =
+      if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
+        target_cursor_column + 1
+      } else {
+        target_cursor_column
+      };
+
     // For `start_column`, calculate the `target_cursor_start_column` based on
     // the `target_cursor_column` as the end column in the window.
     //
@@ -3542,7 +3551,6 @@ fn wrap_search_right(
     // In such case, we cannot simply use `target_cursor_end_column -
     // (window_height * window_width)` to calculate the
     // `target_cursor_start_column`.
-    let target_cursor_end_column = target_cursor_column;
     let target_cursor_start_column = target_cursor_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
 
