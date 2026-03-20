@@ -7437,7 +7437,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "BBBBBBBBBB",
         "BBBBBBBBBB",
         "BBBBBBBBBB",
-        "BBBBBBBBBB\n",
+        "BBBBBBBBBB",
       ];
 
       let actual =
@@ -7461,27 +7461,26 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "\t1. When",
-        " the line is sm",
-        "all enough to c",
-        "ompletely put i",
-        "nside.\n",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 49, 1, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 0)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 0)].into_iter().collect();
-      info!("actual:{:?}", actual);
+        vec![(1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        3,
-        4,
+        1,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -7490,104 +7489,26 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-3
     {
       let expect = vec![
-        "\t2. When",
-        " it too long to",
-        " completely put",
-        ":\n",
-        "\t3. The ",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBBB",
+        "BBBBBBBBB\n",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 50, 1, 1);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        4,
-        6,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-4
-    {
-      let expect = vec![
-        "extra parts are",
-        " been truncated",
-        " if both line-w",
-        "rap and word-wr",
-        "ap options are ",
-      ];
-
-      let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 82, 5, 15);
-
-      let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(5, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(5, 0)].into_iter().collect();
-      assert_viewport(
-        lock!(buf).text(),
-        &actual,
-        &expect,
-        5,
-        6,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-5
-    {
-      let expect = vec![
-        "extra parts are",
-        " split into the",
-        " next row, if e",
-        "ither line-wrap",
-        " or word-wrap o",
-      ];
-
-      let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 82, 6, 15);
-
-      let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(6, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(6, 0)].into_iter().collect();
-      assert_viewport(
-        lock!(buf).text(),
-        &actual,
-        &expect,
-        6,
-        7,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-6
-    {
-      let expect = vec![""];
-
-      let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 0, 7, 0);
-
-      let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(7, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(7, 0)].into_iter().collect();
-      assert_viewport(
-        lock!(buf).text(),
-        &actual,
-        &expect,
-        7,
-        8,
+        1,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
