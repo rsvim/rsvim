@@ -3555,7 +3555,17 @@ fn wrap_search_right(
       .saturating_sub((window_width as usize) * (window_height as usize));
 
     // We try to do some more additional rightward movement on
-    // `target_cursor_start_column`, to keep
+    // `target_cursor_start_column`, to make sure the new viewport can
+    // contain the `target_cursor_char`.
+    let target_cursor_start_column = _find_start_column_to_rightward(
+      line_process_fn,
+      text,
+      size,
+      start_line,
+      target_cursor_start_column,
+      target_cursor_line,
+      target_cursor_column,
+    );
 
     (start_line, target_cursor_start_column)
   } else {
