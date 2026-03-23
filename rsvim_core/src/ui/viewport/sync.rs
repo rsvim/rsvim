@@ -2675,14 +2675,12 @@ fn _if_keep_current_viewport_start_line(
 // use this `first_line + 1` as our `start_line`.
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
-  viewport: &Viewport,
+  _viewport: &Viewport,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
   _target_cursor_char: usize,
 ) -> usize {
-  let _viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
   let window_height = size.height();
   let window_width = size.width();
 
@@ -2693,7 +2691,7 @@ fn _reverse_search_target_cursor_line(
   while (current_row < window_height as usize) && (current_line >= 0) {
     let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
       text,
-      viewport_start_column,
+      0,
       current_line as usize,
       0,
       window_height,
