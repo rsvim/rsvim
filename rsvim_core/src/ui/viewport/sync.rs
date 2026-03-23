@@ -3410,7 +3410,7 @@ fn nowrap_search_right(
 // `target_cursor_start_column` we calculated with above formula. It repeatedly
 // searches to rightward by `target_cursor_start_column += 1`, and check if the
 // result are better.
-fn _find_start_column_to_rightward(
+fn _reverse_search_start_column(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
@@ -3450,7 +3450,9 @@ fn _find_start_column_to_rightward(
     // `end_char > target_cursor_char`, it means now our `new_start_column` can
     // put the `target_cursor_char` inside the window/viewport, even the
     // `target_cursor_char` is at the right-bottom corner of the window.
-    if last_preview_row_viewport.end_char_idx() > target_cursor_char {
+    if last_preview_row_viewport.end_char_idx() > target_cursor_char
+      || target_cursor_char >= bufline_len_char
+    {
       // And don't forget the eol or line end, we need to give 1 more column if
       // the `target_cursor_char` if it is a eol of line end.
 
@@ -3618,7 +3620,7 @@ fn wrap_search_right(
     // We try to do some more additional rightward movement on
     // `target_cursor_start_column`, to make sure the new viewport can
     // contain the `target_cursor_char`.
-    let target_cursor_start_column = _find_start_column_to_rightward(
+    let target_cursor_start_column = _reverse_search_start_column(
       line_process_fn,
       text,
       size,
