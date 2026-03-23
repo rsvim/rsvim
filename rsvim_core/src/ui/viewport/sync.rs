@@ -3115,7 +3115,7 @@ fn wrap_search_left(
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
-  new_start_column: usize,
+  _new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
