@@ -6583,11 +6583,10 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-3
     {
-      let expect =
-        vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
+      let expect = vec!["hen\tit", "\t\tt", "oo\tlong", "\tto", "\tcompletel"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 24);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 12);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
