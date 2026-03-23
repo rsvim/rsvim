@@ -8683,13 +8683,13 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-3
     {
-      let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
+      let expect = vec!["t\t\t", "too\tlong", "\tto", "\t", "completely"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 35);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(4, 6)].into_iter().collect();
+        vec![(4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
@@ -8908,7 +8908,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-4
     {
       let expect =
-        vec!["are split into ", "the\tnext", "\trow,", "\tif", "\teither"];
+        vec!["\t\t4", ". The extra parts", " are split into ", "the\tnext", "\trow,"];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 35);
