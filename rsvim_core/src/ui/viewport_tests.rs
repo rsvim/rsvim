@@ -88,8 +88,14 @@ fn search_viewport(
     target_cursor_line,
     target_cursor_char,
   );
-  assert_eq!(start_line, expect_start_line);
-  assert_eq!(start_column, expect_start_column);
+  assert_eq!(
+    start_line, expect_start_line,
+    "start_line == expect_start_line"
+  );
+  assert_eq!(
+    start_column, expect_start_column,
+    "start_column == expect_start_column"
+  );
 
   let viewport = Viewport::view(
     &opts,
