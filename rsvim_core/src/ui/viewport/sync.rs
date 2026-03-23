@@ -2959,17 +2959,10 @@ fn search_up(
 
     if cfg!(debug_assertions) {
       let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line >= viewport_last_line);
+      debug_assert!(target_cursor_line <= viewport_last_line);
     }
 
-    let start_line = _reverse_search_target_cursor_line(
-      line_process_fn,
-      viewport,
-      text,
-      size,
-      target_cursor_line,
-      target_cursor_char,
-    );
+    let start_line = target_cursor_line;
 
     if target_cursor_column < current_cursor_column {
       // To left side
