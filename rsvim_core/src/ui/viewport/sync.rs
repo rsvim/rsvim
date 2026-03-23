@@ -2521,7 +2521,6 @@ pub fn search(
       (false, _) => nowrap_search_up(
         viewport,
         cursor_viewport,
-        opts,
         text,
         size,
         target_cursor_line,
@@ -2549,7 +2548,6 @@ pub fn search(
       (false, _) => nowrap_search_down(
         viewport,
         cursor_viewport,
-        opts,
         text,
         size,
         target_cursor_line,
@@ -2714,7 +2712,6 @@ fn _reverse_search_target_cursor_line(
 fn nowrap_search_down(
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
@@ -2934,7 +2931,6 @@ fn wrap_search_down(
 fn nowrap_search_up(
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
