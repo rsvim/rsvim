@@ -9129,7 +9129,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       );
     }
 
-    // Search-5
+    // Search-3
     {
       let expect = vec![""];
 
