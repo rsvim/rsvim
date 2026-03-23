@@ -2517,16 +2517,8 @@ pub fn search(
 
   if target_cursor_line < cursor_viewport.line_idx() {
     // Cursor moves upward
-    match (opts.wrap(), opts.line_break()) {
-      (false, _) => nowrap_search_up(
-        viewport,
-        cursor_viewport,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      (true, _) => wrap_search_up(
+    if opts.wrap() {
+      wrap_search_up(
         sync_fn,
         line_process_fn,
         search_left_fn,
@@ -2538,22 +2530,23 @@ pub fn search(
         size,
         target_cursor_line,
         target_cursor_char,
-      ),
+      )
+    } else {
+      nowrap_search_up(
+        viewport,
+        cursor_viewport,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
     }
   } else {
     // Cursor moves downward, or just moves to left/right side. But in this
     // algorithm, we have to moves to downward (even just for 0-lines) before
     // moving to left/right side.
-    match (opts.wrap(), opts.line_break()) {
-      (false, _) => nowrap_search_down(
-        viewport,
-        cursor_viewport,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      (true, _) => wrap_search_down(
+    if opts.wrap() {
+      wrap_search_down(
         sync_fn,
         line_process_fn,
         search_left_fn,
@@ -2565,7 +2558,16 @@ pub fn search(
         size,
         target_cursor_line,
         target_cursor_char,
-      ),
+      )
+    } else {
+      nowrap_search_down(
+        viewport,
+        cursor_viewport,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
     }
   }
 }
