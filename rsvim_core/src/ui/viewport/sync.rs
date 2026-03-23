@@ -2519,10 +2519,6 @@ pub fn search(
     // Cursor moves upward
     match (opts.wrap(), opts.line_break()) {
       (false, _) => nowrap_search_up(
-        sync_fn,
-        line_process_fn,
-        search_left_fn,
-        search_right_fn,
         viewport,
         cursor_viewport,
         opts,
@@ -2551,10 +2547,6 @@ pub fn search(
     // moving to left/right side.
     match (opts.wrap(), opts.line_break()) {
       (false, _) => nowrap_search_down(
-        sync_fn,
-        line_process_fn,
-        search_left_fn,
-        search_right_fn,
         viewport,
         cursor_viewport,
         opts,
@@ -2720,12 +2712,9 @@ fn _reverse_search_target_cursor_line(
 }
 
 fn nowrap_search_down(
-  line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::SearchFn,
-  search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
+  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
@@ -2788,7 +2777,7 @@ fn nowrap_search_down(
     }
 
     let start_line = _reverse_search_target_cursor_line(
-      line_process_fn,
+      nowrap_line_process,
       viewport,
       text,
       size,
@@ -2943,13 +2932,9 @@ fn wrap_search_down(
 }
 
 fn nowrap_search_up(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::SearchFn,
-  search_right_fn: wrap_detail::SearchFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
+  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
