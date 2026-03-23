@@ -2499,25 +2499,20 @@ pub fn search(
     wrap_detail::LineProcessFn,
     wrap_detail::SearchFn,
     wrap_detail::SearchFn,
-  ) = match (opts.wrap(), opts.line_break()) {
-    (false, _) => (
-      nowrap_sync,
-      nowrap_line_process,
-      nowrap_search_left,
-      nowrap_search_right,
-    ),
-    (true, false) => (
-      wrap_nolinebreak_sync,
-      wrap_nolinebreak_line_process,
-      wrap_search_left,
-      wrap_search_right,
-    ),
-    (true, true) => (
+  ) = if opts.line_break() {
+    (
       wrap_linebreak_sync,
       wrap_linebreak_line_process,
       wrap_search_left,
       wrap_search_right,
-    ),
+    )
+  } else {
+    (
+      wrap_nolinebreak_sync,
+      wrap_nolinebreak_line_process,
+      wrap_search_left,
+      wrap_search_right,
+    )
   };
 
   if target_cursor_line < cursor_viewport.line_idx() {
@@ -2772,12 +2767,7 @@ fn nowrap_search_down(
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         viewport_start_line,
@@ -2787,12 +2777,7 @@ fn nowrap_search_down(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         viewport_start_line,
@@ -2822,12 +2807,7 @@ fn nowrap_search_down(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         start_line,
@@ -2837,12 +2817,7 @@ fn nowrap_search_down(
       )
     } else {
       // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         start_line,
@@ -3020,12 +2995,7 @@ fn nowrap_search_up(
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         viewport_start_line,
@@ -3035,12 +3005,7 @@ fn nowrap_search_up(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         viewport_start_line,
@@ -3063,12 +3028,7 @@ fn nowrap_search_up(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         start_line,
@@ -3078,12 +3038,7 @@ fn nowrap_search_up(
       )
     } else {
       // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         start_line,
@@ -3269,11 +3224,6 @@ fn _find_target_cursor_column_exclude_eol(
 }
 
 fn nowrap_search_left(
-  _sync_fn: wrap_detail::SyncFn,
-  _line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
@@ -3574,11 +3524,6 @@ fn wrap_search_left(
 }
 
 fn nowrap_search_right(
-  _sync_fn: wrap_detail::SyncFn,
-  _line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
