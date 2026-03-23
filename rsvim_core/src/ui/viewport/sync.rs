@@ -3202,11 +3202,12 @@ fn wrap_search_left(
     // the end of the last row, while at the beginning of the line, 10 `B`
     // characters are not rendered in the viewport. The window spaces are
     // wasted.
-    //
+
+    let start_column = std::cmp::min(new_start_column, target_cursor_column);
+
     // So we try to do some more additional leftward movement on
     // the `target_cursor_column`, to make give the new viewport can
     // contain the `target_cursor_char`.
-
     let target_cursor_line_end_char = text
       .last_char_idx_on_line_include_eol(target_cursor_line)
       .unwrap_or(0);
@@ -3229,10 +3230,8 @@ fn wrap_search_left(
       target_cursor_char,
     );
 
-    let start_column = std::cmp::min(
-      std::cmp::min(new_start_column, target_cursor_column),
-      target_cursor_line_start_column,
-    );
+    let start_column =
+      std::cmp::min(start_column, target_cursor_line_start_column);
 
     (start_line, start_column)
   } else {
