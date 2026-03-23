@@ -6373,7 +6373,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-3
     {
-      let expect = vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
+      let expect =
+        vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 24);
