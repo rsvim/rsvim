@@ -7009,17 +7009,17 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec!["7. The extra part", "s...", "", ""];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 314, 7, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 314, 6, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(7, 0)].into_iter().collect();
+        vec![(6, 0), (7, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(7, 0)].into_iter().collect();
+        vec![(6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        7,
+        6,
         8,
         &expect_start_fills,
         &expect_end_fills,

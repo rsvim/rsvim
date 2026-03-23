@@ -2469,12 +2469,30 @@ pub fn search(
   let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line =
     std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
+  let target_cursor_line_end_char =
+    match text.last_char_idx_on_line_include_eol(target_cursor_line) {
+      Some(last_char) => {
+        if !text.is_eol(target_cursor_line, last_char)
+          && target_cursor_char > last_char
+        {
+          // If the `last_char` is not a eol, and `target_cursor_char` is still
+          // greater than it. It means `target_cursor_char` wants the line end,
+          // which is actually out of the line.
+          // This only happens when a line doesn't end with eol (i.e. `\n` or
+          // `\r\n`). If a line ends with eol (`\n` or `\r\n`), the
+          // `target_cursor_char` must be less than or equal to the eol.
+          last_char + 1
+        } else {
+          last_char
+        }
+      }
+      None => {
+        // The line is empty
+        0
+      }
+    };
+  let target_cursor_char =
+    std::cmp::min(target_cursor_char, target_cursor_line_end_char);
 
   let (sync_fn, line_process_fn, search_left_fn, search_right_fn): (
     wrap_detail::SyncFn,
