@@ -2582,7 +2582,6 @@ pub fn search(
 
 // Whether current viewport already contains the target cursor line.
 fn _viewport_contains_target_cursor_line(
-  line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
@@ -2615,7 +2614,7 @@ fn _viewport_contains_target_cursor_line(
       while (current_row < window_height)
         && (current_line < buffer_len_lines as isize)
       {
-        let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+        let (rows, _start_fills, _end_fills, _last_row) = nowrap_line_process(
           text,
           viewport_start_column,
           current_line as usize,
@@ -2740,7 +2739,6 @@ fn nowrap_search_down(
   // for users' eye.
   let already_contains_target_cursor_line =
     _viewport_contains_target_cursor_line(
-      line_process_fn,
       viewport,
       cursor_viewport,
       text,
@@ -2843,7 +2841,6 @@ fn wrap_search_down(
   // for users' eye.
   let already_contains_target_cursor_line =
     _viewport_contains_target_cursor_line(
-      line_process_fn,
       viewport,
       cursor_viewport,
       text,
@@ -2966,7 +2963,6 @@ fn nowrap_search_up(
   // for users' eye.
   let already_contains_target_cursor_line =
     _viewport_contains_target_cursor_line(
-      line_process_fn,
       viewport,
       cursor_viewport,
       text,
@@ -3062,7 +3058,6 @@ fn wrap_search_up(
   // for users' eye.
   let already_contains_target_cursor_line =
     _viewport_contains_target_cursor_line(
-      line_process_fn,
       viewport,
       cursor_viewport,
       text,
