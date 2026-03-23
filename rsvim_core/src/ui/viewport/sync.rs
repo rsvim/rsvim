@@ -2580,19 +2580,14 @@ pub fn search(
   }
 }
 
-// Help decide if we can keep current `viewport.start_line_idx()` unchanged,
-// this will reduce the viewport scrolls as small as we can, avoid too big
-// jumps for user eyes.
-//
-// It returns whether current viewport already contains the target cursor line.
-fn _if_keep_current_viewport_start_line(
+// Whether current viewport already contains the target cursor line.
+fn _viewport_contains_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
-  _target_cursor_char: usize,
 ) -> bool {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
@@ -2726,7 +2721,6 @@ fn _reverse_search_target_cursor_line(
 }
 
 fn nowrap_search_down(
-  sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   search_left_fn: wrap_detail::SearchFn,
   search_right_fn: wrap_detail::SearchFn,
@@ -2744,15 +2738,14 @@ fn nowrap_search_down(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let target_cursor_line_is_in_current_viewport =
-    _if_keep_current_viewport_start_line(
+  let already_contains_target_cursor_line =
+    _viewport_contains_target_cursor_line(
       line_process_fn,
       viewport,
       cursor_viewport,
       text,
       size,
       target_cursor_line,
-      target_cursor_char,
     );
 
   let current_cursor_column =
@@ -2760,7 +2753,7 @@ fn nowrap_search_down(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if target_cursor_line_is_in_current_viewport {
+  if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
@@ -2848,15 +2841,14 @@ fn wrap_search_down(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let target_cursor_line_is_in_current_viewport =
-    _if_keep_current_viewport_start_line(
+  let already_contains_target_cursor_line =
+    _viewport_contains_target_cursor_line(
       line_process_fn,
       viewport,
       cursor_viewport,
       text,
       size,
       target_cursor_line,
-      target_cursor_char,
     );
 
   let current_cursor_column =
@@ -2864,7 +2856,7 @@ fn wrap_search_down(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if target_cursor_line_is_in_current_viewport {
+  if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
@@ -2972,15 +2964,14 @@ fn nowrap_search_up(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let target_cursor_line_is_in_current_viewport =
-    _if_keep_current_viewport_start_line(
+  let already_contains_target_cursor_line =
+    _viewport_contains_target_cursor_line(
       line_process_fn,
       viewport,
       cursor_viewport,
       text,
       size,
       target_cursor_line,
-      target_cursor_char,
     );
 
   let current_cursor_column =
@@ -2988,7 +2979,7 @@ fn nowrap_search_up(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if target_cursor_line_is_in_current_viewport {
+  if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
@@ -3069,15 +3060,14 @@ fn wrap_search_up(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let target_cursor_line_is_in_current_viewport =
-    _if_keep_current_viewport_start_line(
+  let already_contains_target_cursor_line =
+    _viewport_contains_target_cursor_line(
       line_process_fn,
       viewport,
       cursor_viewport,
       text,
       size,
       target_cursor_line,
-      target_cursor_char,
     );
 
   let current_cursor_column =
@@ -3085,7 +3075,7 @@ fn wrap_search_up(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if target_cursor_line_is_in_current_viewport {
+  if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
