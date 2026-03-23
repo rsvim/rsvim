@@ -3219,19 +3219,19 @@ fn wrap_search_left(
     };
     let target_cursor_line_start_column = target_cursor_line_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
-    let start_column = std::cmp::min(
-      std::cmp::min(new_start_column, target_cursor_column),
-      target_cursor_line_start_column,
-    );
-
-    let start_column = _reverse_search_start_column(
+    let target_cursor_line_start_column = _reverse_search_start_column(
       line_process_fn,
       text,
       size,
       start_line,
-      start_column,
+      target_cursor_line_start_column,
       target_cursor_line,
       target_cursor_char,
+    );
+
+    let start_column = std::cmp::min(
+      std::cmp::min(new_start_column, target_cursor_column),
+      target_cursor_line_start_column,
     );
 
     (start_line, start_column)
