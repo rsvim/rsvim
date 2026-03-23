@@ -8916,7 +8916,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 35);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
@@ -9023,6 +9023,129 @@ mod tests_search_anchor_downward_wrap_linebreak {
         &expect,
         1,
         2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn new5() {
+    test_log_init();
+
+    let terminal_size = size!(17, 5);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_linebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "But still it contains several things we want to test:\n",
+        "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
+        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
+        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+
+    // Initialize
+    {
+      let expect = vec![
+        "But still it ",
+        "contains several ",
+        "things we want to",
+        " test:\n",
+        "\t1. When",
+      ];
+
+      let actual = tree.window(window_id).unwrap().viewport();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        0,
+        2,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect =
+        vec!["and\t", "word-wrap\t", "options\t", "are\tnot", "\tset.\n"];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 90, 3, 87);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(3, 6)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        3,
+        4,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "either\t",
+        "line-wrap\t",
+        "or\tword-",
+        "wrap\t",
+        "options\t",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 90, 4, 92);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(4, 3)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(4, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        4,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-5
+    {
+      let expect = vec![""];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 82, 5, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        5,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );

@@ -255,7 +255,8 @@ pub fn assert_viewport(
     );
     assert_eq!(
       line_viewport.start_filled_cols(),
-      *expect_start_fills.get(&actual_line_idx).unwrap()
+      *expect_start_fills.get(&actual_line_idx).unwrap(),
+      "line_viewport.start_filled_cols() == *expect_start_fills.get(&actual_line_idx).unwrap()"
     );
     info!(
       "end_filled_cols expect:{:?}, actual:{}",
@@ -264,7 +265,8 @@ pub fn assert_viewport(
     );
     assert_eq!(
       line_viewport.end_filled_cols(),
-      *expect_end_fills.get(&actual_line_idx).unwrap()
+      *expect_end_fills.get(&actual_line_idx).unwrap(),
+      "line_viewport.end_filled_cols() == *expect_end_fills.get(&actual_line_idx).unwrap()"
     );
 
     let rows = &line_viewport.rows();
@@ -297,7 +299,7 @@ pub fn assert_viewport(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
         r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect_rows[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize], "payload == expect_rows[*r as usize]");
     }
   }
 }
