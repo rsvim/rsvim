@@ -3115,7 +3115,7 @@ fn wrap_search_left(
   text: &Text,
   size: &U16Size,
   new_start_line: usize,
-  _new_start_column: usize,
+  new_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3207,21 +3207,29 @@ fn wrap_search_left(
     // the `target_cursor_column`, to make give the new viewport can
     // contain the `target_cursor_char`.
 
-    let target_cursor_end_column =
-      if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
-        target_cursor_column + 1
-      } else {
-        target_cursor_column
-      };
-    let target_cursor_start_column = target_cursor_end_column
+    let target_cursor_line_end_char = text
+      .last_char_idx_on_line_include_eol(target_cursor_line)
+      .unwrap_or(0);
+    let target_cursor_line_end_column = if text
+      .is_eol_or_line_end(target_cursor_line, target_cursor_line_end_char)
+    {
+      target_cursor_line_end_char + 1
+    } else {
+      target_cursor_line_end_char
+    };
+    let target_cursor_line_start_column = target_cursor_line_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
+    let start_column = std::cmp::min(
+      std::cmp::min(new_start_column, target_cursor_column),
+      target_cursor_line_start_column,
+    );
 
     let start_column = _reverse_search_start_column(
       line_process_fn,
       text,
       size,
       start_line,
-      target_cursor_start_column,
+      start_column,
       target_cursor_line,
       target_cursor_char,
     );
