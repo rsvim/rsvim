@@ -3211,13 +3211,15 @@ fn wrap_search_left(
     let target_cursor_line_end_char = text
       .last_char_idx_on_line_include_eol(target_cursor_line)
       .unwrap_or(0);
-    let target_cursor_line_end_column = if text
-      .is_eol_or_line_end(target_cursor_line, target_cursor_line_end_char)
-    {
-      target_cursor_line_end_char + 1
-    } else {
-      target_cursor_line_end_char
-    };
+    let target_cursor_line_end_column = text
+      .width_until(target_cursor_line, target_cursor_line_end_char)
+      + if text
+        .is_eol_or_line_end(target_cursor_line, target_cursor_line_end_char)
+      {
+        1
+      } else {
+        0
+      };
     let target_cursor_line_start_column = target_cursor_line_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
     let target_cursor_line_start_column = _reverse_search_start_column(
