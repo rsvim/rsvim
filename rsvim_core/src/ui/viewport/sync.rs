@@ -2554,20 +2554,11 @@ pub fn search(
   }
 }
 
-// Detect if we can keep current `viewport.start_line_idx()` unchanged, this
-// will reduce the viewport scrolls as small as we can, avoid too big jumps for
-// user eyes.
+// Help decide if we can keep current `viewport.start_line_idx()` unchanged,
+// this will reduce the viewport scrolls as small as we can, avoid too big
+// jumps for user eyes.
 //
-// It returns 3 booleans:
-// 1. Whether target cursor line is already in current viewport.
-// 2. Whether target cursor line is already in current viewport, and it is at
-//    the bottom/last line.
-// 3. Whether target cursor line is already in current viewport, and it is been
-//    fully shown in current viewport. Because we support the bottom line
-//    partial rendering, when option `wrap = true`, if target cursor happens to
-//    be the bottom line but only part of it is shown, it could lead to some
-//    issues. For target cursor, we always try to show all of the line, except
-//    the target cursor line is just too long to put in the entire window.
+// It returns whether current viewport already contains the target cursor line.
 fn _if_keep_current_viewport_start_line(
   line_process_fn: wrap_detail::LineProcessFn,
   viewport: &Viewport,
@@ -2576,7 +2567,7 @@ fn _if_keep_current_viewport_start_line(
   size: &U16Size,
   target_cursor_line: usize,
   _target_cursor_char: usize,
-) -> (bool, bool, bool) {
+) -> bool {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let window_height = size.height();
@@ -2625,43 +2616,8 @@ fn _if_keep_current_viewport_start_line(
 
   // Target cursor line is already in current viewport, i.e. we don't have to
   // change `viewport_start_line` for a new viewport.
-  let target_cursor_line_is_in_current_viewport = (viewport_start_line
-    <= target_cursor_line)
-    && (viewport_last_line >= target_cursor_line);
-
-  // Target cursor line is at the bottom line in current viewport.
-  let target_cursor_line_is_in_bottom_line =
-    viewport_last_line == target_cursor_line;
-
-  // Target cursor line is fully shown in current viewport, since our viewing
-  // algorithm support partial rendering for the bottom line.
-  let target_cursor_line_is_fully_shown_in_current_viewport =
-    if let Some(rows_len) = current_cursor_line_rows_len
-      && target_cursor_line_is_in_current_viewport
-    {
-      let (
-        preview_target_rows,
-        _preview_target_start_fills,
-        _preview_target_end_fills,
-        _,
-      ) = line_process_fn(
-        text,
-        0,
-        target_cursor_line,
-        0_u16,
-        window_height,
-        window_width,
-      );
-      rows_len >= preview_target_rows.len()
-    } else {
-      false
-    };
-
-  (
-    target_cursor_line_is_in_current_viewport,
-    target_cursor_line_is_in_bottom_line,
-    target_cursor_line_is_fully_shown_in_current_viewport,
-  )
+  (viewport_start_line <= target_cursor_line)
+    && (viewport_last_line >= target_cursor_line)
 }
 
 // When cursor moves to downward, and it scrolls the window, we need to set a
@@ -2762,30 +2718,23 @@ fn search_down(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let (
-    target_cursor_line_is_in_current_viewport,
-    target_cursor_line_is_in_bottom_line,
-    target_cursor_line_is_fully_shown_in_current_viewport,
-  ) = _if_keep_current_viewport_start_line(
-    line_process_fn,
-    viewport,
-    cursor_viewport,
-    text,
-    size,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  let target_cursor_line_is_in_current_viewport =
+    _if_keep_current_viewport_start_line(
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  // Whether `target_cursor_line` is inside step-1 iteration result.
-  if target_cursor_line_is_in_current_viewport
-    && !(target_cursor_line_is_in_bottom_line
-      && !target_cursor_line_is_fully_shown_in_current_viewport)
-  {
+  if target_cursor_line_is_in_current_viewport {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
@@ -2893,30 +2842,23 @@ fn search_up(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let (
-    target_cursor_line_is_in_current_viewport,
-    target_cursor_line_is_in_bottom_line,
-    target_cursor_line_is_fully_shown_in_current_viewport,
-  ) = _if_keep_current_viewport_start_line(
-    line_process_fn,
-    viewport,
-    cursor_viewport,
-    text,
-    size,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  let target_cursor_line_is_in_current_viewport =
+    _if_keep_current_viewport_start_line(
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  // Whether `target_cursor_line` is inside step-1 iteration result.
-  if target_cursor_line_is_in_current_viewport
-    && !(target_cursor_line_is_in_bottom_line
-      && !target_cursor_line_is_fully_shown_in_current_viewport)
-  {
+  if target_cursor_line_is_in_current_viewport {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
