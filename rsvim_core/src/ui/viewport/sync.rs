@@ -2704,7 +2704,7 @@ fn nowrap_search_down(
 
     let start_line = std::cmp::max(
       0,
-      (target_cursor_line as isize) - (window_height as isize),
+      (target_cursor_line as isize) - (window_height as isize) + 1,
     ) as usize;
     let start_column = viewport.start_column_idx();
 
