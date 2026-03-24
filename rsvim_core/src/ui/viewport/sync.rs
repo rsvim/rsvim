@@ -3133,7 +3133,8 @@ fn wrap_search_up(
   }
 }
 
-fn _find_target_cursor_column_to_leftward(
+// For/to leftward
+fn _find_target_cursor_column_exclude_eol(
   text: &Text,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -3188,7 +3189,8 @@ fn _find_target_cursor_column_to_leftward(
   target_cursor_column
 }
 
-fn _find_target_cursor_column_to_rightward(
+// For/to rightward
+fn _find_target_cursor_column_include_eol(
   text: &Text,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -3210,7 +3212,7 @@ fn nowrap_search_left(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let mut suggest_start_column = suggest_start_column;
-  let target_cursor_column = _find_target_cursor_column_to_leftward(
+  let target_cursor_column = _find_target_cursor_column_exclude_eol(
     text,
     target_cursor_line,
     target_cursor_char,
@@ -3235,7 +3237,7 @@ fn nowrap_search_right(
   let suggest_end_column = suggest_start_column + window_width as usize;
   let mut suggest_start_column = suggest_start_column;
 
-  let target_cursor_column = _find_target_cursor_column_to_rightward(
+  let target_cursor_column = _find_target_cursor_column_include_eol(
     text,
     target_cursor_line,
     target_cursor_char,
@@ -3275,7 +3277,7 @@ fn wrap_search_left(
     target_cursor_line,
   );
 
-  let target_cursor_column = _find_target_cursor_column_to_leftward(
+  let target_cursor_column = _find_target_cursor_column_exclude_eol(
     text,
     target_cursor_line,
     target_cursor_char,
