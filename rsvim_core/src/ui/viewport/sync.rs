@@ -2864,7 +2864,7 @@ fn nowrap_search_up(
 // We still iterate the lines (in the buffer) one by one, but from the
 // `target_cursor_line` reversely, from bottom to top, until we find the first
 // line which cannot "contain" the `target_cursor_line` any more. Then we use
-// this `first_line + 1` as our `start_line`.
+// the `first_line + 1` as our `start_line`.
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
