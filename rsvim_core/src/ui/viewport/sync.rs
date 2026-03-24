@@ -3445,10 +3445,6 @@ fn _reverse_search_start_column(
       // And don't forget the eol or line end, we need to give 1 more column if
       // the `target_cursor_char` if it is a eol of line end.
 
-      // Target cursor char is eol or line end.
-      let eol_or_line_end =
-        text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
-
       // The width of last row == `window_width`, i.e. the last row already
       // uses all columns (full width).
       // In such case, if the `target_cursor_char` is eol, we will need to
