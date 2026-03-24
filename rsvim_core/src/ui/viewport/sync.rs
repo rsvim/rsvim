@@ -3131,7 +3131,7 @@ fn wrap_search_up(
   }
 }
 
-fn _find_target_cursor_column(
+fn _find_target_cursor_column_to_leftward(
   text: &Text,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -3195,8 +3195,11 @@ fn nowrap_search_left(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let mut new_start_column = new_start_column;
-  let target_cursor_column =
-    _find_target_cursor_column(text, target_cursor_line, target_cursor_char);
+  let target_cursor_column = _find_target_cursor_column_to_leftward(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   if target_cursor_column < new_start_column {
     new_start_column = target_cursor_column;
@@ -3274,8 +3277,11 @@ fn wrap_search_left(
   let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_column =
-    _find_target_cursor_column(text, target_cursor_line, target_cursor_char);
+  let target_cursor_column = _find_target_cursor_column_to_leftward(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
