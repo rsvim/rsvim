@@ -3295,8 +3295,8 @@ fn wrap_search_left(
   _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
+  suggest_start_line: usize,
+  suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3345,7 +3345,7 @@ fn wrap_search_left(
     let start_line = target_cursor_line;
 
     // For `start_column`, it seems that we only need to pick the smaller one
-    // between `target_cursor_column` and `new_start_column`. But there is an
+    // between `target_cursor_column` and `suggest_start_column`. But there is an
     // edge case we need to consider, for example:
     //
     // ```
@@ -3361,9 +3361,9 @@ fn wrap_search_left(
     // ```
     //
     // Cursor wants to move down to line-1, move left to char-32.
-    // In such case, the `new_start_column` is 10 (it is the current viewport
+    // In such case, the `suggest_start_column` is 10 (it is the current viewport
     // `start_column`), the `target_cursor_column` is 32. If we simply use the
-    // smaller one between `new_start_column` and `target_cursor_column`, then
+    // smaller one between `suggest_start_column` and `target_cursor_column`, then
     // the `start_column` is 10. And the viewport becomes:
     //
     // ```
@@ -3383,7 +3383,8 @@ fn wrap_search_left(
     // characters are not rendered in the viewport. The window spaces are
     // wasted.
 
-    let start_column = std::cmp::min(new_start_column, target_cursor_column);
+    let start_column =
+      std::cmp::min(suggest_start_column, target_cursor_column);
 
     // So we try to do some more additional leftward movement on
     // the `target_cursor_column`, to make give the new viewport can
@@ -3470,10 +3471,10 @@ fn wrap_search_left(
     //    column-0. So we need to change the `start_line` to `start_line + 1`,
     //    this would give the bottom line 1 more row to put the target cursor.
     //
-    // 2. Otherwise we just use `new_start_line`.
+    // 2. Otherwise we just use `suggest_start_line`.
 
     let (_preview_viewport_range, preview_viewport) =
-      sync_fn(text, size, new_start_line, start_column);
+      sync_fn(text, size, suggest_start_line, start_column);
 
     let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
       match preview_viewport.last() {
@@ -3521,9 +3522,9 @@ fn wrap_search_left(
       };
 
     let start_line = if cursor_is_in_bottom_line && cursor_is_at_right_bottom {
-      new_start_line + 1
+      suggest_start_line + 1
     } else {
-      new_start_line
+      suggest_start_line
     };
 
     (start_line, start_column)
@@ -3558,8 +3559,8 @@ fn _reverse_search_start_column(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
-  _new_start_line: usize,
-  new_start_column: usize,
+  _suggest_start_line: usize,
+  suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> usize {
@@ -3570,13 +3571,13 @@ fn _reverse_search_start_column(
   let bufline_chars_width =
     text.width_until(target_cursor_line, bufline_len_char);
 
-  let mut new_start_column = new_start_column;
+  let mut suggest_start_column = suggest_start_column;
 
-  while new_start_column < bufline_chars_width {
+  while suggest_start_column < bufline_chars_width {
     let (preview_target_rows, _preview_start_fills, _preview_end_fills, _) =
       line_process_fn(
         text,
-        new_start_column,
+        suggest_start_column,
         target_cursor_line,
         0_u16,
         window_height,
@@ -3591,7 +3592,7 @@ fn _reverse_search_start_column(
       preview_target_rows.last().unwrap();
 
     // For the last row of preview target line viewport, it the last row's
-    // `end_char > target_cursor_char`, it means now our `new_start_column` can
+    // `end_char > target_cursor_char`, it means now our `suggest_start_column` can
     // put the `target_cursor_char` inside the window/viewport, even the
     // `target_cursor_char` is at the right-bottom corner of the window.
     if last_preview_row_viewport.end_char_idx() > target_cursor_char
@@ -3627,13 +3628,13 @@ fn _reverse_search_start_column(
       // I think this should be removed, but it is not harmful, let's keep it
       // until 100% sure about it.
       if eol_or_line_end && last_row_is_full_width {
-        return new_start_column + 1;
+        return suggest_start_column + 1;
       } else {
-        return new_start_column;
+        return suggest_start_column;
       }
     }
 
-    new_start_column += 1;
+    suggest_start_column += 1;
   }
 
   unreachable!()
@@ -3647,8 +3648,8 @@ fn wrap_search_right(
   _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  new_start_line: usize,
-  _new_start_column: usize,
+  suggest_start_line: usize,
+  _suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3829,10 +3830,10 @@ fn wrap_search_right(
     //    column-0. So we need to change the `start_line` to `start_line + 1`,
     //    this would give the bottom line 1 more row to put the target cursor.
     //
-    // 2. Otherwise we just use `new_start_line`.
+    // 2. Otherwise we just use `suggest_start_line`.
 
     let (_preview_viewport_range, preview_viewport) =
-      sync_fn(text, size, new_start_line, start_column);
+      sync_fn(text, size, suggest_start_line, start_column);
 
     let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
       match preview_viewport.last() {
@@ -3880,9 +3881,9 @@ fn wrap_search_right(
       };
 
     let start_line = if cursor_is_in_bottom_line && cursor_is_at_right_bottom {
-      new_start_line + 1
+      suggest_start_line + 1
     } else {
-      new_start_line
+      suggest_start_line
     };
 
     (start_line, start_column)
