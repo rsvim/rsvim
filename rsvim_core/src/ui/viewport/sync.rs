@@ -2708,8 +2708,8 @@ fn nowrap_search_down(
     let start_line = viewport_start_line;
     let start_column = viewport_start_column;
 
-    // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
+      // Cursor moves to left side.
       search_left_fn(
         sync_fn,
         line_process_fn,
@@ -2743,11 +2743,6 @@ fn nowrap_search_down(
     // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
-
-    if cfg!(debug_assertions) {
-      let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line >= viewport_last_line);
-    }
 
     let start_line = std::cmp::max(
       0,
