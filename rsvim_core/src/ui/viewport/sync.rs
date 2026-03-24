@@ -2685,6 +2685,8 @@ fn nowrap_search_down(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let window_height = size.height();
+
   // Step-1: Try to keep current `viewport.start_line_idx()` unchanged, this
   // will keep the viewport scrolls as small as we can, and thus avoid too big
   // jumps for users' eye.
@@ -2740,7 +2742,6 @@ fn nowrap_search_down(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
-    let window_height = size.height();
     let start_line = std::cmp::max(
       0,
       (target_cursor_line as isize) - (window_height as isize),
