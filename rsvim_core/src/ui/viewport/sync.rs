@@ -2921,9 +2921,9 @@ fn _reverse_search_target_cursor_line(
   //  CCC.\n
   // ```
   //
-  // This is not what we want, for `wrap = true` buffer, we always try to put
-  // the entire `target_cursor_line` inside the window/viewport. So for this
-  // case, we use `current_line + 2` as `start_line` for the new viewport.
+  // This is not what we want, (when `wrap = true`) we always try to put the
+  // entire `target_cursor_line` inside the window/viewport. So for this case,
+  // we use `current_line + 2` as `start_line` for the new viewport.
 
   if current_row > window_height as usize {
     (current_line + 2) as usize
