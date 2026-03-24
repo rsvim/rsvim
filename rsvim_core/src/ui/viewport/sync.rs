@@ -3434,7 +3434,8 @@ fn _reverse_search_start_column(
     // `end_char > target_cursor_char`, it means now our `suggest_start_column` can
     // put the `target_cursor_char` inside the window/viewport, even the
     // `target_cursor_char` is at the right-bottom corner of the window.
-    if last_preview_row_viewport.end_char_idx() > target_cursor_char
+    if (target_cursor_char >= last_preview_row_viewport.start_char_idx()
+      && target_cursor_char < last_preview_row_viewport.end_char_idx())
       || target_cursor_char >= bufline_len_char
     {
       // And don't forget the eol or line end, we need to give 1 more column if
