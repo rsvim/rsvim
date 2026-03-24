@@ -3036,11 +3036,7 @@ fn wrap_search_down(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  let (
-    start_line,
-    _cannot_fully_contain_target_cursor_line,
-    _can_exactly_contain_target_cursor_line,
-  ) = _reverse_search_target_cursor_line(
+  let start_line = _reverse_search_target_cursor_line(
     sync_fn,
     line_process_fn,
     text,
