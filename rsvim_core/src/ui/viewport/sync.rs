@@ -3480,7 +3480,7 @@ fn _reverse_search_start_column(
 }
 
 fn wrap_search_right(
-  sync_fn: wrap_detail::SyncFn,
+  _sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   _viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
