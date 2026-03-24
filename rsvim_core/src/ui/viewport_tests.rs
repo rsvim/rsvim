@@ -7726,7 +7726,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   use super::*;
 
   #[test]
-  fn new4_crlf_win() {
+  fn new1_crlf_win() {
     test_log_init();
 
     let terminal_size = size!(17, 4);
@@ -7978,7 +7978,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   }
 
   #[test]
-  fn new4_cr_mac() {
+  fn new1_cr_mac() {
     test_log_init();
 
     let terminal_size = size!(17, 4);
