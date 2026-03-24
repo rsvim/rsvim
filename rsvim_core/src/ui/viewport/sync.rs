@@ -2585,7 +2585,11 @@ pub fn search(
   }
 }
 
-// Returns whether current viewport already contains the `target_cursor_line`.
+// Returns multiple booleans:
+// 1. If current viewport contains the `target_cursor_line`.
+// 2. If current viewport already contains the `target_cursor_line`, how many
+//    rows does the `target_cursor_line` been rendered in the viewport (useful
+//    for detecting partial rendering issue for the last line).
 fn _if_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
@@ -2598,12 +2602,14 @@ fn _if_contains_target_cursor_line(
 // 1. If the window cannot even contain it, because it is just too long.
 // 2. If the window can exactly contain it, i.e. it will use the same rows that
 //    equals to the window height.
+// 3. How many rows will the `target_cursor_line` be rendered if it renders
+//    with all the window, i.e. `start_column = 0, start_line = target_cursor_line`.
 fn _can_fully_contain_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
-) -> (bool, bool) {
+) -> (bool, bool, usize) {
   let window_height = size.height();
   let window_width = size.width();
 
@@ -2636,6 +2642,7 @@ fn _can_fully_contain_target_cursor_line(
   (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
+    preview_target_rows.len(),
   )
 }
 
