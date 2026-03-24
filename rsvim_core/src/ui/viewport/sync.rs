@@ -2630,12 +2630,12 @@ fn _can_fully_contain_target_cursor_line(
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contain_target_cursor_line =
+  let can_exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   (
     cannot_fully_contain_target_cursor_line,
-    exactly_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
   )
 }
 
@@ -2951,7 +2951,7 @@ fn wrap_search_down(
 
   let (
     cannot_fully_contain_target_cursor_line,
-    exactly_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
@@ -3326,7 +3326,7 @@ fn wrap_search_left(
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contain_target_cursor_line =
+  let can_exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column = _find_target_cursor_column_to_leftward(
@@ -3336,7 +3336,7 @@ fn wrap_search_left(
   );
 
   if cannot_fully_contain_target_cursor_line
-    || exactly_contain_target_cursor_line
+    || can_exactly_contain_target_cursor_line
   {
     // Case-1 and Case-2
 
@@ -3678,14 +3678,14 @@ fn wrap_search_right(
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contain_target_cursor_line =
+  let can_exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column =
     text.width_until(target_cursor_line, target_cursor_char);
 
   if cannot_fully_contain_target_cursor_line
-    || exactly_contain_target_cursor_line
+    || can_exactly_contain_target_cursor_line
   {
     // Case-1 and Case-2
 
