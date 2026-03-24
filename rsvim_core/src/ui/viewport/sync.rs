@@ -1000,8 +1000,8 @@ mod wrap_detail {
       /* opts */ &WindowOptions,
       /* text */ &Text,
       /* size */ &U16Size,
-      /* new_start_line */ usize,
-      /* mut new_start_column */ usize,
+      /* suggest_start_line */ usize,
+      /* suggest_start_column */ usize,
       /* target_cursor_line */ usize,
       /* target_cursor_char */ usize,
     ) -> (/* start_line */ usize, /* start_column */ usize);
