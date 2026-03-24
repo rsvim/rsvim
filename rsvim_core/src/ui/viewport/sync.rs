@@ -2687,6 +2687,7 @@ fn nowrap_search_down(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
+  let window_height = size.height();
 
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
@@ -2748,7 +2749,10 @@ fn nowrap_search_down(
       debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
-    let start_line = target_cursor_line.saturating_sub(window_height);
+    let start_line = std::cmp::max(
+      0,
+      (target_cursor_line as isize) - (window_height as isize),
+    ) as usize;
     let start_column = viewport_start_column;
 
     if target_cursor_column < current_cursor_column {
