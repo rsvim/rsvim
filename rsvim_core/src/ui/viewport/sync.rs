@@ -3303,7 +3303,7 @@ fn wrap_search_left(
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    target_cursor_line_fully_rendered_rows,
+    _target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
@@ -3641,7 +3641,7 @@ fn wrap_search_right(
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    target_cursor_line_fully_rendered_rows,
+    _target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
