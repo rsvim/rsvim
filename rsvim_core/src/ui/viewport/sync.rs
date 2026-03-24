@@ -2699,9 +2699,8 @@ fn nowrap_search_down(
       )
     }
   } else {
-    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
-    // have to do an extra reverse-iteration to find out the suitable first
-    // line for the new viewport.
+    // Otherwise `target_cursor_line` is out of current viewport. We have to
+    // find out the correct first line for the new viewport.
 
     let start_line = std::cmp::max(
       0,
@@ -2784,9 +2783,8 @@ fn nowrap_search_up(
       )
     }
   } else {
-    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
-    // have to do an extra reverse-iteration to find out the suitable first
-    // line for the new viewport.
+    // Otherwise `target_cursor_line` is out of current viewport. We have to
+    // find out the correct first line for the new viewport.
 
     let start_line = target_cursor_line;
     let start_column = viewport.start_column_idx();
