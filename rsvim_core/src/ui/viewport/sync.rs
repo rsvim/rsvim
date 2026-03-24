@@ -3135,7 +3135,7 @@ fn wrap_search_up(
   }
 }
 
-fn _find_target_cursor_column_exclude_eol(
+fn _find_target_cursor_column(
   text: &Text,
   _size: &U16Size,
   target_cursor_line: usize,
@@ -3233,7 +3233,7 @@ fn nowrap_search_left(
   }
 
   let mut new_start_column = new_start_column;
-  let target_cursor_column = _find_target_cursor_column_exclude_eol(
+  let target_cursor_column = _find_target_cursor_column(
     text,
     size,
     target_cursor_line,
@@ -3289,7 +3289,7 @@ fn wrap_search_left(
   let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_column = _find_target_cursor_column_exclude_eol(
+  let target_cursor_column = _find_target_cursor_column(
     text,
     size,
     target_cursor_line,
