@@ -2585,12 +2585,64 @@ pub fn search(
   }
 }
 
+// Returns whether current viewport already contains the `target_cursor_line`.
 fn _nowrap_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
 ) -> bool {
   target_cursor_line >= viewport.start_line_idx()
     && target_cursor_line < viewport.end_line_idx()
+}
+
+// Returns whether the `target_cursor_line` is:
+// 1. If the window cannot even contain it, because it is just too long.
+// 2. If the window can exactly contain it, i.e. it will use the same rows that
+//    equals to the window height.
+fn _wrap_contains_target_cursor_line(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  search_left_fn: wrap_detail::HorizontalSearchFn,
+  search_right_fn: wrap_detail::HorizontalSearchFn,
+  viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  target_cursor_line: usize,
+) -> (bool, bool) {
+  let window_height = size.height();
+  let window_width = size.width();
+
+  // Try preview put the target cursor line with `start_column = 0`, start from
+  // `current_row = 0`.
+  let (
+    preview_target_rows,
+    _preview_target_start_fills,
+    _preview_target_end_fills,
+    _,
+  ) = line_process_fn(
+    text,
+    0,
+    target_cursor_line,
+    0_u16,
+    window_height,
+    window_width,
+  );
+
+  // Current window cannot contain the target cursor line, i.e. target cursor
+  // line is just too long to be put in current window.
+  let cannot_fully_contain_target_cursor_line =
+    preview_target_rows.len() > window_height as usize;
+
+  // Current window can exactly contain the target cursor line, i.e. target
+  // cursor line just happens to use all the rows in current window.
+  let exactly_contains_target_cursor_line =
+    preview_target_rows.len() == window_height as usize;
+
+  (
+    cannot_fully_contain_target_cursor_line,
+    exactly_contains_target_cursor_line,
+  )
 }
 
 // When cursor moves to downward, and it scrolls the window, we need to set a
