@@ -2939,10 +2939,6 @@ fn _reverse_search_target_cursor_line(
   //     |          |
   //     +----------+
   //     ```
-  //
-  //    To make the algorithm more easily to implement, if the
-  //    `target_cursor_char` is at the last row of the viewport, then we set
-  //    `start_line = start_line + 1`.
 
   let (
     cannot_fully_contain_target_cursor_line,
@@ -2968,21 +2964,18 @@ fn _reverse_search_target_cursor_line(
     preview_viewport.last().unwrap();
 
   let (target_cursor_line_is_last_line, target_cursor_char_is_at_last_row) = {
-    // Target cursor line is at the bottom line in preview viewport.
+    // Target cursor line is the last line in preview viewport.
     let is_last_line = *last_preview_line == target_cursor_line;
 
-    // Target cursor is at the right-bottom corner in current window or
-    // preview viewport.
-    let at_right_bottom = if is_last_line {
+    // Target cursor char is at last row in the preview viewport.
+    let at_last_row = if is_last_line {
       if let Some((_last_preview_row, last_preview_row_viewport)) =
         last_preview_line_viewport.rows().last()
       {
-        // How do we detect whether target cursor is at right-bottom
-        // corner?
-        //
         // 1. The last row of the preview viewport is not empty
         let last_row_not_empty = last_preview_row_viewport.end_char_idx()
           > last_preview_row_viewport.start_char_idx();
+
         // 2. The end char of last row == `target_cursor_char`
         let at_last_row =
           last_preview_row_viewport.end_char_idx() == target_cursor_char;
@@ -3005,7 +2998,7 @@ fn _reverse_search_target_cursor_line(
     } else {
       false
     };
-    (is_last_line, at_right_bottom)
+    (is_last_line, at_last_row)
   };
 
   start_line
