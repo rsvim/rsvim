@@ -2519,13 +2519,8 @@ pub fn search(
     // Cursor moves upward
     if opts.wrap() {
       nowrap_search_up(
-        sync_fn,
-        line_process_fn,
-        search_left_fn,
-        search_right_fn,
         viewport,
         cursor_viewport,
-        opts,
         text,
         size,
         target_cursor_line,
@@ -2552,13 +2547,8 @@ pub fn search(
     // moving to left/right side.
     if opts.wrap() {
       nowrap_search_down(
-        sync_fn,
-        line_process_fn,
-        search_left_fn,
-        search_right_fn,
         viewport,
         cursor_viewport,
-        opts,
         text,
         size,
         target_cursor_line,
@@ -2744,13 +2734,8 @@ fn nowrap_search_down(
 }
 
 fn nowrap_search_up(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::HorizontalSearchFn,
-  search_right_fn: wrap_detail::HorizontalSearchFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
