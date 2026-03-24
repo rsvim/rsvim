@@ -3249,7 +3249,7 @@ fn nowrap_search_right(
 }
 
 fn wrap_search_left(
-  sync_fn: wrap_detail::SyncFn,
+  _sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   _viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
