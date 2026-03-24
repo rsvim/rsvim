@@ -8397,11 +8397,11 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       buf_opts,
       vec![
         "1st.\n",
-        "2nd\n",
+        "2nd.\n",
         "3rd.\n",
         "AAAAAAAAAAAAAAAAAAAA\n",
         "BBBBBBBBBB\n",
-        "CCCCCCCCCCCCCCCCCCCC\n",
+        "CCCCCCCCCCCCCCCCCCCC",
       ],
     );
 
