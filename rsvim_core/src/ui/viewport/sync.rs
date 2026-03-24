@@ -2844,7 +2844,7 @@ fn _reverse_search_target_cursor_line(
   //
   // In most happy case, the `current_line + 1` will be the `start_line` for
   // new viewport, the `target_cursor_line` will just be the last line in the
-  // new viewport, which makes a better eye view for user.
+  // new viewport, which looks good for users.
   //
   // For example:
   //
