@@ -2963,7 +2963,11 @@ fn _reverse_search_target_cursor_line(
   if cannot_fully_contain_target_cursor_line
     || can_exactly_contain_target_cursor_line
   {
-    return start_line;
+    return (
+      start_line,
+      cannot_fully_contain_target_cursor_line,
+      can_exactly_contain_target_cursor_line,
+    );
   }
 
   let (_preview_line_range, preview_viewport) =
@@ -3109,101 +3113,59 @@ fn wrap_search_up(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
-  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
-  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
-  // for users' eye.
-  let (
-    already_contains_target_cursor_line,
-    _maybe_target_cursor_line_rendered_rows,
-  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
-
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  if already_contains_target_cursor_line {
-    // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport_start_line` as the first line for the new
-    // viewport.
+  let (
+    cannot_fully_contain_target_cursor_line,
+    _can_exactly_contain_target_cursor_line,
+    _target_cursor_line_fully_rendered_rows,
+  ) = _can_fully_contain_target_cursor_line(
+    line_process_fn,
+    text,
+    size,
+    target_cursor_line,
+  );
 
-    // Cursor moves to left side.
-    if target_cursor_column < current_cursor_column {
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
+  let start_line = target_cursor_line;
+  let start_column = if cannot_fully_contain_target_cursor_line {
+    viewport.start_column_idx()
   } else {
-    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
-    // have to do an extra reverse-iteration to find out the suitable first
-    // line for the new viewport.
+    0
+  };
 
-    if cfg!(debug_assertions) {
-      let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line <= viewport_last_line);
-    }
-
-    let start_line = target_cursor_line;
-
-    if target_cursor_column < current_cursor_column {
-      // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
+  // Cursor moves to left side.
+  if target_cursor_column < current_cursor_column {
+    search_left_fn(
+      sync_fn,
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    )
+  } else {
+    // Cursor moves to right side (even just for 0-chars).
+    search_right_fn(
+      sync_fn,
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    )
   }
 }
 
