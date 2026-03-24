@@ -2929,7 +2929,7 @@ fn _reverse_search_target_cursor_line(
     debug_assert!(current_line + 2 <= target_cursor_line as isize);
     (current_line + 2) as usize
   } else {
-    debug_assert!(current_line + 1 <= target_cursor_line as isize);
+    debug_assert!(current_line < target_cursor_line as isize);
     (current_line + 1) as usize
   }
 }
