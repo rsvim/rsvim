@@ -2827,11 +2827,7 @@ fn nowrap_search_up(
 // line which cannot "contain" the `target_cursor_line` any more. Then the
 // `first_line + 1` is our `start_line`.
 //
-// Returns:
-// 1. The correct `start_line` for the new viewport.
-// 2. If the window cannot even contain it, because it is just too long.
-// 3. If the window can exactly contain it, i.e. it will use the same rows that
-//    equals to the window height.
+// Returns `start_line` for the new viewport.
 fn _reverse_search_target_cursor_line(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
@@ -2839,7 +2835,7 @@ fn _reverse_search_target_cursor_line(
   size: &U16Size,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (usize, bool, bool) {
+) -> usize {
   let window_height = size.height();
   let window_width = size.width();
 
@@ -2963,11 +2959,7 @@ fn _reverse_search_target_cursor_line(
   if cannot_fully_contain_target_cursor_line
     || can_exactly_contain_target_cursor_line
   {
-    return (
-      start_line,
-      cannot_fully_contain_target_cursor_line,
-      can_exactly_contain_target_cursor_line,
-    );
+    return start_line;
   }
 
   let (_preview_line_range, preview_viewport) =
@@ -3023,11 +3015,7 @@ fn _reverse_search_target_cursor_line(
   };
   let start_line = std::cmp::min(start_line, target_cursor_line);
 
-  (
-    start_line,
-    cannot_fully_contain_target_cursor_line,
-    can_exactly_contain_target_cursor_line,
-  )
+  start_line
 }
 
 fn wrap_search_down(
