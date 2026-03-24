@@ -3286,8 +3286,6 @@ fn wrap_search_left(
   if cannot_fully_contain_target_cursor_line
     || can_exactly_contain_target_cursor_line
   {
-    // Case-1 and Case-2
-
     // For `start_line`, force it to be `target_cursor_line`, because viewport
     // can only contain this line (and still cannot put all of it inside).
     let start_line = target_cursor_line;
@@ -3366,8 +3364,6 @@ fn wrap_search_left(
 
     (start_line, start_column)
   } else {
-    // Case-3
-
     // For `start_column`, force it to be 0.
     let start_column = 0;
 
