@@ -2827,6 +2827,7 @@ fn nowrap_search_up(
 // line which cannot "contain" the `target_cursor_line` any more. Then the
 // `first_line + 1` is our `start_line`.
 fn _reverse_search_target_cursor_line(
+  sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
@@ -2960,6 +2961,9 @@ fn _reverse_search_target_cursor_line(
     return start_line;
   }
 
+  let (_preview_line_range, preview_viewport) =
+    sync_fn(text, size, start_line, 0);
+
   start_line
 }
 
@@ -3004,6 +3008,7 @@ fn wrap_search_down(
     text.width_before(target_cursor_line, target_cursor_char);
 
   let start_line = _reverse_search_target_cursor_line(
+    sync_fn,
     line_process_fn,
     text,
     size,
@@ -3482,7 +3487,7 @@ fn wrap_search_left(
     //
     // 2. Otherwise we just use `suggest_start_line`.
 
-    let (_preview_viewport_range, preview_viewport) =
+    let (_preview_line_range, preview_viewport) =
       sync_fn(text, size, suggest_start_line, start_column);
 
     let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
@@ -3826,7 +3831,7 @@ fn wrap_search_right(
     //
     // 2. Otherwise we just use `suggest_start_line`.
 
-    let (_preview_viewport_range, preview_viewport) =
+    let (_preview_line_range, preview_viewport) =
       sync_fn(text, size, suggest_start_line, start_column);
 
     let (cursor_is_in_bottom_line, cursor_is_at_right_bottom) =
