@@ -2639,85 +2639,6 @@ fn _can_fully_contain_target_cursor_line(
   )
 }
 
-// When cursor moves to downward, and it scrolls the window, we need to set a
-// bigger `start_line` for the new viewport to try to "put" the target cursor
-// line inside the window viewport.
-//
-// In such case, how could we know what `start_line` we should use for the new
-// viewport? We still iterate the lines (in the buffer) one by one, but from
-// the `target_cursor_line` reversely, from bottom to top, until we find the
-// first line which cannot "contain" the `target_cursor_line` any more. Then we
-// use this `first_line + 1` as our `start_line`.
-fn _reverse_search_target_cursor_line(
-  line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  text: &Text,
-  size: &U16Size,
-  target_cursor_line: usize,
-  _target_cursor_char: usize,
-) -> usize {
-  let window_height = size.height();
-  let window_width = size.width();
-
-  // This time, we iterate in reverse order.
-  let mut current_row: usize = 0;
-  let mut current_line: isize = target_cursor_line as isize;
-
-  while (current_row < window_height as usize) && (current_line >= 0) {
-    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-      text,
-      0,
-      current_line as usize,
-      0,
-      window_height,
-      window_width,
-    );
-    current_row += rows.len();
-    current_line -= 1;
-  }
-
-  // In most happy case, the `current_line + 1` will be the `start_line` of our
-  // new viewport, which will exactly "contain" the `target_cursor_line` (the
-  // `target_cursor_line` will be just the last line in the new viewport). For
-  // example:
-  //
-  // ```
-  //  AAAAAAAAAA    <- current_line
-  // +----------+
-  // |BBBBBBBBBB|   <- current_line + 1
-  // |BBBBBB.\n |
-  // |CCCCCCCCCC|   <- target_cursor_line
-  // |CCC.\n    |
-  // +----------+
-  // ```
-  //
-  // But we have an edge case: the `current_line + 1` happens to be longer and
-  // it uses more rows, so it makes the `target_cursor_line` been partial
-  // rendering, i.e. the `target_cursor_line` will not be fully shown in the
-  // new viewport. For example:
-  //
-  // ```
-  //  AAAAAAAAAA    <- current_line
-  // +----------+
-  // |BBBBBBBBBB|   <- current_line + 1
-  // |BBBBBBBBBB|
-  // |BB.\n     |
-  // |CCCCCCCCCC|   <- target_cursor_line
-  // +----------+
-  //  CCC.\n
-  // ```
-  //
-  // This is not what we want, for `wrap = true` buffer, we always try to put
-  // the entire `target_cursor_line` inside the window/viewport. So for this
-  // case, we use `current_line + 2` as `start_line` for the new viewport.
-
-  if current_row > window_height as usize {
-    (current_line + 2) as usize
-  } else {
-    (current_line + 1) as usize
-  }
-}
-
 fn nowrap_search_down(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
@@ -2930,6 +2851,85 @@ fn nowrap_search_up(
         target_cursor_char,
       )
     }
+  }
+}
+
+// When cursor moves to downward, and it scrolls the window, we need to set a
+// bigger `start_line` for the new viewport to try to "put" the target cursor
+// line inside the window viewport.
+//
+// In such case, how could we know what `start_line` we should use for the new
+// viewport? We still iterate the lines (in the buffer) one by one, but from
+// the `target_cursor_line` reversely, from bottom to top, until we find the
+// first line which cannot "contain" the `target_cursor_line` any more. Then we
+// use this `first_line + 1` as our `start_line`.
+fn _reverse_search_target_cursor_line(
+  line_process_fn: wrap_detail::LineProcessFn,
+  _viewport: &Viewport,
+  text: &Text,
+  size: &U16Size,
+  target_cursor_line: usize,
+  _target_cursor_char: usize,
+) -> usize {
+  let window_height = size.height();
+  let window_width = size.width();
+
+  // This time, we iterate in reverse order.
+  let mut current_row: usize = 0;
+  let mut current_line: isize = target_cursor_line as isize;
+
+  while (current_row < window_height as usize) && (current_line >= 0) {
+    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+      text,
+      0,
+      current_line as usize,
+      0,
+      window_height,
+      window_width,
+    );
+    current_row += rows.len();
+    current_line -= 1;
+  }
+
+  // In most happy case, the `current_line + 1` will be the `start_line` of our
+  // new viewport, which will exactly "contain" the `target_cursor_line` (the
+  // `target_cursor_line` will be just the last line in the new viewport). For
+  // example:
+  //
+  // ```
+  //  AAAAAAAAAA    <- current_line
+  // +----------+
+  // |BBBBBBBBBB|   <- current_line + 1
+  // |BBBBBB.\n |
+  // |CCCCCCCCCC|   <- target_cursor_line
+  // |CCC.\n    |
+  // +----------+
+  // ```
+  //
+  // But we have an edge case: the `current_line + 1` happens to be longer and
+  // it uses more rows, so it makes the `target_cursor_line` been partial
+  // rendering, i.e. the `target_cursor_line` will not be fully shown in the
+  // new viewport. For example:
+  //
+  // ```
+  //  AAAAAAAAAA    <- current_line
+  // +----------+
+  // |BBBBBBBBBB|   <- current_line + 1
+  // |BBBBBBBBBB|
+  // |BB.\n     |
+  // |CCCCCCCCCC|   <- target_cursor_line
+  // +----------+
+  //  CCC.\n
+  // ```
+  //
+  // This is not what we want, for `wrap = true` buffer, we always try to put
+  // the entire `target_cursor_line` inside the window/viewport. So for this
+  // case, we use `current_line + 2` as `start_line` for the new viewport.
+
+  if current_row > window_height as usize {
+    (current_line + 2) as usize
+  } else {
+    (current_line + 1) as usize
   }
 }
 
