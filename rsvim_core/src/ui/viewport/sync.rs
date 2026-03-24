@@ -3427,17 +3427,15 @@ fn _reverse_search_start_column(
     // that 1 single line uses the entier window/viewport.
     debug_assert_eq!(window_height as usize, preview_target_rows.len());
 
-    let (_last_preview_row, last_preview_row_viewport) =
-      preview_target_rows.last().unwrap();
+    // If this preview viewport (with `suggest_start_column`) can contain
+    // `target_cursor_char`.
+    let contains_target_cursor_char =
+      preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
+        target_cursor_char >= row_viewport.start_char_idx()
+          && target_cursor_char < row_viewport.end_char_idx()
+      });
 
-    // For the last row of preview target line viewport, it the last row's
-    // `end_char > target_cursor_char`, it means now our `suggest_start_column` can
-    // put the `target_cursor_char` inside the window/viewport, even the
-    // `target_cursor_char` is at the right-bottom corner of the window.
-    if (target_cursor_char >= last_preview_row_viewport.start_char_idx()
-      && target_cursor_char < last_preview_row_viewport.end_char_idx())
-      || target_cursor_char >= bufline_len_char
-    {
+    if contains_target_cursor_char || target_cursor_char >= bufline_len_char {
       // And don't forget the eol or line end, we need to give 1 more column if
       // the `target_cursor_char` if it is a eol of line end.
 
@@ -3450,6 +3448,9 @@ fn _reverse_search_start_column(
       // In such case, if the `target_cursor_char` is eol, we will need to
       // give it 1 more column for it.
       let last_row_is_full_width = {
+        debug_assert!(preview_target_rows.last().is_some());
+        let (_last_preview_row_idx, last_preview_row_viewport) =
+          preview_target_rows.last().unwrap();
         let last_row_end_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.end_char_idx(),
