@@ -3194,45 +3194,39 @@ fn nowrap_search_left(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  // if cfg!(debug_assertions) {
-  //   match text.char_at(target_cursor_line, new_start_column) {
-  //     Some(new_start_char) => trace!(
-  //       "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
-  //       target_cursor_line,
-  //       target_cursor_char,
-  //       text
-  //         .rope()
-  //         .line(target_cursor_line)
-  //         .get_char(target_cursor_char)
-  //         .unwrap_or('?'),
-  //       new_start_column,
-  //       new_start_char,
-  //       text
-  //         .rope()
-  //         .line(target_cursor_line)
-  //         .get_char(new_start_char)
-  //         .unwrap_or('?')
-  //     ),
-  //     None => trace!(
-  //       "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
-  //       target_cursor_line,
-  //       target_cursor_char,
-  //       text
-  //         .rope()
-  //         .line(target_cursor_line)
-  //         .get_char(target_cursor_char)
-  //         .unwrap_or('?'),
-  //       new_start_column,
-  //     ),
-  //   }
-  // }
-
   let mut new_start_column = new_start_column;
   let target_cursor_column =
     _find_target_cursor_column(text, target_cursor_line, target_cursor_char);
 
   if target_cursor_column < new_start_column {
     new_start_column = target_cursor_column;
+  }
+
+  (new_start_line, new_start_column)
+}
+
+fn nowrap_search_right(
+  text: &Text,
+  size: &U16Size,
+  new_start_line: usize,
+  new_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  let window_width = size.width();
+  let new_end_column = new_start_column + window_width as usize;
+
+  let mut new_start_column = new_start_column;
+  let eol_or_line_end =
+    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+  // For eol or line-end, add 1 more column
+  let target_cursor_width = text
+    .width_until(target_cursor_line, target_cursor_char)
+    + if eol_or_line_end { 1 } else { 0 };
+
+  if target_cursor_width > new_end_column {
+    new_start_column =
+      target_cursor_width.saturating_sub(window_width as usize);
   }
 
   (new_start_line, new_start_column)
@@ -3476,63 +3470,6 @@ fn wrap_search_left(
 
     (start_line, start_column)
   }
-}
-
-fn nowrap_search_right(
-  text: &Text,
-  size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  let window_width = size.width();
-  let new_end_column = new_start_column + window_width as usize;
-
-  if cfg!(debug_assertions) {
-    let new_start_char =
-      match text.char_at(target_cursor_line, new_start_column) {
-        Some(c) => {
-          format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c))
-        }
-        None => "None".to_string(),
-      };
-    let new_end_char = match text.char_at(target_cursor_line, new_end_column) {
-      Some(c) => {
-        format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c))
-      }
-      None => "None".to_string(),
-    };
-    trace!(
-      "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{}({:?}),new_end_column:{}({:?})",
-      target_cursor_line,
-      target_cursor_char,
-      text
-        .rope()
-        .line(target_cursor_line)
-        .get_char(target_cursor_char)
-        .unwrap_or('?'),
-      new_start_column,
-      new_start_char,
-      new_end_column,
-      new_end_char,
-    );
-  }
-
-  let mut new_start_column = new_start_column;
-  let eol_or_line_end =
-    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
-  // For eol or line-end, add 1 more column
-  let target_cursor_width = text
-    .width_until(target_cursor_line, target_cursor_char)
-    + if eol_or_line_end { 1 } else { 0 };
-
-  if target_cursor_width > new_end_column {
-    new_start_column =
-      target_cursor_width.saturating_sub(window_width as usize);
-  }
-
-  (new_start_line, new_start_column)
 }
 
 // By the formula:
