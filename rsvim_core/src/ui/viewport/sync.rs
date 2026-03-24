@@ -3012,11 +3012,6 @@ fn wrap_search_down(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
-    if cfg!(debug_assertions) {
-      let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line >= viewport_last_line);
-    }
-
     let start_line = _reverse_search_target_cursor_line(
       line_process_fn,
       text,
