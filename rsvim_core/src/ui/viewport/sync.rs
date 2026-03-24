@@ -2748,14 +2748,7 @@ fn nowrap_search_down(
       debug_assert!(target_cursor_line >= viewport_last_line);
     }
 
-    let start_line = _reverse_search_target_cursor_line(
-      line_process_fn,
-      viewport,
-      text,
-      size,
-      target_cursor_line,
-      target_cursor_char,
-    );
+    let start_line = target_cursor_line.saturating_sub(window_height);
     let start_column = viewport_start_column;
 
     if target_cursor_column < current_cursor_column {
