@@ -2593,9 +2593,20 @@ pub fn search(
 fn _if_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
-) -> bool {
-  target_cursor_line >= viewport.start_line_idx()
-    && target_cursor_line < viewport.end_line_idx()
+) -> (bool, Option<usize>) {
+  let already_contains = target_cursor_line >= viewport.start_line_idx()
+    && target_cursor_line < viewport.end_line_idx();
+  let rendered_rows = match viewport.lines().get(&target_cursor_line) {
+    Some(line_viewport) => {
+      debug_assert!(already_contains);
+      Some(line_viewport.rows().len())
+    }
+    None => {
+      debug_assert!(!already_contains);
+      None
+    }
+  };
+  (already_contains, rendered_rows)
 }
 
 // Returns whether the `target_cursor_line` is:
@@ -2639,10 +2650,12 @@ fn _can_fully_contain_target_cursor_line(
   let can_exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
+  let target_cursor_line_fully_rendered_rows = preview_target_rows.len();
+
   (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    preview_target_rows.len(),
+    target_cursor_line_fully_rendered_rows,
   )
 }
 
@@ -2664,8 +2677,10 @@ fn nowrap_search_down(
   // Try to keep current `viewport.start_line_idx` unchanged, this will keep
   // the viewport scrolls as small as we can, and thus avoid too big jumps for
   // users' eye.
-  let already_contains_target_cursor_line =
-    _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let (
+    already_contains_target_cursor_line,
+    _maybe_target_cursor_line_rendered_rows,
+  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2772,8 +2787,10 @@ fn nowrap_search_up(
   // Try to keep current `viewport.start_line_idx` unchanged, this will keep
   // the viewport scrolls as small as we can, and thus avoid too big jumps for
   // users' eye.
-  let already_contains_target_cursor_line =
-    _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let (
+    already_contains_target_cursor_line,
+    _maybe_target_cursor_line_rendered_rows,
+  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2960,12 +2977,15 @@ fn wrap_search_down(
   // Try to keep current `viewport.start_line_idx` unchanged, this will keep
   // the viewport scrolls as small as we can, and thus avoid too big jumps for
   // users' eye.
-  let already_contains_target_cursor_line =
-    _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let (
+    already_contains_target_cursor_line,
+    _maybe_target_cursor_line_rendered_rows,
+  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
+    target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
@@ -3079,8 +3099,10 @@ fn wrap_search_up(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let already_contains_target_cursor_line =
-    _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let (
+    already_contains_target_cursor_line,
+    _maybe_target_cursor_line_rendered_rows,
+  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -3310,31 +3332,16 @@ fn wrap_search_left(
   let window_height = size.height();
   let window_width = size.width();
 
-  // Try preview put the target cursor line with `start_column = 0`, start from
-  // `current_row = 0`.
   let (
-    preview_target_rows,
-    _preview_target_start_fills,
-    _preview_target_end_fills,
-    _,
-  ) = line_process_fn(
+    cannot_fully_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
+    target_cursor_line_fully_rendered_rows,
+  ) = _can_fully_contain_target_cursor_line(
+    line_process_fn,
     text,
-    0,
+    size,
     target_cursor_line,
-    0_u16,
-    window_height,
-    window_width,
   );
-
-  // Current window cannot contain the target cursor line, i.e. target cursor
-  // line is just too long to be put in current window.
-  let cannot_fully_contain_target_cursor_line =
-    preview_target_rows.len() > window_height as usize;
-
-  // Current window can exactly contain the target cursor line, i.e. target
-  // cursor line just happens to use all the rows in current window.
-  let can_exactly_contain_target_cursor_line =
-    preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column = _find_target_cursor_column_to_leftward(
     text,
@@ -3663,31 +3670,16 @@ fn wrap_search_right(
   let window_height = size.height();
   let window_width = size.width();
 
-  // Try preview put the target cursor line with `start_column = 0`, start from
-  // `current_row = 0`.
   let (
-    preview_target_rows,
-    _preview_target_start_fills,
-    _preview_target_end_fills,
-    _,
-  ) = line_process_fn(
+    cannot_fully_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
+    target_cursor_line_fully_rendered_rows,
+  ) = _can_fully_contain_target_cursor_line(
+    line_process_fn,
     text,
-    0,
+    size,
     target_cursor_line,
-    0_u16,
-    window_height,
-    window_width,
   );
-
-  // Current window cannot contain the target cursor line, i.e. target cursor
-  // line is just too long to be put in current window.
-  let cannot_fully_contain_target_cursor_line =
-    preview_target_rows.len() > window_height as usize;
-
-  // Current window can exactly contain the target cursor line, i.e. target
-  // cursor line just happens to use all the rows in current window.
-  let can_exactly_contain_target_cursor_line =
-    preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column =
     text.width_until(target_cursor_line, target_cursor_char);
