@@ -3270,23 +3270,23 @@ fn nowrap_search_left(
   _opts: &WindowOptions,
   text: &Text,
   _size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
+  suggest_start_line: usize,
+  suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let mut new_start_column = new_start_column;
+  let mut suggest_start_column = suggest_start_column;
   let target_cursor_column = _find_target_cursor_column_to_leftward(
     text,
     target_cursor_line,
     target_cursor_char,
   );
 
-  if target_cursor_column < new_start_column {
-    new_start_column = target_cursor_column;
+  if target_cursor_column < suggest_start_column {
+    suggest_start_column = target_cursor_column;
   }
 
-  (new_start_line, new_start_column)
+  (suggest_start_line, suggest_start_column)
 }
 
 fn nowrap_search_right(
@@ -3297,26 +3297,26 @@ fn nowrap_search_right(
   _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
-  new_start_line: usize,
-  new_start_column: usize,
+  suggest_start_line: usize,
+  suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let window_width = size.width();
-  let new_end_column = new_start_column + window_width as usize;
+  let suggest_end_column = suggest_start_column + window_width as usize;
+  let mut suggest_start_column = suggest_start_column;
 
-  let mut new_start_column = new_start_column;
   let target_cursor_column = _find_target_cursor_column_to_rightward(
     text,
     target_cursor_line,
     target_cursor_char,
   );
-  if target_cursor_column > new_end_column {
-    new_start_column =
+  if target_cursor_column > suggest_end_column {
+    suggest_start_column =
       target_cursor_column.saturating_sub(window_width as usize);
   }
 
-  (new_start_line, new_start_column)
+  (suggest_start_line, suggest_start_column)
 }
 
 fn wrap_search_left(
