@@ -3133,7 +3133,6 @@ fn wrap_search_up(
 
 fn _find_target_cursor_column(
   text: &Text,
-  _size: &U16Size,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> usize {
@@ -3195,46 +3194,42 @@ fn nowrap_search_left(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  if cfg!(debug_assertions) {
-    match text.char_at(target_cursor_line, new_start_column) {
-      Some(new_start_char) => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
-        target_cursor_line,
-        target_cursor_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        new_start_column,
-        new_start_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(new_start_char)
-          .unwrap_or('?')
-      ),
-      None => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
-        target_cursor_line,
-        target_cursor_char,
-        text
-          .rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        new_start_column,
-      ),
-    }
-  }
+  // if cfg!(debug_assertions) {
+  //   match text.char_at(target_cursor_line, new_start_column) {
+  //     Some(new_start_char) => trace!(
+  //       "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:{}({:?})",
+  //       target_cursor_line,
+  //       target_cursor_char,
+  //       text
+  //         .rope()
+  //         .line(target_cursor_line)
+  //         .get_char(target_cursor_char)
+  //         .unwrap_or('?'),
+  //       new_start_column,
+  //       new_start_char,
+  //       text
+  //         .rope()
+  //         .line(target_cursor_line)
+  //         .get_char(new_start_char)
+  //         .unwrap_or('?')
+  //     ),
+  //     None => trace!(
+  //       "target_cursor_line:{},target_cursor_char:{}({:?}),new_start_column:{},new_start_char:None",
+  //       target_cursor_line,
+  //       target_cursor_char,
+  //       text
+  //         .rope()
+  //         .line(target_cursor_line)
+  //         .get_char(target_cursor_char)
+  //         .unwrap_or('?'),
+  //       new_start_column,
+  //     ),
+  //   }
+  // }
 
   let mut new_start_column = new_start_column;
-  let target_cursor_column = _find_target_cursor_column(
-    text,
-    size,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  let target_cursor_column =
+    _find_target_cursor_column(text, target_cursor_line, target_cursor_char);
 
   if target_cursor_column < new_start_column {
     new_start_column = target_cursor_column;
@@ -3285,12 +3280,8 @@ fn wrap_search_left(
   let exactly_contains_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_column = _find_target_cursor_column(
-    text,
-    size,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  let target_cursor_column =
+    _find_target_cursor_column(text, target_cursor_line, target_cursor_char);
 
   if cannot_completely_contain_target_cursor_line
     || exactly_contains_target_cursor_line
