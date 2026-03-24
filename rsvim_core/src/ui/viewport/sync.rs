@@ -2865,11 +2865,9 @@ fn nowrap_search_up(
 // use this `first_line + 1` as our `start_line`.
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
-  _target_cursor_char: usize,
 ) -> usize {
   let window_height = size.height();
   let window_width = size.width();
@@ -3018,11 +3016,9 @@ fn wrap_search_down(
 
     let start_line = _reverse_search_target_cursor_line(
       line_process_fn,
-      viewport,
       text,
       size,
       target_cursor_line,
-      target_cursor_char,
     );
 
     if target_cursor_column < current_cursor_column {
