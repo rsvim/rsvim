@@ -3013,9 +3013,7 @@ fn _reverse_search_target_cursor_line(
   } else {
     start_line
   };
-  let start_line = std::cmp::min(start_line, target_cursor_line);
-
-  start_line
+  std::cmp::min(start_line, target_cursor_line)
 }
 
 fn wrap_search_down(
