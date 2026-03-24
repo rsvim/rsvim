@@ -2727,8 +2727,8 @@ fn _reverse_search_target_cursor_line(
 fn nowrap_search_down(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
-  _search_left_fn: wrap_detail::HorizontalSearchFn,
-  _search_right_fn: wrap_detail::HorizontalSearchFn,
+  search_left_fn: wrap_detail::HorizontalSearchFn,
+  search_right_fn: wrap_detail::HorizontalSearchFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   opts: &WindowOptions,
@@ -2763,7 +2763,7 @@ fn nowrap_search_down(
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2778,7 +2778,7 @@ fn nowrap_search_down(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2803,7 +2803,7 @@ fn nowrap_search_down(
     }
 
     let start_line = _reverse_search_target_cursor_line(
-      nowrap_line_process,
+      line_process_fn,
       viewport,
       text,
       size,
@@ -2813,7 +2813,7 @@ fn nowrap_search_down(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2828,7 +2828,7 @@ fn nowrap_search_down(
       )
     } else {
       // To right side
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -3005,7 +3005,7 @@ fn nowrap_search_up(
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -3020,7 +3020,7 @@ fn nowrap_search_up(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -3048,7 +3048,7 @@ fn nowrap_search_up(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      nowrap_search_left(
+      search_left_fn(
         sync_fn,
         line_process_fn,
         viewport,
@@ -3063,7 +3063,7 @@ fn nowrap_search_up(
       )
     } else {
       // To right side
-      nowrap_search_right(
+      search_right_fn(
         sync_fn,
         line_process_fn,
         viewport,
