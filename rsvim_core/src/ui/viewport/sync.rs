@@ -2919,7 +2919,8 @@ fn _reverse_search_target_cursor_line(
   // And there are two sub-cases:
   // 1. If the `target_cursor_line` is just too long to be put in current
   //    window. Then the current window will only have 1 line, i.e. the
-  //    `target_cursor_line`. And we don't have to do anything.
+  //    `target_cursor_line`. And we don't have to do anything, leave the
+  //    left/right movements to other methods.
   // 2. If the `target_cursor_line` is not too long, and current window can
   //    contain more than 1 lines, include the `target_cursor_line`, just like
   //    the above example. Then we move 1 more line down to ensure the
