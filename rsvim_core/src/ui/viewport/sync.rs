@@ -2845,7 +2845,6 @@ fn _reverse_search_target_cursor_line(
   // In most happy case, the `current_line + 1` will be the `start_line` for
   // new viewport, the `target_cursor_line` will just be the last line in the
   // new viewport, which looks good for users.
-  //
   // For example:
   //
   // ```
@@ -2857,8 +2856,21 @@ fn _reverse_search_target_cursor_line(
   // |CCC.\n    |
   // +----------+
   // ```
-  //
-  // But we have an edge case: the `target_cursor_line` is partial rendering,
+
+  while (current_row < window_height as usize) && (current_line >= 0) {
+    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+      text,
+      0,
+      current_line as usize,
+      0,
+      window_height,
+      window_width,
+    );
+    current_row += rows.len();
+    current_line -= 1;
+  }
+
+  // Here we have an edge case: the `target_cursor_line` is partially rendered,
   // i.e. the `target_cursor_line` will not be fully shown in the new viewport.
   // For example:
   //
@@ -2873,22 +2885,9 @@ fn _reverse_search_target_cursor_line(
   //  CCC.\n
   // ```
   //
-  // This is not what we want, (when `wrap = true`) we always try to put the
-  // entire `target_cursor_line` inside the window/viewport. So for this case,
-  // we use `current_line + 2` as `start_line` for the new viewport.
-
-  while (current_row < window_height as usize) && (current_line >= 0) {
-    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-      text,
-      0,
-      current_line as usize,
-      0,
-      window_height,
-      window_width,
-    );
-    current_row += rows.len();
-    current_line -= 1;
-  }
+  // When `wrap = true` we always try to put the entire `target_cursor_line`
+  // inside the window/viewport. So for this case, we use `current_line + 2`
+  // as `start_line` for the new viewport.
 
   let start_line = if current_row > window_height as usize {
     debug_assert!(current_line + 2 <= target_cursor_line as isize);
