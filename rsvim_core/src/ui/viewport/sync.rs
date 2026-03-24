@@ -2585,7 +2585,7 @@ pub fn search(
   }
 }
 
-fn _contains_target_cursor_line(
+fn _nowrap_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
 ) -> bool {
@@ -2691,7 +2691,7 @@ fn nowrap_search_down(
   // will keep the viewport scrolls as small as we can, and thus avoid too big
   // jumps for users' eye.
   let already_contains_target_cursor_line =
-    _contains_target_cursor_line(viewport, target_cursor_line);
+    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2795,14 +2795,11 @@ fn nowrap_search_up(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
   // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
-    _contains_target_cursor_line(viewport, target_cursor_line);
+    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2910,7 +2907,7 @@ fn wrap_search_down(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
-    _contains_target_cursor_line(viewport, target_cursor_line);
+    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -3026,7 +3023,7 @@ fn wrap_search_up(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
-    _contains_target_cursor_line(viewport, target_cursor_line);
+    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
