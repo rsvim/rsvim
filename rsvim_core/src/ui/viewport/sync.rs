@@ -2892,11 +2892,13 @@ fn _reverse_search_target_cursor_line(
 
   let start_line = if current_row > window_height as usize {
     debug_assert!(current_line + 2 <= target_cursor_line as isize);
-    (current_line + 2) as usize
+    current_line + 2
   } else {
     debug_assert!(current_line < target_cursor_line as isize);
-    (current_line + 1) as usize
+    current_line + 1
   };
+  let start_line =
+    std::cmp::max(std::cmp::max(0, start_line) as usize, target_cursor_line);
 
   // Here we have another edge case: the `target_cursor_line` is fully rendered,
   // but `target_cursor_char` is eol or line end. Since our rendering algorithm
