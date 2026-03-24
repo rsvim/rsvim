@@ -2687,7 +2687,7 @@ fn nowrap_search_down(
 ) -> (usize, usize) {
   let window_height = size.height();
 
-  // Step-1: Try to keep current `viewport.start_line_idx()` unchanged, this
+  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this
   // will keep the viewport scrolls as small as we can, and thus avoid too big
   // jumps for users' eye.
   let already_contains_target_cursor_line =
@@ -2700,7 +2700,7 @@ fn nowrap_search_down(
 
   if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport.start_line_idx()` as the first line for
+    // we can still use the `viewport.start_line_idx` as the first line for
     // the new viewport.
 
     let start_line = viewport.start_line_idx();
@@ -2782,6 +2782,114 @@ fn nowrap_search_down(
   }
 }
 
+fn nowrap_search_up(
+  sync_fn: wrap_detail::SyncFn,
+  line_process_fn: wrap_detail::LineProcessFn,
+  search_left_fn: wrap_detail::HorizontalSearchFn,
+  search_right_fn: wrap_detail::HorizontalSearchFn,
+  viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
+  opts: &WindowOptions,
+  text: &Text,
+  size: &U16Size,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+
+  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this will
+  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
+  // for users' eye.
+  let already_contains_target_cursor_line =
+    _contains_target_cursor_line(viewport, target_cursor_line);
+
+  let current_cursor_column =
+    text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+  let target_cursor_column =
+    text.width_before(target_cursor_line, target_cursor_char);
+
+  if already_contains_target_cursor_line {
+    // Yes it contains, this means we don't have to scroll the window viewport,
+    // we can still use the `viewport.start_line_idx` as the first line for the
+    // new viewport.
+
+    let start_line = viewport.start_line_idx();
+    let start_column = viewport.start_column_idx();
+
+    if target_cursor_column < current_cursor_column {
+      // Cursor moves to left side.
+      search_left_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // Cursor moves to right side (even just for 0-chars).
+      search_right_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  } else {
+    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
+    // have to do an extra reverse-iteration to find out the suitable first
+    // line for the new viewport.
+
+    let start_line = target_cursor_line;
+    let start_column = viewport.start_column_idx();
+
+    if target_cursor_column < current_cursor_column {
+      // To left side
+      search_left_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      // To right side
+      search_right_fn(
+        sync_fn,
+        line_process_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
+  }
+}
+
 fn wrap_search_down(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
@@ -2798,7 +2906,7 @@ fn wrap_search_down(
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
 
-  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
+  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
@@ -2811,8 +2919,8 @@ fn wrap_search_down(
 
   if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport_start_line` as the first line for the new
-    // viewport.
+    // we can still use the `viewport.start_line_idx` as the first line for the
+    // new viewport.
 
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
@@ -2863,115 +2971,6 @@ fn wrap_search_down(
       target_cursor_line,
       target_cursor_char,
     );
-
-    if target_cursor_column < current_cursor_column {
-      // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
-  }
-}
-
-fn nowrap_search_up(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::HorizontalSearchFn,
-  search_right_fn: wrap_detail::HorizontalSearchFn,
-  viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
-  text: &Text,
-  size: &U16Size,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
-  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
-  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
-  // for users' eye.
-  let already_contains_target_cursor_line =
-    _contains_target_cursor_line(viewport, target_cursor_line);
-
-  let current_cursor_column =
-    text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
-  let target_cursor_column =
-    text.width_before(target_cursor_line, target_cursor_char);
-
-  if already_contains_target_cursor_line {
-    // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport_start_line` as the first line for the new
-    // viewport.
-
-    if target_cursor_column < current_cursor_column {
-      // Cursor moves to left side.
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
-  } else {
-    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
-    // have to do an extra reverse-iteration to find out the suitable first
-    // line for the new viewport.
-
-    if cfg!(debug_assertions) {
-      let viewport_last_line = *viewport.lines().last().unwrap().0;
-      debug_assert!(target_cursor_line <= viewport_last_line);
-    }
-
-    let start_line = target_cursor_line;
 
     if target_cursor_column < current_cursor_column {
       // To left side
