@@ -1006,21 +1006,6 @@ mod wrap_detail {
       /* target_cursor_char */ usize,
     ) -> (/* start_line */ usize, /* start_column */ usize);
 
-  pub type VerticalSearchFn =
-    fn(
-      /* sync_fn */ SyncFn,
-      /* line_process_fn */ LineProcessFn,
-      /* search_left_fn */ HorizontalSearchFn,
-      /* search_right_fn */ HorizontalSearchFn,
-      /* viewport */ &Viewport,
-      /* cursor_viewport */ &CursorViewport,
-      /* opts */ &WindowOptions,
-      /* text */ &Text,
-      /* size */ &U16Size,
-      /* target_cursor_line */ usize,
-      /* target_cursor_char */ usize,
-    ) -> (/* start_line */ usize, /* start_column */ usize);
-
   pub fn maximized_viewport_height(height: u16) -> u16 {
     height.saturating_add(3)
   }
@@ -2509,42 +2494,27 @@ pub fn search(
   let target_cursor_char =
     std::cmp::min(target_cursor_char, target_cursor_line_end_char);
 
-  let (
-    sync_fn,
-    line_process_fn,
-    search_up_fn,
-    search_down_fn,
-    search_left_fn,
-    search_right_fn,
-  ): (
+  let (sync_fn, line_process_fn, search_left_fn, search_right_fn): (
     wrap_detail::SyncFn,
     wrap_detail::LineProcessFn,
-    wrap_detail::VerticalSearchFn,
-    wrap_detail::VerticalSearchFn,
     wrap_detail::HorizontalSearchFn,
     wrap_detail::HorizontalSearchFn,
   ) = match (opts.wrap(), opts.line_break()) {
     (false, _) => (
       nowrap_sync,
       nowrap_line_process,
-      nowrap_search_up,
-      nowrap_search_down,
       nowrap_search_left,
       nowrap_search_right,
     ),
     (true, false) => (
       wrap_nolinebreak_sync,
       wrap_nolinebreak_line_process,
-      wrap_search_up,
-      wrap_search_down,
       wrap_search_left,
       wrap_search_right,
     ),
     (true, true) => (
       wrap_linebreak_sync,
       wrap_linebreak_line_process,
-      wrap_search_up,
-      wrap_search_down,
       wrap_search_left,
       wrap_search_right,
     ),
@@ -2697,7 +2667,7 @@ fn nowrap_search_down(
 
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
-      search_left_fn(
+      nowrap_search_left(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2712,7 +2682,7 @@ fn nowrap_search_down(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
+      nowrap_search_right(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2739,7 +2709,7 @@ fn nowrap_search_down(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      search_left_fn(
+      nowrap_search_left(
         sync_fn,
         line_process_fn,
         viewport,
@@ -2754,7 +2724,7 @@ fn nowrap_search_down(
       )
     } else {
       // To right side
-      search_right_fn(
+      nowrap_search_right(
         sync_fn,
         line_process_fn,
         viewport,
@@ -3301,11 +3271,6 @@ fn _find_target_cursor_column_to_rightward(
 }
 
 fn nowrap_search_left(
-  _sync_fn: wrap_detail::SyncFn,
-  _line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   _size: &U16Size,
   suggest_start_line: usize,
@@ -3328,11 +3293,6 @@ fn nowrap_search_left(
 }
 
 fn nowrap_search_right(
-  _sync_fn: wrap_detail::SyncFn,
-  _line_process_fn: wrap_detail::LineProcessFn,
-  _viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  _opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   suggest_start_line: usize,
