@@ -8230,7 +8230,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   }
 
   #[test]
-  fn new5_crlf_win() {
+  fn new2_crlf_win() {
     test_log_init();
 
     let terminal_size = size!(10, 5);
@@ -8311,7 +8311,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   }
 
   #[test]
-  fn new5_cr_mac() {
+  fn new2_cr_mac() {
     test_log_init();
 
     let terminal_size = size!(10, 5);
