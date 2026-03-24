@@ -2963,6 +2963,50 @@ fn _reverse_search_target_cursor_line(
 
   let (_preview_line_range, preview_viewport) =
     sync_fn(text, size, start_line, 0);
+  debug_assert!(preview_viewport.last().is_some());
+  let (last_preview_line, last_preview_line_viewport) =
+    preview_viewport.last().unwrap();
+
+  let (target_cursor_line_is_last_line, target_cursor_char_is_at_last_row) = {
+    // Target cursor line is at the bottom line in preview viewport.
+    let is_last_line = *last_preview_line == target_cursor_line;
+
+    // Target cursor is at the right-bottom corner in current window or
+    // preview viewport.
+    let at_right_bottom = if is_last_line {
+      if let Some((_last_preview_row, last_preview_row_viewport)) =
+        last_preview_line_viewport.rows().last()
+      {
+        // How do we detect whether target cursor is at right-bottom
+        // corner?
+        //
+        // 1. The last row of the preview viewport is not empty
+        let last_row_not_empty = last_preview_row_viewport.end_char_idx()
+          > last_preview_row_viewport.start_char_idx();
+        // 2. The end char of last row == `target_cursor_char`
+        let at_last_row =
+          last_preview_row_viewport.end_char_idx() == target_cursor_char;
+        // 3. The width of last row >= `window_width`
+        let last_row_full_width = text
+          .width_before(
+            target_cursor_line,
+            last_preview_row_viewport.end_char_idx(),
+          )
+          .saturating_sub(text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.start_char_idx(),
+          ))
+          >= window_width as usize;
+
+        last_row_not_empty && at_last_row && last_row_full_width
+      } else {
+        false
+      }
+    } else {
+      false
+    };
+    (is_last_line, at_right_bottom)
+  };
 
   start_line
 }
