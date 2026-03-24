@@ -3039,9 +3039,6 @@ fn wrap_search_down(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
@@ -3061,7 +3058,7 @@ fn wrap_search_down(
   );
 
   let start_column = if cannot_fully_contain_target_cursor_line {
-    viewport_start_column
+    viewport.start_column_idx()
   } else {
     0
   };
