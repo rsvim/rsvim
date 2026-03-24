@@ -2938,6 +2938,10 @@ fn _reverse_search_target_cursor_line(
   //     |          |
   //     +----------+
   //     ```
+  //
+  //    To make the algorithm more easily to implement, if the
+  //    `target_cursor_char` is at the last row of the viewport, then we set
+  //    `start_line = start_line + 1`.
 
   let (
     cannot_fully_contain_target_cursor_line,
