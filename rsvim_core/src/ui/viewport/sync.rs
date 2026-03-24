@@ -2898,7 +2898,7 @@ fn _reverse_search_target_cursor_line(
     current_line + 1
   };
   let start_line =
-    std::cmp::max(std::cmp::max(0, start_line) as usize, target_cursor_line);
+    std::cmp::min(std::cmp::max(0, start_line) as usize, target_cursor_line);
 
   // Here we have another edge case: the `target_cursor_line` is fully rendered,
   // but `target_cursor_char` is eol or line end. Since our rendering algorithm
@@ -3007,7 +3007,7 @@ fn _reverse_search_target_cursor_line(
   };
 
   if target_cursor_char_is_at_right_bottom_corner {
-    start_line + 1
+    std::cmp::min(start_line + 1, target_cursor_line)
   } else {
     start_line
   }
