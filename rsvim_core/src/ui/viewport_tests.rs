@@ -8451,6 +8451,29 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         &expect_end_fills,
       );
     }
+
+    // Search-2
+    {
+      let expect =
+        vec!["1st.\n", "2nd.\n", "3rd.\n", "AAAAAAAAAA", "AAAAAAAAAA"];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 20, 0, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        0,
+        4,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
   }
 }
 
