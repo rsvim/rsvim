@@ -2733,9 +2733,9 @@ fn nowrap_search_down(
 ) -> (usize, usize) {
   let window_height = size.height();
 
-  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this
-  // will keep the viewport scrolls as small as we can, and thus avoid too big
-  // jumps for users' eye.
+  // Try to keep current `viewport.start_line_idx` unchanged, this will keep
+  // the viewport scrolls as small as we can, and thus avoid too big jumps for
+  // users' eye.
   let already_contains_target_cursor_line =
     _if_contains_target_cursor_line(viewport, target_cursor_line);
 
@@ -2841,9 +2841,9 @@ fn nowrap_search_up(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this will
-  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
-  // for users' eye.
+  // Try to keep current `viewport.start_line_idx` unchanged, this will keep
+  // the viewport scrolls as small as we can, and thus avoid too big jumps for
+  // users' eye.
   let already_contains_target_cursor_line =
     _if_contains_target_cursor_line(viewport, target_cursor_line);
 
@@ -2948,6 +2948,12 @@ fn wrap_search_down(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
+
+  // Try to keep current `viewport.start_line_idx` unchanged, this will keep
+  // the viewport scrolls as small as we can, and thus avoid too big jumps for
+  // users' eye.
+  let already_contains_target_cursor_line =
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let (
     cannot_fully_contain_target_cursor_line,
