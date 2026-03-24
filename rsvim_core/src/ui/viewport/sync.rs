@@ -2683,8 +2683,8 @@ fn nowrap_search_down(
   // Step-1: Try to keep current `viewport_start_line` unchanged, this will
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
-  let already_contains_target_cursor_line = viewport.start_line_idx()
-    <= target_cursor_line
+  let already_contains_target_cursor_line = target_cursor_line
+    >= viewport.start_line_idx()
     && target_cursor_line < viewport.end_line_idx();
 
   let current_cursor_column =
