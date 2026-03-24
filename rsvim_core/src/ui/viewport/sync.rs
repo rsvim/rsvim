@@ -2826,6 +2826,12 @@ fn nowrap_search_up(
 // `target_cursor_line` reversely, from bottom to top, until we find the first
 // line which cannot "contain" the `target_cursor_line` any more. Then the
 // `first_line + 1` is our `start_line`.
+//
+// Returns:
+// 1. The correct `start_line` for the new viewport.
+// 2. If the window cannot even contain it, because it is just too long.
+// 3. If the window can exactly contain it, i.e. it will use the same rows that
+//    equals to the window height.
 fn _reverse_search_target_cursor_line(
   sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
@@ -2833,7 +2839,7 @@ fn _reverse_search_target_cursor_line(
   size: &U16Size,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> usize {
+) -> (usize, bool, bool) {
   let window_height = size.height();
   let window_width = size.width();
 
@@ -2971,7 +2977,7 @@ fn _reverse_search_target_cursor_line(
     let is_last_line = *last_preview_line == target_cursor_line;
 
     // Target cursor char is at right-bottom corner in the preview viewport.
-    let is_at_corner = if is_last_line {
+    if is_last_line {
       if let Some((_last_preview_row, last_preview_row_viewport)) =
         last_preview_line_viewport.rows().last()
       {
@@ -3002,17 +3008,22 @@ fn _reverse_search_target_cursor_line(
       }
     } else {
       false
-    };
-
-    is_at_corner
+    }
   };
 
-  if target_cursor_char_is_at_right_bottom_corner {
+  let start_line = if target_cursor_char_is_at_right_bottom_corner {
     // Add 1 more line, but don't be greater than `target_cursor_line` itself.
-    std::cmp::min(start_line + 1, target_cursor_line)
+    start_line + 1
   } else {
     start_line
-  }
+  };
+  let start_line = std::cmp::min(start_line, target_cursor_line);
+
+  (
+    start_line,
+    cannot_fully_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
+  )
 }
 
 fn wrap_search_down(
@@ -3031,110 +3042,60 @@ fn wrap_search_down(
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
 
-  // Try to keep current `viewport.start_line_idx` unchanged, this will keep
-  // the viewport scrolls as small as we can, and thus avoid too big jumps for
-  // users' eye.
-  let (
-    already_contains_target_cursor_line,
-    _maybe_target_cursor_line_rendered_rows,
-  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
-
-  let (
-    cannot_fully_contain_target_cursor_line,
-    can_exactly_contain_target_cursor_line,
-    target_cursor_line_fully_rendered_rows,
-  ) = _can_fully_contain_target_cursor_line(
-    line_process_fn,
-    text,
-    size,
-    target_cursor_line,
-  );
-
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  let start_line = _reverse_search_target_cursor_line(
+  let (
+    start_line,
+    cannot_fully_contain_target_cursor_line,
+    _can_exactly_contain_target_cursor_line,
+  ) = _reverse_search_target_cursor_line(
     sync_fn,
     line_process_fn,
     text,
     size,
     target_cursor_line,
+    target_cursor_char,
   );
 
-  if already_contains_target_cursor_line {
-    // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport.start_line_idx` as the first line for the
-    // new viewport.
-
-    // Cursor moves to left side.
-    if target_cursor_column < current_cursor_column {
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        viewport_start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
+  let start_column = if cannot_fully_contain_target_cursor_line {
+    viewport_start_column
   } else {
-    // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
-    // have to do an extra reverse-iteration to find out the suitable first
-    // line for the new viewport.
+    0
+  };
 
-    if target_cursor_column < current_cursor_column {
-      // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    } else {
-      // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
-        text,
-        size,
-        start_line,
-        viewport_start_column,
-        target_cursor_line,
-        target_cursor_char,
-      )
-    }
+  // Cursor moves to left side.
+  if target_cursor_column < current_cursor_column {
+    search_left_fn(
+      sync_fn,
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    )
+  } else {
+    // Cursor moves to right side (even just for 0-chars).
+    search_right_fn(
+      sync_fn,
+      line_process_fn,
+      viewport,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    )
   }
 }
 
