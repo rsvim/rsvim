@@ -2704,6 +2704,9 @@ fn nowrap_search_down(
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
 
+    let start_line = viewport_start_line;
+    let start_column = viewport_start_column;
+
     // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
       search_left_fn(
@@ -2714,8 +2717,8 @@ fn nowrap_search_down(
         opts,
         text,
         size,
-        viewport_start_line,
-        viewport_start_column,
+        start_line,
+        start_column,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2729,8 +2732,8 @@ fn nowrap_search_down(
         opts,
         text,
         size,
-        viewport_start_line,
-        viewport_start_column,
+        start_line,
+        start_column,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2753,6 +2756,7 @@ fn nowrap_search_down(
       target_cursor_line,
       target_cursor_char,
     );
+    let start_column = viewport_start_column;
 
     if target_cursor_column < current_cursor_column {
       // To left side
@@ -2765,7 +2769,7 @@ fn nowrap_search_down(
         text,
         size,
         start_line,
-        viewport_start_column,
+        start_column,
         target_cursor_line,
         target_cursor_char,
       )
@@ -2780,7 +2784,7 @@ fn nowrap_search_down(
         text,
         size,
         start_line,
-        viewport_start_column,
+        start_column,
         target_cursor_line,
         target_cursor_char,
       )
