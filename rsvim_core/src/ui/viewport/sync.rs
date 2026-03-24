@@ -2599,13 +2599,7 @@ fn _nowrap_contains_target_cursor_line(
 // 2. If the window can exactly contain it, i.e. it will use the same rows that
 //    equals to the window height.
 fn _wrap_contains_target_cursor_line(
-  sync_fn: wrap_detail::SyncFn,
   line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::HorizontalSearchFn,
-  search_right_fn: wrap_detail::HorizontalSearchFn,
-  viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
