@@ -2657,13 +2657,8 @@ fn _can_fully_contain_target_cursor_line(
 }
 
 fn nowrap_search_down(
-  sync_fn: wrap_detail::SyncFn,
-  line_process_fn: wrap_detail::LineProcessFn,
-  search_left_fn: wrap_detail::HorizontalSearchFn,
-  search_right_fn: wrap_detail::HorizontalSearchFn,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
-  opts: &WindowOptions,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
@@ -2695,11 +2690,6 @@ fn nowrap_search_down(
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
       nowrap_search_left(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
         text,
         size,
         start_line,
@@ -2710,11 +2700,6 @@ fn nowrap_search_down(
     } else {
       // Cursor moves to right side (even just for 0-chars).
       nowrap_search_right(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
         text,
         size,
         start_line,
@@ -2737,11 +2722,6 @@ fn nowrap_search_down(
     if target_cursor_column < current_cursor_column {
       // To left side
       nowrap_search_left(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
         text,
         size,
         start_line,
@@ -2752,11 +2732,6 @@ fn nowrap_search_down(
     } else {
       // To right side
       nowrap_search_right(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
         text,
         size,
         start_line,
@@ -2804,12 +2779,7 @@ fn nowrap_search_up(
 
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         start_line,
@@ -2819,12 +2789,7 @@ fn nowrap_search_up(
       )
     } else {
       // Cursor moves to right side (even just for 0-chars).
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         start_line,
@@ -2843,12 +2808,7 @@ fn nowrap_search_up(
 
     if target_cursor_column < current_cursor_column {
       // To left side
-      search_left_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_left(
         text,
         size,
         start_line,
@@ -2858,12 +2818,7 @@ fn nowrap_search_up(
       )
     } else {
       // To right side
-      search_right_fn(
-        sync_fn,
-        line_process_fn,
-        viewport,
-        cursor_viewport,
-        opts,
+      nowrap_search_right(
         text,
         size,
         start_line,
