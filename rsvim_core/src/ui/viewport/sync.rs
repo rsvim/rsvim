@@ -2897,7 +2897,7 @@ fn _reverse_search_target_cursor_line(
     (current_line + 1) as usize
   };
 
-  // And we have another edge case: the `target_cursor_line` is fully rendered,
+  // Here we have another edge case: the `target_cursor_line` is fully rendered,
   // but `target_cursor_char` is eol or line end. Since our rendering algorithm
   // will not render eol (`\n` or `\r\n`), while in **insert** mode, cursor
   // will want the line end position (for appending characters at the end of
