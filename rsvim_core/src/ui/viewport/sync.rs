@@ -1129,7 +1129,7 @@ mod wrap_detail {
     }
 
     // spellchecker:off
-    // NOTE: The `cannot_fully_contains_target_cursor_line` in caller functions is calculated with
+    // NOTE: The `cannot_fully_contain_target_cursor_line` in caller functions is calculated with
     // `start_column=0`, but here the `start_column` actually belongs to the old viewport, which
     // can be greater than 0. If the tail of target cursor line doesn't fully use the spaces of the
     // viewport, this is not good because we didn't make full use of the viewport. Thus we should
@@ -1891,12 +1891,12 @@ fn search_anchor_downward_wrap(
     wrap_detail::maximized_viewport_height(height),
     width,
   );
-  let cannot_fully_contains_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > height as usize;
   let only_contains_target_cursor_line =
     preview_target_rows.len() == height as usize;
 
-  if cannot_fully_contains_target_cursor_line {
+  if cannot_fully_contain_target_cursor_line {
     // Case-1
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
@@ -2076,12 +2076,12 @@ fn search_anchor_upward_wrap(
     wrap_detail::maximized_viewport_height(height),
     width,
   );
-  let cannot_fully_contains_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > height as usize;
   let only_contains_target_cursor_line =
     preview_target_rows.len() == height as usize;
 
-  if cannot_fully_contains_target_cursor_line {
+  if cannot_fully_contain_target_cursor_line {
     // Case-1
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
@@ -2241,12 +2241,12 @@ fn search_anchor_leftward_wrap(
     wrap_detail::maximized_viewport_height(height),
     width,
   );
-  let cannot_fully_contains_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > height as usize;
   let only_contains_target_cursor_line =
     preview_target_rows.len() == height as usize;
 
-  if cannot_fully_contains_target_cursor_line {
+  if cannot_fully_contain_target_cursor_line {
     // Case-1
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
@@ -2405,12 +2405,12 @@ fn search_anchor_rightward_wrap(
     wrap_detail::maximized_viewport_height(height),
     width,
   );
-  let cannot_fully_contains_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > height as usize;
   let only_contains_target_cursor_line =
     preview_target_rows.len() == height as usize;
 
-  if cannot_fully_contains_target_cursor_line {
+  if cannot_fully_contain_target_cursor_line {
     // Case-1
     // For `start_line`, force it to be `target_cursor_line`, because viewport
     // can only contain this line (and still cannot put all of it inside).
@@ -2586,7 +2586,7 @@ pub fn search(
 }
 
 // Returns whether current viewport already contains the `target_cursor_line`.
-fn _nowrap_contains_target_cursor_line(
+fn _if_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
 ) -> bool {
@@ -2598,7 +2598,7 @@ fn _nowrap_contains_target_cursor_line(
 // 1. If the window cannot even contain it, because it is just too long.
 // 2. If the window can exactly contain it, i.e. it will use the same rows that
 //    equals to the window height.
-fn _wrap_contains_target_cursor_line(
+fn _can_fully_contain_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
@@ -2630,12 +2630,12 @@ fn _wrap_contains_target_cursor_line(
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contains_target_cursor_line =
+  let exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   (
     cannot_fully_contain_target_cursor_line,
-    exactly_contains_target_cursor_line,
+    exactly_contain_target_cursor_line,
   )
 }
 
@@ -2737,7 +2737,7 @@ fn nowrap_search_down(
   // will keep the viewport scrolls as small as we can, and thus avoid too big
   // jumps for users' eye.
   let already_contains_target_cursor_line =
-    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2845,7 +2845,7 @@ fn nowrap_search_up(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
-    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -2949,11 +2949,15 @@ fn wrap_search_down(
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
 
-  // Step-1: Try to keep current `viewport.start_line_idx` unchanged, this will
-  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
-  // for users' eye.
-  let already_contains_target_cursor_line =
-    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
+  let (
+    cannot_fully_contain_target_cursor_line,
+    exactly_contain_target_cursor_line,
+  ) = _can_fully_contain_target_cursor_line(
+    line_process_fn,
+    text,
+    size,
+    target_cursor_line,
+  );
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -3069,7 +3073,7 @@ fn wrap_search_up(
   // keep the viewport scrolls as small as we can, and thus avoid too big jumps
   // for users' eye.
   let already_contains_target_cursor_line =
-    _nowrap_contains_target_cursor_line(viewport, target_cursor_line);
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -3317,12 +3321,12 @@ fn wrap_search_left(
 
   // Current window cannot contain the target cursor line, i.e. target cursor
   // line is just too long to be put in current window.
-  let cannot_completely_contain_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > window_height as usize;
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contains_target_cursor_line =
+  let exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column = _find_target_cursor_column_to_leftward(
@@ -3331,8 +3335,8 @@ fn wrap_search_left(
     target_cursor_char,
   );
 
-  if cannot_completely_contain_target_cursor_line
-    || exactly_contains_target_cursor_line
+  if cannot_fully_contain_target_cursor_line
+    || exactly_contain_target_cursor_line
   {
     // Case-1 and Case-2
 
@@ -3669,19 +3673,19 @@ fn wrap_search_right(
 
   // Current window cannot contain the target cursor line, i.e. target cursor
   // line is just too long to be put in current window.
-  let cannot_completely_contain_target_cursor_line =
+  let cannot_fully_contain_target_cursor_line =
     preview_target_rows.len() > window_height as usize;
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let exactly_contains_target_cursor_line =
+  let exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
   let target_cursor_column =
     text.width_until(target_cursor_line, target_cursor_char);
 
-  if cannot_completely_contain_target_cursor_line
-    || exactly_contains_target_cursor_line
+  if cannot_fully_contain_target_cursor_line
+    || exactly_contain_target_cursor_line
   {
     // Case-1 and Case-2
 
