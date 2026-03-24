@@ -8500,26 +8500,20 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-4
     {
-      let expect = vec![
-        "AAAAAAAAAA",
-        "AAAAAAAAAA",
-        "BBBBBBBBBB",
-        "CCCCCCCCCC",
-        "CCCCCCCCCC",
-      ];
+      let expect = vec!["BBBBBBBBBB", "CCCCCCCCCC", "CCCCCCCCCC", "", ""];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 20, 3, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 20, 4, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 0), (4, 0), (5, 0)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 0), (4, 0), (5, 0)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        3,
+        4,
         6,
         &expect_start_fills,
         &expect_end_fills,
