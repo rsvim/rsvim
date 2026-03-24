@@ -2956,6 +2956,47 @@ fn _reverse_search_target_cursor_line(
     debug_assert!(current_line < target_cursor_line as isize);
     (current_line + 1) as usize
   }
+
+  // And we have another edge case: the `target_cursor_line` is fully rendered,
+  // but `target_cursor_char` is eol or line end. Since our rendering algorithm
+  // will not render eol (`\n` or `\r\n`), while in **insert** mode, cursor
+  // will want the line end position (for appending characters at the end of
+  // line). And it also happens that `target_cursor_line` is the last line, so
+  // the cursor actually wants a position that is next to the right-bottom
+  // corner of the window. For example:
+  //
+  // ```
+  //  AAAAAAAAAA      <- current_line
+  // +----------+
+  // |BBBBBBBBBB|     <- current_line + 1
+  // |BBBBBBBBBB|
+  // |BB.\n     |
+  // |CCCCCCCCCC|_\n  <- target_cursor_line, `_` is target_cursor_char
+  // +----------+
+  //  DDDDDD.\n
+  // ```
+  //
+  // And there are two sub-cases:
+  // 1. If the `target_cursor_line` is just too long to be put in current
+  //    window. Then the current window will only have 1 line, i.e. the
+  //    `target_cursor_line`. And we don't have to do anything.
+  // 2. If the `target_cursor_line` is not too long, and current window can
+  //    contain more than 1 lines, include the `target_cursor_line`, just like
+  //    the above example. Then we move 1 more line down to ensure the
+  //    `target_cursor_char` can be safely put to the next row.
+  //
+  //     ```
+  //      AAAAAAAAAA      <- current_line
+  //      BBBBBBBBBB      <- current_line + 1
+  //      BBBBBBBBBB
+  //      BB.\n
+  //     +----------+
+  //     |CCCCCCCCCC|_\n  <- target_cursor_line, `_` is target_cursor_char
+  //     |*DDDDD.\n |     <- `*` is the cursor rendered in terminal, it is put
+  //     |          |        to next row.
+  //     |          |
+  //     +----------+
+  //     ```
 }
 
 fn wrap_search_down(
