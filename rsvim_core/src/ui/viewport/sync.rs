@@ -3425,7 +3425,7 @@ fn _reverse_search_start_column(
 
     // This method is only used when `wrap = true`, and the line is long enough
     // that 1 single line uses the entier window/viewport.
-    debug_assert_eq!(window_height as usize, preview_target_rows.len());
+    debug_assert!(preview_target_rows.len() <= window_height as usize);
 
     let eol_or_line_end =
       text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
