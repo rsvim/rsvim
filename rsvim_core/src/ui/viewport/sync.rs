@@ -2863,8 +2863,8 @@ fn nowrap_search_up(
 //
 // We still iterate the lines (in the buffer) one by one, but from the
 // `target_cursor_line` reversely, from bottom to top, until we find the first
-// line which cannot "contain" the `target_cursor_line` any more. Then we use
-// the `first_line + 1` as our `start_line`.
+// line which cannot "contain" the `target_cursor_line` any more. Then the
+// `first_line + 1` is our `start_line`.
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
@@ -2874,7 +2874,7 @@ fn _reverse_search_target_cursor_line(
   let window_height = size.height();
   let window_width = size.width();
 
-  // This time, we iterate in reverse order.
+  // Iterate in reverse order.
   let mut current_row: usize = 0;
   let mut current_line: isize = target_cursor_line as isize;
 
