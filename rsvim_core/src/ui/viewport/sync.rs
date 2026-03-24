@@ -3427,15 +3427,21 @@ fn _reverse_search_start_column(
     // that 1 single line uses the entier window/viewport.
     debug_assert_eq!(window_height as usize, preview_target_rows.len());
 
+    let eol_or_line_end =
+      text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+
     // If this preview viewport (with `suggest_start_column`) can contain
     // `target_cursor_char`.
-    let contains_target_cursor_char =
+    let contains_target_cursor_char_or_eol =
       preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
-        target_cursor_char >= row_viewport.start_char_idx()
-          && target_cursor_char < row_viewport.end_char_idx()
+        let contains = target_cursor_char >= row_viewport.start_char_idx()
+          && target_cursor_char < row_viewport.end_char_idx();
+        let is_eol =
+          eol_or_line_end && target_cursor_char == row_viewport.end_char_idx();
+        contains || is_eol
       });
 
-    if contains_target_cursor_char || target_cursor_char >= bufline_len_char {
+    if contains_target_cursor_char_or_eol {
       // And don't forget the eol or line end, we need to give 1 more column if
       // the `target_cursor_char` if it is a eol of line end.
 
