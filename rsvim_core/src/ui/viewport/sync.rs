@@ -2906,10 +2906,9 @@ fn _reverse_search_target_cursor_line(
   // +----------+
   // ```
   //
-  // But we have an edge case: the `current_line + 1` happens to be longer and
-  // it uses more rows, so it makes the `target_cursor_line` been partial
-  // rendering, i.e. the `target_cursor_line` will not be fully shown in the
-  // new viewport. For example:
+  // But we have an edge case: the `target_cursor_line` is partial rendering,
+  // i.e. the `target_cursor_line` will not be fully shown in the new viewport.
+  // For example:
   //
   // ```
   //  AAAAAAAAAA    <- current_line
