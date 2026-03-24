@@ -3008,6 +3008,7 @@ fn _reverse_search_target_cursor_line(
   };
 
   if target_cursor_char_is_at_right_bottom_corner {
+    // Add 1 more line, but don't be greater than `target_cursor_line` itself.
     std::cmp::min(start_line + 1, target_cursor_line)
   } else {
     start_line
