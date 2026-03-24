@@ -2685,13 +2685,9 @@ fn nowrap_search_down(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-  let window_height = size.height();
-
-  // Step-1: Try to keep current `viewport_start_line` unchanged, this will
-  // keep the viewport scrolls as small as we can, and thus avoid too big jumps
-  // for users' eye.
+  // Step-1: Try to keep current `viewport.start_line_idx()` unchanged, this
+  // will keep the viewport scrolls as small as we can, and thus avoid too big
+  // jumps for users' eye.
   let already_contains_target_cursor_line =
     _contains_target_cursor_line(viewport, target_cursor_line);
 
@@ -2702,11 +2698,11 @@ fn nowrap_search_down(
 
   if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
-    // we can still use the `viewport_start_line` as the first line for the new
-    // viewport.
+    // we can still use the `viewport.start_line_idx()` as the first line for
+    // the new viewport.
 
-    let start_line = viewport_start_line;
-    let start_column = viewport_start_column;
+    let start_line = viewport.start_line_idx();
+    let start_column = viewport.start_column_idx();
 
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
@@ -2744,11 +2740,12 @@ fn nowrap_search_down(
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
 
+    let window_height = size.height();
     let start_line = std::cmp::max(
       0,
       (target_cursor_line as isize) - (window_height as isize),
     ) as usize;
-    let start_column = viewport_start_column;
+    let start_column = viewport.start_column_idx();
 
     if target_cursor_column < current_cursor_column {
       // To left side
@@ -2932,8 +2929,8 @@ fn nowrap_search_up(
     // we can still use the `viewport_start_line` as the first line for the new
     // viewport.
 
-    // Cursor moves to left side.
     if target_cursor_column < current_cursor_column {
+      // Cursor moves to left side.
       search_left_fn(
         sync_fn,
         line_process_fn,
