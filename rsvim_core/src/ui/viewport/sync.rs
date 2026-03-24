@@ -3186,6 +3186,19 @@ fn _find_target_cursor_column_to_leftward(
   target_cursor_column
 }
 
+fn _find_target_cursor_column_to_rightward(
+  text: &Text,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> usize {
+  let out_of_line =
+    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+
+  // For eol or line-end, add 1 more column
+  text.width_until(target_cursor_line, target_cursor_char)
+    + if out_of_line { 1 } else { 0 }
+}
+
 fn nowrap_search_left(
   text: &Text,
   _size: &U16Size,
@@ -3220,13 +3233,11 @@ fn nowrap_search_right(
   let new_end_column = new_start_column + window_width as usize;
 
   let mut new_start_column = new_start_column;
-  let out_of_line =
-    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
-  // For eol or line-end, add 1 more column
-  let target_cursor_column = text
-    .width_until(target_cursor_line, target_cursor_char)
-    + if out_of_line { 1 } else { 0 };
-
+  let target_cursor_column = _find_target_cursor_column_to_rightward(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  );
   if target_cursor_column > new_end_column {
     new_start_column =
       target_cursor_column.saturating_sub(window_width as usize);
