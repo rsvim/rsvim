@@ -10926,15 +10926,15 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
-        "nd again. This op",
-        "eration also eats",
-        " more rows in the",
-        " window, thus it ",
-        "may contains less",
+        "d again. This ope",
+        "ration also eats ",
+        "more rows in the ",
+        "window, thus it m",
+        "ay contains less ",
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 280, 6, 287);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 280, 6, 203);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
