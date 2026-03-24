@@ -3445,36 +3445,39 @@ fn _reverse_search_start_column(
       // And don't forget the eol or line end, we need to give 1 more column if
       // the `target_cursor_char` if it is a eol of line end.
 
-      // The width of last row == `window_width`, i.e. the last row already
-      // uses all columns (full width).
-      // In such case, if the `target_cursor_char` is eol, we will need to
-      // give it 1 more column for it.
-      let last_row_is_full_width = {
-        debug_assert!(preview_target_rows.last().is_some());
-        let (_last_preview_row_idx, last_preview_row_viewport) =
-          preview_target_rows.last().unwrap();
-        let last_row_end_column = text.width_before(
-          target_cursor_line,
-          last_preview_row_viewport.end_char_idx(),
-        );
-        let last_row_start_column = text.width_before(
-          target_cursor_line,
-          last_preview_row_viewport.start_char_idx(),
-        );
-        let last_row_width =
-          last_row_end_column.saturating_sub(last_row_start_column);
-        last_row_width >= window_width as usize
-      };
-
-      // FIXME: This is very strange. This `eol_or_line_end &&
-      // last_row_is_full_width` branch actually never hits in unit tests.
-      // I think this should be removed, but it is not harmful, let's keep it
-      // until 100% sure about it.
-      if eol_or_line_end && last_row_is_full_width {
-        return suggest_start_column + 1;
-      } else {
-        return suggest_start_column;
+      if cfg!(debug_assertions) {
+        // The width of last row == `window_width`, i.e. the last row already
+        // uses all columns (full width).
+        // In such case, if the `target_cursor_char` is eol, we will need to
+        // give it 1 more column for it.
+        let last_row_is_full_width = {
+          debug_assert!(preview_target_rows.last().is_some());
+          let (_last_preview_row_idx, last_preview_row_viewport) =
+            preview_target_rows.last().unwrap();
+          let last_row_end_column = text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.end_char_idx(),
+          );
+          let last_row_start_column = text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.start_char_idx(),
+          );
+          let last_row_width =
+            last_row_end_column.saturating_sub(last_row_start_column);
+          last_row_width >= window_width as usize
+        };
+        // FIXME: This is very strange. This `eol_or_line_end &&
+        // last_row_is_full_width` branch actually never hits in unit tests.
+        // I think this should be removed, but it is not harmful, let's keep it
+        // until 100% sure about it.
+        debug_assert!(!(eol_or_line_end && last_row_is_full_width));
       }
+
+      // if eol_or_line_end && last_row_is_full_width {
+      //   return suggest_start_column + 1;
+      // } else {
+      return suggest_start_column;
+      // }
     }
 
     suggest_start_column += 1;
