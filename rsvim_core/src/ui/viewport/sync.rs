@@ -2926,8 +2926,10 @@ fn _reverse_search_target_cursor_line(
   // we use `current_line + 2` as `start_line` for the new viewport.
 
   if current_row > window_height as usize {
+    debug_assert!(current_line + 2 <= target_cursor_line as isize);
     (current_line + 2) as usize
   } else {
+    debug_assert!(current_line + 1 <= target_cursor_line as isize);
     (current_line + 1) as usize
   }
 }
