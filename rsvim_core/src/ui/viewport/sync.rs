@@ -2854,15 +2854,17 @@ fn nowrap_search_up(
   }
 }
 
-// When cursor moves to downward, and it scrolls the window, we need to set a
-// bigger `start_line` for the new viewport to try to "put" the target cursor
-// line inside the window viewport.
+// When cursor moves to downward and scrolls the window, we need to set a
+// larger `start_line` for the new viewport to "contain" the target cursor line
+// inside the window.
 //
 // In such case, how could we know what `start_line` we should use for the new
-// viewport? We still iterate the lines (in the buffer) one by one, but from
-// the `target_cursor_line` reversely, from bottom to top, until we find the
-// first line which cannot "contain" the `target_cursor_line` any more. Then we
-// use this `first_line + 1` as our `start_line`.
+// viewport?
+//
+// We still iterate the lines (in the buffer) one by one, but from the
+// `target_cursor_line` reversely, from bottom to top, until we find the first
+// line which cannot "contain" the `target_cursor_line` any more. Then we use
+// this `first_line + 1` as our `start_line`.
 fn _reverse_search_target_cursor_line(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
