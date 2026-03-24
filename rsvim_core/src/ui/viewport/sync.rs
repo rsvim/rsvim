@@ -2499,59 +2499,86 @@ pub fn search(
     wrap_detail::LineProcessFn,
     wrap_detail::HorizontalSearchFn,
     wrap_detail::HorizontalSearchFn,
-  ) = match (opts.wrap(), opts.line_break()) {
-    (false, _) => (
-      nowrap_sync,
-      nowrap_line_process,
-      nowrap_search_left,
-      nowrap_search_right,
-    ),
-    (true, false) => (
-      wrap_nolinebreak_sync,
-      wrap_nolinebreak_line_process,
-      wrap_search_left,
-      wrap_search_right,
-    ),
-    (true, true) => (
+  ) = if opts.line_break() {
+    (
       wrap_linebreak_sync,
       wrap_linebreak_line_process,
       wrap_search_left,
       wrap_search_right,
-    ),
+    )
+  } else {
+    (
+      wrap_nolinebreak_sync,
+      wrap_nolinebreak_line_process,
+      wrap_search_left,
+      wrap_search_right,
+    )
   };
 
   if target_cursor_line < cursor_viewport.line_idx() {
     // Cursor moves upward
-    search_up_fn(
-      sync_fn,
-      line_process_fn,
-      search_left_fn,
-      search_right_fn,
-      viewport,
-      cursor_viewport,
-      opts,
-      text,
-      size,
-      target_cursor_line,
-      target_cursor_char,
-    )
+    if opts.wrap() {
+      nowrap_search_up(
+        sync_fn,
+        line_process_fn,
+        search_left_fn,
+        search_right_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      wrap_search_up(
+        sync_fn,
+        line_process_fn,
+        search_left_fn,
+        search_right_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
   } else {
     // Cursor moves downward, or just moves to left/right side. But in this
     // algorithm, we have to moves to downward (even just for 0-lines) before
     // moving to left/right side.
-    search_down_fn(
-      sync_fn,
-      line_process_fn,
-      search_left_fn,
-      search_right_fn,
-      viewport,
-      cursor_viewport,
-      opts,
-      text,
-      size,
-      target_cursor_line,
-      target_cursor_char,
-    )
+    if opts.wrap() {
+      nowrap_search_down(
+        sync_fn,
+        line_process_fn,
+        search_left_fn,
+        search_right_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    } else {
+      wrap_search_down(
+        sync_fn,
+        line_process_fn,
+        search_left_fn,
+        search_right_fn,
+        viewport,
+        cursor_viewport,
+        opts,
+        text,
+        size,
+        target_cursor_line,
+        target_cursor_char,
+      )
+    }
   }
 }
 
