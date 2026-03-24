@@ -2831,31 +2831,22 @@ fn _reverse_search_target_cursor_line(
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
+  target_cursor_char: usize,
 ) -> usize {
   let window_height = size.height();
   let window_width = size.width();
 
-  // Iterate in reverse order.
   let mut current_row: usize = 0;
   let mut current_line: isize = target_cursor_line as isize;
 
-  while (current_row < window_height as usize) && (current_line >= 0) {
-    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
-      text,
-      0,
-      current_line as usize,
-      0,
-      window_height,
-      window_width,
-    );
-    current_row += rows.len();
-    current_line -= 1;
-  }
-
-  // In most happy case, the `current_line + 1` will be the `start_line` of our
-  // new viewport, which will exactly "contain" the `target_cursor_line` (the
-  // `target_cursor_line` will be just the last line in the new viewport). For
-  // example:
+  // Here we set the `current_line` iterates start from `target_cursor_line`,
+  // until it cannot fully renders the `target_cursor_line`.
+  //
+  // In most happy case, the `current_line + 1` will be the `start_line` for
+  // new viewport, the `target_cursor_line` will just be the last line in the
+  // new viewport, which makes a better eye view for user.
+  //
+  // For example:
   //
   // ```
   //  AAAAAAAAAA    <- current_line
@@ -2886,13 +2877,26 @@ fn _reverse_search_target_cursor_line(
   // entire `target_cursor_line` inside the window/viewport. So for this case,
   // we use `current_line + 2` as `start_line` for the new viewport.
 
-  if current_row > window_height as usize {
+  while (current_row < window_height as usize) && (current_line >= 0) {
+    let (rows, _start_fills, _end_fills, _last_row) = line_process_fn(
+      text,
+      0,
+      current_line as usize,
+      0,
+      window_height,
+      window_width,
+    );
+    current_row += rows.len();
+    current_line -= 1;
+  }
+
+  let start_line = if current_row > window_height as usize {
     debug_assert!(current_line + 2 <= target_cursor_line as isize);
     (current_line + 2) as usize
   } else {
     debug_assert!(current_line < target_cursor_line as isize);
     (current_line + 1) as usize
-  }
+  };
 
   // And we have another edge case: the `target_cursor_line` is fully rendered,
   // but `target_cursor_char` is eol or line end. Since our rendering algorithm
@@ -2934,6 +2938,25 @@ fn _reverse_search_target_cursor_line(
   //     |          |
   //     +----------+
   //     ```
+
+  let (
+    cannot_fully_contain_target_cursor_line,
+    can_exactly_contain_target_cursor_line,
+    _target_cursor_line_fully_rendered_rows,
+  ) = _can_fully_contain_target_cursor_line(
+    line_process_fn,
+    text,
+    size,
+    target_cursor_line,
+  );
+
+  if cannot_fully_contain_target_cursor_line
+    || can_exactly_contain_target_cursor_line
+  {
+    return start_line;
+  }
+
+  start_line
 }
 
 fn wrap_search_down(
@@ -2976,6 +2999,13 @@ fn wrap_search_down(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
+  let start_line = _reverse_search_target_cursor_line(
+    line_process_fn,
+    text,
+    size,
+    target_cursor_line,
+  );
+
   if already_contains_target_cursor_line {
     // Yes it contains, this means we don't have to scroll the window viewport,
     // we can still use the `viewport.start_line_idx` as the first line for the
@@ -3016,13 +3046,6 @@ fn wrap_search_down(
     // Otherwise `target_cursor_line` is outside of step-1 iteration result. We
     // have to do an extra reverse-iteration to find out the suitable first
     // line for the new viewport.
-
-    let start_line = _reverse_search_target_cursor_line(
-      line_process_fn,
-      text,
-      size,
-      target_cursor_line,
-    );
 
     if target_cursor_column < current_cursor_column {
       // To left side
