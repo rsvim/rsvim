@@ -3188,7 +3188,7 @@ fn _find_target_cursor_column(
 
 fn nowrap_search_left(
   text: &Text,
-  size: &U16Size,
+  _size: &U16Size,
   new_start_line: usize,
   new_start_column: usize,
   target_cursor_line: usize,
