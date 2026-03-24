@@ -2623,7 +2623,9 @@ fn _can_fully_contain_target_cursor_line(
     0,
     target_cursor_line,
     0_u16,
-    window_height,
+    // Note: here use window_height + 3 to give a larger window, to test if the
+    // line can use more rows.
+    window_height.saturating_add(3),
     window_width,
   );
 
