@@ -3217,16 +3217,16 @@ fn nowrap_search_right(
   let new_end_column = new_start_column + window_width as usize;
 
   let mut new_start_column = new_start_column;
-  let eol_or_line_end =
+  let out_of_line =
     text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
   // For eol or line-end, add 1 more column
-  let target_cursor_width = text
+  let target_cursor_column = text
     .width_until(target_cursor_line, target_cursor_char)
-    + if eol_or_line_end { 1 } else { 0 };
+    + if out_of_line { 1 } else { 0 };
 
-  if target_cursor_width > new_end_column {
+  if target_cursor_column > new_end_column {
     new_start_column =
-      target_cursor_width.saturating_sub(window_width as usize);
+      target_cursor_column.saturating_sub(window_width as usize);
   }
 
   (new_start_line, new_start_column)
