@@ -2963,12 +2963,12 @@ fn _reverse_search_target_cursor_line(
   let (last_preview_line, last_preview_line_viewport) =
     preview_viewport.last().unwrap();
 
-  let (target_cursor_line_is_last_line, target_cursor_char_is_at_last_row) = {
+  let target_cursor_char_is_at_right_bottom_corner = {
     // Target cursor line is the last line in preview viewport.
     let is_last_line = *last_preview_line == target_cursor_line;
 
-    // Target cursor char is at last row in the preview viewport.
-    let at_last_row = if is_last_line {
+    // Target cursor char is at right-bottom corner in the preview viewport.
+    let is_at_corner = if is_last_line {
       if let Some((_last_preview_row, last_preview_row_viewport)) =
         last_preview_line_viewport.rows().last()
       {
@@ -2976,32 +2976,39 @@ fn _reverse_search_target_cursor_line(
         let last_row_not_empty = last_preview_row_viewport.end_char_idx()
           > last_preview_row_viewport.start_char_idx();
 
-        // 2. The end char of last row == `target_cursor_char`
+        // 2. The end char of last row <= `target_cursor_char`
         let at_last_row =
-          last_preview_row_viewport.end_char_idx() == target_cursor_char;
-        // 3. The width of last row >= `window_width`
-        let last_row_full_width = text
-          .width_before(
-            target_cursor_line,
-            last_preview_row_viewport.end_char_idx(),
-          )
-          .saturating_sub(text.width_before(
-            target_cursor_line,
-            last_preview_row_viewport.start_char_idx(),
-          ))
-          >= window_width as usize;
+          last_preview_row_viewport.end_char_idx() <= target_cursor_char;
 
-        last_row_not_empty && at_last_row && last_row_full_width
+        // 3. The width of last row >= `window_width`
+        let last_row_end_char_column = text.width_before(
+          target_cursor_line,
+          last_preview_row_viewport.end_char_idx(),
+        );
+        let last_row_start_char_column = text.width_before(
+          target_cursor_line,
+          last_preview_row_viewport.start_char_idx(),
+        );
+        let last_row_width =
+          last_row_end_char_column.saturating_sub(last_row_start_char_column);
+        let last_row_use_full_width = last_row_width >= window_width as usize;
+
+        last_row_not_empty && at_last_row && last_row_use_full_width
       } else {
         false
       }
     } else {
       false
     };
-    (is_last_line, at_last_row)
+
+    is_at_corner
   };
 
-  start_line
+  if target_cursor_char_is_at_right_bottom_corner {
+    start_line + 1
+  } else {
+    start_line
+  }
 }
 
 fn wrap_search_down(
