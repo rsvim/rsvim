@@ -266,8 +266,8 @@ impl CursorViewport {
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
-      let target_is_eol = text.is_eol(line_idx, char_idx);
-      if target_is_eol {
+      let eol_or_line_end = text.is_eol_or_line_end(line_idx, char_idx);
+      if eol_or_line_end {
         // The target cursor is eol, and it doesn't have a space to put in the viewport, it
         // indicates:
         //
