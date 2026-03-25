@@ -275,7 +275,7 @@ impl CursorViewport {
       // 1. The last row still have at least 1 empty column to contain the
       //    cursor.
       // 2. The last row doesn't have any empty columns to contain the cursor,
-      //    we will have to put the cursor to the next line, column-0 (And the
+      //    we will have to put the cursor to the next row, column-0 (And the
       //    next line must exists).
 
       debug_assert!(line_viewport.rows().last().is_some());
@@ -298,16 +298,10 @@ impl CursorViewport {
       if last_row_use_full_width {
         // Case-2:
         // If last row uses all the columns (full width), it means there is no
-        // empty columns that can put cursor. We have to put cursor the the
-        // next line, column-0, and the next line must exists.
+        // empty columns that can put cursor. We have to put cursor to the
+        // next row, column-0, and the next line must exists.
 
-        let next_line_idx = line_idx + 1;
-        debug_assert!(viewport.lines().contains_key(&next_line_idx));
-        let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
-        debug_assert!(next_line_viewport.rows().first().is_some());
-        let (first_row_idx, _first_row_viewport) =
-          next_line_viewport.rows().first().unwrap();
-        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+        CursorViewport::new(line_idx, char_idx, *last_row_idx+1, 0_u16)
       } else {
         // Case-1:
         // If last row doesn't use all columns (full width), it means there is
