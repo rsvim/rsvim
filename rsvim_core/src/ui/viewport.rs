@@ -276,7 +276,7 @@ impl CursorViewport {
       //    cursor.
       // 2. The last row doesn't have any empty columns to contain the cursor,
       //    we will have to put the cursor to the next row, column-0 (And the
-      //    next line must exists).
+      //    next line must exist).
 
       debug_assert!(line_viewport.rows().last().is_some());
       let (last_row_idx, last_row_viewport) =

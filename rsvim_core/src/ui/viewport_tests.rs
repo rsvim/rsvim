@@ -6351,8 +6351,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-2
     {
-      let expect =
-        vec!["small\t", "enough\tto", "\tcompletel", "y\tput", "\tinside.\n"];
+      let expect = vec![
+        "small\t",
+        "enough\tto",
+        "\tcompletel",
+        "y\tput",
+        "\tinside.\n",
+      ];
 
       let actual =
         search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 52);
