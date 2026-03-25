@@ -299,9 +299,10 @@ impl CursorViewport {
         // Case-2:
         // If last row uses all the columns (full width), it means there is no
         // empty columns that can put cursor. We have to put cursor to the
-        // next row, column-0, and the next line must exists.
+        // next row, column-0, and the next line must exist.
 
-        CursorViewport::new(line_idx, char_idx, *last_row_idx+1, 0_u16)
+        debug_assert!(*last_row_idx + 1 < size.height());
+        CursorViewport::new(line_idx, char_idx, *last_row_idx + 1, 0_u16)
       } else {
         // Case-1:
         // If last row doesn't use all columns (full width), it means there is
