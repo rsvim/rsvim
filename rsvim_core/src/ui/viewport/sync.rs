@@ -3356,6 +3356,8 @@ fn wrap_search_left(
       line_process_fn,
       text,
       size,
+      cannot_fully_contain_target_cursor_line,
+      can_exactly_contain_target_cursor_line,
       start_line,
       target_cursor_line_start_column,
       target_cursor_line,
@@ -3403,6 +3405,8 @@ fn _reverse_search_start_column(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
+  cannot_fully_contain_target_cursor_line: bool,
+  can_exactly_contain_target_cursor_line: bool,
   _suggest_start_line: usize,
   suggest_start_column: usize,
   target_cursor_line: usize,
@@ -3414,6 +3418,8 @@ fn _reverse_search_start_column(
   let bufline_len_char = bufline.len_chars();
   let bufline_chars_width =
     text.width_until(target_cursor_line, bufline_len_char);
+  let eol_or_line_end =
+    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
 
   let mut suggest_start_column = suggest_start_column;
 
@@ -3431,9 +3437,6 @@ fn _reverse_search_start_column(
     // This method is only used when `wrap = true`, and the line is long enough
     // that 1 single line uses the entier window/viewport.
     debug_assert!(preview_target_rows.len() <= window_height as usize);
-
-    let eol_or_line_end =
-      text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
 
     // If this preview viewport (with `suggest_start_column`) can contain
     // `target_cursor_char`.
@@ -3596,6 +3599,8 @@ fn wrap_search_right(
       line_process_fn,
       text,
       size,
+      cannot_fully_contain_target_cursor_line,
+      can_exactly_contain_target_cursor_line,
       start_line,
       target_cursor_start_column,
       target_cursor_line,
