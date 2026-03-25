@@ -7623,7 +7623,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["BB\t", "BBBBBBBBBB", "BBBBBBBBBB", "BBBBBBBBBB", "BB\n"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 51, 1, 16);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 51, 1, 10);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
