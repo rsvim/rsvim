@@ -2986,16 +2986,16 @@ fn _reverse_search_target_cursor_line(
           last_preview_row_viewport.end_char_idx() <= target_cursor_char;
 
         // 3. The width of last row >= `window_width`
-        let last_row_end_char_column = text.width_before(
+        let last_row_end_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.end_char_idx(),
         );
-        let last_row_start_char_column = text.width_before(
+        let last_row_start_column = text.width_before(
           target_cursor_line,
           last_preview_row_viewport.start_char_idx(),
         );
         let last_row_width =
-          last_row_end_char_column.saturating_sub(last_row_start_char_column);
+          last_row_end_column.saturating_sub(last_row_start_column);
         let last_row_use_full_width = last_row_width >= window_width as usize;
 
         last_row_not_empty && at_last_row && last_row_use_full_width
