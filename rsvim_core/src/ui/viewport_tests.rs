@@ -109,6 +109,7 @@ fn search_viewport(
     CursorViewport::to_arc(CursorViewport::from_position(
       &viewport,
       buf.text(),
+      &tree.window(window_id).unwrap().actual_shape().size(),
       target_cursor_line,
       target_cursor_char,
     )),

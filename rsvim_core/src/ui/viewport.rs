@@ -174,7 +174,11 @@ impl CursorViewport {
   }
 
   /// Create cursor viewport with the top-left corner position from the window viewport.
-  pub fn from_top_left(viewport: &Viewport, text: &Text) -> Self {
+  pub fn from_top_left(
+    viewport: &Viewport,
+    text: &Text,
+    size: &U16Size,
+  ) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
       return Self::new(0, 0, 0, 0);
@@ -210,7 +214,7 @@ impl CursorViewport {
     }
 
     let char_idx = first_row.start_char_idx();
-    Self::from_position(viewport, text, line_idx, char_idx)
+    Self::from_position(viewport, text, size, line_idx, char_idx)
   }
 
   /// Create cursor viewport with specified position (buffer's line/char index) from the window
