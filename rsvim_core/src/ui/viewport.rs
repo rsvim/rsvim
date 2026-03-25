@@ -292,9 +292,10 @@ impl CursorViewport {
       };
 
       if last_row_use_full_width {
+        // Case-2:
         // If last row uses all the columns (full width), it means there is no
-        // empty columns that can put cursor (Case-2). We have to put cursor
-        // the the next line, column-0, and the next line must exists.
+        // empty columns that can put cursor. We have to put cursor the the
+        // next line, column-0, and the next line must exists.
 
         let next_line_idx = line_idx + 1;
         debug_assert!(viewport.lines().contains_key(&next_line_idx));
@@ -304,9 +305,10 @@ impl CursorViewport {
           next_line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
       } else {
+        // Case-1:
         // If last row doesn't use all columns (full width), it means there is
-        // still at least 1 empty column that can put cursor (Case-1). We just
-        // put it at the end of line.
+        // still at least 1 empty column that can put cursor. We just put it at
+        // the end of line.
 
         let mut row_start_width =
           text.width_before(line_idx, last_row_viewport.start_char_idx());
