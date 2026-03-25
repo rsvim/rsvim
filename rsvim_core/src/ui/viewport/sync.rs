@@ -3482,37 +3482,38 @@ fn _reverse_search_start_column(
     // 3. The last row doesn't use all the columns in the row, i.e. it has at
     //    least 1 empty column to put the `target_cursor_char` at line end.
 
-    let contains_target_cursor_char_as_eol =
-      preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
-        target_cursor_char >= row_viewport.end_char_idx()
-      });
+    if eol_or_line_end {
+      let contains_target_cursor_char_as_eol =
+        preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
+          target_cursor_char == row_viewport.end_char_idx()
+        });
 
-    // The width of last row == `window_width`, i.e. the last row already
-    // uses all columns (full width).
-    // In such case, if the `target_cursor_char` is eol, we will need to
-    // give it 1 more column for it.
-    let last_row_use_full_width = {
-      debug_assert!(preview_target_rows.last().is_some());
-      let (_last_preview_row_idx, last_preview_row_viewport) =
-        preview_target_rows.last().unwrap();
-      let last_row_end_column = text.width_before(
-        target_cursor_line,
-        last_preview_row_viewport.end_char_idx(),
-      );
-      let last_row_start_column = text.width_before(
-        target_cursor_line,
-        last_preview_row_viewport.start_char_idx(),
-      );
-      let last_row_width =
-        last_row_end_column.saturating_sub(last_row_start_column);
-      last_row_width >= window_width as usize
-    };
+      if contains_target_cursor_char_as_eol {
+        // The width of last row == `window_width`, i.e. the last row already
+        // uses all columns (full width).
+        // In such case, if the `target_cursor_char` is eol, we will need to
+        // give it 1 more column for it.
+        let last_row_use_full_width = {
+          debug_assert!(preview_target_rows.last().is_some());
+          let (_last_preview_row_idx, last_preview_row_viewport) =
+            preview_target_rows.last().unwrap();
+          let last_row_end_column = text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.end_char_idx(),
+          );
+          let last_row_start_column = text.width_before(
+            target_cursor_line,
+            last_preview_row_viewport.start_char_idx(),
+          );
+          let last_row_width =
+            last_row_end_column.saturating_sub(last_row_start_column);
+          last_row_width >= window_width as usize
+        };
 
-    if eol_or_line_end
-      && contains_target_cursor_char_as_eol
-      && !last_row_use_full_width
-    {
-      return suggest_start_column;
+        if !last_row_use_full_width {
+          return suggest_start_column;
+        }
+      }
     }
 
     suggest_start_column += 1;
