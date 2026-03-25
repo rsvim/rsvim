@@ -6590,10 +6590,11 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-3
     {
-      let expect = vec!["hen\tit", "\t\tt", "oo\tlong", "\tto", "\tcompletel"];
+      let expect =
+        vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 12);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
@@ -11341,7 +11342,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 280, 6, 287);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 280, 6, 203);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
@@ -11535,8 +11536,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         "But still it contains several things we want to test:\n",
         "\t1. When the line is small enough to completely put inside.\n",
         "\t2. When it too long to completely put:\n",
-        "\t3. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "\t4. The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
       ],
     );
 
