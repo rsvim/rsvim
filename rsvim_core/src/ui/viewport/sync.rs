@@ -3408,8 +3408,6 @@ fn _reverse_search_start_column(
   line_process_fn: wrap_detail::LineProcessFn,
   text: &Text,
   size: &U16Size,
-  cannot_fully_contain_target_cursor_line: bool,
-  can_exactly_contain_target_cursor_line: bool,
   _suggest_start_line: usize,
   suggest_start_column: usize,
   target_cursor_line: usize,
