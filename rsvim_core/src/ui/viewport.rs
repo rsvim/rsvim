@@ -245,9 +245,7 @@ impl CursorViewport {
             && row_viewport.end_char_idx() > char_idx
         });
 
-    if cursor_row.is_some() {
-      let (row_idx, row_viewport) = cursor_row.unwrap();
-
+    if let Some((row_idx, row_viewport)) = cursor_row {
       let mut row_start_width =
         text.width_before(line_idx, row_viewport.start_char_idx());
 
