@@ -3404,7 +3404,11 @@ fn wrap_search_left(
 // `target_cursor_start_column` we calculated with above formula. It repeatedly
 // searches to rightward by `target_cursor_start_column += 1`, and check if the
 // result are better.
-fn annot_fully_contain_target_cursor_line: bool,
+fn _reverse_search_start_column(
+  line_process_fn: wrap_detail::LineProcessFn,
+  text: &Text,
+  size: &U16Size,
+  cannot_fully_contain_target_cursor_line: bool,
   can_exactly_contain_target_cursor_line: bool,
   _suggest_start_line: usize,
   suggest_start_column: usize,
