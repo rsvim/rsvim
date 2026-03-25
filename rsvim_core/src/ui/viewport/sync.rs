@@ -3419,9 +3419,9 @@ fn _reverse_search_start_column(
   let bufline_len_char = bufline.len_chars();
   let bufline_chars_width =
     text.width_until(target_cursor_line, bufline_len_char);
+
   let eol_or_line_end =
     text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
-
   let mut suggest_start_column = suggest_start_column;
 
   while suggest_start_column < bufline_chars_width {
@@ -3439,47 +3439,80 @@ fn _reverse_search_start_column(
     // that 1 single line uses the entier window/viewport.
     debug_assert!(preview_target_rows.len() <= window_height as usize);
 
-    // If this preview viewport (with `suggest_start_column`) can contain
-    // `target_cursor_char`.
-    let contains_target_cursor_char_or_eol =
+    // If this preview viewport can contain `target_cursor_char`.
+    let contains_target_cursor_char =
       preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
-        let contains = target_cursor_char >= row_viewport.start_char_idx()
-          && target_cursor_char < row_viewport.end_char_idx();
-        let is_eol =
-          eol_or_line_end && target_cursor_char == row_viewport.end_char_idx();
-        contains || is_eol
+        target_cursor_char >= row_viewport.start_char_idx()
+          && target_cursor_char < row_viewport.end_char_idx()
+      });
+    if contains_target_cursor_char {
+      // // And don't forget the eol or line end, we need to give 1 more column if
+      // // the `target_cursor_char` if it is a eol of line end.
+      //
+      // // The width of last row == `window_width`, i.e. the last row already
+      // // uses all columns (full width).
+      // // In such case, if the `target_cursor_char` is eol, we will need to
+      // // give it 1 more column for it.
+      // let last_row_is_full_width = {
+      //   debug_assert!(preview_target_rows.last().is_some());
+      //   let (_last_preview_row_idx, last_preview_row_viewport) =
+      //     preview_target_rows.last().unwrap();
+      //   let last_row_end_column = text.width_before(
+      //     target_cursor_line,
+      //     last_preview_row_viewport.end_char_idx(),
+      //   );
+      //   let last_row_start_column = text.width_before(
+      //     target_cursor_line,
+      //     last_preview_row_viewport.start_char_idx(),
+      //   );
+      //   let last_row_width =
+      //     last_row_end_column.saturating_sub(last_row_start_column);
+      //   last_row_width >= window_width as usize
+      // };
+      //
+      // if eol_or_line_end && last_row_is_full_width {
+      //   return suggest_start_column + 1;
+      // } else {
+      return suggest_start_column;
+      // }
+    }
+
+    // 1. If `target_cursor_char` is eol or line end
+    // 2. If this preview viewport last row has the eol or line end
+    // 3. The last row doesn't use all the columns in the row, i.e. it has at
+    //    least 1 empty column to put the `target_cursor_char` at line end.
+
+    let contains_target_cursor_char_as_eol =
+      preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
+        target_cursor_char >= row_viewport.end_char_idx()
       });
 
-    if contains_target_cursor_char_or_eol {
-      // And don't forget the eol or line end, we need to give 1 more column if
-      // the `target_cursor_char` if it is a eol of line end.
+    // The width of last row == `window_width`, i.e. the last row already
+    // uses all columns (full width).
+    // In such case, if the `target_cursor_char` is eol, we will need to
+    // give it 1 more column for it.
+    let last_row_use_full_width = {
+      debug_assert!(preview_target_rows.last().is_some());
+      let (_last_preview_row_idx, last_preview_row_viewport) =
+        preview_target_rows.last().unwrap();
+      let last_row_end_column = text.width_before(
+        target_cursor_line,
+        last_preview_row_viewport.end_char_idx(),
+      );
+      let last_row_start_column = text.width_before(
+        target_cursor_line,
+        last_preview_row_viewport.start_char_idx(),
+      );
+      let last_row_width =
+        last_row_end_column.saturating_sub(last_row_start_column);
+      last_row_width >= window_width as usize
+    };
 
-      // The width of last row == `window_width`, i.e. the last row already
-      // uses all columns (full width).
-      // In such case, if the `target_cursor_char` is eol, we will need to
-      // give it 1 more column for it.
-      let last_row_is_full_width = {
-        debug_assert!(preview_target_rows.last().is_some());
-        let (_last_preview_row_idx, last_preview_row_viewport) =
-          preview_target_rows.last().unwrap();
-        let last_row_end_column = text.width_before(
-          target_cursor_line,
-          last_preview_row_viewport.end_char_idx(),
-        );
-        let last_row_start_column = text.width_before(
-          target_cursor_line,
-          last_preview_row_viewport.start_char_idx(),
-        );
-        let last_row_width =
-          last_row_end_column.saturating_sub(last_row_start_column);
-        last_row_width >= window_width as usize
-      };
-
-      if eol_or_line_end && last_row_is_full_width {
-        return suggest_start_column + 1;
-      } else {
-        return suggest_start_column;
-      }
+    if eol_or_line_end
+      && contains_target_cursor_char_as_eol
+      && !last_row_use_full_width
+    {
+      return suggest_start_column;
     }
 
     suggest_start_column += 1;
