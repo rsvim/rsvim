@@ -228,26 +228,25 @@ impl CursorViewport {
     debug_assert!(viewport.lines().contains_key(&line_idx));
     let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
-    let cursor_row = line_viewport
-      .rows()
-      .iter()
-      .filter(|(_row_idx, row_viewport)| {
-        // trace!(
-        //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
-        //   row_viewport,
-        //   row_viewport.start_char_idx(),
-        //   row_viewport.end_char_idx(),
-        //   line_idx,
-        //   char_idx
-        // );
-        row_viewport.start_char_idx() <= char_idx
-          && row_viewport.end_char_idx() > char_idx
-      })
-      .collect::<Vec<_>>();
+    let cursor_row =
+      line_viewport
+        .rows()
+        .iter()
+        .find(|(_row_idx, row_viewport)| {
+          // trace!(
+          //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
+          //   row_viewport,
+          //   row_viewport.start_char_idx(),
+          //   row_viewport.end_char_idx(),
+          //   line_idx,
+          //   char_idx
+          // );
+          row_viewport.start_char_idx() <= char_idx
+            && row_viewport.end_char_idx() > char_idx
+        });
 
-    if !cursor_row.is_empty() {
-      debug_assert_eq!(cursor_row.len(), 1);
-      let (row_idx, row_viewport) = cursor_row[0];
+    if cursor_row.is_some() {
+      let (row_idx, row_viewport) = cursor_row.unwrap();
 
       let mut row_start_width =
         text.width_before(line_idx, row_viewport.start_char_idx());
@@ -266,14 +265,11 @@ impl CursorViewport {
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
-      let eol_or_line_end = text.is_eol_or_line_end(line_idx, char_idx);
-      if eol_or_line_end {
-        // The target cursor is eol, and it doesn't have a space to put in the viewport, it
-        // indicates:
+      let out_of_line = text.is_eol_or_line_end(line_idx, char_idx);
+      if out_of_line {
+        // The target cursor is eol or line end, we have two cases:
         //
-        // 1. The window must be `wrap=true`
-        // 2. The viewport must contains `line_idx+1`.
-        // 3. The target cursor position is out of viewport.
+        // 1. If the current row
         //
         // The cursor will be put in the position `(next line, 0-column)`.
 
