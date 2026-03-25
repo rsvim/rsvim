@@ -275,7 +275,7 @@ impl CursorViewport {
       //    next line must exists).
 
       debug_assert!(line_viewport.rows().last().is_some());
-      let (_last_row_idx, last_row_viewport) =
+      let (last_row_idx, last_row_viewport) =
         line_viewport.rows().last().unwrap();
       debug_assert!(last_row_viewport.end_char_idx() <= char_idx);
 
@@ -291,13 +291,40 @@ impl CursorViewport {
         last_row_width >= size.width() as usize
       };
 
-      let next_line_idx = line_idx + 1;
-      debug_assert!(viewport.lines().contains_key(&next_line_idx));
-      let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
-      debug_assert!(next_line_viewport.rows().first().is_some());
-      let (first_row_idx, _first_row_viewport) =
-        next_line_viewport.rows().first().unwrap();
-      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      if last_row_use_full_width {
+        // If last row uses all the columns (full width), it means there is no
+        // empty columns that can put cursor (Case-2). We have to put cursor
+        // the the next line, column-0, and the next line must exists.
+
+        let next_line_idx = line_idx + 1;
+        debug_assert!(viewport.lines().contains_key(&next_line_idx));
+        let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
+        debug_assert!(next_line_viewport.rows().first().is_some());
+        let (first_row_idx, _first_row_viewport) =
+          next_line_viewport.rows().first().unwrap();
+        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      } else {
+        // If last row doesn't use all columns (full width), it means there is
+        // still at least 1 empty column that can put cursor (Case-1). We just
+        // put it at the end of line.
+
+        let mut row_start_width =
+          text.width_before(line_idx, last_row_viewport.start_char_idx());
+
+        // Subtract `start_filled_cols` if the row is the first row in the line.
+        let (first_row_idx, _first_row_viewport) =
+          line_viewport.rows.first().unwrap();
+        if first_row_idx == last_row_idx {
+          debug_assert!(row_start_width >= line_viewport.start_filled_cols());
+          row_start_width -= line_viewport.start_filled_cols();
+        };
+
+        let char_start_width = text.width_before(line_idx, char_idx) + 1;
+        let col_idx = (char_start_width - row_start_width) as u16;
+        let row_idx = *last_row_idx;
+
+        CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+      }
     } else {
       debug_assert!(line_viewport.rows().first().is_some());
       let (first_row_idx, _first_row_viewport) =
