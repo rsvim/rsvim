@@ -3352,12 +3352,15 @@ fn wrap_search_left(
       return (start_line, start_column);
     }
 
+    // NOTE: only contain 1 line
+    debug_assert!(
+      cannot_fully_contain_target_cursor_line
+        || can_exactly_contain_target_cursor_line
+    );
     let target_cursor_line_start_column = _reverse_search_start_column(
       line_process_fn,
       text,
       size,
-      cannot_fully_contain_target_cursor_line,
-      can_exactly_contain_target_cursor_line,
       start_line,
       target_cursor_line_start_column,
       target_cursor_line,
@@ -3401,11 +3404,7 @@ fn wrap_search_left(
 // `target_cursor_start_column` we calculated with above formula. It repeatedly
 // searches to rightward by `target_cursor_start_column += 1`, and check if the
 // result are better.
-fn _reverse_search_start_column(
-  line_process_fn: wrap_detail::LineProcessFn,
-  text: &Text,
-  size: &U16Size,
-  cannot_fully_contain_target_cursor_line: bool,
+fn annot_fully_contain_target_cursor_line: bool,
   can_exactly_contain_target_cursor_line: bool,
   _suggest_start_line: usize,
   suggest_start_column: usize,
@@ -3592,6 +3591,11 @@ fn wrap_search_right(
     let target_cursor_start_column = target_cursor_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
 
+    // NOTE: only contain 1 line
+    debug_assert!(
+      cannot_fully_contain_target_cursor_line
+        || can_exactly_contain_target_cursor_line
+    );
     // We try to do some more additional rightward movement on
     // `target_cursor_start_column`, to make sure the new viewport can
     // contain the `target_cursor_char`.
@@ -3599,8 +3603,6 @@ fn wrap_search_right(
       line_process_fn,
       text,
       size,
-      cannot_fully_contain_target_cursor_line,
-      can_exactly_contain_target_cursor_line,
       start_line,
       target_cursor_start_column,
       target_cursor_line,
