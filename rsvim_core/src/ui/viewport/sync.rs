@@ -3095,7 +3095,7 @@ fn wrap_search_up(
   let target_cursor_column =
     text.width_before(target_cursor_line, target_cursor_char);
 
-  let start_line = target_cursor_line;
+  let start_line = std::cmp::min(target_cursor_line, viewport.start_line_idx());
   let start_column = viewport.start_column_idx();
 
   // Cursor moves to left side.
