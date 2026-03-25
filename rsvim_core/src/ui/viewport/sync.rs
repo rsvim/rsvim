@@ -3347,6 +3347,11 @@ fn wrap_search_left(
       };
     let target_cursor_line_start_column = target_cursor_line_end_column
       .saturating_sub((window_width as usize) * (window_height as usize));
+
+    if target_cursor_line_start_column > start_column {
+      return (start_line, start_column);
+    }
+
     let target_cursor_line_start_column = _reverse_search_start_column(
       line_process_fn,
       text,
