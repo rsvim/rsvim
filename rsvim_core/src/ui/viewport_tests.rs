@@ -6351,21 +6351,16 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-2
     {
-      let expect = vec![
-        "small\t",
-        "enough\tto",
-        "\tcompletel",
-        "y\tput",
-        "\tinside.\n",
-      ];
+      let expect =
+        vec!["is\tsmall", "\tenough", "\tto", "\tcompletel", "y\tput"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 52);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 3, 45);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 4)].into_iter().collect();
+        vec![(3, 1)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 0)].into_iter().collect();
+        vec![(3, 5)].into_iter().collect();
       info!("actual:{:?}", actual);
       assert_viewport(
         lock!(buf).text(),
@@ -7624,7 +7619,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["BB\t", "BBBBBBBBBB", "BBBBBBBBBB", "BBBBBBBBBB", "BB\n"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 51, 1, 10);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 51, 1, 16);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
