@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::undo;
 use crate::chan;
 use crate::chan::MasterMessage;
@@ -227,8 +228,12 @@ impl Normal {
           op,
           true,
         );
-        let eol =
-          CompactString::new(format!("{}", buffer.options().end_of_line()));
+        let eol = CompactString::new(format!(
+          "{}",
+          std::convert::Into::<EndOfLineOption>::into(
+            buffer.options().file_format()
+          )
+        ));
 
         // Save editing change
         let cursor_absolute_char_idx = cursor_ops::cursor_absolute_char_idx(

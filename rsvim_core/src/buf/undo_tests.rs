@@ -1,4 +1,5 @@
 use super::undo::*;
+use crate::buf::opt::EndOfLineOption;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::state::ops as state_ops;
@@ -1119,7 +1120,9 @@ mod tests_buffer_editing {
         .1
         .clone();
       let mut buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        buf.options().file_format(),
+      );
       let after_payload = buf.text().rope().to_string();
       assert_eq!(after_payload, format!("Hello, World{}", buf_eol));
       let max_commits = buf.undo().undo_stack().len();
@@ -1197,7 +1200,9 @@ mod tests_buffer_editing {
       info!("undo_stack:{:?}", buf.undo().undo_stack());
 
       debug_assert_eq!(buf.undo().undo_stack().len(), 4);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        buf.options().file_format(),
+      );
       let after_payload = buf.text().rope().to_string();
       assert_eq!(after_payload, format!("HelloWorld{}", buf_eol));
       let mut rope = buf.text().rope().clone();

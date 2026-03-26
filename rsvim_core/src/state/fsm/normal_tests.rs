@@ -5,6 +5,7 @@ use crate::buf::BufferArc;
 use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::opt::FileFormatOption;
 use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
@@ -8146,7 +8147,9 @@ mod tests_goto_insert_mode {
       assert_eq!(actual1.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let line1 = format!("Should go to insert mode{buf_eol}");
       let expect = vec![line1.as_str(), "Bye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> =
