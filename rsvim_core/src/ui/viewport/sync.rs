@@ -3527,7 +3527,7 @@ fn wrap_search_right(
   text: &Text,
   size: &U16Size,
   suggest_start_line: usize,
-  _suggest_start_column: usize,
+  suggest_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -3641,7 +3641,10 @@ fn wrap_search_right(
       target_cursor_char,
     );
 
-    (start_line, target_cursor_start_column)
+    let start_column =
+      std::cmp::max(suggest_start_column, target_cursor_start_column);
+
+    (start_line, start_column)
   } else {
     // For `start_column`, force it to be 0.
     let start_column = 0;
