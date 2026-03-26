@@ -157,10 +157,9 @@ regex = { workspace = true }
 #   "max_level_trace",
 #   "release_max_level_error",
 # ] }
-# tracing-appender = { workspace = true, features = ["parking_lot"] }
+# tracing-appender = { workspace = true }
 # tracing-subscriber = { workspace = true, features = [
 #   "env-filter",
-#   "parking_lot",
 # ] }
 unicode-width = { workspace = true }
 

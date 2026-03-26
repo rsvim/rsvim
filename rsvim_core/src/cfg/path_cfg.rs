@@ -1,8 +1,8 @@
 //! File path configs.
 
-use once_cell::sync::Lazy;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
 #[cfg(test)]
 use crate::tests::evloop::TempPathConfig;
@@ -231,4 +231,4 @@ impl Default for PathConfig {
   }
 }
 
-pub static PATH_CONFIG: Lazy<PathConfig> = Lazy::new(PathConfig::new);
+pub static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);

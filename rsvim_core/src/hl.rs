@@ -64,7 +64,7 @@ use compact_str::ToCompactString;
 use crossterm::style::Attribute;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 pub const DEFAULT: &str = "default";
 pub const RESET_COLOR: Color = Color::Reset;
@@ -129,11 +129,11 @@ pub const VARIABLE_BUILTIN: &str = "variable.builtin";
 pub const VARIABLE_MEMBER: &str = "variable.member";
 pub const VARIABLE_PARAMETER: &str = "variable.parameter";
 
-pub static UI_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
-  Lazy::new(|| [TEXT, BACKGROUND].into_iter().map(|i| (i, i)).collect());
+pub static UI_NAMES: LazyLock<FoldMap<&'static str, &'static str>> =
+  LazyLock::new(|| [TEXT, BACKGROUND].into_iter().map(|i| (i, i)).collect());
 
-pub static SCOPE_NAMES: Lazy<FoldMap<&'static str, &'static str>> =
-  Lazy::new(|| {
+pub static SCOPE_NAMES: LazyLock<FoldMap<&'static str, &'static str>> =
+  LazyLock::new(|| {
     [
       ATTRIBUTE,
       BOOLEAN,

@@ -89,10 +89,9 @@ toml = { version = "1.0", features = ["fast_hash"] }
 #   "max_level_trace",
 #   "release_max_level_error",
 # ] }
-# tracing-appender = { version = "0.2", features = ["parking_lot"] }
+# tracing-appender = { version = "0.2" }
 # tracing-subscriber = { version = "0.3", features = [
 #   "env-filter",
-#   "parking_lot",
 # ] }
 tree-sitter = "0.26"
 tree-sitter-c = "0.24"
