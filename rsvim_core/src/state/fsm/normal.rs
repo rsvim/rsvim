@@ -354,7 +354,7 @@ impl Normal {
     };
     let buffer = lock!(buffer);
 
-    let (target_cursor_char, target_cursor_line, move_direction) =
+    let (target_cursor_char, target_cursor_line) =
       cursor_ops::normalize_cursor_move_to_exclude_eol(
         buffer.text(),
         op,

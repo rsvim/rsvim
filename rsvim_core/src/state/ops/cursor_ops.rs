@@ -132,8 +132,8 @@ pub fn normalize_cursor_move_to_exclude_eol(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) =
+) -> (usize, usize) {
+  let (x, y, _move_direction) =
     _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
@@ -144,7 +144,7 @@ pub fn normalize_cursor_move_to_exclude_eol(
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))
     }
   };
-  (x, y, move_direction)
+  (x, y)
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
@@ -154,8 +154,8 @@ pub fn normalize_cursor_move_to_include_eol(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) =
+) -> (usize, usize) {
+  let (x, y, _move_direction) =
     _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
@@ -166,7 +166,7 @@ pub fn normalize_cursor_move_to_include_eol(
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))
     }
   };
-  (x, y, move_direction)
+  (x, y)
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
@@ -478,8 +478,7 @@ pub fn cursor_move(
   let cursor_viewport = tree.editable_cursor_viewport(id);
 
   // Only move cursor when it is different from current cursor.
-  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
-  {
+  let (target_cursor_char, target_cursor_line) = if include_eol {
     normalize_cursor_move_to_include_eol(
       text,
       op,
