@@ -13258,8 +13258,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        " extra parts are been",
-        " truncated if        ",
+        "extra parts are been ",
+        "truncated if         ",
         "both        line-wrap",
         "        and          ",
         "word-wrap            ",
