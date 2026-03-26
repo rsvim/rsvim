@@ -97,7 +97,20 @@ strum = { workspace = true }
 strum_macros = { workspace = true }
 taffy = { workspace = true }
 thiserror = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true, features = [
+  # "full" features without "parking_lot"
+  "fs",
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "process",
+  "rt",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+  "time",
+] }
 tokio-util = { workspace = true, features = ["full"] }
 toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
