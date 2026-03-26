@@ -1102,6 +1102,7 @@ fn nowrap_search_up(
 fn _reverse_search_target_cursor_line(
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
+  viewport: &Viewport,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
@@ -1172,7 +1173,8 @@ fn _reverse_search_target_cursor_line(
   };
   debug_assert!(start_line >= 0);
   debug_assert!(start_line <= target_cursor_line as isize);
-  let start_line = start_line as usize;
+  let start_line =
+    std::cmp::max(viewport.start_line_idx(), start_line as usize);
 
   // Here we have another edge case: the `target_cursor_line` is fully rendered,
   // but `target_cursor_char` is eol or line end. Since our rendering algorithm
@@ -1308,6 +1310,7 @@ fn wrap_search_down(
   let start_line = _reverse_search_target_cursor_line(
     sync_fn,
     line_process_fn,
+    viewport,
     text,
     size,
     target_cursor_line,
