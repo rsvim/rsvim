@@ -13373,7 +13373,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 295, 6, 317);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 295, 6, 232);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
@@ -13392,11 +13392,16 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-2
     {
-      let expect =
-        vec!["ne-wrap\t", "and\tword-", "wrap\t", "options\t", "are\tnot"];
+      let expect = vec![
+        "a parts are been ",
+        "truncated if both",
+        " line-wrap and wo",
+        "rd-wrap options a",
+        "re not set.\n",
+      ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 78);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 19);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
