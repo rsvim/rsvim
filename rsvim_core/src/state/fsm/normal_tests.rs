@@ -65,6 +65,7 @@ mod tests_raw_cursor_move_y_by {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -91,6 +92,7 @@ mod tests_raw_cursor_move_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -125,6 +127,7 @@ mod tests_raw_cursor_move_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
@@ -166,6 +169,7 @@ mod tests_raw_cursor_move_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4() {
     test_log_init();
 
@@ -207,6 +211,7 @@ mod tests_raw_cursor_move_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap5() {
     test_log_init();
 
@@ -234,6 +239,7 @@ mod tests_raw_cursor_move_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap1() {
     test_log_init();
 
@@ -280,6 +286,7 @@ mod tests_raw_cursor_move_x_by {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -308,6 +315,7 @@ mod tests_raw_cursor_move_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -344,6 +352,7 @@ mod tests_raw_cursor_move_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
@@ -380,6 +389,7 @@ mod tests_raw_cursor_move_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4() {
     test_log_init();
 
@@ -424,6 +434,7 @@ mod tests_raw_cursor_move_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap5() {
     test_log_init();
 
@@ -475,6 +486,7 @@ mod tests_raw_cursor_move_by {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -536,6 +548,7 @@ mod tests_raw_cursor_move_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -596,6 +609,7 @@ mod tests_raw_cursor_move_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap1() {
     test_log_init();
 
@@ -646,6 +660,7 @@ mod tests_raw_cursor_move_to {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -707,6 +722,7 @@ mod tests_raw_cursor_move_to {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -767,6 +783,7 @@ mod tests_raw_cursor_move_to {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap1() {
     test_log_init();
 
@@ -821,6 +838,7 @@ mod tests_raw_window_scroll_y_by {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -879,6 +897,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -971,6 +990,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
@@ -1057,6 +1077,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4() {
     test_log_init();
 
@@ -1139,6 +1160,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap5() {
     test_log_init();
 
@@ -1365,6 +1387,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap1() {
     test_log_init();
 
@@ -1461,6 +1484,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap2() {
     test_log_init();
 
@@ -1664,6 +1688,7 @@ mod tests_raw_window_scroll_y_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak1() {
     test_log_init();
 
@@ -1768,6 +1793,7 @@ mod tests_raw_window_scroll_x_by {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -1826,6 +1852,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -1927,6 +1954,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
@@ -2013,6 +2041,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4() {
     test_log_init();
 
@@ -2097,6 +2126,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap5() {
     test_log_init();
 
@@ -2272,6 +2302,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap6() {
     test_log_init();
 
@@ -2508,6 +2539,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap1() {
     test_log_init();
 
@@ -2604,6 +2636,7 @@ mod tests_raw_window_scroll_x_by {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap2() {
     test_log_init();
 
@@ -2827,6 +2860,7 @@ mod tests_raw_window_scroll_to {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -2919,6 +2953,7 @@ mod tests_raw_window_scroll_to {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -3139,6 +3174,7 @@ mod tests_raw_window_scroll_to {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
