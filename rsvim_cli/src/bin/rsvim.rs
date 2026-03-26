@@ -13,12 +13,12 @@ static GLOBAL: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-use once_cell::sync::Lazy;
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
+use std::sync::LazyLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tokio::time::Instant;
@@ -28,7 +28,7 @@ const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_SNAPSHOT: &[u8] =
   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
-static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
+static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
   let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
   let version_tags = version_tags
@@ -86,7 +86,7 @@ static RSVIM_VERSION: Lazy<String> = Lazy::new(|| {
 });
 
 // --headless (experimental)  Run in headless mode without TUI
-static RSVIM_SHORT_HELP: Lazy<String> = Lazy::new(|| {
+static RSVIM_SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
   const SHORT_HELP: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/SHORT_HELP.TXT"));
   SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
@@ -98,7 +98,7 @@ static RSVIM_SHORT_HELP: Lazy<String> = Lazy::new(|| {
 //     uses STDOUT, STDERR to print messages instead of rendering TUI. All
 //     internal data structures (such as buffers, windows, command-line,
 //     etc) and scripts/plugins will still be initialized
-static RSVIM_LONG_HELP: Lazy<String> = Lazy::new(|| {
+static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
   const LONG_HELP: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/LONG_HELP.TXT"));
   LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))

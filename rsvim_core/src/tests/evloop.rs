@@ -9,10 +9,10 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
-use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::path::Path;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::channel;
 use std::task::Poll;
@@ -143,7 +143,7 @@ impl MockEventReader {
           }
         }
 
-        let mut thread_shared_waker = cloned_shared_waker.lock();
+        let mut thread_shared_waker = lock!(cloned_shared_waker);
         if let Some(waker) = thread_shared_waker.waker.take() {
           waker.wake();
         }
@@ -153,7 +153,7 @@ impl MockEventReader {
       // std::thread::sleep(INTERVAL);
       tx.send(Ok(CTRL_D.clone())).unwrap();
 
-      let mut thread_shared_waker = cloned_shared_waker.lock();
+      let mut thread_shared_waker = lock!(cloned_shared_waker);
       if let Some(waker) = thread_shared_waker.waker.take() {
         waker.wake();
       }
@@ -171,7 +171,7 @@ impl futures::Stream for MockEventReader {
     cx: &mut std::task::Context<'_>,
   ) -> Poll<Option<Self::Item>> {
     {
-      let mut shared_waker = self.shared_waker.lock();
+      let mut shared_waker = lock!(self.shared_waker);
       shared_waker.waker = Some(cx.waker().clone());
     }
     match self.rx.try_recv() {
@@ -224,7 +224,7 @@ impl MockOperationReader {
           }
         }
 
-        let mut thread_shared_waker = cloned_shared_waker.lock();
+        let mut thread_shared_waker = lock!(cloned_shared_waker);
         if let Some(waker) = thread_shared_waker.waker.take() {
           waker.wake();
         }
@@ -238,7 +238,7 @@ impl MockOperationReader {
       // std::thread::sleep(INTERVAL);
       tx.send(Ok(EXIT.clone())).unwrap();
 
-      let mut thread_shared_waker = cloned_shared_waker.lock();
+      let mut thread_shared_waker = lock!(cloned_shared_waker);
       if let Some(waker) = thread_shared_waker.waker.take() {
         waker.wake();
       }
@@ -256,7 +256,7 @@ impl futures::Stream for MockOperationReader {
     cx: &mut std::task::Context<'_>,
   ) -> Poll<Option<Self::Item>> {
     {
-      let mut shared_waker = self.shared_waker.lock();
+      let mut shared_waker = lock!(self.shared_waker);
       shared_waker.waker = Some(cx.waker().clone());
     }
     match self.rx.try_recv() {
