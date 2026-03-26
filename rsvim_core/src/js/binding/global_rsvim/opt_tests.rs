@@ -513,7 +513,7 @@ mod tests_fix_end_of_line {
       let actual = contents.message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.fixEndOfLine" value is not a boolean"####;
+      let expect = r####""Rsvim.opt.fixEndOfLine" value must be a boolean"####;
       assert!(actual.contains(expect));
     }
 
