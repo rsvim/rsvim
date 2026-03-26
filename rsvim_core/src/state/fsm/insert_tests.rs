@@ -5,6 +5,7 @@ use crate::buf::BufferArc;
 use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::opt::FileFormatOption;
 use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
@@ -2720,7 +2721,9 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
@@ -2771,7 +2774,9 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
@@ -2861,7 +2866,9 @@ mod tests_insert_text {
 
     // Insert-5
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
@@ -3028,7 +3035,9 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
@@ -3079,7 +3088,9 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
@@ -3169,7 +3180,9 @@ mod tests_insert_text {
 
     // Insert-5
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
@@ -3341,7 +3354,9 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
@@ -3392,7 +3407,9 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
@@ -3482,7 +3499,9 @@ mod tests_insert_text {
 
     // Insert-5
     {
-      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
