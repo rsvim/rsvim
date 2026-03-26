@@ -9002,13 +9002,13 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-2
     {
-      let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
+      let expect = vec!["too\tlong", "\tto", "\t", "completely", "\tput:\n"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 37, 2, 35);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 37, 2, 39);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(2, 6)].into_iter().collect();
+        vec![(2, 2)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       info!("actual:{:?}", actual);
@@ -9026,16 +9026,15 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-3
     {
       let expect = vec![
-        "are been ",
-        "truncated if",
+        "been truncated if",
         "\tboth",
         "\tline-wrap",
         "\tand",
-        // "\tword-wrap",
+        "\tword-wrap",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 30, 3, 35);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 30, 3, 39);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
@@ -9054,16 +9053,11 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec![
-        "\t\t4",
-        ". The extra parts",
-        " are split into ",
-        "the\tnext",
-        "\trow,",
-      ];
+      let expect =
+        vec!["split into the", "\tnext", "\trow,", "\tif", "\teither"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 4, 39);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
