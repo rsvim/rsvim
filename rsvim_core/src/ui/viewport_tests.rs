@@ -12283,13 +12283,13 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       terminal_size,
       buf_opts,
       vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test.\n",
-        "But still it contains several cases:\n",
-        " 1. When the line is small.\n",
-        " 2. When it is too long:\n",
-        "  2.1. The extra parts are truncated.\n",
-        "  2.2. The extra parts are splitted.\n",
+        "Hello,\tRSVIM!\n",
+        "This\tis\ta\tsimple\ttest.\n",
+        "But\tstill\tit\tcontains\tseveral\tcases:\n",
+        "\t1.\tWhen\tthe\tline\tis\tsmall.\n",
+        "\t2.\tWhen\tit\tis\ttoo\tlong:\n",
+        "\t2.1.\tThe\textra\tparts\tare\ttruncated.\n",
+        "\t2.2.\tThe\textra\tparts\tare\tsplitted.\n",
       ],
     );
 
