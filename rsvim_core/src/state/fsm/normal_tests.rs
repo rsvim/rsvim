@@ -3379,6 +3379,7 @@ mod tests_cursor_move {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -3403,6 +3404,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap2() {
     test_log_init();
 
@@ -3436,6 +3438,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3() {
     test_log_init();
 
@@ -3548,6 +3551,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3_crlf_win() {
     test_log_init();
 
@@ -3664,6 +3668,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap3_cr_mac() {
     test_log_init();
 
@@ -3780,6 +3785,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4() {
     test_log_init();
 
@@ -4072,6 +4078,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4_crlf_win() {
     test_log_init();
 
@@ -4368,6 +4375,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap4_cr_mac() {
     test_log_init();
 
@@ -4664,6 +4672,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap5() {
     test_log_init();
 
@@ -4787,6 +4796,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak1() {
     test_log_init();
 
@@ -4953,6 +4963,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak2() {
     test_log_init();
 
@@ -5294,6 +5305,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak3() {
     test_log_init();
 
@@ -5506,6 +5518,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak3_crlf_win() {
     test_log_init();
 
@@ -5722,6 +5735,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak3_cr_mac() {
     test_log_init();
 
@@ -5938,6 +5952,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak4() {
     test_log_init();
 
@@ -6086,6 +6101,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak4_crlf_win() {
     test_log_init();
 
@@ -6239,6 +6255,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak4_cr_mac() {
     test_log_init();
 
@@ -6392,6 +6409,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_nolinebreak5() {
     test_log_init();
 
@@ -6540,6 +6558,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak1() {
     test_log_init();
 
@@ -6710,6 +6729,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak2() {
     test_log_init();
 
@@ -7055,6 +7075,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak3() {
     test_log_init();
 
@@ -7271,6 +7292,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak4() {
     test_log_init();
 
@@ -7424,6 +7446,7 @@ mod tests_cursor_move {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn wrap_linebreak5() {
     test_log_init();
 
@@ -7638,6 +7661,7 @@ mod tests_goto_cmdline_ex_mode {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -7682,6 +7706,7 @@ mod tests_goto_cmdline_ex_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_with_cmdline_message1() {
     test_log_init();
 
@@ -7771,6 +7796,7 @@ mod tests_goto_insert_mode {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_goto_insert_keep1() {
     test_log_init();
 
@@ -7855,6 +7881,7 @@ mod tests_goto_insert_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_goto_insert_append2() {
     test_log_init();
 
@@ -7939,6 +7966,7 @@ mod tests_goto_insert_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_goto_insert_append3() {
     test_log_init();
 
@@ -8023,6 +8051,7 @@ mod tests_goto_insert_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_goto_insert_newline4() {
     test_log_init();
 
@@ -8108,6 +8137,7 @@ mod tests_goto_insert_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap_with_cmdline_message1() {
     test_log_init();
 
