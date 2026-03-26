@@ -843,28 +843,13 @@ pub fn search(
   }
 }
 
-// Returns multiple booleans:
-// 1. If current viewport contains the `target_cursor_line`.
-// 2. If current viewport already contains the `target_cursor_line`, how many
-//    rows does the `target_cursor_line` been rendered in the viewport (useful
-//    for detecting partial rendering issue for the last line).
+// Returns if current viewport contains the `target_cursor_line`.
 fn _if_contains_target_cursor_line(
   viewport: &Viewport,
   target_cursor_line: usize,
-) -> (bool, Option<usize>) {
-  let already_contains = target_cursor_line >= viewport.start_line_idx()
-    && target_cursor_line < viewport.end_line_idx();
-  let rendered_rows = match viewport.lines().get(&target_cursor_line) {
-    Some(line_viewport) => {
-      debug_assert!(already_contains);
-      Some(line_viewport.rows().len())
-    }
-    None => {
-      debug_assert!(!already_contains);
-      None
-    }
-  };
-  (already_contains, rendered_rows)
+) -> bool {
+  target_cursor_line >= viewport.start_line_idx()
+    && target_cursor_line < viewport.end_line_idx()
 }
 
 // Returns whether the `target_cursor_line` is:
@@ -932,10 +917,8 @@ fn nowrap_search_down(
   // Try to keep current `viewport.start_line_idx` unchanged, this will keep
   // the viewport scrolls as small as we can, and thus avoid too big jumps for
   // users' eye.
-  let (
-    already_contains_target_cursor_line,
-    _maybe_target_cursor_line_rendered_rows,
-  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let already_contains_target_cursor_line =
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
@@ -1016,10 +999,8 @@ fn nowrap_search_up(
   // Try to keep current `viewport.start_line_idx` unchanged, this will keep
   // the viewport scrolls as small as we can, and thus avoid too big jumps for
   // users' eye.
-  let (
-    already_contains_target_cursor_line,
-    _maybe_target_cursor_line_rendered_rows,
-  ) = _if_contains_target_cursor_line(viewport, target_cursor_line);
+  let already_contains_target_cursor_line =
+    _if_contains_target_cursor_line(viewport, target_cursor_line);
 
   let current_cursor_column =
     text.width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
