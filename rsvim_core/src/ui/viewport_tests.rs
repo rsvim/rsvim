@@ -12299,26 +12299,26 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test",
-        ".\n",
-        "But still it contains",
-        " several cases:\n",
-        " 1. When the line is ",
-        "small.\n",
+        "Hello,\tRSVIM!\n",
+        "This\tis",
+        "\ta\tsimp",
+        "le\ttest.\n",
+        "But\tstill",
+        "\tit\tcon",
+        "tains\tseveral",
       ];
 
       let actual = tree.window(window_id).unwrap().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 1)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         0,
-        4,
+        3,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12327,28 +12327,28 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test",
-        ".\n",
-        "But still it contains",
-        " several cases:\n",
-        " 1. When the line is ",
+        "\t1.\tWhe",
+        "n\tthe\tl",
+        "ine\tis\t",
         "small.\n",
+        "\t2.\tWhe",
+        "n\tit\tis",
+        "\ttoo\tlo",
       ];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 0, 0, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 0, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        0,
-        4,
+        3,
+        5,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12357,27 +12357,27 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test",
-        ".\n",
-        "But still it contains",
-        " several cases:\n",
-        " 1. When the line is ",
-        "small.\n",
+        "But\tstill",
+        "\tit\tcon",
+        "tains\tseveral",
+        "\tcases:\n",
+        "\t1.\tWhe",
+        "n\tthe\tl",
+        "ine\tis\t",
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 2, 0, 0, 0);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 2, 0, 2, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        0,
+        2,
         4,
         &expect_start_fills,
         &expect_end_fills,
