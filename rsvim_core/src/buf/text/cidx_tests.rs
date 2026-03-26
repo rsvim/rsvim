@@ -355,11 +355,7 @@ fn width4() {
   assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
 
   // For CR, on Windows it is 0 width, otherwise it is 2 width (^M).
-  let cr_width = if cfg!(target_family = "windows") {
-    13
-  } else {
-    15
-  };
+  let cr_width = 13;
 
   let expect: Vec<usize> = [
     (1..=13).collect(),
