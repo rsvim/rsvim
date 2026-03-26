@@ -11606,8 +11606,13 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect =
-        vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
+      let expect = vec![
+        "\t4. The ex",
+        "tra parts are spl",
+        "it into the next ",
+        "row, if either li",
+        "ne-wrap or word-w",
+      ];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 0);
