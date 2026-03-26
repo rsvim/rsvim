@@ -12049,13 +12049,14 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       terminal_size,
       buf_opts,
       vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
+        "Hello,\tRSVIM!\n",
+        "This\tis\ta\tquite\tsimple\tand\tsmall\ttest\tlines.\n",
+        "But\tstill\tit\tcontains\tseveral\tthings\twe\twant\tto\ttest:\n",
         "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
         "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
-        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
-        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "\t3. The\textra\tparts\tare\tbeen\ttruncated\tif\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t4. The\textra\tparts\tare\tsplit\tinto\tthe\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset.\tIf\tthe\textra\tparts\tare\tstill\ttoo\tlong\tto\tput\tin\tthe\tnext\trow,\trepeat\tthis\toperation\tagain\tand\tagain.\tThis\toperation\talso\teats\tmore\trows\tin\tthe\twindow,\tthus\tit\tmay\tcontains\tless\tlines\tin\tthe\tbuffer.\n",
+        "\t5. The\twhat",
       ],
     );
 
