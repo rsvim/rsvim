@@ -682,7 +682,7 @@ mod tests_view_nowrap_eol {
 
     let expect = vec![
       "Hello, RSVIM!\r\n",
-      "This is a quite simple lines.",
+      "This is a quite simple lines.\r\n",
       "But still it contains several ",
       "",
     ];
@@ -692,7 +692,7 @@ mod tests_view_nowrap_eol {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 1), (2, 0), (3, 0)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
       lock!(buf).text(),
       &actual,
