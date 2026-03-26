@@ -11872,21 +11872,15 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect = vec![
-        "nd again. This op",
-        "eration also eats",
-        " more rows in the",
-        " window, thus it ",
-        "may contains less",
-      ];
+      let expect = vec!["thus\t", "it\tmay", "\tcontains", "\tless", "\tlines"];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 6, 280, 6, 586);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(6, 0)].into_iter().collect();
+        vec![(6, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(6, 0)].into_iter().collect();
+        vec![(6, 4)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
@@ -11904,7 +11898,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["and\t", "word-wrap\t", "options\tar", "e\tnot", "\tset.\n"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 87);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 121);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 6)].into_iter().collect();
@@ -11975,27 +11969,22 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-5
     {
-      let expect = vec![
-        "But still it cont",
-        "ains several thin",
-        "gs we want to tes",
-        "t:\n",
-        "\t1. When",
-      ];
+      let expect =
+        vec!["several\t", "things\twe", "\twant", "\tto", "\ttest:\n"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 2, 82, 2, 0);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 2, 82, 2, 48);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 2)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 2)].into_iter().collect();
+        vec![(2, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         2,
-        4,
+        3,
         &expect_start_fills,
         &expect_end_fills,
       );
