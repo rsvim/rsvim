@@ -20,6 +20,7 @@ mod tests_getter_setter {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn file_ext1() {
     let mut syn_manager = SyntaxManager::new();
     syn_manager
@@ -33,6 +34,7 @@ mod tests_getter_setter {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn file_ext2() {
     let mut syn_manager = SyntaxManager::new();
     syn_manager
@@ -61,6 +63,7 @@ mod tests_getter_setter {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn get_lang1() {
     let mut syn_mgr = SyntaxManager::new();
     syn_mgr
