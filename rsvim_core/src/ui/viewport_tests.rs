@@ -12227,27 +12227,21 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-6
     {
-      let expect = vec![
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
-        "ains several thin",
-      ];
+      let expect = vec!["\ta\t", "quite\tsimp", "le\tand", "\tsmall", "\ttest"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 32, 1, 0);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 32, 1, 14);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0)].into_iter().collect();
+        vec![(1, 5)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         1,
-        3,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
