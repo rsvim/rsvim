@@ -12220,15 +12220,16 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-6
     {
-      let expect = vec!["\ta\t", "quite\tsimp", "le\tand", "\tsmall", "\ttest"];
+      let expect =
+        vec!["quite\tsi", "mple\tand", "\tsmall", "\ttest", "\tlines.\n"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 32, 1, 14);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 32, 1, 29);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(1, 0)].into_iter().collect();
+        vec![(1, 2)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(1, 5)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
@@ -12966,13 +12967,13 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec!["line\t", "is\tsmall", "\tenough", "\tto", "\t"];
+      let expect = vec!["ine\tis", "\tsmall", "\tenough", "\tto", "\t"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 36, 3, 29);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 36, 3, 35);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 5)].into_iter().collect();
+        vec![(3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
@@ -13231,8 +13232,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-2
     {
       let expect = vec![
-        " extra parts are been",
-        " truncated if\t",
+        "extra parts are been ",
+        "truncated if\t",
         "both\tline-wrap",
         "\tand\t",
         "word-wrap\t",
@@ -13240,7 +13241,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 22);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 23);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
