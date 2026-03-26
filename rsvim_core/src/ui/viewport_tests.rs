@@ -13635,11 +13635,16 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-1
     {
-      let expect =
-        vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
+      let expect = vec![
+        "4. The extra",
+        " parts are split ",
+        "into the next row",
+        ", if either line-",
+        "wrap or word-wrap",
+      ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 56);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 3);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
@@ -13667,7 +13672,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 63);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 13);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 1)].into_iter().collect();
