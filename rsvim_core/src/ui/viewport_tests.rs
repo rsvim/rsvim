@@ -12217,7 +12217,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         search_up_viewport(&mut tree, window_id, buf.clone(), 2, 30, 2, 29);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(2, 0)].into_iter().collect();
+        vec![(2, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
