@@ -510,8 +510,8 @@ pub fn cursor_move(
   let search_direction = _to_viewport_search_direction(move_direction);
 
   let new_viewport: Option<ViewportArc> = {
-    let (start_line, start_column) = viewport.search_anchor(
-      search_direction,
+    let (start_line, start_column) = viewport.search(
+      &cursor_viewport,
       tree.editable_options(id),
       text,
       &tree.editable_actual_shape(id).size(),
