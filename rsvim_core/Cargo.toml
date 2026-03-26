@@ -82,9 +82,7 @@ log = { workspace = true, features = [
 lru = { workspace = true }
 normpath = { workspace = true }
 num-traits = { workspace = true }
-once_cell = { workspace = true, features = ["parking_lot"] }
 oxc_resolver = { workspace = true }
-parking_lot = { workspace = true }
 paste = { workspace = true }
 path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [

@@ -5,12 +5,14 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use parking_lot::Mutex;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
 use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::MutexGuard;
+use std::sync::Weak;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -23,9 +25,9 @@ use tree_sitter::Tree;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-pub type SyntaxParserArc = std::sync::Arc<parking_lot::Mutex<Parser>>;
-pub type SyntaxParserWk = std::sync::Weak<parking_lot::Mutex<Parser>>;
-pub type SyntaxParserMutexGuard<'a> = parking_lot::MutexGuard<'a, Parser>;
+pub type SyntaxParserArc = Arc<Mutex<Parser>>;
+pub type SyntaxParserWk = Weak<Mutex<Parser>>;
+pub type SyntaxParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {

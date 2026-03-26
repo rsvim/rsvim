@@ -22,13 +22,13 @@ pub static MUTEX_TIMEOUT: Lazy<Duration> = Lazy::new(|| {
 macro_rules! arc_mutex_ptr {
   ($name:ident) => {
     paste::paste! {
-      pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
-      pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
-      pub type [<$name MutexGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
+      pub type [<$name Arc>] = std::sync::Arc<std::sync::Mutex<$name>>;
+      pub type [<$name Wk>] = std::sync::Weak<std::sync::Mutex<$name>>;
+      pub type [<$name MutexGuard>]<'a> = std::sync::MutexGuard<'a, $name>;
 
       impl $name {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
-          std::sync::Arc::new(parking_lot::Mutex::new(value))
+          std::sync::Arc::new(std::sync::Mutex::new(value))
         }
       }
     }
