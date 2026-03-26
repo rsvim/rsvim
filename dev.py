@@ -234,9 +234,7 @@ class Miri(Cmd):
             job = ""
         else:
             job = f" -j {args.job[0]}"
-        cmd = (
-            f"cargo +nightly miri nextest run{job} --no-default-features -p rsvim_core"
-        )
+        cmd = f"cargo +nightly miri nextest run{job} --no-default-features -F unicode -p rsvim_core"
         run(cmd)
 
 
@@ -457,7 +455,7 @@ if __name__ == "__main__":
         Clippy(subparsers),
         Document(subparsers),
         Format(subparsers),
-        # Miri(subparsers), # We no longer support miri testings
+        Miri(subparsers),
         Npm(subparsers),
         Release(subparsers),
         Test(subparsers),

@@ -71,6 +71,7 @@ mod tests_goto_normal_mode {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
@@ -209,6 +210,7 @@ mod tests_goto_normal_mode {
   }
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1_crlf_win() {
     test_log_init();
 
@@ -352,6 +354,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use super::*;
 
   #[test]
+  #[cfg_attr(miri, ignore)]
   fn nowrap1() {
     test_log_init();
 
