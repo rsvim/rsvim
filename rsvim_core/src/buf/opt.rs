@@ -99,4 +99,15 @@ impl BufferOptions {
   pub fn set_file_format(&mut self, value: FileFormatOption) {
     self.file_format = value;
   }
+
+  /// Buffer 'fixendofline' option.
+  ///
+  /// See: <https://vimhelp.org/options.txt.html#%27fixendofline%27>.
+  pub fn fix_end_of_line(&self) -> bool {
+    self.fix_end_of_line
+  }
+
+  pub fn set_fix_end_of_line(&mut self, value: bool) {
+    self.fix_end_of_line = value;
+  }
 }
