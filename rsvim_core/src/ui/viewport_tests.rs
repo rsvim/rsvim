@@ -13097,9 +13097,9 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
         "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
         "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-        "5. When the line is small enough to completely put inside.\n",
-        "6. When it too long to completely put:\n",
-        "7. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "5. When\tthe line\tis small\tenough to\tcompletely put\tinside.\n",
+        "6.\tWhen it\ttoo long to\tcompletely put:\n",
+        "7. The\textra parts\tare been truncated\tif both line-wrap\tand word-wrap\toptions are\tnot set.\n",
       ],
     );
 
@@ -13794,6 +13794,217 @@ mod tests_search_anchor_upward_wrap_linebreak {
         &expect_start_fills,
         &expect_end_fills,
       );
+    }
+  }
+
+  #[test]
+  fn new6() {
+    test_log_init();
+
+    let terminal_size = size!(21, 6);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_linebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
+        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
+        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "5. When the line is small enough to completely put inside.\n",
+        "6. When it too long to completely put:\n",
+        "7. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      ],
+    );
+
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+
+    // Initialize
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite ",
+        "simple and small test",
+        " lines.\n",
+        "But still it contains",
+        " several things we ",
+      ];
+
+      let actual = tree.window(window_id).unwrap().viewport();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        0,
+        3,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSVIM!        ",
+        "This is a quite      ",
+        "simple and small test",
+        " lines.              ",
+        "But still it contains",
+        " several things we   ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Prepare
+    {
+      let expect = vec![
+        "7. The extra parts ",
+        "are been truncated if",
+        " both line-wrap and ",
+        "word-wrap options are",
+        " not set.\n",
+        "",
+      ];
+
+      let actual =
+        search_down_viewport(&mut tree, window_id, buf.clone(), 10, 0, 9, 0);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(9, 0), (10, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        9,
+        11,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "7. The extra parts   ",
+        "are been truncated if",
+        " both line-wrap and  ",
+        "word-wrap options are",
+        " not set.            ",
+        "                     ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "extra parts are split",
+        " into the\tnext",
+        "\trow,\t",
+        "if\teither",
+        "\tline-wrap",
+        "\tor\t",
+      ];
+
+      let actual =
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 23);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(6, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "extra parts are split",
+        " into the        next",
+        "        row,         ",
+        "if        either     ",
+        "        line-wrap    ",
+        "        or           ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "extra parts are been ",
+        "truncated if\t",
+        "both\tline-wrap",
+        "\tand\t",
+        "word-wrap\t",
+        "options\tare",
+      ];
+
+      let actual =
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 23);
+
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &actual,
+        &expect,
+        5,
+        6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "extra parts are been ",
+        "truncated if         ",
+        "both        line-wrap",
+        "        and          ",
+        "word-wrap            ",
+        "options        are   ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
 }
