@@ -18,8 +18,9 @@ version.workspace = true
 doctest = false
 
 [features]
-default = []
+default = ["unicode", "simd"]
 icudata = ["dep:deno_core_icudata", "icu/compiled_data"]
+simd = ["ropey/simd"]
 typescript = [
   "dep:swc_atoms",
   "dep:swc_bundler",
@@ -50,6 +51,7 @@ typescript = [
   "dep:swc_visit",
 ]
 tzdata = ["jiff/tzdb-bundle-always"]
+unicode = ["ropey/unicode_lines"]
 wasm = []
 
 [dependencies]
@@ -89,7 +91,7 @@ postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
 roaring = { workspace = true }
-ropey = { workspace = true }
+ropey = { workspace = true, default-features = false }
 serde = { workspace = true, features = ["derive"] }
 # serde_json = { workspace = true }
 smallvec = { workspace = true }
