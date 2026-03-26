@@ -13152,38 +13152,31 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Prepare
     {
-      let expect = vec![
-        "7. The extra parts ",
-        "are been truncated if",
-        " both line-wrap and ",
-        "word-wrap options are",
-        " not set.\n",
-        "",
-      ];
+      let expect = vec!["", "", "", "", "", ""];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 10, 0, 9, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 10, 0, 10, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(9, 0), (10, 0)].into_iter().collect();
+        vec![(10, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(9, 0), (10, 0)].into_iter().collect();
+        vec![(10, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        9,
+        10,
         11,
         &expect_start_fills,
         &expect_end_fills,
       );
 
       let expect_canvas = vec![
-        "7. The extra parts   ",
-        "are been truncated if",
-        " both line-wrap and  ",
-        "word-wrap options are",
-        " not set.            ",
+        "                     ",
+        "                     ",
+        "                     ",
+        "                     ",
+        "                     ",
         "                     ",
       ];
 
@@ -13245,8 +13238,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-2
     {
       let expect = vec![
-        "extra parts are been ",
-        "truncated if\t",
+        " extra parts are been",
+        " truncated if\t",
         "both\tline-wrap",
         "\tand\t",
         "word-wrap\t",
@@ -13254,7 +13247,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 23);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 22);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
@@ -13271,8 +13264,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        "extra parts are been ",
-        "truncated if         ",
+        " extra parts are been",
+        " truncated if        ",
         "both        line-wrap",
         "        and          ",
         "word-wrap            ",
