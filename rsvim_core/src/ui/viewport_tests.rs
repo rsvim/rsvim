@@ -12677,7 +12677,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         vec!["ne-wrap\t", "and\tword-", "wrap\t", "options\t", "are\tnot"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 78);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 87);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
