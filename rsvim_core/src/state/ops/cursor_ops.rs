@@ -11,51 +11,24 @@ use crate::ui::viewport::ViewportArc;
 use compact_str::CompactString;
 use std::ops::Range;
 
-#[derive(Debug, Copy, Clone)]
-/// Cursor move direction.
-pub enum CursorMoveDirection {
-  Up,
-  Down,
-  Left,
-  Right,
-}
-
-fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
-  if by_y > 0 {
-    CursorMoveDirection::Down
-  } else if by_y < 0 {
-    CursorMoveDirection::Up
-  } else if by_x > 0 {
-    CursorMoveDirection::Right
-  } else {
-    CursorMoveDirection::Left
-  }
-}
-
 #[allow(dead_code)]
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
 fn _normalize_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (isize, isize, CursorMoveDirection) {
+) -> (isize, isize) {
   match op {
-    Operation::CursorMoveLeftBy(n) => {
-      (-(n as isize), 0, CursorMoveDirection::Left)
-    }
-    Operation::CursorMoveRightBy(n) => {
-      (n as isize, 0, CursorMoveDirection::Right)
-    }
-    Operation::CursorMoveUpBy(n) => (0, -(n as isize), CursorMoveDirection::Up),
-    Operation::CursorMoveDownBy(n) => {
-      (0, n as isize, CursorMoveDirection::Down)
-    }
+    Operation::CursorMoveLeftBy(n) => (-(n as isize), 0),
+    Operation::CursorMoveRightBy(n) => (n as isize, 0),
+    Operation::CursorMoveUpBy(n) => (0, -(n as isize)),
+    Operation::CursorMoveDownBy(n) => (0, n as isize),
     Operation::CursorMoveTo((x, y)) => {
       let x = (x as isize) - (cursor_char_idx as isize);
       let y = (y as isize) - (cursor_line_idx as isize);
-      (x, y, _cursor_direction(x, y))
+      (x, y)
     }
-    Operation::CursorMoveBy((x, y)) => (x, y, _cursor_direction(x, y)),
+    Operation::CursorMoveBy((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -65,38 +38,34 @@ fn _normalize_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
+) -> (usize, usize) {
   match op {
     Operation::CursorMoveLeftBy(n) => {
       let x = cursor_char_idx.saturating_sub(n);
       let y = cursor_line_idx;
-      (x, y, CursorMoveDirection::Left)
+      (x, y)
     }
     Operation::CursorMoveRightBy(n) => {
       let x = cursor_char_idx.saturating_add(n);
       let y = cursor_line_idx;
-      (x, y, CursorMoveDirection::Right)
+      (x, y)
     }
     Operation::CursorMoveUpBy(n) => {
       let x = cursor_char_idx;
       let y = cursor_line_idx.saturating_sub(n);
-      (x, y, CursorMoveDirection::Up)
+      (x, y)
     }
     Operation::CursorMoveDownBy(n) => {
       let x = cursor_char_idx;
       let y = cursor_line_idx.saturating_add(n);
-      (x, y, CursorMoveDirection::Down)
+      (x, y)
     }
     Operation::CursorMoveBy((x, y)) => {
       let to_x = std::cmp::max(0, (cursor_char_idx as isize) + x) as usize;
       let to_y = std::cmp::max(0, (cursor_line_idx as isize) + y) as usize;
-      (to_x, to_y, _cursor_direction(x, y))
+      (to_x, to_y)
     }
-    Operation::CursorMoveTo((x, y)) => {
-      let by_x = (x as isize) - (cursor_char_idx as isize);
-      let by_y = (y as isize) - (cursor_line_idx as isize);
-      (x, y, _cursor_direction(by_x, by_y))
-    }
+    Operation::CursorMoveTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -133,8 +102,7 @@ pub fn normalize_cursor_move_to_exclude_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize) {
-  let (x, y, _move_direction) =
-    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y) = _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_idx_on_line_exclude_eol(y) {
@@ -155,8 +123,7 @@ pub fn normalize_cursor_move_to_include_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize) {
-  let (x, y, _move_direction) =
-    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y) = _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_idx_on_line_exclude_eol(y) {
