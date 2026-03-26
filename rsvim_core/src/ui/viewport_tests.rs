@@ -13421,21 +13421,27 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-3
     {
-      let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
+      let expect = vec![
+        "\t2. When ",
+        "it too long to ",
+        "completely put:\n",
+        "\t3. The ",
+        "extra parts are ",
+      ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 35);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(4, 6)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(4, 0)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         4,
-        5,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -13443,14 +13449,19 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-4
     {
-      let expect =
-        vec!["enough\t", "to\t", "completely", "\tput", "\tinside.\n"];
+      let expect = vec![
+        "\t1. When ",
+        "the line is small",
+        " enough to ",
+        "completely put ",
+        "inside.\n",
+      ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 82, 3, 66);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 82, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 3)].into_iter().collect();
+        vec![(3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
@@ -13471,7 +13482,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "contains several ",
         "things we want to",
         " test:\n",
-        "\t1. When",
+        "\t1. When ",
       ];
 
       let actual =
