@@ -11850,10 +11850,10 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Prepare
     {
-      let expect = vec![""];
+      let expect = vec!["\t5. The", "\twhat"];
 
       let actual =
-        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 0, 7, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 12, 7, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(7, 0)].into_iter().collect();
