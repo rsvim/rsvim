@@ -5573,7 +5573,6 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        // "4th.\n",
         "5th.\n",
         "6th.\n",
         "BBBBBBBBBB",
@@ -5582,13 +5581,13 @@ mod tests_insert_text {
         "8th.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
-        4,
-        8,
+        5,
+        9,
         &expect_fills,
         &expect_fills,
       );
