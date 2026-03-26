@@ -29,7 +29,6 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
