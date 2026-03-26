@@ -67,7 +67,6 @@ pub fn update_viewport(
 }
 
 fn search_viewport(
-  _direction: ViewportSearchDirection,
   tree: &mut Tree,
   window_id: NodeId,
   buf: BufferArc,
@@ -128,7 +127,6 @@ pub fn search_down_viewport(
   expect_start_column: usize,
 ) -> ViewportArc {
   search_viewport(
-    ViewportSearchDirection::Down,
     tree,
     window_id,
     buf,
@@ -149,7 +147,6 @@ pub fn search_up_viewport(
   expect_start_column: usize,
 ) -> ViewportArc {
   search_viewport(
-    ViewportSearchDirection::Up,
     tree,
     window_id,
     buf,
@@ -170,7 +167,6 @@ pub fn search_left_viewport(
   expect_start_column: usize,
 ) -> ViewportArc {
   search_viewport(
-    ViewportSearchDirection::Left,
     tree,
     window_id,
     buf,
@@ -191,7 +187,6 @@ pub fn search_right_viewport(
   expect_start_column: usize,
 ) -> ViewportArc {
   search_viewport(
-    ViewportSearchDirection::Right,
     tree,
     window_id,
     buf,

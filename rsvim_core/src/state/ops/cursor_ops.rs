@@ -8,7 +8,6 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::viewport::ViewportSearchDirection;
 use compact_str::CompactString;
 use std::ops::Range;
 
