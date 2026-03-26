@@ -13954,11 +13954,11 @@ mod tests_search_anchor_upward_wrap_linebreak {
     {
       let expect = vec![
         "\t4. The extra ",
-        "parts are split ",
-        "into the next row",
-        ", if either line-",
-        "wrap or word-wrap",
-        " options are been",
+        "parts are split into ",
+        "the next row, if ",
+        "either line-wrap or ",
+        "word-wrap options are",
+        " been set. If the ",
       ];
 
       let actual =
@@ -13979,12 +13979,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        "extra parts are split",
-        " into the        next",
-        "        row,         ",
-        "if        either     ",
-        "        line-wrap    ",
-        "        or           ",
+        "        4. The extra ",
+        "parts are split into ",
+        "the next row, if     ",
+        "either line-wrap or  ",
+        "word-wrap options are",
+        " been set. If the    ",
       ];
 
       let actual_canvas = make_canvas(
