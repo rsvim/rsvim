@@ -507,7 +507,7 @@ mod tests_fix_end_of_line {
     {
       let buffers = lock!(event_loop.buffer_manager);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
+      assert!(global_local_options.fix_end_of_line());
 
       let contents = lock!(event_loop.cmdline_text);
       let actual = contents.message().rope().to_string();
