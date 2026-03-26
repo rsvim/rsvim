@@ -52,9 +52,7 @@ lru = "0.16"
 mimalloc-safe = "0.1"
 normpath = "1.5"
 num-traits = "0.2"
-once_cell = { version = "1.21", features = ["parking_lot"] }
 oxc_resolver = "11.19"
-parking_lot = "0.12"
 paste = "1.0"
 path-absolutize = "3.1"
 postcard = { version = "1.1", default-features = false, features = ["use-std"] }
@@ -70,7 +68,20 @@ strum_macros = "0.28"
 taffy = "0.9"
 thiserror = "2"
 tikv-jemallocator = "0.6"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = [
+  # "full" features without "parking_lot"
+  "fs",
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "process",
+  "rt",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+  "time",
+] }
 tokio-util = { version = "0.7", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
 toml = { version = "1.0", features = ["fast_hash"] }
