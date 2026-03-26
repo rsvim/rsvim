@@ -10280,7 +10280,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-2
     {
-      let expect = vec!["and\t", "d\tword-wra", "p\toptions", "\tare", "\tnot"];
+      let expect =
+        vec!["and\t", "word-wrap\t", "options\tar", "e\tnot", "\tset.\n"];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 5, 60, 5, 87);
