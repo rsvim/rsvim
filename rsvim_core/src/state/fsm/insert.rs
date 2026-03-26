@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::undo;
 use crate::chan;
 use crate::chan::MasterMessage;
@@ -225,7 +226,9 @@ impl Insert {
         }
       }
       CursorInsertPayload::Eol => {
-        let eol = buffer.options().end_of_line();
+        let eol = std::convert::Into::<EndOfLineOption>::into(
+          buffer.options().file_format(),
+        );
         let eol = format!("{eol}");
         trace!("Insert eol:{eol:?}");
         eol.to_compact_string()
