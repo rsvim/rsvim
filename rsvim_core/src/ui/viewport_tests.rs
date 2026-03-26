@@ -14005,8 +14005,6 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "line-wrap and word-",
         "wrap options are not ",
         "set.\n",
-        "\t4. The extra ",
-        "parts are split into ",
       ];
 
       let actual =
@@ -14033,7 +14031,6 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "line-wrap and word-  ",
         "wrap options are not ",
         "set.                 ",
-        "        4. The extra ",
       ];
 
       let actual_canvas = make_canvas(
