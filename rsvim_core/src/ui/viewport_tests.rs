@@ -13999,12 +13999,14 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-2
     {
       let expect = vec![
-        "extra parts are been ",
-        "truncated if\t",
-        "both\tline-wrap",
-        "\tand\t",
-        "word-wrap\t",
-        "options\tare",
+        "\t3. The extra ",
+        "parts are been ",
+        "truncated if both ",
+        "line-wrap and word-",
+        "wrap options are not ",
+        "set.\n",
+        "\t4. The extra ",
+        "parts are split into ",
       ];
 
       let actual =
@@ -14025,12 +14027,13 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        "extra parts are been ",
-        "truncated if         ",
-        "both        line-wrap",
-        "        and          ",
-        "word-wrap            ",
-        "options        are   ",
+        "        3. The extra ",
+        "parts are been       ",
+        "truncated if both    ",
+        "line-wrap and word-  ",
+        "wrap options are not ",
+        "set.                 ",
+        "        4. The extra ",
       ];
 
       let actual_canvas = make_canvas(
