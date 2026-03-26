@@ -856,14 +856,12 @@ fn _if_contains_target_cursor_line(
 // 1. If the window cannot even contain it, because it is just too long.
 // 2. If the window can exactly contain it, i.e. it will use the same rows that
 //    equals to the window height.
-// 3. How many rows will the `target_cursor_line` be rendered if it renders
-//    with all the window, i.e. `start_column = 0, start_line = target_cursor_line`.
 fn _can_fully_contain_target_cursor_line(
   line_process_fn: WrapLineProcessFn,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
-) -> (bool, bool, usize) {
+) -> (bool, bool) {
   let window_height = size.height();
   let window_width = size.width();
 
@@ -895,12 +893,9 @@ fn _can_fully_contain_target_cursor_line(
   let can_exactly_contain_target_cursor_line =
     preview_target_rows.len() == window_height as usize;
 
-  let target_cursor_line_fully_rendered_rows = preview_target_rows.len();
-
   (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    target_cursor_line_fully_rendered_rows,
   )
 }
 
@@ -1202,7 +1197,6 @@ fn _reverse_search_target_cursor_line(
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    _target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
@@ -1522,7 +1516,6 @@ fn wrap_search_left(
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    _target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
@@ -1792,7 +1785,6 @@ fn wrap_search_right(
   let (
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
-    _target_cursor_line_fully_rendered_rows,
   ) = _can_fully_contain_target_cursor_line(
     line_process_fn,
     text,
