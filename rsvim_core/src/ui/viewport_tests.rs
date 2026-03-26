@@ -12387,28 +12387,28 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-3
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test",
-        ".\n",
-        "But still it contains",
-        " several cases:\n",
-        " 1. When the line is ",
-        "small.\n",
+        "This\tis",
+        "\ta\tsimp",
+        "le\ttest.\n",
+        "But\tstill",
+        "\tit\tcon",
+        "tains\tseveral",
+        "\tcases:\n",
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 0, 0, 0);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 0, 1, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        0,
-        4,
+        1,
+        3,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12417,28 +12417,28 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-4
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a simple test",
-        ".\n",
-        "But still it contains",
-        " several cases:\n",
-        " 1. When the line is ",
-        "small.\n",
+        "Hello,\tRSVIM!\n",
+        "This\tis",
+        "\ta\tsimp",
+        "le\ttest.\n",
+        "But\tstill",
+        "\tit\tcon",
+        "tains\tseveral",
       ];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 0, 0, 0, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 1)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         0,
-        4,
+        3,
         &expect_start_fills,
         &expect_end_fills,
       );
