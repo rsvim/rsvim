@@ -585,14 +585,6 @@ pub struct Viewport {
 
 arc_ptr!(Viewport);
 
-#[derive(Debug, Copy, Clone)]
-pub enum ViewportSearchDirection {
-  Up,
-  Down,
-  Left,
-  Right,
-}
-
 impl Viewport {
   /// Calculate viewport downward, from top to bottom.
   ///
