@@ -80,18 +80,6 @@ pub fn char_width(opt: &BufferOptions, c: char) -> usize {
     match ac {
       AsciiChar::Tab => opt.tab_stop() as usize,
       AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
-      // AsciiChar::CarriageReturn => {
-      //   if opt.file_format() == FileFormatOption::Unix {
-      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-      //     trace!(
-      //       "CarriageReturn (\r) len:{}",
-      //       format!("{ascii_formatter}").len()
-      //     );
-      //     format!("{ascii_formatter}").len()
-      //   } else {
-      //     0
-      //   }
-      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         format!("{ascii_formatter}").len()
@@ -119,14 +107,6 @@ pub fn char_symbol(opt: &BufferOptions, c: char) -> CompactString {
         CompactString::from(" ".repeat(opt.tab_stop() as usize))
       }
       AsciiChar::LineFeed | AsciiChar::CarriageReturn => CompactString::new(""),
-      // AsciiChar::CarriageReturn => {
-      //   if opt.file_format() == FileFormatOption::Unix {
-      //     let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-      //     CompactString::from(format!("{ascii_formatter}"))
-      //   } else {
-      //     CompactString::new("")
-      //   }
-      // }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         CompactString::from(format!("{ascii_formatter}"))
