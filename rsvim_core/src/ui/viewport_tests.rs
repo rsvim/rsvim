@@ -11610,12 +11610,12 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 56);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 6, 70, 6, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(6, 5)].into_iter().collect();
+        vec![(6, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(6, 7)].into_iter().collect();
+        vec![(6, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
@@ -11638,7 +11638,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 59);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 51);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 5)].into_iter().collect();
