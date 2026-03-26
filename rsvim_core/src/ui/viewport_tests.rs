@@ -12477,28 +12477,29 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-6
     {
       let expect = vec![
-        " 2. When it is too lo",
-        "ng:\n",
-        "  2.1. The extra part",
-        "s are truncated.\n",
-        "  2.2. The extra part",
-        "s are splitted.\n",
-        "",
+        "\t2.1.\tT",
+        "he\textra",
+        "\tparts\t",
+        "are\ttruncated.",
+        "\t2.2.\tT",
+        "he\textra",
+        "\tparts\t",
+        "are\tsplitted.\n",
       ];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 5, 0, 5, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
+        vec![(5, 0), (6, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
+        vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
-        4,
-        8,
+        5,
+        7,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12507,28 +12508,28 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-7
     {
       let expect = vec![
-        " 2. When it is too lo",
+        "\t2.\tWhe",
+        "n\tit\tis",
+        "\ttoo\tlo",
         "ng:\n",
-        "  2.1. The extra part",
-        "s are truncated.\n",
-        "  2.2. The extra part",
-        "s are splitted.\n",
-        "",
+        "\t2.1.\tT",
+        "he\textra",
+        "\tparts\t",
       ];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 4, 0, 4, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         4,
-        8,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12537,28 +12538,28 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-8
     {
       let expect = vec![
-        " 1. When the line is ",
+        "\t1.\tWhe",
+        "n\tthe\tl",
+        "ine\tis\t",
         "small.\n",
-        " 2. When it is too lo",
-        "ng:\n",
-        "  2.1. The extra part",
-        "s are truncated.\n",
-        "  2.2. The extra part",
+        "\t2.\tWhe",
+        "n\tit\tis",
+        "\ttoo\tlo",
       ];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 3, 0, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 0), (4, 0), (5, 0), (6, 0)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 0), (4, 0), (5, 0), (6, 0)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         3,
-        7,
+        5,
         &expect_start_fills,
         &expect_end_fills,
       );
