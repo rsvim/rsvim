@@ -13395,9 +13395,9 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec![
         "a parts are been ",
         "truncated if both",
-        " line-wrap and wo",
-        "rd-wrap options a",
-        "re not set.\n",
+        " line-wrap and ",
+        "word-wrap options",
+        " are not set.\n",
       ];
 
       let actual =
