@@ -11992,27 +11992,22 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-6
     {
-      let expect = vec![
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
-        "ains several thin",
-      ];
+      let expect =
+        vec!["This\tis", "\ta\t", "quite\tsimp", "le\tand", "\tsmall"];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 1, 0, 1, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0)].into_iter().collect();
+        vec![(1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0)].into_iter().collect();
+        vec![(1, 4)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         1,
-        3,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -12020,27 +12015,22 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-7
     {
-      let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
-      ];
+      let expect =
+        vec!["Hello,\tRSV", "IM!\n", "This\tis", "\ta\t", "quite\tsimp"];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 0, 8, 0, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         0,
-        3,
+        2,
         &expect_start_fills,
         &expect_end_fills,
       );
