@@ -22,13 +22,6 @@ use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 
-#[cfg(test)]
-use crate::buf::text::Text;
-#[cfg(test)]
-use crate::ui::viewport::CursorViewport;
-#[cfg(test)]
-use crate::ui::viewport::ViewportSearchDirection;
-
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
 pub struct Normal {}
@@ -344,33 +337,6 @@ impl Normal {
 
 impl Normal {
   #[cfg(test)]
-  // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  pub fn _target_cursor_exclude_eol(
-    &self,
-    cursor_viewport: &CursorViewport,
-    text: &Text,
-    op: Operation,
-  ) -> (usize, usize, ViewportSearchDirection) {
-    use crate::state::ops::cursor_ops::CursorMoveDirection;
-
-    let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_cursor_move_to_exclude_eol(
-        text,
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      );
-
-    let search_direction = match move_direction {
-      CursorMoveDirection::Up => ViewportSearchDirection::Up,
-      CursorMoveDirection::Down => ViewportSearchDirection::Down,
-      CursorMoveDirection::Left => ViewportSearchDirection::Left,
-      CursorMoveDirection::Right => ViewportSearchDirection::Right,
-    };
-    (target_cursor_char, target_cursor_line, search_direction)
-  }
-
-  #[cfg(test)]
   pub fn _test_raw_cursor_move(
     &self,
     data_access: &StateDataAccess,
@@ -388,8 +354,13 @@ impl Normal {
     };
     let buffer = lock!(buffer);
 
-    let (target_cursor_char, target_cursor_line, _search_direction) =
-      self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
+    let (target_cursor_char, target_cursor_line) =
+      cursor_ops::normalize_cursor_move_to_exclude_eol(
+        buffer.text(),
+        op,
+        cursor_viewport.char_idx(),
+        cursor_viewport.line_idx(),
+      );
 
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
       &mut tree,

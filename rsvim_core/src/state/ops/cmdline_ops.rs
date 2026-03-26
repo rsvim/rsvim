@@ -76,8 +76,11 @@ pub fn cmdline_clear_input(tree: &mut Tree, cmdline_text: &mut CmdlineText) {
 
   let new_input_viewport =
     Viewport::view(&opts, input_text, &actual_size, 0, 0);
-  let new_input_cursor_viewport =
-    CursorViewport::from_top_left(&new_input_viewport, input_text);
+  let new_input_cursor_viewport = CursorViewport::from_top_left(
+    &new_input_viewport,
+    input_text,
+    &actual_size,
+  );
   let new_input_viewport = Viewport::to_arc(new_input_viewport);
   let new_input_cursor_viewport =
     CursorViewport::to_arc(new_input_cursor_viewport);

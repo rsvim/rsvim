@@ -8,41 +8,8 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::viewport::ViewportSearchDirection;
 use compact_str::CompactString;
 use std::ops::Range;
-
-#[derive(Debug, Copy, Clone)]
-/// Cursor move direction.
-pub enum CursorMoveDirection {
-  Up,
-  Down,
-  Left,
-  Right,
-}
-
-fn _to_viewport_search_direction(
-  move_direction: CursorMoveDirection,
-) -> ViewportSearchDirection {
-  match move_direction {
-    CursorMoveDirection::Up => ViewportSearchDirection::Up,
-    CursorMoveDirection::Down => ViewportSearchDirection::Down,
-    CursorMoveDirection::Left => ViewportSearchDirection::Left,
-    CursorMoveDirection::Right => ViewportSearchDirection::Right,
-  }
-}
-
-fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
-  if by_y > 0 {
-    CursorMoveDirection::Down
-  } else if by_y < 0 {
-    CursorMoveDirection::Up
-  } else if by_x > 0 {
-    CursorMoveDirection::Right
-  } else {
-    CursorMoveDirection::Left
-  }
-}
 
 #[allow(dead_code)]
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
@@ -50,24 +17,18 @@ fn _normalize_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (isize, isize, CursorMoveDirection) {
+) -> (isize, isize) {
   match op {
-    Operation::CursorMoveLeftBy(n) => {
-      (-(n as isize), 0, CursorMoveDirection::Left)
-    }
-    Operation::CursorMoveRightBy(n) => {
-      (n as isize, 0, CursorMoveDirection::Right)
-    }
-    Operation::CursorMoveUpBy(n) => (0, -(n as isize), CursorMoveDirection::Up),
-    Operation::CursorMoveDownBy(n) => {
-      (0, n as isize, CursorMoveDirection::Down)
-    }
+    Operation::CursorMoveLeftBy(n) => (-(n as isize), 0),
+    Operation::CursorMoveRightBy(n) => (n as isize, 0),
+    Operation::CursorMoveUpBy(n) => (0, -(n as isize)),
+    Operation::CursorMoveDownBy(n) => (0, n as isize),
     Operation::CursorMoveTo((x, y)) => {
       let x = (x as isize) - (cursor_char_idx as isize);
       let y = (y as isize) - (cursor_line_idx as isize);
-      (x, y, _cursor_direction(x, y))
+      (x, y)
     }
-    Operation::CursorMoveBy((x, y)) => (x, y, _cursor_direction(x, y)),
+    Operation::CursorMoveBy((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -77,38 +38,34 @@ fn _normalize_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
+) -> (usize, usize) {
   match op {
     Operation::CursorMoveLeftBy(n) => {
       let x = cursor_char_idx.saturating_sub(n);
       let y = cursor_line_idx;
-      (x, y, CursorMoveDirection::Left)
+      (x, y)
     }
     Operation::CursorMoveRightBy(n) => {
       let x = cursor_char_idx.saturating_add(n);
       let y = cursor_line_idx;
-      (x, y, CursorMoveDirection::Right)
+      (x, y)
     }
     Operation::CursorMoveUpBy(n) => {
       let x = cursor_char_idx;
       let y = cursor_line_idx.saturating_sub(n);
-      (x, y, CursorMoveDirection::Up)
+      (x, y)
     }
     Operation::CursorMoveDownBy(n) => {
       let x = cursor_char_idx;
       let y = cursor_line_idx.saturating_add(n);
-      (x, y, CursorMoveDirection::Down)
+      (x, y)
     }
     Operation::CursorMoveBy((x, y)) => {
       let to_x = std::cmp::max(0, (cursor_char_idx as isize) + x) as usize;
       let to_y = std::cmp::max(0, (cursor_line_idx as isize) + y) as usize;
-      (to_x, to_y, _cursor_direction(x, y))
+      (to_x, to_y)
     }
-    Operation::CursorMoveTo((x, y)) => {
-      let by_x = (x as isize) - (cursor_char_idx as isize);
-      let by_y = (y as isize) - (cursor_line_idx as isize);
-      (x, y, _cursor_direction(by_x, by_y))
-    }
+    Operation::CursorMoveTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -144,9 +101,8 @@ pub fn normalize_cursor_move_to_exclude_eol(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) =
-    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
+) -> (usize, usize) {
+  let (x, y) = _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_idx_on_line_exclude_eol(y) {
@@ -156,7 +112,7 @@ pub fn normalize_cursor_move_to_exclude_eol(
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))
     }
   };
-  (x, y, move_direction)
+  (x, y)
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
@@ -166,9 +122,8 @@ pub fn normalize_cursor_move_to_include_eol(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
-) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) =
-    _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
+) -> (usize, usize) {
+  let (x, y) = _normalize_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_idx_on_line_exclude_eol(y) {
@@ -178,7 +133,7 @@ pub fn normalize_cursor_move_to_include_eol(
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))
     }
   };
-  (x, y, move_direction)
+  (x, y)
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
@@ -274,9 +229,14 @@ fn _update_cursor_viewport(
   cursor_char: usize,
 ) -> CursorViewportArc {
   // New cursor position
-  let new_cursor_viewport = CursorViewport::to_arc(
-    CursorViewport::from_position(viewport, text, cursor_line, cursor_char),
-  );
+  let new_cursor_viewport =
+    CursorViewport::to_arc(CursorViewport::from_position(
+      viewport,
+      text,
+      &tree.editable_actual_shape(id).size(),
+      cursor_line,
+      cursor_char,
+    ));
 
   tree.set_editable_cursor_viewport(id, new_cursor_viewport.clone());
 
@@ -485,8 +445,7 @@ pub fn cursor_move(
   let cursor_viewport = tree.editable_cursor_viewport(id);
 
   // Only move cursor when it is different from current cursor.
-  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
-  {
+  let (target_cursor_char, target_cursor_line) = if include_eol {
     normalize_cursor_move_to_include_eol(
       text,
       op,
@@ -502,11 +461,9 @@ pub fn cursor_move(
     )
   };
 
-  let search_direction = _to_viewport_search_direction(move_direction);
-
   let new_viewport: Option<ViewportArc> = {
-    let (start_line, start_column) = viewport.search_anchor(
-      search_direction,
+    let (start_line, start_column) = viewport.search(
+      &cursor_viewport,
       tree.editable_options(id),
       text,
       &tree.editable_actual_shape(id).size(),

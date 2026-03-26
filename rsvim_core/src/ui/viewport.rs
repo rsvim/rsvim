@@ -174,7 +174,11 @@ impl CursorViewport {
   }
 
   /// Create cursor viewport with the top-left corner position from the window viewport.
-  pub fn from_top_left(viewport: &Viewport, text: &Text) -> Self {
+  pub fn from_top_left(
+    viewport: &Viewport,
+    text: &Text,
+    size: &U16Size,
+  ) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
       return Self::new(0, 0, 0, 0);
@@ -210,7 +214,7 @@ impl CursorViewport {
     }
 
     let char_idx = first_row.start_char_idx();
-    Self::from_position(viewport, text, line_idx, char_idx)
+    Self::from_position(viewport, text, size, line_idx, char_idx)
   }
 
   /// Create cursor viewport with specified position (buffer's line/char index) from the window
@@ -222,32 +226,32 @@ impl CursorViewport {
   pub fn from_position(
     viewport: &Viewport,
     text: &Text,
+    size: &U16Size,
     line_idx: usize,
     char_idx: usize,
   ) -> Self {
     debug_assert!(viewport.lines().contains_key(&line_idx));
     let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
-    let cursor_row = line_viewport
-      .rows()
-      .iter()
-      .filter(|(_row_idx, row_viewport)| {
-        // trace!(
-        //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
-        //   row_viewport,
-        //   row_viewport.start_char_idx(),
-        //   row_viewport.end_char_idx(),
-        //   line_idx,
-        //   char_idx
-        // );
-        row_viewport.start_char_idx() <= char_idx
-          && row_viewport.end_char_idx() > char_idx
-      })
-      .collect::<Vec<_>>();
+    let cursor_row =
+      line_viewport
+        .rows()
+        .iter()
+        .find(|(_row_idx, row_viewport)| {
+          // trace!(
+          //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
+          //   row_viewport,
+          //   row_viewport.start_char_idx(),
+          //   row_viewport.end_char_idx(),
+          //   line_idx,
+          //   char_idx
+          // );
+          row_viewport.start_char_idx() <= char_idx
+            && row_viewport.end_char_idx() > char_idx
+        });
 
-    if !cursor_row.is_empty() {
-      debug_assert_eq!(cursor_row.len(), 1);
-      let (row_idx, row_viewport) = cursor_row[0];
+    if let Some((row_idx, row_viewport)) = cursor_row {
+      // Cursor is inside viewport.
 
       let mut row_start_width =
         text.width_before(line_idx, row_viewport.start_char_idx());
@@ -265,31 +269,76 @@ impl CursorViewport {
       let row_idx = *row_idx;
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
-    } else {
-      let target_is_eol = text.is_eol(line_idx, char_idx);
-      if target_is_eol {
-        // The target cursor is eol, and it doesn't have a space to put in the viewport, it
-        // indicates:
-        //
-        // 1. The window must be `wrap=true`
-        // 2. The viewport must contains `line_idx+1`.
-        // 3. The target cursor position is out of viewport.
-        //
-        // The cursor will be put in the position `(next line, 0-column)`.
+    } else if let Some(buffer_line) = text.rope().get_line(line_idx)
+      && buffer_line.len_chars() == 0
+    {
+      // If target cursor line is empty, force `column=0`.
+      debug_assert!(line_viewport.rows().first().is_some());
+      let (first_row_idx, _first_row_viewport) =
+        line_viewport.rows().first().unwrap();
+      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+    } else if text.is_eol_or_line_end(line_idx, char_idx) {
+      // The target cursor is eol or line end, then we have two cases:
+      //
+      // 1. The last row still have at least 1 empty column to contain the
+      //    cursor.
+      // 2. The last row doesn't have any empty columns to contain the cursor,
+      //    we will have to put the cursor to the next row, column-0 (And the
+      //    next line must exist).
 
-        let next_line_idx = line_idx + 1;
-        debug_assert!(viewport.lines().contains_key(&next_line_idx));
-        let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
-        debug_assert!(next_line_viewport.rows().first().is_some());
-        let (first_row_idx, _first_row_viewport) =
-          next_line_viewport.rows().first().unwrap();
-        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      debug_assert!(line_viewport.rows().last().is_some());
+      let (last_row_idx, last_row_viewport) =
+        line_viewport.rows().last().unwrap();
+      debug_assert!(last_row_viewport.end_char_idx() <= char_idx);
+
+      // If last row width >= `window_width`, i.e. the last row uses all the
+      // columns, no empty columns left.
+      let last_row_use_full_width = {
+        let last_row_end_column =
+          text.width_before(line_idx, last_row_viewport.end_char_idx());
+        let last_row_start_char_column =
+          text.width_before(line_idx, last_row_viewport.start_char_idx());
+        let last_row_width =
+          last_row_end_column.saturating_sub(last_row_start_char_column);
+        last_row_width >= size.width() as usize
+      };
+
+      if last_row_use_full_width {
+        // Case-2:
+        // If last row uses all the columns (full width), it means there is no
+        // empty columns that can put cursor. We have to put cursor to the
+        // next row, column-0, and the next line must exist.
+
+        debug_assert!(*last_row_idx + 1 < size.height());
+        CursorViewport::new(line_idx, char_idx, *last_row_idx + 1, 0_u16)
       } else {
-        debug_assert!(line_viewport.rows().first().is_some());
+        // Case-1:
+        // If last row doesn't use all columns (full width), it means there is
+        // still at least 1 empty column that can put cursor. We just put it at
+        // the end of line.
+
+        let mut row_start_width =
+          text.width_before(line_idx, last_row_viewport.start_char_idx());
+
+        // Subtract `start_filled_cols` if the row is the first row in the line.
         let (first_row_idx, _first_row_viewport) =
-          line_viewport.rows().first().unwrap();
-        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+          line_viewport.rows.first().unwrap();
+        if first_row_idx == last_row_idx {
+          debug_assert!(row_start_width >= line_viewport.start_filled_cols());
+          row_start_width -= line_viewport.start_filled_cols();
+        };
+
+        let char_start_width = text.width_before(line_idx, char_idx) + 1;
+        let col_idx = (char_start_width - row_start_width) as u16;
+        let row_idx = *last_row_idx;
+
+        CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
       }
+    } else {
+      debug_assert!(line_viewport.rows().first().is_some());
+      let (first_row_idx, _first_row_viewport) =
+        line_viewport.rows().first().unwrap();
+      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
     }
   }
 }
@@ -544,14 +593,6 @@ pub struct Viewport {
 
 arc_ptr!(Viewport);
 
-#[derive(Debug, Copy, Clone)]
-pub enum ViewportSearchDirection {
-  Up,
-  Down,
-  Left,
-  Right,
-}
-
 impl Viewport {
   /// Calculate viewport downward, from top to bottom.
   ///
@@ -577,17 +618,13 @@ impl Viewport {
     }
   }
 
-  /// Search for a new viewport anchor (i.e. `start_line`/`start_column`) with target cursor
-  /// line/char position, when cursor moves downward.
+  /// Search for a new viewport (i.e. `start_line`/`start_column`) with target
+  /// cursor line/char position, when cursor moves/scrolls.
   ///
-  /// NOTE: If target cursor line/char position cannot be correctly shown in new viewport, the
-  /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
-  /// better user visuals).
-  ///
-  /// Returns `start_line` and `start_column` for new viewport.
-  pub fn search_anchor(
+  /// Returns `(start_line, start_column)` for a new viewport.
+  pub fn search(
     &self,
-    direction: ViewportSearchDirection,
+    cursor_viewport: &CursorViewport,
     opts: &WindowOptions,
     text: &Text,
     size: &U16Size,
@@ -599,40 +636,15 @@ impl Viewport {
       return (0, 0);
     }
 
-    match direction {
-      ViewportSearchDirection::Down => sync::search_anchor_downward(
-        self,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      ViewportSearchDirection::Up => sync::search_anchor_upward(
-        self,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      ViewportSearchDirection::Left => sync::search_anchor_leftward(
-        self,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-      ViewportSearchDirection::Right => sync::search_anchor_rightward(
-        self,
-        opts,
-        text,
-        size,
-        target_cursor_line,
-        target_cursor_char,
-      ),
-    }
+    sync::search(
+      self,
+      cursor_viewport,
+      opts,
+      text,
+      size,
+      target_cursor_line,
+      target_cursor_char,
+    )
   }
 
   #[cfg(not(test))]

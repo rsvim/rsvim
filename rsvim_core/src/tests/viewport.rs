@@ -175,7 +175,11 @@ pub fn assert_viewport(
   for (i, e) in expect_rows.iter().enumerate() {
     info!("expect row[{}]:{:?}", i, e);
   }
-  assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+  assert_eq!(
+    expect_start_fills.len(),
+    expect_end_fills.len(),
+    "`expect_start_fills.len()` == `expect_end_fills.len()`"
+  );
   for (k, start_v) in expect_start_fills.iter() {
     let end_v = expect_end_fills.get(k).unwrap();
     info!(
@@ -184,28 +188,53 @@ pub fn assert_viewport(
     );
   }
 
-  assert_eq!(actual.start_line_idx(), expect_start_line);
-  assert_eq!(actual.end_line_idx(), expect_end_line);
+  assert_eq!(
+    actual.start_line_idx(),
+    expect_start_line,
+    "`actual.start_line_idx()` == `expect_start_line` ({})",
+    expect_start_line
+  );
+  assert_eq!(
+    actual.end_line_idx(),
+    expect_end_line,
+    "`actual.end_line_idx()` == `expect_end_line`"
+  );
   if actual.lines().is_empty() {
-    assert!(actual.end_line_idx() <= actual.start_line_idx());
+    assert!(
+      actual.end_line_idx() <= actual.start_line_idx(),
+      "`actual.end_line_idx()` <= `actual.start_line_idx()`"
+    );
   } else {
     let (first_line_idx, _first_line_viewport) =
       actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
-    assert_eq!(*first_line_idx, actual.start_line_idx());
-    assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    assert_eq!(
+      *first_line_idx,
+      actual.start_line_idx(),
+      "`*first_line_idx` ({}) == `actual.start_line_idx()`",
+      first_line_idx
+    );
+    assert_eq!(
+      *last_line_idx,
+      actual.end_line_idx() - 1,
+      "`*last_line_idx` ({}) == `actual.end_line_idx() - 1`",
+      last_line_idx
+    );
   }
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    actual.lines().len()
+    actual.lines().len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` == `actual.lines().len()`"
   );
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    expect_start_fills.len()
+    expect_start_fills.len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` == `expect_start_fills.len()`"
   );
   assert_eq!(
     actual.end_line_idx() - actual.start_line_idx(),
-    expect_end_fills.len()
+    expect_end_fills.len(),
+    "`actual.end_line_idx() - actual.start_line_idx()` == `expect_end_fills.len()`"
   );
 
   let buflines = text.rope().lines_at(actual.start_line_idx());
@@ -229,7 +258,9 @@ pub fn assert_viewport(
     );
     assert_eq!(
       line_viewport.start_filled_cols(),
-      *expect_start_fills.get(&actual_line_idx).unwrap()
+      *expect_start_fills.get(&actual_line_idx).unwrap(),
+      "line_viewport.start_filled_cols() == *expect_start_fills.get({}).unwrap()",
+      actual_line_idx
     );
     info!(
       "end_filled_cols expect:{:?}, actual:{}",
@@ -238,7 +269,9 @@ pub fn assert_viewport(
     );
     assert_eq!(
       line_viewport.end_filled_cols(),
-      *expect_end_fills.get(&actual_line_idx).unwrap()
+      *expect_end_fills.get(&actual_line_idx).unwrap(),
+      "line_viewport.end_filled_cols() == *expect_end_fills.get({}).unwrap()",
+      actual_line_idx
     );
 
     let rows = &line_viewport.rows();
@@ -271,7 +304,11 @@ pub fn assert_viewport(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
         r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect_rows[*r as usize]);
+      assert_eq!(
+        payload, expect_rows[*r as usize],
+        "payload == expect_rows[*{} as usize]",
+        *r
+      );
     }
   }
 }

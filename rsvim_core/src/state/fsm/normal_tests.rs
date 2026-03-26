@@ -34,7 +34,6 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;

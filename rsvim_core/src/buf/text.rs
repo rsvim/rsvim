@@ -50,7 +50,7 @@ impl Text {
   }
 }
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 impl Drop for Text {
   fn drop(&mut self) {
     let cached_width = self.cached_width.borrow();
@@ -290,6 +290,17 @@ impl Text {
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
       Some(line) => Self::is_eol_on_rope_line(&line, char_idx),
+      None => false,
+    }
+  }
+
+  /// Whether the `line_idx`/`char_idx` is eol (end-of-line), or line end.
+  pub fn is_eol_or_line_end(&self, line_idx: usize, char_idx: usize) -> bool {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        char_idx >= line.len_chars()
+          || Self::is_eol_on_rope_line(&line, char_idx)
+      }
       None => false,
     }
   }
