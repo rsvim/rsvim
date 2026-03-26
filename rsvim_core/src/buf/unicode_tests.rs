@@ -1,6 +1,5 @@
 use super::unicode::*;
 use crate::buf::opt::BufferOptionsBuilder;
-use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ascii::AsciiChar;
@@ -33,14 +32,10 @@ fn char_width1() {
     );
     if asciic == AsciiChar::Tab {
       assert_eq!(char_width(&opt, c), opt.tab_stop() as usize);
-    } else if asciic == AsciiChar::LineFeed {
+    } else if asciic == AsciiChar::LineFeed
+      || asciic == AsciiChar::CarriageReturn
+    {
       assert_eq!(char_width(&opt, c), 0);
-    } else if asciic == AsciiChar::CarriageReturn {
-      if opt.file_format() == FileFormatOption::Unix {
-        assert_eq!(char_width(&opt, c), formatted_len);
-      } else {
-        assert_eq!(char_width(&opt, c), 0);
-      }
     } else {
       assert_eq!(char_width(&opt, c), formatted_len);
     }
