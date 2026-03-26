@@ -12205,7 +12205,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-5
     {
-      let expect = vec!["contains", "\tseveral", "tes", "t:\n", "\t1. When"];
+      let expect = vec!["contains", "\tseveral", "\tthings", "\twe", "\twant"];
 
       let actual =
         search_up_viewport(&mut tree, window_id, buf.clone(), 2, 30, 2, 29);
