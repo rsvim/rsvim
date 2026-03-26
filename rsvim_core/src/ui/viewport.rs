@@ -269,6 +269,14 @@ impl CursorViewport {
       let row_idx = *row_idx;
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+    } else if let Some(buffer_line) = text.rope().get_line(line_idx)
+      && buffer_line.len_chars() == 0
+    {
+      // If target cursor line is empty, force `column=0`.
+      debug_assert!(line_viewport.rows().first().is_some());
+      let (first_row_idx, _first_row_viewport) =
+        line_viewport.rows().first().unwrap();
+      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
     } else if text.is_eol_or_line_end(line_idx, char_idx) {
       // The target cursor is eol or line end, then we have two cases:
       //
