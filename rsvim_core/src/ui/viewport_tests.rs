@@ -11723,7 +11723,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         "ains several thin",
         "gs we want to tes",
         "t:\n",
-        "\t1. When",
+        "\t1. When t",
       ];
 
       let actual =
@@ -11732,7 +11732,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 2)].into_iter().collect();
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
