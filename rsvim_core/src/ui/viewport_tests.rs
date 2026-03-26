@@ -11690,22 +11690,27 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-4
     {
-      let expect =
-        vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
+      let expect = vec![
+        "\t1. When t",
+        "he line is small ",
+        "enough to complet",
+        "ely put inside.\n",
+        "\t2. When i",
+      ];
 
       let actual =
-        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 36, 3, 29);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 36, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(3, 5)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(3, 0)].into_iter().collect();
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &actual,
         &expect,
         3,
-        4,
+        5,
         &expect_start_fills,
         &expect_end_fills,
       );
