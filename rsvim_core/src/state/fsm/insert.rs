@@ -168,7 +168,7 @@ impl Insert {
         .text()
         .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
       trace!(
-        "cursor_line_idx_after:{},cursor_char_idx_after:{},cursor_absolute_char_idx_after",
+        "cursor_line_idx_after:{},cursor_char_idx_after:{},cursor_absolute_char_idx_after:{}",
         cursor_line_idx_after,
         cursor_char_idx_after,
         cursor_absolute_char_idx_after
