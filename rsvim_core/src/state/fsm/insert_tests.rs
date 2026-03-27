@@ -8421,7 +8421,6 @@ mod tests_insert_text_nofixeol {
       let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
-      let a = format!("a");
       let expect = vec!["a"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
