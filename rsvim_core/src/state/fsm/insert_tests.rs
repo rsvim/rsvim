@@ -1940,25 +1940,17 @@ mod tests_cursor_move_nofixeol {
       assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the ", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the "];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        8,
+        7,
         &expect_fills,
         &expect_fills,
       );
