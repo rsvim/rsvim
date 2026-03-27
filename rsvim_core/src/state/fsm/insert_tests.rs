@@ -1879,7 +1879,7 @@ mod tests_cursor_move_nofixeol {
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       size!(10, 10),
@@ -1992,7 +1992,7 @@ mod tests_cursor_move_nofixeol {
       "9th.\n",
       "10th.\n",
       "11th.\n",
-      "12th.\n",
+      "12th.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       size!(10, 6),
@@ -2234,7 +2234,7 @@ mod tests_cursor_move_nofixeol {
       "9th.\n",
       "10th.\n",
       "11th.\n",
-      "12th.\n",
+      "12th.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       size!(10, 6),
