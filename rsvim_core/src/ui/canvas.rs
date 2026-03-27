@@ -250,16 +250,16 @@ impl Canvas {
         || cell.attrs() != start_cell.attrs()
       {
         let contents = get_content(start_i, i);
-        trace!(
-          "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
-          row,
-          start_col,
-          end_col,
-          start_i,
-          i,
-          contents.content(),
-          contents.style()
-        );
+        // trace!(
+        //   "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
+        //   row,
+        //   start_col,
+        //   end_col,
+        //   start_i,
+        //   i,
+        //   contents.content(),
+        //   contents.style()
+        // );
         output_shaders.push(ShaderCommand::StylePrintStyledContentString(
           crossterm::style::PrintStyledContent(contents),
         ));
@@ -268,16 +268,16 @@ impl Canvas {
     }
     if start_i < new_cells.len() {
       let contents = get_content(start_i, new_cells.len());
-      trace!(
-        "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
-        row,
-        start_col,
-        end_col,
-        start_i,
-        new_cells.len(),
-        contents.content(),
-        contents.style()
-      );
+      // trace!(
+      //   "[{:>2},{:>2}-{:>2},{:>2}-{:>2}], content:{} ({:?})",
+      //   row,
+      //   start_col,
+      //   end_col,
+      //   start_i,
+      //   new_cells.len(),
+      //   contents.content(),
+      //   contents.style()
+      // );
       output_shaders.push(ShaderCommand::StylePrintStyledContentString(
         crossterm::style::PrintStyledContent(contents),
       ));
@@ -291,7 +291,7 @@ impl Canvas {
   /// diff-algorithm becomes invalid.
   pub fn _brute_force_diff(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     let size = self.size();
-    trace!("brute force diff, size:{:?}", size);
+    // trace!("brute force diff, size:{:?}", size);
 
     if self.frame().is_zero_sized() {
       return;
@@ -314,7 +314,7 @@ impl Canvas {
   /// unchanged.
   pub fn _dirty_marks_diff(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
     let size = self.size();
-    trace!("dirty marks diff, size:{:?}", size);
+    // trace!("dirty marks diff, size:{:?}", size);
 
     if self.frame().is_zero_sized() {
       return;
