@@ -12682,12 +12682,12 @@ mod tests_delete_text {
 
       let expect_canvas = vec![
         "                                                                              ",
-        "2Ftypes\" /></a>                                                               ",
-        "label=docs.rs\" /></a>                                                         ",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "%2Ftypes\" /></a>                                                              ",
+        "?label=docs.rs\" /></a>                                                        ",
+        "hields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>      ",
+        "github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>",
         "r                                                                             ",
-        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "70?logo=discord&style=social&label=discord\" /></a>                            ",
         "                                                                              ",
         "                                                                              ",
         "                                                                              ",
@@ -12710,16 +12710,16 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 115);
+      assert_eq!(viewport.start_column_idx(), 113);
 
       let expect = vec![
         "",
-        "2Ftypes\" /></a>\n",
-        "label=docs.rs\" /></a>\n",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "m%2Ftypes\" /></a>\n",
+        "e?label=docs.rs\" /></a>\n",
+        "shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a",
         "/\n",
-        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "870?logo=discord&style=social&label=discord\" /></a>\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -12746,12 +12746,12 @@ mod tests_delete_text {
 
       let expect_canvas = vec![
         "                                                                              ",
-        "2Ftypes\" /></a>                                                               ",
-        "label=docs.rs\" /></a>                                                         ",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "m%2Ftypes\" /></a>                                                             ",
+        "e?label=docs.rs\" /></a>                                                       ",
+        "shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>     ",
+        "/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a",
         "/                                                                             ",
-        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "870?logo=discord&style=social&label=discord\" /></a>                           ",
         "                                                                              ",
         "                                                                              ",
         "                                                                              ",
@@ -12774,16 +12774,16 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 115);
+      assert_eq!(viewport.start_column_idx(), 112);
 
       let expect = vec![
         "",
-        "2Ftypes\" /></a>\n",
-        "label=docs.rs\" /></a>\n",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
-        "/\n",
-        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "im%2Ftypes\" /></a>\n",
+        "re?label=docs.rs\" /></a>\n",
+        ".shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "o/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></",
+        "b\n",
+        "9870?logo=discord&style=social&label=discord\" /></a>\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -12810,12 +12810,12 @@ mod tests_delete_text {
 
       let expect_canvas = vec![
         "                                                                              ",
-        "2Ftypes\" /></a>                                                               ",
-        "label=docs.rs\" /></a>                                                         ",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
-        "/                                                                             ",
-        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "im%2Ftypes\" /></a>                                                            ",
+        "re?label=docs.rs\" /></a>                                                      ",
+        ".shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>    ",
+        "o/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></",
+        "b                                                                             ",
+        "9870?logo=discord&style=social&label=discord\" /></a>                          ",
         "                                                                              ",
         "                                                                              ",
         "                                                                              ",
