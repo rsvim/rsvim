@@ -599,9 +599,8 @@ impl Text {
 
 // Edit {
 impl Text {
-  /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
-  /// helps the cursor motion.
-  fn insert_eol_at_tail_if_not_exist(&mut self) {
+  /// Restore the `EOL` at the end of text file.
+  fn restore_eol_at_end_if_not_exist(&mut self) {
     let eol =
       std::convert::Into::<EndOfLineOption>::into(self.options().file_format());
 
@@ -741,7 +740,7 @@ impl Text {
 
     // Append eol at text tail if it doesn't exist.
     if self.options().fix_end_of_line() {
-      self.insert_eol_at_tail_if_not_exist();
+      self.restore_eol_at_end_if_not_exist();
     }
 
     self.dbg_print_textline(
@@ -890,7 +889,7 @@ impl Text {
 
     // Append eol at text tail if it doesn't exist.
     if self.options().fix_end_of_line() {
-      self.insert_eol_at_tail_if_not_exist();
+      self.restore_eol_at_end_if_not_exist();
     }
 
     self.dbg_print_textline(
