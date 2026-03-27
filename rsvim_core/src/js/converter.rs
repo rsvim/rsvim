@@ -83,7 +83,7 @@ impl NodeIdToV8 for NodeId {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+    v8::Integer::new(scope, Into::<i32>::into(*self))
   }
 }
 
@@ -115,7 +115,7 @@ impl BufferIdToV8 for BufferId {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+    v8::Integer::new(scope, Into::<i32>::into(*self))
   }
 }
 
@@ -147,7 +147,7 @@ impl TimerIdToV8 for TimerId {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, std::convert::Into::<i32>::into(*self))
+    v8::Integer::new(scope, Into::<i32>::into(*self))
   }
 }
 

@@ -14,7 +14,6 @@ use crate::ui::viewport::Viewport;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
 use smallvec::SmallVec;
-use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(
