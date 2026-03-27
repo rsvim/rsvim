@@ -131,6 +131,7 @@ swc_visit = "=2.0.1"
 deno_core_icudata = "0.77"
 v8 = { version = "=147.0.0", default-features = false, features = [
   "use_custom_libcxx",
+  "simdutf",
 ] }
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
