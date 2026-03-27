@@ -7894,16 +7894,16 @@ mod tests_insert_text_nofixeol {
       let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
-      let a = format!("a{buf_eol}");
-      let expect = vec![a.as_str(), ""];
+      let a = format!("a");
+      let expect = vec!["a"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -7961,19 +7961,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let b = format!("b{buf_eol}");
-      let expect = vec![b.as_str(), ""];
+      let expect = vec!["b"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8031,19 +8027,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 4);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let b = format!("这个{buf_eol}");
-      let expect = vec![b.as_str(), ""];
+      let expect = vec!["这个"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8072,19 +8064,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let l2 = format!("\t{buf_eol}");
-      let expect = vec!["这个", l2.as_str(), ""];
+      let expect = vec!["这个", "\t"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8118,15 +8106,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["这个", "\t  ", ""];
+      let expect = vec!["这个", "\t  "];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8591,19 +8579,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let a = format!("a{buf_eol}");
-      let expect = vec![a.as_str(), ""];
+      let expect = vec!["a"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8661,19 +8645,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let b = format!("b{buf_eol}");
-      let expect = vec![b.as_str(), ""];
+      let expect = vec!["b"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
