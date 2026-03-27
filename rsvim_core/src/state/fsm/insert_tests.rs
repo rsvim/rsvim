@@ -8852,7 +8852,7 @@ mod tests_insert_text_nofixeol {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
-      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
@@ -11695,7 +11695,7 @@ mod tests_delete_text_nofixeol {
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "* The extra.\n",
+      "* The extra.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
@@ -12475,7 +12475,7 @@ mod tests_delete_text_nofixeol {
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "* The extra.\n",
+      "* The extra.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
