@@ -12168,21 +12168,16 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
-      let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",
         " sow of th",
         ". When the",
         "he extra p",
-        text5.as_str(),
-        "",
+        "he extra.",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -12190,7 +12185,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
