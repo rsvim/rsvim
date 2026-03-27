@@ -77,8 +77,6 @@ mod tests_getter_setter {
 
 #[cfg(test)]
 mod tests_buffer_editing {
-  use crate::buf::opt::EndOfLineOption;
-
   use super::*;
 
   #[tokio::test]
