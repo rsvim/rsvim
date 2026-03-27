@@ -12361,16 +12361,16 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "                                                                                ",
+        "                                                                              ",
         "2Ftypes\" /></a>                                                               ",
         "label=docs.rs\" /></a>                                                         ",
         "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
         "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
         "svim/rsvim\" /></a>                                                            ",
         "0?logo=discord&style=social&label=discord\" /></a>                             ",
-        "                                                                                ",
-        "                                                                                ",
-        "                                                                                ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
