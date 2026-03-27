@@ -3324,9 +3324,8 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
@@ -11937,10 +11936,9 @@ mod tests_delete_text_nofixeol {
         "  2. When ",
         "* The extr",
         "* The extr",
-        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -11948,7 +11946,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
@@ -11989,10 +11987,9 @@ mod tests_delete_text_nofixeol {
         "  2. When ",
         "* The extr",
         "* The extr",
-        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -12000,7 +11997,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
@@ -12041,10 +12038,9 @@ mod tests_delete_text_nofixeol {
         "  2. When ",
         "* The extr",
         "* The extr",
-        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -12052,7 +12048,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
@@ -12093,10 +12089,9 @@ mod tests_delete_text_nofixeol {
         "  2. When ",
         "* The extr",
         "* The extr",
-        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -12104,7 +12099,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
@@ -12135,7 +12130,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
       assert_eq!(actual1.row_idx(), 5);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -12144,11 +12139,10 @@ mod tests_delete_text_nofixeol {
         " sow of th",
         ". When the",
         "he extra p",
-        "he extra.\n",
-        "",
+        "he extra.",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -12156,7 +12150,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
@@ -12187,7 +12181,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
       assert_eq!(actual3.row_idx(), 5);
-      assert_eq!(actual3.column_idx(), 9);
+      assert_eq!(actual3.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = std::convert::Into::<EndOfLineOption>::into(

@@ -601,8 +601,7 @@ impl Text {
 impl Text {
   /// Restore the `EOL` at the end of text file.
   fn restore_eol_at_end_if_not_exist(&mut self) {
-    let eol =
-      std::convert::Into::<EndOfLineOption>::into(self.options().file_format());
+    let eol = Into::<EndOfLineOption>::into(self.options().file_format());
 
     let buffer_len_chars = self.rope.len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);

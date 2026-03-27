@@ -226,9 +226,7 @@ impl Insert {
         }
       }
       CursorInsertPayload::Eol => {
-        let eol = std::convert::Into::<EndOfLineOption>::into(
-          buffer.options().file_format(),
-        );
+        let eol = Into::<EndOfLineOption>::into(buffer.options().file_format());
         let eol = format!("{eol}");
         trace!("Insert eol:{eol:?}");
         eol.to_compact_string()

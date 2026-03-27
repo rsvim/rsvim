@@ -277,13 +277,15 @@ pub fn raw_cursor_viewport_move_to(
 
   let bufline = text.rope().line(line_idx);
 
-  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
+  let char_idx = std::cmp::min(char_idx, bufline.len_chars());
   debug_assert!(bufline.len_chars() >= char_idx);
 
-  if bufline.len_chars() == 0 {
-    debug_assert_eq!(char_idx, 0_usize);
-  } else {
-    debug_assert!(bufline.len_chars() > char_idx);
+  if cfg!(debug_assertions) {
+    if bufline.len_chars() == 0 {
+      debug_assert_eq!(char_idx, 0_usize);
+    } else {
+      debug_assert!(bufline.len_chars() >= char_idx);
+    }
   }
 
   // let new_cursor_viewport =

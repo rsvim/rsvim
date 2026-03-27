@@ -8147,9 +8147,8 @@ mod tests_goto_insert_mode {
       assert_eq!(actual1.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let line1 = format!("Should go to insert mode{buf_eol}");
       let expect = vec![line1.as_str(), "Bye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> =

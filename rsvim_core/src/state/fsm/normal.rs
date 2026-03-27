@@ -230,9 +230,7 @@ impl Normal {
         );
         let eol = CompactString::new(format!(
           "{}",
-          std::convert::Into::<EndOfLineOption>::into(
-            buffer.options().file_format()
-          )
+          Into::<EndOfLineOption>::into(buffer.options().file_format())
         ));
 
         // Save editing change

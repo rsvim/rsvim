@@ -59,7 +59,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
   let lines = file_content.split("\n").collect::<Vec<&str>>();
 
-  let buf_eol = std::convert::Into::<EndOfLineOption>::into(opts.file_format());
+  let buf_eol = Into::<EndOfLineOption>::into(opts.file_format());
   for (i, line) in lines.iter().enumerate() {
     trace!("[{}]:{:?}", i, line);
     rpb.append(line);
