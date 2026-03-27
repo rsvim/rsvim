@@ -287,7 +287,9 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = lock!(contents).input().options().end_of_line();
+      let cmdline_eol = Into::<EndOfLineOption>::into(
+        lock!(contents).input().options().file_format(),
+      );
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
@@ -433,7 +435,9 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = lock!(contents).input().options().end_of_line();
+      let cmdline_eol = Into::<EndOfLineOption>::into(
+        lock!(contents).input().options().file_format(),
+      );
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
