@@ -124,7 +124,7 @@ jobs:
         if: ${{ matrix.os == 'windows-11-arm' }}
         run: |
           cargo nextest run --workspace --color=never --no-capture
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         if: ${{ matrix.os != 'windows-11-arm' }}
         with:
           fail_ci_if_error: true
