@@ -6708,6 +6708,4254 @@ mod tests_insert_text {
 }
 
 #[cfg(test)]
+mod tests_insert_text_nofixeol {
+  use super::*;
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap1() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 18);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "o, RSVIM!\n",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "o, RSVIM! ",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual3 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual3.line_idx(), 0);
+      assert_eq!(actual3.char_idx(), 22);
+      assert_eq!(actual3.row_idx(), 0);
+      assert_eq!(actual3.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "SVIM! Go!\n",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "SVIM! Go! ",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap1_crlf_win() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple and small test lines.\r\n",
+      "But still it contains several things we want to test:\r\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 18);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "o, RSVIM!\r\n",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "o, RSVIM! ",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual3 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual3.line_idx(), 0);
+      assert_eq!(actual3.char_idx(), 22);
+      assert_eq!(actual3.row_idx(), 0);
+      assert_eq!(actual3.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "SVIM! Go!\r\n",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "SVIM! Go! ",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap1_cr_mac() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple and small test lines.\r",
+      "But still it contains several things we want to test:\r",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 18);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "o, RSVIM!\r",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "o, RSVIM! ",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual3 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual3.line_idx(), 0);
+      assert_eq!(actual3.char_idx(), 22);
+      assert_eq!(actual3.row_idx(), 0);
+      assert_eq!(actual3.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "SVIM! Go!\r",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "SVIM! Go! ",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap2() {
+    test_log_init();
+
+    let terminal_size = size!(10, 10);
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside.\n",
+      "  2. When the line is too long to be completely put in.\n",
+      "  3. Is there any other cases?\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 5);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "",
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 31);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "",
+        " and small",
+        "several th",
+        "small enou",
+        "too long t",
+        "r cases?a\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        " and small",
+        "several th",
+        "small enou",
+        "too long t",
+        "r cases?a ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap3() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside.\n",
+      "  2. When the line is too long to be completely put in.\n",
+      "  3. Is there any other cases?\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let l0 = format!("HelLet's{buf_eol}");
+      let l1 = format!("insert{buf_eol}");
+      let expect = vec![
+        l0.as_str(),
+        l1.as_str(),
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "HelLet's  ",
+        "insert    ",
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Insert two lines again!{buf_eol}There's no line-break"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 4);
+      assert_eq!(actual2.char_idx(), 21);
+      assert_eq!(actual2.row_idx(), 4);
+      assert_eq!(actual2.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let l2 = format!("es!{buf_eol}");
+      let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        "          ",
+        "es!       ",
+        "ines again",
+        "ine-breakl",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-4
+    {
+      // let buf_eol = lock!(buf).options().end_of_line();
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 9);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-5
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text5 = CompactString::new(format!(
+        "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect =
+        vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\n"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "  2. When ",
+        "  3. Is th",
+        "The insert",
+        "The insert",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap3_crlf_win() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple and small test lines.\r\n",
+      "But still it contains several things we want to test:\r\n",
+      "  1. When the line is small enough to completely put inside.\r\n",
+      "  2. When the line is too long to be completely put in.\r\n",
+      "  3. Is there any other cases?\r\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let l0 = format!("HelLet's{buf_eol}");
+      let l1 = format!("insert{buf_eol}");
+      let expect = vec![
+        l0.as_str(),
+        l1.as_str(),
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "HelLet's  ",
+        "insert    ",
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Insert two lines again!{buf_eol}There's no line-break"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 4);
+      assert_eq!(actual2.char_idx(), 21);
+      assert_eq!(actual2.row_idx(), 4);
+      assert_eq!(actual2.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let l2 = format!("es!{buf_eol}");
+      let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        "          ",
+        "es!       ",
+        "ines again",
+        "ine-breakl",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-4
+    {
+      // let buf_eol = lock!(buf).options().end_of_line();
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 9);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-5
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text5 = CompactString::new(format!(
+        "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  2. When ",
+        "  3. Is th",
+        "The insert",
+        "The insert",
+        "\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "  2. When ",
+        "  3. Is th",
+        "The insert",
+        "The insert",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap3_cr_mac() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple and small test lines.\r",
+      "But still it contains several things we want to test:\r",
+      "  1. When the line is small enough to completely put inside.\r",
+      "  2. When the line is too long to be completely put in.\r",
+      "  3. Is there any other cases?\r",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let l0 = format!("HelLet's{buf_eol}");
+      let l1 = format!("insert{buf_eol}");
+      let expect = vec![
+        l0.as_str(),
+        l1.as_str(),
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "HelLet's  ",
+        "insert    ",
+        "multiple l",
+        "lo, RSVIM!",
+        "This is a ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text2 = CompactString::new(format!(
+        "Insert two lines again!{buf_eol}There's no line-break"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 4);
+      assert_eq!(actual2.char_idx(), 21);
+      assert_eq!(actual2.row_idx(), 4);
+      assert_eq!(actual2.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let l2 = format!("es!{buf_eol}");
+      let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        "          ",
+        "es!       ",
+        "ines again",
+        "ine-breakl",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-4
+    {
+      // let buf_eol = lock!(buf).options().end_of_line();
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 9);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-5
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let text5 = CompactString::new(format!(
+        "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect =
+        vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\r"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "  2. When ",
+        "  3. Is th",
+        "The insert",
+        "The insert",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 12);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        8,
+        13,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap4() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hi".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 0);
+      assert_eq!(actual2.char_idx(), 2);
+      assert_eq!(actual2.row_idx(), 0);
+      assert_eq!(actual2.column_idx(), 2);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let l0 = format!("Hi{buf_eol}");
+      let expect = vec![l0.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap5() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![""];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let line1 = format!("Hi{buf_eol}");
+
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(line1.to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 1);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 1);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![line1.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap5_crlf_win() {
+    test_log_init();
+
+    let terminal_size = size!(10, 5);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf).options().file_format(),
+      );
+      let buf_eol = format!("{buf_eol}");
+
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(buf_eol.to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 1);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 1);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![buf_eol.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak1() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![
+      "AAAAAAAAAA\n",
+      "1st.\n",
+      "2nd.\n",
+      "3rd.\n",
+      "4th.\n",
+      "5th.\n",
+      "6th.\n",
+      "BBBBBBBBBBCCCCCCCCCC\n",
+      "8th.\n",
+      "9th.\n",
+      "10th.\n",
+      "11th.\n",
+      "12th.\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 7);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 7);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.\n",
+        "3rd.\n",
+        "4th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.\n",
+        "3rd.\n",
+        "4th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.World!",
+        "3rd.\n",
+        "4th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-4
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 13);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.World!",
+        "Go!\n",
+        "3rd.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "Go!       ",
+        "3rd.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-5
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 20);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "4th.\n",
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "4th.      ",
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-7
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 13);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-8
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD       ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak1_crlf_win() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![
+      "AAAAAAAAAA\r\n",
+      "1st.\r\n",
+      "2nd.\r\n",
+      "3rd.\r\n",
+      "4th.\r\n",
+      "5th.\r\n",
+      "6th.\r\n",
+      "BBBBBBBBBBCCCCCCCCCC\r\n",
+      "8th.\r\n",
+      "9th.\r\n",
+      "10th.\r\n",
+      "11th.\r\n",
+      "12th.\r\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 7);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 7);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r\n",
+        "1st.\r\n",
+        "2nd.\r\n",
+        "3rd.\r\n",
+        "4th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r\n",
+        "1st.\r\n",
+        "2nd.\r\n",
+        "3rd.\r\n",
+        "4th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r\n",
+        "1st.\r\n",
+        "2nd.World!",
+        "3rd.\r\n",
+        "4th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-4
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 13);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r\n",
+        "1st.\r\n",
+        "2nd.World!",
+        "Go!\r\n",
+        "3rd.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "Go!       ",
+        "3rd.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-5
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 20);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "4th.\r\n",
+        "5th.\r\n",
+        "6th.\r\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "4th.      ",
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r\n",
+        "6th.\r\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-7
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 13);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r\n",
+        "6th.\r\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-8
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r\n",
+        "6th.\r\n",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD\r\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD       ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak1_cr_mac() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![
+      "AAAAAAAAAA\r",
+      "1st.\r",
+      "2nd.\r",
+      "3rd.\r",
+      "4th.\r",
+      "5th.\r",
+      "6th.\r",
+      "BBBBBBBBBBCCCCCCCCCC\r",
+      "8th.\r",
+      "9th.\r",
+      "10th.\r",
+      "11th.\r",
+      "12th.\r",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm(terminal_size, buf_opts, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 7);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 7);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r",
+        "1st.\r",
+        "2nd.\r",
+        "3rd.\r",
+        "4th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r",
+        "1st.\r",
+        "2nd.\r",
+        "3rd.\r",
+        "4th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r",
+        "1st.\r",
+        "2nd.World!",
+        "3rd.\r",
+        "4th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-4
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 13);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\r",
+        "1st.\r",
+        "2nd.World!",
+        "Go!\r",
+        "3rd.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "Go!       ",
+        "3rd.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-5
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 20);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "4th.\r",
+        "5th.\r",
+        "6th.\r",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "4th.      ",
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r",
+        "6th.\r",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-7
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 13);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r",
+        "6th.\r",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-8
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\r",
+        "6th.\r",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD\r",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD       ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak2() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let a = format!("a{buf_eol}");
+      let expect = vec![a.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "a         ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak3() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![""];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("b".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let b = format!("b{buf_eol}");
+      let expect = vec![b.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "b         ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_nolinebreak4() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![""];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("这个".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 2);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let b = format!("这个{buf_eol}");
+      let expect = vec![b.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 8);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let l2 = format!("\t{buf_eol}");
+      let expect = vec!["这个", l2.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      let mut buf_opts = *lock!(buf).options();
+      buf_opts.set_expand_tab(true);
+      buf_opts.set_shift_width(2);
+      lock!(buf).set_options(&buf_opts);
+
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["这个", "\t  ", ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_linebreak1() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(true)
+      .build()
+      .unwrap();
+    let lines = vec![
+      "AAAAAAAAAA\n",
+      "1st line that we could make it longer.\n",
+      "2nd line that we must make it shorter!\n",
+      "3rd.\n",
+      "4th.\n",
+      "5th.\n",
+      "6th.\n",
+      "BBBBBBBBBBCCCCCCCCCC\n",
+      "8th.\n",
+      "9th.\n",
+      "10th.\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 7);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, ",
+        "AAAAAAAAAA",
+        "1st line ",
+        "that we ",
+        "could make",
+        " it longer",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello,    ",
+        "AAAAAAAAAA",
+        "1st line  ",
+        "that we   ",
+        "could make",
+        " it longer",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "2nd line ",
+        "that we ",
+        "must make ",
+        "it shorter",
+        "!\n",
+        "3rd.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        2,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "2nd line  ",
+        "that we   ",
+        "must make ",
+        "it shorter",
+        "!         ",
+        "3rd.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 7);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "2nd line ",
+        "tWorld!hat",
+        " we must ",
+        "make it ",
+        "shorter!\n",
+        "3rd.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        2,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "2nd line  ",
+        "tWorld!hat",
+        " we must  ",
+        "make it   ",
+        "shorter!  ",
+        "3rd.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-4
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Let's go further!".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 33);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "2nd line ",
+        "tWorld!",
+        "Let's go ",
+        "further!",
+        "hat we ",
+        "must make ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        2,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "2nd line  ",
+        "tWorld!   ",
+        "Let's go  ",
+        "further!  ",
+        "hat we    ",
+        "must make ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-5
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 20);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "4th.\n",
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "4th.      ",
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-6
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-7
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 13);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 3);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCCCCCCCC",
+        "DDDDDDDDDD",
+        "8th.      ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-8
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 7);
+      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "5th.\n",
+        "6th.\n",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        5,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "5th.      ",
+        "6th.      ",
+        "BBBBBBBBBB",
+        "CCCabcCCCC",
+        "CCCDDDDDDD",
+        "DDD       ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_linebreak2() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(true)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let a = format!("a{buf_eol}");
+      let expect = vec![a.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "a         ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn wrap_linebreak3() {
+    test_log_init();
+
+    let terminal_size = size!(10, 6);
+    let window_options = WindowOptionsBuilder::default()
+      .wrap(true)
+      .line_break(true)
+      .build()
+      .unwrap();
+    let lines = vec![""];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("b".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+        lock!(buf.clone()).options().file_format(),
+      );
+      let b = format!("b{buf_eol}");
+      let expect = vec![b.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "b         ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap_special_characters1() {
+    test_log_init();
+
+    let terminal_size = size!(200, 10);
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines =
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Also Inserts ascii characters
+    {
+      let characters = vec![
+        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.',
+        '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`',
+        '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è',
+        'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù',
+        'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ',
+        'ª', 'º', '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│',
+        '┤', 'Á', 'Â', 'À', '©', '╣', '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß',
+        'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´',
+        '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
+        '■',
+      ];
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      let text2 = CompactString::new(format!(
+        "{}\n",
+        characters.iter().collect::<String>()
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap_special_characters2() {
+    test_log_init();
+
+    let terminal_size = size!(200, 10);
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines =
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Insert-1 special-chars
+    {
+      let characters = vec![
+        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.',
+        '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`',
+        '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è',
+        'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù',
+        'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ',
+        'ª', 'º', '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│',
+        '┤', 'Á', 'Â', 'À', '©', '╣', '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß',
+        'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´',
+        '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
+        '■',
+      ];
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      let text2 = CompactString::new(format!(
+        "{}\n",
+        characters.iter().collect::<String>()
+      ));
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 1)));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.char_idx(), 72);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 72);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("你好，Rsvim！".to_compact_string()),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.char_idx(), 81);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 85);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                            ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+}
+
+#[cfg(test)]
 mod tests_delete_text {
   use super::*;
 
