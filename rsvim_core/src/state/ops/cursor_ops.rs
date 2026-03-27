@@ -445,6 +445,12 @@ pub fn cursor_move(
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
+  trace!(
+    "cursor_move old viewport:{}/{},cursor_viewport:{:?}",
+    viewport.start_line_idx(),
+    viewport.start_column_idx(),
+    cursor_viewport
+  );
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line) = if include_eol {
@@ -472,6 +478,7 @@ pub fn cursor_move(
       target_cursor_line,
       target_cursor_char,
     );
+    trace!("cursor_move new viewport:{}/{}", start_line, start_column);
 
     // First try window scroll.
     if start_line != viewport.start_line_idx()
@@ -499,6 +506,7 @@ pub fn cursor_move(
     text,
     Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
   );
+  trace!("cursor_move new cursor_viewport:{:?}", new_cursor_viewport);
 
   debug_assert!(tree.cursor_id().is_some());
   tree
