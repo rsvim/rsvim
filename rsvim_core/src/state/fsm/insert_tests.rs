@@ -3128,7 +3128,6 @@ mod tests_insert_text {
 
     // Move-4
     {
-      // let buf_eol = lock!(buf).options().end_of_line();
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
@@ -3444,7 +3443,6 @@ mod tests_insert_text {
 
     // Move-4
     {
-      // let buf_eol = lock!(buf).options().end_of_line();
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
