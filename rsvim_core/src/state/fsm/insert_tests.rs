@@ -12329,15 +12329,13 @@ mod tests_delete_text {
       assert_eq!(viewport.start_column_idx(), 115);
 
       let expect = vec![
-        "m long to short.\n",
-        "e.\n",
-        " same char positi",
-        "ce.\n",
-        " even change.\n",
         "",
-        "",
-        "",
-        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "svim/rsvim\" /></a>\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -12349,8 +12347,6 @@ mod tests_delete_text {
         (5, 0),
         (6, 0),
         (7, 0),
-        (8, 0),
-        (9, 0),
       ]
       .into_iter()
       .collect();
@@ -12359,22 +12355,22 @@ mod tests_delete_text {
         &viewport,
         &expect,
         0,
-        10,
+        8,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "m long to short. ",
-        "e.               ",
-        " same char positi",
-        "ce.              ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
+        "                                                                                ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "svim/rsvim\" /></a>                                                            ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                                ",
+        "                                                                                ",
+        "                                                                                ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);

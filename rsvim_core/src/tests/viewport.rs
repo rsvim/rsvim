@@ -141,13 +141,27 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
     info!("{:?}", e);
   }
 
-  assert_eq!(actual.len(), expect.len());
+  assert_eq!(
+    actual.len(),
+    expect.len(),
+    "actual.len() ({}) == expect.len() ({})",
+    actual.len(),
+    expect.len()
+  );
   for i in 0..actual.len() {
     let e = &expect[i];
     let a = &actual[i];
     info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
-    assert_eq!(e.len(), a.len());
-    assert_eq!(e, a);
+    assert_eq!(
+      e.len(),
+      a.len(),
+      "expect[{}].len() ({}) == actual[{}].len() ({})",
+      i,
+      e.len(),
+      i,
+      a.len()
+    );
+    assert_eq!(e, a, "expect[{}] ({:?}) == actual[{}] ({:?})", i, e, i, a);
   }
 }
 
