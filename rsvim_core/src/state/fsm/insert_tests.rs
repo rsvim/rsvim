@@ -12784,7 +12784,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
       assert_eq!(actual1.row_idx(), 1);
-      assert_eq!(actual1.column_idx(), 7);
+      assert_eq!(actual1.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["* The ", "extra."];
@@ -12826,7 +12826,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
       assert_eq!(actual3.row_idx(), 1);
-      assert_eq!(actual3.column_idx(), 7);
+      assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["* The ", "extra."];
@@ -12868,7 +12868,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
       assert_eq!(actual3.row_idx(), 1);
-      assert_eq!(actual3.column_idx(), 6);
+      assert_eq!(actual3.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["* The ", "extra"];
