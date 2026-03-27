@@ -7286,7 +7286,7 @@ mod tests_insert_text_nofixeol {
         " 3. Is the",
         "he inserte",
         "he inserte",
-        "nsert 4th\n",
+        "nsert 4th",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
