@@ -6726,7 +6726,7 @@ mod tests_insert_text_nofixeol {
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
@@ -6945,7 +6945,7 @@ mod tests_insert_text_nofixeol {
       "But still it contains several things we want to test:\n",
       "  1. When the line is small enough to completely put inside.\n",
       "  2. When the line is too long to be completely put in.\n",
-      "  3. Is there any other cases?\n",
+      "  3. Is there any other cases?",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
@@ -7078,7 +7078,7 @@ mod tests_insert_text_nofixeol {
       "But still it contains several things we want to test:\n",
       "  1. When the line is small enough to completely put inside.\n",
       "  2. When the line is too long to be completely put in.\n",
-      "  3. Is there any other cases?\n",
+      "  3. Is there any other cases?",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
