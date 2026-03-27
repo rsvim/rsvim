@@ -6909,7 +6909,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 30);
       assert_eq!(actual1.row_idx(), 5);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -6922,7 +6922,7 @@ mod tests_insert_text_nofixeol {
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -6930,7 +6930,7 @@ mod tests_insert_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
