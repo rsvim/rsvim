@@ -738,7 +738,7 @@ impl Text {
       char_idx_after_inserted,
     );
 
-    // Append eol at text tail if it doesn't exist.
+    // Try restore eol if `fix_end_of_line` is on.
     if self.options().fix_end_of_line() {
       self.restore_eol_at_end_if_not_exist();
     }
@@ -887,7 +887,7 @@ impl Text {
       char_idx_after_deleted,
     );
 
-    // Append eol at text tail if it doesn't exist.
+    // Try restore eol if `fix_end_of_line` is on.
     if self.options().fix_end_of_line() {
       self.restore_eol_at_end_if_not_exist();
     }
