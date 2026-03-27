@@ -12295,13 +12295,14 @@ mod tests_delete_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
-      r###"  <a href="https://crates.io/crates/rsvim"><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim" /></a>\n"###,
-      r###"  <a href="https://www.npmjs.com/package/@rsvim/types"><img alt="rsvim" src="https://img.shields.io/npm/v/%40rsvim%2Ftypes" /></a>\n"###,
-      r###"  <a href="https://docs.rs/rsvim_core/latest/"><img alt="rsvim_core" src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs" /></a>\n"###,
-      r###"  <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>\n"###,
-      r###"  <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>\n"###,
-      r###"  <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim" /></a>"###,
-      r###"  <a href="https://discord.gg/5KtRUCAByB"><img alt="discord" src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord" /></a>"###,
+      r###"  <a href="https://crates.io/crates/rsvim"><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim" /></a>
+  <a href="https://www.npmjs.com/package/@rsvim/types"><img alt="rsvim" src="https://img.shields.io/npm/v/%40rsvim%2Ftypes" /></a>
+  <a href="https://docs.rs/rsvim_core/latest/"><img alt="rsvim_core" src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs" /></a>
+  <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>
+  <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>
+  <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim" /></a>
+  <a href="https://discord.gg/5KtRUCAByB"><img alt="discord" src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord" /></a>
+"###,
     ];
     let (event, tree, bufs, buf, contents, data_access) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
@@ -12319,13 +12320,13 @@ mod tests_delete_text {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
-      assert_eq!(actual2.char_idx(), 63);
+      assert_eq!(actual2.char_idx(), 192);
       assert_eq!(actual2.row_idx(), 4);
       assert_eq!(actual2.column_idx(), 77);
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 47);
+      assert_eq!(viewport.start_column_idx(), 115);
 
       let expect = vec![
         "m long to short.\n",
