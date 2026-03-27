@@ -5,6 +5,7 @@ use crate::buf::BufferArc;
 use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::opt::FileFormatOption;
 use crate::buf::text::Text;
 use crate::cmdltext::CmdlineText;
@@ -145,7 +146,9 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = lock!(contents).input().options().end_of_line();
+      let cmdline_eol = Into::<EndOfLineOption>::into(
+        lock!(contents).input().options().file_format(),
+      );
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
