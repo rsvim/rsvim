@@ -7267,9 +7267,8 @@ mod tests_insert_text_nofixeol {
 
     // Insert-5
     {
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
@@ -7393,9 +7392,8 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual2.column_idx(), 2);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let l0 = format!("Hi{buf_eol}");
       let expect = vec![l0.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
@@ -7443,9 +7441,8 @@ mod tests_insert_text_nofixeol {
 
     // Insert-1
     {
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let line1 = format!("Hi{buf_eol}");
 
       stateful.cursor_insert(
@@ -7941,7 +7938,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let a = format!("a{buf_eol}");
@@ -8011,7 +8008,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let b = format!("b{buf_eol}");
@@ -8081,7 +8078,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 4);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let b = format!("这个{buf_eol}");
@@ -8122,7 +8119,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let l2 = format!("\t{buf_eol}");
@@ -8641,7 +8638,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let a = format!("a{buf_eol}");
@@ -8711,7 +8708,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let b = format!("b{buf_eol}");
@@ -9556,7 +9553,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
@@ -9612,7 +9609,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
@@ -10203,7 +10200,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
@@ -10259,7 +10256,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
@@ -10850,7 +10847,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
@@ -10906,7 +10903,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
@@ -11580,7 +11577,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text10 = format!("extra.{buf_eol}");
@@ -11626,7 +11623,7 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text11 = format!("extra{buf_eol}");
@@ -12171,7 +12168,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
@@ -12227,7 +12224,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
@@ -12913,7 +12910,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text10 = format!("extra.{buf_eol}");
@@ -12959,7 +12956,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
+      let buf_eol = Into::<EndOfLineOption>::into(
         lock!(buf.clone()).options().file_format(),
       );
       let text11 = format!("extra{buf_eol}");
