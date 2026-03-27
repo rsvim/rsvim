@@ -1912,26 +1912,17 @@ mod tests_cursor_move_nofixeol {
         "  2. When ",
         "     * The",
         "     * The",
-        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        8,
+        7,
         &expect_fills,
         &expect_fills,
       );
