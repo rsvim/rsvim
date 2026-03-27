@@ -328,13 +328,11 @@ impl CursorViewport {
           row_start_width -= line_viewport.start_filled_cols();
         };
 
-        // FIXME: In the beginning, I believe I must add `+1` for it. i.e. it
-        // should be:
-        //
+        // FIXME: In the beginning, I believe I must add `+1` for the
+        // `char_start_width`. i.e. it should be:
         // ```
         // let char_start_width = text.width_before(line_idx, char_idx) + 1;
         // ```
-        //
         // But during unit test, it is just approved that `+1` should be
         // removed. I still don't understand why this happened...
         let char_start_width = text.width_before(line_idx, char_idx);
