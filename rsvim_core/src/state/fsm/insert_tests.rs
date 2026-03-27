@@ -12642,20 +12642,20 @@ mod tests_delete_text {
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 115);
       assert_eq!(actual2.row_idx(), 5);
-      assert_eq!(actual2.column_idx(), 0);
+      assert_eq!(actual2.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 115);
+      assert_eq!(viewport.start_column_idx(), 114);
 
       let expect = vec![
         "",
-        "2Ftypes\" /></a>\n",
-        "label=docs.rs\" /></a>\n",
-        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
-        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "%2Ftypes\" /></a>\n",
+        "?label=docs.rs\" /></a>\n",
+        "hields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>",
         "r\n",
-        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "70?logo=discord&style=social&label=discord\" /></a>\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
