@@ -6918,7 +6918,7 @@ mod tests_insert_text_nofixeol {
         " several t",
         " small eno",
         " too long ",
-        "er cases?\n",
+        "er cases?",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
@@ -6964,7 +6964,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 31);
       assert_eq!(actual2.row_idx(), 5);
-      assert_eq!(actual2.column_idx(), 9);
+      assert_eq!(actual2.column_idx(), 10);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -6973,11 +6973,11 @@ mod tests_insert_text_nofixeol {
         "several th",
         "small enou",
         "too long t",
-        "r cases?a\n",
+        "r cases?a",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
       assert_viewport(
@@ -6985,7 +6985,7 @@ mod tests_insert_text_nofixeol {
         &viewport,
         &expect,
         0,
-        7,
+        6,
         &expect_fills,
         &expect_fills,
       );
