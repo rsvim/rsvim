@@ -4397,6 +4397,9 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 16);
 
       let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
       let expect = vec![
         "m long to short.\n",
         "e.\n",
@@ -4442,6 +4445,9 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 2);
 
       let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
       let expect = vec![
         "m long to short.\n",
         "e.\n",
@@ -4487,6 +4493,9 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
       let expect = vec![
         "m long to short.\n",
         "e.\n",
@@ -4532,6 +4541,9 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
       let expect = vec![
         "m long to short.\n",
         "e.\n",
@@ -4577,6 +4589,9 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 46);
+
       let expect = vec![
         "om long to short.",
         "ne.\n",
@@ -4599,11 +4614,11 @@ mod tests_insert_text {
       );
 
       let expect_canvas = vec![
-        "m long to short. ",
-        "e.               ",
-        " same char positi",
-        "ce.              ",
-        " even change.    ",
+        "om long to short.",
+        "ne.              ",
+        "e same char posit",
+        "nce.             ",
+        "t even change.   ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
