@@ -20,7 +20,7 @@ doctest = false
 [features]
 default = ["unicode", "simd"]
 icudata = ["dep:deno_core_icudata", "icu/compiled_data"]
-simd = ["ropey/simd", "v8/simdutf"]
+simd = ["ropey/simd"]
 typescript = [
   "dep:swc_atoms",
   "dep:swc_bundler",
@@ -145,6 +145,7 @@ swc_visit = { workspace = true, optional = true }
 deno_core_icudata = { workspace = true, optional = true }
 v8 = { workspace = true, default-features = false, features = [
   "use_custom_libcxx",
+  "simdutf",
 ] }
 
 # NOTE: Javascript dependencies }
