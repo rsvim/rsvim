@@ -7928,8 +7928,12 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(terminal_size, window_options, lines);
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      terminal_size,
+      make_nofixeol_bufopts(),
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7994,8 +7998,12 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(terminal_size, window_options, lines);
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      terminal_size,
+      make_nofixeol_bufopts(),
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -8060,8 +8068,12 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(terminal_size, window_options, lines);
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      terminal_size,
+      make_nofixeol_bufopts(),
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
