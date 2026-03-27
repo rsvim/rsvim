@@ -7348,18 +7348,15 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual2.column_idx(), 2);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol =
-        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
-      let l0 = format!("Hi{buf_eol}");
-      let expect = vec![l0.as_str(), ""];
+      let expect = vec!["Hi"];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -8741,32 +8738,31 @@ mod tests_insert_text_nofixeol {
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 0);
-      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.row_idx(), 1);
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
-        "",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        3,
+        2,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
@@ -8828,32 +8824,31 @@ mod tests_insert_text_nofixeol {
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 0);
-      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.row_idx(), 1);
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
-        "",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        3,
+        2,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
@@ -8870,35 +8865,34 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 1)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 0)));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 72);
-      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 72);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
-        "",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        3,
+        2,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
@@ -8921,32 +8915,31 @@ mod tests_insert_text_nofixeol {
       );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 81);
-      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 85);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
-        "",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        3,
+        2,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                            ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
