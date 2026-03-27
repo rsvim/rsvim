@@ -95,9 +95,4 @@ impl BufferOptions {
   pub fn set_file_format(&mut self, value: FileFormatOption) {
     self.file_format = value;
   }
-
-  /// Get 'end-of-line' based on 'file-format' option.
-  pub fn end_of_line(&self) -> EndOfLineOption {
-    self.file_format.into()
-  }
 }

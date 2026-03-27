@@ -1,4 +1,5 @@
 use super::syntax::*;
+use crate::buf::opt::EndOfLineOption;
 use crate::cli::CliOptions;
 use crate::cli::SpecialCliOptions;
 use crate::evloop::writer::StdoutWriterValue;
@@ -76,6 +77,8 @@ mod tests_getter_setter {
 
 #[cfg(test)]
 mod tests_buffer_editing {
+  use crate::buf::opt::EndOfLineOption;
+
   use super::*;
 
   #[tokio::test]
@@ -133,7 +136,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(format!("Hello, World{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
@@ -226,7 +229,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(format!("HelloWorld{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
@@ -311,7 +314,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(format!("use std::sync::Arc;{}", buf_eol), payload);
       let buf_editing_version = buf.editing_version();
@@ -455,7 +458,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(
         format!(
@@ -551,7 +554,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(
         format!(
@@ -647,7 +650,7 @@ mod tests_buffer_editing {
         .1
         .clone();
       let buf = lock!(buf);
-      let buf_eol = buf.options().end_of_line();
+      let buf_eol = Into::<EndOfLineOption>::into(buf.options().file_format());
       let payload = buf.text().rope().to_string();
       assert_eq!(
         format!(
