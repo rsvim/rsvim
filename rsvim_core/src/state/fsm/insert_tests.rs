@@ -12384,24 +12384,22 @@ mod tests_delete_text {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
-      assert_eq!(actual2.char_idx(), 49);
+      assert_eq!(actual2.char_idx(), 133);
       assert_eq!(actual2.row_idx(), 5);
-      assert_eq!(actual2.column_idx(), 2);
+      assert_eq!(actual2.column_idx(), 18);
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 47);
+      assert_eq!(viewport.start_column_idx(), 115);
 
       let expect = vec![
-        "m long to short.\n",
-        "e.\n",
-        " same char positi",
-        "ce.\n",
-        " even change.\n",
         "",
-        "",
-        "",
-        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "svim/rsvim\" /></a>\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -12413,8 +12411,6 @@ mod tests_delete_text {
         (5, 0),
         (6, 0),
         (7, 0),
-        (8, 0),
-        (9, 0),
       ]
       .into_iter()
       .collect();
@@ -12423,22 +12419,22 @@ mod tests_delete_text {
         &viewport,
         &expect,
         0,
-        5,
+        8,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "m long to short. ",
-        "e.               ",
-        " same char positi",
-        "ce.              ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
-        " even change.    ",
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "svim/rsvim\" /></a>                                                            ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
@@ -12451,42 +12447,58 @@ mod tests_delete_text {
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 1);
-      assert_eq!(actual2.char_idx(), 48);
-      assert_eq!(actual2.row_idx(), 1);
-      assert_eq!(actual2.column_idx(), 1);
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 132);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 17);
 
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.start_line_idx(), 0);
-      assert_eq!(viewport.start_column_idx(), 47);
+      assert_eq!(viewport.start_column_idx(), 115);
 
       let expect = vec![
-        "m long to short.\n",
-        "e\n",
-        " same char positi",
-        "ce.\n",
-        " even change.\n",
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "svim/rsvim\" /></a\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-          .into_iter()
-          .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
       assert_viewport(
         lock!(buf).text(),
         &viewport,
         &expect,
         0,
-        5,
+        8,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "m long to short. ",
-        "e                ",
-        " same char positi",
-        "ce.              ",
-        " even change.    ",
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "svim/rsvim\" /></a                                                             ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
