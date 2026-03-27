@@ -7525,7 +7525,7 @@ mod tests_insert_text_nofixeol {
       "9th.\n",
       "10th.\n",
       "11th.\n",
-      "12th.\n",
+      "12th.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
@@ -8231,7 +8231,7 @@ mod tests_insert_text_nofixeol {
       "BBBBBBBBBBCCCCCCCCCC\n",
       "8th.\n",
       "9th.\n",
-      "10th.\n",
+      "10th.",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
@@ -8765,7 +8765,7 @@ mod tests_insert_text_nofixeol {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
-      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
     let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
