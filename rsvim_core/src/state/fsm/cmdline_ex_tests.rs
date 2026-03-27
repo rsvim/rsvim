@@ -435,7 +435,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = std::convert::Into::<EndOfLineOption>::into(
+      let cmdline_eol = Into::<EndOfLineOption>::into(
         lock!(contents).input().options().file_format(),
       );
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
