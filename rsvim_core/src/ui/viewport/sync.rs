@@ -929,6 +929,16 @@ fn nowrap_search_down(
     let start_column = viewport.start_column_idx();
 
     if target_cursor_column < current_cursor_column {
+      trace!(
+        "viewport:{}/{},cursor_viewport:{:?},start_line/column:{}/{},target_cursor:{}/{}",
+        viewport.start_line_idx(),
+        viewport.start_column_idx(),
+        cursor_viewport,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
       // Cursor moves to left side.
       nowrap_search_left(
         text,
@@ -1469,6 +1479,14 @@ fn nowrap_search_left(
     suggest_start_column = target_cursor_column;
   }
 
+  trace!(
+    "suggest_line/column:{}/{},target_line/char/column:{}/{}/{}",
+    suggest_start_line,
+    suggest_start_column,
+    target_cursor_line,
+    target_cursor_char,
+    target_cursor_column,
+  );
   (suggest_start_line, suggest_start_column)
 }
 

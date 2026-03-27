@@ -251,6 +251,10 @@ impl CursorViewport {
         });
 
     if let Some((row_idx, row_viewport)) = cursor_row {
+      trace!(
+        "from_pos-1 row_idx:{},row_viewport:{:?}",
+        row_idx, row_viewport
+      );
       // Cursor is inside viewport.
 
       let mut row_start_width =
@@ -268,6 +272,10 @@ impl CursorViewport {
       let col_idx = (char_start_width - row_start_width) as u16;
       let row_idx = *row_idx;
 
+      trace!(
+        "from_pos-1 line/char:{}/{},row/col:{}/{}",
+        line_idx, char_idx, row_idx, col_idx
+      );
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else if let Some(buffer_line) = text.rope().get_line(line_idx)
       && buffer_line.len_chars() == 0
@@ -276,6 +284,10 @@ impl CursorViewport {
       debug_assert!(line_viewport.rows().first().is_some());
       let (first_row_idx, _first_row_viewport) =
         line_viewport.rows().first().unwrap();
+      trace!(
+        "from_pos-2 line/char:{}/{},first_row_idx:{},first_row_viewport:{:?}",
+        line_idx, char_idx, first_row_idx, _first_row_viewport
+      );
       CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
     } else if text.is_eol_or_line_end(line_idx, char_idx) {
       // The target cursor is eol or line end, then we have two cases:
@@ -310,6 +322,10 @@ impl CursorViewport {
         // next row, column-0, and the next line must exist.
 
         debug_assert!(*last_row_idx + 1 < size.height());
+        trace!(
+          "from_pos-3 line/char:{}/{},last_row_idx:{},last_row_viewport:{:?}",
+          line_idx, char_idx, last_row_idx, last_row_viewport
+        );
         CursorViewport::new(line_idx, char_idx, *last_row_idx + 1, 0_u16)
       } else {
         // Case-1:
@@ -339,12 +355,27 @@ impl CursorViewport {
         let col_idx = (char_start_width - row_start_width) as u16;
         let row_idx = *last_row_idx;
 
+        trace!(
+          "from_pos-4 line/char:{}/{},row/col:{}/{},first_row_viewport:{:?},last_row_viewport:{:?},row_start_width:{},char_start_width:{}",
+          line_idx,
+          char_idx,
+          row_idx,
+          col_idx,
+          _first_row_viewport,
+          last_row_viewport,
+          row_start_width,
+          char_start_width
+        );
         CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
       }
     } else {
       debug_assert!(line_viewport.rows().first().is_some());
       let (first_row_idx, _first_row_viewport) =
         line_viewport.rows().first().unwrap();
+      trace!(
+        "from_pos-5 line/char:{}/{},first_row_idx:{},first_row_viewport:{:?}",
+        line_idx, char_idx, first_row_idx, _first_row_viewport,
+      );
       CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
     }
   }

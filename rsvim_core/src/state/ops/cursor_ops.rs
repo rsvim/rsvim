@@ -279,6 +279,7 @@ pub fn raw_cursor_viewport_move_to(
 
   let char_idx = std::cmp::min(char_idx, bufline.len_chars());
   debug_assert!(bufline.len_chars() >= char_idx);
+  trace!("raw cursor move line/char:{}/{}", line_idx, char_idx);
 
   if cfg!(debug_assertions) {
     if bufline.len_chars() == 0 {
