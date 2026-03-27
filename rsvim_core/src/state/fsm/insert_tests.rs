@@ -12043,7 +12043,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
       assert_eq!(actual1.row_idx(), 5);
-      assert_eq!(actual1.column_idx(), 10);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -12094,7 +12094,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
       assert_eq!(actual3.row_idx(), 5);
-      assert_eq!(actual3.column_idx(), 10);
+      assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -12145,7 +12145,7 @@ mod tests_delete_text_nofixeol {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
       assert_eq!(actual3.row_idx(), 5);
-      assert_eq!(actual3.column_idx(), 9);
+      assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
