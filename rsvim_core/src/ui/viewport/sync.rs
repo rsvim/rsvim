@@ -1512,16 +1512,21 @@ fn nowrap_search_right(
       target_cursor_column.saturating_sub(window_width as usize);
   }
 
-  // This "search_right" method can still be called if the
-  // `target_cursor_column == current_cursor_column`, which means the viewport
-  // may stay still So this method also need to consider non-right case, or
-  // even search to leftward case.
+  // This "search_right" method can be called if the
+  // `target_cursor_column == current_cursor_column`, which means this method
+  // also need to consider non-right case, or even search to leftward case.
   //
   // If in `target_cursor_line`, the `target_cursor_char` is already the last
   // char, and it is eol or line end, and there is no other visible char in
   // `target_cursor_line`, we should actually move the `suggest_start_column`
   // to leftward for 1 visible char, to ensure the `target_cursor_line`
   // contains at least 1 visible char.
+  let last_char = text
+    .last_char_idx_on_line_exclude_eol(target_cursor_line)
+    .unwrap_or(0);
+  let last_char_column = text.width_before(target_cursor_line, last_char);
+  let suggest_start_column =
+    std::cmp::min(suggest_start_column, last_char_column);
 
   (suggest_start_line, suggest_start_column)
 }
