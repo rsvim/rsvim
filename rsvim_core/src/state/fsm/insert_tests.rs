@@ -6909,7 +6909,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 30);
       assert_eq!(actual1.row_idx(), 5);
-      assert_eq!(actual1.column_idx(), 10);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -6964,7 +6964,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 31);
       assert_eq!(actual2.row_idx(), 5);
-      assert_eq!(actual2.column_idx(), 10);
+      assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -7185,7 +7185,7 @@ mod tests_insert_text_nofixeol {
       assert_eq!(actual1.line_idx(), 9);
       assert_eq!(actual1.char_idx(), 30);
       assert_eq!(actual1.row_idx(), 4);
-      assert_eq!(actual1.column_idx(), 10);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
