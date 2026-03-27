@@ -3404,7 +3404,6 @@ mod tests_insert_text {
 
     // Move-4
     {
-      // let buf_eol = lock!(buf).options().end_of_line();
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
@@ -3715,7 +3714,6 @@ mod tests_insert_text {
 
     // Move-4
     {
-      // let buf_eol = lock!(buf).options().end_of_line();
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
@@ -4031,7 +4029,6 @@ mod tests_insert_text {
 
     // Move-4
     {
-      // let buf_eol = lock!(buf).options().end_of_line();
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
@@ -10012,9 +10009,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
@@ -10068,9 +10064,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
@@ -10659,9 +10654,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\r\n",
@@ -10715,9 +10709,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
       let expect = vec![
         "SVIM!\r\n",
@@ -11306,9 +11299,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\r",
@@ -11362,9 +11354,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
       let expect = vec![
         "SVIM!\r",
@@ -12036,9 +12027,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text10 = format!("extra.{buf_eol}");
       let expect = vec!["* The ", text10.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
@@ -12082,9 +12072,8 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = Into::<EndOfLineOption>::into(
-        lock!(buf.clone()).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text11 = format!("extra{buf_eol}");
       let expect = vec!["* The ", text11.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
