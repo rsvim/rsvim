@@ -12285,6 +12285,217 @@ mod tests_delete_text {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn nowrap5() {
+    test_log_init();
+
+    let terminal_size = size!(78, 10);
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
+    let lines = vec![
+      r###"  <a href="https://crates.io/crates/rsvim"><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim" /></a>\n"###,
+      r###"  <a href="https://www.npmjs.com/package/@rsvim/types"><img alt="rsvim" src="https://img.shields.io/npm/v/%40rsvim%2Ftypes" /></a>\n"###,
+      r###"  <a href="https://docs.rs/rsvim_core/latest/"><img alt="rsvim_core" src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs" /></a>\n"###,
+      r###"  <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>\n"###,
+      r###"  <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>\n"###,
+      r###"  <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim" /></a>"###,
+      r###"  <a href="https://discord.gg/5KtRUCAByB"><img alt="discord" src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord" /></a>"###,
+    ];
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = Insert::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((1000, 4)));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 4);
+      assert_eq!(actual2.char_idx(), 63);
+      assert_eq!(actual2.row_idx(), 4);
+      assert_eq!(actual2.column_idx(), 77);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
+      let expect = vec![
+        "m long to short.\n",
+        "e.\n",
+        " same char positi",
+        "ce.\n",
+        " even change.\n",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+        (8, 0),
+        (9, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "m long to short. ",
+        "e.               ",
+        " same char positi",
+        "ce.              ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 49);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 2);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
+      let expect = vec![
+        "m long to short.\n",
+        "e.\n",
+        " same char positi",
+        "ce.\n",
+        " even change.\n",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+        (8, 0),
+        (9, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "m long to short. ",
+        "e.               ",
+        " same char positi",
+        "ce.              ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+        " even change.    ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-3
+    {
+      stateful.cursor_delete(&data_access, -1);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 1);
+      assert_eq!(actual2.char_idx(), 48);
+      assert_eq!(actual2.row_idx(), 1);
+      assert_eq!(actual2.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 47);
+
+      let expect = vec![
+        "m long to short.\n",
+        "e\n",
+        " same char positi",
+        "ce.\n",
+        " even change.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "m long to short. ",
+        "e                ",
+        " same char positi",
+        "ce.              ",
+        " even change.    ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
 }
 
 #[cfg(test)]
