@@ -7239,7 +7239,7 @@ mod tests_insert_text_nofixeol {
 
       let viewport = get_viewport(tree.clone());
       let expect =
-        vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\n"];
+        vec!["  2. When ", "  3. Is th", "The insert", "The insert", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
