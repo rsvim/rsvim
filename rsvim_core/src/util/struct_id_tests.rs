@@ -17,14 +17,11 @@ fn test_next_test1_id() {
       i, id, last_id, miss_count
     );
     if let Some(last_id) = last_id {
-      assert!(std::convert::Into::<u8>::into(last_id) >= 1);
-      if std::convert::Into::<u8>::into(last_id) == u8::MAX {
-        assert_eq!(std::convert::Into::<u8>::into(id), 1);
+      assert!(Into::<u8>::into(last_id) >= 1);
+      if Into::<u8>::into(last_id) == u8::MAX {
+        assert_eq!(Into::<u8>::into(id), 1);
       } else {
-        assert_eq!(
-          std::convert::Into::<u8>::into(last_id) + 1,
-          std::convert::Into::<u8>::into(id)
-        );
+        assert_eq!(Into::<u8>::into(last_id) + 1, Into::<u8>::into(id));
       }
     } else {
       miss_count += 1;
@@ -49,14 +46,11 @@ fn test_next_test2_id() {
       i, id, last_id, miss_count
     );
     if let Some(last_id) = last_id {
-      assert!(std::convert::Into::<i8>::into(last_id) >= 100);
-      if std::convert::Into::<i8>::into(last_id) == i8::MAX {
-        assert_eq!(std::convert::Into::<i8>::into(id), 100);
+      assert!(Into::<i8>::into(last_id) >= 100);
+      if Into::<i8>::into(last_id) == i8::MAX {
+        assert_eq!(Into::<i8>::into(id), 100);
       } else {
-        assert_eq!(
-          std::convert::Into::<i8>::into(last_id) + 1,
-          std::convert::Into::<i8>::into(id)
-        );
+        assert_eq!(Into::<i8>::into(last_id) + 1, Into::<i8>::into(id));
       }
     } else {
       miss_count += 1;
