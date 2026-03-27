@@ -100,7 +100,7 @@ impl BufferOptions {
     self.file_format = value;
   }
 
-  /// Buffer 'fixendofline' option.
+  /// Buffer 'fix-end-of-line' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27fixendofline%27>.
   pub fn fix_end_of_line(&self) -> bool {
