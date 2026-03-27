@@ -249,3 +249,37 @@ pub fn set_file_format<'s>(
     .global_local_options_mut()
     .set_file_format(value);
 }
+
+/// Get the _fix-end-of-line_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27fixendofline%27>
+pub fn get_fix_end_of_line(
+  scope: &mut v8::PinScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let buffer_manager = lock!(buffer_manager);
+  let value = buffer_manager.global_local_options().fix_end_of_line();
+  trace!("get_fix_end_of_line: {:?}", value);
+  rv.set_bool(value);
+}
+
+/// Set the _fix-end-of-line_ option.
+pub fn set_fix_end_of_line<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
+  trace!("set_fix_end_of_line: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let buffer_manager = state_rc.borrow().buffer_manager.clone();
+  let mut buffer_manager = lock!(buffer_manager);
+
+  buffer_manager
+    .global_local_options_mut()
+    .set_fix_end_of_line(value);
+}

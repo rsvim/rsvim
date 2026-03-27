@@ -277,13 +277,16 @@ pub fn raw_cursor_viewport_move_to(
 
   let bufline = text.rope().line(line_idx);
 
-  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
+  let char_idx = std::cmp::min(char_idx, bufline.len_chars());
   debug_assert!(bufline.len_chars() >= char_idx);
+  trace!("raw cursor move line/char:{}/{}", line_idx, char_idx);
 
-  if bufline.len_chars() == 0 {
-    debug_assert_eq!(char_idx, 0_usize);
-  } else {
-    debug_assert!(bufline.len_chars() > char_idx);
+  if cfg!(debug_assertions) {
+    if bufline.len_chars() == 0 {
+      debug_assert_eq!(char_idx, 0_usize);
+    } else {
+      debug_assert!(bufline.len_chars() >= char_idx);
+    }
   }
 
   // let new_cursor_viewport =
@@ -404,11 +407,12 @@ fn _update_viewport_after_text_changed(
     text.rope().len_lines().saturating_sub(1),
   );
   debug_assert!(text.rope().get_line(start_line).is_some());
-  let bufline_len_chars = text.rope().line(start_line).len_chars();
-  let start_column = std::cmp::min(
-    viewport.start_column_idx(),
-    text.width_before(start_line, bufline_len_chars),
-  );
+  // let bufline_len_chars = text.rope().line(start_line).len_chars();
+  // let start_column = std::cmp::min(
+  //   viewport.start_column_idx(),
+  //   text.width_before(start_line, bufline_len_chars),
+  // );
+  let start_column = viewport.start_column_idx();
 
   let updated_viewport =
     _update_viewport(tree, id, text, start_line, start_column);
@@ -443,6 +447,12 @@ pub fn cursor_move(
 ) {
   let viewport = tree.editable_viewport(id);
   let cursor_viewport = tree.editable_cursor_viewport(id);
+  trace!(
+    "cursor_move old viewport:{}/{},cursor_viewport:{:?}",
+    viewport.start_line_idx(),
+    viewport.start_column_idx(),
+    cursor_viewport
+  );
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line) = if include_eol {
@@ -470,6 +480,7 @@ pub fn cursor_move(
       target_cursor_line,
       target_cursor_char,
     );
+    trace!("cursor_move new viewport:{}/{}", start_line, start_column);
 
     // First try window scroll.
     if start_line != viewport.start_line_idx()
@@ -497,6 +508,7 @@ pub fn cursor_move(
     text,
     Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
   );
+  trace!("cursor_move new cursor_viewport:{:?}", new_cursor_viewport);
 
   debug_assert!(tree.cursor_id().is_some());
   tree

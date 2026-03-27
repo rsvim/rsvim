@@ -421,6 +421,107 @@ mod tests_file_format {
 }
 
 #[cfg(test)]
+mod tests_fix_end_of_line {
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn success1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  const v3 = Rsvim.opt.fixEndOfLine;
+  Rsvim.opt.fixEndOfLine = false;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.fix_end_of_line(), FIX_END_OF_LINE);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert!(!global_local_options.fix_end_of_line());
+
+      let contents = lock!(event_loop.cmdline_text);
+      let actual = contents.message().rope().to_string();
+      assert!(actual.trim().is_empty());
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.fixEndOfLine = "LF";
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.fix_end_of_line(), FIX_END_OF_LINE);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert!(global_local_options.fix_end_of_line());
+
+      let contents = lock!(event_loop.cmdline_text);
+      let actual = contents.message().rope().to_string();
+      let actual = actual.trim();
+      info!("actual:{actual}");
+      let expect = r####""Rsvim.opt.fixEndOfLine" value must be a boolean"####;
+      assert!(actual.contains(expect));
+    }
+
+    Ok(())
+  }
+}
+
+#[cfg(test)]
 mod tests_expand_tab {
   use super::*;
 

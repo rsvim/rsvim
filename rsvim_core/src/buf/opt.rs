@@ -20,6 +20,7 @@ pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_family = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
+pub const FIX_END_OF_LINE: bool = true;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
@@ -38,6 +39,9 @@ pub struct BufferOptions {
 
   #[builder(default = FILE_FORMAT)]
   file_format: FileFormatOption,
+
+  #[builder(default = FIX_END_OF_LINE)]
+  fix_end_of_line: bool,
 }
 
 impl BufferOptions {
@@ -94,5 +98,16 @@ impl BufferOptions {
 
   pub fn set_file_format(&mut self, value: FileFormatOption) {
     self.file_format = value;
+  }
+
+  /// Buffer 'fix-end-of-line' option.
+  ///
+  /// See: <https://vimhelp.org/options.txt.html#%27fixendofline%27>.
+  pub fn fix_end_of_line(&self) -> bool {
+    self.fix_end_of_line
+  }
+
+  pub fn set_fix_end_of_line(&mut self, value: bool) {
+    self.fix_end_of_line = value;
   }
 }

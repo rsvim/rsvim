@@ -599,9 +599,8 @@ impl Text {
 
 // Edit {
 impl Text {
-  /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
-  /// helps the cursor motion.
-  fn append_eol_at_end_if_not_exist(&mut self) {
+  /// Restore the `EOL` at the end of text file.
+  fn restore_eol_at_end_if_not_exist(&mut self) {
     let eol = Into::<EndOfLineOption>::into(self.options().file_format());
 
     let buffer_len_chars = self.rope.len_chars();
@@ -738,8 +737,10 @@ impl Text {
       char_idx_after_inserted,
     );
 
-    // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // Try restore eol if `fix_end_of_line` is on.
+    if self.options().fix_end_of_line() {
+      self.restore_eol_at_end_if_not_exist();
+    }
 
     self.dbg_print_textline(
       line_idx_after_inserted,
@@ -797,11 +798,14 @@ impl Text {
       }
       acc += 1;
     }
-    i
+    std::cmp::min(i, len_chars)
   }
 
   /// Calculate the absolute char index range that will be deleted, by line
   /// index and its char index on the line.
+  ///
+  /// NOTE: This API only removes char range in 1 line, it cannot remove char
+  /// range cross multiple lines.
   pub fn get_removable_char_idx_range(
     &self,
     line_idx: usize,
@@ -811,10 +815,10 @@ impl Text {
     if line_idx >= self.rope.len_lines() {
       return None;
     }
-    if char_idx >= self.rope.line(line_idx).len_chars() {
+    if char_idx > self.rope.line(line_idx).len_chars() {
       return None;
     }
-    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
+    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
     let absolute_char_idx = self.to_absolute_char_idx(line_idx, char_idx);
     debug_assert_eq!(
@@ -833,7 +837,12 @@ impl Text {
     let result = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
       let upper = self.n_chars_to_right(absolute_char_idx, n as usize);
-      debug_assert!(upper <= self.rope.len_chars());
+      debug_assert!(
+        upper <= self.rope.len_chars(),
+        "upper ({}) <= self.rope.len_chars() ({})",
+        upper,
+        self.rope.len_chars()
+      );
       absolute_char_idx..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
@@ -885,8 +894,10 @@ impl Text {
       char_idx_after_deleted,
     );
 
-    // Append eol at file end if it doesn't exist.
-    self.append_eol_at_end_if_not_exist();
+    // Try restore eol if `fix_end_of_line` is on.
+    if self.options().fix_end_of_line() {
+      self.restore_eol_at_end_if_not_exist();
+    }
 
     self.dbg_print_textline(
       line_idx_after_deleted,

@@ -637,7 +637,7 @@ export class RsvimFs {
  */
 export class RsvimOpt {
     /**
-     * Get the _expand-tab_ option. Global local to buffer.
+     * Get the _expand-tab_ option. Local to buffer.
      *
      * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
      * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
@@ -676,7 +676,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_expand_tab(value);
     }
     /**
-     * Get the _file-encoding_ option. Global local to buffer.
+     * Get the _file-encoding_ option. Local to buffer.
      *
      * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
      * This will determine which character encoding is used when RSVIM read/write a file from file system.
@@ -717,7 +717,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
     }
     /**
-     * Get the _file-format_ option. Global local to buffer.
+     * Get the _file-format_ option. Local to buffer.
      *
      * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the buffer. There are 3 kinds of line end:
      * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
@@ -726,11 +726,6 @@ export class RsvimOpt {
      *
      * :::warning
      * Today's Mac also uses `LF` as line end, you should never use `CR` any more.
-     * :::
-     *
-     * :::note
-     * In fact this option should be named to "line-end", "file-format" is just to be consistent
-     * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27).
      * :::
      *
      * For this option, it has below choices:
@@ -770,8 +765,46 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_file_format(value);
     }
     /**
+     * Get the _fix-end-of-line_ option. Local to buffer.
+     *
+     * WHen writing a file and this options is enabled, `EOL` (`LF`, `CR`, `CRLF`) at the end of file will be restored if missing. Disable this option if you want to preserve the situation from the original file.
+     *
+     * @see {@link fileFormat}
+     *
+     * @returns {boolean}
+     *
+     * @defaultValue `true`
+     *
+     * @example
+     * ```javascript
+     * // Get the 'fix-end-of-line' option.
+     * const value = Rsvim.opt.fixEndOfLine;
+     * ```
+     */
+    get fixEndOfLine() {
+        // @ts-ignore Ignore warning
+        return __InternalRsvimGlobalObject.opt_get_fix_end_of_line();
+    }
+    /**
+     * Set the _fix-end-of-line_ option.
+     *
+     * @param {boolean} value - The _fix-end-of-line_ option.
+     * @throws Throws {@link !RangeError} if value is not a boolean.
+     *
+     * @example
+     * ```javascript
+     * // Set the 'fix-end-of-line' option.
+     * Rsvim.opt.fixEndOfLine = false;
+     * ```
+     */
+    set fixEndOfLine(value) {
+        checkIsBoolean(value, `"Rsvim.opt.fixEndOfLine" value`);
+        // @ts-ignore Ignore warning
+        __InternalRsvimGlobalObject.opt_set_fix_end_of_line(value);
+    }
+    /**
      * Get the _line-break_ option. This options is also known as
-     * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Global local to window.
+     * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
      *
      * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
      * It only affects the way the file is displayed, not its contents.
@@ -810,7 +843,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
     /**
-     * Get the _shift-width_ option. Global local to buffer.
+     * Get the _shift-width_ option. Local to buffer.
      *
      * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
      * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
@@ -854,7 +887,7 @@ export class RsvimOpt {
     /**
      * Get the _tab-stop_ option. This option is also known as
      * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
-     * Global local to buffer.
+     * Local to buffer.
      *
      * This option changes how text is displayed.
      *
@@ -896,7 +929,7 @@ export class RsvimOpt {
     }
     /**
      * Get the _wrap_ option. This option is also known as
-     * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Global local to window.
+     * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
      *
      * This option changes how text is displayed.
      *

@@ -929,6 +929,16 @@ fn nowrap_search_down(
     let start_column = viewport.start_column_idx();
 
     if target_cursor_column < current_cursor_column {
+      trace!(
+        "viewport:{}/{},cursor_viewport:{:?},start_line/column:{}/{},target_cursor:{}/{}",
+        viewport.start_line_idx(),
+        viewport.start_column_idx(),
+        cursor_viewport,
+        start_line,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
       // Cursor moves to left side.
       nowrap_search_left(
         text,
@@ -1469,6 +1479,14 @@ fn nowrap_search_left(
     suggest_start_column = target_cursor_column;
   }
 
+  trace!(
+    "suggest_line/column:{}/{},target_line/char/column:{}/{}/{}",
+    suggest_start_line,
+    suggest_start_column,
+    target_cursor_line,
+    target_cursor_char,
+    target_cursor_column,
+  );
   (suggest_start_line, suggest_start_column)
 }
 
@@ -1493,6 +1511,22 @@ fn nowrap_search_right(
     suggest_start_column =
       target_cursor_column.saturating_sub(window_width as usize);
   }
+
+  // This "search_right" method can be called if the
+  // `target_cursor_column == current_cursor_column`, which means this method
+  // also need to consider non-right case, or even search to leftward case.
+  //
+  // If in `target_cursor_line`, the `target_cursor_char` is already the last
+  // char, and it is eol or line end, and there is no other visible char in
+  // `target_cursor_line`, we should actually move the `suggest_start_column`
+  // to leftward for 1 visible char, to ensure the `target_cursor_line`
+  // contains at least 1 visible char.
+  let last_char = text
+    .last_char_idx_on_line_exclude_eol(target_cursor_line)
+    .unwrap_or(0);
+  let last_char_column = text.width_before(target_cursor_line, last_char);
+  let suggest_start_column =
+    std::cmp::min(suggest_start_column, last_char_column);
 
   (suggest_start_line, suggest_start_column)
 }
@@ -1690,42 +1724,13 @@ fn _reverse_search_start_column(
           && target_cursor_char < row_viewport.end_char_idx()
       });
     if contains_target_cursor_char {
-      // // And don't forget the eol or line end, we need to give 1 more column if
-      // // the `target_cursor_char` if it is a eol of line end.
-      //
-      // // The width of last row == `window_width`, i.e. the last row already
-      // // uses all columns (full width).
-      // // In such case, if the `target_cursor_char` is eol, we will need to
-      // // give it 1 more column for it.
-      // let last_row_is_full_width = {
-      //   debug_assert!(preview_target_rows.last().is_some());
-      //   let (_last_preview_row_idx, last_preview_row_viewport) =
-      //     preview_target_rows.last().unwrap();
-      //   let last_row_end_column = text.width_before(
-      //     target_cursor_line,
-      //     last_preview_row_viewport.end_char_idx(),
-      //   );
-      //   let last_row_start_column = text.width_before(
-      //     target_cursor_line,
-      //     last_preview_row_viewport.start_char_idx(),
-      //   );
-      //   let last_row_width =
-      //     last_row_end_column.saturating_sub(last_row_start_column);
-      //   last_row_width >= window_width as usize
-      // };
-      //
-      // if eol_or_line_end && last_row_is_full_width {
-      //   return suggest_start_column + 1;
-      // } else {
       return suggest_start_column;
-      // }
     }
 
     // 1. If `target_cursor_char` is eol or line end
     // 2. If this preview viewport last row has the eol or line end
     // 3. The last row doesn't use all the columns in the row, i.e. it has at
     //    least 1 empty column to put the `target_cursor_char` at line end.
-
     if eol_or_line_end {
       let contains_target_cursor_char_as_eol =
         preview_target_rows.iter().any(|(_row_idx, row_viewport)| {

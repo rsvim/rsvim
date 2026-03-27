@@ -123,6 +123,10 @@ impl Insert {
       let cursor_absolute_char_idx = buffer
         .text()
         .to_absolute_char_idx(cursor_line_idx, cursor_char_idx);
+      trace!(
+        "cursor_line_idx:{},cursor_char_idx:{},cursor_absolute_char_idx:{}",
+        cursor_line_idx, cursor_char_idx, cursor_absolute_char_idx
+      );
       let payload = buffer
         .text()
         .rope()
@@ -163,6 +167,12 @@ impl Insert {
       let cursor_absolute_char_idx_after = buffer
         .text()
         .to_absolute_char_idx(cursor_line_idx_after, cursor_char_idx_after);
+      trace!(
+        "cursor_line_idx_after:{},cursor_char_idx_after:{},cursor_absolute_char_idx_after:{}",
+        cursor_line_idx_after,
+        cursor_char_idx_after,
+        cursor_absolute_char_idx_after
+      );
       buffer.undo_mut().current_mut().delete(undo::Delete {
         payload,
         start_char: absolute_char_idx_range.start,

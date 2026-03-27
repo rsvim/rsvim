@@ -229,6 +229,18 @@ pub fn create_new_context<'s, 'b>(
       "opt_set_file_format",
       global_rsvim::opt::set_file_format,
     );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_fix_end_of_line",
+      global_rsvim::opt::get_fix_end_of_line,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_fix_end_of_line",
+      global_rsvim::opt::set_fix_end_of_line,
+    );
   }
 
   // For `Rsvim.rt`
