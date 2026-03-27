@@ -273,8 +273,15 @@ impl CursorViewport {
       let row_idx = *row_idx;
 
       trace!(
-        "from_pos-1 line/char:{}/{},row/col:{}/{}",
-        line_idx, char_idx, row_idx, col_idx
+        "from_pos-1 line/char:{}/{},row/col:{}/{},first_row_idx:{},first_row_viewport:{:?},row_start_width:{},char_start_width:{}",
+        line_idx,
+        char_idx,
+        row_idx,
+        col_idx,
+        first_row_idx,
+        _first_row_viewport,
+        row_start_width,
+        char_start_width
       );
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else if let Some(buffer_line) = text.rope().get_line(line_idx)
