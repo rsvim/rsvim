@@ -1512,6 +1512,17 @@ fn nowrap_search_right(
       target_cursor_column.saturating_sub(window_width as usize);
   }
 
+  // This "search_right" method can still be called if the
+  // `target_cursor_column == current_cursor_column`, which means the viewport
+  // may stay still So this method also need to consider non-right case, or
+  // even search to leftward case.
+  //
+  // If in `target_cursor_line`, the `target_cursor_char` is already the last
+  // char, and it is eol or line end, and there is no other visible char in
+  // `target_cursor_line`, we should actually move the `suggest_start_column`
+  // to leftward for 1 visible char, to ensure the `target_cursor_line`
+  // contains at least 1 visible char.
+
   (suggest_start_line, suggest_start_column)
 }
 

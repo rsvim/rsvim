@@ -12504,6 +12504,326 @@ mod tests_delete_text {
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
+
+    // Delete-4
+    {
+      stateful.cursor_delete(&data_access, -1);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 131);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 16);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 115);
+
+      let expect = vec![
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "svim/rsvim\" /></\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "svim/rsvim\" /></                                                              ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-5
+    {
+      stateful.cursor_delete(&data_access, -15);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 116);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 115);
+
+      let expect = vec![
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "s\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "s                                                                             ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-6
+    {
+      stateful.cursor_delete(&data_access, -1);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 115);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 115);
+
+      let expect = vec![
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "r\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "r                                                                             ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-7
+    {
+      stateful.cursor_delete(&data_access, -1);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 114);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 115);
+
+      let expect = vec![
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "/\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "/                                                                             ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-8
+    {
+      stateful.cursor_delete(&data_access, -1);
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 113);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.start_line_idx(), 0);
+      assert_eq!(viewport.start_column_idx(), 115);
+
+      let expect = vec![
+        "",
+        "2Ftypes\" /></a>\n",
+        "label=docs.rs\" /></a>\n",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>\n",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a>\n",
+        "/\n",
+        "0?logo=discord&style=social&label=discord\" /></a>\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "                                                                              ",
+        "2Ftypes\" /></a>                                                               ",
+        "label=docs.rs\" /></a>                                                         ",
+        "ields.io/github/actions/workflow/status/rsvim/rsvim/release.yml\" /></a>       ",
+        "ithub/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci\" /></a> ",
+        "/                                                                             ",
+        "0?logo=discord&style=social&label=discord\" /></a>                             ",
+        "                                                                              ",
+        "                                                                              ",
+        "                                                                              ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
   }
 }
 
