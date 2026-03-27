@@ -602,7 +602,7 @@ impl Text {
   /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
   /// helps the cursor motion.
   fn append_eol_at_end_if_not_exist(&mut self) {
-    let eol = self.options().end_of_line();
+    let eol = Into::<EndOfLineOption>::into(self.options().file_format());
 
     let buffer_len_chars = self.rope.len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
