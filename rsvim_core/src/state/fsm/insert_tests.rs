@@ -11749,7 +11749,7 @@ mod tests_delete_text_nofixeol {
         &viewport,
         &expect,
         0,
-        8,
+        7,
         &expect_fills,
         &expect_fills,
       );
