@@ -3376,9 +3376,8 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
@@ -3468,9 +3467,8 @@ mod tests_insert_text {
 
     // Insert-5
     {
-      let buf_eol = std::convert::Into::<EndOfLineOption>::into(
-        lock!(buf).options().file_format(),
-      );
+      let buf_eol =
+        Into::<EndOfLineOption>::into(lock!(buf).options().file_format());
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));

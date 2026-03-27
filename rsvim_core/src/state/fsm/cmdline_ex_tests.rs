@@ -146,7 +146,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = std::convert::Into::<EndOfLineOption>::into(
+      let cmdline_eol = Into::<EndOfLineOption>::into(
         lock!(contents).input().options().file_format(),
       );
       let line0 = format!("Bye{cmdline_eol}");
@@ -287,7 +287,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = cmdline_viewport(tree.clone());
-      let cmdline_eol = std::convert::Into::<EndOfLineOption>::into(
+      let cmdline_eol = Into::<EndOfLineOption>::into(
         lock!(contents).input().options().file_format(),
       );
       let line0 = format!("Bye{cmdline_eol}");
