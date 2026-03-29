@@ -944,7 +944,7 @@ fn _can_fully_contain_target_cursor_line(
 }
 
 fn nowrap_search_down(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
@@ -1043,7 +1043,7 @@ fn nowrap_search_down(
 }
 
 fn nowrap_search_up(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
@@ -1329,7 +1329,7 @@ fn _reverse_search_target_cursor_line(
 }
 
 fn wrap_search_down(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   search_left_fn: WrapHorizontalSearchFn,
@@ -1394,7 +1394,7 @@ fn wrap_search_down(
 }
 
 fn wrap_search_up(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   search_left_fn: WrapHorizontalSearchFn,
@@ -1521,7 +1521,7 @@ fn _find_target_cursor_column_include_eol(
 }
 
 fn nowrap_search_left(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   text: &Text,
   _size: &U16Size,
   suggest_start_line: usize,
@@ -1594,7 +1594,7 @@ fn nowrap_search_right(
 }
 
 fn wrap_search_left(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   _sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   _viewport: &Viewport,
@@ -1835,7 +1835,7 @@ fn _reverse_search_start_column(
 }
 
 fn wrap_search_right(
-  ctx: &mut SearchContext,
+  mut ctx: &mut SearchContext,
   _sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   _viewport: &Viewport,
