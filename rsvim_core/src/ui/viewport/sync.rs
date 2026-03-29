@@ -725,34 +725,56 @@ type WrapHorizontalSearchFn =
 
 #[allow(non_snake_case)]
 struct SearchContext {
-  __text__last_char_idx_on_line_include_eol__target_cursor_line:
-    Option<Option<usize>>,
+  __last_char_idx_on_target_cursor_line_include_eol: Option<Option<usize>>,
+  __cannot_fully_contain_target_cursor_line: Option<bool>,
+  __can_exactly_contain_target_cursor_line: Option<bool>,
 }
 
 #[allow(non_snake_case)]
 impl SearchContext {
   pub fn new() -> Self {
     Self {
-      __text__last_char_idx_on_line_include_eol__target_cursor_line: None,
+      __last_char_idx_on_target_cursor_line_include_eol: None,
+      __cannot_fully_contain_target_cursor_line: None,
+      __can_exactly_contain_target_cursor_line: None,
     }
   }
 
-  pub fn text__last_char_idx_on_line_include_eol__target_cursor_line(
+  pub fn last_char_idx_on_target_cursor_line_include_eol(
     &mut self,
     text: &Text,
     target_cursor_line: usize,
   ) -> Option<usize> {
     if self
-      .__text__last_char_idx_on_line_include_eol__target_cursor_line
+      .__last_char_idx_on_target_cursor_line_include_eol
       .is_none()
     {
       let result = text.last_char_idx_on_line_include_eol(target_cursor_line);
-      self.__text__last_char_idx_on_line_include_eol__target_cursor_line =
-        Some(result);
+      self.__last_char_idx_on_target_cursor_line_include_eol = Some(result);
     }
     self
-      .__text__last_char_idx_on_line_include_eol__target_cursor_line
+      .__last_char_idx_on_target_cursor_line_include_eol
       .unwrap()
+  }
+
+  pub fn can_fully_contain_target_cursor_line(
+    &self,
+  ) -> (Option<bool>, Option<bool>) {
+    (
+      self.__cannot_fully_contain_target_cursor_line,
+      self.__can_exactly_contain_target_cursor_line,
+    )
+  }
+
+  pub fn set_can_fully_contain_target_cursor_line(
+    &mut self,
+    cannot_fully_contain_target_cursor_line: bool,
+    can_exactly_contain_target_cursor_line: bool,
+  ) {
+    self.__cannot_fully_contain_target_cursor_line =
+      Some(cannot_fully_contain_target_cursor_line);
+    self.__can_exactly_contain_target_cursor_line =
+      Some(can_exactly_contain_target_cursor_line);
   }
 }
 
@@ -776,12 +798,9 @@ pub fn search(
   let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line =
     std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_line_last_char = ctx
-    .text__last_char_idx_on_line_include_eol__target_cursor_line(
-      text,
-      target_cursor_line,
-    );
-  let target_cursor_line_end_char = match target_cursor_line_last_char {
+  let target_cursor_line_end_char = match ctx
+    .last_char_idx_on_target_cursor_line_include_eol(text, target_cursor_line)
+  {
     Some(last_char) => {
       if !text.is_eol(target_cursor_line, last_char)
         && target_cursor_char > last_char
@@ -901,11 +920,18 @@ fn _if_contains_target_cursor_line(
 // 2. If the window can exactly contain it, i.e. it will use the same rows that
 //    equals to the window height.
 fn _can_fully_contain_target_cursor_line(
+  ctx: &mut SearchContext,
   line_process_fn: WrapLineProcessFn,
   text: &Text,
   size: &U16Size,
   target_cursor_line: usize,
 ) -> (bool, bool) {
+  if let (Some(cannot_fully_contain), Some(can_exactly_contain)) =
+    ctx.can_fully_contain_target_cursor_line()
+  {
+    return (cannot_fully_contain, can_exactly_contain);
+  }
+
   let window_height = size.height();
   let window_width = size.width();
 
@@ -929,18 +955,18 @@ fn _can_fully_contain_target_cursor_line(
 
   // Current window cannot contain the target cursor line, i.e. target cursor
   // line is just too long to be put in current window.
-  let cannot_fully_contain_target_cursor_line =
-    preview_target_rows.len() > window_height as usize;
+  let cannot_fully_contain = preview_target_rows.len() > window_height as usize;
 
   // Current window can exactly contain the target cursor line, i.e. target
   // cursor line just happens to use all the rows in current window.
-  let can_exactly_contain_target_cursor_line =
-    preview_target_rows.len() == window_height as usize;
+  let can_exactly_contain = preview_target_rows.len() == window_height as usize;
 
-  (
-    cannot_fully_contain_target_cursor_line,
-    can_exactly_contain_target_cursor_line,
-  )
+  ctx.set_can_fully_contain_target_cursor_line(
+    cannot_fully_contain,
+    can_exactly_contain,
+  );
+
+  (cannot_fully_contain, can_exactly_contain)
 }
 
 fn nowrap_search_down(
@@ -986,7 +1012,7 @@ fn nowrap_search_down(
       );
       // Cursor moves to left side.
       nowrap_search_left(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -997,7 +1023,7 @@ fn nowrap_search_down(
     } else {
       // Cursor moves to right side (even just for 0-chars).
       nowrap_search_right(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1019,7 +1045,7 @@ fn nowrap_search_down(
     if target_cursor_column < current_cursor_column {
       // To left side
       nowrap_search_left(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1030,7 +1056,7 @@ fn nowrap_search_down(
     } else {
       // To right side
       nowrap_search_right(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1073,7 +1099,7 @@ fn nowrap_search_up(
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
       nowrap_search_left(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1084,7 +1110,7 @@ fn nowrap_search_up(
     } else {
       // Cursor moves to right side (even just for 0-chars).
       nowrap_search_right(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1103,7 +1129,7 @@ fn nowrap_search_up(
     if target_cursor_column < current_cursor_column {
       // To left side
       nowrap_search_left(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1114,7 +1140,7 @@ fn nowrap_search_up(
     } else {
       // To right side
       nowrap_search_right(
-        &mut ctx,
+        ctx,
         text,
         size,
         start_line,
@@ -1140,6 +1166,7 @@ fn nowrap_search_up(
 //
 // Returns `start_line` for the new viewport.
 fn _reverse_search_target_cursor_line(
+  mut ctx: &mut SearchContext,
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   viewport: &Viewport,
@@ -1262,6 +1289,7 @@ fn _reverse_search_target_cursor_line(
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
   ) = _can_fully_contain_target_cursor_line(
+    ctx,
     line_process_fn,
     text,
     size,
@@ -1348,6 +1376,7 @@ fn wrap_search_down(
     text.width_before(target_cursor_line, target_cursor_char);
 
   let start_line = _reverse_search_target_cursor_line(
+    ctx,
     sync_fn,
     line_process_fn,
     viewport,
@@ -1614,6 +1643,7 @@ fn wrap_search_left(
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
   ) = _can_fully_contain_target_cursor_line(
+    ctx,
     line_process_fn,
     text,
     size,
@@ -1855,6 +1885,7 @@ fn wrap_search_right(
     cannot_fully_contain_target_cursor_line,
     can_exactly_contain_target_cursor_line,
   ) = _can_fully_contain_target_cursor_line(
+    ctx,
     line_process_fn,
     text,
     size,
