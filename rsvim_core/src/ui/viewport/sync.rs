@@ -722,6 +722,39 @@ type WrapHorizontalSearchFn =
     /* target_cursor_char */ usize,
   ) -> (/* start_line */ usize, /* start_column */ usize);
 
+#[allow(non_snake_case)]
+struct SearchContext {
+  __text__last_char_idx_on_line_include_eol__target_cursor_line:
+    Option<Option<usize>>,
+}
+
+#[allow(non_snake_case)]
+impl SearchContext {
+  pub fn new() -> Self {
+    Self {
+      __text__last_char_idx_on_line_include_eol__target_cursor_line: None,
+    }
+  }
+
+  pub fn text__last_char_idx_on_line_include_eol__target_cursor_line(
+    &mut self,
+    text: &Text,
+    target_cursor_line: usize,
+  ) -> Option<usize> {
+    if self
+      .__text__last_char_idx_on_line_include_eol__target_cursor_line
+      .is_none()
+    {
+      let result = text.last_char_idx_on_line_include_eol(target_cursor_line);
+      self.__text__last_char_idx_on_line_include_eol__target_cursor_line =
+        Some(result);
+    }
+    self
+      .__text__last_char_idx_on_line_include_eol__target_cursor_line
+      .unwrap()
+  }
+}
+
 // Search a new viewport anchor (`start_line`, `start_column`).
 //
 // The new viewport anchor can help cursor moves and even scrolling the buffer
@@ -737,31 +770,37 @@ pub fn search(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let mut ctx = SearchContext::new();
+
   let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line =
     std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_line_end_char =
-    match text.last_char_idx_on_line_include_eol(target_cursor_line) {
-      Some(last_char) => {
-        if !text.is_eol(target_cursor_line, last_char)
-          && target_cursor_char > last_char
-        {
-          // If the `last_char` is not a eol, and `target_cursor_char` is still
-          // greater than it. It means `target_cursor_char` wants the line end,
-          // which is actually out of the line.
-          // This only happens when a line doesn't end with eol (i.e. `\n` or
-          // `\r\n`). If a line ends with eol (`\n` or `\r\n`), the
-          // `target_cursor_char` must be less than or equal to the eol.
-          last_char + 1
-        } else {
-          last_char
-        }
+  let target_cursor_line_last_char = ctx
+    .text__last_char_idx_on_line_include_eol__target_cursor_line(
+      text,
+      target_cursor_line,
+    );
+  let target_cursor_line_end_char = match target_cursor_line_last_char {
+    Some(last_char) => {
+      if !text.is_eol(target_cursor_line, last_char)
+        && target_cursor_char > last_char
+      {
+        // If the `last_char` is not a eol, and `target_cursor_char` is still
+        // greater than it. It means `target_cursor_char` wants the line end,
+        // which is actually out of the line.
+        // This only happens when a line doesn't end with eol (i.e. `\n` or
+        // `\r\n`). If a line ends with eol (`\n` or `\r\n`), the
+        // `target_cursor_char` must be less than or equal to the eol.
+        last_char + 1
+      } else {
+        last_char
       }
-      None => {
-        // The line is empty
-        0
-      }
-    };
+    }
+    None => {
+      // The line is empty
+      0
+    }
+  };
   let target_cursor_char =
     std::cmp::min(target_cursor_char, target_cursor_line_end_char);
 
@@ -900,6 +939,7 @@ fn _can_fully_contain_target_cursor_line(
 }
 
 fn nowrap_search_down(
+  ctx: &mut SearchContext,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
@@ -994,6 +1034,7 @@ fn nowrap_search_down(
 }
 
 fn nowrap_search_up(
+  ctx: &mut SearchContext,
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   text: &Text,
@@ -1275,6 +1316,7 @@ fn _reverse_search_target_cursor_line(
 }
 
 fn wrap_search_down(
+  ctx: &mut SearchContext,
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   search_left_fn: WrapHorizontalSearchFn,
@@ -1337,6 +1379,7 @@ fn wrap_search_down(
 }
 
 fn wrap_search_up(
+  ctx: &mut SearchContext,
   sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   search_left_fn: WrapHorizontalSearchFn,
@@ -1461,6 +1504,7 @@ fn _find_target_cursor_column_include_eol(
 }
 
 fn nowrap_search_left(
+  ctx: &mut SearchContext,
   text: &Text,
   _size: &U16Size,
   suggest_start_line: usize,
@@ -1491,6 +1535,7 @@ fn nowrap_search_left(
 }
 
 fn nowrap_search_right(
+  ctx: &mut SearchContext,
   text: &Text,
   size: &U16Size,
   suggest_start_line: usize,
@@ -1532,6 +1577,7 @@ fn nowrap_search_right(
 }
 
 fn wrap_search_left(
+  ctx: &mut SearchContext,
   _sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   _viewport: &Viewport,
@@ -1772,6 +1818,7 @@ fn _reverse_search_start_column(
 }
 
 fn wrap_search_right(
+  ctx: &mut SearchContext,
   _sync_fn: WrapSyncFn,
   line_process_fn: WrapLineProcessFn,
   _viewport: &Viewport,
