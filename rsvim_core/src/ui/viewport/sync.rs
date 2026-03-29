@@ -830,6 +830,7 @@ pub fn search(
     // Cursor moves upward
     if opts.wrap() {
       wrap_search_up(
+        &mut ctx,
         sync_fn,
         line_process_fn,
         search_left_fn,
@@ -844,6 +845,7 @@ pub fn search(
       )
     } else {
       nowrap_search_up(
+        &mut ctx,
         viewport,
         cursor_viewport,
         text,
@@ -858,6 +860,7 @@ pub fn search(
     // moving to left/right side.
     if opts.wrap() {
       wrap_search_down(
+        &mut ctx,
         sync_fn,
         line_process_fn,
         search_left_fn,
@@ -872,6 +875,7 @@ pub fn search(
       )
     } else {
       nowrap_search_down(
+        &mut ctx,
         viewport,
         cursor_viewport,
         text,
@@ -982,6 +986,7 @@ fn nowrap_search_down(
       );
       // Cursor moves to left side.
       nowrap_search_left(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -992,6 +997,7 @@ fn nowrap_search_down(
     } else {
       // Cursor moves to right side (even just for 0-chars).
       nowrap_search_right(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1013,6 +1019,7 @@ fn nowrap_search_down(
     if target_cursor_column < current_cursor_column {
       // To left side
       nowrap_search_left(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1023,6 +1030,7 @@ fn nowrap_search_down(
     } else {
       // To right side
       nowrap_search_right(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1065,6 +1073,7 @@ fn nowrap_search_up(
     if target_cursor_column < current_cursor_column {
       // Cursor moves to left side.
       nowrap_search_left(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1075,6 +1084,7 @@ fn nowrap_search_up(
     } else {
       // Cursor moves to right side (even just for 0-chars).
       nowrap_search_right(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1093,6 +1103,7 @@ fn nowrap_search_up(
     if target_cursor_column < current_cursor_column {
       // To left side
       nowrap_search_left(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1103,6 +1114,7 @@ fn nowrap_search_up(
     } else {
       // To right side
       nowrap_search_right(
+        &mut ctx,
         text,
         size,
         start_line,
@@ -1349,6 +1361,7 @@ fn wrap_search_down(
   // Cursor moves to left side.
   if target_cursor_column < current_cursor_column {
     search_left_fn(
+      &mut ctx,
       sync_fn,
       line_process_fn,
       viewport,
@@ -1364,6 +1377,7 @@ fn wrap_search_down(
   } else {
     // Cursor moves to right side (even just for 0-chars).
     search_right_fn(
+      &mut ctx,
       sync_fn,
       line_process_fn,
       viewport,
@@ -1404,6 +1418,7 @@ fn wrap_search_up(
   // Cursor moves to left side.
   if target_cursor_column < current_cursor_column {
     search_left_fn(
+      &mut ctx,
       sync_fn,
       line_process_fn,
       viewport,
@@ -1419,6 +1434,7 @@ fn wrap_search_up(
   } else {
     // Cursor moves to right side (even just for 0-chars).
     search_right_fn(
+      &mut ctx,
       sync_fn,
       line_process_fn,
       viewport,
