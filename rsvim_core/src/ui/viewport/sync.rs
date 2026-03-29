@@ -726,6 +726,8 @@ type WrapHorizontalSearchFn =
 #[allow(non_snake_case)]
 struct SearchContext {
   __last_char_idx_on_target_cursor_line_include_eol: Option<Option<usize>>,
+  __last_char_idx_on_target_cursor_line_exclude_eol: Option<Option<usize>>,
+  __target_cursor_char_is_eol_or_line_end: Option<bool>,
   __cannot_fully_contain_target_cursor_line: Option<bool>,
   __can_exactly_contain_target_cursor_line: Option<bool>,
 }
@@ -735,9 +737,25 @@ impl SearchContext {
   pub fn new() -> Self {
     Self {
       __last_char_idx_on_target_cursor_line_include_eol: None,
+      __last_char_idx_on_target_cursor_line_exclude_eol: None,
+      __target_cursor_char_is_eol_or_line_end: None,
       __cannot_fully_contain_target_cursor_line: None,
       __can_exactly_contain_target_cursor_line: None,
     }
+  }
+
+  pub fn target_cursor_char_is_eol_or_line_end(
+    &mut self,
+    text: &Text,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> bool {
+    if self.__target_cursor_char_is_eol_or_line_end.is_none() {
+      let result =
+        text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+      self.__target_cursor_char_is_eol_or_line_end = Some(result);
+    }
+    self.__target_cursor_char_is_eol_or_line_end.unwrap()
   }
 
   pub fn last_char_idx_on_target_cursor_line_include_eol(
@@ -754,6 +772,23 @@ impl SearchContext {
     }
     self
       .__last_char_idx_on_target_cursor_line_include_eol
+      .unwrap()
+  }
+
+  pub fn last_char_idx_on_target_cursor_line_exclude_eol(
+    &mut self,
+    text: &Text,
+    target_cursor_line: usize,
+  ) -> Option<usize> {
+    if self
+      .__last_char_idx_on_target_cursor_line_exclude_eol
+      .is_none()
+    {
+      let result = text.last_char_idx_on_line_exclude_eol(target_cursor_line);
+      self.__last_char_idx_on_target_cursor_line_exclude_eol = Some(result);
+    }
+    self
+      .__last_char_idx_on_target_cursor_line_exclude_eol
       .unwrap()
   }
 
@@ -1481,6 +1516,7 @@ fn wrap_search_up(
 
 // For/to leftward
 fn _find_target_cursor_column_exclude_eol(
+  ctx: &mut SearchContext,
   text: &Text,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1514,10 +1550,17 @@ fn _find_target_cursor_column_exclude_eol(
   //
   // Now it looks much better.
 
-  if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
+  if ctx.target_cursor_char_is_eol_or_line_end(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  ) {
     if cfg!(debug_assertions) {
-      if let Some(last_char_exclude_eol) =
-        text.last_char_idx_on_line_exclude_eol(target_cursor_line)
+      if let Some(last_char_exclude_eol) = ctx
+        .last_char_idx_on_target_cursor_line_exclude_eol(
+          text,
+          target_cursor_line,
+        )
       {
         debug_assert!(
           target_cursor_char > last_char_exclude_eol
@@ -1525,8 +1568,8 @@ fn _find_target_cursor_column_exclude_eol(
         );
       }
     }
-    let last_char_exclude_eol = text
-      .last_char_idx_on_line_exclude_eol(target_cursor_line)
+    let last_char_exclude_eol = ctx
+      .last_char_idx_on_target_cursor_line_exclude_eol(text, target_cursor_line)
       .unwrap_or(0);
     target_cursor_column =
       text.width_before(target_cursor_line, last_char_exclude_eol);
@@ -1537,12 +1580,16 @@ fn _find_target_cursor_column_exclude_eol(
 
 // For/to rightward
 fn _find_target_cursor_column_include_eol(
+  ctx: &mut SearchContext,
   text: &Text,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> usize {
-  let out_of_line =
-    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+  let out_of_line = ctx.target_cursor_char_is_eol_or_line_end(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   // For eol or line-end, add 1 more column
   text.width_until(target_cursor_line, target_cursor_char)
@@ -1560,6 +1607,7 @@ fn nowrap_search_left(
 ) -> (usize, usize) {
   let mut suggest_start_column = suggest_start_column;
   let target_cursor_column = _find_target_cursor_column_exclude_eol(
+    ctx,
     text,
     target_cursor_line,
     target_cursor_char,
@@ -1594,6 +1642,7 @@ fn nowrap_search_right(
   let mut suggest_start_column = suggest_start_column;
 
   let target_cursor_column = _find_target_cursor_column_include_eol(
+    ctx,
     text,
     target_cursor_line,
     target_cursor_char,
@@ -1612,8 +1661,8 @@ fn nowrap_search_right(
   // `target_cursor_line`, we should actually move the `suggest_start_column`
   // to leftward for 1 visible char, to ensure the `target_cursor_line`
   // contains at least 1 visible char.
-  let last_char = text
-    .last_char_idx_on_line_exclude_eol(target_cursor_line)
+  let last_char = ctx
+    .last_char_idx_on_target_cursor_line_exclude_eol(text, target_cursor_line)
     .unwrap_or(0);
   let last_char_column = text.width_before(target_cursor_line, last_char);
   let suggest_start_column =
@@ -1651,6 +1700,7 @@ fn wrap_search_left(
   );
 
   let target_cursor_column = _find_target_cursor_column_exclude_eol(
+    ctx,
     text,
     target_cursor_line,
     target_cursor_char,
@@ -1708,14 +1758,16 @@ fn wrap_search_left(
     // So we try to do some more additional leftward movement on
     // the `target_cursor_column`, to make give the new viewport can
     // contain the `target_cursor_char`.
-    let target_cursor_line_end_char = text
-      .last_char_idx_on_line_include_eol(target_cursor_line)
+    let target_cursor_line_end_char = ctx
+      .last_char_idx_on_target_cursor_line_include_eol(text, target_cursor_line)
       .unwrap_or(0);
     let target_cursor_line_end_column = text
       .width_until(target_cursor_line, target_cursor_line_end_char)
-      + if text
-        .is_eol_or_line_end(target_cursor_line, target_cursor_line_end_char)
-      {
+      + if ctx.target_cursor_char_is_eol_or_line_end(
+        text,
+        target_cursor_line,
+        target_cursor_char,
+      ) {
         1
       } else {
         0
@@ -1729,6 +1781,7 @@ fn wrap_search_left(
         || can_exactly_contain_target_cursor_line
     );
     let target_cursor_line_start_column = _reverse_search_start_column(
+      ctx,
       line_process_fn,
       text,
       size,
@@ -1776,6 +1829,7 @@ fn wrap_search_left(
 // searches to rightward by `target_cursor_start_column += 1`, and check if the
 // result are better.
 fn _reverse_search_start_column(
+  ctx: &mut SearchContext,
   line_process_fn: WrapLineProcessFn,
   text: &Text,
   size: &U16Size,
@@ -1791,8 +1845,11 @@ fn _reverse_search_start_column(
   let bufline_chars_width =
     text.width_until(target_cursor_line, bufline_len_char);
 
-  let eol_or_line_end =
-    text.is_eol_or_line_end(target_cursor_line, target_cursor_char);
+  let out_of_line = ctx.target_cursor_char_is_eol_or_line_end(
+    text,
+    target_cursor_line,
+    target_cursor_char,
+  );
   let mut suggest_start_column = suggest_start_column;
 
   while suggest_start_column < bufline_chars_width {
@@ -1824,7 +1881,7 @@ fn _reverse_search_start_column(
     // 2. If this preview viewport last row has the eol or line end
     // 3. The last row doesn't use all the columns in the row, i.e. it has at
     //    least 1 empty column to put the `target_cursor_char` at line end.
-    if eol_or_line_end {
+    if out_of_line {
       let contains_target_cursor_char_as_eol =
         preview_target_rows.iter().any(|(_row_idx, row_viewport)| {
           target_cursor_char == row_viewport.end_char_idx()
@@ -1957,12 +2014,15 @@ fn wrap_search_right(
 
     // If `target_cursor_char` is a eol or line end, we move to right for 1
     // more column to allow the invisible eol or line end.
-    let target_cursor_end_column =
-      if text.is_eol_or_line_end(target_cursor_line, target_cursor_char) {
-        target_cursor_column + 1
-      } else {
-        target_cursor_column
-      };
+    let target_cursor_end_column = if ctx.target_cursor_char_is_eol_or_line_end(
+      text,
+      target_cursor_line,
+      target_cursor_char,
+    ) {
+      target_cursor_column + 1
+    } else {
+      target_cursor_column
+    };
 
     // In such case, we cannot simply use `target_cursor_end_column -
     // (window_height * window_width)` to calculate the
@@ -1979,6 +2039,7 @@ fn wrap_search_right(
     // `target_cursor_start_column`, to make sure the new viewport can
     // contain the `target_cursor_char`.
     let target_cursor_start_column = _reverse_search_start_column(
+      ctx,
       line_process_fn,
       text,
       size,
