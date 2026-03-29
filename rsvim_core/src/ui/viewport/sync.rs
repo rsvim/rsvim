@@ -709,6 +709,7 @@ type WrapLineProcessFn = fn(
 
 type WrapHorizontalSearchFn =
   fn(
+    /* ctx */ &mut SearchContext,
     /* sync_fn */ WrapSyncFn,
     /* line_process_fn */ WrapLineProcessFn,
     /* viewport */ &Viewport,
