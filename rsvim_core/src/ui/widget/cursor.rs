@@ -72,7 +72,7 @@ impl Cursor {
 }
 
 impl Widgetable for Cursor {
-  fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
+  fn draw(&self, canvas: &mut Canvas, _context: &WidgetContext) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     // trace!(
