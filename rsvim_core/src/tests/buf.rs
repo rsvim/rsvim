@@ -119,7 +119,7 @@ pub fn make_buffers_manager(
 
 pub fn make_syntax_and_colorscheme(
   tmpfile: &NamedTempFile,
-) -> (Syntax, ColorScheme) {
+) -> (Syntax, ColorSchemeArc) {
   let buffer_manager = BufferManager::new();
 
   let filename = tmpfile.path();
@@ -151,6 +151,6 @@ pub fn make_syntax_and_colorscheme(
     syntax::query(&syn_tree, &text_rope, &text_payload, &syn.highlight_query());
   syn.set_highlight_capture(syn_capture);
 
-  let colorscheme = buffer_manager.colorscheme().cloned().unwrap();
+  let colorscheme = buffer_manager.colorscheme().unwrap().clone();
   (syn, colorscheme)
 }
