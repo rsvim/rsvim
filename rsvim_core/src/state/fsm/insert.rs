@@ -6,7 +6,7 @@ use crate::chan;
 use crate::chan::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -67,39 +67,33 @@ impl Insert {
 }
 
 impl Stateful for Insert {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+  fn handle(&self, context: &StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
-      return self.handle_op(data_access, op);
+      return self.handle_op(context, op);
     }
 
     State::Insert(Insert::default())
   }
 
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+  fn handle_op(&self, context: &StateContext, op: Operation) -> State {
     match op {
-      Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
+      Operation::GotoNormalMode => self.goto_normal_mode(context),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
-      Operation::CursorInsert(payload) => {
-        self.cursor_insert(&data_access, payload)
-      }
-      Operation::CursorDelete(n) => self.cursor_delete(&data_access, n),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(context, op),
+      Operation::CursorInsert(payload) => self.cursor_insert(context, payload),
+      Operation::CursorDelete(n) => self.cursor_delete(context, n),
       _ => unreachable!(),
     }
   }
 }
 
 impl Insert {
-  pub fn cursor_delete(
-    &self,
-    data_access: &StateDataAccess,
-    n: isize,
-  ) -> State {
-    let tree = data_access.tree.clone();
+  pub fn cursor_delete(&self, context: &StateContext, n: isize) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
@@ -199,7 +193,7 @@ impl Insert {
           version: editing_version,
         }));
         chan::send_to_master(
-          data_access.master_tx.clone(),
+          context.master_tx.clone(),
           MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
             buffer_id: buffer.id(),
           }),
@@ -214,10 +208,10 @@ impl Insert {
 impl Insert {
   pub fn cursor_insert(
     &self,
-    data_access: &StateDataAccess,
+    context: &StateContext,
     payload: CursorInsertPayload,
   ) -> State {
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
@@ -305,7 +299,7 @@ impl Insert {
         version: editing_version,
       }));
       chan::send_to_master(
-        data_access.master_tx.clone(),
+        context.master_tx.clone(),
         MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
           buffer_id: buffer.id(),
         }),
@@ -317,8 +311,8 @@ impl Insert {
 }
 
 impl Insert {
-  pub fn goto_normal_mode(&self, data_access: &StateDataAccess) -> State {
-    let tree = data_access.tree.clone();
+  pub fn goto_normal_mode(&self, context: &StateContext) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
@@ -364,12 +358,8 @@ impl Insert {
 }
 
 impl Insert {
-  pub fn cursor_move(
-    &self,
-    data_access: &StateDataAccess,
-    op: Operation,
-  ) -> State {
-    let tree = data_access.tree.clone();
+  pub fn cursor_move(&self, context: &StateContext, op: Operation) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
