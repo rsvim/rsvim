@@ -8,7 +8,19 @@ pub mod window;
 #[cfg(test)]
 mod window_tests;
 
+use crate::buf::BufferManagerArc;
 use crate::ui::canvas::Canvas;
+
+#[derive(Debug)]
+pub struct WidgetDataAccess {
+  pub buffer_manager: BufferManagerArc,
+}
+
+impl WidgetDataAccess {
+  pub fn new(buffer_manager: BufferManagerArc) -> Self {
+    Self { buffer_manager }
+  }
+}
 
 /// Base trait for all UI widgets.
 pub trait Widgetable {
