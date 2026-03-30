@@ -4,7 +4,7 @@ pub mod draw;
 pub mod sync;
 
 use crate::buf::text::Text;
-use crate::hl::ColorScheme;
+use crate::hl::ColorSchemeArc;
 use crate::prelude::*;
 use crate::syntax::Syntax;
 use crate::ui::canvas::Canvas;
@@ -776,7 +776,7 @@ impl Viewport {
     &self,
     text: &Text,
     syntax: &Option<Syntax>,
-    colorscheme: &Option<ColorScheme>,
+    colorscheme: &Option<ColorSchemeArc>,
     actual_shape: &U16Rect,
     canvas: &mut Canvas,
   ) {

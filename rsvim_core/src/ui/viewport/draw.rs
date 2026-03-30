@@ -2,7 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::buf::unicode::char_is_whitespace;
-use crate::hl::ColorScheme;
+use crate::hl::ColorSchemeArc;
 use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
@@ -20,7 +20,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   syntax: &Option<Syntax>,
-  colorscheme: &Option<ColorScheme>,
+  colorscheme: &Option<ColorSchemeArc>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -153,9 +153,9 @@ pub fn draw(
             if unicode_width > 0 {
               let cap_point = SyntaxCapturePoint { line_idx, char_idx };
 
-              if let Some(syntax) = syntax
+              if let Some(colorscheme) = colorscheme
+                && let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
-                && let Some(colorscheme) = colorscheme
                 && syn_highlight_capture
                   .as_ref()
                   .nodes()

@@ -14,7 +14,7 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::hl::ColorScheme;
+use crate::hl::ColorSchemeArc;
 use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
@@ -68,7 +68,7 @@ pub struct Buffer {
   syntax: Option<Syntax>,
 
   // colorscheme/highlight
-  colorscheme: Option<ColorScheme>,
+  colorscheme: Option<ColorSchemeArc>,
 
   // Text editing version
   editing_version: isize,
@@ -89,7 +89,7 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
     syntax: Option<Syntax>,
-    colorscheme: Option<ColorScheme>,
+    colorscheme: Option<ColorSchemeArc>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -183,7 +183,7 @@ impl Buffer {
     self.syntax = value;
   }
 
-  pub fn colorscheme(&self) -> &Option<ColorScheme> {
+  pub fn colorscheme(&self) -> &Option<ColorSchemeArc> {
     &self.colorscheme
   }
 
@@ -316,7 +316,7 @@ impl BufferManager {
         None,
         None,
         syntax,
-        colorscheme.cloned(),
+        colorscheme,
       )
     };
 
@@ -354,7 +354,7 @@ impl BufferManager {
       None,
       None,
       None,
-      colorscheme.cloned(),
+      colorscheme,
     );
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
@@ -453,7 +453,7 @@ impl BufferManager {
             Some(metadata),
             Some(Instant::now()),
             syntax,
-            colorscheme.cloned(),
+            colorscheme,
           ))
         }
         Err(e) => Err(TheErr::OpenFileFailed(
@@ -584,8 +584,8 @@ impl BufferManager {
     }
   }
 
-  pub fn colorscheme(&self) -> Option<&ColorScheme> {
-    self.colorscheme_manager.get(&self.color_name)
+  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
+    self.colorscheme_manager.get(&self.color_name).cloned()
   }
 }
 // Options }
