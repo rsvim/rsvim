@@ -684,7 +684,7 @@ fn wrap_linebreak_sync(
 
 type WrapSyncFn = fn(
   /* text */ &Text,
-  /* window_actual_size */ &U16Size,
+  /* size */ &U16Size,
   /* start_line */ usize,
   /* start_column */ usize,
 ) -> (
@@ -723,7 +723,17 @@ type WrapHorizontalSearchFn =
     /* target_cursor_char */ usize,
   ) -> (/* start_line */ usize, /* start_column */ usize);
 
-struct SearchParameter<'a> {
+struct NowrapSearchParameter<'a> {
+  pub viewport: &'a Viewport,
+  pub cursor_viewport: &'a CursorViewport,
+  pub opts: &'a WindowOptions,
+  pub text: &'a Text,
+  pub size: &'a U16Size,
+  pub target_cursor_line: usize,
+  pub target_cursor_char: usize,
+}
+
+struct WrapSearchParameter<'a> {
   pub viewport: &'a Viewport,
   pub cursor_viewport: &'a CursorViewport,
   pub opts: &'a WindowOptions,
