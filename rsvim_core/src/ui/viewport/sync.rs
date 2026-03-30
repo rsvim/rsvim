@@ -342,7 +342,7 @@ fn wrap_nolinebreak_sync(
 /// 2. The first char index of this word.
 /// 3. The end char index of this word.
 /// word.
-fn _find_word_by_char(
+fn _binary_search_word_by_char(
   words: &[&str],
   word_end_chars_index: &LiteMap<usize, usize>,
   char_idx: usize,
@@ -393,7 +393,7 @@ fn _part1(
   last_word_is_too_long: &mut Option<(usize, usize, usize, usize)>,
 ) -> (usize, usize) {
   let (end_wd_idx, start_c_of_end_wd, end_c_of_end_wd) =
-    _find_word_by_char(words, words_end_char_idx, end_width_char);
+    _binary_search_word_by_char(words, words_end_char_idx, end_width_char);
 
   let end_c_width = text.width_before(current_line, end_c_of_end_wd);
   if end_c_width > end_width {
