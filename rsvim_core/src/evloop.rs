@@ -640,7 +640,7 @@ impl EventLoop {
 
         // Handle by state machine
         let stateful = self.state_machine;
-        let next_stateful = stateful.handle(context, event);
+        let next_stateful = stateful.handle(&context, event);
         self.state_machine = next_stateful;
       }
       Some(Err(e)) => {
@@ -674,7 +674,7 @@ impl EventLoop {
 
             // Handle by state machine
             let stateful = self.state_machine;
-            let next_stateful = stateful.handle_op(context, op);
+            let next_stateful = stateful.handle_op(&context, op);
             self.state_machine = next_stateful;
           }
           MockOperation::Exit => {

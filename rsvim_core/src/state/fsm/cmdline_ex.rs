@@ -65,7 +65,7 @@ impl CmdlineEx {
 }
 
 impl Stateful for CmdlineEx {
-  fn handle(&self, context: StateContext, event: Event) -> State {
+  fn handle(&self, context: &StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(context, op);
     }
@@ -73,20 +73,20 @@ impl Stateful for CmdlineEx {
     State::CmdlineEx(CmdlineEx::default())
   }
 
-  fn handle_op(&self, context: StateContext, op: Operation) -> State {
+  fn handle_op(&self, context: &StateContext, op: Operation) -> State {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&context, op),
-      Operation::GotoNormalMode => self.goto_normal_mode(&context),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(context, op),
+      Operation::GotoNormalMode => self.goto_normal_mode(context),
       Operation::ConfirmExCommandAndGotoNormalMode => {
-        self.confirm_ex_command_and_goto_normal_mode(&context)
+        self.confirm_ex_command_and_goto_normal_mode(context)
       }
-      Operation::CursorInsert(text) => self.cursor_insert(&context, text),
-      Operation::CursorDelete(n) => self.cursor_delete(&context, n),
+      Operation::CursorInsert(text) => self.cursor_insert(context, text),
+      Operation::CursorDelete(n) => self.cursor_delete(context, n),
       _ => unreachable!(),
     }
   }

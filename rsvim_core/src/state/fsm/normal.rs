@@ -76,7 +76,7 @@ impl Normal {
 }
 
 impl Stateful for Normal {
-  fn handle(&self, context: StateContext, event: Event) -> State {
+  fn handle(&self, context: &StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(context, op);
     }
@@ -84,12 +84,12 @@ impl Stateful for Normal {
     State::Normal(Normal::default())
   }
 
-  fn handle_op(&self, context: StateContext, op: Operation) -> State {
+  fn handle_op(&self, context: &StateContext, op: Operation) -> State {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
-        self.goto_insert_mode(&context, insert_motion)
+        self.goto_insert_mode(context, insert_motion)
       }
-      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(&context),
+      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(context),
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&context)
       // }
@@ -101,7 +101,7 @@ impl Stateful for Normal {
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&context, op),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(context, op),
       _ => unreachable!(),
     }
   }

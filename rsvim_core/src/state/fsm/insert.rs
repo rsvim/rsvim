@@ -67,7 +67,7 @@ impl Insert {
 }
 
 impl Stateful for Insert {
-  fn handle(&self, context: StateContext, event: Event) -> State {
+  fn handle(&self, context: &StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(context, op);
     }
@@ -75,17 +75,17 @@ impl Stateful for Insert {
     State::Insert(Insert::default())
   }
 
-  fn handle_op(&self, context: StateContext, op: Operation) -> State {
+  fn handle_op(&self, context: &StateContext, op: Operation) -> State {
     match op {
-      Operation::GotoNormalMode => self.goto_normal_mode(&context),
+      Operation::GotoNormalMode => self.goto_normal_mode(context),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&context, op),
-      Operation::CursorInsert(payload) => self.cursor_insert(&context, payload),
-      Operation::CursorDelete(n) => self.cursor_delete(&context, n),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(context, op),
+      Operation::CursorInsert(payload) => self.cursor_insert(context, payload),
+      Operation::CursorDelete(n) => self.cursor_delete(context, n),
       _ => unreachable!(),
     }
   }
