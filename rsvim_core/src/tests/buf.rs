@@ -6,7 +6,6 @@ use crate::buf::BufferManager;
 use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
-use crate::hl::ColorScheme;
 use crate::hl::ColorSchemeArc;
 use crate::prelude::*;
 use crate::syntax;
