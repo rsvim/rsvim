@@ -285,7 +285,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("nc::Arc;".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(2000)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     let mut event_loop = make_event_loop(
@@ -429,7 +429,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("}".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(2000)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     let mut event_loop = make_event_loop(
@@ -525,7 +525,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("}".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(2000)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     let mut event_loop = make_event_loop(
@@ -621,7 +621,7 @@ mod tests_buffer_editing {
         state_ops::CursorInsertPayload::Text("}".to_compact_string()),
       )),
       MockOperation::Operation(state_ops::Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(2000)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     let mut event_loop = make_event_loop(
