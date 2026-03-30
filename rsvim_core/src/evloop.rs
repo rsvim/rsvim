@@ -1012,7 +1012,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
