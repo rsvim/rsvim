@@ -500,7 +500,7 @@ pub type ColorSchemeManagerValues<'a> =
 pub type ColorSchemeManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, ColorSchemeArc>;
 
-fn default_colorscheme() -> ColorSchemeArc {
+pub fn default_colorscheme() -> ColorSchemeArc {
   let config = toml::toml! {
     boolean = "magenta"
     comment = "cyan"

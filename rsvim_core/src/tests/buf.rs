@@ -7,6 +7,7 @@ use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::hl::ColorScheme;
+use crate::hl::default_colorscheme;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::Syntax;
@@ -39,7 +40,7 @@ pub fn make_buffer_from_lines(
     None,
     None,
     None,
-    None,
+    default_colorscheme(),
   );
   Buffer::to_arc(buf)
 }

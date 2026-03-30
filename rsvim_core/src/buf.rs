@@ -14,7 +14,6 @@ mod undo_tests;
 #[cfg(test)]
 mod unicode_tests;
 
-use crate::hl::ColorScheme;
 use crate::hl::ColorSchemeArc;
 use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
@@ -355,7 +354,7 @@ impl BufferManager {
       None,
       None,
       None,
-      colorscheme.cloned(),
+      colorscheme,
     );
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
@@ -454,7 +453,7 @@ impl BufferManager {
             Some(metadata),
             Some(Instant::now()),
             syntax,
-            colorscheme.cloned(),
+            colorscheme,
           ))
         }
         Err(e) => Err(TheErr::OpenFileFailed(
@@ -586,7 +585,11 @@ impl BufferManager {
   }
 
   pub fn colorscheme(&self) -> ColorSchemeArc {
-    self.colorscheme_manager.get(&self.color_name).unwrap()
+    self
+      .colorscheme_manager
+      .get(&self.color_name)
+      .unwrap()
+      .clone()
   }
 }
 // Options }
