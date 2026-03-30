@@ -630,7 +630,7 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-        let data_access = StateContext::new(
+        let context = StateContext::new(
           self.tree.clone(),
           self.buffer_manager.clone(),
           self.cmdline_text.clone(),
@@ -640,7 +640,7 @@ impl EventLoop {
 
         // Handle by state machine
         let stateful = self.state_machine;
-        let next_stateful = stateful.handle(data_access, event);
+        let next_stateful = stateful.handle(context, event);
         self.state_machine = next_stateful;
       }
       Some(Err(e)) => {
