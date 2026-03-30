@@ -48,7 +48,7 @@ impl Widgetable for WindowContent {
     viewport.draw(
       buffer.text(),
       buffer.syntax(),
-      buffer.colorscheme().as_ref().unwrap(),
+      buffer.colorscheme().as_ref(),
       &actual_shape,
       canvas,
     );
