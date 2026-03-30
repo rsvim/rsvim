@@ -938,12 +938,12 @@ impl Tree {
 // Draw {
 impl Tree {
   /// Draw the widget tree to canvas.
-  pub fn draw(&self, canvas: CanvasArc, context: WidgetContext) {
+  pub fn draw(&self, canvas: CanvasArc, context: &WidgetContext) {
     let mut canvas = lock!(canvas);
     for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
       if node.enabled() {
-        node.draw(&mut canvas, &context);
+        node.draw(&mut canvas, context);
       }
     }
   }

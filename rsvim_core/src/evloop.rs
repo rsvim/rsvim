@@ -491,7 +491,7 @@ impl EventLoop {
 
     // Flush logic UI to terminal, i.e. print UI to stdout
     let context = WidgetContext::new(self.buffer_manager.clone());
-    lock!(self.tree).draw(self.canvas.clone(), context);
+    lock!(self.tree).draw(self.canvas.clone(), &context);
     self.writer.init_complete(&mut lock!(self.canvas))?;
 
     Ok(())
@@ -945,7 +945,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
@@ -979,7 +980,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
