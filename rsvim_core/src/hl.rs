@@ -548,8 +548,8 @@ impl ColorSchemeManager {
     self.colors.len()
   }
 
-  pub fn get(&self, id: &str) -> Option<ColorSchemeArc> {
-    self.colors.get(id).cloned()
+  pub fn get(&self, id: &str) -> Option<&ColorSchemeArc> {
+    self.colors.get(id)
   }
 
   pub fn contains_key(&self, id: &str) -> bool {
