@@ -6,7 +6,7 @@ use crate::chan;
 use crate::chan::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
@@ -76,40 +76,40 @@ impl Normal {
 }
 
 impl Stateful for Normal {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+  fn handle(&self, context: &StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
-      return self.handle_op(data_access, op);
+      return self.handle_op(context, op);
     }
 
     State::Normal(Normal::default())
   }
 
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+  fn handle_op(&self, context: &StateContext, op: Operation) -> State {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
-        self.goto_insert_mode(&data_access, insert_motion)
+        self.goto_insert_mode(context, insert_motion)
       }
-      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(&data_access),
+      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(context),
       // Operation::GotoCommandLineSearchForwardMode => {
-      //   self.goto_command_line_search_forward_mode(&data_access)
+      //   self.goto_command_line_search_forward_mode(&context)
       // }
       // Operation::GotoCommandLineSearchBackwardMode => {
-      //   self.goto_command_line_search_backward_mode(&data_access)
+      //   self.goto_command_line_search_backward_mode(&context)
       // }
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(context, op),
       _ => unreachable!(),
     }
   }
 }
 
 impl Normal {
-  pub fn goto_cmdline_ex_mode(&self, data_access: &StateDataAccess) -> State {
-    let tree = data_access.tree.clone();
+  pub fn goto_cmdline_ex_mode(&self, context: &StateContext) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
 
     if cfg!(debug_assertions) {
@@ -162,7 +162,7 @@ impl Normal {
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Colon);
 
     if cfg!(debug_assertions) {
-      let contents = data_access.cmdline_text.clone();
+      let contents = context.cmdline_text.clone();
       let contents = lock!(contents);
       let cmdline_input_content = contents.input().rope().to_compact_string();
       debug_assert!(cmdline_input_content.is_empty());
@@ -175,7 +175,7 @@ impl Normal {
 impl Normal {
   fn _goto_command_line_search_forward_mode(
     &self,
-    _data_access: &StateDataAccess,
+    _context: &StateContext,
   ) -> State {
     State::CmdlineSearchForward(super::CmdlineSearchForward::default())
   }
@@ -184,7 +184,7 @@ impl Normal {
 impl Normal {
   fn _goto_command_line_search_backward_mode(
     &self,
-    _data_access: &StateDataAccess,
+    _context: &StateContext,
   ) -> State {
     State::CmdlineSearchBackward(super::CmdlineSearchBackward::default())
   }
@@ -193,10 +193,10 @@ impl Normal {
 impl Normal {
   pub fn goto_insert_mode(
     &self,
-    data_access: &StateDataAccess,
+    context: &StateContext,
     insert_motion: GotoInsertModeVariant,
   ) -> State {
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
 
     match insert_motion {
@@ -295,7 +295,7 @@ impl Normal {
             version: editing_version,
           }));
           chan::send_to_master(
-            data_access.master_tx.clone(),
+            context.master_tx.clone(),
             MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
               buffer_id: buffer.id(),
             }),
@@ -315,12 +315,8 @@ impl Normal {
 
 impl Normal {
   /// Cursor move in current window, with buffer scroll.
-  pub fn cursor_move(
-    &self,
-    data_access: &StateDataAccess,
-    op: Operation,
-  ) -> State {
-    let tree = data_access.tree.clone();
+  pub fn cursor_move(&self, context: &StateContext, op: Operation) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
@@ -340,12 +336,8 @@ impl Normal {
 
 impl Normal {
   #[cfg(test)]
-  pub fn _test_raw_cursor_move(
-    &self,
-    data_access: &StateDataAccess,
-    op: Operation,
-  ) {
-    let tree = data_access.tree.clone();
+  pub fn _test_raw_cursor_move(&self, context: &StateContext, op: Operation) {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
 
     let (buffer, viewport, cursor_viewport, current_window_id) = {
@@ -382,12 +374,8 @@ impl Normal {
   }
 
   #[cfg(test)]
-  pub fn _test_raw_window_scroll(
-    &self,
-    data_access: &StateDataAccess,
-    op: Operation,
-  ) {
-    let tree = data_access.tree.clone();
+  pub fn _test_raw_window_scroll(&self, context: &StateContext, op: Operation) {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     let (buffer, viewport, current_window_id) = {
       let current_window = tree.current_window_mut().unwrap();

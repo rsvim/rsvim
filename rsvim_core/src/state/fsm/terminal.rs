@@ -1,7 +1,7 @@
 //! The terminal mode.
 
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::Operation;
 use crossterm::event::Event;
@@ -11,10 +11,10 @@ use crossterm::event::Event;
 pub struct Terminal {}
 
 impl Stateful for Terminal {
-  fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
+  fn handle(&self, _context: &StateContext, _event: Event) -> State {
     State::Terminal(Terminal::default())
   }
-  fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
+  fn handle_op(&self, _context: &StateContext, _op: Operation) -> State {
     State::Terminal(Terminal::default())
   }
 }

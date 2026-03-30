@@ -24,7 +24,7 @@ use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
 use crate::syntax;
@@ -630,7 +630,7 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-        let data_access = StateDataAccess::new(
+        let context = StateContext::new(
           self.tree.clone(),
           self.buffer_manager.clone(),
           self.cmdline_text.clone(),
@@ -640,7 +640,7 @@ impl EventLoop {
 
         // Handle by state machine
         let stateful = self.state_machine;
-        let next_stateful = stateful.handle(data_access, event);
+        let next_stateful = stateful.handle(&context, event);
         self.state_machine = next_stateful;
       }
       Some(Err(e)) => {
@@ -664,7 +664,7 @@ impl EventLoop {
         trace!("Polled editor operation ok: {:?}", op);
         match op {
           MockOperation::Operation(op) => {
-            let data_access = StateDataAccess::new(
+            let context = StateContext::new(
               self.tree.clone(),
               self.buffer_manager.clone(),
               self.cmdline_text.clone(),
@@ -674,7 +674,7 @@ impl EventLoop {
 
             // Handle by state machine
             let stateful = self.state_machine;
-            let next_stateful = stateful.handle_op(data_access, op);
+            let next_stateful = stateful.handle_op(&context, op);
             self.state_machine = next_stateful;
           }
           MockOperation::Exit => {

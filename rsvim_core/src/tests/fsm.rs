@@ -5,7 +5,7 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
 use crate::prelude::*;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_buffers_manager;
 use crate::tests::tree::make_tree_with_buffers;
@@ -30,7 +30,7 @@ pub fn make_fsm(
   BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
-  StateDataAccess,
+  StateContext,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
@@ -47,7 +47,7 @@ pub fn make_fsm(
 
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
   let (master_tx, _master_rx) = unbounded_channel();
-  let data_access = StateDataAccess::new(
+  let context = StateContext::new(
     tree.clone(),
     bufs.clone(),
     cmdline_text.clone(),
@@ -55,7 +55,7 @@ pub fn make_fsm(
     jsrt_forwarder_tx,
   );
 
-  (event, tree, bufs, buf, cmdline_text, data_access)
+  (event, tree, bufs, buf, cmdline_text, context)
 }
 
 pub fn make_fsm_default_bufopts(
@@ -68,7 +68,7 @@ pub fn make_fsm_default_bufopts(
   BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
-  StateDataAccess,
+  StateContext,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_fsm(terminal_size, buf_opts, window_local_opts, lines)
@@ -85,7 +85,7 @@ pub fn make_fsm_with_cmdline(
   BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
-  StateDataAccess,
+  StateContext,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
@@ -105,7 +105,7 @@ pub fn make_fsm_with_cmdline(
   let event = Event::Key(key_event);
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
   let (master_tx, _master_rx) = unbounded_channel();
-  let data_access = StateDataAccess::new(
+  let context = StateContext::new(
     tree.clone(),
     bufs.clone(),
     cmdline_text.clone(),
@@ -113,7 +113,7 @@ pub fn make_fsm_with_cmdline(
     jsrt_forwarder_tx,
   );
 
-  (event, tree, bufs, buf, cmdline_text, data_access)
+  (event, tree, bufs, buf, cmdline_text, context)
 }
 
 pub fn make_fsm_with_cmdline_default_bufopts(
@@ -126,7 +126,7 @@ pub fn make_fsm_with_cmdline_default_bufopts(
   BufferManagerArc,
   BufferArc,
   CmdlineTextArc,
-  StateDataAccess,
+  StateContext,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_fsm_with_cmdline(terminal_size, buf_opts, window_local_opts, lines)
