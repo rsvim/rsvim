@@ -25,7 +25,7 @@ impl WidgetDataAccess {
 /// Base trait for all UI widgets.
 pub trait Widgetable {
   /// Draw the widget to canvas, on the specific shape.
-  fn draw(&self, _canvas: &mut Canvas) {
+  fn draw(&self, _canvas: &mut Canvas, _data_access: &WidgetDataAccess) {
     // Do nothing.
     // trace!("draw canvas");
   }
@@ -36,10 +36,10 @@ pub trait Widgetable {
 macro_rules! widgetable_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Widgetable for $enum {
-      fn draw(&self, canvas: &mut Canvas) {
+      fn draw(&self, canvas: &mut Canvas, data_access: &WidgetDataAccess) {
         match self {
           $(
-            $enum::$variant(w) => w.draw(canvas),
+            $enum::$variant(w) => w.draw(canvas, data_access),
           )*
         }
       }
