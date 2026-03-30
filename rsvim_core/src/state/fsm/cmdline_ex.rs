@@ -65,28 +65,28 @@ impl CmdlineEx {
 }
 
 impl Stateful for CmdlineEx {
-  fn handle(&self, data_access: StateContext, event: Event) -> State {
+  fn handle(&self, context: StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
-      return self.handle_op(data_access, op);
+      return self.handle_op(context, op);
     }
 
     State::CmdlineEx(CmdlineEx::default())
   }
 
-  fn handle_op(&self, data_access: StateContext, op: Operation) -> State {
+  fn handle_op(&self, context: StateContext, op: Operation) -> State {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
-      Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&context, op),
+      Operation::GotoNormalMode => self.goto_normal_mode(&context),
       Operation::ConfirmExCommandAndGotoNormalMode => {
-        self.confirm_ex_command_and_goto_normal_mode(&data_access)
+        self.confirm_ex_command_and_goto_normal_mode(&context)
       }
-      Operation::CursorInsert(text) => self.cursor_insert(&data_access, text),
-      Operation::CursorDelete(n) => self.cursor_delete(&data_access, n),
+      Operation::CursorInsert(text) => self.cursor_insert(&context, text),
+      Operation::CursorDelete(n) => self.cursor_delete(&context, n),
       _ => unreachable!(),
     }
   }
@@ -95,11 +95,11 @@ impl Stateful for CmdlineEx {
 impl CmdlineEx {
   pub fn confirm_ex_command_and_goto_normal_mode(
     &self,
-    data_access: &StateContext,
+    context: &StateContext,
   ) -> State {
-    let cmdline_input_content = self._goto_normal_mode_impl(data_access);
+    let cmdline_input_content = self._goto_normal_mode_impl(context);
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let tree = lock!(tree);
     let current_window = tree.current_window().unwrap();
     let current_win_id = current_window.id();
@@ -108,7 +108,7 @@ impl CmdlineEx {
     let current_buf_id = buffer.id();
 
     chan::send_to_jsrt(
-      data_access.jsrt_forwarder_tx.clone(),
+      context.jsrt_forwarder_tx.clone(),
       JsMessage::ExCommandReq(ExCommandReq {
         payload: cmdline_input_content,
         current_buf_id,
@@ -123,9 +123,9 @@ impl CmdlineEx {
 impl CmdlineEx {
   pub fn _goto_normal_mode_impl(
     &self,
-    data_access: &StateContext,
+    context: &StateContext,
   ) -> CompactString {
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
 
     if cfg!(debug_assertions) {
@@ -177,7 +177,7 @@ impl CmdlineEx {
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
 
     // Clear command-line both input content and message.
-    let contents = data_access.cmdline_text.clone();
+    let contents = context.cmdline_text.clone();
     let mut contents = lock!(contents);
     let cmdline_input_content = contents.input().rope().to_compact_string();
 
@@ -187,24 +187,20 @@ impl CmdlineEx {
     cmdline_input_content.trim().to_compact_string()
   }
 
-  pub fn goto_normal_mode(&self, data_access: &StateContext) -> State {
-    self._goto_normal_mode_impl(data_access);
+  pub fn goto_normal_mode(&self, context: &StateContext) -> State {
+    self._goto_normal_mode_impl(context);
 
     State::Normal(super::Normal::default())
   }
 }
 
 impl CmdlineEx {
-  pub fn cursor_move(
-    &self,
-    data_access: &StateContext,
-    op: Operation,
-  ) -> State {
-    let tree = data_access.tree.clone();
+  pub fn cursor_move(&self, context: &StateContext, op: Operation) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
     let cmdline_id = tree.cmdline_id().unwrap();
-    let contents = data_access.cmdline_text.clone();
+    let contents = context.cmdline_text.clone();
     let contents = lock!(contents);
 
     cursor_ops::cursor_move(&mut tree, cmdline_id, contents.input(), op, true);
@@ -216,14 +212,14 @@ impl CmdlineEx {
 impl CmdlineEx {
   pub fn cursor_insert(
     &self,
-    data_access: &StateContext,
+    context: &StateContext,
     payload: CursorInsertPayload,
   ) -> State {
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
     let cmdline_id = tree.cmdline_id().unwrap();
-    let contents = data_access.cmdline_text.clone();
+    let contents = context.cmdline_text.clone();
     let mut contents = lock!(contents);
 
     let payload = match payload {
@@ -244,10 +240,10 @@ impl CmdlineEx {
 }
 
 impl CmdlineEx {
-  pub fn cursor_delete(&self, data_access: &StateContext, n: isize) -> State {
-    let tree = data_access.tree.clone();
+  pub fn cursor_delete(&self, context: &StateContext, n: isize) -> State {
+    let tree = context.tree.clone();
     let mut tree = lock!(tree);
-    let contents = data_access.cmdline_text.clone();
+    let contents = context.cmdline_text.clone();
     let mut contents = lock!(contents);
     let text = contents.input_mut();
 
