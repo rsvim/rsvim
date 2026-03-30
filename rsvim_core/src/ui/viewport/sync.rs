@@ -341,7 +341,6 @@ fn wrap_nolinebreak_sync(
 /// 1. The word index, which contains this `char_idx`.
 /// 2. The first char index of this word.
 /// 3. The end char index of this word.
-/// word.
 fn _binary_search_word_by_char(
   words: &[&str],
   word_end_chars_index: &LiteMap<usize, usize>,
@@ -428,7 +427,7 @@ fn _part1(
       // Save the position (`end_width_char`) where we cut the words into
       // pieces.
       *last_word_is_too_long = Some((
-        *end_wd_idx,
+        end_wd_idx,
         start_c_of_end_wd,
         end_c_of_end_wd,
         end_width_char,
