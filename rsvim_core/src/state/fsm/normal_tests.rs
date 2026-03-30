@@ -71,22 +71,20 @@ mod tests_raw_cursor_move_y_by {
     test_log_init();
 
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let state_machine = Normal::default();
-    state_machine
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    state_machine._test_raw_cursor_move(&context, Operation::CursorMoveUpBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
@@ -106,22 +104,20 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let state_machine = Normal::default();
-    state_machine
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    state_machine._test_raw_cursor_move(&context, Operation::CursorMoveUpBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
@@ -141,29 +137,27 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, _buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 3);
     assert_eq!(actual1.char_idx(), 0);
 
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveUpBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 2);
     assert_eq!(actual2.char_idx(), 0);
@@ -183,29 +177,27 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, _buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveDownBy(2));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveUpBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
@@ -218,12 +210,11 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = size!(10, 10);
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -231,9 +222,9 @@ mod tests_raw_cursor_move_y_by {
 
     let state_machine = Normal::default();
     state_machine
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
+      ._test_raw_cursor_move(&context, Operation::CursorMoveDownBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
@@ -253,29 +244,27 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, _buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveDownBy(2));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveUpBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
@@ -294,22 +283,20 @@ mod tests_raw_cursor_move_x_by {
     let terminal_size = size!(10, 10);
     let lines = vec![];
 
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveRightBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
@@ -331,22 +318,20 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = size!(10, 10);
 
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveRightBy(1));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 1);
@@ -368,22 +353,20 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = size!(10, 10);
 
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveRightBy(20));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 12);
@@ -405,30 +388,27 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = size!(10, 10);
 
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveRightBy(5));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveLeftBy(3));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 0);
     assert_eq!(actual2.char_idx(), 2);
@@ -450,31 +430,28 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = size!(10, 10);
 
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = Normal::default();
-    stateful
-      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
+    stateful._test_raw_cursor_move(&context, Operation::CursorMoveRightBy(5));
 
-    let tree = data_access.tree.clone();
+    let tree = context.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 5);
 
     for i in (0..=4).rev() {
-      stateful
-        ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
+      stateful._test_raw_cursor_move(&context, Operation::CursorMoveLeftBy(1));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual = get_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), i);
