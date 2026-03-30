@@ -11,10 +11,10 @@ use crossterm::event::Event;
 pub struct CmdlineSearchForward {}
 
 impl Stateful for CmdlineSearchForward {
-  fn handle(&self, _data_access: StateContext, _event: Event) -> State {
+  fn handle(&self, _context: StateContext, _event: Event) -> State {
     State::CmdlineSearchForward(CmdlineSearchForward::default())
   }
-  fn handle_op(&self, _data_access: StateContext, _op: Operation) -> State {
+  fn handle_op(&self, _context: StateContext, _op: Operation) -> State {
     State::CmdlineSearchForward(CmdlineSearchForward::default())
   }
 }
