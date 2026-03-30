@@ -37,7 +37,7 @@ use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
-pub struct StateDataAccess {
+pub struct StateContext {
   pub tree: TreeArc,
   pub buffer_manager: BufferManagerArc,
   pub cmdline_text: CmdlineTextArc,
@@ -45,7 +45,7 @@ pub struct StateDataAccess {
   pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
 }
 
-impl StateDataAccess {
+impl StateContext {
   pub fn new(
     tree: TreeArc,
     buffer_manager: BufferManagerArc,
@@ -53,7 +53,7 @@ impl StateDataAccess {
     master_tx: UnboundedSender<MasterMessage>,
     jsrt_forwarder_tx: UnboundedSender<JsMessage>,
   ) -> Self {
-    StateDataAccess {
+    StateContext {
       tree,
       buffer_manager,
       cmdline_text,
@@ -68,12 +68,12 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State;
+  fn handle(&self, data_access: StateContext, event: Event) -> State;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State;
+  fn handle_op(&self, data_access: StateContext, op: Operation) -> State;
 }
 
 /// Generate enum dispatcher for `Stateful`.

@@ -6,7 +6,7 @@ use crate::chan;
 use crate::chan::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
@@ -76,7 +76,7 @@ impl Normal {
 }
 
 impl Stateful for Normal {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+  fn handle(&self, data_access: StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
@@ -84,7 +84,7 @@ impl Stateful for Normal {
     State::Normal(Normal::default())
   }
 
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+  fn handle_op(&self, data_access: StateContext, op: Operation) -> State {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
@@ -108,7 +108,7 @@ impl Stateful for Normal {
 }
 
 impl Normal {
-  pub fn goto_cmdline_ex_mode(&self, data_access: &StateDataAccess) -> State {
+  pub fn goto_cmdline_ex_mode(&self, data_access: &StateContext) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -175,7 +175,7 @@ impl Normal {
 impl Normal {
   fn _goto_command_line_search_forward_mode(
     &self,
-    _data_access: &StateDataAccess,
+    _data_access: &StateContext,
   ) -> State {
     State::CmdlineSearchForward(super::CmdlineSearchForward::default())
   }
@@ -184,7 +184,7 @@ impl Normal {
 impl Normal {
   fn _goto_command_line_search_backward_mode(
     &self,
-    _data_access: &StateDataAccess,
+    _data_access: &StateContext,
   ) -> State {
     State::CmdlineSearchBackward(super::CmdlineSearchBackward::default())
   }
@@ -193,7 +193,7 @@ impl Normal {
 impl Normal {
   pub fn goto_insert_mode(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     insert_motion: GotoInsertModeVariant,
   ) -> State {
     let tree = data_access.tree.clone();
@@ -317,7 +317,7 @@ impl Normal {
   /// Cursor move in current window, with buffer scroll.
   pub fn cursor_move(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     op: Operation,
   ) -> State {
     let tree = data_access.tree.clone();
@@ -342,7 +342,7 @@ impl Normal {
   #[cfg(test)]
   pub fn _test_raw_cursor_move(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     op: Operation,
   ) {
     let tree = data_access.tree.clone();
@@ -384,7 +384,7 @@ impl Normal {
   #[cfg(test)]
   pub fn _test_raw_window_scroll(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     op: Operation,
   ) {
     let tree = data_access.tree.clone();

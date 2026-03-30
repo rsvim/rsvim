@@ -11,7 +11,7 @@ use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;

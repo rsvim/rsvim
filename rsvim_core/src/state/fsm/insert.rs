@@ -6,7 +6,7 @@ use crate::chan;
 use crate::chan::MasterMessage;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -67,7 +67,7 @@ impl Insert {
 }
 
 impl Stateful for Insert {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+  fn handle(&self, data_access: StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
@@ -75,7 +75,7 @@ impl Stateful for Insert {
     State::Insert(Insert::default())
   }
 
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+  fn handle_op(&self, data_access: StateContext, op: Operation) -> State {
     match op {
       Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::CursorMoveBy((_, _))
@@ -94,11 +94,7 @@ impl Stateful for Insert {
 }
 
 impl Insert {
-  pub fn cursor_delete(
-    &self,
-    data_access: &StateDataAccess,
-    n: isize,
-  ) -> State {
+  pub fn cursor_delete(&self, data_access: &StateContext, n: isize) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -214,7 +210,7 @@ impl Insert {
 impl Insert {
   pub fn cursor_insert(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     payload: CursorInsertPayload,
   ) -> State {
     let tree = data_access.tree.clone();
@@ -317,7 +313,7 @@ impl Insert {
 }
 
 impl Insert {
-  pub fn goto_normal_mode(&self, data_access: &StateDataAccess) -> State {
+  pub fn goto_normal_mode(&self, data_access: &StateContext) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -366,7 +362,7 @@ impl Insert {
 impl Insert {
   pub fn cursor_move(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     op: Operation,
   ) -> State {
     let tree = data_access.tree.clone();

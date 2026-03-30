@@ -24,7 +24,7 @@ use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
 use crate::syntax;
@@ -630,7 +630,7 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-        let data_access = StateDataAccess::new(
+        let data_access = StateContext::new(
           self.tree.clone(),
           self.buffer_manager.clone(),
           self.cmdline_text.clone(),
@@ -664,7 +664,7 @@ impl EventLoop {
         trace!("Polled editor operation ok: {:?}", op);
         match op {
           MockOperation::Operation(op) => {
-            let data_access = StateDataAccess::new(
+            let data_access = StateContext::new(
               self.tree.clone(),
               self.buffer_manager.clone(),
               self.cmdline_text.clone(),

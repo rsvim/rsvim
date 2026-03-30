@@ -5,7 +5,7 @@ use crate::chan::ExCommandReq;
 use crate::chan::JsMessage;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -65,7 +65,7 @@ impl CmdlineEx {
 }
 
 impl Stateful for CmdlineEx {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+  fn handle(&self, data_access: StateContext, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
@@ -73,7 +73,7 @@ impl Stateful for CmdlineEx {
     State::CmdlineEx(CmdlineEx::default())
   }
 
-  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+  fn handle_op(&self, data_access: StateContext, op: Operation) -> State {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -95,7 +95,7 @@ impl Stateful for CmdlineEx {
 impl CmdlineEx {
   pub fn confirm_ex_command_and_goto_normal_mode(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
   ) -> State {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
@@ -123,7 +123,7 @@ impl CmdlineEx {
 impl CmdlineEx {
   pub fn _goto_normal_mode_impl(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
   ) -> CompactString {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -187,7 +187,7 @@ impl CmdlineEx {
     cmdline_input_content.trim().to_compact_string()
   }
 
-  pub fn goto_normal_mode(&self, data_access: &StateDataAccess) -> State {
+  pub fn goto_normal_mode(&self, data_access: &StateContext) -> State {
     self._goto_normal_mode_impl(data_access);
 
     State::Normal(super::Normal::default())
@@ -197,7 +197,7 @@ impl CmdlineEx {
 impl CmdlineEx {
   pub fn cursor_move(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     op: Operation,
   ) -> State {
     let tree = data_access.tree.clone();
@@ -216,7 +216,7 @@ impl CmdlineEx {
 impl CmdlineEx {
   pub fn cursor_insert(
     &self,
-    data_access: &StateDataAccess,
+    data_access: &StateContext,
     payload: CursorInsertPayload,
   ) -> State {
     let tree = data_access.tree.clone();
@@ -244,11 +244,7 @@ impl CmdlineEx {
 }
 
 impl CmdlineEx {
-  pub fn cursor_delete(
-    &self,
-    data_access: &StateDataAccess,
-    n: isize,
-  ) -> State {
+  pub fn cursor_delete(&self, data_access: &StateContext, n: isize) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let contents = data_access.cmdline_text.clone();
