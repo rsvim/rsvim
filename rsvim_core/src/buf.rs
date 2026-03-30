@@ -584,8 +584,8 @@ impl BufferManager {
     }
   }
 
-  pub fn colorscheme(&self) -> Option<&ColorScheme> {
-    self.colorscheme_manager.get(&self.color_name)
+  pub fn colorscheme(&self) -> &ColorScheme {
+    self.colorscheme_manager.get(&self.color_name).unwrap()
   }
 }
 // Options }
