@@ -11,6 +11,7 @@ use crate::ui::canvas::CanvasArc;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::ViewportArc;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicator;
@@ -937,12 +938,12 @@ impl Tree {
 // Draw {
 impl Tree {
   /// Draw the widget tree to canvas.
-  pub fn draw(&self, canvas: CanvasArc) {
+  pub fn draw(&self, canvas: CanvasArc, context: &WidgetContext) {
     let mut canvas = lock!(canvas);
     for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
       if node.enabled() {
-        node.draw(&mut canvas);
+        node.draw(&mut canvas, context);
       }
     }
   }
