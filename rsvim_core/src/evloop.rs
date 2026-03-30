@@ -196,9 +196,13 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffer_manager = BufferManager::to_arc(BufferManager::new());
-    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
+    let buffer_manager = BufferManager::new();
+    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(
+      canvas_size,
+      buffer_manager.colorscheme(),
+    ));
     let command_manager = CommandManager::to_arc(CommandManager::default());
+    let buffer_manager = BufferManager::to_arc(buffer_manager);
 
     // State
     let state_machine = State::default();
