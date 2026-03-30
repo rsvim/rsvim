@@ -15,6 +15,7 @@ mod undo_tests;
 mod unicode_tests;
 
 use crate::hl::ColorScheme;
+use crate::hl::ColorSchemeArc;
 use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::structural_id_impl;
@@ -68,7 +69,7 @@ pub struct Buffer {
   syntax: Option<Syntax>,
 
   // colorscheme/highlight
-  colorscheme: Option<ColorScheme>,
+  colorscheme: ColorSchemeArc,
 
   // Text editing version
   editing_version: isize,
@@ -89,7 +90,7 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
     syntax: Option<Syntax>,
-    colorscheme: Option<ColorScheme>,
+    colorscheme: ColorSchemeArc,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -183,8 +184,8 @@ impl Buffer {
     self.syntax = value;
   }
 
-  pub fn colorscheme(&self) -> &Option<ColorScheme> {
-    &self.colorscheme
+  pub fn colorscheme(&self) -> ColorSchemeArc {
+    self.colorscheme.clone()
   }
 
   /// Text edit versioning

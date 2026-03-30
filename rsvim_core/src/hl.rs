@@ -218,6 +218,8 @@ pub struct ColorScheme {
   highlights: FoldMap<CompactString, Highlight>,
 }
 
+arc_ptr!(ColorScheme);
+
 fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
     u8::from_str_radix(x, 16).map_err(|_e| {
