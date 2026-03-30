@@ -11,10 +11,10 @@ use crossterm::event::Event;
 pub struct OperatorPending {}
 
 impl Stateful for OperatorPending {
-  fn handle(&self, _data_access: StateContext, _event: Event) -> State {
+  fn handle(&self, _context: StateContext, _event: Event) -> State {
     State::OperatorPending(OperatorPending::default())
   }
-  fn handle_op(&self, _data_access: StateContext, _op: Operation) -> State {
+  fn handle_op(&self, _context: StateContext, _op: Operation) -> State {
     State::OperatorPending(OperatorPending::default())
   }
 }
