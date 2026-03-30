@@ -68,12 +68,12 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StateContext, event: Event) -> State;
+  fn handle(&self, context: StateContext, event: Event) -> State;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(&self, data_access: StateContext, op: Operation) -> State;
+  fn handle_op(&self, context: StateContext, op: Operation) -> State;
 }
 
 /// Generate enum dispatcher for `Stateful`.
@@ -81,18 +81,18 @@ pub trait Stateful {
 macro_rules! stateful_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
+      fn handle(&self, context: StateDataAccess, event: Event) -> State {
         match self {
           $(
-            $enum::$variant(e) => e.handle(data_access, event),
+            $enum::$variant(e) => e.handle(context, event),
           )*
         }
       }
 
-      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
+      fn handle_op(&self, context: StateDataAccess, op: Operation) -> State {
         match self {
           $(
-            $enum::$variant(e) => e.handle_op(data_access, op),
+            $enum::$variant(e) => e.handle_op(context, op),
           )*
         }
       }
