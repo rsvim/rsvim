@@ -183,7 +183,7 @@ impl Buffer {
     self.syntax = value;
   }
 
-  pub fn colorscheme(&self) -> ColorSchemeArc {
+  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
     self.colorscheme.clone()
   }
 
