@@ -11,7 +11,7 @@ use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::StateDataAccess;
+use crate::state::StateContext;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -79,12 +79,11 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 10),
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 10),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -94,9 +93,9 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((5, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 5);
@@ -137,9 +136,9 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(158));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 158);
@@ -190,7 +189,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 10),
       buf_opts,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -205,9 +204,9 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((5, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 5);
@@ -248,9 +247,9 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(158));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 158);
@@ -301,7 +300,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 10),
       buf_opts,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -316,9 +315,9 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((5, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 5);
@@ -359,9 +358,9 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(158));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 158);
@@ -414,16 +413,15 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 6),
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 6),
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -433,8 +431,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -467,8 +465,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -501,8 +499,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -535,8 +533,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -569,8 +567,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -603,8 +601,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -660,7 +658,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       buf_opts,
       WindowOptionsBuilder::default()
@@ -679,8 +677,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -713,8 +711,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -747,8 +745,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -781,8 +779,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -815,8 +813,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -849,8 +847,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -906,7 +904,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       buf_opts,
       WindowOptionsBuilder::default()
@@ -925,8 +923,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -959,8 +957,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -993,8 +991,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -1027,8 +1025,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -1061,8 +1059,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -1095,8 +1093,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -1148,16 +1146,15 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_fsm_default_bufopts(
-        size!(10, 6),
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, context) = make_fsm_default_bufopts(
+      size!(10, 6),
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1167,8 +1164,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -1201,8 +1198,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -1235,8 +1232,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -1269,8 +1266,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -1303,8 +1300,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -1337,8 +1334,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -1394,7 +1391,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       buf_opts,
       WindowOptionsBuilder::default()
@@ -1413,8 +1410,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -1447,8 +1444,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -1481,8 +1478,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -1515,8 +1512,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -1549,8 +1546,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -1583,8 +1580,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -1640,7 +1637,7 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       buf_opts,
       WindowOptionsBuilder::default()
@@ -1659,8 +1656,8 @@ mod tests_cursor_move {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -1693,8 +1690,8 @@ mod tests_cursor_move {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -1727,8 +1724,8 @@ mod tests_cursor_move {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -1761,8 +1758,8 @@ mod tests_cursor_move {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -1795,8 +1792,8 @@ mod tests_cursor_move {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -1829,8 +1826,8 @@ mod tests_cursor_move {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -1881,7 +1878,7 @@ mod tests_cursor_move_nofixeol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 10),
       make_nofixeol_bufopts(),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -1896,9 +1893,9 @@ mod tests_cursor_move_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((5, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 5);
@@ -1930,9 +1927,9 @@ mod tests_cursor_move_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(158));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 158);
@@ -1977,7 +1974,7 @@ mod tests_cursor_move_nofixeol {
       "11th.\n",
       "12th.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       make_nofixeol_bufopts(),
       WindowOptionsBuilder::default()
@@ -1996,8 +1993,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -2030,8 +2027,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -2064,8 +2061,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -2098,8 +2095,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -2132,8 +2129,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -2166,8 +2163,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -2219,7 +2216,7 @@ mod tests_cursor_move_nofixeol {
       "11th.\n",
       "12th.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       size!(10, 6),
       make_nofixeol_bufopts(),
       WindowOptionsBuilder::default()
@@ -2238,8 +2235,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 3);
@@ -2272,8 +2269,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(2));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 2);
       assert_eq!(actual2.char_idx(), 4);
@@ -2306,8 +2303,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((10, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((10, 0)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 10);
@@ -2340,8 +2337,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((0, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((0, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
@@ -2374,8 +2371,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(13));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(13));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -2408,8 +2405,8 @@ mod tests_cursor_move_nofixeol {
 
     // Move-6
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -2463,7 +2460,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -2475,11 +2472,11 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye, ".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -2538,9 +2535,9 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(20));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 18);
@@ -2600,11 +2597,11 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(" Go!".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 22);
@@ -2683,7 +2680,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -2695,11 +2692,11 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye, ".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -2758,9 +2755,9 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(20));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 18);
@@ -2820,11 +2817,11 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(" Go!".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 22);
@@ -2903,7 +2900,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -2915,11 +2912,11 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye, ".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -2978,9 +2975,9 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(20));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 18);
@@ -3040,11 +3037,11 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(" Go!".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 22);
@@ -3118,7 +3115,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3129,9 +3126,9 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 30);
@@ -3182,11 +3179,11 @@ mod tests_insert_text {
     // Insert-2
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 31);
@@ -3251,7 +3248,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3262,9 +3259,9 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -3312,9 +3309,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
@@ -3364,9 +3361,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
       assert_eq!(actual2.char_idx(), 21);
@@ -3404,9 +3401,9 @@ mod tests_insert_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 9);
       assert_eq!(actual1.char_idx(), 30);
@@ -3454,9 +3451,9 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text5));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 0);
@@ -3495,11 +3492,11 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Insert 4th".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 10);
@@ -3561,7 +3558,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\r\n",
       "  3. Is there any other cases?\r\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3572,9 +3569,9 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -3622,9 +3619,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
@@ -3674,9 +3671,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
       assert_eq!(actual2.char_idx(), 21);
@@ -3714,9 +3711,9 @@ mod tests_insert_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 9);
       assert_eq!(actual1.char_idx(), 30);
@@ -3764,9 +3761,9 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text5));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 0);
@@ -3810,11 +3807,11 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Insert 4th".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 10);
@@ -3876,7 +3873,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\r",
       "  3. Is there any other cases?\r",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3887,9 +3884,9 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -3937,9 +3934,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
@@ -3989,9 +3986,9 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
       assert_eq!(actual2.char_idx(), 21);
@@ -4029,9 +4026,9 @@ mod tests_insert_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 9);
       assert_eq!(actual1.char_idx(), 30);
@@ -4079,9 +4076,9 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text5));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 0);
@@ -4120,11 +4117,11 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Insert 4th".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 10);
@@ -4175,7 +4172,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4187,11 +4184,11 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hi".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 2);
@@ -4237,7 +4234,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4253,11 +4250,11 @@ mod tests_insert_text {
       let line1 = format!("Hi{buf_eol}");
 
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(line1.to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 0);
@@ -4304,7 +4301,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4320,11 +4317,11 @@ mod tests_insert_text {
       let buf_eol = format!("{buf_eol}");
 
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(buf_eol.to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 0);
@@ -4373,7 +4370,7 @@ mod tests_insert_text {
       "If the 1/2 line length doesn't has big difference.\n",
       "The viewport start_line/start_column should not even change.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4384,9 +4381,9 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((77, 0)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((77, 0)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 63);
@@ -4432,9 +4429,9 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((49, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((49, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 49);
@@ -4480,9 +4477,9 @@ mod tests_insert_text {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((48, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((48, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 48);
@@ -4528,9 +4525,9 @@ mod tests_insert_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((47, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((47, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 47);
@@ -4576,9 +4573,9 @@ mod tests_insert_text {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((46, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((46, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 46);
@@ -4649,7 +4646,7 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4661,10 +4658,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -4709,8 +4706,8 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 4);
@@ -4756,10 +4753,10 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -4805,10 +4802,10 @@ mod tests_insert_text {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Go!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 13);
@@ -4851,8 +4848,8 @@ mod tests_insert_text {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -4898,10 +4895,10 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -4944,8 +4941,8 @@ mod tests_insert_text {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -4989,10 +4986,10 @@ mod tests_insert_text {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -5064,7 +5061,7 @@ mod tests_insert_text {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5076,10 +5073,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -5124,8 +5121,8 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 4);
@@ -5171,10 +5168,10 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -5220,10 +5217,10 @@ mod tests_insert_text {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Go!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 13);
@@ -5266,8 +5263,8 @@ mod tests_insert_text {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -5313,10 +5310,10 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -5359,8 +5356,8 @@ mod tests_insert_text {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -5404,10 +5401,10 @@ mod tests_insert_text {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -5479,7 +5476,7 @@ mod tests_insert_text {
       "11th.\r",
       "12th.\r",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5491,10 +5488,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -5539,8 +5536,8 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 4);
@@ -5586,10 +5583,10 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -5635,10 +5632,10 @@ mod tests_insert_text {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Go!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 13);
@@ -5681,8 +5678,8 @@ mod tests_insert_text {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -5728,10 +5725,10 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -5774,8 +5771,8 @@ mod tests_insert_text {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -5819,10 +5816,10 @@ mod tests_insert_text {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -5876,7 +5873,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5888,10 +5885,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -5942,7 +5939,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5954,10 +5951,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("b".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -6008,7 +6005,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6020,10 +6017,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("这个".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 2);
@@ -6063,8 +6060,8 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
-      let tree = data_access.tree.clone();
+      stateful.cursor_insert(&context, CursorInsertPayload::Tab);
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -6109,8 +6106,8 @@ mod tests_insert_text {
       buf_opts.set_shift_width(2);
       lock!(buf).set_options(&buf_opts);
 
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
-      let tree = data_access.tree.clone();
+      stateful.cursor_insert(&context, CursorInsertPayload::Tab);
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -6169,7 +6166,7 @@ mod tests_insert_text {
       "9th.\n",
       "10th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6181,10 +6178,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -6227,8 +6224,8 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -6272,10 +6269,10 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 16);
@@ -6319,10 +6316,10 @@ mod tests_insert_text {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Let's go further!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 33);
@@ -6365,8 +6362,8 @@ mod tests_insert_text {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -6412,10 +6409,10 @@ mod tests_insert_text {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -6458,8 +6455,8 @@ mod tests_insert_text {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -6503,10 +6500,10 @@ mod tests_insert_text {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -6560,7 +6557,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6572,10 +6569,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -6626,7 +6623,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6638,10 +6635,10 @@ mod tests_insert_text {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("b".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -6690,7 +6687,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6713,14 +6710,14 @@ mod tests_insert_text {
         '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
         '■',
       ];
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((0, 1)));
       let text2 = CompactString::new(format!(
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 0);
@@ -6773,7 +6770,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6796,14 +6793,14 @@ mod tests_insert_text {
         '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
         '■',
       ];
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((0, 1)));
       let text2 = CompactString::new(format!(
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 0);
@@ -6847,8 +6844,8 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 1)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((72, 1)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 72);
@@ -6893,10 +6890,10 @@ mod tests_insert_text {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("你好，Rsvim！".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 81);
@@ -6961,7 +6958,7 @@ mod tests_insert_text_nofixeol {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -6977,11 +6974,11 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye, ".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -7031,9 +7028,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(20));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 18);
@@ -7084,11 +7081,11 @@ mod tests_insert_text_nofixeol {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(" Go!".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 22);
@@ -7153,7 +7150,7 @@ mod tests_insert_text_nofixeol {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7164,9 +7161,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 30);
@@ -7217,11 +7214,11 @@ mod tests_insert_text_nofixeol {
     // Insert-2
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 31);
@@ -7286,7 +7283,7 @@ mod tests_insert_text_nofixeol {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7297,9 +7294,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -7347,9 +7344,9 @@ mod tests_insert_text_nofixeol {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
@@ -7399,9 +7396,9 @@ mod tests_insert_text_nofixeol {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
       assert_eq!(actual2.char_idx(), 21);
@@ -7440,9 +7437,9 @@ mod tests_insert_text_nofixeol {
     // Move-4
     {
       // let buf_eol = lock!(buf).options().end_of_line();
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((100, 5)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 9);
       assert_eq!(actual1.char_idx(), 30);
@@ -7490,9 +7487,9 @@ mod tests_insert_text_nofixeol {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text5));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 0);
@@ -7531,11 +7528,11 @@ mod tests_insert_text_nofixeol {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Insert 4th".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 12);
       assert_eq!(actual1.char_idx(), 10);
@@ -7586,7 +7583,7 @@ mod tests_insert_text_nofixeol {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7598,11 +7595,11 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hi".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 2);
@@ -7645,7 +7642,7 @@ mod tests_insert_text_nofixeol {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7661,11 +7658,11 @@ mod tests_insert_text_nofixeol {
       let line1 = format!("Hi{buf_eol}");
 
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(line1.to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 0);
@@ -7714,7 +7711,7 @@ mod tests_insert_text_nofixeol {
       "If the 1/2 line length doesn't has big difference.\n",
       "The viewport start_line/start_column should not even change.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7725,9 +7722,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((77, 0)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((77, 0)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 63);
@@ -7773,9 +7770,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((49, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((49, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 49);
@@ -7821,9 +7818,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-3
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((48, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((48, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 48);
@@ -7869,9 +7866,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((47, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((47, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 47);
@@ -7917,9 +7914,9 @@ mod tests_insert_text_nofixeol {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((46, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((46, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 46);
@@ -7990,7 +7987,7 @@ mod tests_insert_text_nofixeol {
       "11th.\n",
       "12th.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -8006,10 +8003,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -8054,8 +8051,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 4);
@@ -8101,10 +8098,10 @@ mod tests_insert_text_nofixeol {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -8150,10 +8147,10 @@ mod tests_insert_text_nofixeol {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Go!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 13);
@@ -8196,8 +8193,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -8243,10 +8240,10 @@ mod tests_insert_text_nofixeol {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -8289,8 +8286,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -8334,10 +8331,10 @@ mod tests_insert_text_nofixeol {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -8391,7 +8388,7 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -8407,10 +8404,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -8460,7 +8457,7 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -8476,10 +8473,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("b".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -8526,7 +8523,7 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -8542,10 +8539,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("这个".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 2);
@@ -8581,8 +8578,8 @@ mod tests_insert_text_nofixeol {
 
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
-      let tree = data_access.tree.clone();
+      stateful.cursor_insert(&context, CursorInsertPayload::Tab);
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -8623,8 +8620,8 @@ mod tests_insert_text_nofixeol {
       buf_opts.set_shift_width(2);
       lock!(buf).set_options(&buf_opts);
 
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
-      let tree = data_access.tree.clone();
+      stateful.cursor_insert(&context, CursorInsertPayload::Tab);
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
@@ -8683,7 +8680,7 @@ mod tests_insert_text_nofixeol {
       "9th.\n",
       "10th.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -8699,10 +8696,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Hello, ".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -8745,8 +8742,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveBy((3, 2)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
@@ -8790,10 +8787,10 @@ mod tests_insert_text_nofixeol {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("World!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 16);
@@ -8837,10 +8834,10 @@ mod tests_insert_text_nofixeol {
     // Insert-4
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Let's go further!".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 33);
@@ -8883,8 +8880,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-5
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((20, 7)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((20, 7)));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 20);
@@ -8930,10 +8927,10 @@ mod tests_insert_text_nofixeol {
     // Insert-6
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 30);
@@ -8976,8 +8973,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-7
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(17));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveLeftBy(17));
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 13);
@@ -9021,10 +9018,10 @@ mod tests_insert_text_nofixeol {
     // Insert-8
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("abc".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
       assert_eq!(actual1.char_idx(), 16);
@@ -9078,7 +9075,7 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -9094,10 +9091,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("a".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -9144,7 +9141,7 @@ mod tests_insert_text_nofixeol {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -9160,10 +9157,10 @@ mod tests_insert_text_nofixeol {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("b".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
@@ -9208,7 +9205,7 @@ mod tests_insert_text_nofixeol {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -9235,14 +9232,14 @@ mod tests_insert_text_nofixeol {
         '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
         '■',
       ];
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((0, 1)));
       let text2 = CompactString::new(format!(
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 0);
@@ -9294,7 +9291,7 @@ mod tests_insert_text_nofixeol {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -9321,14 +9318,14 @@ mod tests_insert_text_nofixeol {
         '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
         '■',
       ];
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((0, 1)));
       let text2 = CompactString::new(format!(
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
+      stateful.cursor_insert(&context, CursorInsertPayload::Text(text2));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 0);
@@ -9371,8 +9368,8 @@ mod tests_insert_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 0)));
-      let tree = data_access.tree.clone();
+      stateful.cursor_move(&context, Operation::CursorMoveTo((72, 0)));
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 72);
@@ -9416,10 +9413,10 @@ mod tests_insert_text_nofixeol {
     // Insert-3
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("你好，Rsvim！".to_compact_string()),
       );
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 81);
@@ -9483,7 +9480,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -9494,9 +9491,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -9555,9 +9552,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -9616,9 +9613,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -9677,9 +9674,9 @@ mod tests_delete_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -9738,9 +9735,9 @@ mod tests_delete_text {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -9790,9 +9787,9 @@ mod tests_delete_text {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -9842,9 +9839,9 @@ mod tests_delete_text {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -9894,9 +9891,9 @@ mod tests_delete_text {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -9946,9 +9943,9 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -9998,9 +9995,9 @@ mod tests_delete_text {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -10053,9 +10050,9 @@ mod tests_delete_text {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -10128,7 +10125,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "* The extra.\r\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -10139,9 +10136,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -10200,9 +10197,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -10261,9 +10258,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -10322,9 +10319,9 @@ mod tests_delete_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -10383,9 +10380,9 @@ mod tests_delete_text {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -10435,9 +10432,9 @@ mod tests_delete_text {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -10487,9 +10484,9 @@ mod tests_delete_text {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -10539,9 +10536,9 @@ mod tests_delete_text {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -10591,9 +10588,9 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -10643,9 +10640,9 @@ mod tests_delete_text {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -10698,9 +10695,9 @@ mod tests_delete_text {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -10773,7 +10770,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "* The extra.\r",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -10784,9 +10781,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -10845,9 +10842,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -10906,9 +10903,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -10967,9 +10964,9 @@ mod tests_delete_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -11028,9 +11025,9 @@ mod tests_delete_text {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -11080,9 +11077,9 @@ mod tests_delete_text {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -11132,9 +11129,9 @@ mod tests_delete_text {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -11184,9 +11181,9 @@ mod tests_delete_text {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -11236,9 +11233,9 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -11288,9 +11285,9 @@ mod tests_delete_text {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -11343,9 +11340,9 @@ mod tests_delete_text {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -11406,7 +11403,7 @@ mod tests_delete_text {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -11417,9 +11414,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -11467,7 +11464,7 @@ mod tests_delete_text {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -11478,9 +11475,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -11539,7 +11536,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -11550,9 +11547,9 @@ mod tests_delete_text {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -11603,9 +11600,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -11656,9 +11653,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -11709,9 +11706,9 @@ mod tests_delete_text {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -11762,9 +11759,9 @@ mod tests_delete_text {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -11815,9 +11812,9 @@ mod tests_delete_text {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -11868,9 +11865,9 @@ mod tests_delete_text {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -11921,9 +11918,9 @@ mod tests_delete_text {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -11974,9 +11971,9 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -12016,9 +12013,9 @@ mod tests_delete_text {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -12061,9 +12058,9 @@ mod tests_delete_text {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -12120,7 +12117,7 @@ mod tests_delete_text {
       "If the 1/2 line length doesn't has big difference.\n",
       "The viewport start_line/start_column should not even change.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -12131,9 +12128,9 @@ mod tests_delete_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((77, 0)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((77, 0)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 63);
@@ -12179,9 +12176,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((49, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((49, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 49);
@@ -12227,9 +12224,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 48);
@@ -12292,7 +12289,7 @@ mod tests_delete_text {
   <a href="https://discord.gg/5KtRUCAByB"><img alt="discord" src="https://img.shields.io/discord/1220171472329379870?logo=discord&style=social&label=discord" /></a>
 "###,
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -12303,9 +12300,9 @@ mod tests_delete_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((1000, 4)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((1000, 4)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
       assert_eq!(actual2.char_idx(), 192);
@@ -12367,9 +12364,9 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((0, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 133);
@@ -12431,9 +12428,9 @@ mod tests_delete_text {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 132);
@@ -12495,9 +12492,9 @@ mod tests_delete_text {
 
     // Delete-4
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 131);
@@ -12559,9 +12556,9 @@ mod tests_delete_text {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -15);
+      stateful.cursor_delete(&context, -15);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 116);
@@ -12623,9 +12620,9 @@ mod tests_delete_text {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 115);
@@ -12687,9 +12684,9 @@ mod tests_delete_text {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 114);
@@ -12751,9 +12748,9 @@ mod tests_delete_text {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 113);
@@ -12836,7 +12833,7 @@ mod tests_delete_text_nofixeol {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -12851,9 +12848,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -12903,9 +12900,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -12955,9 +12952,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -13007,9 +13004,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -13059,9 +13056,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -13110,9 +13107,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -13161,9 +13158,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -13212,9 +13209,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -13263,9 +13260,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -13314,9 +13311,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -13365,9 +13362,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -13424,7 +13421,7 @@ mod tests_delete_text_nofixeol {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -13439,9 +13436,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -13489,7 +13486,7 @@ mod tests_delete_text_nofixeol {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -13504,9 +13501,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -13565,7 +13562,7 @@ mod tests_delete_text_nofixeol {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+    let (event, tree, bufs, buf, contents, context) = make_fsm(
       terminal_size,
       make_nofixeol_bufopts(),
       window_options,
@@ -13580,9 +13577,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-1
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -13633,9 +13630,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
+      stateful.cursor_move(&context, Operation::CursorMoveRightBy(7));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
@@ -13686,9 +13683,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -5);
+      stateful.cursor_delete(&context, -5);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
       assert_eq!(actual3.char_idx(), 2);
@@ -13739,9 +13736,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-4
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&context, Operation::CursorMoveDownBy(3));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 2);
@@ -13792,9 +13789,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-5
     {
-      stateful.cursor_delete(&data_access, -50);
+      stateful.cursor_delete(&context, -50);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -13845,9 +13842,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-6
     {
-      stateful.cursor_delete(&data_access, 60);
+      stateful.cursor_delete(&context, 60);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
@@ -13898,9 +13895,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-7
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -13951,9 +13948,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-8
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 5);
@@ -14004,9 +14001,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
+      stateful.cursor_move(&context, Operation::CursorMoveBy((500, 3)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 5);
       assert_eq!(actual1.char_idx(), 12);
@@ -14046,9 +14043,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-10
     {
-      stateful.cursor_delete(&data_access, 1);
+      stateful.cursor_delete(&context, 1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
@@ -14088,9 +14085,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-11
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
@@ -14144,7 +14141,7 @@ mod tests_delete_text_nofixeol {
       "If the 1/2 line length doesn't has big difference.\n",
       "The viewport start_line/start_column should not even change.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, context) =
       make_fsm(terminal_size, make_nofixeol_bufopts(), window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -14155,9 +14152,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((77, 0)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((77, 0)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 0);
       assert_eq!(actual2.char_idx(), 63);
@@ -14203,9 +14200,9 @@ mod tests_delete_text_nofixeol {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveTo((49, 1)));
+      stateful.cursor_move(&context, Operation::CursorMoveTo((49, 1)));
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 49);
@@ -14251,9 +14248,9 @@ mod tests_delete_text_nofixeol {
 
     // Delete-3
     {
-      stateful.cursor_delete(&data_access, -1);
+      stateful.cursor_delete(&context, -1);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 1);
       assert_eq!(actual2.char_idx(), 48);
