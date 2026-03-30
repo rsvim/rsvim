@@ -47,7 +47,7 @@ pub fn make_fsm(
 
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
   let (master_tx, _master_rx) = unbounded_channel();
-  let data_access = StateContext::new(
+  let context = StateContext::new(
     tree.clone(),
     bufs.clone(),
     cmdline_text.clone(),
@@ -55,7 +55,7 @@ pub fn make_fsm(
     jsrt_forwarder_tx,
   );
 
-  (event, tree, bufs, buf, cmdline_text, data_access)
+  (event, tree, bufs, buf, cmdline_text, context)
 }
 
 pub fn make_fsm_default_bufopts(
