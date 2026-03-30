@@ -7,7 +7,7 @@ use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::hl::ColorScheme;
-use crate::hl::default_colorscheme;
+use crate::hl::ColorSchemeArc;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::Syntax;
@@ -40,7 +40,7 @@ pub fn make_buffer_from_lines(
     None,
     None,
     None,
-    default_colorscheme(),
+    None,
   );
   Buffer::to_arc(buf)
 }
@@ -50,7 +50,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   opts: BufferOptions,
   tmpfile: &NamedTempFile,
   syntax: Syntax,
-  colorscheme: ColorScheme,
+  colorscheme: ColorSchemeArc,
 ) -> BufferArc {
   let mut rpb: RopeBuilder = RopeBuilder::new();
 
