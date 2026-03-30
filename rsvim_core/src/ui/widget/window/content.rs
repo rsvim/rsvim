@@ -40,7 +40,7 @@ impl WindowContent {
 }
 
 impl Widgetable for WindowContent {
-  fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
+  fn draw(&self, canvas: &mut Canvas, _context: &WidgetContext) {
     let actual_shape = self.actual_shape();
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
