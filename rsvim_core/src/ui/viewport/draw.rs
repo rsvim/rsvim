@@ -20,7 +20,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   syntax: &Option<Syntax>,
-  colorscheme: &Option<ColorScheme>,
+  colorscheme: &ColorScheme,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -43,15 +43,13 @@ pub fn draw(
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
   let set_bg = |cell: &mut Cell| {
-    if let Some(colorscheme) = colorscheme {
-      if cell.symbol().chars().any(char_is_whitespace) {
-        cell.set_fg(Color::Reset);
-      } else {
-        cell.set_fg(colorscheme.ui_text());
-      }
-      cell.set_bg(colorscheme.ui_background());
-      cell.set_attrs(Attributes::none());
+    if cell.symbol().chars().any(char_is_whitespace) {
+      cell.set_fg(Color::Reset);
+    } else {
+      cell.set_fg(colorscheme.ui_text());
     }
+    cell.set_bg(colorscheme.ui_background());
+    cell.set_attrs(Attributes::none());
   };
 
   // If viewport is empty (i.e. no lines), it skips this part.
@@ -155,7 +153,6 @@ pub fn draw(
 
               if let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
-                && let Some(colorscheme) = colorscheme
                 && syn_highlight_capture
                   .as_ref()
                   .nodes()
@@ -200,7 +197,7 @@ pub fn draw(
                     cell.set_attrs(colorscheme_hl.attrs);
                   }
                   cell.set_bg(colorscheme_hl.bg.unwrap());
-                } else if let Some(colorscheme) = colorscheme {
+                } else {
                   if cell.symbol().chars().any(char_is_whitespace) {
                     cell.set_fg(Color::Reset);
                   } else {

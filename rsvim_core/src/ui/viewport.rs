@@ -776,7 +776,7 @@ impl Viewport {
     &self,
     text: &Text,
     syntax: &Option<Syntax>,
-    colorscheme: &Option<ColorScheme>,
+    colorscheme: &ColorScheme,
     actual_shape: &U16Rect,
     canvas: &mut Canvas,
   ) {
