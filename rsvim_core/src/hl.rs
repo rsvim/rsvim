@@ -484,7 +484,7 @@ impl ColorScheme {
 #[derive(Debug)]
 pub struct ColorSchemeManager {
   // Maps colorscheme name => colorscheme
-  colors: FoldMap<CompactString, ColorScheme>,
+  colors: FoldMap<CompactString, ColorSchemeArc>,
 }
 
 impl Default for ColorSchemeManager {
@@ -494,13 +494,13 @@ impl Default for ColorSchemeManager {
 }
 
 pub type ColorSchemeManagerKeys<'a> =
-  std::collections::hash_map::Keys<'a, CompactString, ColorScheme>;
+  std::collections::hash_map::Keys<'a, CompactString, ColorSchemeArc>;
 pub type ColorSchemeManagerValues<'a> =
-  std::collections::hash_map::Values<'a, CompactString, ColorScheme>;
+  std::collections::hash_map::Values<'a, CompactString, ColorSchemeArc>;
 pub type ColorSchemeManagerIter<'a> =
-  std::collections::hash_map::Iter<'a, CompactString, ColorScheme>;
+  std::collections::hash_map::Iter<'a, CompactString, ColorSchemeArc>;
 
-fn default_colorscheme() -> ColorScheme {
+fn default_colorscheme() -> ColorSchemeArc {
   let config = toml::toml! {
     boolean = "magenta"
     comment = "cyan"
@@ -529,7 +529,8 @@ fn default_colorscheme() -> ColorScheme {
     text = "white"
     background = "black"
   };
-  ColorScheme::from_toml(DEFAULT, config).unwrap()
+  let cs = ColorScheme::from_toml(DEFAULT, config).unwrap();
+  ColorScheme::to_arc(cs)
 }
 
 impl ColorSchemeManager {
@@ -547,8 +548,8 @@ impl ColorSchemeManager {
     self.colors.len()
   }
 
-  pub fn get(&self, id: &str) -> Option<&ColorScheme> {
-    self.colors.get(id)
+  pub fn get(&self, id: &str) -> Option<ColorSchemeArc> {
+    self.colors.get(id).cloned()
   }
 
   pub fn contains_key(&self, id: &str) -> bool {
@@ -558,12 +559,12 @@ impl ColorSchemeManager {
   pub fn insert(
     &mut self,
     key: CompactString,
-    value: ColorScheme,
-  ) -> Option<ColorScheme> {
+    value: ColorSchemeArc,
+  ) -> Option<ColorSchemeArc> {
     self.colors.insert(key, value)
   }
 
-  pub fn remove(&mut self, id: &str) -> Option<ColorScheme> {
+  pub fn remove(&mut self, id: &str) -> Option<ColorSchemeArc> {
     self.colors.remove(id)
   }
 

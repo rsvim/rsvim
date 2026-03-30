@@ -317,7 +317,7 @@ impl BufferManager {
         None,
         None,
         syntax,
-        colorscheme.cloned(),
+        colorscheme,
       )
     };
 
@@ -585,7 +585,7 @@ impl BufferManager {
     }
   }
 
-  pub fn colorscheme(&self) -> &ColorScheme {
+  pub fn colorscheme(&self) -> ColorSchemeArc {
     self.colorscheme_manager.get(&self.color_name).unwrap()
   }
 }
