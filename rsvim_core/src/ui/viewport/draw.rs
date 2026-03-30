@@ -2,7 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::buf::unicode::char_is_whitespace;
-use crate::hl::ColorScheme;
+use crate::hl::ColorSchemeArc;
 use crate::hl::Highlight;
 use crate::prelude::*;
 use crate::syntax::Syntax;
@@ -20,7 +20,7 @@ pub fn draw(
   viewport: &Viewport,
   text: &Text,
   syntax: &Option<Syntax>,
-  colorscheme: &ColorScheme,
+  colorscheme: &Option<ColorSchemeArc>,
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
@@ -43,13 +43,15 @@ pub fn draw(
   let mut last_hl_capture: Option<SyntaxCaptureValue> = None;
 
   let set_bg = |cell: &mut Cell| {
-    if cell.symbol().chars().any(char_is_whitespace) {
-      cell.set_fg(Color::Reset);
-    } else {
-      cell.set_fg(colorscheme.ui_text());
+    if let Some(colorscheme) = colorscheme {
+      if cell.symbol().chars().any(char_is_whitespace) {
+        cell.set_fg(Color::Reset);
+      } else {
+        cell.set_fg(colorscheme.ui_text());
+      }
+      cell.set_bg(colorscheme.ui_background());
+      cell.set_attrs(Attributes::none());
     }
-    cell.set_bg(colorscheme.ui_background());
-    cell.set_attrs(Attributes::none());
   };
 
   // If viewport is empty (i.e. no lines), it skips this part.
@@ -157,6 +159,7 @@ pub fn draw(
                   .as_ref()
                   .nodes()
                   .contains_key(&cap_point)
+                && let Some(colorscheme) = colorscheme
               {
                 let hl_caps = syn_highlight_capture
                   .as_ref()
@@ -197,7 +200,7 @@ pub fn draw(
                     cell.set_attrs(colorscheme_hl.attrs);
                   }
                   cell.set_bg(colorscheme_hl.bg.unwrap());
-                } else {
+                } else if let Some(colorscheme) = colorscheme {
                   if cell.symbol().chars().any(char_is_whitespace) {
                     cell.set_fg(Color::Reset);
                   } else {
