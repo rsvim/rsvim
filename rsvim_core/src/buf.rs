@@ -584,7 +584,7 @@ impl BufferManager {
     }
   }
 
-  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
+  pub fn colorscheme(&self) -> Option<&ColorSchemeArc> {
     self.colorscheme_manager.get(&self.color_name)
   }
 }
