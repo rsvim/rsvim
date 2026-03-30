@@ -6,6 +6,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone)]
@@ -39,7 +40,7 @@ impl WindowContent {
 }
 
 impl Widgetable for WindowContent {
-  fn draw(&self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
     let actual_shape = self.actual_shape();
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
