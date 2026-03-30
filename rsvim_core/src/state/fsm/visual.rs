@@ -11,10 +11,10 @@ use crossterm::event::Event;
 pub struct Visual {}
 
 impl Stateful for Visual {
-  fn handle(&self, _data_access: StateContext, _event: Event) -> State {
+  fn handle(&self, _context: StateContext, _event: Event) -> State {
     State::Visual(Visual::default())
   }
-  fn handle_op(&self, _data_access: StateContext, _op: Operation) -> State {
+  fn handle_op(&self, _context: StateContext, _op: Operation) -> State {
     State::Visual(Visual::default())
   }
 }
