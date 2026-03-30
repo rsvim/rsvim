@@ -68,7 +68,7 @@ pub struct Buffer {
   syntax: Option<Syntax>,
 
   // colorscheme/highlight
-  colorscheme: ColorSchemeArc,
+  colorscheme: Option<ColorSchemeArc>,
 
   // Text editing version
   editing_version: isize,
@@ -89,7 +89,7 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
     syntax: Option<Syntax>,
-    colorscheme: ColorSchemeArc,
+    colorscheme: Option<ColorSchemeArc>,
   ) -> Self {
     let text = Text::new(opts, canvas_size, rope);
     Self {
@@ -584,12 +584,8 @@ impl BufferManager {
     }
   }
 
-  pub fn colorscheme(&self) -> ColorSchemeArc {
-    self
-      .colorscheme_manager
-      .get(&self.color_name)
-      .unwrap()
-      .clone()
+  pub fn colorscheme(&self) -> Option<&ColorSchemeArc> {
+    self.colorscheme_manager.get(&self.color_name).unwrap()
   }
 }
 // Options }
