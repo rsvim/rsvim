@@ -153,13 +153,13 @@ pub fn draw(
             if unicode_width > 0 {
               let cap_point = SyntaxCapturePoint { line_idx, char_idx };
 
-              if let Some(syntax) = syntax
+              if let Some(colorscheme) = colorscheme
+                && let Some(syntax) = syntax
                 && let Some(syn_highlight_capture) = syntax.highlight_capture()
                 && syn_highlight_capture
                   .as_ref()
                   .nodes()
                   .contains_key(&cap_point)
-                && let Some(colorscheme) = colorscheme
               {
                 let hl_caps = syn_highlight_capture
                   .as_ref()
