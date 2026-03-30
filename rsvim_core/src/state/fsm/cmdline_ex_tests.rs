@@ -80,7 +80,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, context) =
       make_fsm_with_cmdline_default_bufopts(
         terminal_size,
         window_options,
@@ -95,9 +95,9 @@ mod tests_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_cmdline_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&context);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -134,11 +134,11 @@ mod tests_goto_normal_mode {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -177,9 +177,9 @@ mod tests_goto_normal_mode {
 
     // Goto Normal-2
     {
-      stateful.goto_normal_mode(&data_access);
+      stateful.goto_normal_mode(&context);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -225,7 +225,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, context) =
       make_fsm_with_cmdline(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -236,9 +236,9 @@ mod tests_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_cmdline_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&context);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -275,11 +275,11 @@ mod tests_goto_normal_mode {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text("Bye".to_compact_string()),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
@@ -318,9 +318,9 @@ mod tests_goto_normal_mode {
 
     // Goto Normal-2
     {
-      stateful.goto_normal_mode(&data_access);
+      stateful.goto_normal_mode(&context);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -367,7 +367,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (event, tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, context) =
       make_fsm_with_cmdline_default_bufopts(
         terminal_size,
         window_options,
@@ -382,9 +382,9 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_cmdline_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&context);
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
@@ -421,13 +421,13 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     // Insert-1
     {
       stateful.cursor_insert(
-        &data_access,
+        &context,
         CursorInsertPayload::Text(
           "Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7".to_compact_string(),
         ),
       );
 
-      let tree = data_access.tree.clone();
+      let tree = context.tree.clone();
       let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 34);
@@ -466,7 +466,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Goto Normal-2
     {
-      let cmdline_input_content = stateful._goto_normal_mode_impl(&data_access);
+      let cmdline_input_content = stateful._goto_normal_mode_impl(&context);
       info!("cmdline content:{cmdline_input_content:?}");
       assert_eq!(
         "Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7",
