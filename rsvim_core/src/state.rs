@@ -81,7 +81,7 @@ pub trait Stateful {
 macro_rules! stateful_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, context: StateDataAccess, event: Event) -> State {
+      fn handle(&self, context: StateContext, event: Event) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle(context, event),
@@ -89,7 +89,7 @@ macro_rules! stateful_enum_impl {
         }
       }
 
-      fn handle_op(&self, context: StateDataAccess, op: Operation) -> State {
+      fn handle_op(&self, context: StateContext, op: Operation) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle_op(context, op),
