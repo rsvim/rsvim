@@ -154,6 +154,7 @@ v8 = { workspace = true, default-features = false, features = [
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
 criterion = { workspace = true, features = ["async_tokio"] }
+fastrand = { workspace = true }
 regex = { workspace = true }
 unicode-width = { workspace = true }
 
