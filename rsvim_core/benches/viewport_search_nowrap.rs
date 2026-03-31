@@ -28,19 +28,24 @@ const BIG_TERM_WIDTH: u16 = 200;
 const BIG_TERM_HEIGHT: u16 = 50;
 const SMALL_TERM_WIDTH: u16 = 45;
 const SMALL_TERM_HEIGHT: u16 = 12;
-const FILENAME1: &str =
-  "../../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h";
-const FILENAME2: &str =
-  "../../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h";
+const FILENAME1: &str = "dcn_3_2_0_sh_mask.h";
+const FILENAME2: &str = "MIMXRT1176_cm7.h";
+const FILETEXT1: &str = include_str!(concat!(
+  env!("CARGO_MANIFEST_DIR"),
+  "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
+));
+const FILETEXT2: &str = include_str!(concat!(
+  env!("CARGO_MANIFEST_DIR"),
+  "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
+));
 const REPEAT: usize = 1000;
 
 fn make_buffer(
-  filename: &str,
+  filetext: &str,
   buffer_opts: BufferOptions,
   canvas_size: U16Size,
 ) -> BufferArc {
-  let text = std::fs::read_to_string(filename).unwrap();
-  let rop = Rope::from_str(&text);
+  let rop = Rope::from_str(filetext);
   let buffer = Buffer::_new(
     buffer_opts,
     canvas_size,
@@ -95,9 +100,9 @@ fn bench_search_nowrap(c: &mut Criterion) {
 
   let mut g = c.benchmark_group("bench_search_nowrap");
 
-  let run_bench = |width: &u16, height: &u16, file: &str| {
+  let run_bench = |width: &u16, height: &u16, filetext: &str| {
     let canvas_size = size!(*width, *height);
-    let buffer = make_buffer(file, buffer_opts, canvas_size);
+    let buffer = make_buffer(filetext, buffer_opts, canvas_size);
     let (mut tree, window_id) = make_tree(&canvas_size, window_opts, &buffer);
     let buffer = lock!(buffer);
     for _i in 0..REPEAT {
@@ -148,20 +153,28 @@ fn bench_search_nowrap(c: &mut Criterion) {
 
   for canvas_width in [BIG_TERM_WIDTH, SMALL_TERM_WIDTH] {
     for canvas_height in [BIG_TERM_HEIGHT, SMALL_TERM_HEIGHT] {
-      for filename in [FILENAME1, FILENAME2] {
+      for (filename, filetext) in
+        [(FILENAME1, FILETEXT1), (FILENAME2, FILETEXT2)]
+      {
         let benchmark_id_param = format!(
           "width/height={}/{} file={}",
           canvas_width, canvas_height, filename
         );
         let benchmark_id =
           BenchmarkId::new("Viewport::search wrap=false", &benchmark_id_param);
-        let params = (canvas_width, canvas_height, filename);
+        let params = (canvas_width, canvas_height, filename, filetext);
         g.bench_with_input(
           benchmark_id,
           &params,
-          |b, (canvas_width_param, canvas_height_param, filename_param)| {
+          |b,
+           (
+            canvas_width_param,
+            canvas_height_param,
+            filename_param,
+            filetext_param,
+          )| {
             b.iter(|| {
-              run_bench(canvas_width_param, canvas_height_param, filename_param)
+              run_bench(canvas_width_param, canvas_height_param, filetext_param)
             })
           },
         );
