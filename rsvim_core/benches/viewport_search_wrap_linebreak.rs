@@ -22,6 +22,7 @@ use rsvim_core::ui::widget::window::opt::WindowOptions;
 use rsvim_core::ui::widget::window::opt::WindowOptionsBuilder;
 use std::hint::black_box;
 use std::sync::Arc;
+use std::time::Duration;
 use taffy::Style;
 
 const BIG_TERM_WIDTH: u16 = 200;
