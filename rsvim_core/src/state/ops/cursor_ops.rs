@@ -345,13 +345,6 @@ pub fn raw_viewport_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  // let max_len_chars = _max_len_chars_since_line(
-  //   text,
-  //   line_idx,
-  //   tree.editable_actual_shape(id).height(),
-  // );
-  // let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
-
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
   if line_idx == viewport.start_line_idx()
