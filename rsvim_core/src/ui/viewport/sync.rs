@@ -709,7 +709,7 @@ fn wrap_linebreak_sync(
 
 type WrapSyncFn = fn(
   /* text */ &Text,
-  /* window_actual_size */ &U16Size,
+  /* size */ &U16Size,
   /* start_line */ usize,
   /* start_column */ usize,
 ) -> (
