@@ -19,26 +19,24 @@ version = "0.1.2"
 [workspace.dependencies]
 rsvim_core = { version = "0.1.2", path = "./rsvim_core" }
 
-# anyhow = "1"
 arcstr = { version = "1.2", features = ["std"] }
 ascii = "1.1"
 assert_fs = "1.1"
 async-trait = "0.1"
 bitflags = "2.11"
-# bytes = { version = "1" }
-# bumpalo = { version = "3.20", features = ["collections"] }
 compact_str = "0.9"
+criterion = { version = "0.8", features = ["async_tokio"] }
 crossterm = { version = "0.29", features = ["event-stream"] }
 derive_builder = "0.20"
 dirs = "6.0"
 encoding_rs = "0.8"
 env_filter = "1.0"
+fastrand = "2.3"
 fern = "0.7"
 foldhash = "0.2"
 futures = "0.3"
 geo = "0.32"
 git2 = "0.20"
-# heed = "0.20.5"
 icu = "2"
 itertools = "0.14"
 jiff = "0.2"
@@ -56,12 +54,10 @@ oxc_resolver = "11.19"
 paste = "1.0"
 path-absolutize = "3.1"
 postcard = { version = "1.1", default-features = false, features = ["use-std"] }
-# rand = "0.8.5"
 regex = "1.12"
 roaring = "0.11"
 ropey = { version = "1.6", default-features = false }
 serde = { version = "1", features = ["derive"] }
-# serde_json = "1"
 smallvec = "1.15"
 strum = "0.28"
 strum_macros = "0.28"
@@ -70,16 +66,7 @@ thiserror = "2"
 tikv-jemallocator = "0.6"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["full"] }
-# tokio-stream = { version = "0.1.16", features = ["full"] }
 toml = { version = "1.1", features = ["fast_hash"] }
-# tracing = { version = "0.1", features = [
-#   "max_level_trace",
-#   "release_max_level_error",
-# ] }
-# tracing-appender = { version = "0.2" }
-# tracing-subscriber = { version = "0.3", features = [
-#   "env-filter",
-# ] }
 tree-sitter = "0.26"
 tree-sitter-c = "0.24"
 tree-sitter-html = "0.23"
@@ -88,8 +75,6 @@ tree-sitter-md = "0.5"
 tree-sitter-rust = "0.24"
 tree-sitter-toml-ng = "0.7"
 unicode-width = "0.2"
-# url = "2.5.7"
-# zstd = "0.13.3"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 

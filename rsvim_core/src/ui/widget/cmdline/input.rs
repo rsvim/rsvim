@@ -7,6 +7,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone)]
@@ -39,14 +40,21 @@ impl CmdlineInput {
 }
 
 impl Widgetable for CmdlineInput {
-  fn draw(&self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
     if self.enabled() {
       let actual_shape = self.actual_shape();
       let cmdline_text = self.cmdline_text.upgrade().unwrap();
       let cmdline_text = lock!(cmdline_text);
       let viewport = self.viewport.upgrade().unwrap();
+      let buffer_manager = lock!(context.buffer_manager);
 
-      viewport.draw(cmdline_text.input(), &None, &None, &actual_shape, canvas);
+      viewport.draw(
+        cmdline_text.input(),
+        &None,
+        &buffer_manager.colorscheme(),
+        &actual_shape,
+        canvas,
+      );
     }
   }
 }
