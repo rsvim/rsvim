@@ -22385,7 +22385,7 @@ mod tests_search_fuzz {
       "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
     ));
 
-    let mut rng = fastrand::Rng::new();
+    let mut rng = rand::rng();
 
     for width in [45, 200] {
       for height in [12, 50] {
@@ -22400,8 +22400,8 @@ mod tests_search_fuzz {
 
           for _i in 0..1000 {
             let buf = lock!(buf);
-            let target_cursor_line = rng.usize(..);
-            let target_cursor_char = rng.usize(..);
+            let target_cursor_line = rng.random::<usize>();
+            let target_cursor_char = rng.random::<usize>();
             let target_cursor_line = std::cmp::min(
               target_cursor_line,
               buf.text().rope().len_lines().saturating_sub(1),
