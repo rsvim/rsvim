@@ -86,7 +86,6 @@ path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
-rand = { workspace = true }
 roaring = { workspace = true }
 ropey = { workspace = true, default-features = false }
 serde = { workspace = true, features = ["derive"] }
@@ -149,7 +148,7 @@ v8 = { workspace = true, default-features = false, features = [
 [dev-dependencies]
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
-fastrand = "2.3"
+fastrand = { workspace = true }
 regex = { workspace = true }
 unicode-width = { workspace = true }
 

@@ -22371,7 +22371,6 @@ mod tests_search_horizontally_wrap_linebreak {
 
 mod tests_search_fuzz {
   use super::*;
-  use rand::prelude::*;
 
   #[test]
   fn nowrap() {
@@ -22386,7 +22385,7 @@ mod tests_search_fuzz {
       "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
     ));
 
-    let mut rng = rand::rng();
+    let mut rng = fastrand::Rng::new();
 
     for width in [45, 200] {
       for height in [12, 50] {
@@ -22401,8 +22400,8 @@ mod tests_search_fuzz {
 
           for _i in 0..1000 {
             let buf = lock!(buf);
-            let target_cursor_line = rng.random::<u32>() as usize;
-            let target_cursor_char = rng.random::<u32>() as usize;
+            let target_cursor_line = rng.usize(..);
+            let target_cursor_char = rng.usize(..);
             let target_cursor_line = target_cursor_line
               % buf.text().rope().len_lines().saturating_sub(1);
             let target_cursor_char = std::cmp::min(
