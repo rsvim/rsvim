@@ -22372,24 +22372,24 @@ mod tests_search_horizontally_wrap_linebreak {
 mod tests_search_fuzz {
   use super::*;
 
+  const FILETEXT1: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
+  ));
+  const FILETEXT2: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
+  ));
+
   #[test]
   fn nowrap() {
     test_log_init();
-
-    let filetext1 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
-    ));
-    let filetext2 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
-    ));
 
     let mut rng = fastrand::Rng::new();
 
     for width in [45, 200] {
       for height in [12, 50] {
-        for filetext in [filetext1, filetext2] {
+        for filetext in [FILETEXT1, FILETEXT2] {
           let canvas_size = size!(width, height);
           let buf_opts = BufferOptionsBuilder::default().build().unwrap();
           let win_opts = make_nowrap();
@@ -22462,20 +22462,11 @@ mod tests_search_fuzz {
   fn wrap_nolinebreak() {
     test_log_init();
 
-    let filetext1 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
-    ));
-    let filetext2 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
-    ));
-
     let mut rng = fastrand::Rng::new();
 
     for width in [45, 200] {
       for height in [12, 50] {
-        for filetext in [filetext1, filetext2] {
+        for filetext in [FILETEXT1, FILETEXT2] {
           let canvas_size = size!(width, height);
           let buf_opts = BufferOptionsBuilder::default().build().unwrap();
           let win_opts = make_wrap_nolinebreak();
@@ -22548,20 +22539,11 @@ mod tests_search_fuzz {
   fn wrap_linebreak() {
     test_log_init();
 
-    let filetext1 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
-    ));
-    let filetext2 = include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
-    ));
-
     let mut rng = fastrand::Rng::new();
 
     for width in [45, 200] {
       for height in [12, 50] {
-        for filetext in [filetext1, filetext2] {
+        for filetext in [FILETEXT1, FILETEXT2] {
           let canvas_size = size!(width, height);
           let buf_opts = BufferOptionsBuilder::default().build().unwrap();
           let win_opts = make_wrap_linebreak();
