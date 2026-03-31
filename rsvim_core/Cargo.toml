@@ -163,4 +163,4 @@ workspace = true
 
 [[bench]]
 harness = false
-name = "viewport_search"
+name = "viewport_search_nowrap"
