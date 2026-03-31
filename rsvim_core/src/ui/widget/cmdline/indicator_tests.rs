@@ -2,6 +2,7 @@
 
 use super::indicator::*;
 use crate::buf::BufferArc;
+use crate::buf::BufferManager;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::prelude::*;
@@ -14,6 +15,7 @@ use crate::ui::tree::Tree;
 use crate::ui::tree::TreeContext;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
@@ -32,7 +34,9 @@ fn make_canvas(
   cmdline_indicator: &CmdlineIndicator,
 ) -> Canvas {
   let mut canvas = Canvas::new(terminal_size);
-  cmdline_indicator.draw(&mut canvas);
+  let buffer_manager = BufferManager::to_arc(BufferManager::new());
+  let context = WidgetContext::new(buffer_manager);
+  cmdline_indicator.draw(&mut canvas, &context);
   canvas
 }
 

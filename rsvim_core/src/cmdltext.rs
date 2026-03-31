@@ -2,12 +2,15 @@
 
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
+use crate::hl::ColorSchemeArc;
 use crate::prelude::*;
 use ropey::Rope;
 use std::fmt::Debug;
 
 /// Temporary contents except buffers.
 pub struct CmdlineText {
+  colorscheme: Option<ColorSchemeArc>,
+
   // Cmdline input text
   input: Text,
 
@@ -21,13 +24,27 @@ pub struct CmdlineText {
 arc_mutex_ptr!(CmdlineText);
 
 impl CmdlineText {
-  pub fn new(canvas_size: U16Size) -> Self {
+  pub fn new(
+    canvas_size: U16Size,
+    colorscheme: Option<ColorSchemeArc>,
+  ) -> Self {
     let cmdline_opts = BufferOptionsBuilder::default().build().unwrap();
     Self {
+      colorscheme,
       input: Text::new(cmdline_opts, canvas_size, Rope::new()),
       message: Text::new(cmdline_opts, canvas_size, Rope::new()),
       message_history: RingBuffer::new(500),
     }
+  }
+
+  /// Global colorscheme
+  pub fn colorscheme(&self) -> &Option<ColorSchemeArc> {
+    &self.colorscheme
+  }
+
+  /// Set global colorscheme
+  pub fn set_colorscheme(&mut self, value: Option<ColorSchemeArc>) {
+    self.colorscheme = value;
   }
 
   /// Command-line input content
