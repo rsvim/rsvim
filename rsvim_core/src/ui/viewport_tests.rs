@@ -22380,7 +22380,7 @@ mod tests_search_fuzz {
     env!("CARGO_MANIFEST_DIR"),
     "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
   ));
-  const REPEAT: usize = 100;
+  const REPEAT: usize = 500;
 
   #[test]
   fn nowrap() {
