@@ -22,6 +22,7 @@ use rsvim_core::ui::widget::window::opt::WindowOptions;
 use rsvim_core::ui::widget::window::opt::WindowOptionsBuilder;
 use std::hint::black_box;
 use std::sync::Arc;
+use std::time::Duration;
 use taffy::Style;
 
 const BIG_TERM_WIDTH: u16 = 200;
@@ -39,6 +40,7 @@ const FILETEXT2: &str = include_str!(concat!(
   "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
 ));
 const REPEAT: usize = 100;
+const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
 
 fn make_buffer(
   filetext: &str,
@@ -166,7 +168,7 @@ fn bench_search_wrap_linebreak(c: &mut Criterion) {
           &benchmark_id_param,
         );
         let params = (canvas_width, canvas_height, filetext);
-        g.bench_with_input(
+        g.measurement_time(BENCH_MEASUREMENT_TIME).bench_with_input(
           benchmark_id,
           &params,
           |b, (canvas_width_param, canvas_height_param, filetext_param)| {
