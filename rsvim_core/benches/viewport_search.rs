@@ -6,7 +6,6 @@
 use criterion::Criterion;
 use criterion::criterion_group;
 use criterion::criterion_main;
-use itertools::Itertools;
 use ropey::Rope;
 use rsvim_core::buf::Buffer;
 use rsvim_core::buf::BufferArc;
@@ -23,8 +22,6 @@ use rsvim_core::ui::widget::window::opt::WindowOptionsBuilder;
 use std::hint::black_box;
 use std::sync::Arc;
 use taffy::Style;
-use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
 
 const BIG_TERM_WIDTH: u16 = 200;
 const BIG_TERM_HEIGHT: u16 = 50;
@@ -198,5 +195,4 @@ fn bench_search_nowrap_bigterm2(c: &mut Criterion) {
 }
 
 criterion_group!(benches, bench_search_nowrap_bigterm1);
-criterion_group!(benches, bench_search_nowrap_bigterm2);
 criterion_main!(benches);
