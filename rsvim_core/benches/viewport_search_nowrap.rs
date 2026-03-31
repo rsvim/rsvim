@@ -162,17 +162,11 @@ fn bench_search_nowrap(c: &mut Criterion) {
         );
         let benchmark_id =
           BenchmarkId::new("Viewport::search wrap=false", &benchmark_id_param);
-        let params = (canvas_width, canvas_height, filename, filetext);
+        let params = (canvas_width, canvas_height, filetext);
         g.bench_with_input(
           benchmark_id,
           &params,
-          |b,
-           (
-            canvas_width_param,
-            canvas_height_param,
-            filename_param,
-            filetext_param,
-          )| {
+          |b, (canvas_width_param, canvas_height_param, filetext_param)| {
             b.iter(|| {
               run_bench(canvas_width_param, canvas_height_param, filetext_param)
             })
