@@ -22374,9 +22374,51 @@ mod tests_search_fuzz {
 
   #[test]
   fn nowrap() {
-      let text = include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/src/js/runtime/00__web.js"
-      )),
+    test_log_init();
+
+    let canvas_size = size!(200, 50);
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+    let filetext = include_str!(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
+    ));
+    let buf = make_buffer_from_lines(canvas_size, buf_opts, vec![filetext]);
+    let (mut tree, window_id) = make_window(canvas_size, buf.clone(), win_opts);
+
+    for _i in 0..1000 {
+      let buf = lock!(buf);
+      let target_cursor_line = fastrand::usize(..);
+      let target_cursor_char = fastrand::usize(..);
+
+      let old_viewport = tree.window(window_id).unwrap().viewport();
+      let old_cursor_viewport =
+        tree.window(window_id).unwrap().cursor_viewport();
+      let (start_line, start_column) = old_viewport.search(
+        &old_cursor_viewport,
+        &win_opts,
+        buf.text(),
+        &tree.window(window_id).unwrap().actual_shape().size(),
+        target_cursor_line,
+        target_cursor_char,
+      );
+      let new_viewport = Viewport::view(
+        &win_opts,
+        buf.text(),
+        &tree.window(window_id).unwrap().actual_shape().size(),
+        start_line,
+        start_column,
+      );
+      let new_cursor_viewport =
+        CursorViewport::to_arc(CursorViewport::from_position(
+          &new_viewport,
+          buf.text(),
+          &tree.window(window_id).unwrap().actual_shape().size(),
+          target_cursor_line,
+          target_cursor_char,
+        ));
+      tree.set_editable_cursor_viewport(window_id, new_cursor_viewport);
+      tree.set_editable_viewport(window_id, Viewport::to_arc(new_viewport));
+    }
   }
 }
