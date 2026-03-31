@@ -95,8 +95,11 @@ fn make_tree(
 
 fn bench_search_wrap_nolinebreak(c: &mut Criterion) {
   let buffer_opts = BufferOptionsBuilder::default().build().unwrap();
-  let window_opts =
-    WindowOptionsBuilder::default().wrap(false).build().unwrap();
+  let window_opts = WindowOptionsBuilder::default()
+    .wrap(true)
+    .line_break(false)
+    .build()
+    .unwrap();
 
   let mut g = c.benchmark_group("bench_search_wrap_nolinebreak");
 
