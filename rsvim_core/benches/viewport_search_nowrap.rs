@@ -103,6 +103,17 @@ fn bench_search_nowrap(c: &mut Criterion) {
     for _i in 0..REPEAT {
       let target_cursor_line = fastrand::usize(..);
       let target_cursor_char = fastrand::usize(..);
+      let target_cursor_line =
+        target_cursor_line % buffer.text().rope().len_lines();
+      let target_cursor_char = std::cmp::min(
+        buffer.text().rope().line(target_cursor_line).len_chars(),
+        target_cursor_char
+          % (buffer
+            .text()
+            .last_char_idx_on_line_exclude_eol(target_cursor_line)
+            .unwrap_or(0)
+            + 2),
+      );
 
       let old_viewport = tree.window(window_id).unwrap().viewport();
       let old_cursor_viewport =
