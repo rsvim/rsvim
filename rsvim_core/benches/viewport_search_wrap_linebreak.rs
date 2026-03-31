@@ -31,6 +31,7 @@ const SMALL_TERM_WIDTH: u16 = 45;
 const SMALL_TERM_HEIGHT: u16 = 12;
 const FILENAME1: &str = "dcn_3_2_0_sh_mask.h";
 const FILENAME2: &str = "MIMXRT1176_cm7.h";
+const FILENAME3: &str = "d3.min.js";
 const FILETEXT1: &str = include_str!(concat!(
   env!("CARGO_MANIFEST_DIR"),
   "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
@@ -38,6 +39,10 @@ const FILETEXT1: &str = include_str!(concat!(
 const FILETEXT2: &str = include_str!(concat!(
   env!("CARGO_MANIFEST_DIR"),
   "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
+));
+const FILETEXT3: &str = include_str!(concat!(
+  env!("CARGO_MANIFEST_DIR"),
+  "/../tests_and_benchmarks/benches/bigfiles/d3.min.js"
 ));
 const REPEAT: usize = 100;
 const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
@@ -158,15 +163,15 @@ fn bench_search_wrap_linebreak(c: &mut Criterion) {
 
   for canvas_width in [BIG_TERM_WIDTH, SMALL_TERM_WIDTH] {
     for canvas_height in [BIG_TERM_HEIGHT, SMALL_TERM_HEIGHT] {
-      for (filename, filetext) in
-        [(FILENAME1, FILETEXT1), (FILENAME2, FILETEXT2)]
-      {
+      for (filename, filetext) in [
+        (FILENAME1, FILETEXT1),
+        (FILENAME2, FILETEXT2),
+        (FILENAME3, FILETEXT3),
+      ] {
         let benchmark_id_param =
           format!("{}/{}/{}", canvas_width, canvas_height, filename);
-        let benchmark_id = BenchmarkId::new(
-          "Viewport::search wrap=true linebreak=true",
-          &benchmark_id_param,
-        );
+        let benchmark_id =
+          BenchmarkId::new("wrap, linebreak", &benchmark_id_param);
         let params = (canvas_width, canvas_height, filetext);
         g.measurement_time(BENCH_MEASUREMENT_TIME).bench_with_input(
           benchmark_id,

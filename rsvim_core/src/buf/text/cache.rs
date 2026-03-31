@@ -10,14 +10,14 @@ use arcstr::ArcStr;
 use lru::LruCache;
 use std::hash::Hash;
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 #[derive(Debug, Default)]
 pub struct Stats {
   hits: usize,
   misses: usize,
 }
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 impl Stats {
   pub fn hit(&mut self) {
     self.hits += 1;
@@ -48,7 +48,7 @@ impl Stats {
   }
 }
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 impl std::fmt::Display for Stats {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.total() == 0 {
@@ -74,7 +74,7 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 pub struct GenericCache<K: Copy + Eq + Hash, V> {
   cache: LruCache<K, V, RandomState>,
 
-  #[cfg(debug_assertions)]
+  #[cfg(test)]
   stats: Stats,
 }
 
@@ -84,12 +84,12 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
     Self {
       cache: LruCache::with_hasher(cache_size, RandomState::default()),
 
-      #[cfg(debug_assertions)]
+      #[cfg(test)]
       stats: Stats::default(),
     }
   }
 
-  #[cfg(debug_assertions)]
+  #[cfg(test)]
   pub fn stats(&self) -> &Stats {
     &self.stats
   }
@@ -98,7 +98,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   where
     F: FnOnce() -> Option<V>,
   {
-    #[cfg(debug_assertions)]
+    #[cfg(test)]
     {
       if self.cache.contains(k) {
         self.stats.hit();
