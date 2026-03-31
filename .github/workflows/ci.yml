@@ -66,6 +66,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: true
       - uses: davidlattimore/wild-action@latest
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -90,6 +92,8 @@ jobs:
       - name: Install Rust
         run: rustup component add clippy
       - uses: actions/checkout@v6
+        with:
+          submodules: true
       - name: Test
         run: cargo test --color=never --workspace
       - name: Test (--no-default-features)
@@ -112,6 +116,8 @@ jobs:
       - name: Install Rust
         run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
+        with:
+          submodules: true
       - uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ matrix.os != 'windows-11-arm' }}
       - uses: taiki-e/install-action@nextest
