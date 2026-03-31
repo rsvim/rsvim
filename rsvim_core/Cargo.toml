@@ -159,3 +159,11 @@ workspace = true
 [[bench]]
 harness = false
 name = "viewport_search_nowrap"
+
+[[bench]]
+harness = false
+name = "viewport_search_wrap_nolinebreak"
+
+[[bench]]
+harness = false
+name = "viewport_search_wrap_linebreak"
