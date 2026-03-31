@@ -6,6 +6,7 @@ use crate::ui::canvas;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 use std::fmt::Debug;
 
@@ -71,7 +72,7 @@ impl Cursor {
 }
 
 impl Widgetable for Cursor {
-  fn draw(&self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas, _context: &WidgetContext) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     // trace!(

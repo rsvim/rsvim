@@ -281,6 +281,29 @@ class Build(Cmd):
         run(cmd)
 
 
+# bench
+class Bench(Cmd):
+    def __init__(self, subparsers) -> None:
+        self._name = "bench"
+
+        self.bench_parser = subparsers.add_parser(
+            self._name,
+            help="cargo bench",
+        )
+        self.bench_parser.add_argument("name", nargs=1)
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        name = args.name[0]
+        cmd = f"cargo bench -p rsvim_core --bench {name}"
+        run(cmd)
+
+
 # fmt/f
 class Format(Cmd):
     def __init__(self, subparsers) -> None:
@@ -451,6 +474,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest="subcommand")
 
     commands = [
+        Bench(subparsers),
         Build(subparsers),
         Clippy(subparsers),
         Document(subparsers),

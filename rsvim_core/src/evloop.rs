@@ -33,6 +33,7 @@ use crate::syntax::SyntaxEditNew;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
+use crate::ui::widget::WidgetContext;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -196,9 +197,13 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffer_manager = BufferManager::to_arc(BufferManager::new());
-    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
+    let buffer_manager = BufferManager::new();
+    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(
+      canvas_size,
+      buffer_manager.colorscheme(),
+    ));
     let command_manager = CommandManager::to_arc(CommandManager::default());
+    let buffer_manager = BufferManager::to_arc(buffer_manager);
 
     // State
     let state_machine = State::default();
@@ -485,7 +490,8 @@ impl EventLoop {
     self._init_pending_messages();
 
     // Flush logic UI to terminal, i.e. print UI to stdout
-    lock!(self.tree).draw(self.canvas.clone());
+    let context = WidgetContext::new(self.buffer_manager.clone());
+    lock!(self.tree).draw(self.canvas.clone(), &context);
     self.writer.init_complete(&mut lock!(self.canvas))?;
 
     Ok(())
@@ -939,7 +945,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
@@ -973,7 +980,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
@@ -1004,7 +1012,8 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      lock!(self.tree).draw(self.canvas.clone());
+      let context = WidgetContext::new(self.buffer_manager.clone());
+      lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
 

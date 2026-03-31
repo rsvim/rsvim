@@ -498,13 +498,13 @@ fn wrap_linebreak_line_process(
       )
       .unwrap();
 
-    trace!(
-      "cloned_line({}):{:?}, cloned_start_char:{}, start_column:{}",
-      cloned_line.len(),
-      cloned_line.as_str(),
-      cloned_start_char,
-      start_column
-    );
+    // trace!(
+    //   "cloned_line({}):{:?}, cloned_start_char:{}, start_column:{}",
+    //   cloned_line.len(),
+    //   cloned_line.as_str(),
+    //   cloned_start_char,
+    //   start_column
+    // );
 
     let segmenter =
       WordSegmenter::new_auto(WordBreakInvariantOptions::default());

@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::buf::BufferArc;
+use crate::buf::BufferManager;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -11,6 +12,7 @@ use crate::ui::tree::Tree;
 use crate::ui::tree::TreeArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
+use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
@@ -110,8 +112,10 @@ pub fn make_canvas(
     _ => unreachable!(),
   };
   let mut canvas = Canvas::new(terminal_size);
+  let buffer_manager = BufferManager::to_arc(BufferManager::new());
+  let context = WidgetContext::new(buffer_manager);
   match tree.node(content_id).unwrap() {
-    Node::WindowContent(content) => content.draw(&mut canvas),
+    Node::WindowContent(content) => content.draw(&mut canvas, &context),
     _ => unreachable!(),
   }
   canvas
@@ -120,8 +124,10 @@ pub fn make_canvas(
 pub fn make_tree_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
   let canvas = Canvas::new(terminal_size);
   let canvas = Canvas::to_arc(canvas);
+  let buffer_manager = BufferManager::to_arc(BufferManager::new());
+  let context = WidgetContext::new(buffer_manager);
   let tree = lock!(tree);
-  tree.draw(canvas.clone());
+  tree.draw(canvas.clone(), &context);
   canvas
 }
 
