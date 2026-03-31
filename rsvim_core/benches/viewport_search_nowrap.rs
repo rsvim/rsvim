@@ -38,7 +38,7 @@ const FILETEXT2: &str = include_str!(concat!(
   env!("CARGO_MANIFEST_DIR"),
   "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
 ));
-const REPEAT: usize = 1000;
+const REPEAT: usize = 100;
 
 fn make_buffer(
   filetext: &str,
