@@ -157,7 +157,7 @@ fn bench_search_nowrap(c: &mut Criterion) {
         [(FILENAME1, FILETEXT1), (FILENAME2, FILETEXT2)]
       {
         let benchmark_id_param = format!(
-          " (width/height={}/{} file={})",
+          " (w/h={}/{} file={})",
           canvas_width, canvas_height, filename
         );
         let benchmark_id =
