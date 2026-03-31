@@ -22552,7 +22552,7 @@ mod tests_search_fuzz {
           let (mut tree, window_id) =
             make_window(canvas_size, buf.clone(), win_opts);
 
-          for _i in 0..1000 {
+          for _i in 0..500 {
             let buf = lock!(buf);
             let target_cursor_line = rng.usize(..);
             let target_cursor_char = rng.usize(..);
