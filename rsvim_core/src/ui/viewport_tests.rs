@@ -22402,8 +22402,8 @@ mod tests_search_fuzz {
             let buf = lock!(buf);
             let target_cursor_line = rng.usize(..);
             let target_cursor_char = rng.usize(..);
-            let target_cursor_line = target_cursor_line
-              % buf.text().rope().len_lines().saturating_sub(1);
+            let target_cursor_line =
+              target_cursor_line % buf.text().rope().len_lines();
             let target_cursor_char = std::cmp::min(
               buf.text().rope().line(target_cursor_line).len_chars(),
               target_cursor_char
@@ -22411,7 +22411,7 @@ mod tests_search_fuzz {
                   .text()
                   .last_char_idx_on_line_exclude_eol(target_cursor_line)
                   .unwrap_or(0)
-                  + 1),
+                  + 2),
             );
             info!(
               "fuzz size:{:?}, target_cursor={}/{}",
