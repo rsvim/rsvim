@@ -88,57 +88,6 @@ fn make_tree(
   (tree, window_id)
 }
 
-fn make(
-  width: u16,
-  height: u16,
-  buffer_opts: BufferOptions,
-  window_opts: WindowOptions,
-  filename: &str,
-) -> (BufferArc, Tree, NodeId) {
-  let canvas_size = size!(width, height);
-  let text = std::fs::read_to_string(filename).unwrap();
-  let rop = Rope::from_str(&text);
-  let buffer = Buffer::_new(
-    buffer_opts,
-    canvas_size,
-    rop.clone(),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-  );
-  let buffer = Buffer::to_arc(buffer);
-  let tree_style = Style {
-    size: taffy::Size {
-      width: taffy::prelude::length(canvas_size.width()),
-      height: taffy::prelude::length(canvas_size.height()),
-    },
-    ..Default::default()
-  };
-  let mut tree = Tree::new(tree_style).unwrap();
-  tree.set_global_local_options(window_opts);
-  let window_style = Style {
-    size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
-    },
-    ..Default::default()
-  };
-  let window_id = tree
-    .new_window_with_parent(
-      tree.root_id(),
-      window_style,
-      *tree.global_local_options(),
-      Arc::downgrade(&buffer),
-    )
-    .unwrap();
-
-  (buffer, tree, window_id)
-}
-
 fn bench_search_nowrap(c: &mut Criterion) {
   let buffer_opts = BufferOptionsBuilder::default().build().unwrap();
   let window_opts =
