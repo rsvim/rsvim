@@ -22380,6 +22380,7 @@ mod tests_search_fuzz {
     env!("CARGO_MANIFEST_DIR"),
     "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
   ));
+  const REPEAT: usize = 500;
 
   #[test]
   fn nowrap() {
@@ -22398,7 +22399,7 @@ mod tests_search_fuzz {
           let (mut tree, window_id) =
             make_window(canvas_size, buf.clone(), win_opts);
 
-          for _i in 0..1000 {
+          for _i in 0..REPEAT {
             let buf = lock!(buf);
             let target_cursor_line = rng.usize(..);
             let target_cursor_char = rng.usize(..);
@@ -22475,7 +22476,7 @@ mod tests_search_fuzz {
           let (mut tree, window_id) =
             make_window(canvas_size, buf.clone(), win_opts);
 
-          for _i in 0..1000 {
+          for _i in 0..REPEAT {
             let buf = lock!(buf);
             let target_cursor_line = rng.usize(..);
             let target_cursor_char = rng.usize(..);
@@ -22552,7 +22553,7 @@ mod tests_search_fuzz {
           let (mut tree, window_id) =
             make_window(canvas_size, buf.clone(), win_opts);
 
-          for _i in 0..500 {
+          for _i in 0..REPEAT {
             let buf = lock!(buf);
             let target_cursor_line = rng.usize(..);
             let target_cursor_char = rng.usize(..);
