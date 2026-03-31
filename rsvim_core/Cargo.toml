@@ -148,9 +148,22 @@ v8 = { workspace = true, default-features = false, features = [
 [dev-dependencies]
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
+criterion = { workspace = true, features = ["async_tokio"] }
 fastrand = { workspace = true }
 regex = { workspace = true }
 unicode-width = { workspace = true }
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name = "viewport_search_nowrap"
+
+[[bench]]
+harness = false
+name = "viewport_search_wrap_nolinebreak"
+
+[[bench]]
+harness = false
+name = "viewport_search_wrap_linebreak"
