@@ -22425,8 +22425,8 @@ mod tests_search_fuzz {
             let old_viewport = tree.window(window_id).unwrap().viewport();
             let old_cursor_viewport =
               tree.window(window_id).unwrap().cursor_viewport();
-            info!("fuzz old viewport:{:?}", old_viewport);
-            info!("fuzz old cursor_viewport:{:?}", old_cursor_viewport);
+            // info!("fuzz old viewport:{:?}", old_viewport);
+            // info!("fuzz old cursor_viewport:{:?}", old_cursor_viewport);
             let (start_line, start_column) = old_viewport.search(
               &old_cursor_viewport,
               &win_opts,
@@ -22443,7 +22443,7 @@ mod tests_search_fuzz {
               start_line,
               start_column,
             );
-            info!("fuzz new viewport:{:?}", new_viewport);
+            // info!("fuzz new viewport:{:?}", new_viewport);
             let new_cursor_viewport =
               CursorViewport::to_arc(CursorViewport::from_position(
                 &new_viewport,
@@ -22452,7 +22452,7 @@ mod tests_search_fuzz {
                 target_cursor_line,
                 target_cursor_char,
               ));
-            info!("fuzz new cursor_viewport:{:?}", new_cursor_viewport);
+            // info!("fuzz new cursor_viewport:{:?}", new_cursor_viewport);
             tree.set_editable_cursor_viewport(window_id, new_cursor_viewport);
             tree
               .set_editable_viewport(window_id, Viewport::to_arc(new_viewport));
