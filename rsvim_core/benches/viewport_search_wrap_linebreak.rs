@@ -159,13 +159,12 @@ fn bench_search_wrap_linebreak(c: &mut Criterion) {
       for (filename, filetext) in
         [(FILENAME1, FILETEXT1), (FILENAME2, FILETEXT2)]
       {
-        let benchmark_id = format!(
-          "Viewport::search wrap=true linebreak=true (width/height={}/{} file={})",
-          canvas_width, canvas_height, filename
-        );
         let benchmark_id_param =
           format!("{}/{}/{}", canvas_width, canvas_height, filename);
-        let benchmark_id = BenchmarkId::new(&benchmark_id, &benchmark_id_param);
+        let benchmark_id = BenchmarkId::new(
+          "Viewport::search wrap=true linebreak=true",
+          &benchmark_id_param,
+        );
         let params = (canvas_width, canvas_height, filetext);
         g.bench_with_input(
           benchmark_id,
