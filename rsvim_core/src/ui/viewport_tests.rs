@@ -22457,4 +22457,176 @@ mod tests_search_fuzz {
       }
     }
   }
+
+  #[test]
+  fn wrap_nolinebreak() {
+    test_log_init();
+
+    let filetext1 = include_str!(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
+    ));
+    let filetext2 = include_str!(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
+    ));
+
+    let mut rng = fastrand::Rng::new();
+
+    for width in [45, 200] {
+      for height in [12, 50] {
+        for filetext in [filetext1, filetext2] {
+          let canvas_size = size!(width, height);
+          let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+          let win_opts = make_wrap_nolinebreak();
+          let buf =
+            make_buffer_from_lines(canvas_size, buf_opts, vec![filetext]);
+          let (mut tree, window_id) =
+            make_window(canvas_size, buf.clone(), win_opts);
+
+          for _i in 0..1000 {
+            let buf = lock!(buf);
+            let target_cursor_line = rng.usize(..);
+            let target_cursor_char = rng.usize(..);
+            let target_cursor_line =
+              target_cursor_line % buf.text().rope().len_lines();
+            let target_cursor_char = std::cmp::min(
+              buf.text().rope().line(target_cursor_line).len_chars(),
+              target_cursor_char
+                % (buf
+                  .text()
+                  .last_char_idx_on_line_exclude_eol(target_cursor_line)
+                  .unwrap_or(0)
+                  + 2),
+            );
+            info!(
+              "fuzz size:{:?}, target_cursor={}/{}",
+              canvas_size, target_cursor_line, target_cursor_char
+            );
+
+            let old_viewport = tree.window(window_id).unwrap().viewport();
+            let old_cursor_viewport =
+              tree.window(window_id).unwrap().cursor_viewport();
+            // info!("fuzz old viewport:{:?}", old_viewport);
+            // info!("fuzz old cursor_viewport:{:?}", old_cursor_viewport);
+            let (start_line, start_column) = old_viewport.search(
+              &old_cursor_viewport,
+              &win_opts,
+              buf.text(),
+              &tree.window(window_id).unwrap().actual_shape().size(),
+              target_cursor_line,
+              target_cursor_char,
+            );
+            info!("fuzz start_line/colum:{}/{}", start_line, start_column);
+            let new_viewport = Viewport::view(
+              &win_opts,
+              buf.text(),
+              &tree.window(window_id).unwrap().actual_shape().size(),
+              start_line,
+              start_column,
+            );
+            // info!("fuzz new viewport:{:?}", new_viewport);
+            let new_cursor_viewport =
+              CursorViewport::to_arc(CursorViewport::from_position(
+                &new_viewport,
+                buf.text(),
+                &tree.window(window_id).unwrap().actual_shape().size(),
+                target_cursor_line,
+                target_cursor_char,
+              ));
+            // info!("fuzz new cursor_viewport:{:?}", new_cursor_viewport);
+            tree.set_editable_cursor_viewport(window_id, new_cursor_viewport);
+            tree
+              .set_editable_viewport(window_id, Viewport::to_arc(new_viewport));
+          }
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn wrap_linebreak() {
+    test_log_init();
+
+    let filetext1 = include_str!(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h"
+    ));
+    let filetext2 = include_str!(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
+    ));
+
+    let mut rng = fastrand::Rng::new();
+
+    for width in [45, 200] {
+      for height in [12, 50] {
+        for filetext in [filetext1, filetext2] {
+          let canvas_size = size!(width, height);
+          let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+          let win_opts = make_wrap_linebreak();
+          let buf =
+            make_buffer_from_lines(canvas_size, buf_opts, vec![filetext]);
+          let (mut tree, window_id) =
+            make_window(canvas_size, buf.clone(), win_opts);
+
+          for _i in 0..1000 {
+            let buf = lock!(buf);
+            let target_cursor_line = rng.usize(..);
+            let target_cursor_char = rng.usize(..);
+            let target_cursor_line =
+              target_cursor_line % buf.text().rope().len_lines();
+            let target_cursor_char = std::cmp::min(
+              buf.text().rope().line(target_cursor_line).len_chars(),
+              target_cursor_char
+                % (buf
+                  .text()
+                  .last_char_idx_on_line_exclude_eol(target_cursor_line)
+                  .unwrap_or(0)
+                  + 2),
+            );
+            info!(
+              "fuzz size:{:?}, target_cursor={}/{}",
+              canvas_size, target_cursor_line, target_cursor_char
+            );
+
+            let old_viewport = tree.window(window_id).unwrap().viewport();
+            let old_cursor_viewport =
+              tree.window(window_id).unwrap().cursor_viewport();
+            // info!("fuzz old viewport:{:?}", old_viewport);
+            // info!("fuzz old cursor_viewport:{:?}", old_cursor_viewport);
+            let (start_line, start_column) = old_viewport.search(
+              &old_cursor_viewport,
+              &win_opts,
+              buf.text(),
+              &tree.window(window_id).unwrap().actual_shape().size(),
+              target_cursor_line,
+              target_cursor_char,
+            );
+            info!("fuzz start_line/colum:{}/{}", start_line, start_column);
+            let new_viewport = Viewport::view(
+              &win_opts,
+              buf.text(),
+              &tree.window(window_id).unwrap().actual_shape().size(),
+              start_line,
+              start_column,
+            );
+            // info!("fuzz new viewport:{:?}", new_viewport);
+            let new_cursor_viewport =
+              CursorViewport::to_arc(CursorViewport::from_position(
+                &new_viewport,
+                buf.text(),
+                &tree.window(window_id).unwrap().actual_shape().size(),
+                target_cursor_line,
+                target_cursor_char,
+              ));
+            // info!("fuzz new cursor_viewport:{:?}", new_cursor_viewport);
+            tree.set_editable_cursor_viewport(window_id, new_cursor_viewport);
+            tree
+              .set_editable_viewport(window_id, Viewport::to_arc(new_viewport));
+          }
+        }
+      }
+    }
+  }
 }
