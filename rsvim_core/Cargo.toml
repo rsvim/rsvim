@@ -55,11 +55,9 @@ unicode = ["ropey/unicode_lines"]
 wasm = []
 
 [dependencies]
-# anyhow = { workspace = true }
 arcstr = { workspace = true, features = ["std"] }
 ascii = { workspace = true }
 async-trait = { workspace = true }
-# bumpalo = { workspace = true, features = ["collections"] }
 compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
 derive_builder = { workspace = true }
@@ -88,10 +86,10 @@ path-absolutize = { workspace = true }
 postcard = { workspace = true, default-features = false, features = [
   "use-std",
 ] }
+rand = { workspace = true }
 roaring = { workspace = true }
 ropey = { workspace = true, default-features = false }
 serde = { workspace = true, features = ["derive"] }
-# serde_json = { workspace = true }
 smallvec = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
@@ -107,8 +105,6 @@ tree-sitter-loader = { workspace = true }
 tree-sitter-md = { workspace = true }
 tree-sitter-rust = { workspace = true }
 tree-sitter-toml-ng = { workspace = true }
-# url = { workspace = true }
-# zstd = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
