@@ -95,11 +95,9 @@ fn bench_search_nowrap(c: &mut Criterion) {
 
   let mut g = c.benchmark_group("bench_search_nowrap");
 
-  let run_bench = |canvas_width_param: &u16,
-                   canvas_height_param: &u16,
-                   filename_param: &str| {
-    let canvas_size = size!(*canvas_width_param, *canvas_height_param);
-    let buffer = make_buffer(filename_param, buffer_opts, canvas_size);
+  let run_bench = |width: &u16, height: &u16, file: &str| {
+    let canvas_size = size!(*width, *height);
+    let buffer = make_buffer(file, buffer_opts, canvas_size);
     let (mut tree, window_id) = make_tree(&canvas_size, window_opts, &buffer);
     let buffer = lock!(buffer);
     for _i in 0..REPEAT {
