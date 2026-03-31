@@ -13,6 +13,7 @@ use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
+use crossterm::style::Color;
 use itertools::Itertools;
 use std::time::Duration;
 
@@ -1002,53 +1003,13 @@ Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.tx
 
     // After running
     {
-      // let shaders = match event_loop.writer {
-      //   StdoutWriterValue::DevNullWriter(w) => w.shaders().clone(),
-      //   _ => unreachable!(),
-      // };
-      // let text_shaders = shaders
-      //   .iter()
-      //   .map(|shader| {
-      //     let shader_commands = shader
-      //       .iter()
-      //       .filter(|cmd| {
-      //         matches!(
-      //           cmd,
-      //           ShaderCommand::StylePrintStyledContentString(_)
-      //             | ShaderCommand::StylePrintString(_)
-      //         )
-      //       })
-      //       .cloned()
-      //       .collect_vec();
-      //     Shader::new(shader_commands)
-      //   })
-      //   .collect_vec();
-      // for (i, text_shader) in text_shaders.iter().enumerate() {
-      //   info!("shader [{}]", i);
-      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
-      //     if let ShaderCommand::StylePrintStyledContentString(content) =
-      //       shader_cmd
-      //     {
-      //       info!("{:>2}: {}", j, content.0.content(),);
-      //     } else {
-      //       unreachable!();
-      //     }
-      //   }
-      //   for (j, shader_cmd) in text_shader.iter().enumerate() {
-      //     match shader_cmd {
-      //       ShaderCommand::StylePrintStyledContentString(content) => {
-      //         info!(
-      //           "shader [{},{}]:{:?} ({:?})",
-      //           i,
-      //           j,
-      //           content.0.content(),
-      //           content.0.style()
-      //         );
-      //       }
-      //       _ => unreachable!(),
-      //     }
-      //   }
-      // }
+      let canvas = event_loop.canvas;
+      let canvas = lock!(canvas);
+      let frame = canvas.frame();
+      for (i, c) in frame.get_cells().iter().enumerate() {
+        info!("cell[{}]:{:?}", i, c);
+        assert_eq!(*c.bg(), Color::Black);
+      }
     }
 
     Ok(())
@@ -1139,7 +1100,15 @@ Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.tx
     event_loop.shutdown()?;
 
     // After running
-    {}
+    {
+      let canvas = event_loop.canvas;
+      let canvas = lock!(canvas);
+      let frame = canvas.frame();
+      for (i, c) in frame.get_cells().iter().enumerate() {
+        info!("cell[{}]:{:?}", i, c);
+        assert_eq!(*c.bg(), Color::Black);
+      }
+    }
 
     Ok(())
   }
@@ -1187,7 +1156,15 @@ fn main() {
     event_loop.shutdown()?;
 
     // After running
-    {}
+    {
+      let canvas = event_loop.canvas;
+      let canvas = lock!(canvas);
+      let frame = canvas.frame();
+      for (i, c) in frame.get_cells().iter().enumerate() {
+        info!("cell[{}]:{:?}", i, c);
+        assert_eq!(*c.bg(), Color::Black);
+      }
+    }
 
     Ok(())
   }
@@ -1236,7 +1213,15 @@ int main() {
     event_loop.shutdown()?;
 
     // After running
-    {}
+    {
+      let canvas = event_loop.canvas;
+      let canvas = lock!(canvas);
+      let frame = canvas.frame();
+      for (i, c) in frame.get_cells().iter().enumerate() {
+        info!("cell[{}]:{:?}", i, c);
+        assert_eq!(*c.bg(), Color::Black);
+      }
+    }
 
     Ok(())
   }
