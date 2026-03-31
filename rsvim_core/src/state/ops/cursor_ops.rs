@@ -381,11 +381,6 @@ fn _update_viewport_after_text_changed(
     text.rope().len_lines().saturating_sub(1),
   );
   debug_assert!(text.rope().get_line(start_line).is_some());
-  // let bufline_len_chars = text.rope().line(start_line).len_chars();
-  // let start_column = std::cmp::min(
-  //   viewport.start_column_idx(),
-  //   text.width_before(start_line, bufline_len_chars),
-  // );
   let start_column = viewport.start_column_idx();
 
   let updated_viewport =
