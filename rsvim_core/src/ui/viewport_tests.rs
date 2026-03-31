@@ -22403,19 +22403,15 @@ mod tests_search_fuzz {
             let buf = lock!(buf);
             let target_cursor_line = rng.random::<u32>() as usize;
             let target_cursor_char = rng.random::<u32>() as usize;
-            let target_cursor_line = std::cmp::min(
-              target_cursor_line,
-              buf.text().rope().len_lines().saturating_sub(1),
-            );
-            let target_cursor_char = std::cmp::min(
-              buf.text().rope().line(target_cursor_line).len_chars(),
-              std::cmp::max(
-                target_cursor_char,
-                buf
-                  .text()
-                  .last_char_idx_on_line_exclude_eol(target_cursor_line)
-                  .unwrap_or(0),
-              ),
+            let target_cursor_line = target_cursor_line
+              % buf.text().rope().len_lines().saturating_sub(1);
+            let target_cursor_char = std::cmp::max(
+              target_cursor_char
+                % buf.text().rope().line(target_cursor_line).len_chars(),
+              buf
+                .text()
+                .last_char_idx_on_line_exclude_eol(target_cursor_line)
+                .unwrap_or(0),
             );
             info!(
               "fuzz size:{:?}, target_cursor={}/{}",
