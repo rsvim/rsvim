@@ -22371,6 +22371,7 @@ mod tests_search_horizontally_wrap_linebreak {
 
 mod tests_search_fuzz {
   use super::*;
+  use rand::prelude::*;
 
   #[test]
   fn nowrap() {
