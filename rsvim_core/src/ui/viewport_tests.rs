@@ -66,7 +66,7 @@ pub fn update_viewport(
   tree.window(window_id).unwrap().viewport()
 }
 
-fn search_viewport(
+fn _search_viewport(
   tree: &mut Tree,
   window_id: NodeId,
   buf: BufferArc,
@@ -126,7 +126,7 @@ pub fn search_down_viewport(
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  search_viewport(
+  _search_viewport(
     tree,
     window_id,
     buf,
@@ -146,7 +146,7 @@ pub fn search_up_viewport(
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  search_viewport(
+  _search_viewport(
     tree,
     window_id,
     buf,
@@ -166,7 +166,7 @@ pub fn search_left_viewport(
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  search_viewport(
+  _search_viewport(
     tree,
     window_id,
     buf,
@@ -186,7 +186,7 @@ pub fn search_right_viewport(
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  search_viewport(
+  _search_viewport(
     tree,
     window_id,
     buf,
@@ -3862,7 +3862,7 @@ mod tests_view_wrap_linebreak_startcol {
   }
 }
 
-mod tests_search_anchor_downward_nowrap {
+mod tests_search_down_nowrap {
   use super::*;
 
   #[test]
@@ -5339,7 +5339,7 @@ mod tests_search_anchor_downward_nowrap {
   }
 }
 
-mod tests_search_anchor_downward_nowrap_eol {
+mod tests_search_down_nowrap_eol {
   use super::*;
 
   #[test]
@@ -6262,7 +6262,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   }
 }
 
-mod tests_search_anchor_downward_wrap_nolinebreak {
+mod tests_search_down_wrap_nolinebreak {
   use super::*;
 
   #[test]
@@ -7718,7 +7718,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
   }
 }
 
-mod tests_search_anchor_downward_wrap_nolinebreak_eol {
+mod tests_search_down_wrap_nolinebreak_eol {
   use super::*;
 
   #[test]
@@ -8518,7 +8518,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   }
 }
 
-mod tests_search_anchor_downward_wrap_linebreak {
+mod tests_search_down_wrap_linebreak {
   use super::*;
 
   #[test]
@@ -9289,7 +9289,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
   }
 }
 
-mod tests_search_anchor_upward_nowrap {
+mod tests_search_up_nowrap {
   use super::*;
 
   #[test]
@@ -10162,7 +10162,7 @@ mod tests_search_anchor_upward_nowrap {
   }
 }
 
-mod tests_search_anchor_upward_wrap_nolinebreak {
+mod tests_search_up_wrap_nolinebreak {
   use super::*;
 
   #[test]
@@ -12556,7 +12556,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
   }
 }
 
-mod tests_search_anchor_upward_wrap_linebreak {
+mod tests_search_up_wrap_linebreak {
   use super::*;
 
   #[test]
@@ -14026,7 +14026,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
   }
 }
 
-mod tests_search_anchor_horizontally_nowrap {
+mod tests_search_horizontally_nowrap {
   use super::*;
 
   #[test]
@@ -15376,7 +15376,7 @@ mod tests_search_anchor_horizontally_nowrap {
   }
 }
 
-mod tests_search_anchor_horizontally_nowrap_eol {
+mod tests_search_horizontally_nowrap_eol {
   use super::*;
 
   #[test]
@@ -17085,7 +17085,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
   }
 }
 
-mod tests_search_anchor_horizontally_wrap_nolinebreak {
+mod tests_search_horizontally_wrap_nolinebreak {
   use super::*;
 
   #[test]
@@ -18631,7 +18631,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
   }
 }
 
-mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
+mod tests_search_horizontally_wrap_nolinebreak_eol {
   use super::*;
 
   #[test]
@@ -20685,7 +20685,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   }
 }
 
-mod tests_search_anchor_horizontally_wrap_linebreak {
+mod tests_search_horizontally_wrap_linebreak {
   use super::*;
 
   #[test]
@@ -22366,5 +22366,17 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         &expect_end_fills,
       );
     }
+  }
+}
+
+mod tests_search_fuzz {
+  use super::*;
+
+  #[test]
+  fn nowrap() {
+      let text = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/js/runtime/00__web.js"
+      )),
   }
 }

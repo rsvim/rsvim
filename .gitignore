@@ -27,7 +27,3 @@ generated-typedocs
 # Snapshot
 RSVIM_SNAPSHOT.BIN
 RSVIM_VERSION.TXT
-
-# Tests/Benchmarks
-/tests_and_benchmarks
-.test.lock
