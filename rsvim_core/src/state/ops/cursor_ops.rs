@@ -366,25 +366,6 @@ pub fn raw_viewport_scroll_to(
   Some(new_viewport)
 }
 
-// fn _max_len_chars_since_line(
-//   text: &Text,
-//   mut start_line_idx: usize,
-//   window_height: u16,
-// ) -> usize {
-//   let buffer_len_lines = text.rope().len_lines();
-//
-//   let mut max_len_chars = 0_usize;
-//   let mut i = 0_u16;
-//   while i < window_height && start_line_idx < buffer_len_lines {
-//     debug_assert!(text.rope().get_line(start_line_idx).is_some());
-//     let bufline = text.rope().line(start_line_idx);
-//     max_len_chars = std::cmp::max(max_len_chars, bufline.len_chars());
-//     i += 1;
-//     start_line_idx += 1;
-//   }
-//   max_len_chars
-// }
-
 fn _update_viewport_after_text_changed(
   tree: &mut Tree,
   id: NodeId,
