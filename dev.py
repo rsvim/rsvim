@@ -299,9 +299,7 @@ class Bench(Cmd):
         return None
 
     def run(self, args) -> None:
-        sccache()
-        rustflags()
-        name = args.name
+        name = args.name[0]
         cmd = f"cargo bench -p rsvim_core --bench {name}"
         run(cmd)
 
@@ -476,6 +474,7 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest="subcommand")
 
     commands = [
+        Bench(subparsers),
         Build(subparsers),
         Clippy(subparsers),
         Document(subparsers),
