@@ -22413,7 +22413,6 @@ mod tests_search_fuzz {
                   .unwrap_or(0),
               ),
             );
-
             info!(
               "fuzz size:{:?}, target_cursor={}/{}",
               canvas_size, target_cursor_line, target_cursor_char
