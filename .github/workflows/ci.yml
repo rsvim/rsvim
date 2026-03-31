@@ -66,6 +66,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: true
       - uses: davidlattimore/wild-action@latest
       - uses: dtolnay/rust-toolchain@master
         with:
