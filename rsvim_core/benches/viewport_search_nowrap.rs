@@ -29,9 +29,9 @@ const BIG_TERM_HEIGHT: u16 = 50;
 const SMALL_TERM_WIDTH: u16 = 45;
 const SMALL_TERM_HEIGHT: u16 = 12;
 const FILENAME1: &str =
-  "../../../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h";
+  "../../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h";
 const FILENAME2: &str =
-  "../../../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h";
+  "../../tests_and_benchmarks/benches/bigfiles/MIMXRT1176_cm7.h";
 const REPEAT: usize = 1000;
 
 fn make_buffer(
