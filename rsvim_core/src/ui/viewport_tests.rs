@@ -22384,6 +22384,9 @@ mod tests_search_fuzz {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/benches/bigfiles/dcn_3_2_0_sh_mask.h"
     ));
+
+    let mut rng = fastrand::Rng::new();
+
     for width in [45, 200] {
       for height in [12, 50] {
         for filetext in [filetext1, filetext2] {
@@ -22397,8 +22400,8 @@ mod tests_search_fuzz {
 
           for _i in 0..1000 {
             let buf = lock!(buf);
-            let target_cursor_line = fastrand::usize(..);
-            let target_cursor_char = fastrand::usize(..);
+            let target_cursor_line = rng.usize(..);
+            let target_cursor_char = rng.usize(..);
             let target_cursor_line = std::cmp::min(
               target_cursor_line,
               buf.text().rope().len_lines().saturating_sub(1),
