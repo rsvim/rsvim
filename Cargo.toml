@@ -33,6 +33,7 @@ derive_builder = "0.20"
 dirs = "6.0"
 encoding_rs = "0.8"
 env_filter = "1.0"
+fastrand = "2.3"
 fern = "0.7"
 foldhash = "0.2"
 futures = "0.3"
@@ -72,14 +73,6 @@ tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
 toml = { version = "1.1", features = ["fast_hash"] }
-# tracing = { version = "0.1", features = [
-#   "max_level_trace",
-#   "release_max_level_error",
-# ] }
-# tracing-appender = { version = "0.2" }
-# tracing-subscriber = { version = "0.3", features = [
-#   "env-filter",
-# ] }
 tree-sitter = "0.26"
 tree-sitter-c = "0.24"
 tree-sitter-html = "0.23"

@@ -153,15 +153,8 @@ v8 = { workspace = true, default-features = false, features = [
 [dev-dependencies]
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
+fastrand = "2.3"
 regex = { workspace = true }
-# tracing = { workspace = true, features = [
-#   "max_level_trace",
-#   "release_max_level_error",
-# ] }
-# tracing-appender = { workspace = true }
-# tracing-subscriber = { workspace = true, features = [
-#   "env-filter",
-# ] }
 unicode-width = { workspace = true }
 
 [lints]
