@@ -13,8 +13,7 @@ fn cli_opt1() {
     vec!["README.md"],
     vec!["README.md", "LICENSE"],
     vec!["README.md", "LICENSE", "--version"],
-    vec!["README.md", "LICENSE", "-V"],
-    vec!["README.md", "LICENSE"],
+    vec!["README.md", "-V"],
   ];
 
   let to_pathbuf = |paths: Vec<&str>| {
@@ -29,8 +28,7 @@ fn cli_opt1() {
     CliOptions::new(false, to_pathbuf(vec!["README.md"])),
     CliOptions::new(false, to_pathbuf(vec!["README.md", "LICENSE"])),
     CliOptions::new(true, to_pathbuf(vec!["README.md", "LICENSE"])),
-    CliOptions::new(true, to_pathbuf(vec!["README.md", "LICENSE"])),
-    CliOptions::new(false, to_pathbuf(vec!["README.md", "LICENSE"])),
+    CliOptions::new(true, to_pathbuf(vec!["README.md"])),
   ];
 
   assert_eq!(input.len(), expects.len());
