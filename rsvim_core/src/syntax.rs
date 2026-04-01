@@ -498,7 +498,12 @@ impl SyntaxManager {
       None,
       opts.output_path.clone(),
     );
-    self.loader.load_language_at_path(compile_cfg.clone());
+    self.loader.load_language_at_path(compile_cfg);
+    let compile_cfg = CompileConfig::new(
+      opts.src_path.as_path(),
+      None,
+      opts.output_path.clone(),
+    );
     self.loader.load_language_at_path_with_name(compile_cfg);
     Ok(())
   }
