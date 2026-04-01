@@ -1,18 +1,22 @@
 use super::cli::*;
+use crate::prelude::*;
+use crate::tests::log::init as test_log_init;
+use clap::Parser;
 use std::path::Path;
 
 #[test]
 fn cli_opt1() {
+  test_log_init();
+
   let input = [
-    vec![],
-    vec!["README.md"],
-    vec!["README.md", "LICENSE"],
-    vec!["README.md", "LICENSE", "--help", "--version"],
-    vec!["README.md", "LICENSE", "-h", "-V"],
-    vec!["README.md", "LICENSE", "--headless"],
+    vec!["rsvim"],
+    vec!["rsvim", "README.md"],
+    vec!["rsvim", "README.md", "LICENSE"],
+    vec!["rsvim", "README.md", "LICENSE", "--version"],
+    vec!["rsvim", "README.md", "-V"],
   ];
 
-  let to_pb = |paths: Vec<&str>| {
+  let to_pathbuf = |paths: Vec<&str>| {
     paths
       .iter()
       .map(|p| Path::new(p).to_path_buf())
@@ -20,54 +24,38 @@ fn cli_opt1() {
   };
 
   let expects = [
-    CliOptions::new(SpecialCliOptions::empty(), to_pb(vec![]), false),
-    CliOptions::new(
-      SpecialCliOptions::empty(),
-      to_pb(vec!["README.md"]),
-      false,
-    ),
-    CliOptions::new(
-      SpecialCliOptions::empty(),
-      to_pb(vec!["README.md", "LICENSE"]),
-      false,
-    ),
-    CliOptions::new(
-      SpecialCliOptions::new(true, false, true),
-      to_pb(vec!["README.md", "LICENSE"]),
-      false,
-    ),
-    CliOptions::new(
-      SpecialCliOptions::new(true, true, false),
-      to_pb(vec!["README.md", "LICENSE"]),
-      false,
-    ),
-    CliOptions::new(
-      SpecialCliOptions::empty(),
-      to_pb(vec!["README.md", "LICENSE"]),
-      true,
-    ),
+    CliOptions::new(false, to_pathbuf(vec![])),
+    CliOptions::new(false, to_pathbuf(vec!["README.md"])),
+    CliOptions::new(false, to_pathbuf(vec!["README.md", "LICENSE"])),
+    CliOptions::new(true, to_pathbuf(vec!["README.md", "LICENSE"])),
+    CliOptions::new(true, to_pathbuf(vec!["README.md"])),
   ];
 
   assert_eq!(input.len(), expects.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOptions::from_args(&input[i]).unwrap();
+    let actual = CliOptions::parse_from(input[i].iter());
     let expect = &expects[i];
-    assert_eq!(actual.headless(), expect.headless());
+    info!(
+      "{} input:{:?},actual:{:?},expect:{:?}",
+      i, input[i], actual, expect
+    );
+    assert_eq!(actual.version(), expect.version());
     assert_eq!(actual.file().len(), expect.file().len());
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);
     }
-    assert_eq!(actual.special_opts(), expect.special_opts());
   }
 }
 
 #[test]
 fn cli_opt2() {
-  let input = [vec!["--ex"], vec!["--v"]];
+  test_log_init();
+  let input = [vec!["rsvim", "--ex"], vec!["rsvim", "--v"]];
 
   for i in input {
-    let actual = CliOptions::from_args(&i);
+    let actual = CliOptions::try_parse_from(&i);
+    info!("input:{:?},actual:{:?}", i, actual);
     assert!(actual.is_err());
   }
 }

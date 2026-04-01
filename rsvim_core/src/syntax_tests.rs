@@ -1,7 +1,6 @@
 use super::syntax::*;
 use crate::buf::opt::EndOfLineOption;
 use crate::cli::CliOptions;
-use crate::cli::SpecialCliOptions;
 use crate::evloop::writer::StdoutWriterValue;
 use crate::prelude::*;
 use crate::state::ops as state_ops;
@@ -114,11 +113,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("err1.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("err1.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -207,11 +202,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("err2.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("err2.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -292,11 +283,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("ok1.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("ok1.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -436,11 +423,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("ok2.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("ok2.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -532,11 +515,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("ok3.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("ok3.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -628,11 +607,7 @@ mod tests_buffer_editing {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("err3.rs").to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![Path::new("err3.rs").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -820,11 +795,7 @@ fn main() {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![tmpfile.path().to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![tmpfile.path().to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -988,11 +959,7 @@ Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.tx
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![tmpfile.path().to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![tmpfile.path().to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -1086,11 +1053,7 @@ Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.tx
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![tmpfile.path().to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![tmpfile.path().to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -1142,11 +1105,7 @@ fn main() {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![tmpfile.path().to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![tmpfile.path().to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -1199,11 +1158,7 @@ int main() {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![tmpfile.path().to_path_buf()],
-        false,
-      ),
+      CliOptions::new(false, vec![tmpfile.path().to_path_buf()]),
     );
 
     event_loop.initialize()?;

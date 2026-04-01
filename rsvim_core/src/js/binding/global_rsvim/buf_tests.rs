@@ -1,5 +1,4 @@
 use crate::cli::CliOptions;
-use crate::cli::SpecialCliOptions;
 use crate::prelude::*;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::GotoInsertModeVariant;
@@ -108,11 +107,7 @@ mod tests_current1 {
     let mut event_loop = make_event_loop(
       terminal_cols,
       terminal_rows,
-      CliOptions::new(
-        SpecialCliOptions::empty(),
-        vec![Path::new("README.md").to_path_buf()],
-        true,
-      ),
+      CliOptions::new(false, vec![Path::new("README.md").to_path_buf()]),
     );
 
     event_loop.initialize()?;
@@ -178,11 +173,7 @@ mod tests_current1 {
       let mut event_loop = make_event_loop(
         terminal_cols,
         terminal_rows,
-        CliOptions::new(
-          SpecialCliOptions::empty(),
-          vec![f1.to_path_buf()],
-          true,
-        ),
+        CliOptions::new(false, vec![f1.to_path_buf()]),
       );
 
       event_loop.initialize()?;
@@ -212,11 +203,7 @@ mod tests_current1 {
       let mut event_loop = make_event_loop(
         terminal_cols,
         terminal_rows,
-        CliOptions::new(
-          SpecialCliOptions::empty(),
-          vec![f1.to_path_buf()],
-          true,
-        ),
+        CliOptions::new(false, vec![f1.to_path_buf()]),
       );
 
       event_loop.initialize()?;
