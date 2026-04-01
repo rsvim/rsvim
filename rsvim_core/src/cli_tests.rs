@@ -36,7 +36,7 @@ fn cli_opt1() {
   assert_eq!(input.len(), expects.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOptions::parse_from(input[i].clone());
+    let actual = CliOptions::parse_from(&input[i]);
     let expect = &expects[i];
     info!(
       "{} input:{:?},actual:{:?},expect:{:?}",
