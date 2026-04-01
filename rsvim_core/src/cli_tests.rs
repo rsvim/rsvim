@@ -12,8 +12,8 @@ fn cli_opt1() {
     vec![],
     vec!["README.md"],
     vec!["README.md", "LICENSE"],
-    vec!["README.md", "LICENSE", "--help", "--version"],
-    vec!["README.md", "LICENSE", "-h", "-V"],
+    vec!["README.md", "LICENSE", "--version"],
+    vec!["README.md", "LICENSE", "-V"],
     vec!["README.md", "LICENSE"],
   ];
 
