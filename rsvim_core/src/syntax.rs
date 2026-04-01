@@ -481,7 +481,7 @@ impl SyntaxManager {
 
 pub struct SyntaxLoadOptions {}
 
-// Load and build {
+// Language loader {
 impl SyntaxManager {
   /// Load tree-sitter grammar in async.
   pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
@@ -493,7 +493,7 @@ impl SyntaxManager {
     Ok(())
   }
 }
-// Load and build }
+// Language loader }
 
 impl Default for SyntaxManager {
   fn default() -> Self {
