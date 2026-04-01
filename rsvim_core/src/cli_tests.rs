@@ -9,11 +9,11 @@ fn cli_opt1() {
   test_log_init();
 
   let input = [
-    vec![],
-    vec!["README.md"],
-    vec!["README.md", "LICENSE"],
-    vec!["README.md", "LICENSE", "--version"],
-    vec!["README.md", "-V"],
+    vec!["rsvim"],
+    vec!["rsvim", "README.md"],
+    vec!["rsvim", "README.md", "LICENSE"],
+    vec!["rsvim", "README.md", "LICENSE", "--version"],
+    vec!["rsvim", "README.md", "-V"],
   ];
 
   let to_pathbuf = |paths: Vec<&str>| {
