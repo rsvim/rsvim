@@ -509,7 +509,19 @@ impl SyntaxManager {
   }
 
   /// Load tree-sitter grammar in sync.
-  pub fn load(_force_rebuild: bool) -> TheResult<()> {
+  pub fn load(&mut self, opts: &SyntaxLoadOptions) -> TheResult<()> {
+    let compile_cfg = CompileConfig::new(
+      opts.src_path.as_path(),
+      None,
+      opts.output_path.clone(),
+    );
+    self.loader.load_language_at_path(compile_cfg);
+    let compile_cfg = CompileConfig::new(
+      opts.src_path.as_path(),
+      None,
+      opts.output_path.clone(),
+    );
+    self.loader.load_language_at_path_with_name(compile_cfg);
     Ok(())
   }
 }
