@@ -9,12 +9,12 @@ fn cli_opt1() {
   test_log_init();
 
   let input = [
-    "",
-    "README.md",
-    "README.md LICENSE",
-    "README.md LICENSE --help --version",
-    "README.md LICENSE -h -V",
-    "README.md LICENSE",
+    vec![],
+    vec!["README.md"],
+    vec!["README.md", "LICENSE"],
+    vec!["README.md", "LICENSE", "--help", "--version"],
+    vec!["README.md", "LICENSE", "-h", "-V"],
+    vec!["README.md", "LICENSE"],
   ];
 
   let to_pathbuf = |paths: Vec<&str>| {
@@ -36,7 +36,7 @@ fn cli_opt1() {
   assert_eq!(input.len(), expects.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOptions::try_parse_from(input[i]).unwrap();
+    let actual = CliOptions::try_parse_from(&input[i]).unwrap();
     let expect = &expects[i];
     info!(
       "{} input:{:?},actual:{:?},expect:{:?}",
