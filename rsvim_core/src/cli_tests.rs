@@ -47,6 +47,6 @@ fn cli_opt2() {
 
   for i in input {
     let actual = CliOptions::try_parse_from(&i).is_err();
-    assert!(actual.is_err());
+    assert!(actual);
   }
 }

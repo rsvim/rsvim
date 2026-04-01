@@ -17,7 +17,7 @@ pub fn make_js_runtime() -> JsRuntime {
   let (master_tx, _master_rx) = unbounded_channel();
   let (_jsrt_tx, jsrt_rx) = unbounded_channel();
 
-  let cli_opts = CliOptions::new(false, vec![]).unwrap();
+  let cli_opts = CliOptions::new(false, vec![]);
 
   let style = Style {
     size: taffy::Size {
