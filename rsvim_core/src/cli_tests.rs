@@ -50,10 +50,12 @@ fn cli_opt1() {
 
 #[test]
 fn cli_opt2() {
-  let input = [vec!["--ex"], vec!["--v"]];
+  test_log_init();
+  let input = [vec!["rsvim", "--ex"], vec!["rsvim", "--v"]];
 
   for i in input {
-    let actual = CliOptions::try_parse_from(&i).is_err();
-    assert!(actual);
+    let actual = CliOptions::try_parse_from(&i);
+    info!("input:{:?},actual:{:?}", i, actual);
+    assert!(actual.is_err());
   }
 }
