@@ -24,8 +24,6 @@ use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tokio::time::Instant;
 
-const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
-
 const RSVIM_SNAPSHOT: &[u8] =
   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
