@@ -103,8 +103,8 @@ fn main() -> IoResult<()> {
   }
 
   // Explicitly create tokio runtime for the EventLoop.
-  let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
-  evloop_tokio_runtime.block_on(async {
+  let rt = tokio::runtime::Runtime::new()?;
+  rt.block_on(async {
     // Create event loop.
     let mut event_loop = EventLoop::new(
       startup_moment,
