@@ -58,6 +58,7 @@ wasm = []
 arcstr = { workspace = true, features = ["std"] }
 ascii = { workspace = true }
 async-trait = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
 derive_builder = { workspace = true }
@@ -71,7 +72,6 @@ geo = { workspace = true }
 icu = { workspace = true }
 itertools = { workspace = true }
 jiff = { workspace = true }
-lexopt = { workspace = true }
 litemap = { workspace = true }
 log = { workspace = true, features = [
   "max_level_trace",

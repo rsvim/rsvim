@@ -24,6 +24,7 @@ ascii = "1.1"
 assert_fs = "1.1"
 async-trait = "0.1"
 bitflags = "2.11"
+clap = { version = "4.6", features = ["derive"] }
 compact_str = "0.9"
 criterion = { version = "0.8", features = ["async_tokio"] }
 crossterm = { version = "0.29", features = ["event-stream"] }
@@ -40,7 +41,6 @@ git2 = "0.20"
 icu = "2"
 itertools = "0.14"
 jiff = "0.2"
-lexopt = "0.3"
 litemap = "0.8"
 log = { version = "0.4", features = [
   "max_level_trace",
