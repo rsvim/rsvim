@@ -26,7 +26,11 @@ wasm = ["rsvim_core/wasm"]
 [dependencies]
 rsvim_core = { workspace = true }
 
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true, default-features = false, features = [
+  "std",
+  "help",
+  "derive",
+] }
 log = { workspace = true, features = [
   "max_level_trace",
   "release_max_level_error",
