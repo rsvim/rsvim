@@ -21,6 +21,11 @@ pub struct CliOptions {
 }
 
 impl CliOptions {
+  /// version.
+  pub fn version(&self) -> bool {
+    self.version
+  }
+
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
