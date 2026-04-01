@@ -291,11 +291,7 @@ impl EventLoop {
       (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(cols, rows)?;
 
-    let writer = if cli_opts.headless() {
-      StdoutWriterValue::headless()
-    } else {
-      StdoutWriterValue::editor()
-    };
+    let writer = StdoutWriterValue::editor();
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
