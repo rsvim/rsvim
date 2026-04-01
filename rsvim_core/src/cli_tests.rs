@@ -1,4 +1,5 @@
 use super::cli::*;
+use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use clap::Parser;
 use std::path::Path;
@@ -37,7 +38,10 @@ fn cli_opt1() {
   for i in 0..n {
     let actual = CliOptions::try_parse_from(&input[i]).unwrap();
     let expect = &expects[i];
-    info!("{} actual:{:?},expect:{:?}", i, actual, expect);
+    info!(
+      "{} input:{:?},actual:{:?},expect:{:?}",
+      i, input[i], actual, expect
+    );
     assert_eq!(actual.file().len(), expect.file().len());
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);
