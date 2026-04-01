@@ -61,6 +61,7 @@ async-trait = { workspace = true }
 clap = { workspace = true, default-features = false, features = [
   "std",
   "help",
+  "usage",
   "derive",
 ] }
 compact_str = { workspace = true }

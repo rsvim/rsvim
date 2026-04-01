@@ -29,6 +29,7 @@ rsvim_core = { workspace = true }
 clap = { workspace = true, default-features = false, features = [
   "std",
   "help",
+  "usage",
   "derive",
 ] }
 log = { workspace = true, features = [
