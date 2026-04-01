@@ -34,12 +34,13 @@ fn cli_opt1() {
   assert_eq!(input.len(), expects.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOptions::parse_from(&input[i]);
+    let actual = CliOptions::parse_from(input[i].iter());
     let expect = &expects[i];
     info!(
       "{} input:{:?},actual:{:?},expect:{:?}",
       i, input[i], actual, expect
     );
+    assert_eq!(actual.version(), expect.version());
     assert_eq!(actual.file().len(), expect.file().len());
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);
