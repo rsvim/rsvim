@@ -214,10 +214,7 @@ impl EventLoop {
       Arc::downgrade(&syntax_manager),
       Arc::downgrade(&colorscheme_manager),
     );
-    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(
-      canvas_size,
-      buffer_manager.colorscheme(),
-    ));
+    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let command_manager = CommandManager::to_arc(CommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
 
