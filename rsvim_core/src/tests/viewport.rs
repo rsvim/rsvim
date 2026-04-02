@@ -127,8 +127,9 @@ pub fn make_canvas(
 pub fn make_tree_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
   let canvas = Canvas::new(terminal_size);
   let canvas = Canvas::to_arc(canvas);
-  let buffer_manager = BufferManager::to_arc(BufferManager::new());
-  let context = WidgetContext::new(buffer_manager);
+  let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let context = WidgetContext::new(syntax_mgr, cs_mgr);
   let tree = lock!(tree);
   tree.draw(canvas.clone(), &context);
   canvas
