@@ -394,15 +394,15 @@ impl BufferManager {
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
-    let syn_mgr = self.syntax_manager.upgrade().unwrap();
-    let syn_mgr = lock!(syn_mgr);
-    syn_mgr.load_syntax_by_ext(file_extension)
+    let syntax_manager = self.syntax_manager.upgrade().unwrap();
+    let syntax_manager = lock!(syntax_manager);
+    syntax_manager.load_syntax_by_ext(file_extension)
   }
 
   fn _colorscheme(&self) -> Option<ColorSchemeArc> {
-    let cs_mgr = self.colorscheme_manager.upgrade().unwrap();
-    let cs_mgr = lock!(cs_mgr);
-    cs_mgr.colorscheme()
+    let colorscheme_manager = self.colorscheme_manager.upgrade().unwrap();
+    let colorscheme_manager = lock!(colorscheme_manager);
+    colorscheme_manager.colorscheme()
   }
 }
 
