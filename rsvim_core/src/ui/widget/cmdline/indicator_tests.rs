@@ -38,12 +38,7 @@ fn make_canvas(
   let mut canvas = Canvas::new(terminal_size);
   let syn_mgr = SyntaxManager::to_arc(SyntaxManager::new());
   let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
-  let buffer_manager = BufferManager::to_arc(BufferManager::new(
-    Arc::downgrade(&syn_mgr),
-    Arc::downgrade(&cs_mgr),
-  ));
-  let context =
-    WidgetContext::new(buffer_manager, syn_mgr.clone(), cs_mgr.clone());
+  let context = WidgetContext::new(syn_mgr.clone(), cs_mgr.clone());
   cmdline_indicator.draw(&mut canvas, &context);
   canvas
 }
