@@ -409,7 +409,7 @@ impl BufferManager {
       let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
+        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
