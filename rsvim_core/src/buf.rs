@@ -36,9 +36,6 @@ use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
 
-// Default options
-pub const COLOR_NAME: &str = crate::hl::DEFAULT;
-
 // BufferId starts from 1.
 structural_id_impl!(i32, BufferId, 1);
 
@@ -232,9 +229,6 @@ pub struct BufferManager {
 
   // ColorScheme manager
   colorscheme_manager: ColorSchemeManagerWk,
-
-  // Current global-local colorscheme name
-  color_name: CompactString,
 }
 
 arc_mutex_ptr!(BufferManager);
@@ -250,7 +244,6 @@ impl BufferManager {
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
       syntax_manager,
       colorscheme_manager,
-      color_name: COLOR_NAME.to_compact_string(),
     }
   }
 
@@ -575,19 +568,6 @@ impl BufferManager {
 
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
     self.global_local_options = *options;
-  }
-
-  pub fn color_name(&self) -> &CompactString {
-    &self.color_name
-  }
-
-  pub fn set_color_name(&mut self, color_name: &str) -> TheResult<()> {
-    if self.colorscheme_manager.contains_key(color_name) {
-      self.color_name = color_name.to_compact_string();
-      Ok(())
-    } else {
-      Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
-    }
   }
 
   pub fn colorscheme(&self) -> Option<ColorSchemeArc> {

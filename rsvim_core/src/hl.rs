@@ -550,8 +550,13 @@ impl ColorSchemeManager {
     &self.color_name
   }
 
-  pub fn set_color_name(&mut self, color_name: CompactString) {
-    self.color_name = color_name;
+  pub fn set_color_name(&mut self, color_name: &str) -> TheResult<()> {
+    if self.contains_key(color_name) {
+      self.color_name = color_name.to_compact_string();
+      Ok(())
+    } else {
+      Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
+    }
   }
 
   pub fn is_empty(&self) -> bool {
