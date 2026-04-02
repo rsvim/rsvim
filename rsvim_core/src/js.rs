@@ -317,6 +317,8 @@ pub mod build {
 /// thus has the best startup performance.
 pub mod boost {
 
+  use crate::{hl::ColorSchemeManagerArc, syntax::SyntaxManagerArc};
+
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -375,6 +377,8 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffer_manager: BufferManagerArc,
     pub cmdline_text: CmdlineTextArc,
+    pub syntax_manager: SyntaxManagerArc,
+    pub colorscheme_manager: ColorSchemeManagerArc,
     pub command_manager: CommandManagerArc,
     // Data Access for RSVIM }
   }
@@ -418,6 +422,8 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
+      syntax_manager: SyntaxManagerArc,
+      colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -472,6 +478,8 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
+        syntax_manager,
+        colorscheme_manager,
         command_manager,
       });
 
@@ -508,6 +516,8 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
+      syntax_manager: SyntaxManagerArc,
+      colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -546,6 +556,8 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
+        syntax_manager,
+        colorscheme_manager,
         command_manager,
       });
 
