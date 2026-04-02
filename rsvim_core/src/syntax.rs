@@ -515,7 +515,10 @@ pub struct SyntaxLoadOptions {
 // Language loader {
 impl SyntaxManager {
   /// Load tree-sitter grammar.
-  pub fn load(opts: &SyntaxLoadOptions) -> Result<Language, LoaderError> {
+  pub fn load(
+    &self,
+    opts: &SyntaxLoadOptions,
+  ) -> Result<Language, LoaderError> {
     let compile_cfg = CompileConfig::new(
       opts.src_path.as_path(),
       None,
