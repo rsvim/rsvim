@@ -546,6 +546,14 @@ impl ColorSchemeManager {
     Self { colors, color_name }
   }
 
+  pub fn color_name(&self) -> &CompactString {
+    &self.color_name
+  }
+
+  pub fn set_color_name(&mut self, color_name: CompactString) {
+    self.color_name = color_name;
+  }
+
   pub fn is_empty(&self) -> bool {
     self.colors.is_empty()
   }
