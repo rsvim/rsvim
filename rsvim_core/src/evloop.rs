@@ -322,6 +322,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
@@ -396,6 +398,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
@@ -472,6 +476,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
