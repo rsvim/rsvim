@@ -9,16 +9,28 @@ pub mod window;
 mod window_tests;
 
 use crate::buf::BufferManagerArc;
+use crate::hl::ColorSchemeManagerArc;
+use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
 
 #[derive(Debug)]
 pub struct WidgetContext {
   pub buffer_manager: BufferManagerArc,
+  pub syntax_manager: BufferManagerArc,
+  pub colorscheme_manager: ColorSchemeManagerArc,
 }
 
 impl WidgetContext {
-  pub fn new(buffer_manager: BufferManagerArc) -> Self {
-    Self { buffer_manager }
+  pub fn new(
+    buffer_manager: BufferManagerArc,
+    syntax_manager: SyntaxManagerArc,
+    colorscheme_manager: ColorSchemeManagerArc,
+  ) -> Self {
+    Self {
+      buffer_manager,
+      syntax_manager,
+      colorscheme_manager,
+    }
   }
 }
 
