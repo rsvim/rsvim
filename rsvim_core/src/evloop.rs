@@ -519,7 +519,10 @@ impl EventLoop {
     self._init_pending_messages();
 
     // Flush logic UI to terminal, i.e. print UI to stdout
-    let context = WidgetContext::new(self.buffer_manager.clone());
+    let context = WidgetContext::new(
+      self.syntax_manager.clone(),
+      self.colorscheme_manager.clone(),
+    );
     lock!(self.tree).draw(self.canvas.clone(), &context);
     self.writer.init_complete(&mut lock!(self.canvas))?;
 
@@ -974,7 +977,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
@@ -1009,7 +1015,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
@@ -1041,7 +1050,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }

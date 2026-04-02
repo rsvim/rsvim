@@ -15,19 +15,16 @@ use crate::ui::canvas::Canvas;
 
 #[derive(Debug)]
 pub struct WidgetContext {
-  pub buffer_manager: BufferManagerArc,
   pub syntax_manager: SyntaxManagerArc,
   pub colorscheme_manager: ColorSchemeManagerArc,
 }
 
 impl WidgetContext {
   pub fn new(
-    buffer_manager: BufferManagerArc,
     syntax_manager: SyntaxManagerArc,
     colorscheme_manager: ColorSchemeManagerArc,
   ) -> Self {
     Self {
-      buffer_manager,
       syntax_manager,
       colorscheme_manager,
     }
