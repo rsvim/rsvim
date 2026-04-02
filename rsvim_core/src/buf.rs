@@ -394,22 +394,9 @@ impl BufferManager {
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
-    if let Some(ext) = file_extension
-      && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
-    {
-      trace!(
-        "Load syntax by file ext:{:?} lang:{:?}",
-        file_extension,
-        lang.name()
-      );
-      let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
-      match Syntax::new(lang, highlight_query) {
-        Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
-      }
-    } else {
-      Ok(None)
-    }
+    let syn_mgr = self.syntax_manager.upgrade().unwrap();
+    let syn_mgr = lock!(syn_mgr);
+    syn_mgr.load_syntax_by_ext(file_extension)
   }
 
   fn _colorscheme(&self) -> Option<ColorSchemeArc> {
