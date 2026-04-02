@@ -37,7 +37,7 @@ pub fn make_js_runtime() -> JsRuntime {
     Arc::downgrade(&syntax_manager),
     Arc::downgrade(&colorscheme_manager),
   ));
-  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size, None));
+  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
   let ex_commands_manager = CommandManager::to_arc(CommandManager::default());
 
   let startup_moment = Instant::now();
