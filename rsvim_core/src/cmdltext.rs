@@ -31,7 +31,7 @@ impl CmdlineText {
   ) -> Self {
     let cmdline_opts = BufferOptionsBuilder::default().build().unwrap();
     Self {
-      colorscheme,
+      colorscheme_manager,
       input: Text::new(cmdline_opts, canvas_size, Rope::new()),
       message: Text::new(cmdline_opts, canvas_size, Rope::new()),
       message_history: RingBuffer::new(500),
