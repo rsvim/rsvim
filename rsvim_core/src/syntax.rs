@@ -329,6 +329,8 @@ pub struct SyntaxManager {
   ext2id: FoldMap<CompactString, CompactString>,
 }
 
+arc_mutex_ptr!(SyntaxManager);
+
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")

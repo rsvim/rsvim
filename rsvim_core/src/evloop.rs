@@ -13,6 +13,7 @@ use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
+use crate::hl::ColorSchemeManagerArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
@@ -30,6 +31,7 @@ use crate::state::ops::cmdline_ops;
 use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -94,8 +96,12 @@ pub struct EventLoop {
 
   /// Vim buffers.
   pub buffer_manager: BufferManagerArc,
-  /// Text contents (except buffers).
+  /// Cmdline text.
   pub cmdline_text: CmdlineTextArc,
+  /// Syntax and parsers.
+  pub syntax_manager: SyntaxManagerArc,
+  /// Colorschemes.
+  pub colorscheme_manager: ColorSchemeManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
