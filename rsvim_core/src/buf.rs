@@ -300,7 +300,7 @@ impl BufferManager {
       let file_extension = filename
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
-      let syntax = self._load_syntax_by_file_ext(&file_extension)?;
+      let syntax = self._new_syntax_by_file_ext(&file_extension)?;
       let colorscheme = self._colorscheme();
       Buffer::_new(
         *self.global_local_options(),
@@ -390,13 +390,13 @@ impl BufferManager {
 
   /// NOTE: This API should be never used by external logic, it is been exposed
   /// as `pub` API just for testing purpose.
-  pub fn _load_syntax_by_file_ext(
+  pub fn _new_syntax_by_file_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     let syntax_manager = self.syntax_manager.upgrade().unwrap();
     let syntax_manager = lock!(syntax_manager);
-    syntax_manager.load_syntax_by_ext(file_extension)
+    syntax_manager.new_syntax_by_ext(file_extension)
   }
 
   fn _colorscheme(&self) -> Option<ColorSchemeArc> {
@@ -429,7 +429,7 @@ impl BufferManager {
           let file_extension = filename
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
-          let syntax = self._load_syntax_by_file_ext(&file_extension)?;
+          let syntax = self._new_syntax_by_file_ext(&file_extension)?;
           let colorscheme = self._colorscheme();
 
           Ok(Buffer::_new(
