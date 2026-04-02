@@ -329,6 +329,8 @@ pub struct SyntaxManager {
   ext2id: FoldMap<CompactString, CompactString>,
 }
 
+arc_mutex_ptr!(SyntaxManager);
+
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
@@ -475,6 +477,29 @@ impl SyntaxManager {
       .get(ext)
       .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
+  }
+
+  /// Load/create a new Syntax by file extension.
+  pub fn load_syntax_by_ext(
+    &self,
+    file_extension: &Option<CompactString>,
+  ) -> TheResult<Option<Syntax>> {
+    if let Some(ext) = file_extension
+      && let Some(lang) = self.get_lang_by_ext(ext)
+    {
+      trace!(
+        "Load syntax by file ext:{:?} lang:{:?}",
+        file_extension,
+        lang.name()
+      );
+      let highlight_query = self.get_highlight_query_by_ext(ext);
+      match Syntax::new(lang, highlight_query) {
+        Ok(syntax) => Ok(Some(syntax)),
+        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
+      }
+    } else {
+      Ok(None)
+    }
   }
 }
 // Language and queries }

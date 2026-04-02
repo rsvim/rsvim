@@ -7,16 +7,19 @@ use crate::buf::BufferManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::hl::ColorSchemeArc;
+use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::SyntaxManager;
 use assert_fs::NamedTempFile;
 use compact_str::ToCompactString;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
+use std::sync::Arc;
 use tokio::time::Instant;
 
 pub fn make_buffer_from_lines(
@@ -108,7 +111,10 @@ pub fn make_buffers_manager(
   opts: BufferOptions,
   bufs: Vec<BufferArc>,
 ) -> BufferManagerArc {
-  let mut bm = BufferManager::new();
+  let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let mut bm =
+    BufferManager::new(Arc::downgrade(&syntax_mgr), Arc::downgrade(&cs_mgr));
   bm.set_global_local_options(&opts);
   for buf in bufs.iter() {
     bm._add_buffer(buf.clone());
@@ -119,7 +125,10 @@ pub fn make_buffers_manager(
 pub fn make_syntax_and_colorscheme(
   tmpfile: &NamedTempFile,
 ) -> (Syntax, ColorSchemeArc) {
-  let buffer_manager = BufferManager::new();
+  let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let buffer_manager =
+    BufferManager::new(Arc::downgrade(&syntax_mgr), Arc::downgrade(&cs_mgr));
 
   let filename = tmpfile.path();
   let file_extension = filename
@@ -150,6 +159,6 @@ pub fn make_syntax_and_colorscheme(
     syntax::query(&syn_tree, &text_rope, &text_payload, &syn.highlight_query());
   syn.set_highlight_capture(syn_capture);
 
-  let colorscheme = buffer_manager.colorscheme().unwrap().clone();
+  let colorscheme = lock!(cs_mgr).colorscheme().unwrap();
   (syn, colorscheme)
 }

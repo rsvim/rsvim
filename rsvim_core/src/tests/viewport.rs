@@ -3,7 +3,9 @@
 use crate::buf::BufferArc;
 use crate::buf::BufferManager;
 use crate::buf::text::Text;
+use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
+use crate::syntax::SyntaxManager;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Node;
@@ -112,8 +114,9 @@ pub fn make_canvas(
     _ => unreachable!(),
   };
   let mut canvas = Canvas::new(terminal_size);
-  let buffer_manager = BufferManager::to_arc(BufferManager::new());
-  let context = WidgetContext::new(buffer_manager);
+  let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let context = WidgetContext::new(syntax_mgr, cs_mgr);
   match tree.node(content_id).unwrap() {
     Node::WindowContent(content) => content.draw(&mut canvas, &context),
     _ => unreachable!(),
@@ -124,8 +127,9 @@ pub fn make_canvas(
 pub fn make_tree_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
   let canvas = Canvas::new(terminal_size);
   let canvas = Canvas::to_arc(canvas);
-  let buffer_manager = BufferManager::to_arc(BufferManager::new());
-  let context = WidgetContext::new(buffer_manager);
+  let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let context = WidgetContext::new(syntax_mgr, cs_mgr);
   let tree = lock!(tree);
   tree.draw(canvas.clone(), &context);
   canvas

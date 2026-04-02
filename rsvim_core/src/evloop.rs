@@ -13,6 +13,8 @@ use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineText;
 use crate::cmdltext::CmdlineTextArc;
+use crate::hl::ColorSchemeManager;
+use crate::hl::ColorSchemeManagerArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
@@ -30,6 +32,8 @@ use crate::state::ops::cmdline_ops;
 use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::SyntaxManager;
+use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
@@ -94,8 +98,12 @@ pub struct EventLoop {
 
   /// Vim buffers.
   pub buffer_manager: BufferManagerArc,
-  /// Text contents (except buffers).
+  /// Cmdline text.
   pub cmdline_text: CmdlineTextArc,
+  /// Syntax and parsers.
+  pub syntax_manager: SyntaxManagerArc,
+  /// Colorschemes.
+  pub colorscheme_manager: ColorSchemeManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -158,6 +166,8 @@ impl EventLoop {
     /* state_machine */ State,
     /* buffer_manager */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
+    /* syntax_manager */ SyntaxManagerArc,
+    /* colorscheme_manager */ ColorSchemeManagerArc,
     /* command_manager */ CommandManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -197,11 +207,14 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
-    let buffer_manager = BufferManager::new();
-    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(
-      canvas_size,
-      buffer_manager.colorscheme(),
-    ));
+    let syntax_manager = SyntaxManager::to_arc(SyntaxManager::new());
+    let colorscheme_manager =
+      ColorSchemeManager::to_arc(ColorSchemeManager::new());
+    let buffer_manager = BufferManager::new(
+      Arc::downgrade(&syntax_manager),
+      Arc::downgrade(&colorscheme_manager),
+    );
+    let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let command_manager = CommandManager::to_arc(CommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
 
@@ -256,6 +269,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -281,6 +296,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -305,6 +322,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
@@ -317,6 +336,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
@@ -347,6 +368,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -375,6 +398,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
@@ -387,6 +412,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
@@ -418,6 +445,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -447,6 +476,8 @@ impl EventLoop {
       tree.clone(),
       buffer_manager.clone(),
       cmdline_text.clone(),
+      syntax_manager.clone(),
+      colorscheme_manager.clone(),
       command_manager,
     );
 
@@ -459,6 +490,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
@@ -486,7 +519,10 @@ impl EventLoop {
     self._init_pending_messages();
 
     // Flush logic UI to terminal, i.e. print UI to stdout
-    let context = WidgetContext::new(self.buffer_manager.clone());
+    let context = WidgetContext::new(
+      self.syntax_manager.clone(),
+      self.colorscheme_manager.clone(),
+    );
     lock!(self.tree).draw(self.canvas.clone(), &context);
     self.writer.init_complete(&mut lock!(self.canvas))?;
 
@@ -941,7 +977,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
@@ -976,7 +1015,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }
@@ -1008,7 +1050,10 @@ impl EventLoop {
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
-      let context = WidgetContext::new(self.buffer_manager.clone());
+      let context = WidgetContext::new(
+        self.syntax_manager.clone(),
+        self.colorscheme_manager.clone(),
+      );
       lock!(self.tree).draw(self.canvas.clone(), &context);
       self.writer.write(&mut lock!(self.canvas))?;
     }

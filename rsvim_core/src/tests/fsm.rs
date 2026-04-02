@@ -36,7 +36,7 @@ pub fn make_fsm(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(terminal_size, None));
+  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -89,7 +89,7 @@ pub fn make_fsm_with_cmdline(
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(terminal_size, None));
+  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(terminal_size));
   let tree = make_tree_with_buffers_cmdline(
     terminal_size,
     window_local_opts,
