@@ -1,10 +1,12 @@
 use crate::buf::BufferManager;
 use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineText;
+use crate::hl::ColorSchemeManager;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::command::CommandManager;
 use crate::prelude::*;
+use crate::syntax::SyntaxManager;
 use crate::ui::tree::Tree;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -29,6 +31,9 @@ pub fn make_js_runtime() -> JsRuntime {
   let tree = Tree::to_arc(Tree::new(style).unwrap());
   let buffers_manager = BufferManager::to_arc(BufferManager::new());
   let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size, None));
+  let syntax_manager = SyntaxManager::to_arc(SyntaxManager::new());
+  let colorscheme_manager =
+    ColorSchemeManager::to_arc(ColorSchemeManager::new());
   let ex_commands_manager = CommandManager::to_arc(CommandManager::default());
 
   let startup_moment = Instant::now();
@@ -47,6 +52,8 @@ pub fn make_js_runtime() -> JsRuntime {
     tree,
     buffers_manager,
     cmdline_text,
+    syntax_manager,
+    colorscheme_manager,
     ex_commands_manager,
   )
 }
