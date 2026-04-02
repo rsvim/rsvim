@@ -37,8 +37,19 @@ log = { workspace = true, features = [
   "release_max_level_error",
 ] }
 mimalloc-safe = { workspace = true, optional = true }
-tokio = { workspace = true, features = ["full"] }
-# zstd = { workspace = true }
+tokio = { workspace = true, features = [
+  "fs",
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "process",
+  "rt",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+  "time",
+] }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }

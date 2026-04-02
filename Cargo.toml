@@ -69,7 +69,19 @@ strum_macros = "0.28"
 taffy = "0.9"
 thiserror = "2"
 tikv-jemallocator = "0.6"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = [
+  "fs",
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "process",
+  "rt",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+  "time",
+] }
 tokio-util = { version = "0.7", features = ["full"] }
 toml = { version = "1.1", features = ["fast_hash"] }
 tree-sitter = "0.26"

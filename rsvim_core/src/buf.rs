@@ -15,11 +15,11 @@ mod undo_tests;
 mod unicode_tests;
 
 use crate::hl::ColorSchemeArc;
-use crate::hl::ColorSchemeManager;
+use crate::hl::ColorSchemeManagerWk;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
-use crate::syntax::SyntaxManager;
+use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use opt::*;
@@ -32,9 +32,6 @@ use std::path::PathBuf;
 use text::Text;
 use tokio::time::Instant;
 use undo::Undo;
-
-// Default options
-pub const COLOR_NAME: &str = crate::hl::DEFAULT;
 
 // BufferId starts from 1.
 structural_id_impl!(i32, BufferId, 1);
@@ -225,26 +222,25 @@ pub struct BufferManager {
   global_local_options: BufferOptions,
 
   // Syntax manager
-  syntax_manager: SyntaxManager,
+  syntax_manager: SyntaxManagerWk,
 
   // ColorScheme manager
-  colorscheme_manager: ColorSchemeManager,
-
-  // Current global-local colorscheme name
-  color_name: CompactString,
+  colorscheme_manager: ColorSchemeManagerWk,
 }
 
 arc_mutex_ptr!(BufferManager);
 
 impl BufferManager {
-  pub fn new() -> Self {
+  pub fn new(
+    syntax_manager: SyntaxManagerWk,
+    colorscheme_manager: ColorSchemeManagerWk,
+  ) -> Self {
     BufferManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
-      syntax_manager: SyntaxManager::new(),
-      colorscheme_manager: ColorSchemeManager::new(),
-      color_name: COLOR_NAME.to_compact_string(),
+      syntax_manager,
+      colorscheme_manager,
     }
   }
 
@@ -305,7 +301,7 @@ impl BufferManager {
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
       let syntax = self._load_syntax_by_file_ext(&file_extension)?;
-      let colorscheme = self.colorscheme();
+      let colorscheme = self._colorscheme();
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -343,7 +339,7 @@ impl BufferManager {
   pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let colorscheme = self.colorscheme();
+    let colorscheme = self._colorscheme();
     let buf = Buffer::_new(
       *self.global_local_options(),
       canvas_size,
@@ -392,28 +388,21 @@ impl BufferManager {
     buf_id
   }
 
-  /// NOTE: This API should never be used by external logic, it is been exposed
+  /// NOTE: This API should be never used by external logic, it is been exposed
   /// as `pub` API just for testing purpose.
   pub fn _load_syntax_by_file_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
-    if let Some(ext) = file_extension
-      && let Some(lang) = self.syntax_manager.get_lang_by_ext(ext)
-    {
-      trace!(
-        "Load syntax by file ext:{:?} lang:{:?}",
-        file_extension,
-        lang.name()
-      );
-      let highlight_query = self.syntax_manager.get_highlight_query_by_ext(ext);
-      match Syntax::new(lang, highlight_query) {
-        Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
-      }
-    } else {
-      Ok(None)
-    }
+    let syntax_manager = self.syntax_manager.upgrade().unwrap();
+    let syntax_manager = lock!(syntax_manager);
+    syntax_manager.load_syntax_by_ext(file_extension)
+  }
+
+  fn _colorscheme(&self) -> Option<ColorSchemeArc> {
+    let colorscheme_manager = self.colorscheme_manager.upgrade().unwrap();
+    let colorscheme_manager = lock!(colorscheme_manager);
+    colorscheme_manager.colorscheme()
   }
 }
 
@@ -441,7 +430,7 @@ impl BufferManager {
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
           let syntax = self._load_syntax_by_file_ext(&file_extension)?;
-          let colorscheme = self.colorscheme();
+          let colorscheme = self._colorscheme();
 
           Ok(Buffer::_new(
             *self.global_local_options(),
@@ -551,12 +540,6 @@ impl BufferManager {
 }
 // Buffers }
 
-impl Default for BufferManager {
-  fn default() -> Self {
-    BufferManager::new()
-  }
-}
-
 // Options {
 impl BufferManager {
   pub fn global_local_options(&self) -> &BufferOptions {
@@ -569,23 +552,6 @@ impl BufferManager {
 
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
     self.global_local_options = *options;
-  }
-
-  pub fn color_name(&self) -> &CompactString {
-    &self.color_name
-  }
-
-  pub fn set_color_name(&mut self, color_name: &str) -> TheResult<()> {
-    if self.colorscheme_manager.contains_key(color_name) {
-      self.color_name = color_name.to_compact_string();
-      Ok(())
-    } else {
-      Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
-    }
-  }
-
-  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
-    self.colorscheme_manager.get(&self.color_name).cloned()
   }
 }
 // Options }

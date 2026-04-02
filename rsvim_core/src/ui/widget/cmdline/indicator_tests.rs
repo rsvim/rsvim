@@ -5,7 +5,9 @@ use crate::buf::BufferArc;
 use crate::buf::BufferManager;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
+use crate::hl::ColorSchemeManager;
 use crate::prelude::*;
+use crate::syntax::SyntaxManager;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
@@ -34,8 +36,9 @@ fn make_canvas(
   cmdline_indicator: &CmdlineIndicator,
 ) -> Canvas {
   let mut canvas = Canvas::new(terminal_size);
-  let buffer_manager = BufferManager::to_arc(BufferManager::new());
-  let context = WidgetContext::new(buffer_manager);
+  let syn_mgr = SyntaxManager::to_arc(SyntaxManager::new());
+  let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let context = WidgetContext::new(syn_mgr.clone(), cs_mgr.clone());
   cmdline_indicator.draw(&mut canvas, &context);
   canvas
 }

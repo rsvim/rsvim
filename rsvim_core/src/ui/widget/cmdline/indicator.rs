@@ -69,10 +69,10 @@ impl Widgetable for CmdlineIndicator {
       let upos: U16Pos = actual_shape.min().into();
       let symbol = self.symbol;
       let symbol = format!("{symbol}").to_compact_string();
-      let buffer_manager = lock!(context.buffer_manager);
+      let colorscheme_manager = lock!(context.colorscheme_manager);
 
       let mut cell = Cell::with_symbol(symbol);
-      if let Some(colorscheme) = buffer_manager.colorscheme() {
+      if let Some(colorscheme) = colorscheme_manager.colorscheme() {
         if cell.symbol().chars().any(char_is_whitespace) {
           cell.set_fg(Color::Reset);
         } else {

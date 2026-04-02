@@ -35,8 +35,10 @@ use crate::chan::JsMessage;
 use crate::chan::MasterMessage;
 use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineTextArc;
+use crate::hl::ColorSchemeManagerArc;
 use crate::prelude::*;
 use crate::structural_id_impl;
+use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
@@ -316,7 +318,6 @@ pub mod build {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
-
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -375,6 +376,8 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffer_manager: BufferManagerArc,
     pub cmdline_text: CmdlineTextArc,
+    pub syntax_manager: SyntaxManagerArc,
+    pub colorscheme_manager: ColorSchemeManagerArc,
     pub command_manager: CommandManagerArc,
     // Data Access for RSVIM }
   }
@@ -418,6 +421,8 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
+      syntax_manager: SyntaxManagerArc,
+      colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -472,6 +477,8 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
+        syntax_manager,
+        colorscheme_manager,
         command_manager,
       });
 
@@ -508,6 +515,8 @@ pub mod boost {
       tree: TreeArc,
       buffer_manager: BufferManagerArc,
       cmdline_text: CmdlineTextArc,
+      syntax_manager: SyntaxManagerArc,
+      colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -546,6 +555,8 @@ pub mod boost {
         tree,
         buffer_manager,
         cmdline_text,
+        syntax_manager,
+        colorscheme_manager,
         command_manager,
       });
 

@@ -485,7 +485,12 @@ impl ColorScheme {
 pub struct ColorSchemeManager {
   // Maps colorscheme name => colorscheme
   colors: FoldMap<CompactString, ColorSchemeArc>,
+
+  // Current global colorscheme name.
+  color_name: CompactString,
 }
+
+arc_mutex_ptr!(ColorSchemeManager);
 
 impl Default for ColorSchemeManager {
   fn default() -> Self {
@@ -537,7 +542,25 @@ impl ColorSchemeManager {
   pub fn new() -> Self {
     let mut colors = FoldMap::new();
     colors.insert(DEFAULT.to_compact_string(), default_colorscheme());
-    Self { colors }
+    let color_name = DEFAULT.to_compact_string();
+    Self { colors, color_name }
+  }
+
+  pub fn color_name(&self) -> &CompactString {
+    &self.color_name
+  }
+
+  pub fn set_color_name(&mut self, color_name: &str) -> TheResult<()> {
+    if self.contains_key(color_name) {
+      self.color_name = color_name.to_compact_string();
+      Ok(())
+    } else {
+      Err(TheErr::ColorSchemeNotFound(color_name.to_compact_string()))
+    }
+  }
+
+  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
+    self.colors.get(&self.color_name).cloned()
   }
 
   pub fn is_empty(&self) -> bool {
