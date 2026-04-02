@@ -166,6 +166,8 @@ impl EventLoop {
     /* state_machine */ State,
     /* buffer_manager */ BufferManagerArc,
     /* cmdline_text */ CmdlineTextArc,
+    /* syntax_manager */ SyntaxManagerArc,
+    /* colorscheme_manager */ ColorSchemeManagerArc,
     /* command_manager */ CommandManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -212,6 +214,9 @@ impl EventLoop {
     ));
     let command_manager = CommandManager::to_arc(CommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
+    let syntax_manager = SyntaxManager::to_arc(SyntaxManager::new());
+    let colorscheme_manager =
+      ColorSchemeManager::to_arc(ColorSchemeManager::new());
 
     // State
     let state_machine = State::default();
@@ -264,6 +269,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -289,6 +296,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -325,6 +334,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
@@ -355,6 +366,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -395,6 +408,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
@@ -426,6 +441,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       command_manager,
       cancellation_token,
       detached_tracker,
@@ -467,6 +484,8 @@ impl EventLoop {
       state_machine,
       buffer_manager,
       cmdline_text,
+      syntax_manager,
+      colorscheme_manager,
       writer,
       cancellation_token,
       detached_tracker,
