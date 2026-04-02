@@ -8,6 +8,7 @@ use crate::js::command::CommandManager;
 use crate::prelude::*;
 use crate::syntax::SyntaxManager;
 use crate::ui::tree::Tree;
+use std::sync::Arc;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use taffy::Style;
@@ -29,11 +30,14 @@ pub fn make_js_runtime() -> JsRuntime {
     ..Default::default()
   };
   let tree = Tree::to_arc(Tree::new(style).unwrap());
-  let buffers_manager = BufferManager::to_arc(BufferManager::new());
-  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size, None));
   let syntax_manager = SyntaxManager::to_arc(SyntaxManager::new());
   let colorscheme_manager =
     ColorSchemeManager::to_arc(ColorSchemeManager::new());
+  let buffers_manager = BufferManager::to_arc(BufferManager::new(
+    Arc::downgrade(&syntax_manager),
+    Arc::downgrade(&colorscheme_manager),
+  ));
+  let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size, None));
   let ex_commands_manager = CommandManager::to_arc(CommandManager::default());
 
   let startup_moment = Instant::now();
