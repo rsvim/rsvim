@@ -569,9 +569,5 @@ impl BufferManager {
   pub fn set_global_local_options(&mut self, options: &BufferOptions) {
     self.global_local_options = *options;
   }
-
-  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
-    self.colorscheme_manager.get(&self.color_name).cloned()
-  }
 }
 // Options }
