@@ -16,10 +16,13 @@ mod unicode_tests;
 
 use crate::hl::ColorSchemeArc;
 use crate::hl::ColorSchemeManager;
+use crate::hl::ColorSchemeManagerWk;
+use crate::hl::ColorSchemeWk;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxManager;
+use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use opt::*;
@@ -225,10 +228,10 @@ pub struct BufferManager {
   global_local_options: BufferOptions,
 
   // Syntax manager
-  syntax_manager: SyntaxManager,
+  syntax_manager: SyntaxManagerWk,
 
   // ColorScheme manager
-  colorscheme_manager: ColorSchemeManager,
+  colorscheme_manager: ColorSchemeManagerWk,
 
   // Current global-local colorscheme name
   color_name: CompactString,
@@ -237,13 +240,16 @@ pub struct BufferManager {
 arc_mutex_ptr!(BufferManager);
 
 impl BufferManager {
-  pub fn new() -> Self {
+  pub fn new(
+    syntax_manager: SyntaxManagerWk,
+    colorscheme_manager: ColorSchemeManagerWk,
+  ) -> Self {
     BufferManager {
       buffers: BTreeMap::new(),
       buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
-      syntax_manager: SyntaxManager::new(),
-      colorscheme_manager: ColorSchemeManager::new(),
+      syntax_manager,
+      colorscheme_manager,
       color_name: COLOR_NAME.to_compact_string(),
     }
   }
