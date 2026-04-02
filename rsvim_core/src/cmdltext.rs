@@ -38,16 +38,6 @@ impl CmdlineText {
     }
   }
 
-  /// Global colorscheme
-  pub fn colorscheme(&self) -> &Option<ColorSchemeArc> {
-    &self.colorscheme
-  }
-
-  /// Set global colorscheme
-  pub fn set_colorscheme(&mut self, value: Option<ColorSchemeArc>) {
-    self.colorscheme = value;
-  }
-
   /// Command-line input content
   pub fn input(&self) -> &Text {
     &self.input
