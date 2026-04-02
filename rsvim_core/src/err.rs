@@ -36,7 +36,7 @@ pub enum TheErr {
   SaveBufferFailed(BufferId, CompactString, IoErr),
 
   #[error("Failed to load syntax for language {0}: {1}.")]
-  LoadSyntaxLanguageFailed(CompactString, LanguageError),
+  LoadSyntaxFailed(CompactString, LanguageError),
 
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
