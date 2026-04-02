@@ -550,12 +550,6 @@ impl BufferManager {
 }
 // Buffers }
 
-impl Default for BufferManager {
-  fn default() -> Self {
-    BufferManager::new()
-  }
-}
-
 // Options {
 impl BufferManager {
   pub fn global_local_options(&self) -> &BufferOptions {
