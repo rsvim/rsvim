@@ -388,7 +388,7 @@ impl BufferManager {
     buf_id
   }
 
-  /// NOTE: This API should never be used by external logic, it is been exposed
+  /// NOTE: This API should be never used by external logic, it is been exposed
   /// as `pub` API just for testing purpose.
   pub fn _load_syntax_by_file_ext(
     &self,
