@@ -38,6 +38,9 @@ pub enum TheErr {
   #[error("Failed to load syntax for language {0}: {1}.")]
   LoadSyntaxFailed(CompactString, LanguageError),
 
+  #[error("Failed to load tree-sitter language {0}: {1}.")]
+  LoadTreesitterLanguageFailed(CompactString, LoaderError),
+
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
 
