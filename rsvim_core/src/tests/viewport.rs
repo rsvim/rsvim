@@ -116,10 +116,6 @@ pub fn make_canvas(
   let mut canvas = Canvas::new(terminal_size);
   let syntax_mgr = SyntaxManager::to_arc(SyntaxManager::new());
   let cs_mgr = ColorSchemeManager::to_arc(ColorSchemeManager::new());
-  let buffer_manager = BufferManager::to_arc(BufferManager::new(
-    Arc::downgrade(&syntax_mgr),
-    Arc::downgrade(&cs_mgr),
-  ));
   let context = WidgetContext::new(syntax_mgr, cs_mgr);
   match tree.node(content_id).unwrap() {
     Node::WindowContent(content) => content.draw(&mut canvas, &context),
