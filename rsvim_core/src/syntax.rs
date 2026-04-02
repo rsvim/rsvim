@@ -25,6 +25,7 @@ use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
 use tree_sitter_loader::CompileConfig;
 use tree_sitter_loader::Loader;
+use tree_sitter_loader::LoaderError;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
@@ -488,41 +489,14 @@ pub struct SyntaxLoadOptions {
 
 // Language loader {
 impl SyntaxManager {
-  /// Load tree-sitter grammar in async.
-  pub async fn async_load(
-    &mut self,
-    opts: &SyntaxLoadOptions,
-  ) -> TheResult<()> {
+  /// Load tree-sitter grammar.
+  pub fn load(opts: &SyntaxLoadOptions) -> Result<Language, LoaderError> {
     let compile_cfg = CompileConfig::new(
       opts.src_path.as_path(),
       None,
       opts.output_path.clone(),
     );
-    self.loader.load_language_at_path(compile_cfg);
-    let compile_cfg = CompileConfig::new(
-      opts.src_path.as_path(),
-      None,
-      opts.output_path.clone(),
-    );
-    self.loader.load_language_at_path_with_name(compile_cfg);
-    Ok(())
-  }
-
-  /// Load tree-sitter grammar in sync.
-  pub fn load(&mut self, opts: &SyntaxLoadOptions) -> TheResult<()> {
-    let compile_cfg = CompileConfig::new(
-      opts.src_path.as_path(),
-      None,
-      opts.output_path.clone(),
-    );
-    self.loader.load_language_at_path(compile_cfg);
-    let compile_cfg = CompileConfig::new(
-      opts.src_path.as_path(),
-      None,
-      opts.output_path.clone(),
-    );
-    self.loader.load_language_at_path_with_name(compile_cfg);
-    Ok(())
+    self.loader.load_language_at_path(compile_cfg)
   }
 }
 // Language loader }
