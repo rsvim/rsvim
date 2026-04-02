@@ -15,13 +15,10 @@ mod undo_tests;
 mod unicode_tests;
 
 use crate::hl::ColorSchemeArc;
-use crate::hl::ColorSchemeManager;
 use crate::hl::ColorSchemeManagerWk;
-use crate::hl::ColorSchemeWk;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use crate::syntax::Syntax;
-use crate::syntax::SyntaxManager;
 use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -304,7 +301,7 @@ impl BufferManager {
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
       let syntax = self._load_syntax_by_file_ext(&file_extension)?;
-      let colorscheme = self.colorscheme();
+      let colorscheme = self._colorscheme();
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -342,7 +339,7 @@ impl BufferManager {
   pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let colorscheme = self.colorscheme();
+    let colorscheme = self._colorscheme();
     let buf = Buffer::_new(
       *self.global_local_options(),
       canvas_size,
@@ -414,6 +411,12 @@ impl BufferManager {
       Ok(None)
     }
   }
+
+  fn _colorscheme(&self) -> Option<ColorSchemeArc> {
+    let cs_mgr = self.colorscheme_manager.upgrade().unwrap();
+    let cs_mgr = lock!(cs_mgr);
+    cs_mgr.colorscheme()
+  }
 }
 
 // Primitive APIs {
@@ -440,7 +443,7 @@ impl BufferManager {
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
           let syntax = self._load_syntax_by_file_ext(&file_extension)?;
-          let colorscheme = self.colorscheme();
+          let colorscheme = self._colorscheme();
 
           Ok(Buffer::_new(
             *self.global_local_options(),

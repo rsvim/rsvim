@@ -559,6 +559,10 @@ impl ColorSchemeManager {
     }
   }
 
+  pub fn colorscheme(&self) -> Option<ColorSchemeArc> {
+    self.colors.get(&self.color_name).cloned()
+  }
+
   pub fn is_empty(&self) -> bool {
     self.colors.is_empty()
   }
