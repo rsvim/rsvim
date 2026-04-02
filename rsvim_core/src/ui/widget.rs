@@ -16,7 +16,7 @@ use crate::ui::canvas::Canvas;
 #[derive(Debug)]
 pub struct WidgetContext {
   pub buffer_manager: BufferManagerArc,
-  pub syntax_manager: BufferManagerArc,
+  pub syntax_manager: SyntaxManagerArc,
   pub colorscheme_manager: ColorSchemeManagerArc,
 }
 
