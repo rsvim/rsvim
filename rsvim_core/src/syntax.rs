@@ -497,7 +497,7 @@ impl SyntaxManager {
       let highlight_query = self.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
+        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
