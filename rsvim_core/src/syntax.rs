@@ -514,7 +514,7 @@ pub struct SyntaxLoadOptions {
 
 // Language loader {
 impl SyntaxManager {
-  /// Load tree-sitter grammar.
+  /// Load the tree-sitter grammar `Language` FFI dynamic library.
   pub fn load_treesitter_language(
     &self,
     opts: &SyntaxLoadOptions,
