@@ -8,7 +8,6 @@ pub mod window;
 #[cfg(test)]
 mod window_tests;
 
-use crate::buf::BufferManagerArc;
 use crate::hl::ColorSchemeManagerArc;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
