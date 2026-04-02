@@ -1,7 +1,5 @@
 //! Buffer utils for testing.
 
-use std::sync::Arc;
-
 use crate::buf::Buffer;
 use crate::buf::BufferArc;
 use crate::buf::BufferManager;
@@ -21,6 +19,7 @@ use compact_str::ToCompactString;
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
+use std::sync::Arc;
 use tokio::time::Instant;
 
 pub fn make_buffer_from_lines(
