@@ -9,6 +9,7 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -22,6 +23,9 @@ use tree_sitter::Query;
 use tree_sitter::QueryCursor;
 use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
+use tree_sitter_loader::CompileConfig;
+use tree_sitter_loader::Loader;
+use tree_sitter_loader::LoaderError;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
@@ -312,13 +316,10 @@ impl Syntax {
   }
 }
 
-// #[derive(Debug, Clone)]
-// pub struct SyntaxBuiltParser {
-//   pub grammar_path: PathBuf,
-//   pub library_path: PathBuf,
-// }
-
 pub struct SyntaxManager {
+  // tree-sitter loader
+  loader: Loader,
+
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
@@ -346,6 +347,7 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
+      loader: Loader::new().unwrap(),
       languages: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
@@ -480,7 +482,7 @@ impl SyntaxManager {
   }
 
   /// Load/create a new Syntax by file extension.
-  pub fn load_syntax_by_ext(
+  pub fn new_syntax_by_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
@@ -495,7 +497,7 @@ impl SyntaxManager {
       let highlight_query = self.get_highlight_query_by_ext(ext);
       match Syntax::new(lang, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
+        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
@@ -504,21 +506,28 @@ impl SyntaxManager {
 }
 // Language and queries }
 
-pub struct SyntaxLoadOptions {}
+#[derive(Debug, Clone)]
+pub struct SyntaxLoadOptions {
+  pub src_path: PathBuf,
+  pub output_path: Option<PathBuf>,
+}
 
-// Load and build {
+// Language loader {
 impl SyntaxManager {
-  /// Load tree-sitter grammar in async.
-  pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
-  }
-
-  /// Load tree-sitter grammar in sync.
-  pub fn load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
+  /// Load the tree-sitter grammar `Language` FFI dynamic library.
+  pub fn load_treesitter_language(
+    &self,
+    opts: &SyntaxLoadOptions,
+  ) -> Result<Language, LoaderError> {
+    let compile_cfg = CompileConfig::new(
+      opts.src_path.as_path(),
+      None,
+      opts.output_path.clone(),
+    );
+    self.loader.load_language_at_path(compile_cfg)
   }
 }
-// Load and build }
+// Language loader }
 
 impl Default for SyntaxManager {
   fn default() -> Self {
