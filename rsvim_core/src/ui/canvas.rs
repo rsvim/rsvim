@@ -125,11 +125,6 @@ impl Canvas {
       if !self.cursor().hidden() {
         shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
       }
-
-      shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-        saved_cursor_pos.x(),
-        saved_cursor_pos.y(),
-      )));
     }
 
     // For cursor
