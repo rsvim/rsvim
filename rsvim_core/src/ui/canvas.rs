@@ -107,7 +107,11 @@ impl Canvas {
 
     self._shade_cells(&mut shaders);
 
-    // For cells, it needs extra save and restore cursor position
+    // Since cursor position will be changed while we are printing a lot of
+    // text to the terminal (in the `_shade_cells` method).
+    // Thus we need to save and restore the previous cursor position
+    let saved_prev_cursor_pos = *self.prev_cursor().pos();
+
     if !shaders.is_empty() {
       // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
       //
@@ -124,6 +128,12 @@ impl Canvas {
         shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
       }
     }
+
+    // Here restore the previous cursor position
+    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+      saved_prev_cursor_pos.x(),
+      saved_prev_cursor_pos.y(),
+    )));
 
     // For cursor
     self._shade_cursor(&mut shaders);
