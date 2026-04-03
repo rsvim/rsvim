@@ -19,7 +19,7 @@ const REPEAT: usize = 100;
 const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
 
 fn bench_shade(c: &mut Criterion) {
-  let mut g = c.benchmark_group("bench_search_nowrap");
+  let mut g = c.benchmark_group("bench_shade");
 
   let run_bench = |width: &u16, height: &u16| {
     let canvas_size = size!(*width, *height);
