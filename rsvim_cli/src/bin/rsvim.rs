@@ -4,7 +4,7 @@
 
 #[cfg(all(feature = "mimalloc", not(any(feature = "jemalloc"))))]
 #[global_allocator]
-static GLOBAL: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
   feature = "jemalloc",

@@ -105,28 +105,34 @@ impl Canvas {
       (self.size().height() as usize) * (self.size().width() as usize),
     );
 
-    // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
-    //
-    // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
-    // the cursor twinkling/jumping while refreshing the TUI screen.
-    // So here let's hide cursor before flushing shaders, and restore the
-    // cursor after flushing is done.
-    if !self.cursor().hidden() {
-      shaders.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
-    }
-
-    // For cells, it needs extra save and restore cursor position
     self._shade_cells(&mut shaders);
-    let saved_cursor_pos = self.cursor().pos();
 
-    // Revert hide cursor.
-    if !self.cursor().hidden() {
-      shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+    // Since cursor position will be changed while we are printing a lot of
+    // text to the terminal (in the `_shade_cells` method).
+    // Thus we need to save and restore the previous cursor position
+    let saved_prev_cursor_pos = *self.prev_cursor().pos();
+
+    if !shaders.is_empty() {
+      // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
+      //
+      // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
+      // the cursor twinkling/jumping while refreshing the TUI screen.
+      // So here let's hide cursor before flushing shaders, and restore the
+      // cursor after flushing is done.
+      if !self.cursor().hidden() {
+        shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      }
+
+      // Revert hide cursor.
+      if !self.cursor().hidden() {
+        shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+      }
     }
 
+    // Here restore the previous cursor position
     shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      saved_cursor_pos.x(),
-      saved_cursor_pos.y(),
+      saved_prev_cursor_pos.x(),
+      saved_prev_cursor_pos.y(),
     )));
 
     // For cursor

@@ -52,7 +52,7 @@ log = { version = "0.4", features = [
   "release_max_level_error",
 ] }
 lru = "0.16"
-mimalloc-safe = "0.1"
+mimalloc = "0.1"
 normpath = "1.5"
 num-traits = "0.2"
 oxc_resolver = "11.19"
