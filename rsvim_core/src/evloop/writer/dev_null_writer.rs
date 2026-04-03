@@ -32,7 +32,7 @@ impl StdoutWritable for DevNullWriter {
 
   fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
     let shaders = canvas.shade();
-    let shaders = shaders.borrow();
+    let shaders = lock!(shaders);
     self.shaders.extend_from_slice(&shaders);
     Ok(())
   }

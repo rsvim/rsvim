@@ -72,7 +72,7 @@ impl StdoutWritable for EditorWriter {
   fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
     // Compute the commands that need to output to the terminal device.
     let shaders = canvas.shade();
-    let shaders = shaders.borrow();
+    let shaders = lock!(shaders);
     self.dispatch_shader(&shaders)?;
     self.output.flush()?;
 
