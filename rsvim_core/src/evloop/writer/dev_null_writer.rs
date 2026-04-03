@@ -3,7 +3,6 @@
 use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::canvas::Shader;
 use crate::ui::canvas::ShaderCommand;
 
 #[derive(Debug)]
@@ -46,7 +45,7 @@ impl Default for DevNullWriter {
 }
 
 impl DevNullWriter {
-  pub fn shaders(&self) -> &Vec<Shader> {
+  pub fn shaders(&self) -> &Vec<ShaderCommand> {
     &self.shaders
   }
 }
