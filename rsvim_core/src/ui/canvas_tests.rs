@@ -2,6 +2,8 @@ use super::canvas::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use itertools::Itertools;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 fn int2letter(i: u8) -> char {
   (i + 65) as char
@@ -21,22 +23,23 @@ fn _shade_cursor1() {
 
   let cursor1 = Cursor::default();
   can.frame_mut().set_cursor(cursor1);
-  let mut actual1 = vec![];
-  can._shade_cursor(&mut actual1);
+  let actual1 = Rc::new(RefCell::new(vec![]));
+  can._shade_cursor(actual1.clone());
   can._shade_done();
-  assert!(actual1.is_empty());
+  assert!(actual1.borrow().is_empty());
 
   let cursor2 =
     Cursor::new(point!(3, 7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
-  let mut actual2 = vec![];
-  can._shade_cursor(&mut actual2);
+  let actual2 = Rc::new(RefCell::new(vec![]));
+  can._shade_cursor(actual2.clone());
   can._shade_done();
-  info!("actual2:{:?}", actual2);
-  assert!(!actual2.is_empty());
-  assert_eq!(actual2.len(), 3);
+  info!("actual2:{:?}", actual2.borrow());
+  assert!(!actual2.borrow().is_empty());
+  assert_eq!(actual2.borrow().len(), 3);
   assert_eq!(
     actual2
+      .borrow()
       .iter()
       .filter(|sh| {
         if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh
@@ -52,6 +55,7 @@ fn _shade_cursor1() {
   );
   assert_eq!(
     actual2
+      .borrow()
       .iter()
       .filter(|sh| {
         matches!(
@@ -67,6 +71,7 @@ fn _shade_cursor1() {
   );
   assert_eq!(
     actual2
+      .borrow()
       .iter()
       .filter(|sh| {
         matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide))
@@ -77,6 +82,7 @@ fn _shade_cursor1() {
   );
   assert_eq!(
     actual2
+      .borrow()
       .iter()
       .filter(|sh| {
         matches!(
@@ -94,13 +100,14 @@ fn _shade_cursor1() {
   let cursor3 =
     Cursor::new(point!(4, 5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
-  let mut actual3 = vec![];
-  can._shade_cursor(&mut actual3);
+  let actual3 = Rc::new(RefCell::new(vec![]));
+  can._shade_cursor(actual3.clone());
   can._shade_done();
-  info!("actual3:{:?}", actual3);
-  assert_eq!(actual3.len(), 3);
+  info!("actual3:{:?}", actual3.borrow());
+  assert_eq!(actual3.borrow().len(), 3);
   assert_eq!(
     actual3
+      .borrow()
       .iter()
       .filter(|sh| {
         if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh
@@ -116,6 +123,7 @@ fn _shade_cursor1() {
   );
   assert_eq!(
     actual3
+      .borrow()
       .iter()
       .filter(|sh| {
         matches!(
@@ -131,6 +139,7 @@ fn _shade_cursor1() {
   );
   assert_eq!(
     actual3
+      .borrow()
       .iter()
       .filter(|sh| {
         matches!(
