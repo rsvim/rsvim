@@ -175,6 +175,10 @@ workspace = true
 
 [[bench]]
 harness = false
+name = "canvas_shade"
+
+[[bench]]
+harness = false
 name = "viewport_search_nowrap"
 
 [[bench]]
