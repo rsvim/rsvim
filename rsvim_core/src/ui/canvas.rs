@@ -462,23 +462,3 @@ pub enum ShaderCommand {
   TerminalScrollUp(crossterm::terminal::ScrollUp),
   TerminalSetSize(crossterm::terminal::SetSize),
 }
-
-#[derive(Debug, Clone)]
-/// The rendering updates on each draw, returns from [`Canvas::shade`] method.
-///
-/// It's simply a collection of [`ShaderCommand`].
-pub struct Shader {
-  commands: Vec<ShaderCommand>,
-}
-
-impl Shader {
-  /// Make new shader.
-  pub fn new(commands: Vec<ShaderCommand>) -> Self {
-    Shader { commands }
-  }
-
-  /// Get an iterator of the collection.
-  pub fn iter(&self) -> Iter<'_, ShaderCommand> {
-    self.commands.iter()
-  }
-}
