@@ -28,6 +28,7 @@ use std::slice::Iter;
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
+  shaders: Vec<ShaderCommand>,
 }
 
 arc_mutex_ptr!(Canvas);
@@ -35,9 +36,12 @@ arc_mutex_ptr!(Canvas);
 impl Canvas {
   /// Make new canvas with terminal actual size.
   pub fn new(size: U16Size) -> Self {
+    let shaders =
+      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
     Canvas {
       prev_frame: Frame::new(size, Cursor::default()),
       frame: Frame::new(size, Cursor::default()),
+      shaders,
     }
   }
 
