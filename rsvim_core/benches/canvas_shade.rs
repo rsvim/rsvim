@@ -39,7 +39,7 @@ fn bench_shade(c: &mut Criterion) {
         canvas.frame_mut().set_cell(black_box(pos), black_box(cell));
       }
       let shaders = canvas.shade();
-      let _shaders = shaders.lock().unwrap();
+      let _shaders = black_box(shaders.lock().unwrap());
     }
   };
 
