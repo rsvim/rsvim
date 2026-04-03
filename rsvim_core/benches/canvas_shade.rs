@@ -15,7 +15,7 @@ const BIG_TERM_WIDTH: u16 = 200;
 const BIG_TERM_HEIGHT: u16 = 50;
 const SMALL_TERM_WIDTH: u16 = 45;
 const SMALL_TERM_HEIGHT: u16 = 12;
-const REPEAT: usize = 100;
+const REPEAT: usize = 1000;
 const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
 
 fn bench_shade(c: &mut Criterion) {
