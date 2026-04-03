@@ -108,8 +108,6 @@ impl Canvas {
     self._shade_cells(&mut shaders);
 
     // For cells, it needs extra save and restore cursor position
-    let saved_cursor_pos = self.cursor().pos();
-
     if !shaders.is_empty() {
       // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
       //
