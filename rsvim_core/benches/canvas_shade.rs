@@ -5,11 +5,9 @@ use criterion::criterion_group;
 use criterion::criterion_main;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use rsvim_core::buf::opt::BufferOptionsBuilder;
 use rsvim_core::prelude::*;
 use rsvim_core::ui::canvas::Canvas;
 use rsvim_core::ui::canvas::Cell;
-use rsvim_core::ui::widget::window::opt::WindowOptionsBuilder;
 use std::hint::black_box;
 use std::time::Duration;
 
