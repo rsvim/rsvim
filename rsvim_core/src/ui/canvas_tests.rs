@@ -2,8 +2,8 @@ use super::canvas::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use itertools::Itertools;
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 fn int2letter(i: u8) -> char {
   (i + 65) as char
@@ -23,7 +23,7 @@ fn _shade_cursor1() {
 
   let cursor1 = Cursor::default();
   can.frame_mut().set_cursor(cursor1);
-  let actual1 = Rc::new(RefCell::new(vec![]));
+  let actual1 = Arc::new(Mutex::new(vec![]));
   can._shade_cursor(actual1.clone());
   can._shade_done();
   assert!(actual1.borrow().is_empty());
@@ -31,7 +31,7 @@ fn _shade_cursor1() {
   let cursor2 =
     Cursor::new(point!(3, 7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
-  let actual2 = Rc::new(RefCell::new(vec![]));
+  let actual2 = Arc::new(Mutex::new(vec![]));
   can._shade_cursor(actual2.clone());
   can._shade_done();
   info!("actual2:{:?}", actual2.borrow());
@@ -100,7 +100,7 @@ fn _shade_cursor1() {
   let cursor3 =
     Cursor::new(point!(4, 5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
-  let actual3 = Rc::new(RefCell::new(vec![]));
+  let actual3 = Arc::new(Mutex::new(vec![]));
   can._shade_cursor(actual3.clone());
   can._shade_done();
   info!("actual3:{:?}", actual3.borrow());
