@@ -14,9 +14,9 @@ pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
 use itertools::Itertools;
-use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.
@@ -29,7 +29,7 @@ use std::rc::Rc;
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
-  shaders: Rc<RefCell<Vec<ShaderCommand>>>,
+  shaders: Arc<Mutex<Vec<ShaderCommand>>>,
 }
 
 arc_mutex_ptr!(Canvas);
@@ -42,7 +42,7 @@ impl Canvas {
     Canvas {
       prev_frame: Frame::new(size, Cursor::default()),
       frame: Frame::new(size, Cursor::default()),
-      shaders: Rc::new(RefCell::new(shaders)),
+      shaders: Arc::new(Mutex::new(shaders)),
     }
   }
 
@@ -105,8 +105,8 @@ impl Canvas {
 impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
-  pub fn shade(&mut self) -> Rc<RefCell<Vec<ShaderCommand>>> {
-    self.shaders.borrow_mut().clear();
+  pub fn shade(&mut self) -> Arc<Mutex<Vec<ShaderCommand>>> {
+    lock!(self.shaders).clear();
 
     self._shade_cells(self.shaders.clone());
 
@@ -116,7 +116,7 @@ impl Canvas {
     let saved_prev_cursor_pos = *self.prev_cursor().pos();
 
     {
-      let mut shaders = self.shaders.borrow_mut();
+      let mut shaders = lock!(self.shaders);
       if !shaders.is_empty() {
         // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
         //
@@ -160,9 +160,9 @@ impl Canvas {
   /// Shade cursor and append results into shader vector.
   pub fn _shade_cursor(
     &mut self,
-    output_shaders: Rc<RefCell<Vec<ShaderCommand>>>,
+    output_shaders: Arc<Mutex<Vec<ShaderCommand>>>,
   ) {
-    let mut output_shaders = output_shaders.borrow_mut();
+    let mut output_shaders = lock!(output_shaders);
 
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
@@ -204,9 +204,9 @@ impl Canvas {
   /// Shade cells and append results into shader vector.
   pub fn _shade_cells(
     &mut self,
-    output_shaders: Rc<RefCell<Vec<ShaderCommand>>>,
+    output_shaders: Arc<Mutex<Vec<ShaderCommand>>>,
   ) {
-    let mut output_shaders = output_shaders.borrow_mut();
+    let mut output_shaders = lock!(output_shaders);
 
     if self.size() == self.prev_size() {
       // When terminal size doesn't change, use dirty-marks diff-algorithm.
