@@ -5,23 +5,13 @@ use criterion::criterion_group;
 use criterion::criterion_main;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use rsvim_core::buf::BufferArc;
-use rsvim_core::buf::opt::BufferOptions;
 use rsvim_core::buf::opt::BufferOptionsBuilder;
 use rsvim_core::prelude::*;
 use rsvim_core::ui::canvas::Canvas;
 use rsvim_core::ui::canvas::Cell;
-use rsvim_core::ui::tree::Inodify;
-use rsvim_core::ui::tree::NodeId;
-use rsvim_core::ui::tree::Tree;
-use rsvim_core::ui::viewport::CursorViewport;
-use rsvim_core::ui::viewport::Viewport;
-use rsvim_core::ui::widget::window::opt::WindowOptions;
 use rsvim_core::ui::widget::window::opt::WindowOptionsBuilder;
 use std::hint::black_box;
-use std::sync::Arc;
 use std::time::Duration;
-use taffy::Style;
 
 const BIG_TERM_WIDTH: u16 = 200;
 const BIG_TERM_HEIGHT: u16 = 50;
@@ -55,7 +45,7 @@ fn bench_shade(c: &mut Criterion) {
         canvas.frame_mut().set_cell(black_box(pos), black_box(cell));
       }
       let shaders = canvas.shade();
-      let shaders = shaders.lock().unwrap();
+      let _shaders = shaders.lock().unwrap();
     }
   };
 
