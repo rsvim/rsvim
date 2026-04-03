@@ -4,7 +4,6 @@ use crate::evloop::writer::StdoutWritable;
 use crate::evloop::writer::tui;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::canvas::Shader;
 use crate::ui::canvas::ShaderCommand;
 use crossterm::queue;
 use std::io::BufWriter;
@@ -72,8 +71,9 @@ impl StdoutWritable for EditorWriter {
   /// Write canvas to terminal through STDOUT.
   fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
     // Compute the commands that need to output to the terminal device.
-    let shader = canvas.shade();
-    self.dispatch_shader(shader)?;
+    let shaders = canvas.shade();
+    let shaders = lock!(shaders);
+    self.dispatch_shader(&shaders)?;
     self.output.flush()?;
 
     Ok(())
@@ -82,8 +82,8 @@ impl StdoutWritable for EditorWriter {
 
 impl EditorWriter {
   /// Render (queue) shader.
-  fn dispatch_shader(&mut self, shader: Shader) -> IoResult<()> {
-    for shader_command in shader.iter() {
+  fn dispatch_shader(&mut self, shaders: &[ShaderCommand]) -> IoResult<()> {
+    for shader_command in shaders.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => {
           queue!(self.output, command)?

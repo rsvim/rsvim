@@ -2,6 +2,7 @@
 //!
 //! 1. `benches/bigfiles/MIMRT1176_cm7.h`
 //! 2. `dcn_3_2_0_sh_mask.h`
+//! 3. `d3.min.js`
 
 use criterion::BenchmarkId;
 use criterion::Criterion;

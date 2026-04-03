@@ -3,12 +3,12 @@
 use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::canvas::Shader;
+use crate::ui::canvas::ShaderCommand;
 
 #[derive(Debug)]
 /// The `/dev/null` mode writer, it eats everything and print nothing.
 pub struct DevNullWriter {
-  shaders: Vec<Shader>,
+  shaders: Vec<ShaderCommand>,
 }
 
 impl DevNullWriter {
@@ -31,8 +31,9 @@ impl StdoutWritable for DevNullWriter {
   }
 
   fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
-    let shader = canvas.shade();
-    self.shaders.push(shader);
+    let shaders = canvas.shade();
+    let shaders = lock!(shaders);
+    self.shaders.extend_from_slice(&shaders);
     Ok(())
   }
 }
@@ -44,7 +45,7 @@ impl Default for DevNullWriter {
 }
 
 impl DevNullWriter {
-  pub fn shaders(&self) -> &Vec<Shader> {
+  pub fn shaders(&self) -> &Vec<ShaderCommand> {
     &self.shaders
   }
 }
