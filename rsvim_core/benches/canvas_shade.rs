@@ -4,16 +4,20 @@
 //! 2. `dcn_3_2_0_sh_mask.h`
 //! 3. `d3.min.js`
 
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use criterion::BenchmarkId;
 use criterion::Criterion;
 use criterion::criterion_group;
 use criterion::criterion_main;
-use ropey::Rope;
-use rsvim_core::buf::Buffer;
+use crossterm::style::Attributes;
+use crossterm::style::Color;
 use rsvim_core::buf::BufferArc;
 use rsvim_core::buf::opt::BufferOptions;
 use rsvim_core::buf::opt::BufferOptionsBuilder;
 use rsvim_core::prelude::*;
+use rsvim_core::ui::canvas::Canvas;
+use rsvim_core::ui::canvas::Cell;
 use rsvim_core::ui::tree::Inodify;
 use rsvim_core::ui::tree::NodeId;
 use rsvim_core::ui::tree::Tree;
@@ -48,26 +52,7 @@ const FILETEXT3: &str = include_str!(concat!(
 const REPEAT: usize = 100;
 const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
 
-fn make_buffer(
-  filetext: &str,
-  buffer_opts: BufferOptions,
-  canvas_size: U16Size,
-) -> BufferArc {
-  let rop = Rope::from_str(filetext);
-  let buffer = Buffer::_new(
-    buffer_opts,
-    canvas_size,
-    rop,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-  );
-  Buffer::to_arc(buffer)
-}
+fn make_canvas(canvas_size: U16Size) -> BufferArc {}
 
 fn make_tree(
   canvas_size: &U16Size,
@@ -110,10 +95,21 @@ fn bench_search_nowrap(c: &mut Criterion) {
 
   let run_bench = |width: &u16, height: &u16, filetext: &str| {
     let canvas_size = size!(*width, *height);
-    let buffer = make_buffer(filetext, buffer_opts, canvas_size);
-    let (mut tree, window_id) = make_tree(&canvas_size, window_opts, &buffer);
-    let buffer = lock!(buffer);
+    let mut canvas = Canvas::new(canvas_size);
+
     for _i in 0..REPEAT {
+      let n = (*width as usize) * (*height as usize);
+      for j in 0..n {
+        let s = fastrand::u8(32..127) as char; // Printable chars
+        let pos = canvas.frame().idx2pos(j);
+        let cell = Cell::new(
+          s.to_compact_string(),
+          Color::White,
+          Color::Black,
+          Attributes::none(),
+        );
+        canvas.frame_mut().set_cell(pos, cell);
+      }
       let target_cursor_line = fastrand::usize(..);
       let target_cursor_char = fastrand::usize(..);
       let target_cursor_line =
