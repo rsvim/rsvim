@@ -18,7 +18,7 @@ version.workspace = true
 default = ["icudata", "tzdata", "typescript", "wasm"]
 icudata = ["rsvim_core/icudata"]
 jemalloc = ["dep:tikv-jemallocator"]
-mimalloc = ["dep:mimalloc-safe"]
+mimalloc = ["dep:mimalloc"]
 typescript = ["rsvim_core/typescript"]
 tzdata = ["rsvim_core/tzdata"]
 wasm = ["rsvim_core/wasm"]
@@ -36,7 +36,7 @@ log = { workspace = true, features = [
   "max_level_trace",
   "release_max_level_error",
 ] }
-mimalloc-safe = { workspace = true, optional = true }
+mimalloc = { workspace = true, optional = true }
 tokio = { workspace = true, features = [
   "fs",
   "io-std",
