@@ -15,7 +15,8 @@ pub use frame::cursor::*;
 pub use frame::*;
 use itertools::Itertools;
 use std::fmt::Debug;
-use std::slice::Iter;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.
@@ -28,6 +29,7 @@ use std::slice::Iter;
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
+  shaders: Arc<Mutex<Vec<ShaderCommand>>>,
 }
 
 arc_mutex_ptr!(Canvas);
@@ -35,9 +37,12 @@ arc_mutex_ptr!(Canvas);
 impl Canvas {
   /// Make new canvas with terminal actual size.
   pub fn new(size: U16Size) -> Self {
+    let shaders =
+      Vec::with_capacity((size.height() as usize) * (size.width() as usize));
     Canvas {
       prev_frame: Frame::new(size, Cursor::default()),
       frame: Frame::new(size, Cursor::default()),
+      shaders: Arc::new(Mutex::new(shaders)),
     }
   }
 
@@ -100,48 +105,48 @@ impl Canvas {
 impl Canvas {
   /// Get the shader commands that should print to the terminal device, it internally uses a
   /// diff-algorithm to reduce the outputs.
-  pub fn shade(&mut self) -> Shader {
-    let mut shaders = Vec::with_capacity(
-      (self.size().height() as usize) * (self.size().width() as usize),
-    );
+  pub fn shade(&mut self) -> Arc<Mutex<Vec<ShaderCommand>>> {
+    lock!(self.shaders).clear();
 
-    self._shade_cells(&mut shaders);
+    self._shade_cells(self.shaders.clone());
 
     // Since cursor position will be changed while we are printing a lot of
     // text to the terminal (in the `_shade_cells` method).
     // Thus we need to save and restore the previous cursor position
     let saved_prev_cursor_pos = *self.prev_cursor().pos();
 
-    if !shaders.is_empty() {
-      // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
-      //
-      // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
-      // the cursor twinkling/jumping while refreshing the TUI screen.
-      // So here let's hide cursor before flushing shaders, and restore the
-      // cursor after flushing is done.
-      if !self.cursor().hidden() {
-        shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
-      }
+    {
+      let mut shaders = lock!(self.shaders);
+      if !shaders.is_empty() {
+        // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
+        //
+        // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
+        // the cursor twinkling/jumping while refreshing the TUI screen.
+        // So here let's hide cursor before flushing shaders, and restore the
+        // cursor after flushing is done.
+        if !self.cursor().hidden() {
+          shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
+        }
 
-      // Revert hide cursor.
-      if !self.cursor().hidden() {
-        shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+        // Revert hide cursor.
+        if !self.cursor().hidden() {
+          shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+        }
       }
+      // Here restore the previous cursor position
+      shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+        saved_prev_cursor_pos.x(),
+        saved_prev_cursor_pos.y(),
+      )));
     }
 
-    // Here restore the previous cursor position
-    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      saved_prev_cursor_pos.x(),
-      saved_prev_cursor_pos.y(),
-    )));
-
     // For cursor
-    self._shade_cursor(&mut shaders);
+    self._shade_cursor(self.shaders.clone());
 
     // Finish shade.
     self._shade_done();
 
-    Shader::new(shaders)
+    self.shaders.clone()
   }
 
   /// Shade done.
@@ -153,7 +158,12 @@ impl Canvas {
   }
 
   /// Shade cursor and append results into shader vector.
-  pub fn _shade_cursor(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
+  pub fn _shade_cursor(
+    &mut self,
+    output_shaders: Arc<Mutex<Vec<ShaderCommand>>>,
+  ) {
+    let mut output_shaders = lock!(output_shaders);
+
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
 
@@ -192,13 +202,18 @@ impl Canvas {
   }
 
   /// Shade cells and append results into shader vector.
-  pub fn _shade_cells(&mut self, output_shaders: &mut Vec<ShaderCommand>) {
+  pub fn _shade_cells(
+    &mut self,
+    output_shaders: Arc<Mutex<Vec<ShaderCommand>>>,
+  ) {
+    let mut output_shaders = lock!(output_shaders);
+
     if self.size() == self.prev_size() {
       // When terminal size doesn't change, use dirty-marks diff-algorithm.
-      self._dirty_marks_diff(output_shaders);
+      self._dirty_marks_diff(&mut output_shaders);
     } else {
       // When terminal size changes, use brute-force diff-algorithm.
-      self._brute_force_diff(output_shaders)
+      self._brute_force_diff(&mut output_shaders)
     }
   }
 
@@ -445,24 +460,4 @@ pub enum ShaderCommand {
   TerminalScrollDown(crossterm::terminal::ScrollDown),
   TerminalScrollUp(crossterm::terminal::ScrollUp),
   TerminalSetSize(crossterm::terminal::SetSize),
-}
-
-#[derive(Debug, Clone)]
-/// The rendering updates on each draw, returns from [`Canvas::shade`] method.
-///
-/// It's simply a collection of [`ShaderCommand`].
-pub struct Shader {
-  commands: Vec<ShaderCommand>,
-}
-
-impl Shader {
-  /// Make new shader.
-  pub fn new(commands: Vec<ShaderCommand>) -> Self {
-    Shader { commands }
-  }
-
-  /// Get an iterator of the collection.
-  pub fn iter(&self) -> Iter<'_, ShaderCommand> {
-    self.commands.iter()
-  }
 }
