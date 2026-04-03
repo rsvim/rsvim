@@ -17,7 +17,6 @@ use itertools::Itertools;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
-use std::slice::Iter;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.
