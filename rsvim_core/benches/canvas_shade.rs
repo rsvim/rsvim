@@ -21,10 +21,6 @@ const REPEAT: usize = 100;
 const BENCH_MEASUREMENT_TIME: Duration = Duration::from_secs(10);
 
 fn bench_shade(c: &mut Criterion) {
-  let buffer_opts = BufferOptionsBuilder::default().build().unwrap();
-  let window_opts =
-    WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
   let mut g = c.benchmark_group("bench_search_nowrap");
 
   let run_bench = |width: &u16, height: &u16| {
