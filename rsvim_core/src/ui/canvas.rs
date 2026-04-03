@@ -105,29 +105,32 @@ impl Canvas {
       (self.size().height() as usize) * (self.size().width() as usize),
     );
 
-    // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
-    //
-    // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
-    // the cursor twinkling/jumping while refreshing the TUI screen.
-    // So here let's hide cursor before flushing shaders, and restore the
-    // cursor after flushing is done.
-    if !self.cursor().hidden() {
-      shaders.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
-    }
+    self._shade_cells(&mut shaders);
 
     // For cells, it needs extra save and restore cursor position
-    self._shade_cells(&mut shaders);
     let saved_cursor_pos = self.cursor().pos();
 
-    // Revert hide cursor.
-    if !self.cursor().hidden() {
-      shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
-    }
+    if !shaders.is_empty() {
+      // Hide cursor to avoid terminal cursor twinkling/jumping while rendering.
+      //
+      // NOTE: On Windows Terminal, flushing shaders without hiding cursor makes
+      // the cursor twinkling/jumping while refreshing the TUI screen.
+      // So here let's hide cursor before flushing shaders, and restore the
+      // cursor after flushing is done.
+      if !self.cursor().hidden() {
+        shaders.insert(0, ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      }
 
-    shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      saved_cursor_pos.x(),
-      saved_cursor_pos.y(),
-    )));
+      // Revert hide cursor.
+      if !self.cursor().hidden() {
+        shaders.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+      }
+
+      shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+        saved_cursor_pos.x(),
+        saved_cursor_pos.y(),
+      )));
+    }
 
     // For cursor
     self._shade_cursor(&mut shaders);
