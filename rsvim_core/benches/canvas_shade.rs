@@ -4,7 +4,6 @@
 //! 2. `dcn_3_2_0_sh_mask.h`
 //! 3. `d3.min.js`
 
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 use criterion::BenchmarkId;
 use criterion::Criterion;
