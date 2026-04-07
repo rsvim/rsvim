@@ -347,6 +347,30 @@ impl SyntaxParserLoader {
     }
   }
 
+
+  pub fn get_treesitter_parser_grammar_json_name(&self, grammar_path: &Path) -> TheResult<ComapctString> {
+    let file = std::fs::File::open(grammar_path)
+      .map_err(|e| TheErr::TreesitterParserNotFound(grammar_path.to_string_lossy().to_compact_string()))?;
+
+    let first_three_lines = BufReader::new(file)
+      .lines()
+      .take(3)
+      .collect::<Result<Vec<_>, std::io::Error>>()
+      .map_err(|_| {
+        LoaderError::GrammarJSON(grammar_path.to_string_lossy().to_string())
+      })?
+      .join("\n");
+
+    let name = GRAMMAR_NAME_REGEX
+      .captures(&first_three_lines)
+      .and_then(|c| c.get(1))
+      .ok_or_else(|| {
+        LoaderError::GrammarJSON(grammar_path.to_string_lossy().to_string())
+      })?;
+
+    Ok(name.as_str().to_string())
+  }
+
   pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> &str {
 
   }
