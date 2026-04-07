@@ -352,6 +352,15 @@ impl SyntaxParserLoader {
   }
 }
 
+impl Debug for SyntaxParserLoader {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxParserLoader")
+      .field("loader.parser_lib_path", &self.loader.parser_lib_path)
+      .field("parsers", &self.parsers)
+      .finish()
+  }
+}
+
 pub struct SyntaxManager {
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
