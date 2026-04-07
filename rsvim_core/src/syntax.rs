@@ -333,7 +333,7 @@ pub struct SyntaxParserLoader {
 arc_mutex_ptr!(SyntaxParserLoader);
 
 #[derive(Debug, Clone)]
-pub struct SyntaxParserLoaderOptions {
+pub struct SyntaxParserLoadOptions {
   pub src_path: PathBuf,
 }
 
@@ -377,8 +377,9 @@ impl SyntaxParserLoader {
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
   pub fn load_treesitter_parser(
     &mut self,
-    opts: &SyntaxParserLoaderOptions,
+    opts: &SyntaxParserLoadOptions,
   ) -> TheResult<&Language> {
+    let lang_name = self.get_treesitter_parser_name(opts.src_path.as_path())?;
     if let Some(lang) = self.parsers.get(lang_name) {
       return Ok(lang);
     }
