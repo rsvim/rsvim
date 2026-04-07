@@ -327,6 +327,19 @@ impl SyntaxParserLoader {
       loader: Loader::new().unwrap(),
     }
   }
+
+  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
+  pub fn load_treesitter_parser(
+    &self,
+    opts: &SyntaxLoadOptions,
+  ) -> Result<Language, LoaderError> {
+    let compile_cfg = CompileConfig::new(
+      opts.src_path.as_path(),
+      None,
+      opts.output_path.clone(),
+    );
+    self.loader.load_language_at_path(compile_cfg)
+  }
 }
 
 pub struct SyntaxManager {
