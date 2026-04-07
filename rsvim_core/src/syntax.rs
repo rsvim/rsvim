@@ -321,10 +321,10 @@ pub struct SyntaxParserLoader {
   // tree-sitter loader
   loader: Loader,
 
-  // tree-sitter parser paths to its names
-  paths2names: FoldMap<PathBuf, CompactString>,
-  // tree-sitter parser names to its paths
-  names2paths: FoldMap<CompactString, PathBuf>,
+  // tree-sitter parser grammar.json paths to its names
+  grammarpaths2names: FoldMap<PathBuf, CompactString>,
+  // tree-sitter parser grammar.json names to its paths
+  names2grammarpaths: FoldMap<CompactString, PathBuf>,
 
   // tree-sitter parsers
   parsers: FoldMap<CompactString, Language>,
@@ -341,8 +341,8 @@ impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
       loader: Loader::new().unwrap(),
-      paths2names: FoldMap::new(),
-      names2paths: FoldMap::new(),
+      grammarpaths2names: FoldMap::new(),
+      names2grammarpaths: FoldMap::new(),
       parsers: FoldMap::new(),
     }
   }
@@ -363,8 +363,15 @@ impl SyntaxParserLoader {
     }
   }
 
-  pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> &str {
-
+  pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> TheResult<&str> {
+    let grammar_path = src_path.join("grammar.json");
+    if !self.grammarpaths2names.contains_key(&grammar_path) {
+      let grammar_name = self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
+      self.grammarpaths2names.insert(grammar_path.clone(), grammar_name);
+      self.names2grammarpaths.insert(grammar_name, grammar_path.clone());
+    }
+    let grammar_name = self.grammarpaths2names.get(&grammar_path).unwrap();
+    Ok(grammar_name)
   }
 
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
