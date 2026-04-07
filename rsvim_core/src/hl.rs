@@ -492,12 +492,6 @@ pub struct ColorSchemeManager {
 
 arc_mutex_ptr!(ColorSchemeManager);
 
-impl Default for ColorSchemeManager {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
 pub type ColorSchemeManagerKeys<'a> =
   std::collections::hash_map::Keys<'a, CompactString, ColorSchemeArc>;
 pub type ColorSchemeManagerValues<'a> =
