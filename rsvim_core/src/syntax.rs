@@ -539,20 +539,7 @@ impl SyntaxManager {
 // Language and queries }
 
 // Language loader {
-impl SyntaxManager {
-  /// Load the tree-sitter grammar `Language` FFI dynamic library.
-  pub fn load_treesitter_language(
-    &self,
-    opts: &SyntaxParserLoaderOptions,
-  ) -> Result<Language, LoaderError> {
-    let compile_cfg = CompileConfig::new(
-      opts.src_path.as_path(),
-      None,
-      opts.output_path.clone(),
-    );
-    self.loader.load_language_at_path(compile_cfg)
-  }
-}
+impl SyntaxManager {}
 // Language loader }
 
 impl Default for SyntaxManager {
