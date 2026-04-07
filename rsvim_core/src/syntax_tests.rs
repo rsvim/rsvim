@@ -6,7 +6,6 @@ use crate::prelude::*;
 use crate::state::ops as state_ops;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use crate::ui::canvas::Shader;
 use crate::ui::canvas::ShaderCommand;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
@@ -812,45 +811,26 @@ fn main() {
       };
       let text_shaders = shaders
         .iter()
-        .map(|shader| {
-          let shader_commands = shader
-            .iter()
-            .filter(|cmd| {
-              matches!(
-                cmd,
-                ShaderCommand::StylePrintStyledContentString(_)
-                  | ShaderCommand::StylePrintString(_)
-              )
-            })
-            .cloned()
-            .collect_vec();
-          Shader::new(shader_commands)
+        .filter(|cmd| {
+          matches!(
+            cmd,
+            ShaderCommand::StylePrintStyledContentString(_)
+              | ShaderCommand::StylePrintString(_)
+          )
         })
         .collect_vec();
-      for (i, text_shader) in text_shaders.iter().enumerate() {
-        info!("shader [{}]", i);
-        for (j, shader_cmd) in text_shader.iter().enumerate() {
-          if let ShaderCommand::StylePrintStyledContentString(content) =
-            shader_cmd
-          {
-            info!("{:>2}: {}", j, content.0.content(),);
-          } else {
-            unreachable!();
-          }
-        }
-        for (j, shader_cmd) in text_shader.iter().enumerate() {
-          match shader_cmd {
-            ShaderCommand::StylePrintStyledContentString(content) => {
-              info!(
-                "shader [{},{}]:{:?} ({:?})",
-                i,
-                j,
-                content.0.content(),
-                content.0.style()
-              );
-            }
-            _ => unreachable!(),
-          }
+      for (i, shader_cmd) in text_shaders.iter().enumerate() {
+        if let ShaderCommand::StylePrintStyledContentString(content) =
+          shader_cmd
+        {
+          info!(
+            "shader [{:>2}]:{:?} ({:?})",
+            i,
+            content.0.content(),
+            content.0.style()
+          );
+        } else {
+          unreachable!();
         }
       }
     }
