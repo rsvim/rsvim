@@ -26,7 +26,6 @@ use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
 use tree_sitter_loader::CompileConfig;
 use tree_sitter_loader::Loader;
-use tree_sitter_loader::LoaderError;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
@@ -317,9 +316,13 @@ impl Syntax {
   }
 }
 
+pub type SyntaxLoaderArc = Arc<Mutex<Loader>>;
+pub type SyntaxLoaderWk = Weak<Mutex<Loader>>;
+pub type SyntaxLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+
 pub struct SyntaxParserLoader {
   // tree-sitter loader
-  loader: Loader,
+  loader: SyntaxLoaderArc,
 
   // tree-sitter parser grammar.json paths to its names
   grammarpaths2names: FoldMap<PathBuf, CompactString>,
@@ -340,7 +343,7 @@ pub struct SyntaxParserLoadOptions {
 impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
-      loader: Loader::new().unwrap(),
+      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
       grammarpaths2names: FoldMap::new(),
       names2grammarpaths: FoldMap::new(),
       parsers: FoldMap::new(),
@@ -372,7 +375,7 @@ impl SyntaxParserLoader {
   pub fn get_treesitter_parser_name(
     &mut self,
     src_path: &Path,
-  ) -> TheResult<&str> {
+  ) -> TheResult<CompactString> {
     let grammar_path = src_path.join("grammar.json");
     if !self.grammarpaths2names.contains_key(&grammar_path) {
       let name =
@@ -383,7 +386,7 @@ impl SyntaxParserLoader {
       self.names2grammarpaths.insert(name, grammar_path.clone());
     }
     let name = self.grammarpaths2names.get(&grammar_path).unwrap();
-    Ok(name)
+    Ok(name.to_compact_string())
   }
 
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
@@ -391,10 +394,11 @@ impl SyntaxParserLoader {
     &mut self,
     opts: &SyntaxParserLoadOptions,
   ) -> TheResult<&Language> {
+    let loader = self.loader.clone();
     let lang_name = self.get_treesitter_parser_name(opts.src_path.as_path())?;
-    if !self.parsers.contains_key(lang_name) {
+    if !self.parsers.contains_key(&lang_name) {
       let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
-      match self.loader.load_language_at_path(compile_cfg) {
+      match lock!(loader).load_language_at_path(compile_cfg) {
         Ok(lang) => {
           self.parsers.insert(lang_name.to_compact_string(), lang);
         }
@@ -407,7 +411,7 @@ impl SyntaxParserLoader {
         }
       }
     }
-    Ok(self.parsers.get(lang_name).unwrap())
+    Ok(self.parsers.get(&lang_name).unwrap())
   }
 }
 
