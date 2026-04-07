@@ -322,7 +322,7 @@ pub type SyntaxLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxParserLoader {
   // tree-sitter loader
-  loader: SyntaxLoaderArc,
+  loader: Loader,
 
   // tree-sitter parser grammar.json paths to its names
   grammarpaths2names: FoldMap<PathBuf, CompactString>,
@@ -343,7 +343,8 @@ pub struct SyntaxParserLoadOptions {
 impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
-      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
+      // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
+      loader: Loader::new().unwrap(),
       grammarpaths2names: FoldMap::new(),
       names2grammarpaths: FoldMap::new(),
       parsers: FoldMap::new(),
@@ -394,11 +395,10 @@ impl SyntaxParserLoader {
     &mut self,
     opts: &SyntaxParserLoadOptions,
   ) -> TheResult<&Language> {
-    let loader = self.loader.clone();
     let lang_name = self.get_treesitter_parser_name(opts.src_path.as_path())?;
     if !self.parsers.contains_key(&lang_name) {
       let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
-      match lock!(loader).load_language_at_path(compile_cfg) {
+      match self.loader.load_language_at_path(compile_cfg) {
         Ok(lang) => {
           self.parsers.insert(lang_name.to_compact_string(), lang);
         }
