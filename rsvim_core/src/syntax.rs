@@ -319,12 +319,16 @@ impl Syntax {
 pub struct SyntaxParserLoader {
   // tree-sitter loader
   loader: Loader,
+
+  // tree-sitter parsers
+  parsers: FoldMap<CompactString, Language>,
 }
 
 impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
       loader: Loader::new().unwrap(),
+      parsers: FoldMap::new(),
     }
   }
 
