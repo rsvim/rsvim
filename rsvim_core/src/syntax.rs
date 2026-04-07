@@ -316,10 +316,20 @@ impl Syntax {
   }
 }
 
-pub struct SyntaxManager {
+pub struct SyntaxParserLoader {
   // tree-sitter loader
   loader: Loader,
+}
 
+impl SyntaxParserLoader {
+  pub fn new() -> Self {
+    Self {
+      loader: Loader::new().unwrap(),
+    }
+  }
+}
+
+pub struct SyntaxManager {
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
@@ -347,7 +357,6 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
-      loader: Loader::new().unwrap(),
       languages: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
