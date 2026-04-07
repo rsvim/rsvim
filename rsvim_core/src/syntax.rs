@@ -25,6 +25,7 @@ use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
 use tree_sitter_loader::CompileConfig;
 use tree_sitter_loader::Loader;
+use std::path::Path;
 use tree_sitter_loader::LoaderError;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -320,6 +321,11 @@ pub struct SyntaxParserLoader {
   // tree-sitter loader
   loader: Loader,
 
+  // tree-sitter parser paths to its names
+  paths2names: FoldMap<PathBuf, CompactString>,
+  // tree-sitter parser names to its paths
+  names2paths: FoldMap<CompactString, PathBuf>,
+
   // tree-sitter parsers
   parsers: FoldMap<CompactString, Language>,
 }
@@ -329,28 +335,37 @@ arc_mutex_ptr!(SyntaxParserLoader);
 #[derive(Debug, Clone)]
 pub struct SyntaxParserLoaderOptions {
   pub src_path: PathBuf,
-  pub output_path: Option<PathBuf>,
 }
 
 impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
       loader: Loader::new().unwrap(),
+      paths2names: FoldMap::new(),
+      names2paths: FoldMap::new(),
       parsers: FoldMap::new(),
     }
   }
 
+  pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> &str {
+
+  }
+
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
   pub fn load_treesitter_parser(
-    &self,
+    &mut self,
     opts: &SyntaxParserLoaderOptions,
-  ) -> Result<Language, LoaderError> {
-    let compile_cfg = CompileConfig::new(
-      opts.src_path.as_path(),
-      None,
-      opts.output_path.clone(),
-    );
-    self.loader.load_language_at_path(compile_cfg)
+  ) -> TheResult<&Language> {
+    if let Some(lang) = self.parsers.get(lang_name) {
+      return Ok(lang);
+    }
+    let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
+    match self.loader.load_language_at_path(compile_cfg) {
+      Ok(lang) => {}
+      Err(e) => {
+        let e = TheErr::LoadTreesitterParserFailed((), ())
+      }
+    }
   }
 }
 

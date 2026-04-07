@@ -41,6 +41,9 @@ pub enum TheErr {
   #[error("Failed to load tree-sitter parser {0}: {1}.")]
   LoadTreesitterParserFailed(CompactString, LoaderError),
 
+  #[error("Tree-sitter parser {0} not found: {1}.")]
+  TreesitterParserNotFound(CompactString, CompactString),
+
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
 
