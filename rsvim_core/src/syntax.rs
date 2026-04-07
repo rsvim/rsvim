@@ -407,7 +407,7 @@ impl SyntaxParserLoader {
         }
       }
     }
-    Ok(self.parsers.get(&lang_name).unwrap())
+    Ok(self.parsers.get(lang_name).unwrap())
   }
 }
 
