@@ -366,12 +366,12 @@ impl SyntaxParserLoader {
   pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> TheResult<&str> {
     let grammar_path = src_path.join("grammar.json");
     if !self.grammarpaths2names.contains_key(&grammar_path) {
-      let grammar_name = self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
-      self.grammarpaths2names.insert(grammar_path.clone(), grammar_name);
-      self.names2grammarpaths.insert(grammar_name, grammar_path.clone());
+      let name = self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
+      self.grammarpaths2names.insert(grammar_path.clone(), name.clone());
+      self.names2grammarpaths.insert(name, grammar_path.clone());
     }
-    let grammar_name = self.grammarpaths2names.get(&grammar_path).unwrap();
-    Ok(grammar_name)
+    let name = self.grammarpaths2names.get(&grammar_path).unwrap();
+    Ok(name)
   }
 
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
