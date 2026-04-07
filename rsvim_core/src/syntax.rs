@@ -9,6 +9,7 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
+use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -25,7 +26,6 @@ use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
 use tree_sitter_loader::CompileConfig;
 use tree_sitter_loader::Loader;
-use std::path::Path;
 use tree_sitter_loader::LoaderError;
 
 const INVALID_EDITING_VERSION: isize = -1;
@@ -347,27 +347,39 @@ impl SyntaxParserLoader {
     }
   }
 
-
-  pub fn get_treesitter_parser_grammar_json_name(&self, grammar_path: &Path) -> TheResult<CompactString> {
-    let err = || TheErr::TreesitterParserNotFound(grammar_path.to_string_lossy().to_compact_string());
-    let grammar_json_text = std::fs::read_to_string(grammar_path)
-      .map_err(|_e| err())?;
-    let grammar_json_data : serde_json::Value = serde_json::from_str(&grammar_json_text)
-      .map_err(|_e| err())?;
+  pub fn get_treesitter_parser_grammar_json_name(
+    &self,
+    grammar_path: &Path,
+  ) -> TheResult<CompactString> {
+    let err = || {
+      TheErr::TreesitterParserNotFound(
+        grammar_path.to_string_lossy().to_compact_string(),
+      )
+    };
+    let grammar_json_text =
+      std::fs::read_to_string(grammar_path).map_err(|_e| err())?;
+    let grammar_json_data: serde_json::Value =
+      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
     match grammar_json_data.get("name") {
       Some(name_value) => match name_value.as_str() {
-          Some(name) => Ok(name.to_compact_string()),
-          None  => Err(err()),
-        },
+        Some(name) => Ok(name.to_compact_string()),
+        None => Err(err()),
+      },
       None => Err(err()),
     }
   }
 
-  pub fn get_treesitter_parser_name(&mut self, src_path: &Path) -> TheResult<&str> {
+  pub fn get_treesitter_parser_name(
+    &mut self,
+    src_path: &Path,
+  ) -> TheResult<&str> {
     let grammar_path = src_path.join("grammar.json");
     if !self.grammarpaths2names.contains_key(&grammar_path) {
-      let name = self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
-      self.grammarpaths2names.insert(grammar_path.clone(), name.clone());
+      let name =
+        self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
+      self
+        .grammarpaths2names
+        .insert(grammar_path.clone(), name.clone());
       self.names2grammarpaths.insert(name, grammar_path.clone());
     }
     let name = self.grammarpaths2names.get(&grammar_path).unwrap();
@@ -380,16 +392,22 @@ impl SyntaxParserLoader {
     opts: &SyntaxParserLoadOptions,
   ) -> TheResult<&Language> {
     let lang_name = self.get_treesitter_parser_name(opts.src_path.as_path())?;
-    if let Some(lang) = self.parsers.get(lang_name) {
-      return Ok(lang);
-    }
-    let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
-    match self.loader.load_language_at_path(compile_cfg) {
-      Ok(lang) => {}
-      Err(e) => {
-        let e = TheErr::LoadTreesitterParserFailed((), ())
+    if !self.parsers.contains_key(lang_name) {
+      let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
+      match self.loader.load_language_at_path(compile_cfg) {
+        Ok(lang) => {
+          self.parsers.insert(lang_name.to_compact_string(), lang);
+        }
+        Err(e) => {
+          let e = TheErr::LoadTreesitterParserFailed(
+            lang_name.to_compact_string(),
+            e,
+          );
+          return Err(e);
+        }
       }
     }
+    Ok(self.parsers.get(&lang_name).unwrap())
   }
 }
 
