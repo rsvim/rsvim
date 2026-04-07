@@ -324,6 +324,12 @@ pub struct SyntaxParserLoader {
   parsers: FoldMap<CompactString, Language>,
 }
 
+#[derive(Debug, Clone)]
+pub struct SyntaxParserLoaderOptions {
+  pub src_path: PathBuf,
+  pub output_path: Option<PathBuf>,
+}
+
 impl SyntaxParserLoader {
   pub fn new() -> Self {
     Self {
@@ -335,7 +341,7 @@ impl SyntaxParserLoader {
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
   pub fn load_treesitter_parser(
     &self,
-    opts: &SyntaxLoadOptions,
+    opts: &SyntaxParserLoaderOptions,
   ) -> Result<Language, LoaderError> {
     let compile_cfg = CompileConfig::new(
       opts.src_path.as_path(),
@@ -532,18 +538,12 @@ impl SyntaxManager {
 }
 // Language and queries }
 
-#[derive(Debug, Clone)]
-pub struct SyntaxLoadOptions {
-  pub src_path: PathBuf,
-  pub output_path: Option<PathBuf>,
-}
-
 // Language loader {
 impl SyntaxManager {
   /// Load the tree-sitter grammar `Language` FFI dynamic library.
   pub fn load_treesitter_language(
     &self,
-    opts: &SyntaxLoadOptions,
+    opts: &SyntaxParserLoaderOptions,
   ) -> Result<Language, LoaderError> {
     let compile_cfg = CompileConfig::new(
       opts.src_path.as_path(),
