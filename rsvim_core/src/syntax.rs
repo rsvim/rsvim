@@ -324,6 +324,8 @@ pub struct SyntaxParserLoader {
   parsers: FoldMap<CompactString, Language>,
 }
 
+arc_mutex_ptr!(SyntaxParserLoader);
+
 #[derive(Debug, Clone)]
 pub struct SyntaxParserLoaderOptions {
   pub src_path: PathBuf,
