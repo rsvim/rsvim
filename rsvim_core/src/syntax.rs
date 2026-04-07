@@ -349,7 +349,7 @@ impl SyntaxParserLoader {
 
 
   pub fn get_treesitter_parser_grammar_json_name(&self, grammar_path: &Path) -> TheResult<CompactString> {
-    let err = || Err(TheErr::TreesitterParserNotFound(grammar_path.to_string_lossy().to_compact_string()));
+    let err = || TheErr::TreesitterParserNotFound(grammar_path.to_string_lossy().to_compact_string());
     let grammar_json_text = std::fs::read_to_string(grammar_path)
       .map_err(|_e| err())?;
     let grammar_json_data : serde_json::Value = serde_json::from_str(&grammar_json_text)
@@ -357,9 +357,9 @@ impl SyntaxParserLoader {
     match grammar_json_data.get("name") {
       Some(name_value) => match name_value.as_str() {
           Some(name) => Ok(name.to_compact_string()),
-          None  => err(),
+          None  => Err(err()),
         },
-      None => err(),
+      None => Err(err()),
     }
   }
 
