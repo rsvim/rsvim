@@ -337,7 +337,7 @@ arc_mutex_ptr!(SyntaxParserLoader);
 
 #[derive(Debug, Clone)]
 pub struct SyntaxParserLoadOptions {
-  pub src_path: PathBuf,
+  pub grammar_path: PathBuf,
 }
 
 impl SyntaxParserLoader {
@@ -395,9 +395,11 @@ impl SyntaxParserLoader {
     &mut self,
     opts: &SyntaxParserLoadOptions,
   ) -> TheResult<&Language> {
-    let lang_name = self.get_treesitter_parser_name(opts.src_path.as_path())?;
+    let src_path = opts.grammar_path.join("src");
+    let src_path = src_path.as_path();
+    let lang_name = self.get_treesitter_parser_name(src_path)?;
     if !self.parsers.contains_key(&lang_name) {
-      let compile_cfg = CompileConfig::new(opts.src_path.as_path(), None, None);
+      let compile_cfg = CompileConfig::new(src_path, None, None);
       match self.loader.load_language_at_path(compile_cfg) {
         Ok(lang) => {
           self.parsers.insert(lang_name.to_compact_string(), lang);
