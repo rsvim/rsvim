@@ -320,7 +320,7 @@ pub type TreesitterLoaderArc = Arc<Mutex<Loader>>;
 pub type TreesitterLoaderWk = Weak<Mutex<Loader>>;
 pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-pub struct SyntaxGrammarLoader {
+pub struct SyntaxLoader {
   // tree-sitter loader
   loader: Loader,
 
@@ -328,14 +328,14 @@ pub struct SyntaxGrammarLoader {
   grammars: FoldMap<CompactString, Language>,
 }
 
-arc_mutex_ptr!(SyntaxGrammarLoader);
+arc_mutex_ptr!(SyntaxLoader);
 
 #[derive(Debug, Clone)]
-pub struct SyntaxGrammarLoadRequest {
+pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
 }
 
-impl SyntaxGrammarLoader {
+impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
       // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
@@ -368,9 +368,9 @@ impl SyntaxGrammarLoader {
   }
 
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  pub fn load_treesitter_parser(
+  pub fn load_treesitter_language(
     &mut self,
-    req: &SyntaxGrammarLoadRequest,
+    req: &SyntaxLoadGrammarRequest,
   ) -> TheResult<&Language> {
     let src_path = req.grammar_path.join("src");
     let src_path = src_path.as_path();
@@ -394,7 +394,7 @@ impl SyntaxGrammarLoader {
   }
 }
 
-impl Debug for SyntaxGrammarLoader {
+impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxGrammarLoader")
       .field("loader.parser_lib_path", &self.loader.parser_lib_path)
@@ -404,9 +404,9 @@ impl Debug for SyntaxGrammarLoader {
 }
 
 pub struct SyntaxManager {
-  loader: SyntaxGrammarLoaderArc,
+  loader: SyntaxLoaderArc,
   is_loading_grammar: bool,
-  pending_grammar_requests: Vec<SyntaxGrammarLoadRequest>,
+  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
@@ -438,7 +438,7 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
-      loader: SyntaxGrammarLoader::to_arc(SyntaxGrammarLoader::new()),
+      loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
       is_loading_grammar: false,
       pending_grammar_requests: vec![],
       languages: FoldMap::new(),
