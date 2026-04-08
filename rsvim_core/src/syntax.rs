@@ -353,15 +353,15 @@ impl SyntaxParserLoader {
 
   pub fn get_treesitter_parser_grammar_json_name(
     &self,
-    grammar_path: &Path,
+    grammar_json_path: &Path,
   ) -> TheResult<CompactString> {
     let err = || {
       TheErr::TreesitterParserNotFound(
-        grammar_path.to_string_lossy().to_compact_string(),
+        grammar_json_path.to_string_lossy().to_compact_string(),
       )
     };
     let grammar_json_text =
-      std::fs::read_to_string(grammar_path).map_err(|_e| err())?;
+      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
     let grammar_json_data: serde_json::Value =
       serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
     match grammar_json_data.get("name") {
@@ -377,16 +377,18 @@ impl SyntaxParserLoader {
     &mut self,
     src_path: &Path,
   ) -> TheResult<CompactString> {
-    let grammar_path = src_path.join("grammar.json");
-    if !self.grammarpaths2names.contains_key(&grammar_path) {
-      let name =
-        self.get_treesitter_parser_grammar_json_name(grammar_path.as_path())?;
+    let grammar_json_path = src_path.join("grammar.json");
+    if !self.grammarpaths2names.contains_key(&grammar_json_path) {
+      let name = self
+        .get_treesitter_parser_grammar_json_name(grammar_json_path.as_path())?;
       self
         .grammarpaths2names
-        .insert(grammar_path.clone(), name.clone());
-      self.names2grammarpaths.insert(name, grammar_path.clone());
+        .insert(grammar_json_path.clone(), name.clone());
+      self
+        .names2grammarpaths
+        .insert(name, grammar_json_path.clone());
     }
-    let name = self.grammarpaths2names.get(&grammar_path).unwrap();
+    let name = self.grammarpaths2names.get(&grammar_json_path).unwrap();
     Ok(name.to_compact_string())
   }
 
