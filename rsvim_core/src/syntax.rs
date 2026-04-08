@@ -29,9 +29,9 @@ use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-pub type SyntaxParserArc = Arc<Mutex<Parser>>;
-pub type SyntaxParserWk = Weak<Mutex<Parser>>;
-pub type SyntaxParserMutexGuard<'a> = MutexGuard<'a, Parser>;
+pub type TreesitterParserArc = Arc<Mutex<Parser>>;
+pub type TreesitterParserWk = Weak<Mutex<Parser>>;
+pub type TreesitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
@@ -174,7 +174,7 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: SyntaxParserArc,
+  parser: TreesitterParserArc,
 
   // Filetype, i.e. language name
   filetype: Option<CompactString>,
@@ -281,7 +281,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> SyntaxParserArc {
+  pub fn parser(&self) -> TreesitterParserArc {
     self.parser.clone()
   }
 
@@ -316,9 +316,9 @@ impl Syntax {
   }
 }
 
-pub type SyntaxLoaderArc = Arc<Mutex<Loader>>;
-pub type SyntaxLoaderWk = Weak<Mutex<Loader>>;
-pub type SyntaxLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+pub type TreesitterLoaderArc = Arc<Mutex<Loader>>;
+pub type TreesitterLoaderWk = Weak<Mutex<Loader>>;
+pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxGrammarLoader {
   // tree-sitter loader
@@ -693,7 +693,7 @@ pub fn make_input_edit_by_insert(
 }
 
 pub fn parse(
-  parser: SyntaxParserArc,
+  parser: TreesitterParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
@@ -909,7 +909,7 @@ pub fn query(
 }
 
 pub async fn parse_and_query(
-  parser: SyntaxParserArc,
+  parser: TreesitterParserArc,
   old_tree: Option<Tree>,
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
