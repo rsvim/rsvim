@@ -217,8 +217,8 @@ impl Syntax {
   ) -> Result<Self, LanguageError> {
     let filetype = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
-    loader.set_language(lang)?;
-    let parser = Arc::new(Mutex::new(loader));
+    parser.set_language(lang)?;
+    let parser = Arc::new(Mutex::new(parser));
     let highlight_query = match highlight_query {
       Some(source) => Query::new(lang, source)
         .map(|q| Some(Arc::new(q)))
@@ -236,7 +236,7 @@ impl Syntax {
       highlight_capture: None,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
-      loader,
+      parser,
       filetype,
       pending: vec![],
       parsing: false,
@@ -626,7 +626,7 @@ pub fn parse(
     match &pending_edits[0] {
       SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
-        let new_tree = loader.parse(&payload, tree.as_ref());
+        let new_tree = parser.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = new.version;
         // trace!(
@@ -664,7 +664,7 @@ pub fn parse(
 
   if let Some(last_update) = last_update {
     let payload = last_update.payload.to_string();
-    let new_tree = loader.parse(&payload, tree.as_ref());
+    let new_tree = parser.parse(&payload, tree.as_ref());
     tree = new_tree;
     editing_version = last_update.version;
     // trace!(
@@ -816,7 +816,7 @@ pub async fn parse_and_query(
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (tree, editing_version, text_rope, text_payload) =
-    parse(loader, old_tree, pending_edits);
+    parse(parser, old_tree, pending_edits);
   let highlight_capture =
     query(&tree, &text_rope, &text_payload, &highlight_query);
   (tree, editing_version, highlight_capture)
