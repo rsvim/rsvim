@@ -423,6 +423,9 @@ arc_mutex_ptr!(SyntaxManager);
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
+      .field("loader", &lock!(self.loader))
+      .field("is_loading_grammar", &self.is_loading_grammar)
+      .field("pending_grammar_requests", &self.pending_grammar_requests)
       .field("languages", &self.languages)
       .field("highlight_queries", &self.highlight_queries)
       .field("id2ext", &self.id2ext)
