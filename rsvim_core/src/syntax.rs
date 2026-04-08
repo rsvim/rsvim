@@ -437,6 +437,7 @@ impl SyntaxManager {
     let mut it = Self {
       loader: SyntaxGrammarLoader::to_arc(SyntaxGrammarLoader::new()),
       is_loading_grammar: false,
+      pending_grammar_requests: vec![],
       languages: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
