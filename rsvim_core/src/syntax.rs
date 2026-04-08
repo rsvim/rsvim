@@ -350,7 +350,7 @@ impl SyntaxLoader {
     let grammar_json_path = src_path.join("grammar.json");
     let grammar_json_path = grammar_json_path.as_path();
     let err = || {
-      TheErr::TreesitterParserNotFound(
+      TheErr::TreesitterGrammarNotFound(
         grammar_json_path.to_string_lossy().to_compact_string(),
       )
     };
@@ -382,7 +382,7 @@ impl SyntaxLoader {
           self.grammars.insert(lang_name.to_compact_string(), lang);
         }
         Err(e) => {
-          let e = TheErr::LoadTreesitterParserFailed(
+          let e = TheErr::LoadTreesitterGrammarFailed(
             lang_name.to_compact_string(),
             e,
           );
