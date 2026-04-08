@@ -1,6 +1,6 @@
 //! Tree-sitter based syntax engine.
 
-pub mod parser;
+pub mod loader;
 
 use crate::buf::Buffer;
 use crate::prelude::*;
@@ -11,8 +11,6 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
-use std::path::Path;
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -26,8 +24,6 @@ use tree_sitter::Query;
 use tree_sitter::QueryCursor;
 use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
-use tree_sitter_loader::CompileConfig;
-use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
@@ -221,8 +217,8 @@ impl Syntax {
   ) -> Result<Self, LanguageError> {
     let filetype = lang.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
-    parser.set_language(lang)?;
-    let parser = Arc::new(Mutex::new(parser));
+    loader.set_language(lang)?;
+    let parser = Arc::new(Mutex::new(loader));
     let highlight_query = match highlight_query {
       Some(source) => Query::new(lang, source)
         .map(|q| Some(Arc::new(q)))
@@ -240,7 +236,7 @@ impl Syntax {
       highlight_capture: None,
       tree: None,
       editing_version: INVALID_EDITING_VERSION,
-      parser,
+      loader,
       filetype,
       pending: vec![],
       parsing: false,
@@ -630,7 +626,7 @@ pub fn parse(
     match &pending_edits[0] {
       SyntaxEdit::New(new) => {
         let payload = new.payload.to_string();
-        let new_tree = parser.parse(&payload, tree.as_ref());
+        let new_tree = loader.parse(&payload, tree.as_ref());
         tree = new_tree;
         editing_version = new.version;
         // trace!(
@@ -668,7 +664,7 @@ pub fn parse(
 
   if let Some(last_update) = last_update {
     let payload = last_update.payload.to_string();
-    let new_tree = parser.parse(&payload, tree.as_ref());
+    let new_tree = loader.parse(&payload, tree.as_ref());
     tree = new_tree;
     editing_version = last_update.version;
     // trace!(
@@ -820,7 +816,7 @@ pub async fn parse_and_query(
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (tree, editing_version, text_rope, text_payload) =
-    parse(parser, old_tree, pending_edits);
+    parse(loader, old_tree, pending_edits);
   let highlight_capture =
     query(&tree, &text_rope, &text_payload, &highlight_query);
   (tree, editing_version, highlight_capture)
