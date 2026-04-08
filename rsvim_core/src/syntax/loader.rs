@@ -11,6 +11,7 @@ use std::sync::Weak;
 use tree_sitter::Language;
 use tree_sitter_loader::CompileConfig;
 use tree_sitter_loader::Loader;
+
 pub type SyntaxLoaderArc = Arc<Mutex<Loader>>;
 pub type SyntaxLoaderWk = Weak<Mutex<Loader>>;
 pub type SyntaxLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;

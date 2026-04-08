@@ -7,6 +7,7 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+pub use loader::SyntaxParserLoaderArc;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -315,6 +316,9 @@ impl Syntax {
 }
 
 pub struct SyntaxManager {
+  loader: SyntaxParserLoaderArc,
+  is_loading: bool,
+
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
