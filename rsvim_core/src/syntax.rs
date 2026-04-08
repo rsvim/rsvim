@@ -396,7 +396,7 @@ impl SyntaxGrammarLoader {
 
 impl Debug for SyntaxGrammarLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxParserLoader")
+    f.debug_struct("SyntaxGrammarLoader")
       .field("loader.parser_lib_path", &self.loader.parser_lib_path)
       .field("parsers", &self.grammars)
       .finish()
@@ -909,7 +909,7 @@ pub fn query(
 }
 
 pub async fn parse_and_query(
-  parser: Arc<Mutex<Parser>>,
+  parser: SyntaxParserArc,
   old_tree: Option<Tree>,
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
