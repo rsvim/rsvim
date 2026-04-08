@@ -6,13 +6,11 @@ use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ropey::Rope;
-use std::path::Path;
-use std::path::PathBuf;
-use tree_sitter_loader::Loader;
-use tree_sitter_loader::CompileConfig;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -26,6 +24,8 @@ use tree_sitter::Query;
 use tree_sitter::QueryCursor;
 use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
+use tree_sitter_loader::CompileConfig;
+use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
@@ -320,7 +320,7 @@ pub type SyntaxLoaderArc = Arc<Mutex<Loader>>;
 pub type SyntaxLoaderWk = Weak<Mutex<Loader>>;
 pub type SyntaxLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-pub struct SyntaxParserLoader {
+pub struct SyntaxGrammarLoader {
   // tree-sitter loader
   loader: Loader,
 
@@ -328,14 +328,14 @@ pub struct SyntaxParserLoader {
   grammars: FoldMap<CompactString, Language>,
 }
 
-arc_mutex_ptr!(SyntaxParserLoader);
+arc_mutex_ptr!(SyntaxGrammarLoader);
 
 #[derive(Debug, Clone)]
-pub struct SyntaxParserLoadOptions {
+pub struct SyntaxGrammarLoadRequest {
   pub grammar_path: PathBuf,
 }
 
-impl SyntaxParserLoader {
+impl SyntaxGrammarLoader {
   pub fn new() -> Self {
     Self {
       // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
@@ -370,9 +370,9 @@ impl SyntaxParserLoader {
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
   pub fn load_treesitter_parser(
     &mut self,
-    opts: &SyntaxParserLoadOptions,
+    req: &SyntaxGrammarLoadRequest,
   ) -> TheResult<&Language> {
-    let src_path = opts.grammar_path.join("src");
+    let src_path = req.grammar_path.join("src");
     let src_path = src_path.as_path();
     let lang_name = Self::get_language_name_from_src_path(src_path)?;
     if !self.grammars.contains_key(&lang_name) {
@@ -394,7 +394,7 @@ impl SyntaxParserLoader {
   }
 }
 
-impl Debug for SyntaxParserLoader {
+impl Debug for SyntaxGrammarLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxParserLoader")
       .field("loader.parser_lib_path", &self.loader.parser_lib_path)
@@ -403,12 +403,10 @@ impl Debug for SyntaxParserLoader {
   }
 }
 
-pub struct 
-
 pub struct SyntaxManager {
-  loader: SyntaxParserLoaderArc,
+  loader: SyntaxGrammarLoaderArc,
   is_loading_grammar: bool,
-  pending_grammar_requests: Vec<>,
+  pending_grammar_requests: Vec<SyntaxGrammarLoadRequest>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
@@ -437,7 +435,7 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
-      loader: SyntaxParserLoader::to_arc(SyntaxParserLoader::new()),
+      loader: SyntaxGrammarLoader::to_arc(SyntaxGrammarLoader::new()),
       is_loading_grammar: false,
       languages: FoldMap::new(),
       highlight_queries: FoldMap::new(),
