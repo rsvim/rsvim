@@ -289,7 +289,7 @@ impl Normal {
           let editing_version = buffer.editing_version();
           let syn = buffer.syntax_mut().as_mut().unwrap();
           debug_assert!(syn_insert.is_some());
-          syn.add_pending(SyntaxEdit::Update(SyntaxEditUpdate {
+          syn.add_pending_edit(SyntaxEdit::Update(SyntaxEditUpdate {
             payload: rope,
             input: syn_insert.unwrap(),
             version: editing_version,

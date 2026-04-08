@@ -5,11 +5,11 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-pub use loader::SyntaxParserLoader;
-pub use loader::SyntaxParserLoaderArc;
 use ropey::Rope;
 use std::path::Path;
 use std::path::PathBuf;
+use tree_sitter_loader::Loader;
+use tree_sitter_loader::CompileConfig;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
@@ -180,7 +180,7 @@ pub struct Syntax {
   filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
-  pending: Vec<SyntaxEdit>,
+  pending_edits: Vec<SyntaxEdit>,
 
   // Whether the parser is already parsing the buffer text in a background
   // task. If true, it means the `parser` is parsing in a background task.
@@ -206,7 +206,7 @@ impl Debug for Syntax {
       )
       .field("editing_version", &self.editing_version)
       .field("filetype", &self.filetype)
-      .field("pending", &self.pending)
+      .field("pending_edits", &self.pending_edits)
       .field("parsing", &self.parsing)
       .finish()
   }
@@ -240,7 +240,7 @@ impl Syntax {
       editing_version: INVALID_EDITING_VERSION,
       parser,
       filetype,
-      pending: vec![],
+      pending_edits: vec![],
       parsing: false,
     })
   }
@@ -293,26 +293,26 @@ impl Syntax {
     self.parsing = value;
   }
 
-  pub fn pending_is_empty(&self) -> bool {
-    self.pending.is_empty()
+  pub fn pending_edits_is_empty(&self) -> bool {
+    self.pending_edits.is_empty()
   }
 
-  pub fn pending_len(&self) -> usize {
-    self.pending.len()
+  pub fn pending_edits_len(&self) -> usize {
+    self.pending_edits.len()
   }
 
-  pub fn add_pending(&mut self, value: SyntaxEdit) {
-    self.pending.push(value);
+  pub fn add_pending_edit(&mut self, value: SyntaxEdit) {
+    self.pending_edits.push(value);
   }
 
-  pub fn drain_pending<R>(
+  pub fn drain_pending_edits<R>(
     &mut self,
     range: R,
   ) -> std::vec::Drain<'_, SyntaxEdit>
   where
     R: std::ops::RangeBounds<usize>,
   {
-    self.pending.drain(range)
+    self.pending_edits.drain(range)
   }
 }
 
@@ -324,8 +324,8 @@ pub struct SyntaxParserLoader {
   // tree-sitter loader
   loader: Loader,
 
-  // tree-sitter parsers
-  parsers: FoldMap<CompactString, Language>,
+  // tree-sitter grammars
+  grammars: FoldMap<CompactString, Language>,
 }
 
 arc_mutex_ptr!(SyntaxParserLoader);
@@ -340,7 +340,7 @@ impl SyntaxParserLoader {
     Self {
       // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
       loader: Loader::new().unwrap(),
-      parsers: FoldMap::new(),
+      grammars: FoldMap::new(),
     }
   }
 
@@ -375,11 +375,11 @@ impl SyntaxParserLoader {
     let src_path = opts.grammar_path.join("src");
     let src_path = src_path.as_path();
     let lang_name = Self::get_language_name_from_src_path(src_path)?;
-    if !self.parsers.contains_key(&lang_name) {
+    if !self.grammars.contains_key(&lang_name) {
       let compile_cfg = CompileConfig::new(src_path, None, None);
       match self.loader.load_language_at_path(compile_cfg) {
         Ok(lang) => {
-          self.parsers.insert(lang_name.to_compact_string(), lang);
+          self.grammars.insert(lang_name.to_compact_string(), lang);
         }
         Err(e) => {
           let e = TheErr::LoadTreesitterParserFailed(
@@ -390,7 +390,7 @@ impl SyntaxParserLoader {
         }
       }
     }
-    Ok(self.parsers.get(&lang_name).unwrap())
+    Ok(self.grammars.get(&lang_name).unwrap())
   }
 }
 
@@ -398,15 +398,17 @@ impl Debug for SyntaxParserLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxParserLoader")
       .field("loader.parser_lib_path", &self.loader.parser_lib_path)
-      .field("parsers", &self.parsers)
+      .field("parsers", &self.grammars)
       .finish()
   }
 }
 
+pub struct 
+
 pub struct SyntaxManager {
   loader: SyntaxParserLoaderArc,
   is_loading_grammar: bool,
-  loader_requests: 
+  pending_grammar_requests: Vec<>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
