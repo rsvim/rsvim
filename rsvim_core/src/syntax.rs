@@ -7,6 +7,7 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+pub use loader::SyntaxParserLoader;
 pub use loader::SyntaxParserLoaderArc;
 use ropey::Rope;
 use std::cmp::Ordering;
@@ -317,7 +318,7 @@ impl Syntax {
 
 pub struct SyntaxManager {
   loader: SyntaxParserLoaderArc,
-  is_loading: bool,
+  is_loading_grammar: bool,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   languages: FoldMap<CompactString, Language>,
@@ -346,6 +347,8 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
+      loader: SyntaxParserLoader::to_arc(SyntaxParserLoader::new()),
+      is_loading_grammar: false,
       languages: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
