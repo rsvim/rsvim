@@ -693,7 +693,7 @@ pub fn make_input_edit_by_insert(
 }
 
 pub fn parse(
-  parser: Arc<Mutex<Parser>>,
+  parser: SyntaxParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
