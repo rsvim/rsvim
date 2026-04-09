@@ -542,17 +542,17 @@ impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
     id: CompactString,
-    lang: Language,
+    grammar: Language,
     highlight_query: Option<String>,
   ) {
-    self.grammars.insert(id.clone(), lang);
+    self.grammars.insert(id.clone(), grammar);
     if let Some(hl_query) = highlight_query {
       self.highlight_queries.insert(id.clone(), hl_query);
     }
     self.gid2ext.entry(id.clone()).or_default();
   }
 
-  pub fn get_lang(&self, id: &str) -> Option<&Language> {
+  pub fn get_grammar(&self, id: &str) -> Option<&Language> {
     self.grammars.get(id)
   }
 
@@ -560,11 +560,11 @@ impl SyntaxManager {
     self.highlight_queries.get(id)
   }
 
-  pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
+  pub fn get_grammar_by_ext(&self, ext: &str) -> Option<&Language> {
     self
       .ext2gid
       .get(ext)
-      .map(|id| self.get_lang(id))
+      .map(|id| self.get_grammar(id))
       .unwrap_or(None)
   }
 
@@ -582,7 +582,7 @@ impl SyntaxManager {
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) = self.get_lang_by_ext(ext)
+      && let Some(lang) = self.get_grammar_by_ext(ext)
     {
       trace!(
         "Load syntax by file ext:{:?} lang:{:?}",
