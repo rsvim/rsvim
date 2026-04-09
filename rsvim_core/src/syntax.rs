@@ -344,7 +344,7 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn get_language_name_from_src_path(
+  pub fn get_grammar_name_from_src_path(
     src_path: &Path,
   ) -> TheResult<CompactString> {
     let grammar_json_path = src_path.join("grammar.json");
@@ -374,7 +374,7 @@ impl SyntaxLoader {
   ) -> TheResult<&Language> {
     let src_path = req.grammar_path.join("src");
     let src_path = src_path.as_path();
-    let lang_name = Self::get_language_name_from_src_path(src_path)?;
+    let lang_name = Self::get_grammar_name_from_src_path(src_path)?;
     if !self.grammars.contains_key(&lang_name) {
       let compile_cfg = CompileConfig::new(src_path, None, None);
       match self.loader.load_language_at_path(compile_cfg) {
