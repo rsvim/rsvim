@@ -1,6 +1,3 @@
 [submodule "tests_and_benchmarks"]
 	path = tests_and_benchmarks
 	url = https://github.com/rsvim/tests_and_benchmarks
-[submodule "tree-sitter-rust"]
-	path = tree-sitter-rust
-	url = https://github.com/tree-sitter/tree-sitter-rust
