@@ -189,7 +189,7 @@ fn cells_at1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
-    let mut c = Cell::default();
+    let mut c = Cell::empty();
     c.set_symbol(input.1.to_compact_string());
     let actual = frame.set_cell(input.0, c);
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
