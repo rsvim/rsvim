@@ -103,7 +103,7 @@ impl Iframe {
     self.size = size;
     self.cells.resize(
       size.height() as usize * size.width() as usize,
-      Cell::default(),
+      Cell::empty(),
     );
     old_size
   }
