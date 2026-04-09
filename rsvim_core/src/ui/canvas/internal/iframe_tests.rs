@@ -19,7 +19,7 @@ fn new1() {
     f.size().height() as usize * f.size().width() as usize
   );
   for c in f.get_cells().iter() {
-    assert_eq!(c.symbol(), Cell::default().symbol());
+    assert_eq!(c.symbol(), Cell::empty().symbol());
   }
 }
 
@@ -104,7 +104,7 @@ fn set_cell1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
-    let mut c = Cell::default();
+    let mut c = Cell::empty();
     c.set_symbol(input.1.to_compact_string());
     let actual = frame.set_cell(input.0, c);
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
@@ -140,7 +140,7 @@ fn set_empty_cell1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
-    let mut c = Cell::default();
+    let mut c = Cell::empty();
     c.set_symbol(input.1.to_compact_string());
     let actual = frame.set_cell(input.0, c);
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
@@ -158,7 +158,7 @@ fn set_empty_cell1() {
     assert_eq!(actual.attrs(), &Attributes::default());
   }
   for (i, input) in inputs.iter().enumerate() {
-    let mut c = Cell::default();
+    let mut c = Cell::empty();
     c.set_symbol(input.1.to_compact_string());
     let actual = frame.set_empty_cell(input.0);
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
@@ -203,7 +203,7 @@ fn cells_at1() {
   ];
 
   for (i, input) in inputs.iter().enumerate() {
-    let mut c = Cell::default();
+    let mut c = Cell::empty();
     c.set_symbol(input.1.to_compact_string());
     let actual = frame.set_cell(input.0, c);
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
