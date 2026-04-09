@@ -551,7 +551,7 @@ impl EventLoop {
         .syntax_mut()
         .as_mut()
         .unwrap()
-        .add_pending_edit(SyntaxEdit::New(SyntaxEditNew { payload, version }));
+        .add_pending_edits(SyntaxEdit::New(SyntaxEditNew { payload, version }));
       chan::send_to_master(
         self.master_tx.clone(),
         MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {

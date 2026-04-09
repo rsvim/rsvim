@@ -205,9 +205,3 @@ impl EditorWriter {
     Ok(())
   }
 }
-
-impl Default for EditorWriter {
-  fn default() -> Self {
-    Self::new()
-  }
-}

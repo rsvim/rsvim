@@ -29,7 +29,7 @@ impl Iframe {
     let n = size.height() as usize * size.width() as usize;
     Iframe {
       size,
-      cells: vec![Cell::default(); n],
+      cells: vec![Cell::empty(); n],
       dirty_marks: RoaringBitmap::new(),
     }
   }
@@ -103,7 +103,7 @@ impl Iframe {
     self.size = size;
     self.cells.resize(
       size.height() as usize * size.width() as usize,
-      Cell::default(),
+      Cell::empty(),
     );
     old_size
   }

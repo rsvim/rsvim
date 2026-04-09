@@ -301,7 +301,7 @@ impl Syntax {
     self.pending_edits.len()
   }
 
-  pub fn add_pending_edit(&mut self, value: SyntaxEdit) {
+  pub fn add_pending_edits(&mut self, value: SyntaxEdit) {
     self.pending_edits.push(value);
   }
 
@@ -575,7 +575,7 @@ impl SyntaxManager {
   }
 
   /// Load/create a new Syntax by file extension.
-  pub fn new_syntax_by_ext(
+  pub fn make_syntax_by_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
@@ -599,9 +599,21 @@ impl SyntaxManager {
 }
 // Language and queries }
 
-// Language loader {
-impl SyntaxManager {}
-// Language loader }
+pub struct SyntaxLoadOptions {}
+
+// Load and build {
+impl SyntaxManager {
+  /// Load tree-sitter grammar in async.
+  pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
+    Ok(())
+  }
+
+  /// Load tree-sitter grammar in sync.
+  pub fn load(_force_rebuild: bool) -> TheResult<()> {
+    Ok(())
+  }
+}
+// Load and build }
 
 fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
   rope

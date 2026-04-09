@@ -300,8 +300,8 @@ impl BufferManager {
       let file_extension = filename
         .extension()
         .map(|e| e.to_string_lossy().to_compact_string());
-      let syntax = self._new_syntax_by_file_ext(&file_extension)?;
-      let colorscheme = self._colorscheme();
+      let syntax = self._make_syntax_by_file_ext(&file_extension)?;
+      let colorscheme = self._get_colorscheme();
       Buffer::_new(
         *self.global_local_options(),
         canvas_size,
@@ -339,7 +339,7 @@ impl BufferManager {
   pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let colorscheme = self._colorscheme();
+    let colorscheme = self._get_colorscheme();
     let buf = Buffer::_new(
       *self.global_local_options(),
       canvas_size,
@@ -390,16 +390,16 @@ impl BufferManager {
 
   /// NOTE: This API should be never used by external logic, it is been exposed
   /// as `pub` API just for testing purpose.
-  pub fn _new_syntax_by_file_ext(
+  pub fn _make_syntax_by_file_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     let syntax_manager = self.syntax_manager.upgrade().unwrap();
     let syntax_manager = lock!(syntax_manager);
-    syntax_manager.new_syntax_by_ext(file_extension)
+    syntax_manager.make_syntax_by_ext(file_extension)
   }
 
-  fn _colorscheme(&self) -> Option<ColorSchemeArc> {
+  fn _get_colorscheme(&self) -> Option<ColorSchemeArc> {
     let colorscheme_manager = self.colorscheme_manager.upgrade().unwrap();
     let colorscheme_manager = lock!(colorscheme_manager);
     colorscheme_manager.colorscheme()
@@ -429,8 +429,8 @@ impl BufferManager {
           let file_extension = filename
             .extension()
             .map(|e| e.to_string_lossy().to_compact_string());
-          let syntax = self._new_syntax_by_file_ext(&file_extension)?;
-          let colorscheme = self._colorscheme();
+          let syntax = self._make_syntax_by_file_ext(&file_extension)?;
+          let colorscheme = self._get_colorscheme();
 
           Ok(Buffer::_new(
             *self.global_local_options(),
