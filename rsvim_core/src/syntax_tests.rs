@@ -1219,4 +1219,22 @@ mod tests_grammar_loader {
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_ok());
   }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn failed1() {
+    let grammar_path = Path::new(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/benches"
+    ));
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+  }
 }
