@@ -413,9 +413,9 @@ pub struct SyntaxManager {
   highlight_queries: FoldMap<CompactString, String>,
 
   // Maps grammar ID to file extensions
-  id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
+  grammarid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to grammar ID
-  ext2id: FoldMap<CompactString, CompactString>,
+  ext2grammarid: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(SyntaxManager);
@@ -428,8 +428,8 @@ impl Debug for SyntaxManager {
       .field("pending_grammar_requests", &self.pending_grammar_requests)
       .field("languages", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
-      .field("id2ext", &self.id2ext)
-      .field("ext2id", &self.ext2id)
+      .field("id2ext", &self.grammarid2ext)
+      .field("ext2id", &self.ext2grammarid)
       .finish()
   }
 }
@@ -443,8 +443,8 @@ impl SyntaxManager {
       pending_grammar_requests: vec![],
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
-      id2ext: FoldMap::new(),
-      ext2id: FoldMap::new(),
+      grammarid2ext: FoldMap::new(),
+      ext2grammarid: FoldMap::new(),
     };
 
     let language_bindings = [
@@ -505,32 +505,32 @@ impl SyntaxManager {
   /// - Source files: cc, c++, cpp
   pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
     self
-      .id2ext
+      .grammarid2ext
       .entry(id.clone())
       .or_default()
       .insert(ext.clone());
-    self.ext2id.entry(ext).or_insert(id);
+    self.ext2grammarid.entry(ext).or_insert(id);
   }
 
   /// Un-associate a language ID with a file extension.
   pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
     self
-      .id2ext
+      .grammarid2ext
       .entry(id.to_compact_string())
       .or_default()
       .remove(ext);
-    self.ext2id.remove(ext);
+    self.ext2grammarid.remove(ext);
   }
 
   pub fn get_file_ext_by_id(
     &self,
     id: &str,
   ) -> Option<&FoldSet<CompactString>> {
-    self.id2ext.get(id)
+    self.grammarid2ext.get(id)
   }
 
   pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
-    self.ext2id.get(ext)
+    self.ext2grammarid.get(ext)
   }
 }
 // Language ID and file extensions }
@@ -547,7 +547,7 @@ impl SyntaxManager {
     if let Some(hl_query) = highlight_query {
       self.highlight_queries.insert(id.clone(), hl_query);
     }
-    self.id2ext.entry(id.clone()).or_default();
+    self.grammarid2ext.entry(id.clone()).or_default();
   }
 
   pub fn get_lang(&self, id: &str) -> Option<&Language> {
@@ -560,7 +560,7 @@ impl SyntaxManager {
 
   pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
     self
-      .ext2id
+      .ext2grammarid
       .get(ext)
       .map(|id| self.get_lang(id))
       .unwrap_or(None)
@@ -568,7 +568,7 @@ impl SyntaxManager {
 
   pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
     self
-      .ext2id
+      .ext2grammarid
       .get(ext)
       .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
