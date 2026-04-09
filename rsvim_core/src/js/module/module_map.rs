@@ -289,9 +289,3 @@ impl ModuleMap {
     }
   }
 }
-
-impl Default for ModuleMap {
-  fn default() -> Self {
-    ModuleMap::new()
-  }
-}

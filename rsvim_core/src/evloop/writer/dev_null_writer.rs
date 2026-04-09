@@ -38,12 +38,6 @@ impl StdoutWritable for DevNullWriter {
   }
 }
 
-impl Default for DevNullWriter {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
 impl DevNullWriter {
   pub fn shaders(&self) -> &Vec<ShaderCommand> {
     &self.shaders
