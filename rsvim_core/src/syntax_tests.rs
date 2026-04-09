@@ -1227,6 +1227,30 @@ mod tests_grammar_loader {
     test_log_init();
 
     let grammar_path = assert_fs::TempDir::new().unwrap();
+
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn failed2() {
+    test_log_init();
+
+    let grammar_path = assert_fs::TempDir::new().unwrap();
     let grammar_json_path = grammar_path.child("src").child("grammar.json");
     grammar_json_path.touch().unwrap();
     grammar_json_path.write_str(r###"{
