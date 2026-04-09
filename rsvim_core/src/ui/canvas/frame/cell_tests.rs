@@ -5,7 +5,7 @@ use crossterm::style::Color;
 
 #[test]
 fn default1() {
-  let c = Cell::default();
+  let c = Cell::empty();
   assert_eq!(c.symbol(), "");
   assert_eq!(c.fg(), &Color::Reset);
   assert_eq!(c.bg(), &Color::Reset);
@@ -20,7 +20,7 @@ fn new1() {
     Color::Reset,
     Attributes::default(),
   );
-  let c2 = Cell::default();
+  let c2 = Cell::empty();
   assert_eq!(c1.symbol(), " ");
   assert_eq!(c2.symbol(), "");
   assert_eq!(c1.fg(), &Color::Reset);

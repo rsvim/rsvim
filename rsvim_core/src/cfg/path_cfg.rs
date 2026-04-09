@@ -225,10 +225,4 @@ impl PathConfig {
   }
 }
 
-impl Default for PathConfig {
-  fn default() -> Self {
-    PathConfig::new()
-  }
-}
-
 pub static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);

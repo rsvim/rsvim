@@ -520,12 +520,6 @@ impl SyntaxManager {
 }
 // Load and build }
 
-impl Default for SyntaxManager {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
 fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
   rope
     .try_char_to_byte(absolute_char_idx)

@@ -71,13 +71,6 @@ impl Cell {
   }
 }
 
-impl Default for Cell {
-  /// Make default cell, same with [`Cell::empty()`].
-  fn default() -> Self {
-    Cell::empty()
-  }
-}
-
 impl Cell {
   /// Make cell with a symbol, foreground/background color, attributes.
   pub fn new(
