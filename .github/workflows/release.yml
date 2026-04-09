@@ -34,9 +34,6 @@ jobs:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     env:
-      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
-      RUSTFLAGS: >-
-        ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0 -Ctarget-feature=+crt-static ' || '' }}
       BIN_EXT: ${{ contains(matrix.os, 'windows') && '.exe' || '' }}
     needs: prepare
     strategy:

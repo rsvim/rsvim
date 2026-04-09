@@ -72,8 +72,6 @@ def _linker():
 
 def rustflags():
     flags = ["-Dwarnings"]
-    if WINDOWS:
-        flags.append("-Csymbol-mangling-version=v0")
     linker_flags = _linker()
     if linker_flags is not None:
         flags.append(linker_flags)
