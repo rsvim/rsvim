@@ -1164,6 +1164,8 @@ int main() {
 
 #[cfg(test)]
 mod tests_grammar_loader {
+  use assert_fs::prelude::PathChild;
+
   use super::*;
 
   #[test]
@@ -1225,10 +1227,15 @@ mod tests_grammar_loader {
   fn failed1() {
     test_log_init();
 
-    let grammar_path = Path::new(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/benches"
-    ));
+    let grammar_path = assert_fs::TempDir::new().unwrap();
+    let grammar_json_path = grammar_path.child("src").child("grammar.json");
+    grammar_json_path.touch().unwrap();
+    grammar_json_path.write_str(r###"{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
+  "name": "rust",
+  "word": "identifier"
+}"###).unwrap();
+
     let mut syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
