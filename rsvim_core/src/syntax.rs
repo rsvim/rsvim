@@ -176,7 +176,7 @@ pub struct Syntax {
   // Syntax parser
   parser: TreesitterParserArc,
 
-  // Filetype, i.e. language name
+  // Filetype, i.e. programming language name, grammar id
   filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
@@ -214,15 +214,15 @@ impl Debug for Syntax {
 
 impl Syntax {
   pub fn new(
-    lang: &Language,
+    grammar: &Language,
     highlight_query: Option<&String>,
   ) -> Result<Self, LanguageError> {
-    let filetype = lang.name().map(|name| name.to_compact_string());
+    let filetype = grammar.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
-    parser.set_language(lang)?;
+    parser.set_language(grammar)?;
     let parser = Arc::new(Mutex::new(parser));
     let highlight_query = match highlight_query {
-      Some(source) => Query::new(lang, source)
+      Some(source) => Query::new(grammar, source)
         .map(|q| Some(Arc::new(q)))
         .unwrap_or(None),
       None => None,
