@@ -551,7 +551,7 @@ impl EventLoop {
         .syntax_mut()
         .as_mut()
         .unwrap()
-        .add_pending(SyntaxEdit::New(SyntaxEditNew { payload, version }));
+        .add_pending_edits(SyntaxEdit::New(SyntaxEditNew { payload, version }));
       chan::send_to_master(
         self.master_tx.clone(),
         MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
@@ -845,7 +845,7 @@ impl EventLoop {
             let syntax_has_pending_edits = buf
               .syntax()
               .as_ref()
-              .map(|s| !s.pending_is_empty())
+              .map(|s| !s.pending_edits_is_empty())
               .unwrap_or(false);
             if has_no_syntax || syntax_is_parsing || !syntax_has_pending_edits {
               return;
@@ -861,7 +861,7 @@ impl EventLoop {
               let syn = buf.syntax_mut().as_mut().unwrap();
               syn.set_is_parsing(true);
               let syn_id = syn.id();
-              let pending_edits = syn.drain_pending(..).collect_vec();
+              let pending_edits = syn.drain_pending_edits(..).collect_vec();
               let syn_parser = syn.parser();
               let syn_tree = syn.tree().clone();
               let syn_highlight_query = syn.highlight_query();
@@ -903,7 +903,7 @@ impl EventLoop {
 
                   // If buffer already has more pending editings, trigger next
                   // parsing immediately.
-                  if !syn.pending_is_empty() {
+                  if !syn.pending_edits_is_empty() {
                     chan::send_to_master(
                       master_tx.clone(),
                       MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
