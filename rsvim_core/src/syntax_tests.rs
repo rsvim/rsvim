@@ -68,7 +68,7 @@ mod tests_getter_setter {
     let mut syn_mgr = SyntaxManager::new();
     syn_mgr
       .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let lang = syn_mgr.get_lang_by_ext("rs");
+    let lang = syn_mgr.get_grammar_by_ext("rs");
     assert!(lang.is_some());
     assert_eq!(lang.unwrap().name(), Some("rust"));
   }

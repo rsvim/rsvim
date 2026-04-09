@@ -9,6 +9,8 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -22,12 +24,14 @@ use tree_sitter::Query;
 use tree_sitter::QueryCursor;
 use tree_sitter::StreamingIterator;
 use tree_sitter::Tree;
+use tree_sitter_loader::CompileConfig;
+use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-pub type SyntaxParserArc = Arc<Mutex<Parser>>;
-pub type SyntaxParserWk = Weak<Mutex<Parser>>;
-pub type SyntaxParserMutexGuard<'a> = MutexGuard<'a, Parser>;
+pub type TreesitterParserArc = Arc<Mutex<Parser>>;
+pub type TreesitterParserWk = Weak<Mutex<Parser>>;
+pub type TreesitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
@@ -170,9 +174,9 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: SyntaxParserArc,
+  parser: TreesitterParserArc,
 
-  // Filetype, i.e. language name
+  // Filetype, i.e. programming language name, grammar id
   filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
@@ -210,15 +214,15 @@ impl Debug for Syntax {
 
 impl Syntax {
   pub fn new(
-    lang: &Language,
+    grammar: &Language,
     highlight_query: Option<&String>,
   ) -> Result<Self, LanguageError> {
-    let filetype = lang.name().map(|name| name.to_compact_string());
+    let filetype = grammar.name().map(|name| name.to_compact_string());
     let mut parser = Parser::new();
-    parser.set_language(lang)?;
+    parser.set_language(grammar)?;
     let parser = Arc::new(Mutex::new(parser));
     let highlight_query = match highlight_query {
-      Some(source) => Query::new(lang, source)
+      Some(source) => Query::new(grammar, source)
         .map(|q| Some(Arc::new(q)))
         .unwrap_or(None),
       None => None,
@@ -277,7 +281,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> SyntaxParserArc {
+  pub fn parser(&self) -> TreesitterParserArc {
     self.parser.clone()
   }
 
@@ -312,21 +316,108 @@ impl Syntax {
   }
 }
 
-// #[derive(Debug, Clone)]
-// pub struct SyntaxBuiltParser {
-//   pub grammar_path: PathBuf,
-//   pub library_path: PathBuf,
-// }
+pub type TreesitterLoaderArc = Arc<Mutex<Loader>>;
+pub type TreesitterLoaderWk = Weak<Mutex<Loader>>;
+pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+
+pub struct SyntaxLoader {
+  // tree-sitter loader
+  loader: Loader,
+
+  // tree-sitter grammars
+  grammars: FoldMap<CompactString, Language>,
+}
+
+arc_mutex_ptr!(SyntaxLoader);
+
+#[derive(Debug, Clone)]
+pub struct SyntaxLoadGrammarRequest {
+  pub grammar_path: PathBuf,
+}
+
+impl SyntaxLoader {
+  pub fn new() -> Self {
+    Self {
+      // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
+      loader: Loader::new().unwrap(),
+      grammars: FoldMap::new(),
+    }
+  }
+
+  pub fn get_grammar_name_from_src_path(
+    src_path: &Path,
+  ) -> TheResult<CompactString> {
+    let grammar_json_path = src_path.join("grammar.json");
+    let grammar_json_path = grammar_json_path.as_path();
+    let err = || {
+      TheErr::TreesitterGrammarNotFound(
+        grammar_json_path.to_string_lossy().to_compact_string(),
+      )
+    };
+    let grammar_json_text =
+      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
+    let grammar_json_data: serde_json::Value =
+      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
+    match grammar_json_data.get("name") {
+      Some(name_value) => match name_value.as_str() {
+        Some(name) => Ok(name.to_compact_string()),
+        None => Err(err()),
+      },
+      None => Err(err()),
+    }
+  }
+
+  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
+  pub fn load_treesitter_grammar(
+    &mut self,
+    req: &SyntaxLoadGrammarRequest,
+  ) -> TheResult<&Language> {
+    let src_path = req.grammar_path.join("src");
+    let src_path = src_path.as_path();
+    let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
+    if !self.grammars.contains_key(&grammar_id) {
+      let compile_cfg = CompileConfig::new(src_path, None, None);
+      match self.loader.load_language_at_path(compile_cfg) {
+        Ok(grammar) => {
+          self
+            .grammars
+            .insert(grammar_id.to_compact_string(), grammar);
+        }
+        Err(e) => {
+          let e = TheErr::LoadTreesitterGrammarFailed(
+            grammar_id.to_compact_string(),
+            e,
+          );
+          return Err(e);
+        }
+      }
+    }
+    Ok(self.grammars.get(&grammar_id).unwrap())
+  }
+}
+
+impl Debug for SyntaxLoader {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SyntaxGrammarLoader")
+      .field("loader.parser_lib_path", &self.loader.parser_lib_path)
+      .field("parsers", &self.grammars)
+      .finish()
+  }
+}
 
 pub struct SyntaxManager {
+  loader: SyntaxLoaderArc,
+  is_loading_grammar: bool,
+  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
+
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
-  languages: FoldMap<CompactString, Language>,
+  grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
 
-  // Maps language ID to file extensions
-  id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
-  // Maps file extension to language ID
-  ext2id: FoldMap<CompactString, CompactString>,
+  // Maps grammar ID to file extensions
+  gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
+  // Maps file extension to grammar ID
+  ext2gid: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(SyntaxManager);
@@ -334,10 +425,13 @@ arc_mutex_ptr!(SyntaxManager);
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
-      .field("languages", &self.languages)
+      .field("loader", &lock!(self.loader))
+      .field("is_loading_grammar", &self.is_loading_grammar)
+      .field("pending_grammar_requests", &self.pending_grammar_requests)
+      .field("grammars", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
-      .field("id2ext", &self.id2ext)
-      .field("ext2id", &self.ext2id)
+      .field("grammarid2ext", &self.gid2ext)
+      .field("ext2grammarid", &self.ext2gid)
       .finish()
   }
 }
@@ -346,13 +440,16 @@ impl Debug for SyntaxManager {
 impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
-      languages: FoldMap::new(),
+      loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
+      is_loading_grammar: false,
+      pending_grammar_requests: vec![],
+      grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
-      id2ext: FoldMap::new(),
-      ext2id: FoldMap::new(),
+      gid2ext: FoldMap::new(),
+      ext2gid: FoldMap::new(),
     };
 
-    let language_bindings = [
+    let grammar_bindings = [
       (
         "c",
         tree_sitter_c::LANGUAGE,
@@ -385,95 +482,95 @@ impl SyntaxManager {
       ),
     ];
 
-    for lang_binding in language_bindings {
-      for lang_ext in lang_binding.3.iter() {
+    for grammar_binding in grammar_bindings {
+      for file_ext in grammar_binding.3.iter() {
         it.insert_file_ext(
-          lang_binding.0.to_compact_string(),
-          lang_ext.to_compact_string(),
+          grammar_binding.0.to_compact_string(),
+          file_ext.to_compact_string(),
         );
       }
-      it.insert_lang(
-        lang_binding.0.to_compact_string(),
-        lang_binding.1.into(),
-        lang_binding.2.map(|q| q.to_string()),
+      it.insert_grammar(
+        grammar_binding.0.to_compact_string(),
+        grammar_binding.1.into(),
+        grammar_binding.2.map(|q| q.to_string()),
       );
     }
 
     it
   }
 
-  /// Associate a language ID with a file extension.
+  /// Associate a grammar ID with a file extension.
   ///
-  /// For example, a 'C++' language ID can be associate with below file
+  /// For example, a 'C++' grammar can be associate with below file
   /// extensions:
   /// - Feader files: hh, h++, hpp
   /// - Source files: cc, c++, cpp
   pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
     self
-      .id2ext
+      .gid2ext
       .entry(id.clone())
       .or_default()
       .insert(ext.clone());
-    self.ext2id.entry(ext).or_insert(id);
+    self.ext2gid.entry(ext).or_insert(id);
   }
 
-  /// Un-associate a language ID with a file extension.
+  /// Un-associate a grammar ID with a file extension.
   pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
     self
-      .id2ext
+      .gid2ext
       .entry(id.to_compact_string())
       .or_default()
       .remove(ext);
-    self.ext2id.remove(ext);
+    self.ext2gid.remove(ext);
   }
 
   pub fn get_file_ext_by_id(
     &self,
     id: &str,
   ) -> Option<&FoldSet<CompactString>> {
-    self.id2ext.get(id)
+    self.gid2ext.get(id)
   }
 
   pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
-    self.ext2id.get(ext)
+    self.ext2gid.get(ext)
   }
 }
 // Language ID and file extensions }
 
 // Language and queries {
 impl SyntaxManager {
-  pub fn insert_lang(
+  pub fn insert_grammar(
     &mut self,
     id: CompactString,
-    lang: Language,
+    grammar: Language,
     highlight_query: Option<String>,
   ) {
-    self.languages.insert(id.clone(), lang);
+    self.grammars.insert(id.clone(), grammar);
     if let Some(hl_query) = highlight_query {
       self.highlight_queries.insert(id.clone(), hl_query);
     }
-    self.id2ext.entry(id.clone()).or_default();
+    self.gid2ext.entry(id.clone()).or_default();
   }
 
-  pub fn get_lang(&self, id: &str) -> Option<&Language> {
-    self.languages.get(id)
+  pub fn get_grammar(&self, id: &str) -> Option<&Language> {
+    self.grammars.get(id)
   }
 
   pub fn get_highlight_query(&self, id: &str) -> Option<&String> {
     self.highlight_queries.get(id)
   }
 
-  pub fn get_lang_by_ext(&self, ext: &str) -> Option<&Language> {
+  pub fn get_grammar_by_ext(&self, ext: &str) -> Option<&Language> {
     self
-      .ext2id
+      .ext2gid
       .get(ext)
-      .map(|id| self.get_lang(id))
+      .map(|id| self.get_grammar(id))
       .unwrap_or(None)
   }
 
   pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
     self
-      .ext2id
+      .ext2gid
       .get(ext)
       .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
@@ -485,17 +582,17 @@ impl SyntaxManager {
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) = self.get_lang_by_ext(ext)
+      && let Some(grammar) = self.get_grammar_by_ext(ext)
     {
       trace!(
-        "Load syntax by file ext:{:?} lang:{:?}",
+        "Load syntax by file ext:{:?} grammar:{:?}",
         file_extension,
-        lang.name()
+        grammar.name()
       );
       let highlight_query = self.get_highlight_query_by_ext(ext);
-      match Syntax::new(lang, highlight_query) {
+      match Syntax::new(grammar, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
-        Err(e) => Err(TheErr::LoadSyntaxLanguageFailed(ext.clone(), e)),
+        Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
     } else {
       Ok(None)
@@ -610,7 +707,7 @@ pub fn make_input_edit_by_insert(
 }
 
 pub fn parse(
-  parser: Arc<Mutex<Parser>>,
+  parser: TreesitterParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
@@ -826,7 +923,7 @@ pub fn query(
 }
 
 pub async fn parse_and_query(
-  parser: Arc<Mutex<Parser>>,
+  parser: TreesitterParserArc,
   old_tree: Option<Tree>,
   highlight_query: Option<SyntaxQueryArc>,
   pending_edits: Vec<SyntaxEdit>,

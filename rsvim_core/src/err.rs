@@ -6,6 +6,7 @@ use crate::js::module::ModulePath;
 use compact_str::CompactString;
 use std::borrow::Cow;
 use tree_sitter::LanguageError;
+use tree_sitter_loader::LoaderError;
 
 // std::io {
 
@@ -35,7 +36,13 @@ pub enum TheErr {
   SaveBufferFailed(BufferId, CompactString, IoErr),
 
   #[error("Failed to load syntax for language {0}: {1}.")]
-  LoadSyntaxLanguageFailed(CompactString, LanguageError),
+  LoadSyntaxFailed(CompactString, LanguageError),
+
+  #[error("Failed to load tree-sitter grammar {0}: {1}.")]
+  LoadTreesitterGrammarFailed(CompactString, LoaderError),
+
+  #[error("Tree-sitter grammar not found: {0}.")]
+  TreesitterGrammarNotFound(CompactString),
 
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
