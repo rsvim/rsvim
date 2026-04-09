@@ -378,8 +378,10 @@ impl SyntaxLoader {
     if !self.grammars.contains_key(&grammar_id) {
       let compile_cfg = CompileConfig::new(src_path, None, None);
       match self.loader.load_language_at_path(compile_cfg) {
-        Ok(lang) => {
-          self.grammars.insert(grammar_id.to_compact_string(), lang);
+        Ok(grammar) => {
+          self
+            .grammars
+            .insert(grammar_id.to_compact_string(), grammar);
         }
         Err(e) => {
           let e = TheErr::LoadTreesitterGrammarFailed(
@@ -481,13 +483,13 @@ impl SyntaxManager {
     ];
 
     for grammar_binding in grammar_bindings {
-      for lang_ext in grammar_binding.3.iter() {
+      for file_ext in grammar_binding.3.iter() {
         it.insert_file_ext(
           grammar_binding.0.to_compact_string(),
-          lang_ext.to_compact_string(),
+          file_ext.to_compact_string(),
         );
       }
-      it.insert_lang(
+      it.insert_grammar(
         grammar_binding.0.to_compact_string(),
         grammar_binding.1.into(),
         grammar_binding.2.map(|q| q.to_string()),
@@ -537,7 +539,7 @@ impl SyntaxManager {
 
 // Language and queries {
 impl SyntaxManager {
-  pub fn insert_lang(
+  pub fn insert_grammar(
     &mut self,
     id: CompactString,
     lang: Language,
