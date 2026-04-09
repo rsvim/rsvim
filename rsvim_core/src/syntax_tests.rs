@@ -10,6 +10,7 @@ use crate::ui::canvas::ShaderCommand;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use crossterm::style::Color;
 use itertools::Itertools;
@@ -1164,8 +1165,6 @@ int main() {
 
 #[cfg(test)]
 mod tests_grammar_loader {
-  use assert_fs::prelude::PathChild;
-
   use super::*;
 
   #[test]
