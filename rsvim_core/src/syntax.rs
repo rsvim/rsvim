@@ -374,23 +374,23 @@ impl SyntaxLoader {
   ) -> TheResult<&Language> {
     let src_path = req.grammar_path.join("src");
     let src_path = src_path.as_path();
-    let lang_name = Self::get_grammar_name_from_src_path(src_path)?;
-    if !self.grammars.contains_key(&lang_name) {
+    let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
+    if !self.grammars.contains_key(&grammar_id) {
       let compile_cfg = CompileConfig::new(src_path, None, None);
       match self.loader.load_language_at_path(compile_cfg) {
         Ok(lang) => {
-          self.grammars.insert(lang_name.to_compact_string(), lang);
+          self.grammars.insert(grammar_id.to_compact_string(), lang);
         }
         Err(e) => {
           let e = TheErr::LoadTreesitterGrammarFailed(
-            lang_name.to_compact_string(),
+            grammar_id.to_compact_string(),
             e,
           );
           return Err(e);
         }
       }
     }
-    Ok(self.grammars.get(&lang_name).unwrap())
+    Ok(self.grammars.get(&grammar_id).unwrap())
   }
 }
 
