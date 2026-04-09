@@ -409,12 +409,12 @@ pub struct SyntaxManager {
   pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
-  languages: FoldMap<CompactString, Language>,
+  grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
 
-  // Maps language ID to file extensions
+  // Maps grammar ID to file extensions
   id2ext: FoldMap<CompactString, FoldSet<CompactString>>,
-  // Maps file extension to language ID
+  // Maps file extension to grammar ID
   ext2id: FoldMap<CompactString, CompactString>,
 }
 
@@ -426,7 +426,7 @@ impl Debug for SyntaxManager {
       .field("loader", &lock!(self.loader))
       .field("is_loading_grammar", &self.is_loading_grammar)
       .field("pending_grammar_requests", &self.pending_grammar_requests)
-      .field("languages", &self.languages)
+      .field("languages", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
       .field("id2ext", &self.id2ext)
       .field("ext2id", &self.ext2id)
@@ -441,7 +441,7 @@ impl SyntaxManager {
       loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
       is_loading_grammar: false,
       pending_grammar_requests: vec![],
-      languages: FoldMap::new(),
+      grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       id2ext: FoldMap::new(),
       ext2id: FoldMap::new(),
@@ -543,7 +543,7 @@ impl SyntaxManager {
     lang: Language,
     highlight_query: Option<String>,
   ) {
-    self.languages.insert(id.clone(), lang);
+    self.grammars.insert(id.clone(), lang);
     if let Some(hl_query) = highlight_query {
       self.highlight_queries.insert(id.clone(), hl_query);
     }
@@ -551,7 +551,7 @@ impl SyntaxManager {
   }
 
   pub fn get_lang(&self, id: &str) -> Option<&Language> {
-    self.languages.get(id)
+    self.grammars.get(id)
   }
 
   pub fn get_highlight_query(&self, id: &str) -> Option<&String> {
