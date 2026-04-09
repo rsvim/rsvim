@@ -426,10 +426,10 @@ impl Debug for SyntaxManager {
       .field("loader", &lock!(self.loader))
       .field("is_loading_grammar", &self.is_loading_grammar)
       .field("pending_grammar_requests", &self.pending_grammar_requests)
-      .field("languages", &self.grammars)
+      .field("grammars", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
-      .field("id2ext", &self.grammarid2ext)
-      .field("ext2id", &self.ext2grammarid)
+      .field("grammarid2ext", &self.grammarid2ext)
+      .field("ext2grammarid", &self.ext2grammarid)
       .finish()
   }
 }
@@ -447,7 +447,7 @@ impl SyntaxManager {
       ext2grammarid: FoldMap::new(),
     };
 
-    let language_bindings = [
+    let grammar_bindings = [
       (
         "c",
         tree_sitter_c::LANGUAGE,
@@ -480,26 +480,26 @@ impl SyntaxManager {
       ),
     ];
 
-    for lang_binding in language_bindings {
-      for lang_ext in lang_binding.3.iter() {
+    for grammar_binding in grammar_bindings {
+      for lang_ext in grammar_binding.3.iter() {
         it.insert_file_ext(
-          lang_binding.0.to_compact_string(),
+          grammar_binding.0.to_compact_string(),
           lang_ext.to_compact_string(),
         );
       }
       it.insert_lang(
-        lang_binding.0.to_compact_string(),
-        lang_binding.1.into(),
-        lang_binding.2.map(|q| q.to_string()),
+        grammar_binding.0.to_compact_string(),
+        grammar_binding.1.into(),
+        grammar_binding.2.map(|q| q.to_string()),
       );
     }
 
     it
   }
 
-  /// Associate a language ID with a file extension.
+  /// Associate a grammar ID with a file extension.
   ///
-  /// For example, a 'C++' language ID can be associate with below file
+  /// For example, a 'C++' grammar can be associate with below file
   /// extensions:
   /// - Feader files: hh, h++, hpp
   /// - Source files: cc, c++, cpp
