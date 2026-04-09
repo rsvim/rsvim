@@ -81,10 +81,6 @@ jobs:
       matrix:
         os: [ubuntu-22.04-arm, macos-15-intel, windows-11-arm]
     runs-on: ${{ matrix.os }}
-    env:
-      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
-      RUSTFLAGS: >-
-        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: davidlattimore/wild-action@latest
@@ -105,10 +101,6 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-15, windows-2022]
     runs-on: ${{ matrix.os }}
-    env:
-      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
-      RUSTFLAGS: >-
-        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: davidlattimore/wild-action@latest
