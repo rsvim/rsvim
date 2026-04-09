@@ -1177,5 +1177,8 @@ mod tests_grammar_loader {
     };
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_ok());
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
   }
 }
