@@ -480,7 +480,7 @@ impl SyntaxManager {
   }
 
   /// Load/create a new Syntax by file extension.
-  pub fn load_syntax_by_ext(
+  pub fn make_syntax_by_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
