@@ -135,7 +135,7 @@ pub fn make_syntax_and_colorscheme(
     .extension()
     .map(|e| e.to_string_lossy().to_compact_string());
   let mut syn = buffer_manager
-    ._load_syntax_by_file_ext(&file_extension)
+    ._make_syntax_by_file_ext(&file_extension)
     .unwrap()
     .unwrap();
 

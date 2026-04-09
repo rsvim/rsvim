@@ -176,7 +176,7 @@ pub struct Syntax {
   filetype: Option<CompactString>,
 
   // Pending edits that waiting for parsing
-  pending: Vec<SyntaxEdit>,
+  pending_edits: Vec<SyntaxEdit>,
 
   // Whether the parser is already parsing the buffer text in a background
   // task. If true, it means the `parser` is parsing in a background task.
@@ -202,7 +202,7 @@ impl Debug for Syntax {
       )
       .field("editing_version", &self.editing_version)
       .field("filetype", &self.filetype)
-      .field("pending", &self.pending)
+      .field("pending_edits", &self.pending_edits)
       .field("parsing", &self.parsing)
       .finish()
   }
@@ -236,7 +236,7 @@ impl Syntax {
       editing_version: INVALID_EDITING_VERSION,
       parser,
       filetype,
-      pending: vec![],
+      pending_edits: vec![],
       parsing: false,
     })
   }
@@ -289,26 +289,26 @@ impl Syntax {
     self.parsing = value;
   }
 
-  pub fn pending_is_empty(&self) -> bool {
-    self.pending.is_empty()
+  pub fn pending_edits_is_empty(&self) -> bool {
+    self.pending_edits.is_empty()
   }
 
-  pub fn pending_len(&self) -> usize {
-    self.pending.len()
+  pub fn pending_edits_len(&self) -> usize {
+    self.pending_edits.len()
   }
 
-  pub fn add_pending(&mut self, value: SyntaxEdit) {
-    self.pending.push(value);
+  pub fn add_pending_edits(&mut self, value: SyntaxEdit) {
+    self.pending_edits.push(value);
   }
 
-  pub fn drain_pending<R>(
+  pub fn drain_pending_edits<R>(
     &mut self,
     range: R,
   ) -> std::vec::Drain<'_, SyntaxEdit>
   where
     R: std::ops::RangeBounds<usize>,
   {
-    self.pending.drain(range)
+    self.pending_edits.drain(range)
   }
 }
 
@@ -480,7 +480,7 @@ impl SyntaxManager {
   }
 
   /// Load/create a new Syntax by file extension.
-  pub fn load_syntax_by_ext(
+  pub fn make_syntax_by_ext(
     &self,
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
