@@ -582,15 +582,15 @@ impl SyntaxManager {
     file_extension: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_extension
-      && let Some(lang) = self.get_grammar_by_ext(ext)
+      && let Some(grammar) = self.get_grammar_by_ext(ext)
     {
       trace!(
-        "Load syntax by file ext:{:?} lang:{:?}",
+        "Load syntax by file ext:{:?} grammar:{:?}",
         file_extension,
-        lang.name()
+        grammar.name()
       );
       let highlight_query = self.get_highlight_query_by_ext(ext);
-      match Syntax::new(lang, highlight_query) {
+      match Syntax::new(grammar, highlight_query) {
         Ok(syntax) => Ok(Some(syntax)),
         Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
