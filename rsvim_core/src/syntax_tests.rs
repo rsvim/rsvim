@@ -1161,3 +1161,21 @@ int main() {
     Ok(())
   }
 }
+
+#[cfg(test)]
+mod tests_grammar_loader {
+  use super::*;
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn rust1() {
+    let grammar_path =
+      Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../tree-sitter-rust"));
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+  }
+}
