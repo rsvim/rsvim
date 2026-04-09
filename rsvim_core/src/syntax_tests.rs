@@ -10,6 +10,7 @@ use crate::ui::canvas::ShaderCommand;
 use assert_fs::NamedTempFile;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use crossterm::style::Color;
 use itertools::Itertools;
@@ -1159,5 +1160,119 @@ int main() {
     }
 
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests_grammar_loader {
+  use super::*;
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn rust1() {
+    let grammar_path = Path::new(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-rust"
+    ));
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn c1() {
+    let grammar_path = Path::new(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-c"
+    ));
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn python1() {
+    let grammar_path = Path::new(concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-python"
+    ));
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_ok());
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn failed1() {
+    test_log_init();
+
+    let grammar_path = assert_fs::TempDir::new().unwrap();
+
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn failed2() {
+    test_log_init();
+
+    let grammar_path = assert_fs::TempDir::new().unwrap();
+    let grammar_json_path = grammar_path.child("src").child("grammar.json");
+    grammar_json_path.touch().unwrap();
+    grammar_json_path.write_str(r###"{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
+  "name": "rust",
+  "word": "identifier"
+}"###).unwrap();
+
+    let mut syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
+
+    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
   }
 }

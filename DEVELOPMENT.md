@@ -4,7 +4,7 @@
 
 Please setup your development environment with:
 
-- Run `git submodule update --init` to clone the [`tests_and_benchmarks`](https://github.com/rsvim/tests_and_benchmarks) repo.
+- Run `git submodule update --init --recursive` to clone the [`tests_and_benchmarks`](https://github.com/rsvim/tests_and_benchmarks) repo.
 - Latest C++ toolchain:
   - For Linux, install [gcc](https://gcc.gnu.org/).
   - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
