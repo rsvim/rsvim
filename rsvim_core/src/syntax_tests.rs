@@ -1223,6 +1223,8 @@ mod tests_grammar_loader {
   #[test]
   #[cfg_attr(miri, ignore)]
   fn failed1() {
+    test_log_init();
+
     let grammar_path = Path::new(concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/benches"
@@ -1233,8 +1235,14 @@ mod tests_grammar_loader {
     };
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
+    if let Err(e) = grammar {
+      info!("grammar failed:{:?}", e)
+    }
   }
 }
