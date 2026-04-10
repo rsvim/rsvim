@@ -1170,6 +1170,8 @@ mod tests_grammar_loader {
   #[test]
   #[cfg_attr(miri, ignore)]
   fn rust1() {
+    test_log_init();
+
     let grammar_path = Path::new(concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-rust"
@@ -1179,15 +1181,19 @@ mod tests_grammar_loader {
       grammar_path: grammar_path.to_path_buf(),
     };
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("rust1:{:?}", grammar);
     assert!(grammar.is_ok());
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("rust1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
 
   #[test]
   #[cfg_attr(miri, ignore)]
   fn c1() {
+    test_log_init();
+
     let grammar_path = Path::new(concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-c"
@@ -1197,15 +1203,19 @@ mod tests_grammar_loader {
       grammar_path: grammar_path.to_path_buf(),
     };
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
 
   #[test]
   #[cfg_attr(miri, ignore)]
   fn python1() {
+    test_log_init();
+
     let grammar_path = Path::new(concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-python"
@@ -1215,9 +1225,11 @@ mod tests_grammar_loader {
       grammar_path: grammar_path.to_path_buf(),
     };
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("python1:{:?}", grammar);
     assert!(grammar.is_ok());
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
+    info!("python1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
 
@@ -1235,13 +1247,13 @@ mod tests_grammar_loader {
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
-      info!("grammar failed:{:?}", e)
+      info!("failed1:{:?}", e)
     }
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
-      info!("grammar failed:{:?}", e)
+      info!("failed1:{:?}", e)
     }
   }
 
@@ -1266,13 +1278,13 @@ mod tests_grammar_loader {
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
-      info!("grammar failed:{:?}", e)
+      info!("failed2:{:?}", e)
     }
 
     let grammar = syn_loader.load_treesitter_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
-      info!("grammar failed:{:?}", e)
+      info!("failed2:{:?}", e)
     }
   }
 }
