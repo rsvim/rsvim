@@ -326,7 +326,7 @@ pub struct SyntaxLoader {
 
   // Loading status
   is_loading_grammar: bool,
-  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
+  pending_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
@@ -342,8 +342,9 @@ pub struct SyntaxLoadGrammarRequest {
 impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
-      // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
       loader: Loader::new().unwrap(),
+      is_loading_grammar: false,
+      pending_requests: vec![],
       grammars: FoldMap::new(),
     }
   }
@@ -431,8 +432,6 @@ impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
       .field("loader", &lock!(self.loader))
-      .field("is_loading_grammar", &self.is_loading_grammar)
-      .field("pending_grammar_requests", &self.pending_grammar_requests)
       .field("grammars", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
       .field("grammarid2ext", &self.gid2ext)
@@ -446,8 +445,6 @@ impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
       loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
-      is_loading_grammar: false,
-      pending_grammar_requests: vec![],
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       gid2ext: FoldMap::new(),
