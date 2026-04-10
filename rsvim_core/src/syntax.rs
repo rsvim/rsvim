@@ -322,10 +322,10 @@ pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxLoader {
   // tree-sitter loader
-  loader: Loader,
+  loader: TreesitterLoaderArc,
 
   // Loading status
-  is_loading_grammar: bool,
+  is_loading: bool,
   pending_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // Loaded grammars/parsers
@@ -342,8 +342,8 @@ pub struct SyntaxLoadGrammarRequest {
 impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
-      loader: Loader::new().unwrap(),
-      is_loading_grammar: false,
+      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
+      is_loading: false,
       pending_requests: vec![],
       grammars: FoldMap::new(),
     }
@@ -372,46 +372,59 @@ impl SyntaxLoader {
     }
   }
 
-  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  /// NOTE: Make this method public only for testing.
-  pub fn _load_treesitter_grammar(
-    &mut self,
-    req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<&Language> {
-    let src_path = req.grammar_path.join("src");
-    let src_path = src_path.as_path();
-    let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
-    if !self.grammars.contains_key(&grammar_id) {
-      let compile_cfg = CompileConfig::new(src_path, None, None);
-      match self.loader.load_language_at_path(compile_cfg) {
-        Ok(grammar) => {
-          self
-            .grammars
-            .insert(grammar_id.to_compact_string(), grammar);
-        }
-        Err(e) => {
-          let e = TheErr::LoadTreesitterGrammarFailed(
-            grammar_id.to_compact_string(),
-            e,
-          );
-          return Err(e);
-        }
-      }
-    }
-    Ok(self.grammars.get(&grammar_id).unwrap())
+  // /// Load the tree-sitter parser (`Language`) FFI dynamic library.
+  // /// NOTE: Make this method public only for testing.
+  // pub fn _load_treesitter_grammar(
+  //   &mut self,
+  //   req: &SyntaxLoadGrammarRequest,
+  // ) -> TheResult<&Language> {
+  //   let src_path = req.grammar_path.join("src");
+  //   let src_path = src_path.as_path();
+  //   let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
+  //   if !self.grammars.contains_key(&grammar_id) {
+  //     let compile_cfg = CompileConfig::new(src_path, None, None);
+  //     match self.loader.load_language_at_path(compile_cfg) {
+  //       Ok(grammar) => {
+  //         self
+  //           .grammars
+  //           .insert(grammar_id.to_compact_string(), grammar);
+  //       }
+  //       Err(e) => {
+  //         let e = TheErr::LoadTreesitterGrammarFailed(
+  //           grammar_id.to_compact_string(),
+  //           e,
+  //         );
+  //         return Err(e);
+  //       }
+  //     }
+  //   }
+  //   Ok(self.grammars.get(&grammar_id).unwrap())
+  // }
+
+  pub fn is_loading(&self) -> bool {
+    self.is_loading
   }
 
-  pub fn add_pending_requests(&mut self, req: SyntaxLoadGrammarRequest) {}
+  pub fn pending_requests(&self) -> &Vec<SyntaxLoadGrammarRequest> {
+    &self.pending_requests
+  }
+
+  pub fn pending_requests_mut(&mut self) -> &mut Vec<SyntaxLoadGrammarRequest> {
+    &mut self.pending_requests
+  }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxGrammarLoader")
-      .field("loader.parser_lib_path", &self.loader.parser_lib_path)
+      .field("is_loading", &self.is_loading)
+      .field("pending_requests", &self.pending_requests)
       .field("parsers", &self.grammars)
       .finish()
   }
 }
+
+pub fn load_grammar() {}
 
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
