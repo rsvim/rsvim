@@ -324,7 +324,11 @@ pub struct SyntaxLoader {
   // tree-sitter loader
   loader: Loader,
 
-  // tree-sitter grammars
+  // Loading status
+  is_loading_grammar: bool,
+  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
+
+  // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
 }
 
@@ -395,6 +399,8 @@ impl SyntaxLoader {
     }
     Ok(self.grammars.get(&grammar_id).unwrap())
   }
+
+  pub fn add_pending_requests(&mut self, req: SyntaxLoadGrammarRequest) {}
 }
 
 impl Debug for SyntaxLoader {
@@ -408,8 +414,6 @@ impl Debug for SyntaxLoader {
 
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
-  is_loading_grammar: bool,
-  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
