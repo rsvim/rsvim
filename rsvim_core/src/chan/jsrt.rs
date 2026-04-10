@@ -32,6 +32,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of fs write
   FsWriteResp(FsWriteResp),
+
+  /// Master send js runtime the result of load tree-sitter grammar/parser.
+  LoadTreesitterGrammarResp(LoadTreesitterGrammarResp),
 }
 
 #[derive(Debug)]
@@ -74,7 +77,7 @@ pub struct FsWriteResp {
 }
 
 #[derive(Debug)]
-pub struct LoadTreesitterGrammarResq {
+pub struct LoadTreesitterGrammarResp {
   pub task_id: TaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
