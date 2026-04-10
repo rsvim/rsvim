@@ -928,6 +928,7 @@ impl EventLoop {
         }
         MasterMessage::LoadTreesitterGrammarReq(req) => {
           trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
+          let syn_loader = lock!(self.syntax_manager).loader();
         }
       }
     }

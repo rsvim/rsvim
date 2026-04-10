@@ -499,6 +499,10 @@ impl SyntaxManager {
     it
   }
 
+  pub fn loader(&self) -> SyntaxLoaderArc {
+    self.loader.clone()
+  }
+
   /// Associate a grammar ID with a file extension.
   ///
   /// For example, a 'C++' grammar can be associate with below file
