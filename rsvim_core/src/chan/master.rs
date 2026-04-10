@@ -2,7 +2,6 @@
 //! call it "master".
 
 use crate::buf::BufferId;
-use crate::err::TheErr;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
