@@ -368,7 +368,8 @@ impl SyntaxLoader {
   }
 
   /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  pub fn load_treesitter_grammar(
+  /// NOTE: Make this method public only for testing.
+  pub fn _load_treesitter_grammar(
     &mut self,
     req: &SyntaxLoadGrammarRequest,
   ) -> TheResult<&Language> {
