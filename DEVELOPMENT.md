@@ -4,13 +4,17 @@
 
 Please setup your development environment with:
 
-- Run `git submodule update --init --recursive` to clone the [`tests_and_benchmarks`](https://github.com/rsvim/tests_and_benchmarks) repo.
 - Latest C++ toolchain:
   - For Linux, install [gcc](https://gcc.gnu.org/).
   - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, install [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Install [mise](https://github.com/jdx/mise), then run `mise i` and `npm i`.
 - (Optional) Faster linker for linux, install [clang](https://llvm.org/), [mold](https://github.com/rui314/mold)/[wild](https://github.com/davidlattimore/wild).
+
+Also you need to sync git submodules with the [`tests_and_benchmarks`](https://github.com/rsvim/tests_and_benchmarks) repo, use below commands:
+
+- Run `git submodule update --init --recursive` to update all the recursive submodules.
+- Run `git submodule update --remote --merge` to update to latest commit.
 
 ## Rust
 
