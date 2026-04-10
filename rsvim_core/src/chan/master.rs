@@ -2,6 +2,7 @@
 //! call it "master".
 
 use crate::buf::BufferId;
+use crate::err::TheErr;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
@@ -38,6 +39,9 @@ pub enum MasterMessage {
 
   /// Response master for syntax parsing complete.
   SyntaxEditResp(SyntaxEditResp),
+
+  /// Js runtime ask master to load tree-sitter grammar/parser.
+  LoadTreesitterGrammarReq(LoadTreesitterGrammarReq),
 }
 
 #[derive(Debug)]
@@ -88,6 +92,12 @@ pub struct SyntaxEditReq {
 #[derive(Debug)]
 pub struct SyntaxEditResp {
   pub buffer_id: BufferId,
+}
+
+#[derive(Debug)]
+pub struct LoadTreesitterGrammarReq {
+  pub task_id: TaskId,
+  pub grammar_path: PathBuf,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
