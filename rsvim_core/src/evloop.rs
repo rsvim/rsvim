@@ -926,6 +926,9 @@ impl EventLoop {
         MasterMessage::SyntaxEditResp(resp) => {
           trace!("Recv SyntaxEditResp:{:?}", resp.buffer_id);
         }
+        MasterMessage::LoadTreesitterGrammarReq(req) => {
+          trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
+        }
       }
     }
   }
