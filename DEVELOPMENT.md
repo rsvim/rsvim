@@ -12,6 +12,11 @@ Please setup your development environment with:
 - Install [mise](https://github.com/jdx/mise), then run `mise i` and `npm i`.
 - (Optional) Faster linker for linux, install [clang](https://llvm.org/), [mold](https://github.com/rui314/mold)/[wild](https://github.com/davidlattimore/wild).
 
+Also you need to sync git submodules with the [`tests_and_benchmarks`](https://github.com/rsvim/tests_and_benchmarks) repo, use below commands:
+
+- Run `git submodule update --init --recursive` to update all the recursive submodules.
+- Run `git submodule update --remote --merge` to update to latest commit.
+
 ## Rust
 
 The `dev.py` script is provided to help running cargo commands, use `dev.py -h` for more details. For window, please use `dev.cmd`.
