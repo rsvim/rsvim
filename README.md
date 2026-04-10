@@ -38,10 +38,12 @@ Please download prebuilt executables in [releases](https://github.com/rsvim/rsvi
 cargo install --locked rsvim
 ```
 
-To get latest updates, build with git source on `main` branch:
+To get latest updates, build with source code:
 
 ```bash
-cargo install --locked rsvim --git https://github.com/rsvim/rsvim.git --branch main
+git clone https://github.com/rsvim/rsvim
+cd rsvim
+cargo install --path .
 ```
 
 ## Get Started
