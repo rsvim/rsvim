@@ -35,15 +35,15 @@ RSVIM is an open source terminal based text editor, built from scratch with [Rus
 Please download prebuilt executables in [releases](https://github.com/rsvim/rsvim/releases) page, or build with cargo:
 
 ```bash
-cargo install --locked rsvim
+cargo install rsvim
 ```
 
-To get latest updates, build with source code:
+To get latest updates, build with source:
 
 ```bash
 git clone https://github.com/rsvim/rsvim
 cd rsvim
-cargo install --path .
+cargo install --path ./rsvim_cli
 ```
 
 ## Get Started
