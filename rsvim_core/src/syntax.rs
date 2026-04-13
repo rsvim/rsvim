@@ -349,35 +349,6 @@ impl SyntaxLoader {
     }
   }
 
-  // /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  // /// NOTE: Make this method public only for testing.
-  // pub fn _load_treesitter_grammar(
-  //   &mut self,
-  //   req: &SyntaxLoadGrammarRequest,
-  // ) -> TheResult<&Language> {
-  //   let src_path = req.grammar_path.join("src");
-  //   let src_path = src_path.as_path();
-  //   let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
-  //   if !self.grammars.contains_key(&grammar_id) {
-  //     let compile_cfg = CompileConfig::new(src_path, None, None);
-  //     match self.loader.load_language_at_path(compile_cfg) {
-  //       Ok(grammar) => {
-  //         self
-  //           .grammars
-  //           .insert(grammar_id.to_compact_string(), grammar);
-  //       }
-  //       Err(e) => {
-  //         let e = TheErr::LoadTreesitterGrammarFailed(
-  //           grammar_id.to_compact_string(),
-  //           e,
-  //         );
-  //         return Err(e);
-  //       }
-  //     }
-  //   }
-  //   Ok(self.grammars.get(&grammar_id).unwrap())
-  // }
-
   pub fn is_loading(&self) -> bool {
     self.is_loading
   }
