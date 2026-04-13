@@ -941,6 +941,7 @@ impl EventLoop {
               .pending_requests_mut()
               .drain(..)
               .filter(|req| {
+                // We only load unloaded grammars
                 if let Ok(grammar_id) =
                   syntax::get_grammar_name_from_src_path(req)
                 {
