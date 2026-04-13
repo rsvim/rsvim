@@ -47,7 +47,7 @@ impl JsFuture for LoadTreesitterGrammarFuture {
   }
 }
 
-/// Javascript `setTimeout`/`setInterval` API.
+/// Javascript `loadTreeSitterGrammar` API.
 pub fn create_syn_load_grammar<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
