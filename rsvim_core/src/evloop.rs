@@ -32,6 +32,7 @@ use crate::state::ops::cmdline_ops;
 use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::SyntaxLoadGrammarRequest;
 use crate::syntax::SyntaxManager;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
@@ -923,44 +924,39 @@ impl EventLoop {
         MasterMessage::LoadTreesitterGrammarReq(req) => {
           trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
           let syn_loader = lock!(self.syntax_manager).loader();
-          let mut syn_loader = lock!(syn_loader);
+          let ts_loader = lock!(syn_loader).loader();
 
-          // Early quit if any below conditions are met:
-          // 2. Loader is loading
-          // 3. Loader has no pending requests
-          let loader_is_loading = syn_loader.is_loading();
-          let loader_has_no_pending_requests =
-            syn_loader.pending_requests().is_empty();
-          if loader_is_loading || loader_has_no_pending_requests {
-            return;
-          }
-
-          let (pending_requests, ts_loader) = {
-            syn_loader.set_is_loading(true);
-            let pending_requests =
-              syn_loader.pending_requests_mut().drain(..).collect_vec();
-            let ts_loader = syn_loader.loader();
-            (pending_requests, ts_loader)
-          };
-
-          // Release syntax loader
-          drop(syn_loader);
-
-          let syn_loader = lock!(self.syntax_manager).loader();
-          // let master_tx = self.master_tx.clone();
-
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let loaded_grammars =
-              syntax::load_grammar(ts_loader, pending_requests).await;
+            let load_req = SyntaxLoadGrammarRequest {
+              grammar_path: req.grammar_path,
+            };
+            let load_result =
+              syntax::load_treesitter_grammar(ts_loader, &load_req);
             let mut syn_loader = lock!(syn_loader);
-            for loaded_grammar in loaded_grammars {
-              match loaded_grammar {
-                Ok((grammar_id, grammar)) => {
-                  syn_loader
-                    .loaded_grammars_mut()
-                    .insert(grammar_id.clone(), grammar);
-                }
-                Err(_) => { /* */ }
+            match load_result {
+              Ok((grammar_id, grammar)) => {
+                syn_loader
+                  .loaded_grammars_mut()
+                  .insert(grammar_id.clone(), grammar);
+                jsrt_forwarder_tx
+                  .send(JsMessage::LoadTreesitterGrammarResp(
+                    chan::LoadTreesitterGrammarResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Ok(
+                        postcard::to_allocvec(&()).unwrap(),
+                      )),
+                    },
+                  ))
+                  .unwrap();
+              }
+              Err(e) => {
+                jsrt_forwarder_tx
+                  .send(JsMessage::FsWriteResp(chan::FsWriteResp {
+                    task_id: req.task_id,
+                    maybe_result: Some(Err(e)),
+                  }))
+                  .unwrap();
               }
             }
           });

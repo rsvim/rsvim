@@ -323,10 +323,6 @@ pub struct SyntaxLoader {
   // tree-sitter loader
   loader: TreesitterLoaderArc,
 
-  // Loading status
-  is_loading: bool,
-  pending_requests: Vec<SyntaxLoadGrammarRequest>,
-
   // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
 }
@@ -352,30 +348,12 @@ impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
       loader: Arc::new(Mutex::new(Loader::new().unwrap())),
-      is_loading: false,
-      pending_requests: vec![],
       grammars: FoldMap::new(),
     }
   }
 
   pub fn loader(&self) -> TreesitterLoaderArc {
     self.loader.clone()
-  }
-
-  pub fn is_loading(&self) -> bool {
-    self.is_loading
-  }
-
-  pub fn set_is_loading(&mut self, value: bool) {
-    self.is_loading = value;
-  }
-
-  pub fn pending_requests(&self) -> &Vec<SyntaxLoadGrammarRequest> {
-    &self.pending_requests
-  }
-
-  pub fn pending_requests_mut(&mut self) -> &mut Vec<SyntaxLoadGrammarRequest> {
-    &mut self.pending_requests
   }
 
   pub fn loaded_grammars(&self) -> &FoldMap<CompactString, Language> {
@@ -425,7 +403,7 @@ pub fn get_grammar_name_from_src_path(
 /// Load the tree-sitter parser (`Language`) FFI dynamic library.
 ///
 /// NOTE: Make this method public only for testing purpose.
-pub fn _load_treesitter_grammar(
+pub fn load_treesitter_grammar(
   loader: TreesitterLoaderArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
@@ -441,18 +419,6 @@ pub fn _load_treesitter_grammar(
       e,
     )),
   }
-}
-
-pub async fn load_grammar(
-  loader: TreesitterLoaderArc,
-  pending_requests: Vec<SyntaxLoadGrammarRequest>,
-) -> Vec<TheResult<(CompactString, Language)>> {
-  let mut grammars = Vec::with_capacity(pending_requests.len());
-  for req in pending_requests.iter() {
-    let res = _load_treesitter_grammar(loader.clone(), req);
-    grammars.push(res);
-  }
-  grammars
 }
 
 pub struct SyntaxManager {
