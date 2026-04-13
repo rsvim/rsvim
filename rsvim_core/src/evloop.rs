@@ -947,43 +947,35 @@ impl EventLoop {
           drop(syn_loader);
 
           let syn_loader = lock!(self.syntax_manager).loader();
+          let tree = self.tree.clone();
+          let cmdline_text = self.cmdline_text.clone();
           let master_tx = self.master_tx.clone();
 
           self.detached_tracker.spawn(async move {
             let loaded_grammars =
               syntax::load_grammar(ts_loader, pending_requests).await;
 
-            let syn_loader = lock!(syn_loader);
-
-            // If the buffer and its syntax remains the same
-            if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
-              let mut buf = lock!(buf);
-              if let Some(syn) = buf.syntax_mut() {
-                if syn.id() == syn_id {
-                  syn.set_treesitter_tree(parsed_tree);
-                  syn.set_editing_version(parsed_editing_version);
-                  syn.set_highlight_capture(highlight_capture);
-                  syn.set_is_parsing(false);
+            let mut syn_loader = lock!(syn_loader);
+            let mut tree = lock!(tree);
+            let mut cmdline_text = lock!(cmdline_text);
+            for loaded_grammar in loaded_grammars {
+              match loaded_grammar {
+                Ok((grammar_id, grammar)) => {
+                  syn_loader.loaded_grammars_mut().insert(grammar_id, grammar);
+                  cmdline_ops::cmdline_set_message(
+                    &mut tree,
+                    &mut cmdline_text,
+                    format!("Loaded tree-sitter grammar {}", grammar_id),
+                  );
                 }
-
-                // If buffer already has more pending editings, trigger next
-                // parsing immediately.
-                if !syn.pending_edits_is_empty() {
-                  chan::send_to_master(
-                    master_tx.clone(),
-                    MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
-                      buffer_id: buf.id(),
-                    }),
+                Err(e) => {
+                  cmdline_ops::cmdline_set_message(
+                    &mut tree,
+                    &mut cmdline_text,
+                    e.to_string(),
                   );
                 }
               }
-              // Notify syntax parsing/query is completed
-              chan::send_to_master(
-                master_tx,
-                MasterMessage::SyntaxEditResp(chan::SyntaxEditResp {
-                  buffer_id: buf.id(),
-                }),
-              );
             }
           });
         }
