@@ -1220,7 +1220,7 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-python"
     ));
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
@@ -1240,7 +1240,7 @@ mod tests_grammar_loader {
 
     let grammar_path = assert_fs::TempDir::new().unwrap();
 
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
@@ -1271,7 +1271,7 @@ mod tests_grammar_loader {
   "word": "identifier"
 }"###).unwrap();
 
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
