@@ -737,6 +737,18 @@ pub mod boost {
               .unwrap();
             write_cb(resp.maybe_result);
           }
+          JsMessage::LoadTreesitterGrammarResp(resp) => {
+            trace!("Recv LoadTreesitterGrammarResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut write_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            write_cb(resp.maybe_result);
+          }
         }
       }
 
