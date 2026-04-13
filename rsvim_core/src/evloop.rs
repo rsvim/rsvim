@@ -944,7 +944,7 @@ impl EventLoop {
                     chan::LoadTreesitterGrammarResp {
                       task_id: req.task_id,
                       maybe_result: Some(Ok(
-                        postcard::to_allocvec(&()).unwrap(),
+                        postcard::to_allocvec(&grammar_id.to_string()).unwrap(),
                       )),
                     },
                   ))
