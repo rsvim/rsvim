@@ -851,26 +851,20 @@ impl EventLoop {
               return;
             }
 
-            let (
-              pending_edits,
-              syn_id,
-              ts_parser,
-              syn_tree,
-              syn_highlight_query,
-            ) = {
+            let (pending_edits, syn_id, ts_parser, ts_tree, ts_highlight_query) = {
               let syn = buf.syntax_mut().as_mut().unwrap();
               syn.set_is_parsing(true);
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending_edits(..).collect_vec();
               let ts_parser = syn.treesitter_parser();
               let ts_tree = syn.treesitter_tree().clone();
-              let syn_highlight_query = syn.treesitter_highlight_query();
+              let ts_highlight_query = syn.treesitter_highlight_query();
               (
                 pending_edits,
                 syn_id,
                 ts_parser,
                 ts_tree,
-                syn_highlight_query,
+                ts_highlight_query,
               )
             };
 
@@ -884,8 +878,8 @@ impl EventLoop {
               let (parsed_tree, parsed_editing_version, highlight_capture) =
                 syntax::parse_and_query(
                   ts_parser,
-                  syn_tree,
-                  syn_highlight_query,
+                  ts_tree,
+                  ts_highlight_query,
                   pending_edits,
                 )
                 .await;

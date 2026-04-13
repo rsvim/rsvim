@@ -959,14 +959,14 @@ pub fn _query(
 }
 
 pub async fn parse_and_query(
-  parser: TreesitterParserArc,
-  old_tree: Option<Tree>,
-  highlight_query: Option<TreesitterQueryArc>,
+  ts_parser: TreesitterParserArc,
+  old_ts_tree: Option<Tree>,
+  ts_highlight_query: Option<TreesitterQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
-  let (tree, editing_version, text_rope, text_payload) =
-    _parse(parser, old_tree, pending_edits);
+  let (new_ts_tree, editing_version, text_rope, text_payload) =
+    _parse(ts_parser, old_ts_tree, pending_edits);
   let highlight_capture =
-    _query(&tree, &text_rope, &text_payload, &highlight_query);
-  (tree, editing_version, highlight_capture)
+    _query(&new_ts_tree, &text_rope, &text_payload, &ts_highlight_query);
+  (new_ts_tree, editing_version, highlight_capture)
 }
