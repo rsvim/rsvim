@@ -265,7 +265,7 @@ impl Syntax {
     self.highlight_capture = value;
   }
 
-  pub fn tree(&self) -> &Option<Tree> {
+  pub fn ts_tree(&self) -> &Option<Tree> {
     &self.tree
   }
 
