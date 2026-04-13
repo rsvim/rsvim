@@ -14,8 +14,6 @@ use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use crossterm::style::Color;
 use itertools::Itertools;
-use std::sync::Arc;
-use std::sync::Mutex;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -1277,13 +1275,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
