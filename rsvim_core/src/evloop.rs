@@ -961,7 +961,9 @@ impl EventLoop {
             for loaded_grammar in loaded_grammars {
               match loaded_grammar {
                 Ok((grammar_id, grammar)) => {
-                  syn_loader.loaded_grammars_mut().insert(grammar_id, grammar);
+                  syn_loader
+                    .loaded_grammars_mut()
+                    .insert(grammar_id.clone(), grammar);
                   cmdline_ops::cmdline_set_message(
                     &mut tree,
                     &mut cmdline_text,
