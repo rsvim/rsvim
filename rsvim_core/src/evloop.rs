@@ -947,36 +947,20 @@ impl EventLoop {
           drop(syn_loader);
 
           let syn_loader = lock!(self.syntax_manager).loader();
-          let tree = self.tree.clone();
-          let cmdline_text = self.cmdline_text.clone();
           // let master_tx = self.master_tx.clone();
 
           self.detached_tracker.spawn(async move {
             let loaded_grammars =
               syntax::load_grammar(ts_loader, pending_requests).await;
-
             let mut syn_loader = lock!(syn_loader);
-            let mut tree = lock!(tree);
-            let mut cmdline_text = lock!(cmdline_text);
             for loaded_grammar in loaded_grammars {
               match loaded_grammar {
                 Ok((grammar_id, grammar)) => {
                   syn_loader
                     .loaded_grammars_mut()
                     .insert(grammar_id.clone(), grammar);
-                  cmdline_ops::cmdline_set_message(
-                    &mut tree,
-                    &mut cmdline_text,
-                    format!("Loaded tree-sitter grammar {}", grammar_id),
-                  );
                 }
-                Err(e) => {
-                  cmdline_ops::cmdline_set_message(
-                    &mut tree,
-                    &mut cmdline_text,
-                    e.to_string(),
-                  );
-                }
+                Err(_) => { /* */ }
               }
             }
           });
