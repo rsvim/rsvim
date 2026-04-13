@@ -937,7 +937,7 @@ impl EventLoop {
             match load_result {
               Ok((grammar_id, grammar)) => {
                 syn_loader
-                  .grammars_mut()
+                  .cached_grammars_mut()
                   .insert(grammar_id.clone(), grammar);
                 jsrt_forwarder_tx
                   .send(JsMessage::LoadTreesitterGrammarResp(

@@ -356,11 +356,13 @@ impl SyntaxLoader {
     self.loader.clone()
   }
 
-  pub fn grammars(&self) -> &FoldMap<CompactString, Language> {
+  pub fn cached_grammars(&self) -> &FoldMap<CompactString, Language> {
     &self.grammars
   }
 
-  pub fn grammars_mut(&mut self) -> &mut FoldMap<CompactString, Language> {
+  pub fn cached_grammars_mut(
+    &mut self,
+  ) -> &mut FoldMap<CompactString, Language> {
     &mut self.grammars
   }
 }
