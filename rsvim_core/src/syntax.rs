@@ -339,6 +339,16 @@ pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
 }
 
+impl SyntaxLoadGrammarRequest {
+  pub fn src_path(&self) -> PathBuf {
+    self.grammar_path.join("src")
+  }
+
+  pub fn grammar_json_path(&self) -> PathBuf {
+    self.src_path().join("grammar.json")
+  }
+}
+
 impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
@@ -355,6 +365,10 @@ impl SyntaxLoader {
 
   pub fn is_loading(&self) -> bool {
     self.is_loading
+  }
+
+  pub fn set_is_loading(&mut self, value: bool) {
+    self.is_loading = value;
   }
 
   pub fn pending_requests(&self) -> &Vec<SyntaxLoadGrammarRequest> {
@@ -386,8 +400,10 @@ impl Debug for SyntaxLoader {
   }
 }
 
-fn get_grammar_name_from_src_path(src_path: &Path) -> TheResult<CompactString> {
-  let grammar_json_path = src_path.join("grammar.json");
+pub fn get_grammar_name_from_src_path(
+  req: &SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  let grammar_json_path = req.grammar_json_path();
   let grammar_json_path = grammar_json_path.as_path();
   let err = || {
     TheErr::TreesitterGrammarNotFound(
@@ -414,9 +430,9 @@ pub fn _load_treesitter_grammar(
   loader: TreesitterLoaderArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
-  let src_path = req.grammar_path.join("src");
+  let src_path = req.src_path();
   let src_path = src_path.as_path();
-  let grammar_id = get_grammar_name_from_src_path(src_path)?;
+  let grammar_id = get_grammar_name_from_src_path(req)?;
   let compile_cfg = CompileConfig::new(src_path, None, None);
   let loader = lock!(loader);
   match loader.load_language_at_path(compile_cfg) {
@@ -428,7 +444,7 @@ pub fn _load_treesitter_grammar(
   }
 }
 
-pub fn load_grammar(
+pub async fn load_grammar(
   loader: TreesitterLoaderArc,
   pending_requests: Vec<SyntaxLoadGrammarRequest>,
 ) -> Vec<TheResult<(CompactString, Language)>> {
@@ -633,22 +649,6 @@ impl SyntaxManager {
   }
 }
 // Language and queries }
-
-pub struct SyntaxLoadOptions {}
-
-// Load and build {
-impl SyntaxManager {
-  /// Load tree-sitter grammar in async.
-  pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
-  }
-
-  /// Load tree-sitter grammar in sync.
-  pub fn load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
-  }
-}
-// Load and build }
 
 fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
   rope

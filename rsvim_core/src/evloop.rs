@@ -935,28 +935,68 @@ impl EventLoop {
             return;
           }
 
-          let (
-            pending_requests,
-            syn_id,
-            syn_loader,
-            syn_tree,
-            syn_highlight_query,
-          ) = {
-            let syn = buf.syntax_mut().as_mut().unwrap();
-            syn.set_is_parsing(true);
-            let syn_id = syn.id();
-            let pending_edits = syn.drain_pending_edits(..).collect_vec();
-            let syn_parser = syn.parser();
-            let syn_tree = syn.tree().clone();
-            let syn_highlight_query = syn.highlight_query();
-            (
-              pending_edits,
-              syn_id,
-              syn_parser,
-              syn_tree,
-              syn_highlight_query,
-            )
+          let (pending_requests, ts_loader) = {
+            syn_loader.set_is_loading(true);
+            let pending_requests = syn_loader
+              .pending_requests_mut()
+              .drain(..)
+              .filter(|req| {
+                if let Ok(grammar_id) =
+                  syntax::get_grammar_name_from_src_path(req)
+                {
+                  !syn_loader.loaded_grammars().contains_key(&grammar_id)
+                } else {
+                  false
+                }
+              })
+              .collect_vec();
+            let ts_loader = syn_loader.loader();
+            (pending_requests, ts_loader)
           };
+
+          // Release syntax loader
+          drop(syn_loader);
+
+          let syn_loader = lock!(self.syntax_manager).loader();
+          let master_tx = self.master_tx.clone();
+
+          self.detached_tracker.spawn(async move {
+            let loaded_grammars =
+              syntax::load_grammar(ts_loader, pending_requests).await;
+
+            let syn_loader = lock!(syn_loader);
+
+            // If the buffer and its syntax remains the same
+            if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
+              let mut buf = lock!(buf);
+              if let Some(syn) = buf.syntax_mut() {
+                if syn.id() == syn_id {
+                  syn.set_treesitter_tree(parsed_tree);
+                  syn.set_editing_version(parsed_editing_version);
+                  syn.set_highlight_capture(highlight_capture);
+                  syn.set_is_parsing(false);
+                }
+
+                // If buffer already has more pending editings, trigger next
+                // parsing immediately.
+                if !syn.pending_edits_is_empty() {
+                  chan::send_to_master(
+                    master_tx.clone(),
+                    MasterMessage::SyntaxEditReq(chan::SyntaxEditReq {
+                      buffer_id: buf.id(),
+                    }),
+                  );
+                }
+              }
+              // Notify syntax parsing/query is completed
+              chan::send_to_master(
+                master_tx,
+                MasterMessage::SyntaxEditResp(chan::SyntaxEditResp {
+                  buffer_id: buf.id(),
+                }),
+              );
+            }
+          });
         }
       }
     }
