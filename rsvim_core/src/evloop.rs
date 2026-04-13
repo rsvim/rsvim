@@ -949,7 +949,7 @@ impl EventLoop {
           let syn_loader = lock!(self.syntax_manager).loader();
           let tree = self.tree.clone();
           let cmdline_text = self.cmdline_text.clone();
-          let master_tx = self.master_tx.clone();
+          // let master_tx = self.master_tx.clone();
 
           self.detached_tracker.spawn(async move {
             let loaded_grammars =
