@@ -364,6 +364,14 @@ impl SyntaxLoader {
   pub fn pending_requests_mut(&mut self) -> &mut Vec<SyntaxLoadGrammarRequest> {
     &mut self.pending_requests
   }
+
+  pub fn loaded_grammars(&self) -> &FoldMap<CompactString, Language> {
+    &self.grammars
+  }
+
+  pub fn loaded_grammars_mut(&self) -> &mut FoldMap<CompactString, Language> {
+    &mut self.grammars
+  }
 }
 
 impl Debug for SyntaxLoader {
