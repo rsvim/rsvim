@@ -159,7 +159,7 @@ pub fn make_syntax_and_colorscheme(
     &syn_tree,
     &text_rope,
     &text_payload,
-    &syn.highlight_query(),
+    &syn.treesitter_highlight_query(),
   );
   syn.set_highlight_capture(syn_capture);
 

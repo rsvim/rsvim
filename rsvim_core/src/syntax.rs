@@ -85,7 +85,7 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
-pub type SyntaxQueryArc = Arc<Query>;
+pub type TreesitterQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCapturePoint {
@@ -163,7 +163,7 @@ pub struct Syntax {
   id: SyntaxId,
 
   // Highlight query
-  highlight_query: Option<SyntaxQueryArc>,
+  highlight_query: Option<TreesitterQueryArc>,
   highlight_capture: Option<SyntaxCaptureArc>,
 
   // Parsed syntax tree
@@ -253,7 +253,7 @@ impl Syntax {
     &self.filetype
   }
 
-  pub fn highlight_query(&self) -> Option<SyntaxQueryArc> {
+  pub fn treesitter_highlight_query(&self) -> Option<TreesitterQueryArc> {
     self.highlight_query.clone()
   }
 
@@ -872,7 +872,7 @@ pub fn _query(
   tree: &Option<Tree>,
   text_rope: &Option<Rope>,
   text_payload: &Option<String>,
-  highlight_query: &Option<SyntaxQueryArc>,
+  highlight_query: &Option<TreesitterQueryArc>,
 ) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
@@ -961,7 +961,7 @@ pub fn _query(
 pub async fn parse_and_query(
   parser: TreesitterParserArc,
   old_tree: Option<Tree>,
-  highlight_query: Option<SyntaxQueryArc>,
+  highlight_query: Option<TreesitterQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (tree, editing_version, text_rope, text_payload) =

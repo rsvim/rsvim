@@ -863,13 +863,13 @@ impl EventLoop {
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending_edits(..).collect_vec();
               let ts_parser = syn.treesitter_parser();
-              let syn_tree = syn.treesitter_tree().clone();
-              let syn_highlight_query = syn.highlight_query();
+              let ts_tree = syn.treesitter_tree().clone();
+              let syn_highlight_query = syn.treesitter_highlight_query();
               (
                 pending_edits,
                 syn_id,
                 ts_parser,
-                syn_tree,
+                ts_tree,
                 syn_highlight_query,
               )
             };
