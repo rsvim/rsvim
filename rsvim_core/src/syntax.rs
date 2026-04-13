@@ -369,7 +369,9 @@ impl SyntaxLoader {
     &self.grammars
   }
 
-  pub fn loaded_grammars_mut(&self) -> &mut FoldMap<CompactString, Language> {
+  pub fn loaded_grammars_mut(
+    &mut self,
+  ) -> &mut FoldMap<CompactString, Language> {
     &mut self.grammars
   }
 }
