@@ -370,9 +370,7 @@ impl SyntaxLoader {
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxGrammarLoader")
-      .field("is_loading", &self.is_loading)
-      .field("pending_requests", &self.pending_requests)
-      .field("parsers", &self.grammars)
+      .field("grammars", &self.grammars)
       .finish()
   }
 }
