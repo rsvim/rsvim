@@ -265,11 +265,11 @@ impl Syntax {
     self.highlight_capture = value;
   }
 
-  pub fn ts_tree(&self) -> &Option<Tree> {
+  pub fn treesitter_tree(&self) -> &Option<Tree> {
     &self.tree
   }
 
-  pub fn set_tree(&mut self, tree: Option<Tree>) {
+  pub fn set_treesitter_tree(&mut self, tree: Option<Tree>) {
     self.tree = tree;
   }
 
@@ -281,7 +281,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn ts_parser(&self) -> TreesitterParserArc {
+  pub fn treesitter_parser(&self) -> TreesitterParserArc {
     self.parser.clone()
   }
 

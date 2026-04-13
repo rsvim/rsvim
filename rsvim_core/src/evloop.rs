@@ -862,8 +862,8 @@ impl EventLoop {
               syn.set_is_parsing(true);
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending_edits(..).collect_vec();
-              let ts_parser = syn.ts_parser();
-              let syn_tree = syn.ts_tree().clone();
+              let ts_parser = syn.treesitter_parser();
+              let syn_tree = syn.treesitter_tree().clone();
               let syn_highlight_query = syn.highlight_query();
               (
                 pending_edits,
@@ -895,7 +895,7 @@ impl EventLoop {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   if syn.id() == syn_id {
-                    syn.set_tree(parsed_tree);
+                    syn.set_treesitter_tree(parsed_tree);
                     syn.set_editing_version(parsed_editing_version);
                     syn.set_highlight_capture(highlight_capture);
                     syn.set_is_parsing(false);
