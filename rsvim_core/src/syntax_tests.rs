@@ -1198,15 +1198,15 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-c"
     ));
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = Arc::new(Mutex::new(SyntaxLoader::new()));
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.clone(), &opts);
     info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
 
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.clone(), &opts);
     info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
