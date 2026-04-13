@@ -55,30 +55,40 @@ pub struct ExCommandReq {
 #[derive(Debug)]
 pub struct LoadImportResp {
   pub task_id: TaskId,
+
+  /// ModuleSource
   pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsOpenResp {
   pub task_id: TaskId,
+
+  /// usize
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsReadResp {
   pub task_id: TaskId,
+
+  /// Vec<u8>
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsWriteResp {
   pub task_id: TaskId,
+
+  /// usize
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct LoadTreesitterGrammarResp {
   pub task_id: TaskId,
+
+  /// String
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
