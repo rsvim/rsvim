@@ -6,6 +6,7 @@ use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::TimerId;
+use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
@@ -34,14 +35,14 @@ impl JsFuture for LoadTreesitterGrammarFuture {
     // Otherwise, get the result and deserialize it.
     let result = result.unwrap();
 
-    // Deserialize bytes into a file-descriptor.
-    let fd = postcard::from_bytes::<usize>(&result).unwrap();
-    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
+    // Deserialize bytes into a loaded grammar name.
+    let grammar_id = postcard::from_bytes::<String>(&result).unwrap();
+    let grammar_id = grammar_id.to_v8(scope);
 
     self
       .promise
       .open(scope)
-      .resolve(scope, file_wrapper.into())
+      .resolve(scope, grammar_id.into())
       .unwrap();
   }
 }
