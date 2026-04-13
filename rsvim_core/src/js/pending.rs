@@ -106,7 +106,7 @@ pub fn create_fs_write(
   );
 }
 
-pub fn create_syn_grammar_load(
+pub fn create_syn_load_grammar(
   state: &mut JsRuntimeState,
   task_id: TaskId,
   grammar_path: &Path,
