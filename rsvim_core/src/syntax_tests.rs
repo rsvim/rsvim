@@ -14,6 +14,8 @@ use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use crossterm::style::Color;
 use itertools::Itertools;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Duration;
 
 #[cfg(test)]
