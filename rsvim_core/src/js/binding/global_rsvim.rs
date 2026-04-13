@@ -5,6 +5,7 @@ pub mod cmd;
 pub mod fs;
 pub mod opt;
 pub mod rt;
+pub mod syn;
 
 #[cfg(test)]
 mod buf_tests;
@@ -16,3 +17,5 @@ mod fs_tests;
 mod opt_tests;
 #[cfg(test)]
 mod rt_tests;
+#[cfg(test)]
+mod syn_tests;
