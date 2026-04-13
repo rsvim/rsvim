@@ -349,29 +349,6 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn get_grammar_name_from_src_path(
-    src_path: &Path,
-  ) -> TheResult<CompactString> {
-    let grammar_json_path = src_path.join("grammar.json");
-    let grammar_json_path = grammar_json_path.as_path();
-    let err = || {
-      TheErr::TreesitterGrammarNotFound(
-        grammar_json_path.to_string_lossy().to_compact_string(),
-      )
-    };
-    let grammar_json_text =
-      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
-    let grammar_json_data: serde_json::Value =
-      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
-    match grammar_json_data.get("name") {
-      Some(name_value) => match name_value.as_str() {
-        Some(name) => Ok(name.to_compact_string()),
-        None => Err(err()),
-      },
-      None => Err(err()),
-    }
-  }
-
   // /// Load the tree-sitter parser (`Language`) FFI dynamic library.
   // /// NOTE: Make this method public only for testing.
   // pub fn _load_treesitter_grammar(
@@ -424,7 +401,59 @@ impl Debug for SyntaxLoader {
   }
 }
 
-pub fn load_grammar() {}
+fn get_grammar_name_from_src_path(src_path: &Path) -> TheResult<CompactString> {
+  let grammar_json_path = src_path.join("grammar.json");
+  let grammar_json_path = grammar_json_path.as_path();
+  let err = || {
+    TheErr::TreesitterGrammarNotFound(
+      grammar_json_path.to_string_lossy().to_compact_string(),
+    )
+  };
+  let grammar_json_text =
+    std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
+  let grammar_json_data: serde_json::Value =
+    serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
+  match grammar_json_data.get("name") {
+    Some(name_value) => match name_value.as_str() {
+      Some(name) => Ok(name.to_compact_string()),
+      None => Err(err()),
+    },
+    None => Err(err()),
+  }
+}
+
+/// Load the tree-sitter parser (`Language`) FFI dynamic library.
+///
+/// NOTE: Make this method public only for testing purpose.
+pub fn _load_treesitter_grammar(
+  loader: TreesitterLoaderArc,
+  req: &SyntaxLoadGrammarRequest,
+) -> TheResult<(CompactString, Language)> {
+  let src_path = req.grammar_path.join("src");
+  let src_path = src_path.as_path();
+  let grammar_id = get_grammar_name_from_src_path(src_path)?;
+  let compile_cfg = CompileConfig::new(src_path, None, None);
+  let loader = lock!(loader);
+  match loader.load_language_at_path(compile_cfg) {
+    Ok(grammar) => Ok((grammar_id, grammar)),
+    Err(e) => Err(TheErr::LoadTreesitterGrammarFailed(
+      grammar_id.to_compact_string(),
+      e,
+    )),
+  }
+}
+
+pub fn load_grammar(
+  loader: TreesitterLoaderArc,
+  pending_requests: Vec<SyntaxLoadGrammarRequest>,
+) -> Vec<TheResult<(CompactString, Language)>> {
+  let mut grammars = Vec::with_capacity(pending_requests.len());
+  for req in pending_requests.iter() {
+    let res = _load_treesitter_grammar(loader.clone(), req);
+    grammars.push(res);
+  }
+  grammars
+}
 
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
@@ -725,7 +754,8 @@ pub fn make_input_edit_by_insert(
   }
 }
 
-pub fn parse(
+/// NOTE: Make this method public only for testing purpose.
+pub fn _parse(
   parser: TreesitterParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
@@ -851,7 +881,9 @@ fn convert_ts_point(rope: &Rope, point: &tree_sitter::Point) -> (usize, usize) {
 ///      instead of a window/viewport. This leads to longer response time,
 ///      i.e. for a very big buffer, user will wait longer time to get the
 ///      latest highlights after some editings.
-pub fn query(
+///
+/// NOTE: Make this method public only for testing purpose.
+pub fn _query(
   tree: &Option<Tree>,
   text_rope: &Option<Rope>,
   text_payload: &Option<String>,
@@ -948,8 +980,8 @@ pub async fn parse_and_query(
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (tree, editing_version, text_rope, text_payload) =
-    parse(parser, old_tree, pending_edits);
+    _parse(parser, old_tree, pending_edits);
   let highlight_capture =
-    query(&tree, &text_rope, &text_payload, &highlight_query);
+    _query(&tree, &text_rope, &text_payload, &highlight_query);
   (tree, editing_version, highlight_capture)
 }
