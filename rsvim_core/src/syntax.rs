@@ -352,7 +352,7 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn loader(&self) -> TreesitterLoaderArc {
+  pub fn treesitter_loader(&self) -> TreesitterLoaderArc {
     self.loader.clone()
   }
 
