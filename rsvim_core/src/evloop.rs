@@ -952,10 +952,12 @@ impl EventLoop {
               }
               Err(e) => {
                 jsrt_forwarder_tx
-                  .send(JsMessage::FsWriteResp(chan::FsWriteResp {
-                    task_id: req.task_id,
-                    maybe_result: Some(Err(e)),
-                  }))
+                  .send(JsMessage::LoadTreesitterGrammarResp(
+                    chan::LoadTreesitterGrammarResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Err(e)),
+                    },
+                  ))
                   .unwrap();
               }
             }
