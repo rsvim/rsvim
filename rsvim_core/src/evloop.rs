@@ -937,20 +937,8 @@ impl EventLoop {
 
           let (pending_requests, ts_loader) = {
             syn_loader.set_is_loading(true);
-            let pending_requests = syn_loader
-              .pending_requests_mut()
-              .drain(..)
-              .filter(|req| {
-                // We only load unloaded grammars
-                if let Ok(grammar_id) =
-                  syntax::get_grammar_name_from_src_path(req)
-                {
-                  !syn_loader.loaded_grammars().contains_key(&grammar_id)
-                } else {
-                  false
-                }
-              })
-              .collect_vec();
+            let pending_requests =
+              syn_loader.pending_requests_mut().drain(..).collect_vec();
             let ts_loader = syn_loader.loader();
             (pending_requests, ts_loader)
           };
