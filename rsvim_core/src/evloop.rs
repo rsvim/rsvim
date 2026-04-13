@@ -923,7 +923,7 @@ impl EventLoop {
         MasterMessage::LoadTreesitterGrammarReq(req) => {
           trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
           let syn_loader = lock!(self.syntax_manager).loader();
-          let syn_loader = lock!(syn_loader);
+          let mut syn_loader = lock!(syn_loader);
 
           // Early quit if any below conditions are met:
           // 2. Loader is loading
