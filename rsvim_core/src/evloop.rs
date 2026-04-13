@@ -854,7 +854,7 @@ impl EventLoop {
             let (
               pending_edits,
               syn_id,
-              syn_parser,
+              ts_parser,
               syn_tree,
               syn_highlight_query,
             ) = {
@@ -862,13 +862,13 @@ impl EventLoop {
               syn.set_is_parsing(true);
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending_edits(..).collect_vec();
-              let syn_parser = syn.parser();
+              let ts_parser = syn.ts_parser();
               let syn_tree = syn.tree().clone();
               let syn_highlight_query = syn.highlight_query();
               (
                 pending_edits,
                 syn_id,
-                syn_parser,
+                ts_parser,
                 syn_tree,
                 syn_highlight_query,
               )
@@ -883,7 +883,7 @@ impl EventLoop {
             self.detached_tracker.spawn(async move {
               let (parsed_tree, parsed_editing_version, highlight_capture) =
                 syntax::parse_and_query(
-                  syn_parser,
+                  ts_parser,
                   syn_tree,
                   syn_highlight_query,
                   pending_edits,
@@ -929,6 +929,40 @@ impl EventLoop {
         MasterMessage::LoadTreesitterGrammarReq(req) => {
           trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
           let syn_loader = lock!(self.syntax_manager).loader();
+          let syn_loader = lock!(syn_loader);
+
+          // Early quit if any below conditions are met:
+          // 2. Loader is loading
+          // 3. Loader has no pending requests
+          let loader_is_loading = syn_loader.is_loading();
+          let loader_has_no_pending_requests =
+            syn_loader.pending_requests().is_empty();
+          if loader_is_loading || loader_has_no_pending_requests {
+            return;
+          }
+
+          let (
+            pending_requests,
+            syn_id,
+            syn_loader,
+            syn_tree,
+            syn_highlight_query,
+          ) = {
+            let syn = buf.syntax_mut().as_mut().unwrap();
+            syn.set_is_parsing(true);
+            let syn_id = syn.id();
+            let pending_edits = syn.drain_pending_edits(..).collect_vec();
+            let syn_parser = syn.parser();
+            let syn_tree = syn.tree().clone();
+            let syn_highlight_query = syn.highlight_query();
+            (
+              pending_edits,
+              syn_id,
+              syn_parser,
+              syn_tree,
+              syn_highlight_query,
+            )
+          };
         }
       }
     }

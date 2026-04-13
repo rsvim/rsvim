@@ -281,7 +281,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> TreesitterParserArc {
+  pub fn ts_parser(&self) -> TreesitterParserArc {
     self.parser.clone()
   }
 

@@ -146,7 +146,7 @@ pub fn make_syntax_and_colorscheme(
   let mut text_rope_builder: RopeBuilder = RopeBuilder::new();
   text_rope_builder.append(&file_content);
   let text_rope = text_rope_builder.finish();
-  let syn_parser = syn.parser();
+  let syn_parser = syn.ts_parser();
   let (syn_tree, _editing_version, text_rope, text_payload) = syntax::_parse(
     syn_parser,
     None,
