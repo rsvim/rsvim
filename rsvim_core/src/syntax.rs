@@ -349,6 +349,10 @@ impl SyntaxLoader {
     }
   }
 
+  pub fn loader(&self) -> TreesitterLoaderArc {
+    self.loader.clone()
+  }
+
   pub fn is_loading(&self) -> bool {
     self.is_loading
   }

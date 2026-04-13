@@ -1200,15 +1200,15 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-c"
     ));
-    let syn_loader = Arc::new(Mutex::new(SyntaxLoader::new()));
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = _load_treesitter_grammar(syn_loader.clone(), &opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
 
-    let grammar = _load_treesitter_grammar(syn_loader.clone(), &opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     info!("c1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
@@ -1226,11 +1226,11 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     info!("python1:{:?}", grammar);
     assert!(grammar.is_ok());
 
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     info!("python1:{:?}", grammar);
     assert!(grammar.is_ok());
   }
@@ -1246,13 +1246,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar = syn_loader._load_treesitter_grammar(&opts);
+    let grammar = _load_treesitter_grammar(syn_loader.loader(), &opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
