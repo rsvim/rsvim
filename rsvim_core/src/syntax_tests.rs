@@ -1167,50 +1167,45 @@ int main() {
 mod tests_grammar_loader {
   use super::*;
 
-  // #[test]
-  // #[cfg_attr(miri, ignore)]
-  // fn rust1() {
-  //   test_log_init();
-  //
-  //   let grammar_path = Path::new(concat!(
-  //     env!("CARGO_MANIFEST_DIR"),
-  //     "/../tests_and_benchmarks/tree-sitter-rust"
-  //   ));
-  //   let mut syn_loader = SyntaxLoader::new();
-  //   let opts = SyntaxLoadGrammarRequest {
-  //     grammar_path: grammar_path.to_path_buf(),
-  //   };
-  //   let grammar = syn_loader.load_treesitter_grammar(&opts);
-  //   info!("rust1:{:?}", grammar);
-  //   assert!(grammar.is_ok());
-  //
-  //   let grammar = syn_loader.load_treesitter_grammar(&opts);
-  //   info!("rust1:{:?}", grammar);
-  //   assert!(grammar.is_ok());
-  // }
-
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn c1() {
-    test_log_init();
-
-    let grammar_path = Path::new(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/../tests_and_benchmarks/tree-sitter-c"
-    ));
+  fn run_loader(grammar_path: &str, hint: &str) {
+    let grammar_path = Path::new(grammar_path);
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
     let grammar =
       _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
-    info!("c1:{:?}", grammar);
+    info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
 
     let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
-    info!("c1:{:?}", grammar);
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn rust1() {
+    test_log_init();
+
+    let grammar_path = concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-rust"
+    );
+    run_loader(grammar_path, "rust1");
+  }
+
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn c1() {
+    test_log_init();
+
+    let grammar_path = concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-c"
+    );
+    run_loader(grammar_path, "c1");
   }
 
   #[test]
@@ -1218,23 +1213,11 @@ mod tests_grammar_loader {
   fn python1() {
     test_log_init();
 
-    let grammar_path = Path::new(concat!(
+    let grammar_path = concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-python"
-    ));
-    let syn_loader = SyntaxLoader::new();
-    let opts = SyntaxLoadGrammarRequest {
-      grammar_path: grammar_path.to_path_buf(),
-    };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
-    info!("python1:{:?}", grammar);
-    assert!(grammar.is_ok());
-
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
-    info!("python1:{:?}", grammar);
-    assert!(grammar.is_ok());
+    );
+    run_loader(grammar_path, "python1");
   }
 
   #[test]
