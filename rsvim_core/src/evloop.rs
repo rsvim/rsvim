@@ -924,8 +924,8 @@ impl EventLoop {
         MasterMessage::LoadTreesitterGrammarReq(req) => {
           trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
           let syn_loader = lock!(self.syntax_manager).loader();
-
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+
           self.detached_tracker.spawn(async move {
             let load_req = SyntaxLoadGrammarRequest {
               grammar_path: req.grammar_path,
