@@ -106,10 +106,11 @@ pub fn create_fs_write(
   );
 }
 
-pub fn create_syn_load_grammar(
+pub fn create_syn_load_treesitter_grammar(
   state: &mut JsRuntimeState,
   task_id: TaskId,
   grammar_path: &Path,
+  output_path: &Path,
   cb: TaskCallback,
 ) {
   state.pending_tasks.insert(task_id, cb);
@@ -118,6 +119,7 @@ pub fn create_syn_load_grammar(
     MasterMessage::LoadTreeSitterGrammarReq(chan::LoadTreeSitterGrammarReq {
       task_id,
       grammar_path: grammar_path.to_path_buf(),
+      output_path: output_path.to_path_buf(),
     }),
   );
 }

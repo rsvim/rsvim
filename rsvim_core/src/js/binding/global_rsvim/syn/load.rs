@@ -1,18 +1,14 @@
 //! Load tree-sitter grammar APIs.
 
 use crate::from_v8_prop;
-use crate::is_v8_bool;
-use crate::is_v8_int;
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::TimerId;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::syntax::SyntaxLoadGrammarRequest;
-use crate::syntax::async_load_grammar;
 use crate::syntax::load_grammar;
 use crate::to_v8_prop;
 use compact_str::CompactString;
@@ -62,14 +58,14 @@ impl StructToV8 for SynLoadTreeSitterGrammarOptions {
   }
 }
 
-struct LoadTreeSitterGrammarFuture {
+struct SynLoadTreeSitterGrammarFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for LoadTreeSitterGrammarFuture {
+impl JsFuture for SynLoadTreeSitterGrammarFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|LoadTreeSitterGrammarFuture|");
+    trace!("|SynLoadTreeSitterGrammarFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
@@ -98,7 +94,7 @@ impl JsFuture for LoadTreeSitterGrammarFuture {
 }
 
 /// Javascript `loadTreeSitterGrammarSync` API.
-pub fn load_treesitter_grammar<'s>(
+pub fn load_treesitter_grammar_sync<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -128,20 +124,47 @@ pub fn load_treesitter_grammar<'s>(
   }
 }
 
-/// Javascript `clearTimeout`/`clearInterval` API.
-pub fn clear_timer<'s>(
+/// Javascript `loadTreeSitterGrammar` API.
+pub fn load_treesitter_grammar<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  _: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  // Get timer ID, and remove it.
-  debug_assert!(is_v8_int!(args.get(0)));
-  let timer_id =
-    TimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+    scope,
+    args.get(0).to_object(scope).unwrap(),
+  );
+  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
   let state_rc = JsRuntime::state(scope);
+  let load_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = SynLoadTreeSitterGrammarFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
 
   let mut state = state_rc.borrow_mut();
-  pending::remove_timer(&mut state, timer_id);
-  trace!("|clear_timer| timer_id:{:?}", timer_id);
+  let task_id = js::TaskId::next();
+  let grammar_path = Path::new(&options.grammar_path);
+  let output_path = Path::new(&options.output_path);
+  pending::create_syn_load_treesitter_grammar(
+    &mut state,
+    task_id,
+    grammar_path,
+    output_path,
+    Box::new(load_cb),
+  );
+
+  rv.set(promise.into());
 }

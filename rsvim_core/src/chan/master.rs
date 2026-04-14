@@ -97,6 +97,7 @@ pub struct SyntaxEditResp {
 pub struct LoadTreeSitterGrammarReq {
   pub task_id: TaskId,
   pub grammar_path: PathBuf,
+  pub output_path: PathBuf,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
