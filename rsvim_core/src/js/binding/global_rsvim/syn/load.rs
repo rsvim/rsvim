@@ -1,15 +1,10 @@
 //! Load tree-sitter grammar APIs.
 
 use crate::from_v8_prop;
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::converter::*;
-use crate::js::pending;
 use crate::prelude::*;
-use crate::syntax::SyntaxLoadGrammarRequest;
-use crate::syntax::load_grammar;
 use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
