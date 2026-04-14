@@ -1179,7 +1179,6 @@ mod tests_grammar_loader {
   //   let mut syn_loader = SyntaxLoader::new();
   //   let opts = SyntaxLoadGrammarRequest {
   //     grammar_path: grammar_path.to_path_buf(),
-  //    output_path: grammar_path.to_path_buf(),
   //   };
   //   let grammar = syn_loader.load_treesitter_grammar(&opts);
   //   info!("rust1:{:?}", grammar);
@@ -1202,7 +1201,6 @@ mod tests_grammar_loader {
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
-      output_path: grammar_path.to_path_buf(),
     };
     let grammar =
       _load_treesitter_grammar(syn_loader.treesitter_loader(), &opts);
@@ -1227,7 +1225,6 @@ mod tests_grammar_loader {
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
-      output_path: grammar_path.to_path_buf(),
     };
     let grammar =
       _load_treesitter_grammar(syn_loader.treesitter_loader(), &opts);
@@ -1250,7 +1247,6 @@ mod tests_grammar_loader {
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
-      output_path: grammar_path.to_path_buf(),
     };
     let grammar =
       _load_treesitter_grammar(syn_loader.treesitter_loader(), &opts);
@@ -1284,7 +1280,6 @@ mod tests_grammar_loader {
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
-      output_path: grammar_path.to_path_buf(),
     };
     let grammar =
       _load_treesitter_grammar(syn_loader.treesitter_loader(), &opts);
