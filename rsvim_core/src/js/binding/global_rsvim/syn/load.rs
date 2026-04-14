@@ -13,7 +13,6 @@ use crate::syntax::load_grammar;
 use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use std::rc::Rc;
 
 pub const GRAMMAR_PATH: &str = "grammarPath";
 pub const OUTPUT_PATH: &str = "outputPath";
