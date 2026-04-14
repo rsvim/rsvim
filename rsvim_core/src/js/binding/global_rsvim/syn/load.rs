@@ -12,29 +12,31 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::to_v8_prop;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::rc::Rc;
 
 pub const GRAMMAR_PATH: &str = "grammarPath";
 pub const OUTPUT_PATH: &str = "outputPath";
 
-pub const GRAMMAR_PATH_DEFAULT: Option<String> = None;
-pub const OUTPUT_PATH_DEFAULT: Option<String> = None;
+pub const GRAMMAR_PATH_DEFAULT: &str = "";
+pub const OUTPUT_PATH_DEFAULT: &str = "";
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct SynLoadTreeSitterGrammarOptions {
-  #[builder(default = GRAMMAR_PATH_DEFAULT)]
-  grammar_path: Option<String>,
+  #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
+  grammar_path: CompactString,
 
-  #[builder(default = OUTPUT_PATH_DEFAULT)]
-  output_path: Option<String>,
+  #[builder(default = OUTPUT_PATH_DEFAULT.to_compact_string())]
+  output_path: CompactString,
 }
 
 impl SynLoadTreeSitterGrammarOptions {
-  pub fn grammar_path(&self) -> &Option<String> {
+  pub fn grammar_path(&self) -> &CompactString {
     &self.grammar_path
   }
 
-  pub fn output_path(&self) -> &Option<String> {
+  pub fn output_path(&self) -> &CompactString {
     &self.output_path
   }
 }
@@ -46,8 +48,8 @@ impl StructFromV8 for SynLoadTreeSitterGrammarOptions {
   ) -> Self {
     let mut builder = SynLoadTreeSitterGrammarOptionsBuilder::default();
 
-    from_v8_prop!(builder, obj, scope, String, grammar_path, optional);
-    from_v8_prop!(builder, obj, scope, String, output_path, optional);
+    from_v8_prop!(builder, obj, scope, CompactString, grammar_path);
+    from_v8_prop!(builder, obj, scope, CompactString, output_path);
 
     builder.build().unwrap()
   }
