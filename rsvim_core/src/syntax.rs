@@ -320,11 +320,7 @@ pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
 pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-structural_id_impl!(usize, SyntaxLoaderId, 1);
-
 pub struct SyntaxLoader {
-  id: SyntaxLoaderId,
-
   loader: TreeSitterLoaderArc,
 
   // Loaded grammars/parsers
@@ -353,7 +349,6 @@ impl SyntaxLoader {
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      id: SyntaxLoaderId::next(),
       loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
         parser_lib_path,
       ))),
@@ -368,9 +363,7 @@ impl SyntaxLoader {
   /// NOTE: This will reset the tree-sitter loader and all loaded
   /// parsers/grammars.
   pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
-    self.id = SyntaxLoaderId::next();
-    self.loader =
-      Arc::new(Mutex::new(Loader::with_parser_lib_path(parser_lib_path)));
+    lock!(self.loader).parser_lib_path = parser_lib_path;
     self.grammars.clear();
   }
 
