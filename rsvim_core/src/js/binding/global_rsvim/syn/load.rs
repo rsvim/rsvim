@@ -11,6 +11,9 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::syntax::SyntaxLoadGrammarRequest;
+use crate::syntax::async_load_grammar;
+use crate::syntax::load_grammar;
 use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -106,6 +109,14 @@ pub fn load_treesitter_grammar<'s>(
     args.get(0).to_object(scope).unwrap(),
   );
   trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
+  let syn_loader = lock!(state.syntax_manager).loader();
+  let load_req = SyntaxLoadGrammarRequest {
+    grammar_path: Path::new(&options.grammar_path).to_path_buf(),
+    output_path: Path::new(&options.output_path).to_path_buf(),
+  };
 
   // Get timer's delay time in millis.
   debug_assert!(is_v8_int!(args.get(1)));

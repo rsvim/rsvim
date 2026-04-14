@@ -332,6 +332,7 @@ arc_mutex_ptr!(SyntaxLoader);
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
+  pub output_path: PathBuf,
 }
 
 impl SyntaxLoadGrammarRequest {
@@ -408,7 +409,8 @@ pub fn _load_treesitter_grammar(
   let src_path = req.src_path();
   let src_path = src_path.as_path();
   let grammar_id = get_grammar_name_from_src_path(req)?;
-  let compile_cfg = CompileConfig::new(src_path, None, None);
+  let compile_cfg =
+    CompileConfig::new(src_path, None, Some(req.output_path.clone()));
   let loader = lock!(loader);
   match loader.load_language_at_path(compile_cfg) {
     Ok(grammar) => Ok((grammar_id, grammar)),
@@ -424,10 +426,7 @@ pub fn load_grammar(
   req: SyntaxLoadGrammarRequest,
 ) -> TheResult<CompactString> {
   let ts_loader = lock!(syn_loader).treesitter_loader();
-  let load_req = SyntaxLoadGrammarRequest {
-    grammar_path: req.grammar_path,
-  };
-  let load_result = _load_treesitter_grammar(ts_loader, &load_req);
+  let load_result = _load_treesitter_grammar(ts_loader, &req);
   let mut syn_loader = lock!(syn_loader);
   match load_result {
     Ok((grammar_id, grammar)) => {
