@@ -1,5 +1,6 @@
 //! Load tree-sitter grammar APIs.
 
+use crate::from_v8_prop;
 use crate::is_v8_bool;
 use crate::is_v8_int;
 use crate::js;
@@ -10,27 +11,64 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::to_v8_prop;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-pub const APPEND_DEFAULT: bool = false;
+pub const GRAMMAR_PATH: &str = "grammarPath";
+pub const OUTPUT_PATH: &str = "outputPath";
+
+pub const GRAMMAR_PATH_DEFAULT: Option<String> = None;
+pub const OUTPUT_PATH_DEFAULT: Option<String> = None;
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct SynLoadTreeSitterGrammarOptions {
-  #[builder]
-  grammar_path: PathBuf,
+  #[builder(default = GRAMMAR_PATH_DEFAULT)]
+  grammar_path: Option<String>,
 
-  #[builder]
-  output_path: PathBuf,
+  #[builder(default = OUTPUT_PATH_DEFAULT)]
+  output_path: Option<String>,
 }
 
 impl SynLoadTreeSitterGrammarOptions {
-  pub fn grammar_path(&self) -> &PathBuf {
+  pub fn grammar_path(&self) -> &Option<String> {
     &self.grammar_path
   }
 
-  pub fn output_path(&self) -> &PathBuf {
+  pub fn output_path(&self) -> &Option<String> {
     &self.output_path
+  }
+}
+
+impl StructFromV8 for SynLoadTreeSitterGrammarOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = SynLoadTreeSitterGrammarOptionsBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, String, grammar_path);
+    from_v8_prop!(builder, obj, scope, String, output_path);
+
+    builder.build().unwrap()
+  }
+}
+
+impl StructToV8 for SynLoadTreeSitterGrammarOptions {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
+    let obj = v8::Object::new(scope);
+
+    to_v8_prop!(self, obj, scope, append, ());
+    to_v8_prop!(self, obj, scope, create, ());
+    to_v8_prop!(self, obj, scope, create_new, ());
+    to_v8_prop!(self, obj, scope, read, ());
+    to_v8_prop!(self, obj, scope, truncate, ());
+    to_v8_prop!(self, obj, scope, write, ());
+
+    obj
   }
 }
 
