@@ -1184,6 +1184,7 @@ mod tests_grammar_loader {
     assert!(grammar.is_ok());
   }
 
+  // This test case always fail on macos-intel-x64 in github actions.
   #[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
   #[test]
   #[cfg_attr(miri, ignore)]
