@@ -342,12 +342,18 @@ impl SyntaxLoadGrammarRequest {
     self.src_path().join("grammar.json")
   }
 
-  pub fn output_path(&self) -> TheResult<PathBuf> {
-    let grammar_id = get_grammar_name_from_src_path(self)?;
-    let mut out = self.grammar_path.join(grammar_id);
-    out.set_extension(std::env::consts::DLL_EXTENSION);
-    Ok(out)
-  }
+  // FIXME: tree-sitter-loader use `parser_lib_path` to configure where it
+  // caches all the compiled dynamic libraries (e.g. c.dll, rust.dylib, etc).
+  // For each parser/grammar, its `output_path` is built with `parser_lib_path`
+  // by default, so once we set a correct value for `parser_lib_path`, we no
+  // longer need to configure `output_path` for each parser/grammar.
+  //
+  // pub fn output_path(&self) -> TheResult<PathBuf> {
+  //   let grammar_id = get_grammar_name_from_src_path(self)?;
+  //   let mut out = self.grammar_path.join(grammar_id);
+  //   out.set_extension(std::env::consts::DLL_EXTENSION);
+  //   Ok(out)
+  // }
 }
 
 impl SyntaxLoader {
@@ -414,8 +420,7 @@ pub fn _load_treesitter_grammar(
   let src_path = req.src_path();
   let src_path = src_path.as_path();
   let grammar_id = get_grammar_name_from_src_path(&req)?;
-  let output_path = req.output_path()?;
-  let compile_cfg = CompileConfig::new(src_path, None, Some(output_path));
+  let compile_cfg = CompileConfig::new(src_path, None, None);
   match lock!(loader).load_language_at_path(compile_cfg) {
     Ok(grammar) => Ok((grammar_id, grammar)),
     Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
