@@ -332,7 +332,6 @@ arc_mutex_ptr!(SyntaxLoader);
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
-  pub output_path: PathBuf,
 }
 
 impl SyntaxLoadGrammarRequest {
@@ -342,6 +341,13 @@ impl SyntaxLoadGrammarRequest {
 
   pub fn grammar_json_path(&self) -> PathBuf {
     self.src_path().join("grammar.json")
+  }
+
+  pub fn output_path(&self) -> TheResult<PathBuf> {
+    let grammar_id = get_grammar_name_from_src_path(self)?;
+    let mut out = self.grammar_path.join(grammar_id);
+    out.set_extension(std::env::consts::DLL_EXTENSION);
+    Ok(out)
   }
 }
 
@@ -399,6 +405,29 @@ pub fn get_grammar_name_from_src_path(
   }
 }
 
+pub fn get_grammar_output_path_from_src_path(
+  req: &SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  let grammar_json_path = req.grammar_json_path();
+  let grammar_json_path = grammar_json_path.as_path();
+  let err = || {
+    TheErr::TreeSitterGrammarNotFound(
+      grammar_json_path.to_string_lossy().to_compact_string(),
+    )
+  };
+  let grammar_json_text =
+    std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
+  let grammar_json_data: serde_json::Value =
+    serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
+  match grammar_json_data.get("name") {
+    Some(name_value) => match name_value.as_str() {
+      Some(name) => Ok(name.to_compact_string()),
+      None => Err(err()),
+    },
+    None => Err(err()),
+  }
+}
+
 /// Load the tree-sitter parser (`Language`) FFI dynamic library.
 ///
 /// NOTE: Make this method public only for testing purpose.
@@ -409,8 +438,8 @@ pub fn _load_treesitter_grammar(
   let src_path = req.src_path();
   let src_path = src_path.as_path();
   let grammar_id = get_grammar_name_from_src_path(req)?;
-  let compile_cfg =
-    CompileConfig::new(src_path, None, Some(req.output_path.clone()));
+  let output_path = req.output_path()?;
+  let compile_cfg = CompileConfig::new(src_path, None, Some(output_path));
   let loader = lock!(loader);
   match loader.load_language_at_path(compile_cfg) {
     Ok(grammar) => Ok((grammar_id, grammar)),
