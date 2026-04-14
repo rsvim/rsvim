@@ -390,72 +390,70 @@ impl Debug for SyntaxLoader {
   }
 }
 
-pub fn get_grammar_name_from_src_path(
-  req: &SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  let grammar_json_path = req.grammar_json_path();
-  let grammar_json_path = grammar_json_path.as_path();
-  let err = || {
-    TheErr::TreeSitterGrammarNotFound(
-      grammar_json_path.to_string_lossy().to_compact_string(),
-    )
-  };
-  let grammar_json_text =
-    std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
-  let grammar_json_data: serde_json::Value =
-    serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
-  match grammar_json_data.get("name") {
-    Some(name_value) => match name_value.as_str() {
-      Some(name) => Ok(name.to_compact_string()),
+impl SyntaxLoader {
+  pub fn get_grammar_name_from_src_path(
+    req: &SyntaxLoadGrammarRequest,
+  ) -> TheResult<CompactString> {
+    let grammar_json_path = req.grammar_json_path();
+    let grammar_json_path = grammar_json_path.as_path();
+    let err = || {
+      TheErr::TreeSitterGrammarNotFound(
+        grammar_json_path.to_string_lossy().to_compact_string(),
+      )
+    };
+    let grammar_json_text =
+      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
+    let grammar_json_data: serde_json::Value =
+      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
+    match grammar_json_data.get("name") {
+      Some(name_value) => match name_value.as_str() {
+        Some(name) => Ok(name.to_compact_string()),
+        None => Err(err()),
+      },
       None => Err(err()),
-    },
-    None => Err(err()),
-  }
-}
-
-/// Load the tree-sitter parser (`Language`) FFI dynamic library.
-///
-/// NOTE: Make this method public only for testing purpose.
-pub fn _load_treesitter_grammar(
-  loader: TreeSitterLoaderArc,
-  req: SyntaxLoadGrammarRequest,
-) -> TheResult<(CompactString, Language)> {
-  let src_path = req.src_path();
-  let src_path = src_path.as_path();
-  let grammar_id = get_grammar_name_from_src_path(&req)?;
-  let compile_cfg = CompileConfig::new(src_path, None, None);
-  match lock!(loader).load_language_at_path(compile_cfg) {
-    Ok(grammar) => Ok((grammar_id, grammar)),
-    Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
-      grammar_id.to_compact_string(),
-      e,
-    )),
-  }
-}
-
-pub fn load_grammar(
-  syn_loader: SyntaxLoaderArc,
-  req: SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  let loader = lock!(syn_loader).treesitter_loader();
-  let load_result = _load_treesitter_grammar(loader, req);
-  let mut syn_loader = lock!(syn_loader);
-  match load_result {
-    Ok((grammar_id, grammar)) => {
-      syn_loader
-        .cached_grammars_mut()
-        .insert(grammar_id.clone(), grammar);
-      Ok(grammar_id)
     }
-    Err(e) => Err(e),
   }
-}
 
-pub async fn async_load_grammar(
-  syn_loader: SyntaxLoaderArc,
-  req: SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  load_grammar(syn_loader, req)
+  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
+  ///
+  /// NOTE: Make this method public only for testing purpose.
+  pub fn _load_treesitter_grammar(
+    &self,
+    req: SyntaxLoadGrammarRequest,
+  ) -> TheResult<(CompactString, Language)> {
+    let src_path = req.src_path();
+    let src_path = src_path.as_path();
+    let grammar_id = Self::get_grammar_name_from_src_path(&req)?;
+    let compile_cfg = CompileConfig::new(src_path, None, None);
+    match lock!(self.loader).load_language_at_path(compile_cfg) {
+      Ok(grammar) => Ok((grammar_id, grammar)),
+      Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
+        grammar_id.to_compact_string(),
+        e,
+      )),
+    }
+  }
+
+  pub fn load_grammar(
+    &mut self,
+    req: SyntaxLoadGrammarRequest,
+  ) -> TheResult<CompactString> {
+    let load_result = self._load_treesitter_grammar(req);
+    match load_result {
+      Ok((grammar_id, grammar)) => {
+        self.grammars.insert(grammar_id.clone(), grammar);
+        Ok(grammar_id)
+      }
+      Err(e) => Err(e),
+    }
+  }
+
+  pub async fn async_load_grammar(
+    &mut self,
+    req: SyntaxLoadGrammarRequest,
+  ) -> TheResult<CompactString> {
+    self.load_grammar(req)
+  }
 }
 
 pub struct SyntaxManager {
