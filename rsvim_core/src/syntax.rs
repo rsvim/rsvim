@@ -320,9 +320,6 @@ pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxLoader {
-  // tree-sitter loader
-  loader: TreeSitterLoaderArc,
-
   // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
 }
@@ -354,13 +351,8 @@ impl SyntaxLoadGrammarRequest {
 impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
-      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
       grammars: FoldMap::new(),
     }
-  }
-
-  pub fn treesitter_loader(&self) -> TreeSitterLoaderArc {
-    self.loader.clone()
   }
 
   pub fn cached_grammars(&self) -> &FoldMap<CompactString, Language> {
@@ -432,15 +424,14 @@ pub fn get_grammar_output_path_from_src_path(
 ///
 /// NOTE: Make this method public only for testing purpose.
 pub fn _load_treesitter_grammar(
-  loader: TreeSitterLoaderArc,
-  req: &SyntaxLoadGrammarRequest,
+  req: SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
+  let loader = Loader::new().unwrap();
   let src_path = req.src_path();
   let src_path = src_path.as_path();
-  let grammar_id = get_grammar_name_from_src_path(req)?;
+  let grammar_id = get_grammar_name_from_src_path(&req)?;
   let output_path = req.output_path()?;
   let compile_cfg = CompileConfig::new(src_path, None, Some(output_path));
-  let loader = lock!(loader);
   match loader.load_language_at_path(compile_cfg) {
     Ok(grammar) => Ok((grammar_id, grammar)),
     Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
@@ -454,8 +445,7 @@ pub fn load_grammar(
   syn_loader: SyntaxLoaderArc,
   req: SyntaxLoadGrammarRequest,
 ) -> TheResult<CompactString> {
-  let ts_loader = lock!(syn_loader).treesitter_loader();
-  let load_result = _load_treesitter_grammar(ts_loader, &req);
+  let load_result = _load_treesitter_grammar(req);
   let mut syn_loader = lock!(syn_loader);
   match load_result {
     Ok((grammar_id, grammar)) => {
