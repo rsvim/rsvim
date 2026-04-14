@@ -25,20 +25,10 @@ pub const OUTPUT_PATH_DEFAULT: &str = "";
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct SynLoadTreeSitterGrammarOptions {
   #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
-  grammar_path: CompactString,
+  pub grammar_path: CompactString,
 
   #[builder(default = OUTPUT_PATH_DEFAULT.to_compact_string())]
-  output_path: CompactString,
-}
-
-impl SynLoadTreeSitterGrammarOptions {
-  pub fn grammar_path(&self) -> &CompactString {
-    &self.grammar_path
-  }
-
-  pub fn output_path(&self) -> &CompactString {
-    &self.output_path
-  }
+  pub output_path: CompactString,
 }
 
 impl StructFromV8 for SynLoadTreeSitterGrammarOptions {
@@ -62,12 +52,8 @@ impl StructToV8 for SynLoadTreeSitterGrammarOptions {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, append, ());
-    to_v8_prop!(self, obj, scope, create, ());
-    to_v8_prop!(self, obj, scope, create_new, ());
-    to_v8_prop!(self, obj, scope, read, ());
-    to_v8_prop!(self, obj, scope, truncate, ());
-    to_v8_prop!(self, obj, scope, write, ());
+    to_v8_prop!(self, obj, scope, grammar_path);
+    to_v8_prop!(self, obj, scope, output_path);
 
     obj
   }
