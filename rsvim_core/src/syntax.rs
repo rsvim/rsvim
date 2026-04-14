@@ -1,8 +1,6 @@
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
-use crate::chan::JsMessage;
-use crate::chan::jsrt;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -16,7 +14,6 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 use std::sync::Weak;
-use tokio::sync::mpsc::UnboundedSender;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
