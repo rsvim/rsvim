@@ -1187,7 +1187,7 @@ mod tests_grammar_loader {
   // This test case always fail.
   // #[test]
   #[cfg_attr(miri, ignore)]
-  fn rust1() {
+  fn _rust1() {
     test_log_init();
 
     let grammar_path = concat!(
