@@ -113,67 +113,19 @@ pub fn load_treesitter_grammar<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
   let syn_loader = lock!(state.syntax_manager).loader();
-  let load_req = SyntaxLoadGrammarRequest {
+  let req = SyntaxLoadGrammarRequest {
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
     output_path: Path::new(&options.output_path).to_path_buf(),
   };
 
-  // Get timer's delay time in millis.
-  debug_assert!(is_v8_int!(args.get(1)));
-  let delay = u32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
-  // Get timer's repeated.
-  debug_assert!(is_v8_bool!(args.get(2)));
-  let repeated = bool::from_v8(scope, args.get(2).to_boolean(scope));
-
-  // NOTE: Don't delete this part of code, it shows how to convert function
-  // arguments into an array of values.
-  //
-  // Convert params argument (Array<Local<Value>>) to Rust vector.
-  // let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
-  //   Ok(params) => (0..params.length()).fold(
-  //     Vec::<v8::Global<v8::Value>>::new(),
-  //     |mut acc, i| {
-  //       let param = params.get_index(scope, i).unwrap();
-  //       acc.push(v8::Global::new(scope, param));
-  //       acc
-  //     },
-  //   ),
-  //   Err(_) => vec![],
-  // };
-
-  // NOTE: Since in javascript side, we don't pass any extra parameters to
-  // timers, thus it is always empty array. But, we leave this code here as a
-  // reference.
-  let params = vec![];
-  let params = Rc::new(params);
-
-  let state_rc = JsRuntime::state(scope);
-  let timer_cb = {
-    let state_rc = state_rc.clone();
-    move || {
-      let fut = TimeoutFuture {
-        cb: Rc::clone(&callback),
-        params: Rc::clone(&params),
-      };
-      let mut state = state_rc.borrow_mut();
-      state.pending_futures.push(Box::new(fut));
+  match load_grammar(syn_loader, req) {
+    Ok(grammar_id) => {
+      rv.set(v8::String::new(scope, &grammar_id).unwrap().into());
     }
-  };
-
-  let mut state = state_rc.borrow_mut();
-  let timer_id = js::TimerId::next();
-  pending::create_timer(
-    &mut state,
-    timer_id,
-    delay,
-    repeated,
-    Box::new(timer_cb),
-  );
-  rv.set_int32(timer_id.into());
-  trace!(
-    "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
-    timer_id, delay, repeated
-  );
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
 }
 
 /// Javascript `clearTimeout`/`clearInterval` API.
