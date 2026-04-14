@@ -404,7 +404,7 @@ pub fn get_grammar_name_from_src_path(
 /// Load the tree-sitter parser (`Language`) FFI dynamic library.
 ///
 /// NOTE: Make this method public only for testing purpose.
-fn _load_treesitter_grammar(
+fn load_treesitter_grammar(
   loader: TreesitterLoaderArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
@@ -430,7 +430,7 @@ pub fn load_grammar(
   let load_req = SyntaxLoadGrammarRequest {
     grammar_path: req.grammar_path,
   };
-  let load_result = _load_treesitter_grammar(ts_loader, &load_req);
+  let load_result = load_treesitter_grammar(ts_loader, &load_req);
   let mut syn_loader = lock!(syn_loader);
   match load_result {
     Ok((grammar_id, grammar)) => {
