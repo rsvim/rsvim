@@ -56,7 +56,7 @@ pub struct ExCommandReq {
 pub struct LoadImportResp {
   pub task_id: TaskId,
 
-  /// ModuleSource
+  // ModuleSource
   pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
@@ -64,7 +64,7 @@ pub struct LoadImportResp {
 pub struct FsOpenResp {
   pub task_id: TaskId,
 
-  /// usize
+  // usize
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
@@ -72,7 +72,7 @@ pub struct FsOpenResp {
 pub struct FsReadResp {
   pub task_id: TaskId,
 
-  /// Vec<u8>
+  // Vec<u8>
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
@@ -80,7 +80,7 @@ pub struct FsReadResp {
 pub struct FsWriteResp {
   pub task_id: TaskId,
 
-  /// usize
+  // usize
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
@@ -88,7 +88,7 @@ pub struct FsWriteResp {
 pub struct LoadTreeSitterGrammarResp {
   pub task_id: TaskId,
 
-  /// String
+  // String
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
