@@ -1,6 +1,8 @@
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
+use crate::chan::JsMessage;
+use crate::chan::jsrt;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -14,6 +16,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 use std::sync::Weak;
+use tokio::sync::mpsc::UnboundedSender;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
@@ -401,7 +404,7 @@ pub fn get_grammar_name_from_src_path(
 /// Load the tree-sitter parser (`Language`) FFI dynamic library.
 ///
 /// NOTE: Make this method public only for testing purpose.
-pub fn load_treesitter_grammar(
+fn _load_treesitter_grammar(
   loader: TreesitterLoaderArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
@@ -417,6 +420,34 @@ pub fn load_treesitter_grammar(
       e,
     )),
   }
+}
+
+pub fn load_grammar(
+  syn_loader: SyntaxLoaderArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  let ts_loader = lock!(syn_loader).treesitter_loader();
+  let load_req = SyntaxLoadGrammarRequest {
+    grammar_path: req.grammar_path,
+  };
+  let load_result = _load_treesitter_grammar(ts_loader, &load_req);
+  let mut syn_loader = lock!(syn_loader);
+  match load_result {
+    Ok((grammar_id, grammar)) => {
+      syn_loader
+        .cached_grammars_mut()
+        .insert(grammar_id.clone(), grammar);
+      Ok(grammar_id)
+    }
+    Err(e) => Err(e),
+  }
+}
+
+pub async fn async_load_grammar(
+  syn_loader: SyntaxLoaderArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  load_grammar(syn_loader, req)
 }
 
 pub struct SyntaxManager {

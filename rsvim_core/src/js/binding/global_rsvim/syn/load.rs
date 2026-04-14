@@ -1,6 +1,4 @@
-//! Syntax APIs.
-
-pub mod load;
+//! Load tree-sitter grammar APIs.
 
 use crate::is_v8_bool;
 use crate::is_v8_int;
