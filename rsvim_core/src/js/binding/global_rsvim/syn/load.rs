@@ -101,10 +101,11 @@ pub fn load_treesitter_grammar<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options =
-    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
-  let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
-  let callback = Rc::new(v8::Global::new(scope, callback));
+  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+    scope,
+    args.get(0).to_object(scope).unwrap(),
+  );
+  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
 
   // Get timer's delay time in millis.
   debug_assert!(is_v8_int!(args.get(1)));
