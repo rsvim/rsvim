@@ -76,12 +76,10 @@ pub fn load_treesitter_grammar<'s>(
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
   let grammar_path = Path::new(&options.grammar_path);
-  let output_path = Path::new(&options.output_path);
   pending::create_syn_load_treesitter_grammar(
     &mut state,
     task_id,
     grammar_path,
-    output_path,
     Box::new(load_cb),
   );
 

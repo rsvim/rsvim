@@ -929,7 +929,6 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let load_req = SyntaxLoadGrammarRequest {
               grammar_path: req.grammar_path,
-              output_path: req.output_path,
             };
             let loaded_grammar =
               syntax::async_load_grammar(syn_loader, load_req).await;
