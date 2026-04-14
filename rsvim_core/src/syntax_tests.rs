@@ -1167,7 +1167,7 @@ int main() {
 mod tests_grammar_loader {
   use super::*;
 
-  fn run_loader(grammar_path: &str, hint: &str) {
+  fn _run_loader(grammar_path: &str, hint: &str) {
     let grammar_path = Path::new(grammar_path);
     let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
@@ -1193,7 +1193,7 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-rust"
     );
-    run_loader(grammar_path, "rust1");
+    _run_loader(grammar_path, "rust1");
   }
 
   #[test]
@@ -1205,7 +1205,7 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-c"
     );
-    run_loader(grammar_path, "c1");
+    _run_loader(grammar_path, "c1");
   }
 
   #[test]
@@ -1217,7 +1217,7 @@ mod tests_grammar_loader {
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-python"
     );
-    run_loader(grammar_path, "python1");
+    _run_loader(grammar_path, "python1");
   }
 
   #[test]
