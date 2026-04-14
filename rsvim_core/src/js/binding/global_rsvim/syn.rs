@@ -2,102 +2,72 @@
 
 pub mod load;
 
-use crate::is_v8_bool;
-use crate::is_v8_int;
 use crate::js;
-use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::TimerId;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
-use std::rc::Rc;
+use crate::syntax::SyntaxLoadGrammarRequest;
+use crate::syntax::load_grammar;
+pub use load::SynLoadTreeSitterGrammarFuture;
+pub use load::SynLoadTreeSitterGrammarOptions;
 
-struct LoadTreeSitterGrammarFuture {
-  pub promise: v8::Global<v8::PromiseResolver>,
-  pub maybe_result: Option<TheResult<Vec<u8>>>,
-}
-
-impl JsFuture for LoadTreeSitterGrammarFuture {
-  fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|LoadTreeSitterGrammarFuture|");
-
-    let result = self.maybe_result.take().unwrap();
-
-    // Handle when something goes wrong with opening the file.
-    if let Err(e) = result {
-      let message = v8::String::new(scope, &e.to_string()).unwrap();
-      let exception = v8::Exception::error(scope, message);
-      binding::set_exception_code(scope, exception, &e);
-      self.promise.open(scope).reject(scope, exception);
-      return;
-    }
-
-    // Otherwise, get the result and deserialize it.
-    let result = result.unwrap();
-
-    // Deserialize bytes into a loaded grammar name.
-    let grammar_id = postcard::from_bytes::<String>(&result).unwrap();
-    let grammar_id = grammar_id.to_v8(scope);
-
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, grammar_id.into())
-      .unwrap();
-  }
-}
-
-/// Javascript `loadTreeSitterGrammar` API.
-pub fn async_load_treesitter_grammar<'s>(
+/// Javascript `loadTreeSitterGrammarSync` API.
+pub fn load_treesitter_grammar_sync<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 3);
-
-  // Get timer's callback.
-  debug_assert!(args.get(0).is_function());
-  let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
-  let callback = Rc::new(v8::Global::new(scope, callback));
-
-  // Get timer's delay time in millis.
-  debug_assert!(is_v8_int!(args.get(1)));
-  let delay = u32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
-  // Get timer's repeated.
-  debug_assert!(is_v8_bool!(args.get(2)));
-  let repeated = bool::from_v8(scope, args.get(2).to_boolean(scope));
-
-  // NOTE: Don't delete this part of code, it shows how to convert function
-  // arguments into an array of values.
-  //
-  // Convert params argument (Array<Local<Value>>) to Rust vector.
-  // let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
-  //   Ok(params) => (0..params.length()).fold(
-  //     Vec::<v8::Global<v8::Value>>::new(),
-  //     |mut acc, i| {
-  //       let param = params.get_index(scope, i).unwrap();
-  //       acc.push(v8::Global::new(scope, param));
-  //       acc
-  //     },
-  //   ),
-  //   Err(_) => vec![],
-  // };
-
-  // NOTE: Since in javascript side, we don't pass any extra parameters to
-  // timers, thus it is always empty array. But, we leave this code here as a
-  // reference.
-  let params = vec![];
-  let params = Rc::new(params);
+  debug_assert!(args.length() == 1);
+  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+    scope,
+    args.get(0).to_object(scope).unwrap(),
+  );
+  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
 
   let state_rc = JsRuntime::state(scope);
-  let timer_cb = {
+  let state = state_rc.borrow();
+  let syn_loader = lock!(state.syntax_manager).loader();
+  let req = SyntaxLoadGrammarRequest {
+    grammar_path: Path::new(&options.grammar_path).to_path_buf(),
+    output_path: Path::new(&options.output_path).to_path_buf(),
+  };
+
+  match load_grammar(syn_loader, req) {
+    Ok(grammar_id) => {
+      rv.set(v8::String::new(scope, &grammar_id).unwrap().into());
+    }
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
+}
+
+/// Javascript `loadTreeSitterGrammar` API.
+pub fn load_treesitter_grammar<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+    scope,
+    args.get(0).to_object(scope).unwrap(),
+  );
+  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let load_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
-    move || {
-      let fut = TimeoutFuture {
-        cb: Rc::clone(&callback),
-        params: Rc::clone(&params),
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = SynLoadTreeSitterGrammarFuture {
+        promise: promise.clone(),
+        maybe_result,
       };
       let mut state = state_rc.borrow_mut();
       state.pending_futures.push(Box::new(fut));
@@ -105,35 +75,16 @@ pub fn async_load_treesitter_grammar<'s>(
   };
 
   let mut state = state_rc.borrow_mut();
-  let timer_id = js::TimerId::next();
-  pending::create_timer(
+  let task_id = js::TaskId::next();
+  let grammar_path = Path::new(&options.grammar_path);
+  let output_path = Path::new(&options.output_path);
+  pending::create_syn_load_treesitter_grammar(
     &mut state,
-    timer_id,
-    delay,
-    repeated,
-    Box::new(timer_cb),
+    task_id,
+    grammar_path,
+    output_path,
+    Box::new(load_cb),
   );
-  rv.set_int32(timer_id.into());
-  trace!(
-    "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
-    timer_id, delay, repeated
-  );
-}
 
-/// Javascript `clearTimeout`/`clearInterval` API.
-pub fn clear_timer<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  _: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 1);
-  // Get timer ID, and remove it.
-  debug_assert!(is_v8_int!(args.get(0)));
-  let timer_id =
-    TimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
-  let state_rc = JsRuntime::state(scope);
-
-  let mut state = state_rc.borrow_mut();
-  pending::remove_timer(&mut state, timer_id);
-  trace!("|clear_timer| timer_id:{:?}", timer_id);
+  rv.set(promise.into());
 }
