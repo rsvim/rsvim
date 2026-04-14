@@ -31,7 +31,6 @@ pub fn load_treesitter_grammar_sync<'s>(
   let syn_loader = lock!(state.syntax_manager).loader();
   let req = SyntaxLoadGrammarRequest {
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
-    output_path: Path::new(&options.output_path).to_path_buf(),
   };
 
   match load_grammar(syn_loader, req) {
