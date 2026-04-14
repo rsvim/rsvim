@@ -14,14 +14,14 @@ use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
 
-struct LoadTreesitterGrammarFuture {
+struct LoadTreeSitterGrammarFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for LoadTreesitterGrammarFuture {
+impl JsFuture for LoadTreeSitterGrammarFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|LoadTreesitterGrammarFuture|");
+    trace!("|LoadTreeSitterGrammarFuture|");
 
     let result = self.maybe_result.take().unwrap();
 

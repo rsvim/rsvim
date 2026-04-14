@@ -40,7 +40,7 @@ pub enum MasterMessage {
   SyntaxEditResp(SyntaxEditResp),
 
   /// Js runtime ask master to load tree-sitter grammar/parser.
-  LoadTreesitterGrammarReq(LoadTreesitterGrammarReq),
+  LoadTreeSitterGrammarReq(LoadTreeSitterGrammarReq),
 }
 
 #[derive(Debug)]
@@ -94,7 +94,7 @@ pub struct SyntaxEditResp {
 }
 
 #[derive(Debug)]
-pub struct LoadTreesitterGrammarReq {
+pub struct LoadTreeSitterGrammarReq {
   pub task_id: TaskId,
   pub grammar_path: PathBuf,
 }

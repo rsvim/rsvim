@@ -737,8 +737,8 @@ pub mod boost {
               .unwrap();
             write_cb(resp.maybe_result);
           }
-          JsMessage::LoadTreesitterGrammarResp(resp) => {
-            trace!("Recv LoadTreesitterGrammarResp:{:?}", resp.task_id);
+          JsMessage::LoadTreeSitterGrammarResp(resp) => {
+            trace!("Recv LoadTreeSitterGrammarResp:{:?}", resp.task_id);
             debug_assert!(
               state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
             );

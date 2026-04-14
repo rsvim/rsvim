@@ -921,8 +921,8 @@ impl EventLoop {
         MasterMessage::SyntaxEditResp(resp) => {
           trace!("Recv SyntaxEditResp:{:?}", resp.buffer_id);
         }
-        MasterMessage::LoadTreesitterGrammarReq(req) => {
-          trace!("Recv LoadTreesitterGrammarReq:{:?}", req.task_id);
+        MasterMessage::LoadTreeSitterGrammarReq(req) => {
+          trace!("Recv LoadTreeSitterGrammarReq:{:?}", req.task_id);
           let syn_loader = lock!(self.syntax_manager).loader();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
 
@@ -935,8 +935,8 @@ impl EventLoop {
             match loaded_grammar {
               Ok(grammar_id) => {
                 jsrt_forwarder_tx
-                  .send(JsMessage::LoadTreesitterGrammarResp(
-                    chan::LoadTreesitterGrammarResp {
+                  .send(JsMessage::LoadTreeSitterGrammarResp(
+                    chan::LoadTreeSitterGrammarResp {
                       task_id: req.task_id,
                       maybe_result: Some(Ok(
                         postcard::to_allocvec(&grammar_id.to_string()).unwrap(),
@@ -947,8 +947,8 @@ impl EventLoop {
               }
               Err(e) => {
                 jsrt_forwarder_tx
-                  .send(JsMessage::LoadTreesitterGrammarResp(
-                    chan::LoadTreesitterGrammarResp {
+                  .send(JsMessage::LoadTreeSitterGrammarResp(
+                    chan::LoadTreeSitterGrammarResp {
                       task_id: req.task_id,
                       maybe_result: Some(Err(e)),
                     },

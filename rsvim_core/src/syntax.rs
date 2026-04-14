@@ -28,9 +28,9 @@ use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-pub type TreesitterParserArc = Arc<Mutex<Parser>>;
-pub type TreesitterParserWk = Weak<Mutex<Parser>>;
-pub type TreesitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
+pub type TreeSitterParserArc = Arc<Mutex<Parser>>;
+pub type TreeSitterParserWk = Weak<Mutex<Parser>>;
+pub type TreeSitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
@@ -84,7 +84,7 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
-pub type TreesitterQueryArc = Arc<Query>;
+pub type TreeSitterQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCapturePoint {
@@ -162,7 +162,7 @@ pub struct Syntax {
   id: SyntaxId,
 
   // Highlight query
-  highlight_query: Option<TreesitterQueryArc>,
+  highlight_query: Option<TreeSitterQueryArc>,
   highlight_capture: Option<SyntaxCaptureArc>,
 
   // Parsed syntax tree
@@ -173,7 +173,7 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: TreesitterParserArc,
+  parser: TreeSitterParserArc,
 
   // Filetype, i.e. programming language name, grammar id
   filetype: Option<CompactString>,
@@ -252,7 +252,7 @@ impl Syntax {
     &self.filetype
   }
 
-  pub fn treesitter_highlight_query(&self) -> Option<TreesitterQueryArc> {
+  pub fn treesitter_highlight_query(&self) -> Option<TreeSitterQueryArc> {
     self.highlight_query.clone()
   }
 
@@ -280,7 +280,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn treesitter_parser(&self) -> TreesitterParserArc {
+  pub fn treesitter_parser(&self) -> TreeSitterParserArc {
     self.parser.clone()
   }
 
@@ -315,13 +315,13 @@ impl Syntax {
   }
 }
 
-pub type TreesitterLoaderArc = Arc<Mutex<Loader>>;
-pub type TreesitterLoaderWk = Weak<Mutex<Loader>>;
-pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
+pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
+pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxLoader {
   // tree-sitter loader
-  loader: TreesitterLoaderArc,
+  loader: TreeSitterLoaderArc,
 
   // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
@@ -352,7 +352,7 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn treesitter_loader(&self) -> TreesitterLoaderArc {
+  pub fn treesitter_loader(&self) -> TreeSitterLoaderArc {
     self.loader.clone()
   }
 
@@ -381,7 +381,7 @@ pub fn get_grammar_name_from_src_path(
   let grammar_json_path = req.grammar_json_path();
   let grammar_json_path = grammar_json_path.as_path();
   let err = || {
-    TheErr::TreesitterGrammarNotFound(
+    TheErr::TreeSitterGrammarNotFound(
       grammar_json_path.to_string_lossy().to_compact_string(),
     )
   };
@@ -402,7 +402,7 @@ pub fn get_grammar_name_from_src_path(
 ///
 /// NOTE: Make this method public only for testing purpose.
 pub fn _load_treesitter_grammar(
-  loader: TreesitterLoaderArc,
+  loader: TreeSitterLoaderArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<(CompactString, Language)> {
   let src_path = req.src_path();
@@ -412,7 +412,7 @@ pub fn _load_treesitter_grammar(
   let loader = lock!(loader);
   match loader.load_language_at_path(compile_cfg) {
     Ok(grammar) => Ok((grammar_id, grammar)),
-    Err(e) => Err(TheErr::LoadTreesitterGrammarFailed(
+    Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
       grammar_id.to_compact_string(),
       e,
     )),
@@ -732,7 +732,7 @@ pub fn make_input_edit_by_insert(
 
 /// NOTE: Make this method public only for testing purpose.
 pub fn _parse(
-  parser: TreesitterParserArc,
+  parser: TreeSitterParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
@@ -863,7 +863,7 @@ pub fn _query(
   tree: &Option<Tree>,
   text_rope: &Option<Rope>,
   text_payload: &Option<String>,
-  highlight_query: &Option<TreesitterQueryArc>,
+  highlight_query: &Option<TreeSitterQueryArc>,
 ) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
@@ -950,9 +950,9 @@ pub fn _query(
 }
 
 pub async fn parse_and_query(
-  ts_parser: TreesitterParserArc,
+  ts_parser: TreeSitterParserArc,
   old_ts_tree: Option<Tree>,
-  ts_highlight_query: Option<TreesitterQueryArc>,
+  ts_highlight_query: Option<TreeSitterQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
   let (new_ts_tree, editing_version, text_rope, text_payload) =

@@ -12,14 +12,35 @@ use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
 
-struct LoadTreesitterGrammarFuture {
+#[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
+pub struct SynLoadTreeSitterOpenOptions {
+  #[builder(default = APPEND_DEFAULT)]
+  append: bool,
+
+  #[builder(default = CREATE_DEFAULT)]
+  create: bool,
+
+  #[builder(default = CREATE_NEW_DEFAULT)]
+  create_new: bool,
+
+  #[builder(default = READ_DEFAULT)]
+  read: bool,
+
+  #[builder(default = TRUNCATE_DEFAULT)]
+  truncate: bool,
+
+  #[builder(default = WRITE_DEFAULT)]
+  write: bool,
+}
+
+struct LoadTreeSitterGrammarFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for LoadTreesitterGrammarFuture {
+impl JsFuture for LoadTreeSitterGrammarFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|LoadTreesitterGrammarFuture|");
+    trace!("|LoadTreeSitterGrammarFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
@@ -47,16 +68,15 @@ impl JsFuture for LoadTreesitterGrammarFuture {
   }
 }
 
-/// Javascript `loadTreeSitterGrammar` API.
-pub fn async_load_treesitter_grammar<'s>(
+/// Javascript `loadTreeSitterGrammarSync` API.
+pub fn load_treesitter_grammar<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 3);
-
-  // Get timer's callback.
-  debug_assert!(args.get(0).is_function());
+  debug_assert!(args.length() == 1);
+  let options =
+    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
 

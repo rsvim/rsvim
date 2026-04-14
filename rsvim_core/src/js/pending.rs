@@ -115,7 +115,7 @@ pub fn create_syn_load_grammar(
   state.pending_tasks.insert(task_id, cb);
   chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::LoadTreesitterGrammarReq(chan::LoadTreesitterGrammarReq {
+    MasterMessage::LoadTreeSitterGrammarReq(chan::LoadTreeSitterGrammarReq {
       task_id,
       grammar_path: grammar_path.to_path_buf(),
     }),
