@@ -452,7 +452,7 @@ pub fn load_grammar(
   syn_loader: SyntaxLoaderArc,
   req: SyntaxLoadGrammarRequest,
 ) -> TheResult<CompactString> {
-  let loader = syn_loader.treesitter_loader();
+  let loader = lock!(syn_loader).treesitter_loader();
   let load_result = _load_treesitter_grammar(loader, req);
   let mut syn_loader = lock!(syn_loader);
   match load_result {
