@@ -1,6 +1,7 @@
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
+use crate::cfg::path_cfg::PATH_CONFIG;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -341,25 +342,16 @@ impl SyntaxLoadGrammarRequest {
   pub fn grammar_json_path(&self) -> PathBuf {
     self.src_path().join("grammar.json")
   }
-
-  // FIXME: tree-sitter-loader use `parser_lib_path` to configure where it
-  // caches all the compiled dynamic libraries (e.g. c.dll, rust.dylib, etc).
-  // For each parser/grammar, its `output_path` is built with `parser_lib_path`
-  // by default, so once we set a correct value for `parser_lib_path`, we no
-  // longer need to configure `output_path` for each parser/grammar.
-  //
-  // pub fn output_path(&self) -> TheResult<PathBuf> {
-  //   let grammar_id = get_grammar_name_from_src_path(self)?;
-  //   let mut out = self.grammar_path.join(grammar_id);
-  //   out.set_extension(std::env::consts::DLL_EXTENSION);
-  //   Ok(out)
-  // }
 }
 
 impl SyntaxLoader {
   pub fn new() -> Self {
+    let parser_lib_path =
+      PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
+      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
+        parser_lib_path,
+      ))),
       grammars: FoldMap::new(),
     }
   }
