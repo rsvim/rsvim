@@ -50,7 +50,7 @@ impl JsFuture for LoadTreesitterGrammarFuture {
 }
 
 /// Javascript `loadTreeSitterGrammar` API.
-pub fn async_create_syn_load_grammar<'s>(
+pub fn async_load_treesitter_grammar<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
