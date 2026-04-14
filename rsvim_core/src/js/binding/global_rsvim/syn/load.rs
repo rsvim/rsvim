@@ -10,27 +10,28 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use std::path::PathBuf;
 use std::rc::Rc;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
-pub struct SynLoadTreeSitterOpenOptions {
-  #[builder(default = APPEND_DEFAULT)]
-  append: bool,
+pub const APPEND_DEFAULT: bool = false;
 
-  #[builder(default = CREATE_DEFAULT)]
-  create: bool,
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+pub struct SynLoadTreeSitterGrammarOptions {
+  #[builder]
+  grammar_path: PathBuf,
 
-  #[builder(default = CREATE_NEW_DEFAULT)]
-  create_new: bool,
+  #[builder]
+  output_path: PathBuf,
+}
 
-  #[builder(default = READ_DEFAULT)]
-  read: bool,
+impl SynLoadTreeSitterGrammarOptions {
+  pub fn grammar_path(&self) -> &PathBuf {
+    &self.grammar_path
+  }
 
-  #[builder(default = TRUNCATE_DEFAULT)]
-  truncate: bool,
-
-  #[builder(default = WRITE_DEFAULT)]
-  write: bool,
+  pub fn output_path(&self) -> &PathBuf {
+    &self.output_path
+  }
 }
 
 struct LoadTreeSitterGrammarFuture {
