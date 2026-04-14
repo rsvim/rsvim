@@ -12,7 +12,6 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 pub const GRAMMAR_PATH: &str = "grammarPath";
@@ -47,8 +46,8 @@ impl StructFromV8 for SynLoadTreeSitterGrammarOptions {
   ) -> Self {
     let mut builder = SynLoadTreeSitterGrammarOptionsBuilder::default();
 
-    from_v8_prop!(builder, obj, scope, String, grammar_path);
-    from_v8_prop!(builder, obj, scope, String, output_path);
+    from_v8_prop!(builder, obj, scope, String, grammar_path, optional);
+    from_v8_prop!(builder, obj, scope, String, output_path, optional);
 
     builder.build().unwrap()
   }
