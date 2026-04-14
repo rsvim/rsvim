@@ -38,6 +38,9 @@ pub enum MasterMessage {
 
   /// Response master for syntax parsing complete.
   SyntaxEditResp(SyntaxEditResp),
+
+  /// Js runtime ask master to load tree-sitter grammar/parser.
+  LoadTreeSitterGrammarReq(LoadTreeSitterGrammarReq),
 }
 
 #[derive(Debug)]
@@ -88,6 +91,12 @@ pub struct SyntaxEditReq {
 #[derive(Debug)]
 pub struct SyntaxEditResp {
   pub buffer_id: BufferId,
+}
+
+#[derive(Debug)]
+pub struct LoadTreeSitterGrammarReq {
+  pub task_id: TaskId,
+  pub grammar_path: PathBuf,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".

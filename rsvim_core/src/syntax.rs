@@ -9,7 +9,6 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
-use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -29,9 +28,9 @@ use tree_sitter_loader::Loader;
 
 const INVALID_EDITING_VERSION: isize = -1;
 
-pub type TreesitterParserArc = Arc<Mutex<Parser>>;
-pub type TreesitterParserWk = Weak<Mutex<Parser>>;
-pub type TreesitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
+pub type TreeSitterParserArc = Arc<Mutex<Parser>>;
+pub type TreeSitterParserWk = Weak<Mutex<Parser>>;
+pub type TreeSitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
 #[derive(Clone)]
 pub struct SyntaxEditNew {
@@ -85,7 +84,7 @@ pub enum SyntaxEdit {
   Update(SyntaxEditUpdate),
 }
 
-pub type SyntaxQueryArc = Arc<Query>;
+pub type TreeSitterQueryArc = Arc<Query>;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct SyntaxCapturePoint {
@@ -163,7 +162,7 @@ pub struct Syntax {
   id: SyntaxId,
 
   // Highlight query
-  highlight_query: Option<SyntaxQueryArc>,
+  highlight_query: Option<TreeSitterQueryArc>,
   highlight_capture: Option<SyntaxCaptureArc>,
 
   // Parsed syntax tree
@@ -174,7 +173,7 @@ pub struct Syntax {
   editing_version: isize,
 
   // Syntax parser
-  parser: TreesitterParserArc,
+  parser: TreeSitterParserArc,
 
   // Filetype, i.e. programming language name, grammar id
   filetype: Option<CompactString>,
@@ -253,7 +252,7 @@ impl Syntax {
     &self.filetype
   }
 
-  pub fn highlight_query(&self) -> Option<SyntaxQueryArc> {
+  pub fn treesitter_highlight_query(&self) -> Option<TreeSitterQueryArc> {
     self.highlight_query.clone()
   }
 
@@ -265,11 +264,11 @@ impl Syntax {
     self.highlight_capture = value;
   }
 
-  pub fn tree(&self) -> &Option<Tree> {
+  pub fn treesitter_tree(&self) -> &Option<Tree> {
     &self.tree
   }
 
-  pub fn set_tree(&mut self, tree: Option<Tree>) {
+  pub fn set_treesitter_tree(&mut self, tree: Option<Tree>) {
     self.tree = tree;
   }
 
@@ -281,7 +280,7 @@ impl Syntax {
     self.editing_version = value;
   }
 
-  pub fn parser(&self) -> TreesitterParserArc {
+  pub fn treesitter_parser(&self) -> TreeSitterParserArc {
     self.parser.clone()
   }
 
@@ -316,15 +315,14 @@ impl Syntax {
   }
 }
 
-pub type TreesitterLoaderArc = Arc<Mutex<Loader>>;
-pub type TreesitterLoaderWk = Weak<Mutex<Loader>>;
-pub type TreesitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
+pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
+pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxLoader {
-  // tree-sitter loader
-  loader: Loader,
+  loader: TreeSitterLoaderArc,
 
-  // tree-sitter grammars
+  // Loaded grammars/parsers
   grammars: FoldMap<CompactString, Language>,
 }
 
@@ -335,80 +333,130 @@ pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
 }
 
+impl SyntaxLoadGrammarRequest {
+  pub fn src_path(&self) -> PathBuf {
+    self.grammar_path.join("src")
+  }
+
+  pub fn grammar_json_path(&self) -> PathBuf {
+    self.src_path().join("grammar.json")
+  }
+
+  // FIXME: tree-sitter-loader use `parser_lib_path` to configure where it
+  // caches all the compiled dynamic libraries (e.g. c.dll, rust.dylib, etc).
+  // For each parser/grammar, its `output_path` is built with `parser_lib_path`
+  // by default, so once we set a correct value for `parser_lib_path`, we no
+  // longer need to configure `output_path` for each parser/grammar.
+  //
+  // pub fn output_path(&self) -> TheResult<PathBuf> {
+  //   let grammar_id = get_grammar_name_from_src_path(self)?;
+  //   let mut out = self.grammar_path.join(grammar_id);
+  //   out.set_extension(std::env::consts::DLL_EXTENSION);
+  //   Ok(out)
+  // }
+}
+
 impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
-      // loader: Arc::new(Mutex::new(Loader::new().unwrap())),
-      loader: Loader::new().unwrap(),
+      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
       grammars: FoldMap::new(),
     }
   }
 
-  pub fn get_grammar_name_from_src_path(
-    src_path: &Path,
-  ) -> TheResult<CompactString> {
-    let grammar_json_path = src_path.join("grammar.json");
-    let grammar_json_path = grammar_json_path.as_path();
-    let err = || {
-      TheErr::TreesitterGrammarNotFound(
-        grammar_json_path.to_string_lossy().to_compact_string(),
-      )
-    };
-    let grammar_json_text =
-      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
-    let grammar_json_data: serde_json::Value =
-      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
-    match grammar_json_data.get("name") {
-      Some(name_value) => match name_value.as_str() {
-        Some(name) => Ok(name.to_compact_string()),
-        None => Err(err()),
-      },
-      None => Err(err()),
-    }
+  pub fn treesitter_loader(&self) -> TreeSitterLoaderArc {
+    self.loader.clone()
   }
 
-  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  pub fn load_treesitter_grammar(
+  pub fn cached_grammars(&self) -> &FoldMap<CompactString, Language> {
+    &self.grammars
+  }
+
+  pub fn cached_grammars_mut(
     &mut self,
-    req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<&Language> {
-    let src_path = req.grammar_path.join("src");
-    let src_path = src_path.as_path();
-    let grammar_id = Self::get_grammar_name_from_src_path(src_path)?;
-    if !self.grammars.contains_key(&grammar_id) {
-      let compile_cfg = CompileConfig::new(src_path, None, None);
-      match self.loader.load_language_at_path(compile_cfg) {
-        Ok(grammar) => {
-          self
-            .grammars
-            .insert(grammar_id.to_compact_string(), grammar);
-        }
-        Err(e) => {
-          let e = TheErr::LoadTreesitterGrammarFailed(
-            grammar_id.to_compact_string(),
-            e,
-          );
-          return Err(e);
-        }
-      }
-    }
-    Ok(self.grammars.get(&grammar_id).unwrap())
+  ) -> &mut FoldMap<CompactString, Language> {
+    &mut self.grammars
   }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxGrammarLoader")
-      .field("loader.parser_lib_path", &self.loader.parser_lib_path)
-      .field("parsers", &self.grammars)
+      .field("grammars", &self.grammars)
       .finish()
   }
 }
 
+pub fn get_grammar_name_from_src_path(
+  req: &SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  let grammar_json_path = req.grammar_json_path();
+  let grammar_json_path = grammar_json_path.as_path();
+  let err = || {
+    TheErr::TreeSitterGrammarNotFound(
+      grammar_json_path.to_string_lossy().to_compact_string(),
+    )
+  };
+  let grammar_json_text =
+    std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
+  let grammar_json_data: serde_json::Value =
+    serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
+  match grammar_json_data.get("name") {
+    Some(name_value) => match name_value.as_str() {
+      Some(name) => Ok(name.to_compact_string()),
+      None => Err(err()),
+    },
+    None => Err(err()),
+  }
+}
+
+/// Load the tree-sitter parser (`Language`) FFI dynamic library.
+///
+/// NOTE: Make this method public only for testing purpose.
+pub fn _load_treesitter_grammar(
+  loader: TreeSitterLoaderArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<(CompactString, Language)> {
+  let src_path = req.src_path();
+  let src_path = src_path.as_path();
+  let grammar_id = get_grammar_name_from_src_path(&req)?;
+  let compile_cfg = CompileConfig::new(src_path, None, None);
+  match lock!(loader).load_language_at_path(compile_cfg) {
+    Ok(grammar) => Ok((grammar_id, grammar)),
+    Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
+      grammar_id.to_compact_string(),
+      e,
+    )),
+  }
+}
+
+pub fn load_grammar(
+  syn_loader: SyntaxLoaderArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  let loader = lock!(syn_loader).treesitter_loader();
+  let load_result = _load_treesitter_grammar(loader, req);
+  let mut syn_loader = lock!(syn_loader);
+  match load_result {
+    Ok((grammar_id, grammar)) => {
+      syn_loader
+        .cached_grammars_mut()
+        .insert(grammar_id.clone(), grammar);
+      Ok(grammar_id)
+    }
+    Err(e) => Err(e),
+  }
+}
+
+pub async fn async_load_grammar(
+  syn_loader: SyntaxLoaderArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<CompactString> {
+  load_grammar(syn_loader, req)
+}
+
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
-  is_loading_grammar: bool,
-  pending_grammar_requests: Vec<SyntaxLoadGrammarRequest>,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
@@ -426,8 +474,6 @@ impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
       .field("loader", &lock!(self.loader))
-      .field("is_loading_grammar", &self.is_loading_grammar)
-      .field("pending_grammar_requests", &self.pending_grammar_requests)
       .field("grammars", &self.grammars)
       .field("highlight_queries", &self.highlight_queries)
       .field("grammarid2ext", &self.gid2ext)
@@ -441,8 +487,6 @@ impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self {
       loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
-      is_loading_grammar: false,
-      pending_grammar_requests: vec![],
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       gid2ext: FoldMap::new(),
@@ -497,6 +541,10 @@ impl SyntaxManager {
     }
 
     it
+  }
+
+  pub fn loader(&self) -> SyntaxLoaderArc {
+    self.loader.clone()
   }
 
   /// Associate a grammar ID with a file extension.
@@ -601,22 +649,6 @@ impl SyntaxManager {
 }
 // Language and queries }
 
-pub struct SyntaxLoadOptions {}
-
-// Load and build {
-impl SyntaxManager {
-  /// Load tree-sitter grammar in async.
-  pub async fn async_load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
-  }
-
-  /// Load tree-sitter grammar in sync.
-  pub fn load(_force_rebuild: bool) -> TheResult<()> {
-    Ok(())
-  }
-}
-// Load and build }
-
 fn convert_edit_char_to_byte(rope: &Rope, absolute_char_idx: usize) -> usize {
   rope
     .try_char_to_byte(absolute_char_idx)
@@ -706,8 +738,9 @@ pub fn make_input_edit_by_insert(
   }
 }
 
-pub fn parse(
-  parser: TreesitterParserArc,
+/// NOTE: Make this method public only for testing purpose.
+pub fn _parse(
+  parser: TreeSitterParserArc,
   old_tree: Option<Tree>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<Rope>, Option<String>) {
@@ -832,11 +865,13 @@ fn convert_ts_point(rope: &Rope, point: &tree_sitter::Point) -> (usize, usize) {
 ///      instead of a window/viewport. This leads to longer response time,
 ///      i.e. for a very big buffer, user will wait longer time to get the
 ///      latest highlights after some editings.
-pub fn query(
+///
+/// NOTE: Make this method public only for testing purpose.
+pub fn _query(
   tree: &Option<Tree>,
   text_rope: &Option<Rope>,
   text_payload: &Option<String>,
-  highlight_query: &Option<SyntaxQueryArc>,
+  highlight_query: &Option<TreeSitterQueryArc>,
 ) -> Option<SyntaxCaptureArc> {
   let mut query_cursor = QueryCursor::new();
   if let Some(syn_tree) = tree
@@ -923,14 +958,14 @@ pub fn query(
 }
 
 pub async fn parse_and_query(
-  parser: TreesitterParserArc,
-  old_tree: Option<Tree>,
-  highlight_query: Option<SyntaxQueryArc>,
+  ts_parser: TreeSitterParserArc,
+  old_ts_tree: Option<Tree>,
+  ts_highlight_query: Option<TreeSitterQueryArc>,
   pending_edits: Vec<SyntaxEdit>,
 ) -> (Option<Tree>, isize, Option<SyntaxCaptureArc>) {
-  let (tree, editing_version, text_rope, text_payload) =
-    parse(parser, old_tree, pending_edits);
+  let (new_ts_tree, editing_version, text_rope, text_payload) =
+    _parse(ts_parser, old_ts_tree, pending_edits);
   let highlight_capture =
-    query(&tree, &text_rope, &text_payload, &highlight_query);
-  (tree, editing_version, highlight_capture)
+    _query(&new_ts_tree, &text_rope, &text_payload, &ts_highlight_query);
+  (new_ts_tree, editing_version, highlight_capture)
 }

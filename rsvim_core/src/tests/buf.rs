@@ -146,8 +146,8 @@ pub fn make_syntax_and_colorscheme(
   let mut text_rope_builder: RopeBuilder = RopeBuilder::new();
   text_rope_builder.append(&file_content);
   let text_rope = text_rope_builder.finish();
-  let syn_parser = syn.parser();
-  let (syn_tree, _editing_version, text_rope, text_payload) = syntax::parse(
+  let syn_parser = syn.treesitter_parser();
+  let (syn_tree, _editing_version, text_rope, text_payload) = syntax::_parse(
     syn_parser,
     None,
     vec![SyntaxEdit::New(SyntaxEditNew {
@@ -155,8 +155,12 @@ pub fn make_syntax_and_colorscheme(
       version: 0,
     })],
   );
-  let syn_capture =
-    syntax::query(&syn_tree, &text_rope, &text_payload, &syn.highlight_query());
+  let syn_capture = syntax::_query(
+    &syn_tree,
+    &text_rope,
+    &text_payload,
+    &syn.treesitter_highlight_query(),
+  );
   syn.set_highlight_capture(syn_capture);
 
   let colorscheme = lock!(cs_mgr).colorscheme().unwrap();

@@ -32,6 +32,7 @@ use crate::state::ops::cmdline_ops;
 use crate::syntax;
 use crate::syntax::SyntaxEdit;
 use crate::syntax::SyntaxEditNew;
+use crate::syntax::SyntaxLoadGrammarRequest;
 use crate::syntax::SyntaxManager;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::canvas::Canvas;
@@ -851,26 +852,20 @@ impl EventLoop {
               return;
             }
 
-            let (
-              pending_edits,
-              syn_id,
-              syn_parser,
-              syn_tree,
-              syn_highlight_query,
-            ) = {
+            let (pending_edits, syn_id, ts_parser, ts_tree, ts_highlight_query) = {
               let syn = buf.syntax_mut().as_mut().unwrap();
               syn.set_is_parsing(true);
               let syn_id = syn.id();
               let pending_edits = syn.drain_pending_edits(..).collect_vec();
-              let syn_parser = syn.parser();
-              let syn_tree = syn.tree().clone();
-              let syn_highlight_query = syn.highlight_query();
+              let ts_parser = syn.treesitter_parser();
+              let ts_tree = syn.treesitter_tree().clone();
+              let ts_highlight_query = syn.treesitter_highlight_query();
               (
                 pending_edits,
                 syn_id,
-                syn_parser,
-                syn_tree,
-                syn_highlight_query,
+                ts_parser,
+                ts_tree,
+                ts_highlight_query,
               )
             };
 
@@ -883,9 +878,9 @@ impl EventLoop {
             self.detached_tracker.spawn(async move {
               let (parsed_tree, parsed_editing_version, highlight_capture) =
                 syntax::parse_and_query(
-                  syn_parser,
-                  syn_tree,
-                  syn_highlight_query,
+                  ts_parser,
+                  ts_tree,
+                  ts_highlight_query,
                   pending_edits,
                 )
                 .await;
@@ -895,7 +890,7 @@ impl EventLoop {
                 let mut buf = lock!(buf);
                 if let Some(syn) = buf.syntax_mut() {
                   if syn.id() == syn_id {
-                    syn.set_tree(parsed_tree);
+                    syn.set_treesitter_tree(parsed_tree);
                     syn.set_editing_version(parsed_editing_version);
                     syn.set_highlight_capture(highlight_capture);
                     syn.set_is_parsing(false);
@@ -925,6 +920,43 @@ impl EventLoop {
         }
         MasterMessage::SyntaxEditResp(resp) => {
           trace!("Recv SyntaxEditResp:{:?}", resp.buffer_id);
+        }
+        MasterMessage::LoadTreeSitterGrammarReq(req) => {
+          trace!("Recv LoadTreeSitterGrammarReq:{:?}", req.task_id);
+          let syn_loader = lock!(self.syntax_manager).loader();
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+
+          self.detached_tracker.spawn(async move {
+            let load_req = SyntaxLoadGrammarRequest {
+              grammar_path: req.grammar_path,
+            };
+            let loaded_grammar =
+              syntax::async_load_grammar(syn_loader, load_req).await;
+            match loaded_grammar {
+              Ok(grammar_id) => {
+                jsrt_forwarder_tx
+                  .send(JsMessage::LoadTreeSitterGrammarResp(
+                    chan::LoadTreeSitterGrammarResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Ok(
+                        postcard::to_allocvec(&grammar_id.to_string()).unwrap(),
+                      )),
+                    },
+                  ))
+                  .unwrap();
+              }
+              Err(e) => {
+                jsrt_forwarder_tx
+                  .send(JsMessage::LoadTreeSitterGrammarResp(
+                    chan::LoadTreeSitterGrammarResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Err(e)),
+                    },
+                  ))
+                  .unwrap();
+              }
+            }
+          });
         }
       }
     }

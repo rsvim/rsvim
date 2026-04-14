@@ -32,6 +32,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of fs write
   FsWriteResp(FsWriteResp),
+
+  /// Master send js runtime the result of load tree-sitter grammar/parser.
+  LoadTreeSitterGrammarResp(LoadTreeSitterGrammarResp),
 }
 
 #[derive(Debug)]
@@ -52,24 +55,40 @@ pub struct ExCommandReq {
 #[derive(Debug)]
 pub struct LoadImportResp {
   pub task_id: TaskId,
+
+  // type: `ModuleSource`
   pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsOpenResp {
   pub task_id: TaskId,
+
+  // type: `usize`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsReadResp {
   pub task_id: TaskId,
+
+  // type: `Vec<u8>`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 #[derive(Debug)]
 pub struct FsWriteResp {
   pub task_id: TaskId,
+
+  // type: `usize`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct LoadTreeSitterGrammarResp {
+  pub task_id: TaskId,
+
+  // type: `String`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

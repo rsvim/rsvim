@@ -137,7 +137,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -226,7 +226,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -307,7 +307,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -452,7 +452,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -544,7 +544,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -636,7 +636,7 @@ mod tests_buffer_editing {
       let syn_editing_version =
         buf.syntax().as_ref().unwrap().editing_version();
       assert_eq!(buf_editing_version, syn_editing_version);
-      let syn_tree = buf.syntax().as_ref().unwrap().tree();
+      let syn_tree = buf.syntax().as_ref().unwrap().treesitter_tree();
       assert!(syn_tree.as_ref().is_some());
       info!(
         "syn tree:{:?}",
@@ -1167,48 +1167,47 @@ int main() {
 mod tests_grammar_loader {
   use super::*;
 
-  // #[test]
-  // #[cfg_attr(miri, ignore)]
-  // fn rust1() {
-  //   test_log_init();
-  //
-  //   let grammar_path = Path::new(concat!(
-  //     env!("CARGO_MANIFEST_DIR"),
-  //     "/../tests_and_benchmarks/tree-sitter-rust"
-  //   ));
-  //   let mut syn_loader = SyntaxLoader::new();
-  //   let opts = SyntaxLoadGrammarRequest {
-  //     grammar_path: grammar_path.to_path_buf(),
-  //   };
-  //   let grammar = syn_loader.load_treesitter_grammar(&opts);
-  //   info!("rust1:{:?}", grammar);
-  //   assert!(grammar.is_ok());
-  //
-  //   let grammar = syn_loader.load_treesitter_grammar(&opts);
-  //   info!("rust1:{:?}", grammar);
-  //   assert!(grammar.is_ok());
-  // }
+  fn _run_loader(grammar_path: &str, hint: &str) {
+    let grammar_path = Path::new(grammar_path);
+    let syn_loader = SyntaxLoader::new();
+    let opts = SyntaxLoadGrammarRequest {
+      grammar_path: grammar_path.to_path_buf(),
+    };
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    info!("{}:{:?}", hint, grammar);
+    assert!(grammar.is_ok());
+
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    info!("{}:{:?}", hint, grammar);
+    assert!(grammar.is_ok());
+  }
+
+  // This test case always fail on macos-intel-x64 in github actions.
+  #[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
+  #[test]
+  #[cfg_attr(miri, ignore)]
+  fn rust1() {
+    test_log_init();
+
+    let grammar_path = concat!(
+      env!("CARGO_MANIFEST_DIR"),
+      "/../tests_and_benchmarks/tree-sitter-rust"
+    );
+    _run_loader(grammar_path, "rust1");
+  }
 
   #[test]
   #[cfg_attr(miri, ignore)]
   fn c1() {
     test_log_init();
 
-    let grammar_path = Path::new(concat!(
+    let grammar_path = concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-c"
-    ));
-    let mut syn_loader = SyntaxLoader::new();
-    let opts = SyntaxLoadGrammarRequest {
-      grammar_path: grammar_path.to_path_buf(),
-    };
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
-    info!("c1:{:?}", grammar);
-    assert!(grammar.is_ok());
-
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
-    info!("c1:{:?}", grammar);
-    assert!(grammar.is_ok());
+    );
+    _run_loader(grammar_path, "c1");
   }
 
   #[test]
@@ -1216,21 +1215,11 @@ mod tests_grammar_loader {
   fn python1() {
     test_log_init();
 
-    let grammar_path = Path::new(concat!(
+    let grammar_path = concat!(
       env!("CARGO_MANIFEST_DIR"),
       "/../tests_and_benchmarks/tree-sitter-python"
-    ));
-    let mut syn_loader = SyntaxLoader::new();
-    let opts = SyntaxLoadGrammarRequest {
-      grammar_path: grammar_path.to_path_buf(),
-    };
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
-    info!("python1:{:?}", grammar);
-    assert!(grammar.is_ok());
-
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
-    info!("python1:{:?}", grammar);
-    assert!(grammar.is_ok());
+    );
+    _run_loader(grammar_path, "python1");
   }
 
   #[test]
@@ -1240,17 +1229,19 @@ mod tests_grammar_loader {
 
     let grammar_path = assert_fs::TempDir::new().unwrap();
 
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
@@ -1271,17 +1262,19 @@ mod tests_grammar_loader {
   "word": "identifier"
 }"###).unwrap();
 
-    let mut syn_loader = SyntaxLoader::new();
+    let syn_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar = syn_loader.load_treesitter_grammar(&opts);
+    let grammar =
+      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
