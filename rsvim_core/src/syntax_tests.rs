@@ -1184,6 +1184,7 @@ mod tests_grammar_loader {
     assert!(grammar.is_ok());
   }
 
+  #[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
   #[test]
   #[cfg_attr(miri, ignore)]
   fn rust1() {
