@@ -932,7 +932,7 @@ impl EventLoop {
               grammar_path: req.grammar_path,
             };
             let load_result =
-              syntax::load_treesitter_grammar(ts_loader, &load_req);
+              syntax::_load_treesitter_grammar(ts_loader, &load_req);
             let mut syn_loader = lock!(syn_loader);
             match load_result {
               Ok((grammar_id, grammar)) => {
