@@ -526,7 +526,7 @@ pub struct SyntaxManager {
   grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
   tags_queries: FoldMap<CompactString, String>,
-  injection_regex_queries: FoldMap<CompactString, String>,
+  injection_queries: FoldMap<CompactString, String>,
 
   // Maps grammar ID to file extensions
   gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
@@ -543,7 +543,7 @@ impl Debug for SyntaxManager {
       .field("grammars", &self.grammars.keys())
       .field("highlight_queries", &self.highlight_queries)
       .field("tags_queries", &self.tags_queries)
-      .field("injection_regex_queries", &self.injection_regex_queries)
+      .field("injection_queries", &self.injection_queries)
       .field("grammarid2ext", &self.gid2ext)
       .field("ext2grammarid", &self.ext2gid)
       .finish()
@@ -558,7 +558,7 @@ impl SyntaxManager {
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
-      injection_regex_queries: FoldMap::new(),
+      injection_queries: FoldMap::new(),
       gid2ext: FoldMap::new(),
       ext2gid: FoldMap::new(),
     };
@@ -568,30 +568,40 @@ impl SyntaxManager {
         "c",
         tree_sitter_c::LANGUAGE,
         Some(tree_sitter_c::HIGHLIGHT_QUERY),
+        Some(tree_sitter_c::TAGS_QUERY),
+        None,
         vec!["c", "h"],
       ),
       (
         "rust",
         tree_sitter_rust::LANGUAGE,
         Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
+        Some(tree_sitter_rust::TAGS_QUERY),
+        Some(tree_sitter_rust::INJECTIONS_QUERY),
         vec!["rs"],
       ),
       (
         "markdown",
         tree_sitter_md::LANGUAGE,
         Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
+        None,
+        Some(tree_sitter_md::INJECTION_QUERY_BLOCK),
         vec!["md", "markdown"],
       ),
       (
         "toml",
         tree_sitter_toml_ng::LANGUAGE,
         Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
+        None,
+        None,
         vec!["toml"],
       ),
       (
         "html",
         tree_sitter_html::LANGUAGE,
         Some(tree_sitter_html::HIGHLIGHTS_QUERY),
+        None,
+        Some(tree_sitter_html::INJECTIONS_QUERY),
         vec!["html", "htm"],
       ),
     ];
@@ -607,6 +617,8 @@ impl SyntaxManager {
         grammar_binding.0.to_compact_string(),
         grammar_binding.1.into(),
         grammar_binding.2.map(|q| q.to_string()),
+        grammar_binding.3.map(|q| q.to_string()),
+        grammar_binding.4.map(|q| q.to_string()),
       );
     }
 
@@ -673,11 +685,17 @@ impl SyntaxManager {
     grammar: Language,
     highlight_query: Option<String>,
     tags_query: Option<String>,
-    injection_regex: Option<String>,
+    injection_query: Option<String>,
   ) {
     self.grammars.insert(grammar_id.clone(), grammar);
-    if let Some(hl_query) = highlight_query {
-      self.highlight_queries.insert(grammar_id.clone(), hl_query);
+    if let Some(hl) = highlight_query {
+      self.highlight_queries.insert(grammar_id.clone(), hl);
+    }
+    if let Some(tag) = tags_query {
+      self.tags_queries.insert(grammar_id.clone(), tag);
+    }
+    if let Some(injection) = injection_query {
+      self.injection_queries.insert(grammar_id.clone(), injection);
     }
     self.gid2ext.entry(grammar_id.clone()).or_default();
   }
