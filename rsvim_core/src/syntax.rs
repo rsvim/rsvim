@@ -392,15 +392,10 @@ struct SyntaxTreeSitterGrammarMetainfo {
 
 #[derive(Debug, Clone)]
 struct SyntaxTreeSitterMetainfo {
-  pub grammar_path: PathBuf,
-
   pub grammars: Vec<SyntaxTreeSitterGrammarMetainfo>,
 
-  pub metadata_version: CompactString,
-  pub metadata_repository: CompactString,
-
+  pub grammar_path: PathBuf,
   pub src_path: PathBuf,
-  pub tree_sitter_json_path: PathBuf,
   pub grammar_json_path: PathBuf,
 }
 
@@ -426,7 +421,7 @@ impl SyntaxLoader {
       .as_array()
       .ok_or(err())?;
 
-    let mut grammars_metadata =
+    let mut grammars_metainfo =
       Vec::with_capacity(tree_sitter_json_grammars.len());
     for grammar in tree_sitter_json_grammars {
       let name = grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
@@ -468,7 +463,7 @@ impl SyntaxLoader {
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|ij| ij.to_compact_string());
-      let grammar_metadata = SyntaxTreeSitterGrammarMetainfo {
+      let grammar_metainfo = SyntaxTreeSitterGrammarMetainfo {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
         scope: scope.to_compact_string(),
@@ -478,18 +473,19 @@ impl SyntaxLoader {
         tags,
         injection_regex,
       };
+      grammars_metainfo.push(grammar_metainfo);
     }
 
     let src_path = grammar_path.join("src");
-    let src_path = grammar_path.join("src");
+    let grammar_json_path = src_path.join("grammar.json");
 
-    pub fn queries_path(&self) -> PathBuf {
-      self.grammar_path.join("queries")
-    }
-
-    pub fn grammar_json_path(&self) -> PathBuf {
-      self.src_path().join("grammar.json")
-    }
+    let metainfo = SyntaxTreeSitterMetainfo {
+      grammars: grammars_metainfo,
+      grammar_path: grammar_path.to_path_buf(),
+      src_path,
+      grammar_json_path,
+    };
+    Ok(metainfo)
   }
 
   pub fn get_grammar_name_from_src_path(
