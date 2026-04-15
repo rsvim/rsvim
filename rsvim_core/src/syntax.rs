@@ -399,13 +399,17 @@ impl SyntaxLoader {
   pub fn load_grammar(
     &mut self,
     req: SyntaxLoadGrammarRequest,
-  ) -> TheResult<(CompactString, Language)> {
+  ) -> TheResult<(
+    /* grammar_id */ CompactString,
+    /* grammar */ Language,
+    /* highlight_query */ Option<String>,
+  )> {
     let src_path = req.src_path();
     let src_path = src_path.as_path();
     let grammar_id = Self::get_grammar_name_from_src_path(&req)?;
     let compile_cfg = CompileConfig::new(src_path, None, None);
     match lock!(self.loader).load_language_at_path(compile_cfg) {
-      Ok(grammar) => Ok((grammar_id, grammar)),
+      Ok(grammar) => Ok((grammar_id, grammar, None)),
       Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
         grammar_id.to_compact_string(),
         e,
