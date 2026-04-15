@@ -20,6 +20,7 @@ use std::sync::Weak;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
+use tree_sitter::LanguageFn;
 use tree_sitter::Parser;
 use tree_sitter::Point;
 use tree_sitter::Query;
@@ -636,6 +637,38 @@ impl Debug for SyntaxManager {
   }
 }
 
+#[cfg(test)]
+// WARNING: This is for testing only
+struct _BuiltinTreeSitterGrammar {
+  pub grammar_name: CompactString,
+  pub language: Language,
+  pub highlight_query: Option<String>,
+  pub tags_query: Option<String>,
+  pub injection_query: Option<String>,
+  pub file_types: Vec<CompactString>,
+}
+
+#[cfg(test)]
+impl _BuiltinTreeSitterGrammar {
+  pub fn new(
+    grammar_name: &str,
+    language: Language,
+    highlight_query: Option<String>,
+    tags_query: Option<String>,
+    injection_query: Option<String>,
+    file_types: Vec<CompactString>,
+  ) -> Self {
+    Self {
+      grammar_name: grammar_name.to_compact_string(),
+      language,
+      highlight_query,
+      tags_query,
+      injection_query,
+      file_types,
+    }
+  }
+}
+
 // Language ID and file extensions {
 impl SyntaxManager {
   #[cfg(not(test))]
@@ -664,61 +697,73 @@ impl SyntaxManager {
     };
 
     let grammar_bindings = [
-      (
+      _BuiltinTreeSitterGrammar::new(
         "c",
-        tree_sitter_c::LANGUAGE,
-        Some(tree_sitter_c::HIGHLIGHT_QUERY),
-        Some(tree_sitter_c::TAGS_QUERY),
+        tree_sitter_c::LANGUAGE.into(),
+        Some(tree_sitter_c::HIGHLIGHT_QUERY.to_string()),
+        Some(tree_sitter_c::TAGS_QUERY.to_string()),
         None,
-        vec!["c", "h"],
+        ["c", "h"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "rust",
-        tree_sitter_rust::LANGUAGE,
-        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
-        Some(tree_sitter_rust::TAGS_QUERY),
-        Some(tree_sitter_rust::INJECTIONS_QUERY),
-        vec!["rs"],
+        tree_sitter_rust::LANGUAGE.into(),
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY.to_string()),
+        Some(tree_sitter_rust::TAGS_QUERY.to_string()),
+        Some(tree_sitter_rust::INJECTIONS_QUERY.to_string()),
+        ["rs"].iter().map(|ft| ft.to_compact_string()).collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "markdown",
-        tree_sitter_md::LANGUAGE,
-        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
+        tree_sitter_md::LANGUAGE.into(),
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string()),
         None,
-        Some(tree_sitter_md::INJECTION_QUERY_BLOCK),
-        vec!["md", "markdown"],
+        Some(tree_sitter_md::INJECTION_QUERY_BLOCK.to_string()),
+        ["md", "markdown"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "toml",
-        tree_sitter_toml_ng::LANGUAGE,
-        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
+        tree_sitter_toml_ng::LANGUAGE.into(),
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string()),
         None,
         None,
-        vec!["toml"],
+        ["toml"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "html",
-        tree_sitter_html::LANGUAGE,
-        Some(tree_sitter_html::HIGHLIGHTS_QUERY),
+        tree_sitter_html::LANGUAGE.into(),
+        Some(tree_sitter_html::HIGHLIGHTS_QUERY.to_string()),
         None,
-        Some(tree_sitter_html::INJECTIONS_QUERY),
-        vec!["html", "htm"],
+        Some(tree_sitter_html::INJECTIONS_QUERY.to_string()),
+        ["html", "htm"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
     ];
 
     for grammar_binding in grammar_bindings {
-      for file_ext in grammar_binding.5.iter() {
+      for file_ext in grammar_binding.file_types.iter() {
         it.insert_file_ext(
-          grammar_binding.0.to_compact_string(),
-          file_ext.to_compact_string(),
+          grammar_binding.grammar_name.clone(),
+          file_ext.clone(),
         );
       }
       it.insert_grammar(
-        grammar_binding.0.to_compact_string(),
-        grammar_binding.1.into(),
-        grammar_binding.2.map(|q| q.to_string()),
-        grammar_binding.3.map(|q| q.to_string()),
-        grammar_binding.4.map(|q| q.to_string()),
+        grammar_binding.grammar_name.clone(),
+        grammar_binding.language,
+        grammar_binding.highlight_query,
+        grammar_binding.tags_query,
+        grammar_binding.injection_query,
       );
     }
 
