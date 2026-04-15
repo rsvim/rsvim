@@ -953,12 +953,17 @@ impl EventLoop {
                     grammar_metainfo.injection_regex.map(|inj| inj.to_string()),
                   );
                 }
+                let grammar_names = metainfo
+                  .grammars
+                  .iter()
+                  .map(|gm| gm.name.to_string())
+                  .collect_vec();
                 jsrt_forwarder_tx
                   .send(JsMessage::LoadTreeSitterGrammarResp(
                     chan::LoadTreeSitterGrammarResp {
                       task_id: req.task_id,
                       maybe_result: Some(Ok(
-                        postcard::to_allocvec(&metainfo.to_string()).unwrap(),
+                        postcard::to_allocvec(&grammar_names).unwrap(),
                       )),
                     },
                   ))

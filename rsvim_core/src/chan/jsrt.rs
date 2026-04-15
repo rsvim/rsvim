@@ -88,7 +88,7 @@ pub struct FsWriteResp {
 pub struct LoadTreeSitterGrammarResp {
   pub task_id: TaskId,
 
-  // type: `String`
+  // type: `Vec<String>`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
