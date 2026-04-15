@@ -526,6 +526,8 @@ pub struct SyntaxManager {
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
+  tags_queries: FoldMap<CompactString, String>,
+  injection_regex_queries: FoldMap<CompactString, String>,
 
   // Maps grammar ID to file extensions
   gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
@@ -541,6 +543,8 @@ impl Debug for SyntaxManager {
       .field("loader", &self.loader)
       .field("grammars", &self.grammars.keys())
       .field("highlight_queries", &self.highlight_queries)
+      .field("tags_queries", &self.tags_queries)
+      .field("injection_regex_queries", &self.injection_regex_queries)
       .field("grammarid2ext", &self.gid2ext)
       .field("ext2grammarid", &self.ext2gid)
       .finish()
@@ -554,6 +558,8 @@ impl SyntaxManager {
       loader: SyntaxLoader::new(),
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
+      tags_queries: FoldMap::new(),
+      injection_regex_queries: FoldMap::new(),
       gid2ext: FoldMap::new(),
       ext2gid: FoldMap::new(),
     };
@@ -667,6 +673,8 @@ impl SyntaxManager {
     grammar_id: CompactString,
     grammar: Language,
     highlight_query: Option<String>,
+    tags_query: Option<String>,
+    injection_regex: Option<String>,
   ) {
     self.grammars.insert(grammar_id.clone(), grammar);
     if let Some(hl_query) = highlight_query {

@@ -41,6 +41,7 @@ use crate::ui::tree::*;
 use crate::ui::widget::WidgetContext;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
+use fern::meta;
 use futures::StreamExt;
 use itertools::Itertools;
 use std::sync::Arc;
@@ -934,11 +935,23 @@ impl EventLoop {
             let load_result = syn_loader.async_load_grammar(load_req).await;
             match load_result {
               Ok((metainfo, grammar)) => {
-                lock!(syn_manager).insert_grammar(
-                  metainfo.clone(),
-                  grammar,
-                  None,
-                );
+                for grammar_metainfo in metainfo.grammars.iter() {
+                  let highlight_query = match grammar_metainfo.highlights {
+                    Some(highlights) => {
+                      tokio::fs::read_to_string(highlights).await.ok()
+                    }
+                    None => None,
+                  };
+                  let tags_query = match grammar_metainfo.tags {
+                    Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
+                    None => None,
+                  };
+                  lock!(syn_manager).insert_grammar(
+                    grammar_metainfo.name.clone(),
+                    grammar,
+                    None,
+                  );
+                }
                 jsrt_forwarder_tx
                   .send(JsMessage::LoadTreeSitterGrammarResp(
                     chan::LoadTreeSitterGrammarResp {
