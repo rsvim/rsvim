@@ -1176,10 +1176,14 @@ mod tests_grammar_loader {
     let grammar = syn_loader.load_grammar(opts.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
+    let (metainfo, _) = grammar.unwrap();
+    info!("{}:{:?}", hint, metainfo);
 
     let grammar = syn_loader.load_grammar(opts.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
+    let (metainfo, _) = grammar.unwrap();
+    info!("{}:{:?}", hint, metainfo);
   }
 
   // This test case always fail.
