@@ -437,32 +437,46 @@ impl SyntaxLoader {
         .ok_or(err())?;
       let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
       let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
-      let path = grammar_path.join(path).normalize().map_err(|_e| err())?;
-      let filetypes = grammar
+      let path = grammar_path
+        .join(path)
+        .normalize()
+        .map_err(|_e| err())?
+        .into_path_buf();
+      let file_types = grammar
         .get("file-types")
         .ok_or(err())?
         .as_array()
         .ok_or(err())?
         .iter()
         .map(|ft| ft.as_str().ok_or(err()));
-      let filetypes = process_results(filetypes, |ft| ft.collect_vec());
+      let file_types = process_results(file_types, |ft| ft.collect_vec())?
+        .iter()
+        .map(|ft| ft.to_compact_string())
+        .collect_vec();
       let highlights = grammar
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?;
-      let highlights = highlights.map(|hl| Path::new(hl));
+      let highlights = highlights.map(|hl| Path::new(hl).to_path_buf());
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?;
-      let tags = tags.map(|tg| Path::new(tg));
+      let tags = tags.map(|tg| Path::new(tg).to_path_buf());
       let injection_regex = grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
-        .transpose()?;
+        .transpose()?
+        .map(|ij| ij.to_compact_string());
       let grammar_metadata = SyntaxTreeSitterGrammarMetainfo {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
+        scope: scope.to_compact_string(),
+        path,
+        file_types,
+        highlights,
+        tags,
+        injection_regex,
       };
     }
 
