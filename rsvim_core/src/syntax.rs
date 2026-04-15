@@ -493,7 +493,7 @@ impl SyntaxLoader {
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
-    /* grammar */ TreeSitterLanguageArc,
+    /* grammar */ Language,
   )> {
     let metainfo =
       Self::parse_treesitter_grammar_metainfo(req.grammar_path.as_path())?;
@@ -513,20 +513,17 @@ impl SyntaxLoader {
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
-    /* grammar */ TreeSitterLanguageArc,
+    /* grammar */ Language,
   )> {
     self.load_grammar(req)
   }
 }
 
-pub type TreeSitterLanguageArc = Arc<Language>;
-pub type TreeSitterLanguageWeak = Weak<Language>;
-
 pub struct SyntaxManager {
   loader: SyntaxLoader,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
-  grammars: FoldMap<CompactString, TreeSitterLanguageArc>,
+  grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
   tags_queries: FoldMap<CompactString, String>,
   injection_queries: FoldMap<CompactString, String>,
@@ -685,7 +682,7 @@ impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
     grammar_id: CompactString,
-    grammar: TreeSitterLanguageArc,
+    grammar: Language,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
