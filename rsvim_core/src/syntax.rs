@@ -20,7 +20,6 @@ use std::sync::Weak;
 use tree_sitter::InputEdit;
 use tree_sitter::Language;
 use tree_sitter::LanguageError;
-use tree_sitter::LanguageFn;
 use tree_sitter::Parser;
 use tree_sitter::Point;
 use tree_sitter::Query;
