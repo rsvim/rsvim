@@ -923,17 +923,23 @@ impl EventLoop {
         }
         MasterMessage::LoadTreeSitterGrammarReq(req) => {
           trace!("Recv LoadTreeSitterGrammarReq:{:?}", req.task_id);
-          let syn_loader = lock!(self.syntax_manager).loader();
+          let syn_manager = self.syntax_manager.clone();
+          let syn_loader = lock!(syn_manager).loader();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
 
           self.detached_tracker.spawn(async move {
             let load_req = SyntaxLoadGrammarRequest {
               grammar_path: req.grammar_path,
             };
-            let loaded_grammar =
-              syntax::async_load_grammar(syn_loader, load_req).await;
-            match loaded_grammar {
-              Ok(grammar_id) => {
+            let load_result =
+              lock!(syn_loader).async_load_grammar(load_req).await;
+            match load_result {
+              Ok((grammar_id, grammar)) => {
+                lock!(syn_manager).insert_grammar(
+                  grammar_id.clone(),
+                  grammar,
+                  None,
+                );
                 jsrt_forwarder_tx
                   .send(JsMessage::LoadTreeSitterGrammarResp(
                     chan::LoadTreeSitterGrammarResp {

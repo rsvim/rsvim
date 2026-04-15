@@ -557,15 +557,15 @@ impl SyntaxManager {
 impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
-    id: CompactString,
+    grammar_id: CompactString,
     grammar: Language,
     highlight_query: Option<String>,
   ) {
-    self.grammars.insert(id.clone(), grammar);
+    self.grammars.insert(grammar_id.clone(), grammar);
     if let Some(hl_query) = highlight_query {
-      self.highlight_queries.insert(id.clone(), hl_query);
+      self.highlight_queries.insert(grammar_id.clone(), hl_query);
     }
-    self.gid2ext.entry(id.clone()).or_default();
+    self.gid2ext.entry(grammar_id.clone()).or_default();
   }
 
   pub fn get_grammar(&self, id: &str) -> Option<&Language> {
