@@ -334,20 +334,6 @@ pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
 }
 
-impl SyntaxLoadGrammarRequest {
-  pub fn src_path(&self) -> PathBuf {
-    self.grammar_path.join("src")
-  }
-
-  pub fn queries_path(&self) -> PathBuf {
-    self.grammar_path.join("queries")
-  }
-
-  pub fn grammar_json_path(&self) -> PathBuf {
-    self.src_path().join("grammar.json")
-  }
-}
-
 impl SyntaxLoader {
   pub fn new() -> Self {
     let parser_lib_path =
@@ -400,11 +386,11 @@ struct SyntaxTreeSitterMetainfo {
 }
 
 impl SyntaxLoader {
-  pub fn grammar_metainfo(
+  pub fn parse_treesitter_metainfo(
     grammar_path: &Path,
   ) -> TheResult<SyntaxTreeSitterMetainfo> {
     let err = || {
-      TheErr::TreeSitterGrammarNotFound(
+      TheErr::TreeSitterParserNotFound(
         grammar_path.to_string_lossy().to_compact_string(),
       )
     };
@@ -494,7 +480,7 @@ impl SyntaxLoader {
     let grammar_json_path = req.grammar_json_path();
     let grammar_json_path = grammar_json_path.as_path();
     let err = || {
-      TheErr::TreeSitterGrammarNotFound(
+      TheErr::TreeSitterParserNotFound(
         grammar_json_path.to_string_lossy().to_compact_string(),
       )
     };
@@ -516,18 +502,16 @@ impl SyntaxLoader {
     &mut self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
-    /* grammar_id */ CompactString,
+    /* metainfo */ SyntaxTreeSitterMetainfo,
     /* grammar */ Language,
-    /* highlight_query */ Option<String>,
   )> {
-    let src_path = req.src_path();
-    let src_path = src_path.as_path();
-    let grammar_id = Self::get_grammar_name_from_src_path(&req)?;
-    let compile_cfg = CompileConfig::new(src_path, None, None);
+    let metainfo = Self::parse_treesitter_metainfo(req.grammar_path.as_path())?;
+    let compile_cfg =
+      CompileConfig::new(metainfo.src_path.as_path(), None, None);
     match lock!(self.loader).load_language_at_path(compile_cfg) {
-      Ok(grammar) => Ok((grammar_id, grammar, None)),
-      Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
-        grammar_id.to_compact_string(),
+      Ok(grammar) => Ok((metainfo, grammar)),
+      Err(e) => Err(TheErr::LoadTreeSitterParserFailed(
+        req.grammar_path.to_string_lossy().to_compact_string(),
         e,
       )),
     }
