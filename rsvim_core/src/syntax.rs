@@ -316,15 +316,8 @@ impl Syntax {
   }
 }
 
-pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
-pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
-pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
-
 pub struct SyntaxLoader {
-  loader: TreeSitterLoaderArc,
-
-  // Loaded grammars/parsers
-  grammars: FoldMap<CompactString, Language>,
+  loader: Loader,
 }
 
 arc_mutex_ptr!(SyntaxLoader);
@@ -349,43 +342,23 @@ impl SyntaxLoader {
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
-        parser_lib_path,
-      ))),
-      grammars: FoldMap::new(),
+      loader: Loader::with_parser_lib_path(parser_lib_path),
     }
   }
 
   pub fn treesitter_parser_lib_path(&self) -> PathBuf {
-    lock!(self.loader).parser_lib_path.clone()
+    self.loader.parser_lib_path.clone()
   }
 
-  /// NOTE: This will reset the tree-sitter loader and all loaded
-  /// parsers/grammars.
   pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
-    lock!(self.loader).parser_lib_path = parser_lib_path;
-    self.grammars.clear();
-  }
-
-  pub fn treesitter_loader(&self) -> TreeSitterLoaderArc {
-    self.loader.clone()
-  }
-
-  pub fn cached_grammars(&self) -> &FoldMap<CompactString, Language> {
-    &self.grammars
-  }
-
-  pub fn cached_grammars_mut(
-    &mut self,
-  ) -> &mut FoldMap<CompactString, Language> {
-    &mut self.grammars
+    self.loader.parser_lib_path = parser_lib_path;
   }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxGrammarLoader")
-      .field("grammars", &self.grammars)
+    f.debug_struct("SyntaxLoader")
+      .field("parser_lib_path", &self.loader.parser_lib_path)
       .finish()
   }
 }
@@ -425,7 +398,7 @@ impl SyntaxLoader {
     let src_path = src_path.as_path();
     let grammar_id = Self::get_grammar_name_from_src_path(&req)?;
     let compile_cfg = CompileConfig::new(src_path, None, None);
-    match lock!(self.loader).load_language_at_path(compile_cfg) {
+    match self.loader.load_language_at_path(compile_cfg) {
       Ok(grammar) => Ok((grammar_id, grammar)),
       Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
         grammar_id.to_compact_string(),
@@ -438,14 +411,8 @@ impl SyntaxLoader {
     &mut self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<CompactString> {
-    let load_result = self._load_treesitter_grammar(req);
-    match load_result {
-      Ok((grammar_id, grammar)) => {
-        self.grammars.insert(grammar_id.clone(), grammar);
-        Ok(grammar_id)
-      }
-      Err(e) => Err(e),
-    }
+    let (grammar_id, _grammar) = self._load_treesitter_grammar(req)?;
+    Ok(grammar_id)
   }
 
   pub async fn async_load_grammar(
