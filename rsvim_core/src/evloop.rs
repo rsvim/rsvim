@@ -924,38 +924,16 @@ impl EventLoop {
         MasterMessage::LoadTreeSitterGrammarReq(req) => {
           trace!("Recv LoadTreeSitterGrammarReq:{:?}", req.task_id);
           let syn_manager = self.syntax_manager.clone();
-          let syn_loader = lock!(syn_manager).loader();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
 
           self.detached_tracker.spawn(async move {
             let load_req = SyntaxLoadGrammarRequest {
               grammar_path: req.grammar_path,
             };
-            let load_result = syn_loader.async_load_grammar(load_req).await;
+            let load_result =
+              syntax::async_load_syntax_grammar(syn_manager, load_req).await;
             match load_result {
-              Ok((metainfo, grammar)) => {
-                for grammar_metainfo in metainfo.grammars.iter() {
-                  let highlight_query = match &grammar_metainfo.highlights {
-                    Some(highlights) => {
-                      tokio::fs::read_to_string(highlights).await.ok()
-                    }
-                    None => None,
-                  };
-                  let tags_query = match &grammar_metainfo.tags {
-                    Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
-                    None => None,
-                  };
-                  lock!(syn_manager).insert_grammar(
-                    grammar_metainfo.name.clone(),
-                    grammar.clone(),
-                    highlight_query,
-                    tags_query,
-                    grammar_metainfo
-                      .injection_regex
-                      .as_ref()
-                      .map(|inj| inj.to_string()),
-                  );
-                }
+              Ok(metainfo) => {
                 let grammar_names = metainfo
                   .grammars
                   .iter()
