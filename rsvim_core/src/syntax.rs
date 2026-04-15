@@ -1,7 +1,6 @@
 //! Tree-sitter based syntax engine.
 
 use crate::buf::Buffer;
-use crate::cfg::path_cfg::PATH_CONFIG;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
@@ -335,7 +334,18 @@ pub struct SyntaxLoadGrammarRequest {
 }
 
 impl SyntaxLoader {
+  #[cfg(test)]
   pub fn new() -> Self {
+    Self {
+      loader: Arc::new(Mutex::new(Loader::new())),
+      parser_lib_path,
+    }
+  }
+
+  #[cfg(not(test))]
+  pub fn new() -> Self {
+    use crate::cfg::path_cfg::PATH_CONFIG;
+
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
