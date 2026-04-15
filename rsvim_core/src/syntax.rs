@@ -346,8 +346,8 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> &PathBuf {
-    &self.parser_lib_path
+  pub fn treesitter_parser_lib_path(&self) -> &Path {
+    self.parser_lib_path.as_path()
   }
 
   pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
@@ -594,17 +594,17 @@ impl SyntaxManager {
     it
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> PathBuf {
-    lock!(self.loader).treesitter_parser_lib_path()
+  pub fn treesitter_parser_lib_path(&self) -> &Path {
+    self.loader.treesitter_parser_lib_path()
   }
 
   /// NOTE: This will reset the tree-sitter loader and all loaded
   /// parsers/grammars.
   pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
-    lock!(self.loader).set_treesitter_parser_lib_path(parser_lib_path);
+    self.loader.set_treesitter_parser_lib_path(parser_lib_path);
   }
 
-  pub fn loader(&self) -> SyntaxLoaderArc {
+  pub fn loader(&self) -> SyntaxLoader {
     self.loader.clone()
   }
 
