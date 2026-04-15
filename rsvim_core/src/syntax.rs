@@ -604,8 +604,8 @@ impl SyntaxManager {
     self.loader.set_treesitter_parser_lib_path(parser_lib_path);
   }
 
-  pub fn loader(&self) -> SyntaxLoader {
-    self.loader.clone()
+  pub fn loader(&self) -> &SyntaxLoader {
+    &self.loader
   }
 
   /// Associate a grammar ID with a file extension.
