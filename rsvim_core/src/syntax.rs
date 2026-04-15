@@ -365,7 +365,7 @@ impl Debug for SyntaxLoader {
 }
 
 #[derive(Debug, Clone)]
-struct SyntaxTreeSitterGrammarMetainfoGrammar {
+pub struct SyntaxTreeSitterGrammarMetainfoGrammar {
   pub name: CompactString,
   pub camelcase: CompactString,
   pub scope: CompactString,
@@ -377,7 +377,7 @@ struct SyntaxTreeSitterGrammarMetainfoGrammar {
 }
 
 #[derive(Debug, Clone)]
-struct SyntaxTreeSitterGrammarMetainfo {
+pub struct SyntaxTreeSitterGrammarMetainfo {
   pub grammars: Vec<SyntaxTreeSitterGrammarMetainfoGrammar>,
   pub grammar_path: PathBuf,
   pub src_path: PathBuf,
@@ -519,6 +519,80 @@ impl SyntaxLoader {
   }
 }
 
+fn save_loaded_grammars(
+  syn_manager: &SyntaxManagerArc,
+  metainfo: &SyntaxTreeSitterGrammarMetainfo,
+  grammar: &Language,
+) {
+  for grammar_metainfo in metainfo.grammars.iter() {
+    let highlight_query = match &grammar_metainfo.highlights {
+      Some(highlights) => std::fs::read_to_string(highlights).ok(),
+      None => None,
+    };
+    let tags_query = match &grammar_metainfo.tags {
+      Some(tags) => std::fs::read_to_string(tags).ok(),
+      None => None,
+    };
+    lock!(syn_manager).insert_grammar(
+      grammar_metainfo.name.clone(),
+      grammar.clone(),
+      highlight_query,
+      tags_query,
+      grammar_metainfo
+        .injection_regex
+        .as_ref()
+        .map(|inj| inj.to_string()),
+    );
+  }
+}
+
+async fn async_save_loaded_grammars(
+  syn_manager: &SyntaxManagerArc,
+  metainfo: &SyntaxTreeSitterGrammarMetainfo,
+  grammar: &Language,
+) {
+  for grammar_metainfo in metainfo.grammars.iter() {
+    let highlight_query = match &grammar_metainfo.highlights {
+      Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
+      None => None,
+    };
+    let tags_query = match &grammar_metainfo.tags {
+      Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
+      None => None,
+    };
+    lock!(syn_manager).insert_grammar(
+      grammar_metainfo.name.clone(),
+      grammar.clone(),
+      highlight_query,
+      tags_query,
+      grammar_metainfo
+        .injection_regex
+        .as_ref()
+        .map(|inj| inj.to_string()),
+    );
+  }
+}
+
+pub fn load_syntax_grammar(
+  syn_manager: SyntaxManagerArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<SyntaxTreeSitterGrammarMetainfo> {
+  let syn_loader = lock!(syn_manager).loader();
+  let (metainfo, grammar) = syn_loader.load_grammar(req)?;
+  save_loaded_grammars(&syn_manager, &metainfo, &grammar);
+  Ok(metainfo)
+}
+
+pub async fn async_load_syntax_grammar(
+  syn_manager: SyntaxManagerArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<SyntaxTreeSitterGrammarMetainfo> {
+  let syn_loader = lock!(syn_manager).loader();
+  let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
+  async_save_loaded_grammars(&syn_manager, &metainfo, &grammar).await;
+  Ok(metainfo)
+}
+
 pub struct SyntaxManager {
   loader: SyntaxLoader,
 
@@ -635,8 +709,8 @@ impl SyntaxManager {
     self.loader.set_treesitter_parser_lib_path(parser_lib_path);
   }
 
-  pub fn loader(&self) -> &SyntaxLoader {
-    &self.loader
+  pub fn loader(&self) -> SyntaxLoader {
+    self.loader.clone()
   }
 
   /// Associate a grammar ID with a file extension.

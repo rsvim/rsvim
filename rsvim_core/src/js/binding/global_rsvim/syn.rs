@@ -9,7 +9,6 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::syntax::SyntaxLoadGrammarRequest;
-use crate::syntax::load_grammar;
 pub use load::SynLoadTreeSitterGrammarFuture;
 pub use load::SynLoadTreeSitterGrammarOptions;
 
@@ -33,9 +32,17 @@ pub fn load_treesitter_grammar_sync<'s>(
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
   };
 
-  match load_grammar(syn_loader, req) {
-    Ok(grammar_id) => {
-      rv.set(v8::String::new(scope, &grammar_id).unwrap().into());
+  match syn_loader.load_grammar(req) {
+    Ok((metainfo, _grammar)) => {
+      let grammar_names = metainfo
+        .grammars
+        .iter()
+        .map(|gm| gm.name.to_string())
+        .collect::<Vec<String>>()
+        .to_v8(scope, |scope, grammar_name| {
+          grammar_name.to_v8(scope).into()
+        });
+      rv.set(grammar_names.into());
     }
     Err(e) => {
       binding::throw_exception(scope, &e);
