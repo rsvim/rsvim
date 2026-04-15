@@ -338,7 +338,7 @@ impl SyntaxLoader {
   pub fn new() -> Self {
     Self {
       loader: Arc::new(Mutex::new(Loader::new().unwrap())),
-      parser_lib_path,
+      parser_lib_path: Path::new(".").to_path_buf(),
     }
   }
 
