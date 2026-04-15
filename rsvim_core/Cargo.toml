@@ -116,12 +116,7 @@ tokio = { workspace = true, features = [
 tokio-util = { workspace = true, features = ["full"] }
 toml = { workspace = true, features = ["fast_hash"] }
 tree-sitter = { workspace = true }
-tree-sitter-c = { workspace = true }
-tree-sitter-html = { workspace = true }
 tree-sitter-loader = { workspace = true }
-tree-sitter-md = { workspace = true }
-tree-sitter-rust = { workspace = true }
-tree-sitter-toml-ng = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
@@ -169,6 +164,11 @@ bitflags = { workspace = true }
 criterion = { workspace = true, features = ["async_tokio"] }
 fastrand = { workspace = true }
 regex = { workspace = true }
+tree-sitter-c = { workspace = true }
+tree-sitter-html = { workspace = true }
+tree-sitter-md = { workspace = true }
+tree-sitter-rust = { workspace = true }
+tree-sitter-toml-ng = { workspace = true }
 unicode-width = { workspace = true }
 
 [lints]
