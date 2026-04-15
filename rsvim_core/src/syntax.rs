@@ -379,7 +379,6 @@ struct SyntaxTreeSitterGrammarMetainfoGrammar {
 #[derive(Debug, Clone)]
 struct SyntaxTreeSitterGrammarMetainfo {
   pub grammars: Vec<SyntaxTreeSitterGrammarMetainfoGrammar>,
-
   pub grammar_path: PathBuf,
   pub src_path: PathBuf,
   pub grammar_json_path: PathBuf,

@@ -41,7 +41,6 @@ use crate::ui::tree::*;
 use crate::ui::widget::WidgetContext;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
-use fern::meta;
 use futures::StreamExt;
 use itertools::Itertools;
 use std::sync::Arc;
