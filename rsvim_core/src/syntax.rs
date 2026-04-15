@@ -500,7 +500,7 @@ impl SyntaxLoader {
     let compile_cfg =
       CompileConfig::new(metainfo.src_path.as_path(), None, None);
     match lock!(self.loader).load_language_at_path(compile_cfg) {
-      Ok(grammar) => Ok((metainfo, Arc::new(grammar))),
+      Ok(grammar) => Ok((metainfo, grammar)),
       Err(e) => Err(TheErr::LoadTreeSitterParserFailed(
         req.grammar_path.to_string_lossy().to_compact_string(),
         e,
