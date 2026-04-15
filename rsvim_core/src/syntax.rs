@@ -373,7 +373,7 @@ struct SyntaxTreeSitterGrammarMetainfoGrammar {
   pub file_types: Vec<CompactString>,
   pub highlights: Option<PathBuf>,
   pub tags: Option<PathBuf>,
-  pub injection_regex: Option<CompactString>,
+  pub injection_regex: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -461,7 +461,7 @@ impl SyntaxLoader {
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
-        .map(|ij| ij.to_compact_string());
+        .map(|inj| inj.to_string());
       let grammar_metainfo = SyntaxTreeSitterGrammarMetainfoGrammar {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
