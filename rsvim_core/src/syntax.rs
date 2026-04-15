@@ -5,6 +5,9 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use itertools::Itertools;
+use itertools::process_results;
+use normpath::PathExt;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -319,148 +322,297 @@ pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
 pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
+#[derive(Clone)]
 pub struct SyntaxLoader {
   loader: TreeSitterLoaderArc,
-
-  // Loaded grammars/parsers
-  grammars: FoldMap<CompactString, Language>,
+  parser_lib_path: PathBuf,
 }
-
-arc_mutex_ptr!(SyntaxLoader);
 
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
 }
 
-impl SyntaxLoadGrammarRequest {
-  pub fn src_path(&self) -> PathBuf {
-    self.grammar_path.join("src")
-  }
-
-  pub fn grammar_json_path(&self) -> PathBuf {
-    self.src_path().join("grammar.json")
-  }
-
-  // FIXME: tree-sitter-loader use `parser_lib_path` to configure where it
-  // caches all the compiled dynamic libraries (e.g. c.dll, rust.dylib, etc).
-  // For each parser/grammar, its `output_path` is built with `parser_lib_path`
-  // by default, so once we set a correct value for `parser_lib_path`, we no
-  // longer need to configure `output_path` for each parser/grammar.
-  //
-  // pub fn output_path(&self) -> TheResult<PathBuf> {
-  //   let grammar_id = get_grammar_name_from_src_path(self)?;
-  //   let mut out = self.grammar_path.join(grammar_id);
-  //   out.set_extension(std::env::consts::DLL_EXTENSION);
-  //   Ok(out)
-  // }
-}
-
 impl SyntaxLoader {
+  #[cfg(test)]
   pub fn new() -> Self {
+    let loader = Loader::new().unwrap();
+    let parser_lib_path = loader.parser_lib_path.clone();
     Self {
-      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
-      grammars: FoldMap::new(),
+      loader: Arc::new(Mutex::new(loader)),
+      parser_lib_path,
     }
   }
 
-  pub fn treesitter_loader(&self) -> TreeSitterLoaderArc {
-    self.loader.clone()
+  #[cfg(not(test))]
+  pub fn new() -> Self {
+    use crate::cfg::path_cfg::PATH_CONFIG;
+
+    let parser_lib_path =
+      PATH_CONFIG.config_home().join(".tree-sitter-parsers");
+    Self {
+      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
+        parser_lib_path.clone(),
+      ))),
+      parser_lib_path,
+    }
   }
 
-  pub fn cached_grammars(&self) -> &FoldMap<CompactString, Language> {
-    &self.grammars
+  pub fn treesitter_parser_lib_path(&self) -> &Path {
+    self.parser_lib_path.as_path()
   }
 
-  pub fn cached_grammars_mut(
-    &mut self,
-  ) -> &mut FoldMap<CompactString, Language> {
-    &mut self.grammars
+  pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
+    lock!(self.loader).parser_lib_path = parser_lib_path.clone();
+    self.parser_lib_path = parser_lib_path;
   }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxGrammarLoader")
-      .field("grammars", &self.grammars)
+    f.debug_struct("SyntaxLoader")
+      .field("parser_lib_path", &self.parser_lib_path)
       .finish()
   }
 }
 
-pub fn get_grammar_name_from_src_path(
-  req: &SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  let grammar_json_path = req.grammar_json_path();
-  let grammar_json_path = grammar_json_path.as_path();
-  let err = || {
-    TheErr::TreeSitterGrammarNotFound(
-      grammar_json_path.to_string_lossy().to_compact_string(),
-    )
-  };
-  let grammar_json_text =
-    std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
-  let grammar_json_data: serde_json::Value =
-    serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
-  match grammar_json_data.get("name") {
-    Some(name_value) => match name_value.as_str() {
-      Some(name) => Ok(name.to_compact_string()),
-      None => Err(err()),
-    },
-    None => Err(err()),
-  }
+#[derive(Debug, Clone)]
+pub struct SyntaxTreeSitterGrammarMetadata {
+  pub name: CompactString,
+  pub camelcase: CompactString,
+  pub scope: CompactString,
+  pub path: PathBuf,
+  pub file_types: Vec<CompactString>,
+  pub highlights: Option<PathBuf>,
+  pub tags: Option<PathBuf>,
+  pub injection_regex: Option<String>,
 }
 
-/// Load the tree-sitter parser (`Language`) FFI dynamic library.
-///
-/// NOTE: Make this method public only for testing purpose.
-pub fn _load_treesitter_grammar(
-  loader: TreeSitterLoaderArc,
-  req: SyntaxLoadGrammarRequest,
-) -> TheResult<(CompactString, Language)> {
-  let src_path = req.src_path();
-  let src_path = src_path.as_path();
-  let grammar_id = get_grammar_name_from_src_path(&req)?;
-  let compile_cfg = CompileConfig::new(src_path, None, None);
-  match lock!(loader).load_language_at_path(compile_cfg) {
-    Ok(grammar) => Ok((grammar_id, grammar)),
-    Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
-      grammar_id.to_compact_string(),
-      e,
-    )),
-  }
+#[derive(Debug, Clone)]
+pub struct SyntaxTreeSitterGrammarRepository {
+  pub grammars: Vec<SyntaxTreeSitterGrammarMetadata>,
+  pub grammar_path: PathBuf,
+  pub src_path: PathBuf,
+  pub grammar_json_path: PathBuf,
 }
 
-pub fn load_grammar(
-  syn_loader: SyntaxLoaderArc,
-  req: SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  let loader = lock!(syn_loader).treesitter_loader();
-  let load_result = _load_treesitter_grammar(loader, req);
-  let mut syn_loader = lock!(syn_loader);
-  match load_result {
-    Ok((grammar_id, grammar)) => {
-      syn_loader
-        .cached_grammars_mut()
-        .insert(grammar_id.clone(), grammar);
-      Ok(grammar_id)
+impl SyntaxLoader {
+  pub fn parse_treesitter_grammar_metadata(
+    grammar_path: &Path,
+  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
+    let err = || {
+      TheErr::TreeSitterParserNotFound(
+        grammar_path.to_string_lossy().to_compact_string(),
+      )
+    };
+
+    let tree_sitter_json_path = grammar_path.join("tree-sitter.json");
+    let tree_sitter_json_text =
+      std::fs::read_to_string(tree_sitter_json_path).map_err(|_e| err())?;
+    let tree_sitter_json_data: serde_json::Value =
+      serde_json::from_str(&tree_sitter_json_text).map_err(|_e| err())?;
+
+    let tree_sitter_json_grammars = tree_sitter_json_data
+      .get("grammars")
+      .ok_or(err())?
+      .as_array()
+      .ok_or(err())?;
+
+    let mut grammars_metainfo =
+      Vec::with_capacity(tree_sitter_json_grammars.len());
+    for grammar in tree_sitter_json_grammars {
+      let name = grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
+      let camelcase = grammar
+        .get("camelcase")
+        .ok_or(err())?
+        .as_str()
+        .ok_or(err())?;
+      let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
+      let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
+      let path = grammar_path
+        .join(path)
+        .normalize()
+        .map_err(|_e| err())?
+        .into_path_buf();
+      let file_types = grammar
+        .get("file-types")
+        .ok_or(err())?
+        .as_array()
+        .ok_or(err())?
+        .iter()
+        .map(|ft| ft.as_str().ok_or(err()));
+      let file_types = process_results(file_types, |ft| ft.collect_vec())?
+        .iter()
+        .map(|ft| ft.to_compact_string())
+        .collect_vec();
+      let highlights = grammar
+        .get("highlights")
+        .map(|hl| hl.as_str().ok_or(err()))
+        .transpose()?
+        .map(|hl| {
+          grammar_path
+            .join(hl)
+            .normalize()
+            .map(|hl| hl.into_path_buf())
+            .map_err(|_e| err())
+        })
+        .transpose()?;
+      let tags = grammar
+        .get("tags")
+        .map(|tg| tg.as_str().ok_or(err()))
+        .transpose()?
+        .map(|tg| {
+          grammar_path
+            .join(tg)
+            .normalize()
+            .map(|tg| tg.into_path_buf())
+            .map_err(|_e| err())
+        })
+        .transpose()?;
+      let injection_regex = grammar
+        .get("injection-regex")
+        .map(|tg| tg.as_str().ok_or(err()))
+        .transpose()?
+        .map(|inj| inj.to_string());
+      let grammar_metainfo = SyntaxTreeSitterGrammarMetadata {
+        name: name.to_compact_string(),
+        camelcase: camelcase.to_compact_string(),
+        scope: scope.to_compact_string(),
+        path,
+        file_types,
+        highlights,
+        tags,
+        injection_regex,
+      };
+      grammars_metainfo.push(grammar_metainfo);
     }
-    Err(e) => Err(e),
+
+    let src_path = grammar_path.join("src");
+    let grammar_json_path = src_path.join("grammar.json");
+
+    let metainfo = SyntaxTreeSitterGrammarRepository {
+      grammars: grammars_metainfo,
+      grammar_path: grammar_path.to_path_buf(),
+      src_path,
+      grammar_json_path,
+    };
+    Ok(metainfo)
+  }
+
+  /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
+  pub fn load_grammar(
+    &self,
+    req: SyntaxLoadGrammarRequest,
+  ) -> TheResult<(
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
+    /* grammar */ Language,
+  )> {
+    let metainfo =
+      Self::parse_treesitter_grammar_metadata(req.grammar_path.as_path())?;
+    let compile_cfg =
+      CompileConfig::new(metainfo.src_path.as_path(), None, None);
+    match lock!(self.loader).load_language_at_path(compile_cfg) {
+      Ok(grammar) => Ok((metainfo, grammar)),
+      Err(e) => Err(TheErr::LoadTreeSitterParserFailed(
+        req.grammar_path.to_string_lossy().to_compact_string(),
+        e,
+      )),
+    }
+  }
+
+  pub async fn async_load_grammar(
+    &self,
+    req: SyntaxLoadGrammarRequest,
+  ) -> TheResult<(
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
+    /* grammar */ Language,
+  )> {
+    self.load_grammar(req)
   }
 }
 
-pub async fn async_load_grammar(
-  syn_loader: SyntaxLoaderArc,
+fn save_loaded_grammars(
+  syn_manager: &SyntaxManagerArc,
+  metainfo: &SyntaxTreeSitterGrammarRepository,
+  grammar: &Language,
+) {
+  for grammar_metainfo in metainfo.grammars.iter() {
+    let highlight_query = match &grammar_metainfo.highlights {
+      Some(highlights) => std::fs::read_to_string(highlights).ok(),
+      None => None,
+    };
+    let tags_query = match &grammar_metainfo.tags {
+      Some(tags) => std::fs::read_to_string(tags).ok(),
+      None => None,
+    };
+    lock!(syn_manager).insert_grammar(
+      grammar_metainfo.name.clone(),
+      grammar.clone(),
+      highlight_query,
+      tags_query,
+      grammar_metainfo
+        .injection_regex
+        .as_ref()
+        .map(|inj| inj.to_string()),
+    );
+  }
+}
+
+async fn async_save_loaded_grammars(
+  syn_manager: &SyntaxManagerArc,
+  metainfo: &SyntaxTreeSitterGrammarRepository,
+  grammar: &Language,
+) {
+  for grammar_metainfo in metainfo.grammars.iter() {
+    let highlight_query = match &grammar_metainfo.highlights {
+      Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
+      None => None,
+    };
+    let tags_query = match &grammar_metainfo.tags {
+      Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
+      None => None,
+    };
+    lock!(syn_manager).insert_grammar(
+      grammar_metainfo.name.clone(),
+      grammar.clone(),
+      highlight_query,
+      tags_query,
+      grammar_metainfo
+        .injection_regex
+        .as_ref()
+        .map(|inj| inj.to_string()),
+    );
+  }
+}
+
+pub fn load_syntax_grammar(
+  syn_manager: SyntaxManagerArc,
   req: SyntaxLoadGrammarRequest,
-) -> TheResult<CompactString> {
-  load_grammar(syn_loader, req)
+) -> TheResult<SyntaxTreeSitterGrammarRepository> {
+  let syn_loader = lock!(syn_manager).loader();
+  let (metainfo, grammar) = syn_loader.load_grammar(req)?;
+  save_loaded_grammars(&syn_manager, &metainfo, &grammar);
+  Ok(metainfo)
+}
+
+pub async fn async_load_syntax_grammar(
+  syn_manager: SyntaxManagerArc,
+  req: SyntaxLoadGrammarRequest,
+) -> TheResult<SyntaxTreeSitterGrammarRepository> {
+  let syn_loader = lock!(syn_manager).loader();
+  let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
+  async_save_loaded_grammars(&syn_manager, &metainfo, &grammar).await;
+  Ok(metainfo)
 }
 
 pub struct SyntaxManager {
-  loader: SyntaxLoaderArc,
+  loader: SyntaxLoader,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
   highlight_queries: FoldMap<CompactString, String>,
+  tags_queries: FoldMap<CompactString, String>,
+  injection_queries: FoldMap<CompactString, String>,
 
   // Maps grammar ID to file extensions
   gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
@@ -473,77 +625,161 @@ arc_mutex_ptr!(SyntaxManager);
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
-      .field("loader", &lock!(self.loader))
-      .field("grammars", &self.grammars)
+      .field("loader", &self.loader)
+      .field("grammars", &self.grammars.keys())
       .field("highlight_queries", &self.highlight_queries)
+      .field("tags_queries", &self.tags_queries)
+      .field("injection_queries", &self.injection_queries)
       .field("grammarid2ext", &self.gid2ext)
       .field("ext2grammarid", &self.ext2gid)
       .finish()
   }
 }
 
+#[cfg(test)]
+// WARNING: This is for testing only
+struct _BuiltinTreeSitterGrammar {
+  pub grammar_name: CompactString,
+  pub language: Language,
+  pub highlight_query: Option<String>,
+  pub tags_query: Option<String>,
+  pub injection_query: Option<String>,
+  pub file_types: Vec<CompactString>,
+}
+
+#[cfg(test)]
+impl _BuiltinTreeSitterGrammar {
+  pub fn new(
+    grammar_name: &str,
+    language: Language,
+    highlight_query: Option<String>,
+    tags_query: Option<String>,
+    injection_query: Option<String>,
+    file_types: Vec<CompactString>,
+  ) -> Self {
+    Self {
+      grammar_name: grammar_name.to_compact_string(),
+      language,
+      highlight_query,
+      tags_query,
+      injection_query,
+      file_types,
+    }
+  }
+}
+
 // Language ID and file extensions {
 impl SyntaxManager {
+  #[cfg(not(test))]
   pub fn new() -> Self {
-    let mut it = Self {
-      loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
+    Self {
+      loader: SyntaxLoader::new(),
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
+      tags_queries: FoldMap::new(),
+      injection_queries: FoldMap::new(),
+      gid2ext: FoldMap::new(),
+      ext2gid: FoldMap::new(),
+    }
+  }
+
+  #[cfg(test)]
+  pub fn new() -> Self {
+    let mut it = Self {
+      loader: SyntaxLoader::new(),
+      grammars: FoldMap::new(),
+      highlight_queries: FoldMap::new(),
+      tags_queries: FoldMap::new(),
+      injection_queries: FoldMap::new(),
       gid2ext: FoldMap::new(),
       ext2gid: FoldMap::new(),
     };
 
     let grammar_bindings = [
-      (
+      _BuiltinTreeSitterGrammar::new(
         "c",
-        tree_sitter_c::LANGUAGE,
-        Some(tree_sitter_c::HIGHLIGHT_QUERY),
-        vec!["c", "h"],
+        tree_sitter_c::LANGUAGE.into(),
+        Some(tree_sitter_c::HIGHLIGHT_QUERY.to_string()),
+        Some(tree_sitter_c::TAGS_QUERY.to_string()),
+        None,
+        ["c", "h"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "rust",
-        tree_sitter_rust::LANGUAGE,
-        Some(tree_sitter_rust::HIGHLIGHTS_QUERY),
-        vec!["rs"],
+        tree_sitter_rust::LANGUAGE.into(),
+        Some(tree_sitter_rust::HIGHLIGHTS_QUERY.to_string()),
+        Some(tree_sitter_rust::TAGS_QUERY.to_string()),
+        Some(tree_sitter_rust::INJECTIONS_QUERY.to_string()),
+        ["rs"].iter().map(|ft| ft.to_compact_string()).collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "markdown",
-        tree_sitter_md::LANGUAGE,
-        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK),
-        vec!["md", "markdown"],
+        tree_sitter_md::LANGUAGE.into(),
+        Some(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string()),
+        None,
+        Some(tree_sitter_md::INJECTION_QUERY_BLOCK.to_string()),
+        ["md", "markdown"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "toml",
-        tree_sitter_toml_ng::LANGUAGE,
-        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY),
-        vec!["toml"],
+        tree_sitter_toml_ng::LANGUAGE.into(),
+        Some(tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string()),
+        None,
+        None,
+        ["toml"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
-      (
+      _BuiltinTreeSitterGrammar::new(
         "html",
-        tree_sitter_html::LANGUAGE,
-        Some(tree_sitter_html::HIGHLIGHTS_QUERY),
-        vec!["html", "htm"],
+        tree_sitter_html::LANGUAGE.into(),
+        Some(tree_sitter_html::HIGHLIGHTS_QUERY.to_string()),
+        None,
+        Some(tree_sitter_html::INJECTIONS_QUERY.to_string()),
+        ["html", "htm"]
+          .iter()
+          .map(|ft| ft.to_compact_string())
+          .collect_vec(),
       ),
     ];
 
     for grammar_binding in grammar_bindings {
-      for file_ext in grammar_binding.3.iter() {
+      for file_ext in grammar_binding.file_types.iter() {
         it.insert_file_ext(
-          grammar_binding.0.to_compact_string(),
-          file_ext.to_compact_string(),
+          grammar_binding.grammar_name.clone(),
+          file_ext.clone(),
         );
       }
       it.insert_grammar(
-        grammar_binding.0.to_compact_string(),
-        grammar_binding.1.into(),
-        grammar_binding.2.map(|q| q.to_string()),
+        grammar_binding.grammar_name.clone(),
+        grammar_binding.language,
+        grammar_binding.highlight_query,
+        grammar_binding.tags_query,
+        grammar_binding.injection_query,
       );
     }
 
     it
   }
 
-  pub fn loader(&self) -> SyntaxLoaderArc {
+  pub fn treesitter_parser_lib_path(&self) -> &Path {
+    self.loader.treesitter_parser_lib_path()
+  }
+
+  /// NOTE: This will reset the tree-sitter loader and all loaded
+  /// parsers/grammars.
+  pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
+    self.loader.set_treesitter_parser_lib_path(parser_lib_path);
+  }
+
+  pub fn loader(&self) -> SyntaxLoader {
     self.loader.clone()
   }
 
@@ -589,15 +825,25 @@ impl SyntaxManager {
 impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
-    id: CompactString,
+    grammar_name: CompactString,
     grammar: Language,
     highlight_query: Option<String>,
+    tags_query: Option<String>,
+    injection_query: Option<String>,
   ) {
-    self.grammars.insert(id.clone(), grammar);
-    if let Some(hl_query) = highlight_query {
-      self.highlight_queries.insert(id.clone(), hl_query);
+    self.grammars.insert(grammar_name.clone(), grammar);
+    if let Some(hl) = highlight_query {
+      self.highlight_queries.insert(grammar_name.clone(), hl);
     }
-    self.gid2ext.entry(id.clone()).or_default();
+    if let Some(tag) = tags_query {
+      self.tags_queries.insert(grammar_name.clone(), tag);
+    }
+    if let Some(injection) = injection_query {
+      self
+        .injection_queries
+        .insert(grammar_name.clone(), injection);
+    }
+    self.gid2ext.entry(grammar_name.clone()).or_default();
   }
 
   pub fn get_grammar(&self, id: &str) -> Option<&Language> {

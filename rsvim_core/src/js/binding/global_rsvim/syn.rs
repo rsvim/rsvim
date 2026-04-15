@@ -8,8 +8,8 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
-use crate::syntax::load_grammar;
 pub use load::SynLoadTreeSitterGrammarFuture;
 pub use load::SynLoadTreeSitterGrammarOptions;
 
@@ -28,14 +28,21 @@ pub fn load_treesitter_grammar_sync<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let syn_loader = lock!(state.syntax_manager).loader();
+
   let req = SyntaxLoadGrammarRequest {
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
   };
-
-  match load_grammar(syn_loader, req) {
-    Ok(grammar_id) => {
-      rv.set(v8::String::new(scope, &grammar_id).unwrap().into());
+  match syntax::load_syntax_grammar(state.syntax_manager.clone(), req) {
+    Ok(metainfo) => {
+      let grammar_names = metainfo
+        .grammars
+        .iter()
+        .map(|gm| gm.name.to_string())
+        .collect::<Vec<String>>()
+        .to_v8(scope, |scope, grammar_name| {
+          grammar_name.to_v8(scope).into()
+        });
+      rv.set(grammar_names.into());
     }
     Err(e) => {
       binding::throw_exception(scope, &e);

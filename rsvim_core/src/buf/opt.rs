@@ -1,4 +1,4 @@
-//! Vim buffer options.
+//! Buffer options.
 
 pub mod file_encoding;
 pub mod file_format;
@@ -23,7 +23,7 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 pub const FIX_END_OF_LINE: bool = true;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
-/// Local buffer options.
+/// Buffer options.
 pub struct BufferOptions {
   #[builder(default = EXPAND_TAB)]
   expand_tab: bool,

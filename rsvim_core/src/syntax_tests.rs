@@ -1169,19 +1169,21 @@ mod tests_grammar_loader {
 
   fn _run_loader(grammar_path: &str, hint: &str) {
     let grammar_path = Path::new(grammar_path);
-    let syn_loader = SyntaxLoader::new();
-    let opts = SyntaxLoadGrammarRequest {
+    let syn_manager = SyntaxManager::to_arc(SyntaxManager::new());
+    let req = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
+    let metainfo = grammar.unwrap();
+    info!("{}:{:?}", hint, metainfo);
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
+    let metainfo = grammar.unwrap();
+    info!("{}:{:?}", hint, metainfo);
   }
 
   // This test case always fail.
@@ -1232,15 +1234,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
@@ -1265,15 +1265,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)

@@ -38,11 +38,11 @@ pub enum TheErr {
   #[error("Failed to load syntax for language {0}: {1}.")]
   LoadSyntaxFailed(CompactString, LanguageError),
 
-  #[error("Failed to load tree-sitter grammar {0}: {1}.")]
-  LoadTreeSitterGrammarFailed(CompactString, LoaderError),
+  #[error("Failed to load tree-sitter parser {0}: {1}.")]
+  LoadTreeSitterParserFailed(CompactString, LoaderError),
 
-  #[error("Tree-sitter grammar not found: {0}.")]
-  TreeSitterGrammarNotFound(CompactString),
+  #[error("Tree-sitter parser not found: {0}.")]
+  TreeSitterParserNotFound(CompactString),
 
   #[error("Failed to load colorscheme: {0}.")]
   LoadColorSchemeFailed(CompactString),
