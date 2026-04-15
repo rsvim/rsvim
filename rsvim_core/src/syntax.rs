@@ -493,14 +493,14 @@ impl SyntaxLoader {
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
-    /* grammar */ Language,
+    /* grammar */ TreeSitterLanguageArc,
   )> {
     let metainfo =
       Self::parse_treesitter_grammar_metainfo(req.grammar_path.as_path())?;
     let compile_cfg =
       CompileConfig::new(metainfo.src_path.as_path(), None, None);
     match lock!(self.loader).load_language_at_path(compile_cfg) {
-      Ok(grammar) => Ok((metainfo, grammar)),
+      Ok(grammar) => Ok((metainfo, Arc::new(grammar))),
       Err(e) => Err(TheErr::LoadTreeSitterParserFailed(
         req.grammar_path.to_string_lossy().to_compact_string(),
         e,
@@ -513,17 +513,20 @@ impl SyntaxLoader {
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
-    /* grammar */ Language,
+    /* grammar */ TreeSitterLanguageArc,
   )> {
     self.load_grammar(req)
   }
 }
 
+pub type TreeSitterLanguageArc = Arc<Language>;
+pub type TreeSitterLanguageWeak = Weak<Language>;
+
 pub struct SyntaxManager {
   loader: SyntaxLoader,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
-  grammars: FoldMap<CompactString, Language>,
+  grammars: FoldMap<CompactString, TreeSitterLanguageArc>,
   highlight_queries: FoldMap<CompactString, String>,
   tags_queries: FoldMap<CompactString, String>,
   injection_queries: FoldMap<CompactString, String>,
@@ -682,7 +685,7 @@ impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
     grammar_id: CompactString,
-    grammar: Language,
+    grammar: TreeSitterLanguageArc,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,

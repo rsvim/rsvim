@@ -935,19 +935,19 @@ impl EventLoop {
             match load_result {
               Ok((metainfo, grammar)) => {
                 for grammar_metainfo in metainfo.grammars.iter() {
-                  let highlight_query = match grammar_metainfo.highlights {
+                  let highlight_query = match &grammar_metainfo.highlights {
                     Some(highlights) => {
                       tokio::fs::read_to_string(highlights).await.ok()
                     }
                     None => None,
                   };
-                  let tags_query = match grammar_metainfo.tags {
+                  let tags_query = match &grammar_metainfo.tags {
                     Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
                     None => None,
                   };
                   lock!(syn_manager).insert_grammar(
                     grammar_metainfo.name.clone(),
-                    grammar,
+                    grammar.clone(),
                     highlight_query,
                     tags_query,
                     grammar_metainfo.injection_regex.map(|inj| inj.to_string()),
