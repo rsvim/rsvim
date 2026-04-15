@@ -336,9 +336,11 @@ pub struct SyntaxLoadGrammarRequest {
 impl SyntaxLoader {
   #[cfg(test)]
   pub fn new() -> Self {
+    let loader = Loader::new().unwrap();
+    let parser_lib_path = loader.parser_lib_path.clone();
     Self {
-      loader: Arc::new(Mutex::new(Loader::new().unwrap())),
-      parser_lib_path: Path::new(".").to_path_buf(),
+      loader: Arc::new(Mutex::new(loader)),
+      parser_lib_path,
     }
   }
 
