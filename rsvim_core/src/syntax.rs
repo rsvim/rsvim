@@ -438,12 +438,26 @@ impl SyntaxLoader {
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
-        .map(|hl| Path::new(hl).to_path_buf());
+        .map(|hl| {
+          grammar_path
+            .join(hl)
+            .normalize()
+            .map(|hl| hl.into_path_buf())
+            .map_err(|_e| err())
+        })
+        .transpose()?;
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
-        .map(|tg| Path::new(tg).to_path_buf());
+        .map(|tg| {
+          grammar_path
+            .join(tg)
+            .normalize()
+            .map(|tg| tg.into_path_buf())
+            .map_err(|_e| err())
+        })
+        .transpose()?;
       let injection_regex = grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
