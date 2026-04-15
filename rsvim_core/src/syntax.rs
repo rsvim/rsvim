@@ -377,7 +377,7 @@ impl Debug for SyntaxLoader {
 }
 
 #[derive(Debug, Clone)]
-pub struct SyntaxTreeSitterGrammarMetadataGrammar {
+pub struct SyntaxTreeSitterGrammarMetadata {
   pub name: CompactString,
   pub camelcase: CompactString,
   pub scope: CompactString,
@@ -389,8 +389,8 @@ pub struct SyntaxTreeSitterGrammarMetadataGrammar {
 }
 
 #[derive(Debug, Clone)]
-pub struct SyntaxTreeSitterGrammarMetadata {
-  pub grammars: Vec<SyntaxTreeSitterGrammarMetadataGrammar>,
+pub struct SyntaxTreeSitterGrammarRepository {
+  pub grammars: Vec<SyntaxTreeSitterGrammarMetadata>,
   pub grammar_path: PathBuf,
   pub src_path: PathBuf,
   pub grammar_json_path: PathBuf,
@@ -399,7 +399,7 @@ pub struct SyntaxTreeSitterGrammarMetadata {
 impl SyntaxLoader {
   pub fn parse_treesitter_grammar_metadata(
     grammar_path: &Path,
-  ) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
+  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
     let err = || {
       TheErr::TreeSitterParserNotFound(
         grammar_path.to_string_lossy().to_compact_string(),
@@ -474,7 +474,7 @@ impl SyntaxLoader {
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|inj| inj.to_string());
-      let grammar_metainfo = SyntaxTreeSitterGrammarMetadataGrammar {
+      let grammar_metainfo = SyntaxTreeSitterGrammarMetadata {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
         scope: scope.to_compact_string(),
@@ -490,7 +490,7 @@ impl SyntaxLoader {
     let src_path = grammar_path.join("src");
     let grammar_json_path = src_path.join("grammar.json");
 
-    let metainfo = SyntaxTreeSitterGrammarMetadata {
+    let metainfo = SyntaxTreeSitterGrammarRepository {
       grammars: grammars_metainfo,
       grammar_path: grammar_path.to_path_buf(),
       src_path,
@@ -504,7 +504,7 @@ impl SyntaxLoader {
     &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarMetadata,
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
     /* grammar */ Language,
   )> {
     let metainfo =
@@ -524,7 +524,7 @@ impl SyntaxLoader {
     &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarMetadata,
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
     /* grammar */ Language,
   )> {
     self.load_grammar(req)
@@ -533,7 +533,7 @@ impl SyntaxLoader {
 
 fn save_loaded_grammars(
   syn_manager: &SyntaxManagerArc,
-  metainfo: &SyntaxTreeSitterGrammarMetadata,
+  metainfo: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
   for grammar_metainfo in metainfo.grammars.iter() {
@@ -560,7 +560,7 @@ fn save_loaded_grammars(
 
 async fn async_save_loaded_grammars(
   syn_manager: &SyntaxManagerArc,
-  metainfo: &SyntaxTreeSitterGrammarMetadata,
+  metainfo: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
   for grammar_metainfo in metainfo.grammars.iter() {
@@ -588,7 +588,7 @@ async fn async_save_loaded_grammars(
 pub fn load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
   req: SyntaxLoadGrammarRequest,
-) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
+) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.load_grammar(req)?;
   save_loaded_grammars(&syn_manager, &metainfo, &grammar);
@@ -598,7 +598,7 @@ pub fn load_syntax_grammar(
 pub async fn async_load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
   req: SyntaxLoadGrammarRequest,
-) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
+) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
   async_save_loaded_grammars(&syn_manager, &metainfo, &grammar).await;
