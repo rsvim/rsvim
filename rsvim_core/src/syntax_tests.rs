@@ -1234,15 +1234,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
@@ -1267,15 +1265,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts);
+    let grammar = syn_loader.load_grammar(opts.clone());
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
