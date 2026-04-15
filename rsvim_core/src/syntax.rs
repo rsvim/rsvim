@@ -442,7 +442,7 @@ impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxManager")
       .field("loader", &lock!(self.loader))
-      .field("grammars", &self.grammars)
+      .field("grammars", &self.grammars.keys())
       .field("highlight_queries", &self.highlight_queries)
       .field("grammarid2ext", &self.gid2ext)
       .field("ext2grammarid", &self.ext2gid)
