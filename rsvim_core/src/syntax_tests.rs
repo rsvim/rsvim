@@ -1169,20 +1169,20 @@ mod tests_grammar_loader {
 
   fn _run_loader(grammar_path: &str, hint: &str) {
     let grammar_path = Path::new(grammar_path);
-    let syn_loader = SyntaxLoader::new();
-    let opts = SyntaxLoadGrammarRequest {
+    let syn_manager = SyntaxManager::to_arc(SyntaxManager::new());
+    let req = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
-    let (metainfo, _) = grammar.unwrap();
+    let metainfo = grammar.unwrap();
     info!("{}:{:?}", hint, metainfo);
 
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
-    let (metainfo, _) = grammar.unwrap();
+    let metainfo = grammar.unwrap();
     info!("{}:{:?}", hint, metainfo);
   }
 
