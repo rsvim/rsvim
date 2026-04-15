@@ -474,29 +474,6 @@ impl SyntaxLoader {
     Ok(metainfo)
   }
 
-  pub fn get_grammar_name_from_src_path(
-    req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<CompactString> {
-    let grammar_json_path = req.grammar_json_path();
-    let grammar_json_path = grammar_json_path.as_path();
-    let err = || {
-      TheErr::TreeSitterParserNotFound(
-        grammar_json_path.to_string_lossy().to_compact_string(),
-      )
-    };
-    let grammar_json_text =
-      std::fs::read_to_string(grammar_json_path).map_err(|_e| err())?;
-    let grammar_json_data: serde_json::Value =
-      serde_json::from_str(&grammar_json_text).map_err(|_e| err())?;
-    match grammar_json_data.get("name") {
-      Some(name_value) => match name_value.as_str() {
-        Some(name) => Ok(name.to_compact_string()),
-        None => Err(err()),
-      },
-      None => Err(err()),
-    }
-  }
-
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
   pub fn load_grammar(
     &mut self,
