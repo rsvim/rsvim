@@ -681,23 +681,25 @@ impl SyntaxManager {
 impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
-    grammar_id: CompactString,
+    grammar_name: CompactString,
     grammar: Language,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
   ) {
-    self.grammars.insert(grammar_id.clone(), grammar);
+    self.grammars.insert(grammar_name.clone(), grammar);
     if let Some(hl) = highlight_query {
-      self.highlight_queries.insert(grammar_id.clone(), hl);
+      self.highlight_queries.insert(grammar_name.clone(), hl);
     }
     if let Some(tag) = tags_query {
-      self.tags_queries.insert(grammar_id.clone(), tag);
+      self.tags_queries.insert(grammar_name.clone(), tag);
     }
     if let Some(injection) = injection_query {
-      self.injection_queries.insert(grammar_id.clone(), injection);
+      self
+        .injection_queries
+        .insert(grammar_name.clone(), injection);
     }
-    self.gid2ext.entry(grammar_id.clone()).or_default();
+    self.gid2ext.entry(grammar_name.clone()).or_default();
   }
 
   pub fn get_grammar(&self, id: &str) -> Option<&Language> {
