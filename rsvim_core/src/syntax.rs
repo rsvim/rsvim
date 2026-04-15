@@ -387,11 +387,9 @@ impl SyntaxLoader {
     }
   }
 
-  /// Load the tree-sitter parser (`Language`) FFI dynamic library.
-  ///
-  /// NOTE: Make this method public only for testing purpose.
-  pub fn _load_treesitter_grammar(
-    &self,
+  /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
+  pub fn load_grammar(
+    &mut self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(CompactString, Language)> {
     let src_path = req.src_path();
@@ -407,18 +405,10 @@ impl SyntaxLoader {
     }
   }
 
-  pub fn load_grammar(
-    &mut self,
-    req: SyntaxLoadGrammarRequest,
-  ) -> TheResult<CompactString> {
-    let (grammar_id, _grammar) = self._load_treesitter_grammar(req)?;
-    Ok(grammar_id)
-  }
-
   pub async fn async_load_grammar(
     &mut self,
     req: SyntaxLoadGrammarRequest,
-  ) -> TheResult<CompactString> {
+  ) -> TheResult<(CompactString, Language)> {
     self.load_grammar(req)
   }
 }
