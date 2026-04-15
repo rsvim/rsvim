@@ -948,7 +948,9 @@ impl EventLoop {
                   lock!(syn_manager).insert_grammar(
                     grammar_metainfo.name.clone(),
                     grammar,
-                    None,
+                    highlight_query,
+                    tags_query,
+                    grammar_metainfo.injection_regex.map(|inj| inj.to_string()),
                   );
                 }
                 jsrt_forwarder_tx
