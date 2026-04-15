@@ -377,7 +377,7 @@ impl Debug for SyntaxLoader {
 }
 
 #[derive(Debug, Clone)]
-pub struct SyntaxTreeSitterGrammarMetainfoGrammar {
+pub struct SyntaxTreeSitterGrammarMetadataGrammar {
   pub name: CompactString,
   pub camelcase: CompactString,
   pub scope: CompactString,
@@ -389,17 +389,17 @@ pub struct SyntaxTreeSitterGrammarMetainfoGrammar {
 }
 
 #[derive(Debug, Clone)]
-pub struct SyntaxTreeSitterGrammarMetainfo {
-  pub grammars: Vec<SyntaxTreeSitterGrammarMetainfoGrammar>,
+pub struct SyntaxTreeSitterGrammarMetadata {
+  pub grammars: Vec<SyntaxTreeSitterGrammarMetadataGrammar>,
   pub grammar_path: PathBuf,
   pub src_path: PathBuf,
   pub grammar_json_path: PathBuf,
 }
 
 impl SyntaxLoader {
-  pub fn parse_treesitter_grammar_metainfo(
+  pub fn parse_treesitter_grammar_metadata(
     grammar_path: &Path,
-  ) -> TheResult<SyntaxTreeSitterGrammarMetainfo> {
+  ) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
     let err = || {
       TheErr::TreeSitterParserNotFound(
         grammar_path.to_string_lossy().to_compact_string(),
@@ -474,7 +474,7 @@ impl SyntaxLoader {
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|inj| inj.to_string());
-      let grammar_metainfo = SyntaxTreeSitterGrammarMetainfoGrammar {
+      let grammar_metainfo = SyntaxTreeSitterGrammarMetadataGrammar {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
         scope: scope.to_compact_string(),
@@ -490,7 +490,7 @@ impl SyntaxLoader {
     let src_path = grammar_path.join("src");
     let grammar_json_path = src_path.join("grammar.json");
 
-    let metainfo = SyntaxTreeSitterGrammarMetainfo {
+    let metainfo = SyntaxTreeSitterGrammarMetadata {
       grammars: grammars_metainfo,
       grammar_path: grammar_path.to_path_buf(),
       src_path,
@@ -504,11 +504,11 @@ impl SyntaxLoader {
     &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
+    /* metainfo */ SyntaxTreeSitterGrammarMetadata,
     /* grammar */ Language,
   )> {
     let metainfo =
-      Self::parse_treesitter_grammar_metainfo(req.grammar_path.as_path())?;
+      Self::parse_treesitter_grammar_metadata(req.grammar_path.as_path())?;
     let compile_cfg =
       CompileConfig::new(metainfo.src_path.as_path(), None, None);
     match lock!(self.loader).load_language_at_path(compile_cfg) {
@@ -524,7 +524,7 @@ impl SyntaxLoader {
     &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
+    /* metainfo */ SyntaxTreeSitterGrammarMetadata,
     /* grammar */ Language,
   )> {
     self.load_grammar(req)
@@ -533,7 +533,7 @@ impl SyntaxLoader {
 
 fn save_loaded_grammars(
   syn_manager: &SyntaxManagerArc,
-  metainfo: &SyntaxTreeSitterGrammarMetainfo,
+  metainfo: &SyntaxTreeSitterGrammarMetadata,
   grammar: &Language,
 ) {
   for grammar_metainfo in metainfo.grammars.iter() {
@@ -560,7 +560,7 @@ fn save_loaded_grammars(
 
 async fn async_save_loaded_grammars(
   syn_manager: &SyntaxManagerArc,
-  metainfo: &SyntaxTreeSitterGrammarMetainfo,
+  metainfo: &SyntaxTreeSitterGrammarMetadata,
   grammar: &Language,
 ) {
   for grammar_metainfo in metainfo.grammars.iter() {
@@ -588,7 +588,7 @@ async fn async_save_loaded_grammars(
 pub fn load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
   req: SyntaxLoadGrammarRequest,
-) -> TheResult<SyntaxTreeSitterGrammarMetainfo> {
+) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.load_grammar(req)?;
   save_loaded_grammars(&syn_manager, &metainfo, &grammar);
@@ -598,7 +598,7 @@ pub fn load_syntax_grammar(
 pub async fn async_load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
   req: SyntaxLoadGrammarRequest,
-) -> TheResult<SyntaxTreeSitterGrammarMetainfo> {
+) -> TheResult<SyntaxTreeSitterGrammarMetadata> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
   async_save_loaded_grammars(&syn_manager, &metainfo, &grammar).await;
