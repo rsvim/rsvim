@@ -404,7 +404,7 @@ impl SyntaxLoader {
     let src_path = src_path.as_path();
     let grammar_id = Self::get_grammar_name_from_src_path(&req)?;
     let compile_cfg = CompileConfig::new(src_path, None, None);
-    match self.loader.load_language_at_path(compile_cfg) {
+    match lock!(self.loader).load_language_at_path(compile_cfg) {
       Ok(grammar) => Ok((grammar_id, grammar)),
       Err(e) => Err(TheErr::LoadTreeSitterGrammarFailed(
         grammar_id.to_compact_string(),
