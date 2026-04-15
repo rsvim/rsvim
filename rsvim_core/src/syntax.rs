@@ -638,6 +638,20 @@ impl Debug for SyntaxManager {
 
 // Language ID and file extensions {
 impl SyntaxManager {
+  #[cfg(not(test))]
+  pub fn new() -> Self {
+    Self {
+      loader: SyntaxLoader::new(),
+      grammars: FoldMap::new(),
+      highlight_queries: FoldMap::new(),
+      tags_queries: FoldMap::new(),
+      injection_queries: FoldMap::new(),
+      gid2ext: FoldMap::new(),
+      ext2gid: FoldMap::new(),
+    }
+  }
+
+  #[cfg(test)]
   pub fn new() -> Self {
     let mut it = Self {
       loader: SyntaxLoader::new(),
