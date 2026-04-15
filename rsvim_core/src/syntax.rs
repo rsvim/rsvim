@@ -456,13 +456,13 @@ impl SyntaxLoader {
       let highlights = grammar
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
-        .transpose()?;
-      let highlights = highlights.map(|hl| Path::new(hl).to_path_buf());
+        .transpose()?
+        .map(|hl| Path::new(hl).to_path_buf());
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
-        .transpose()?;
-      let tags = tags.map(|tg| Path::new(tg).to_path_buf());
+        .transpose()?
+        .map(|tg| Path::new(tg).to_path_buf());
       let injection_regex = grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
