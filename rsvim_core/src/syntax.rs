@@ -316,11 +316,15 @@ impl Syntax {
   }
 }
 
-pub struct SyntaxLoader {
-  loader: Loader,
-}
+pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
+pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
+pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-arc_mutex_ptr!(SyntaxLoader);
+#[derive(Clone)]
+pub struct SyntaxLoader {
+  loader: TreeSitterLoaderArc,
+  parser_lib_path: PathBuf,
+}
 
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
@@ -342,23 +346,27 @@ impl SyntaxLoader {
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      loader: Loader::with_parser_lib_path(parser_lib_path),
+      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
+        parser_lib_path.clone(),
+      ))),
+      parser_lib_path,
     }
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> PathBuf {
-    self.loader.parser_lib_path.clone()
+  pub fn treesitter_parser_lib_path(&self) -> &PathBuf {
+    &self.parser_lib_path
   }
 
   pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
-    self.loader.parser_lib_path = parser_lib_path;
+    lock!(self.loader).parser_lib_path = parser_lib_path.clone();
+    self.parser_lib_path = parser_lib_path;
   }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxLoader")
-      .field("parser_lib_path", &self.loader.parser_lib_path)
+      .field("parser_lib_path", &self.parser_lib_path)
       .finish()
   }
 }
