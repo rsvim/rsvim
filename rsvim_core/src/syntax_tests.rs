@@ -1173,13 +1173,11 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
 
-    let grammar =
-      _load_treesitter_grammar(syn_loader.treesitter_loader(), opts.clone());
+    let grammar = syn_loader.load_grammar(opts.clone());
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
   }

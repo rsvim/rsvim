@@ -476,7 +476,7 @@ impl SyntaxLoader {
 
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
   pub fn load_grammar(
-    &mut self,
+    &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
@@ -496,7 +496,7 @@ impl SyntaxLoader {
   }
 
   pub async fn async_load_grammar(
-    &mut self,
+    &self,
     req: SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarMetainfo,
