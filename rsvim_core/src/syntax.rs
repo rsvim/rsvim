@@ -6,6 +6,9 @@ use crate::prelude::*;
 use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use itertools::Itertools;
+use itertools::process_results;
+use normpath::PathExt;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -336,6 +339,10 @@ impl SyntaxLoadGrammarRequest {
     self.grammar_path.join("src")
   }
 
+  pub fn queries_path(&self) -> PathBuf {
+    self.grammar_path.join("queries")
+  }
+
   pub fn grammar_json_path(&self) -> PathBuf {
     self.src_path().join("grammar.json")
   }
@@ -371,7 +378,106 @@ impl Debug for SyntaxLoader {
   }
 }
 
+#[derive(Debug, Clone)]
+struct SyntaxTreeSitterGrammarMetainfo {
+  pub name: CompactString,
+  pub camelcase: CompactString,
+  pub scope: CompactString,
+  pub path: PathBuf,
+  pub file_types: Vec<CompactString>,
+  pub highlights: Option<PathBuf>,
+  pub tags: Option<PathBuf>,
+  pub injection_regex: Option<CompactString>,
+}
+
+#[derive(Debug, Clone)]
+struct SyntaxTreeSitterMetainfo {
+  pub grammar_path: PathBuf,
+
+  pub grammars: Vec<SyntaxTreeSitterGrammarMetainfo>,
+
+  pub metadata_version: CompactString,
+  pub metadata_repository: CompactString,
+
+  pub src_path: PathBuf,
+  pub tree_sitter_json_path: PathBuf,
+  pub grammar_json_path: PathBuf,
+}
+
 impl SyntaxLoader {
+  pub fn grammar_metainfo(
+    grammar_path: &Path,
+  ) -> TheResult<SyntaxTreeSitterMetainfo> {
+    let err = || {
+      TheErr::TreeSitterGrammarNotFound(
+        grammar_path.to_string_lossy().to_compact_string(),
+      )
+    };
+
+    let tree_sitter_json_path = grammar_path.join("tree-sitter.json");
+    let tree_sitter_json_text =
+      std::fs::read_to_string(tree_sitter_json_path).map_err(|_e| err())?;
+    let tree_sitter_json_data: serde_json::Value =
+      serde_json::from_str(&tree_sitter_json_text).map_err(|_e| err())?;
+
+    let tree_sitter_json_grammars = tree_sitter_json_data
+      .get("grammars")
+      .ok_or(err())?
+      .as_array()
+      .ok_or(err())?;
+
+    let mut grammars_metadata =
+      Vec::with_capacity(tree_sitter_json_grammars.len());
+    for grammar in tree_sitter_json_grammars {
+      let name = grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
+      let camelcase = grammar
+        .get("camelcase")
+        .ok_or(err())?
+        .as_str()
+        .ok_or(err())?;
+      let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
+      let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
+      let path = grammar_path.join(path).normalize().map_err(|_e| err())?;
+      let filetypes = grammar
+        .get("file-types")
+        .ok_or(err())?
+        .as_array()
+        .ok_or(err())?
+        .iter()
+        .map(|ft| ft.as_str().ok_or(err()));
+      let filetypes = process_results(filetypes, |ft| ft.collect_vec());
+      let highlights = grammar
+        .get("highlights")
+        .map(|hl| hl.as_str().ok_or(err()))
+        .transpose()?;
+      let highlights = highlights.map(|hl| Path::new(hl));
+      let tags = grammar
+        .get("tags")
+        .map(|tg| tg.as_str().ok_or(err()))
+        .transpose()?;
+      let tags = tags.map(|tg| Path::new(tg));
+      let injection_regex = grammar
+        .get("injection-regex")
+        .map(|tg| tg.as_str().ok_or(err()))
+        .transpose()?;
+      let grammar_metadata = SyntaxTreeSitterGrammarMetainfo {
+        name: name.to_compact_string(),
+        camelcase: camelcase.to_compact_string(),
+      };
+    }
+
+    let src_path = grammar_path.join("src");
+    let src_path = grammar_path.join("src");
+
+    pub fn queries_path(&self) -> PathBuf {
+      self.grammar_path.join("queries")
+    }
+
+    pub fn grammar_json_path(&self) -> PathBuf {
+      self.src_path().join("grammar.json")
+    }
+  }
+
   pub fn get_grammar_name_from_src_path(
     req: &SyntaxLoadGrammarRequest,
   ) -> TheResult<CompactString> {
