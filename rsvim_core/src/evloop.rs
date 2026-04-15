@@ -950,7 +950,10 @@ impl EventLoop {
                     grammar.clone(),
                     highlight_query,
                     tags_query,
-                    grammar_metainfo.injection_regex.map(|inj| inj.to_string()),
+                    grammar_metainfo
+                      .injection_regex
+                      .as_ref()
+                      .map(|inj| inj.to_string()),
                   );
                 }
                 let grammar_names = metainfo
