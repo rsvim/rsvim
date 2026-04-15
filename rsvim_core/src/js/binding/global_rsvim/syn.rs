@@ -8,6 +8,7 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
 pub use load::SynLoadTreeSitterGrammarFuture;
 pub use load::SynLoadTreeSitterGrammarOptions;
@@ -27,13 +28,12 @@ pub fn load_treesitter_grammar_sync<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let syn_loader = lock!(state.syntax_manager).loader();
+
   let req = SyntaxLoadGrammarRequest {
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
   };
-
-  match syn_loader.load_grammar(req) {
-    Ok((metainfo, _grammar)) => {
+  match syntax::load_syntax_grammar(state.syntax_manager.clone(), req) {
+    Ok(metainfo) => {
       let grammar_names = metainfo
         .grammars
         .iter()
