@@ -693,7 +693,7 @@ impl SyntaxManager {
     ];
 
     for grammar_binding in grammar_bindings {
-      for file_ext in grammar_binding.3.iter() {
+      for file_ext in grammar_binding.5.iter() {
         it.insert_file_ext(
           grammar_binding.0.to_compact_string(),
           file_ext.to_compact_string(),
