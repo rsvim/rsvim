@@ -23,7 +23,6 @@ use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use opt::*;
-use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::fs::Metadata;
