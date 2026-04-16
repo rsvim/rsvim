@@ -322,9 +322,8 @@ pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
 pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-#[derive(Clone)]
 pub struct SyntaxLoader {
-  loader: TreeSitterLoaderArc,
+  loader: Mutex<Loader>,
 }
 
 arc_ptr!(SyntaxLoader);
@@ -339,7 +338,7 @@ impl SyntaxLoader {
   pub fn new() -> Self {
     let loader = Loader::new().unwrap();
     Self {
-      loader: Arc::new(Mutex::new(loader)),
+      loader: Mutex::new(loader),
     }
   }
 
@@ -350,9 +349,7 @@ impl SyntaxLoader {
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
-        parser_lib_path.clone(),
-      ))),
+      loader: Mutex::new(Loader::with_parser_lib_path(parser_lib_path.clone())),
     }
   }
 
