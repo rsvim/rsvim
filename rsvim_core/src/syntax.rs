@@ -666,7 +666,7 @@ impl _BuiltinTreeSitterGrammar {
 impl SyntaxManager {
   fn _new() -> Self {
     Self {
-      loader: Arc::new(SyntaxLoader::new()),
+      loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
