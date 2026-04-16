@@ -12,7 +12,6 @@ use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Range;
-use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;

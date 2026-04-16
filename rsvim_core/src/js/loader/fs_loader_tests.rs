@@ -6,7 +6,6 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use normpath::PathExt;
-use std::path::Path;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]

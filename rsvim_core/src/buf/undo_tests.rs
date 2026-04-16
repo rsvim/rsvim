@@ -10,7 +10,6 @@ use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::ops::Range;
-use std::path::Path;
 use std::time::Duration;
 
 const MAX_SIZE: usize = 100;
