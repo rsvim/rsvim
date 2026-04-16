@@ -1162,7 +1162,7 @@ export class RsvimOpt {
    *
    * @returns {string}
    *
-   * @defaultValue `8`
+   * @defaultValue `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers`, `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
    *
    * @example
    * ```javascript
