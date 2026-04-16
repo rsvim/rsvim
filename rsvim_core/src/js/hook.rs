@@ -11,7 +11,6 @@ use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::util::paths;
-use normpath::PathExt;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -81,7 +80,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   meta.create_data_property(scope, key.into(), value.into());
 
   // `import.meta.dirname`
-  let filepath = Path::new(&filename).normalize().unwrap();
+  let filepath = Path::new(&filename).normalize().to_path_buf();
   let dirname = paths::maybe_parent(&filepath);
   let key = v8::String::new(scope, "dirname").unwrap();
   let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
