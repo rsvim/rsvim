@@ -1,4 +1,4 @@
-exclude = ["tests_and_benchmarks"]
+exclude = ["tests_and_benchmarks/**/*.toml"]
 
 [formatting]
 reorder_keys = true
