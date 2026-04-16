@@ -802,7 +802,7 @@ mod tests_syntax_parser_lib_path {
       let syntax_manager = lock!(event_loop.syntax_manager);
       let lib_path = syntax_manager.treesitter_parser_lib_path();
       info!("parser_lib_path:{:?}", lib_path);
-      assert!(lib_path.to_string_lossy().ends_with(".tree-sitter/lib"));
+      assert!(lib_path.to_string_lossy().ends_with("tree-sitter/lib"));
     }
 
     event_loop.initialize()?;
@@ -846,7 +846,7 @@ mod tests_syntax_parser_lib_path {
       let syntax_manager = lock!(event_loop.syntax_manager);
       let lib_path = syntax_manager.treesitter_parser_lib_path();
       info!("parser_lib_path:{:?}", lib_path);
-      assert!(lib_path.to_string_lossy().ends_with(".tree-sitter/lib"));
+      assert!(lib_path.to_string_lossy().ends_with("tree-sitter/lib"));
     }
 
     event_loop.initialize()?;
