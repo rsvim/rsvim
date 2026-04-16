@@ -327,6 +327,8 @@ pub struct SyntaxLoader {
   loader: TreeSitterLoaderArc,
 }
 
+arc_ptr!(SyntaxLoader);
+
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
   pub grammar_path: PathBuf,
@@ -601,7 +603,7 @@ pub async fn async_load_syntax_grammar(
 }
 
 pub struct SyntaxManager {
-  loader: SyntaxLoader,
+  loader: SyntaxLoaderArc,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
@@ -665,10 +667,9 @@ impl _BuiltinTreeSitterGrammar {
 
 // Language ID and file extensions {
 impl SyntaxManager {
-  #[cfg(not(test))]
-  pub fn new() -> Self {
+  fn _new() -> Self {
     Self {
-      loader: SyntaxLoader::new(),
+      loader: Arc::new(SyntaxLoader::new()),
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
@@ -678,17 +679,14 @@ impl SyntaxManager {
     }
   }
 
+  #[cfg(not(test))]
+  pub fn new() -> Self {
+    Self::_new()
+  }
+
   #[cfg(test)]
   pub fn new() -> Self {
-    let mut it = Self {
-      loader: SyntaxLoader::new(),
-      grammars: FoldMap::new(),
-      highlight_queries: FoldMap::new(),
-      tags_queries: FoldMap::new(),
-      injection_queries: FoldMap::new(),
-      gid2ext: FoldMap::new(),
-      ext2gid: FoldMap::new(),
-    };
+    let mut it = Self::_new();
 
     let grammar_bindings = [
       _BuiltinTreeSitterGrammar::new(
