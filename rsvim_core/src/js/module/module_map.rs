@@ -254,9 +254,9 @@ impl ModuleMap {
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
     self.by_path.iter().find(|(k, _v)| {
       let kp = Path::new(k);
-      let kp = kp.normalize();
+      let kp = kp.canonicalize().unwrap();
       let pp = Path::new(path);
-      let pp = pp.normalize();
+      let pp = pp.canonicalize().unwrap();
       kp.ends_with(&pp) || pp.ends_with(kp)
     })
   }
