@@ -439,14 +439,7 @@ impl SyntaxLoader {
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
-        .map(|hl| {
-          grammar_path
-            .join(hl)
-            .normalize()
-            .map(|hl| hl.into_path_buf())
-            .map_err(|_e| err())
-        })
-        .transpose()?;
+        .map(|hl| grammar_path.join(hl).normalize().to_path_buf());
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
