@@ -21,8 +21,8 @@ pub trait PathExt {
   /// Absolutize file path, relative to current directory.
   fn absolutize(&self) -> Result<Cow<'_, Path>>;
 
-  /// Absolutize file path, relative to parameter `cwd` as current directory.
-  fn absolutize_with(&self, cwd: &Path) -> Cow<'_, Path>;
+  /// Same with [`PathExt::absolutize`], but relative to parameter `cwd` as current directory.
+  fn absolutize_with(&self, cwd: &Path) -> Result<Cow<'_, Path>>;
 }
 
 impl PathExt for Path {
