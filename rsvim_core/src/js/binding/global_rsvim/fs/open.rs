@@ -9,6 +9,7 @@ use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
+use std::path::Path;
 
 // Attribute names.
 pub const APPEND: &str = "append";
