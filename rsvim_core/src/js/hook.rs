@@ -80,7 +80,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   meta.create_data_property(scope, key.into(), value.into());
 
   // `import.meta.dirname`
-  let filepath = Path::new(&filename).normalize().to_path_buf();
+  let filepath = Path::new(&filename).canonicalize().unwrap();
   let dirname = paths::maybe_parent(&filepath);
   let key = v8::String::new(scope, "dirname").unwrap();
   let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
