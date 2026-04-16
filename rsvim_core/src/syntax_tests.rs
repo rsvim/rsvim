@@ -1173,13 +1173,13 @@ mod tests_grammar_loader {
     let req = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), &req);
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
     let metainfo = grammar.unwrap();
     info!("{}:{:?}", hint, metainfo);
 
-    let grammar = load_syntax_grammar(syn_manager.clone(), req.clone());
+    let grammar = load_syntax_grammar(syn_manager.clone(), &req);
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
     let metainfo = grammar.unwrap();
@@ -1234,13 +1234,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = syn_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = syn_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
@@ -1265,13 +1265,13 @@ mod tests_grammar_loader {
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = syn_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar = syn_loader.load_grammar(opts.clone());
+    let grammar = syn_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)

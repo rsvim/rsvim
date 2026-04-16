@@ -9,6 +9,7 @@ use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
+use std::path::Path;
 
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
@@ -282,4 +283,40 @@ pub fn set_fix_end_of_line<'s>(
   buffer_manager
     .global_local_options_mut()
     .set_fix_end_of_line(value);
+}
+
+/// Get the _syntax-parser-lib-path_ option.
+pub fn get_syntax_parser_lib_path(
+  scope: &mut v8::PinScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let syntax_manager = state_rc.borrow().syntax_manager.clone();
+  let syntax_manager = lock!(syntax_manager);
+  let value = syntax_manager
+    .loader()
+    .treesitter_parser_lib_path()
+    .to_string_lossy()
+    .to_v8(scope);
+  trace!("get_syntax_parser_lib_path: {:?}", value);
+  rv.set(value.into());
+}
+
+/// Set the _syntax-parser-lib-path_ option.
+pub fn set_syntax_parser_lib_path<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let value = args.get(0).to_rust_string_lossy(scope);
+  trace!("set_syntax_parser_lib_path: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let syntax_manager = state_rc.borrow().syntax_manager.clone();
+  let syntax_manager = lock!(syntax_manager);
+  syntax_manager
+    .loader()
+    .set_treesitter_parser_lib_path(Path::new(&value).to_path_buf());
 }

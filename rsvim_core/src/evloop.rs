@@ -931,7 +931,7 @@ impl EventLoop {
               grammar_path: req.grammar_path,
             };
             let load_result =
-              syntax::async_load_syntax_grammar(syn_manager, load_req).await;
+              syntax::async_load_syntax_grammar(syn_manager, &load_req).await;
             match load_result {
               Ok(metainfo) => {
                 let grammar_names = metainfo

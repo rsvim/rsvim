@@ -318,15 +318,15 @@ impl Syntax {
   }
 }
 
-pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
-pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
-pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+// pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
+// pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
+// pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
-#[derive(Clone)]
 pub struct SyntaxLoader {
-  loader: TreeSitterLoaderArc,
-  parser_lib_path: PathBuf,
+  loader: Mutex<Loader>,
 }
+
+arc_ptr!(SyntaxLoader);
 
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
@@ -337,10 +337,8 @@ impl SyntaxLoader {
   #[cfg(test)]
   pub fn new() -> Self {
     let loader = Loader::new().unwrap();
-    let parser_lib_path = loader.parser_lib_path.clone();
     Self {
-      loader: Arc::new(Mutex::new(loader)),
-      parser_lib_path,
+      loader: Mutex::new(loader),
     }
   }
 
@@ -351,27 +349,23 @@ impl SyntaxLoader {
     let parser_lib_path =
       PATH_CONFIG.config_home().join(".tree-sitter-parsers");
     Self {
-      loader: Arc::new(Mutex::new(Loader::with_parser_lib_path(
-        parser_lib_path.clone(),
-      ))),
-      parser_lib_path,
+      loader: Mutex::new(Loader::with_parser_lib_path(parser_lib_path.clone())),
     }
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> &Path {
-    self.parser_lib_path.as_path()
+  pub fn treesitter_parser_lib_path(&self) -> PathBuf {
+    lock!(self.loader).parser_lib_path.clone()
   }
 
-  pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
-    lock!(self.loader).parser_lib_path = parser_lib_path.clone();
-    self.parser_lib_path = parser_lib_path;
+  pub fn set_treesitter_parser_lib_path(&self, parser_lib_path: PathBuf) {
+    lock!(self.loader).parser_lib_path = parser_lib_path;
   }
 }
 
 impl Debug for SyntaxLoader {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SyntaxLoader")
-      .field("parser_lib_path", &self.parser_lib_path)
+      .field("parser_lib_path", &lock!(self.loader).parser_lib_path)
       .finish()
   }
 }
@@ -502,7 +496,7 @@ impl SyntaxLoader {
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
   pub fn load_grammar(
     &self,
-    req: SyntaxLoadGrammarRequest,
+    req: &SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarRepository,
     /* grammar */ Language,
@@ -522,7 +516,7 @@ impl SyntaxLoader {
 
   pub async fn async_load_grammar(
     &self,
-    req: SyntaxLoadGrammarRequest,
+    req: &SyntaxLoadGrammarRequest,
   ) -> TheResult<(
     /* metainfo */ SyntaxTreeSitterGrammarRepository,
     /* grammar */ Language,
@@ -587,7 +581,7 @@ async fn async_save_loaded_grammars(
 
 pub fn load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
-  req: SyntaxLoadGrammarRequest,
+  req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.load_grammar(req)?;
@@ -597,7 +591,7 @@ pub fn load_syntax_grammar(
 
 pub async fn async_load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
-  req: SyntaxLoadGrammarRequest,
+  req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
@@ -606,7 +600,7 @@ pub async fn async_load_syntax_grammar(
 }
 
 pub struct SyntaxManager {
-  loader: SyntaxLoader,
+  loader: SyntaxLoaderArc,
 
   // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
   grammars: FoldMap<CompactString, Language>,
@@ -670,10 +664,9 @@ impl _BuiltinTreeSitterGrammar {
 
 // Language ID and file extensions {
 impl SyntaxManager {
-  #[cfg(not(test))]
-  pub fn new() -> Self {
+  fn _new() -> Self {
     Self {
-      loader: SyntaxLoader::new(),
+      loader: SyntaxLoader::to_arc(SyntaxLoader::new()),
       grammars: FoldMap::new(),
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
@@ -683,17 +676,14 @@ impl SyntaxManager {
     }
   }
 
+  #[cfg(not(test))]
+  pub fn new() -> Self {
+    Self::_new()
+  }
+
   #[cfg(test)]
   pub fn new() -> Self {
-    let mut it = Self {
-      loader: SyntaxLoader::new(),
-      grammars: FoldMap::new(),
-      highlight_queries: FoldMap::new(),
-      tags_queries: FoldMap::new(),
-      injection_queries: FoldMap::new(),
-      gid2ext: FoldMap::new(),
-      ext2gid: FoldMap::new(),
-    };
+    let mut it = Self::_new();
 
     let grammar_bindings = [
       _BuiltinTreeSitterGrammar::new(
@@ -769,17 +759,17 @@ impl SyntaxManager {
     it
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> &Path {
+  pub fn treesitter_parser_lib_path(&self) -> PathBuf {
     self.loader.treesitter_parser_lib_path()
   }
 
   /// NOTE: This will reset the tree-sitter loader and all loaded
   /// parsers/grammars.
-  pub fn set_treesitter_parser_lib_path(&mut self, parser_lib_path: PathBuf) {
+  pub fn set_treesitter_parser_lib_path(&self, parser_lib_path: PathBuf) {
     self.loader.set_treesitter_parser_lib_path(parser_lib_path);
   }
 
-  pub fn loader(&self) -> SyntaxLoader {
+  pub fn loader(&self) -> SyntaxLoaderArc {
     self.loader.clone()
   }
 
