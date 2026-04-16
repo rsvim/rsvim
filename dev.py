@@ -348,7 +348,18 @@ class Format(Cmd):
 
     def tsc(self):
         cmd = "tsc"
+
+        # Compile .ts files into .js files
         run(cmd)
+
+        # Minify .js files into .min.js files
+        for file in ["00__web", "01__rsvim"]:
+            src_file = f"./rsvim_core/src/js/runtime/{file}.js"
+            dest_file = f"./rsvim_core/src/js/runtime/{file}.min.js"
+            cmd = f"terser {src_file} --keep-classnames --keep-fnames -o {dest_file}"
+            run(cmd)
+
+        # Post-process .d.ts files to avoid boring lint warnings
         for file in ["00__web.d.ts", "01__rsvim.d.ts"]:
             src_file = f"types/{file}"
             dest_file = f".{file}"

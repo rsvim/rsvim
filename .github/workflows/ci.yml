@@ -28,6 +28,7 @@ jobs:
       - name: Tsc
         run: |
           npm install -g typescript
+          npm install -g terser
           tsc --version
           echo "show PWD=${PWD}"
           echo "./dev.py fmt --tsc"
