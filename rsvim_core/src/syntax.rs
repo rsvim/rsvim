@@ -772,7 +772,7 @@ impl SyntaxManager {
     self.loader.set_treesitter_parser_lib_path(parser_lib_path);
   }
 
-  pub fn loader(&self) -> SyntaxLoader {
+  pub fn loader(&self) -> SyntaxLoaderArc {
     self.loader.clone()
   }
 
