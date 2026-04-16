@@ -13,6 +13,7 @@ use crate::prelude::*;
 use crate::util::paths;
 use normpath::PathExt;
 use std::cell::RefCell;
+use std::path::Path;
 use std::rc::Rc;
 
 /// Called during `Module::instantiate_module`, see:

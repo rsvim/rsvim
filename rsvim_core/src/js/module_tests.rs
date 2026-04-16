@@ -5,6 +5,7 @@ use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
+use std::path::Path;
 
 #[test]
 #[cfg_attr(miri, ignore)]

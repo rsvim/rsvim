@@ -44,6 +44,9 @@ use crate::prelude::*;
 use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 
+#[cfg(test)]
+use std::path::Path;
+
 #[derive(Clone)]
 /// Import kind.
 pub enum ImportKind {

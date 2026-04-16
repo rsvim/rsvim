@@ -4,6 +4,7 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use std::path::Path;
 use std::time::Duration;
 
 #[tokio::test]

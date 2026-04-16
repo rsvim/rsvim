@@ -7,6 +7,7 @@ use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::prelude::*;
+use std::path::Path;
 use tokio::time::Instant;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;

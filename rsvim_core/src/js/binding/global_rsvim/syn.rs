@@ -12,6 +12,7 @@ use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
 pub use load::SynLoadTreeSitterGrammarFuture;
 pub use load::SynLoadTreeSitterGrammarOptions;
+use std::path::Path;
 
 /// Javascript `loadTreeSitterGrammarSync` API.
 pub fn load_treesitter_grammar_sync<'s>(
