@@ -582,7 +582,7 @@ async fn async_save_loaded_grammars(
 
 pub fn load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
-  req: SyntaxLoadGrammarRequest,
+  req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.load_grammar(req)?;
@@ -592,7 +592,7 @@ pub fn load_syntax_grammar(
 
 pub async fn async_load_syntax_grammar(
   syn_manager: SyntaxManagerArc,
-  req: SyntaxLoadGrammarRequest,
+  req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syn_loader = lock!(syn_manager).loader();
   let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
@@ -764,7 +764,7 @@ impl SyntaxManager {
     it
   }
 
-  pub fn treesitter_parser_lib_path(&self) -> &Path {
+  pub fn treesitter_parser_lib_path(&self) -> PathBuf {
     self.loader.treesitter_parser_lib_path()
   }
 
