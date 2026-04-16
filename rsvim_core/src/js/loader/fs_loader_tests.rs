@@ -5,7 +5,6 @@ use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use normpath::PathExt;
 use std::path::Path;
 
 #[tokio::test]
@@ -44,8 +43,8 @@ export function sayHello() {
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&specifier).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&specifier).normalize(),
   );
 
   let actual_module1 = loader.load(&actual);
@@ -98,8 +97,8 @@ export function sayHello() {
     base, specifier, actual, expect
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -148,8 +147,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -198,8 +197,8 @@ export function sayHello() {
     base, specifier, actual,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&specifier).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&specifier).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -274,8 +273,8 @@ export function sayHello() {
     specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -379,8 +378,8 @@ export function sayHello() {
     specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -431,8 +430,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -483,8 +482,8 @@ export function sayHello() {
     specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -538,8 +537,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -692,8 +691,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -744,8 +743,8 @@ export function sayHello() {
   assert!(actual.is_err());
   // let actual = actual.unwrap();
   // assert_eq!(
-  //   Path::new(&actual).normalize().unwrap(),
-  //   Path::new(&expect).normalize().unwrap()
+  //   Path::new(&actual).normalize(),
+  //   Path::new(&expect).normalize()
   // );
   //
   // let actual_module1 = loader.load(&actual);
@@ -796,8 +795,8 @@ export function sayHello() {
   assert!(actual.is_err());
   // let actual = actual.unwrap();
   // assert_eq!(
-  //   Path::new(&actual).normalize().unwrap(),
-  //   Path::new(&expect).normalize().unwrap()
+  //   Path::new(&actual).normalize(),
+  //   Path::new(&expect).normalize()
   // );
   //
   // let actual_module1 = loader.load(&actual);
@@ -847,8 +846,8 @@ export function sayHello() {
     specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -906,8 +905,8 @@ export function sayHello() {
     specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -969,8 +968,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -1032,8 +1031,8 @@ export function sayHello() {
     base, specifier, actual, expect,
   );
   assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+    Path::new(&actual).normalize(),
+    Path::new(&expect).normalize()
   );
 
   let actual_module1 = loader.load(&actual);
@@ -1134,8 +1133,8 @@ export function sayHello() {
       specifier, actual, expect,
     );
     assert_eq!(
-      Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&actual).normalize(),
+      Path::new(&expect).normalize()
     );
 
     let actual_module1 = loader.load(&actual);
@@ -1166,8 +1165,8 @@ export function sayHello() {
       specifier, actual, expect,
     );
     assert_eq!(
-      Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&actual).normalize(),
+      Path::new(&expect).normalize()
     );
 
     let actual_module1 = loader.load(&actual);
@@ -1198,8 +1197,8 @@ export function sayHello() {
       specifier, actual, expect,
     );
     assert_eq!(
-      Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&actual).normalize(),
+      Path::new(&expect).normalize()
     );
 
     let actual_module1 = loader.load(&actual);
@@ -1230,8 +1229,8 @@ export function sayHello() {
       specifier, actual, expect,
     );
     assert_eq!(
-      Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&actual).normalize(),
+      Path::new(&expect).normalize()
     );
 
     let actual_module1 = loader.load(&actual);
