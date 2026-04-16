@@ -1132,10 +1132,10 @@ export class RsvimOpt {
   }
 
   /**
-   * Set the _expand-tab_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
+   * Set the _shift-width_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
    *
    *
-   * @param {boolean} value - The _expand-tab_ option.
+   * @param {number} value - The _shift-width_ option.
    * @throws Throws {@link !TypeError} if value is not an integer.
    *
    * @example
@@ -1172,14 +1172,14 @@ export class RsvimOpt {
    */
   get syntaxParserLibPath(): string {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_shift_width();
+    return __InternalRsvimGlobalObject.opt_get_syntax_parser_lib_path();
   }
 
   /**
    * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
    *
    *
-   * @param {boolean} value - The _expand-tab_ option.
+   * @param {} value - The _expand-tab_ option.
    * @throws Throws {@link !TypeError} if value is not an integer.
    *
    * @example
@@ -1188,11 +1188,10 @@ export class RsvimOpt {
    * Rsvim.opt.shiftWidth = 4;
    * ```
    */
-  set shiftWidth(value: number) {
-    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
-    value = boundByIntegers(value, [1, 255]);
+  set syntaxParserLibPath(value: string) {
+    checkIsString(value, `"Rsvim.opt.syntaxParserLibPath" value`);
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_shift_width(value);
+    __InternalRsvimGlobalObject.opt_set_syntax_parser_lib_path(value);
   }
 
   /**
