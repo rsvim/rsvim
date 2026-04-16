@@ -444,14 +444,7 @@ impl SyntaxLoader {
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
-        .map(|tg| {
-          grammar_path
-            .join(tg)
-            .normalize()
-            .map(|tg| tg.into_path_buf())
-            .map_err(|_e| err())
-        })
-        .transpose()?;
+        .map(|tg| grammar_path.join(tg).normalize().to_path_buf());
       let injection_regex = grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
