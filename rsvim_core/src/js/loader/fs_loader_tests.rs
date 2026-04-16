@@ -326,14 +326,10 @@ export function sayHello() {
   assert!(
     Path::new(&actual)
       .normalize()
-      .unwrap()
-      .as_path()
       .to_string_lossy()
       .contains(&expect)
       || Path::new(&expect)
         .normalize()
-        .unwrap()
-        .as_path()
         .to_string_lossy()
         .contains(&actual)
   );
