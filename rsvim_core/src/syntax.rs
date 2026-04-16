@@ -318,9 +318,9 @@ impl Syntax {
   }
 }
 
-pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
-pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
-pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
+// pub type TreeSitterLoaderArc = Arc<Mutex<Loader>>;
+// pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
+// pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
 pub struct SyntaxLoader {
   loader: Mutex<Loader>,
