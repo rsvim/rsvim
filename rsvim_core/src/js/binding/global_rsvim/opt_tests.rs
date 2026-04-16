@@ -800,8 +800,8 @@ mod tests_syntax_parser_lib_path {
     // Before running
     {
       let syntax_manager = lock!(event_loop.syntax_manager);
-      let global_local_options = syntax_manager.global_local_options();
-      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+      let lib_path = syntax_manager.treesitter_parser_lib_path();
+      assert!(lib_path.to_string_lossy().ends_with(".tree-sitter-parsers"));
     }
 
     event_loop.initialize()?;
@@ -812,13 +812,9 @@ mod tests_syntax_parser_lib_path {
 
     // After running
     {
-      let buffers = lock!(event_loop.buffer_manager);
-      let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.shift_width(), 4);
-
-      let contents = lock!(event_loop.cmdline_text);
-      let actual = contents.message().rope().to_string();
-      assert!(actual.trim().is_empty());
+      let syntax_manager = lock!(event_loop.syntax_manager);
+      let lib_path = syntax_manager.treesitter_parser_lib_path();
+      assert_eq!(lib_path.to_string_lossy(), ".");
     }
 
     Ok(())
