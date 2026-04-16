@@ -29,10 +29,10 @@ pub fn load_treesitter_grammar_sync<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
-  let req = SyntaxLoadGrammarRequest {
+  let load_req = SyntaxLoadGrammarRequest {
     grammar_path: Path::new(&options.grammar_path).to_path_buf(),
   };
-  match syntax::load_syntax_grammar(state.syntax_manager.clone(), req) {
+  match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req) {
     Ok(metainfo) => {
       let grammar_names = metainfo
         .grammars
