@@ -423,7 +423,7 @@ impl SyntaxLoader {
         .ok_or(err())?;
       let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
       let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
-      let path = grammar_path.join(path).normalize().to_path_buf();
+      let path = grammar_path.join(path).canonicalize().unwrap();
       let file_types = grammar
         .get("file-types")
         .ok_or(err())?
@@ -439,12 +439,14 @@ impl SyntaxLoader {
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
-        .map(|hl| grammar_path.join(hl).normalize().to_path_buf());
+        .map(|hl| grammar_path.join(hl).canonicalize().map_err(|_e| err()))
+        .transpose()?;
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
-        .map(|tg| grammar_path.join(tg).normalize().to_path_buf());
+        .map(|tg| grammar_path.join(tg).canonicalize().map_err(|_e| err()))
+        .transpose()?;
       let injection_regex = grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
