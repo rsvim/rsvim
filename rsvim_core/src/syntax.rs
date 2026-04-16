@@ -526,7 +526,7 @@ impl SyntaxLoader {
 }
 
 fn save_loaded_grammars(
-  syn_manager: &SyntaxManagerArc,
+  syntax_manager: &SyntaxManagerArc,
   metainfo: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
@@ -539,7 +539,7 @@ fn save_loaded_grammars(
       Some(tags) => std::fs::read_to_string(tags).ok(),
       None => None,
     };
-    lock!(syn_manager).insert_grammar(
+    lock!(syntax_manager).insert_grammar(
       grammar_metainfo.name.clone(),
       grammar.clone(),
       highlight_query,
@@ -553,7 +553,7 @@ fn save_loaded_grammars(
 }
 
 async fn async_save_loaded_grammars(
-  syn_manager: &SyntaxManagerArc,
+  syntax_manager: &SyntaxManagerArc,
   metainfo: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
@@ -566,7 +566,7 @@ async fn async_save_loaded_grammars(
       Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
       None => None,
     };
-    lock!(syn_manager).insert_grammar(
+    lock!(syntax_manager).insert_grammar(
       grammar_metainfo.name.clone(),
       grammar.clone(),
       highlight_query,
@@ -580,22 +580,22 @@ async fn async_save_loaded_grammars(
 }
 
 pub fn load_syntax_grammar(
-  syn_manager: SyntaxManagerArc,
+  syntax_manager: SyntaxManagerArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
-  let syn_loader = lock!(syn_manager).loader();
-  let (metainfo, grammar) = syn_loader.load_grammar(req)?;
-  save_loaded_grammars(&syn_manager, &metainfo, &grammar);
+  let syntax_loader = lock!(syntax_manager).loader();
+  let (metainfo, grammar) = syntax_loader.load_grammar(req)?;
+  save_loaded_grammars(&syntax_manager, &metainfo, &grammar);
   Ok(metainfo)
 }
 
 pub async fn async_load_syntax_grammar(
-  syn_manager: SyntaxManagerArc,
+  syntax_manager: SyntaxManagerArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
-  let syn_loader = lock!(syn_manager).loader();
-  let (metainfo, grammar) = syn_loader.async_load_grammar(req).await?;
-  async_save_loaded_grammars(&syn_manager, &metainfo, &grammar).await;
+  let syntax_loader = lock!(syntax_manager).loader();
+  let (metainfo, grammar) = syntax_loader.async_load_grammar(req).await?;
+  async_save_loaded_grammars(&syntax_manager, &metainfo, &grammar).await;
   Ok(metainfo)
 }
 

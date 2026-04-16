@@ -9,4 +9,9 @@ extend-ignore-words-re = [
 ]
 
 [files]
-extend-exclude = ["CHANGELOG.md", "dev.py", "*_tests.rs"]
+extend-exclude = [
+  "CHANGELOG.md",
+  "dev.py",
+  "*_tests.rs",
+  "tests_and_benchmarks",
+]
