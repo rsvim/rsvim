@@ -16,7 +16,7 @@ use crate::syntax::SyntaxEditNew;
 use crate::syntax::SyntaxManager;
 use assert_fs::NamedTempFile;
 use compact_str::ToCompactString;
-use path_absolutize::Absolutize;
+use normpath::PathExt;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::sync::Arc;
@@ -57,7 +57,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   let mut rpb: RopeBuilder = RopeBuilder::new();
 
   let filename = tmpfile.path();
-  let absolute_filename = filename.absolutize().unwrap();
+  let absolute_filename = filename.normalize().unwrap();
   let metadata = std::fs::metadata(&absolute_filename).unwrap();
   let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
   let lines = file_content.split("\n").collect::<Vec<&str>>();
@@ -72,7 +72,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   let file_extension = filename
     .extension()
     .map(|e| e.to_string_lossy().to_compact_string());
-  let absolute_filename = filename.absolutize().unwrap().to_path_buf();
+  let absolute_filename = filename.normalize().unwrap().to_path_buf();
   let buf = Buffer::_new(
     opts,
     terminal_size,
