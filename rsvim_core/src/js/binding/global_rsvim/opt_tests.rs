@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::widget::window::opt::*;
-use std::path::Path;
 use std::time::Duration;
 
 #[cfg(test)]
