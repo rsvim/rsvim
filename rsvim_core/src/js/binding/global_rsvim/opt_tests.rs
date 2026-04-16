@@ -777,6 +777,12 @@ mod tests_shift_width {
 mod tests_syntax_parser_lib_path {
   use super::*;
 
+  #[cfg(not(target_os = "windows"))]
+  const TREE_SITTER_LIB: &str = "tree-sitter/lib";
+
+  #[cfg(target_os = "windows")]
+  const TREE_SITTER_LIB: &str = "tree-sitter\\lib";
+
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
   async fn success1() -> IoResult<()> {
@@ -802,7 +808,7 @@ mod tests_syntax_parser_lib_path {
       let syntax_manager = lock!(event_loop.syntax_manager);
       let lib_path = syntax_manager.treesitter_parser_lib_path();
       info!("parser_lib_path:{:?}", lib_path);
-      assert!(lib_path.to_string_lossy().ends_with("tree-sitter/lib"));
+      assert!(lib_path.to_string_lossy().ends_with(TREE_SITTER_LIB));
     }
 
     event_loop.initialize()?;
@@ -846,7 +852,7 @@ mod tests_syntax_parser_lib_path {
       let syntax_manager = lock!(event_loop.syntax_manager);
       let lib_path = syntax_manager.treesitter_parser_lib_path();
       info!("parser_lib_path:{:?}", lib_path);
-      assert!(lib_path.to_string_lossy().ends_with("tree-sitter/lib"));
+      assert!(lib_path.to_string_lossy().ends_with(TREE_SITTER_LIB));
     }
 
     event_loop.initialize()?;
