@@ -241,18 +241,18 @@ pub fn create_new_context<'s, 'b>(
       "opt_set_fix_end_of_line",
       global_rsvim::opt::set_fix_end_of_line,
     );
-    set_function_to(
-      scope,
-      vim,
-      "opt_get_syntax_parser_lib_path",
-      global_rsvim::opt::get_syntax_parser_lib_path,
-    );
-    set_function_to(
-      scope,
-      vim,
-      "opt_set_syntax_parser_lib_path",
-      global_rsvim::opt::set_syntax_parser_lib_path,
-    );
+    // set_function_to(
+    //   scope,
+    //   vim,
+    //   "opt_get_syntax_parser_lib_path",
+    //   global_rsvim::opt::get_syntax_parser_lib_path,
+    // );
+    // set_function_to(
+    //   scope,
+    //   vim,
+    //   "opt_set_syntax_parser_lib_path",
+    //   global_rsvim::opt::set_syntax_parser_lib_path,
+    // );
   }
 
   // For `Rsvim.rt`
