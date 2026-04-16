@@ -287,7 +287,7 @@ pub fn fetch_module_tree<'s>(
     let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
     // Transform v8's ModuleRequest into Rust string.
-    let base = paths::parent_or_remain(&filename).to_string_lossy();
+    let base = paths::maybe_parent(&filename).to_string_lossy();
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
 
     let specifier = match resolve_import(&base, &specifier, None) {

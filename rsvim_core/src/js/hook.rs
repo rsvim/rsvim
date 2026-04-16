@@ -37,7 +37,7 @@ pub fn module_resolve_cb<'a>(
   let referrer = v8::Global::new(scope, referrer);
 
   let dependant = state.module_map.get_path(referrer_id, referrer).unwrap();
-  let dependant = paths::parent_or_remain(&dependant).to_string_lossy();
+  let dependant = paths::maybe_parent(&dependant).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier = resolve_import(&dependant, &specifier, import_map).unwrap();
   trace!(
@@ -82,7 +82,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 
   // `import.meta.dirname`
   let filepath = Path::new(&filename).normalize().unwrap();
-  let dirname = paths::parent_or_remain(&filepath);
+  let dirname = paths::maybe_parent(&filepath);
   let key = v8::String::new(scope, "dirname").unwrap();
   let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
   meta.create_data_property(scope, key.into(), value.into());
@@ -121,7 +121,7 @@ fn import_meta_resolve(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
   let base = args.data().to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_string_lossy();
+  let base = paths::maybe_parent(&base).to_string_lossy();
   let specifier = args.get(0).to_rust_string_lossy(scope);
   trace!(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
@@ -189,7 +189,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_string_lossy();
+  let base = paths::maybe_parent(&base).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
   trace!(
     "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",
