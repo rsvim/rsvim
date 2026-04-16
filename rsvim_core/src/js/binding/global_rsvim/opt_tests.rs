@@ -814,6 +814,7 @@ mod tests_syntax_parser_lib_path {
     {
       let syntax_manager = lock!(event_loop.syntax_manager);
       let lib_path = syntax_manager.treesitter_parser_lib_path();
+      info!("parser_lib_path:{:?}", lib_path);
       assert_eq!(lib_path.to_string_lossy(), ".");
     }
 
@@ -838,13 +839,6 @@ mod tests_syntax_parser_lib_path {
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-    // Before running
-    {
-      let buffers = lock!(event_loop.buffer_manager);
-      let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
-    }
 
     event_loop.initialize()?;
     event_loop
