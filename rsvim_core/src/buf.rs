@@ -22,8 +22,8 @@ use crate::syntax::Syntax;
 use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use normpath::PathExt;
 use opt::*;
-use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::fs::Metadata;
@@ -266,8 +266,8 @@ impl BufferManager {
     canvas_size: U16Size,
     filename: &Path,
   ) -> TheResult<BufferId> {
-    let abs_filename = match filename.absolutize() {
-      Ok(abs_filename) => abs_filename.to_path_buf(),
+    let abs_filename = match filename.normalize() {
+      Ok(abs_filename) => abs_filename.into_path_buf(),
       Err(e) => {
         trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
         return Err(TheErr::NormalizePathFailed(
