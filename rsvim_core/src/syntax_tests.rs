@@ -66,10 +66,10 @@ mod tests_getter_setter {
   #[test]
   #[cfg_attr(miri, ignore)]
   fn get_lang1() {
-    let mut syn_mgr = SyntaxManager::new();
-    syn_mgr
+    let mut syntax_manager = SyntaxManager::new();
+    syntax_manager
       .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let lang = syn_mgr.get_grammar_by_ext("rs");
+    let lang = syntax_manager.get_grammar_by_ext("rs");
     assert!(lang.is_some());
     assert_eq!(lang.unwrap().name(), Some("rust"));
   }
