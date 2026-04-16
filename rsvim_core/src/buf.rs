@@ -26,8 +26,6 @@ use opt::*;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::fs::Metadata;
-use std::path::Path;
-use std::path::PathBuf;
 use text::Text;
 use tokio::time::Instant;
 use undo::Undo;

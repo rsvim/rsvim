@@ -13,8 +13,6 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
-use std::path::Path;
-use std::path::PathBuf;
 
 /// Checks if path is a JSON file.
 fn is_json_import(path: &Path) -> bool {

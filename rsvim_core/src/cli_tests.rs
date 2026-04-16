@@ -2,7 +2,6 @@ use super::cli::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use clap::Parser;
-use std::path::Path;
 
 #[test]
 fn cli_opt1() {

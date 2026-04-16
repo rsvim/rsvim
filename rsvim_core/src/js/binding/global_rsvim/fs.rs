@@ -24,7 +24,6 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::wrap_cppgc_handle;
 use itertools::Itertools;
-use std::path::Path;
 
 /// `Rsvim.fs.open` API.
 pub fn open<'s>(

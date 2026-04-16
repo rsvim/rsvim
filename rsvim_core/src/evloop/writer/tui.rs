@@ -65,7 +65,7 @@ pub fn shutdown_raw_mode_on_panic() {
       now.time().second(),
       now.time().millisecond(),
     );
-    let log_path = std::path::Path::new(log_name.as_str());
+    let log_path = Path::new(log_name.as_str());
     if let Ok(mut f) = std::fs::File::create(log_path) {
       if f
         .write_all(
