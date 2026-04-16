@@ -257,7 +257,7 @@ impl ModuleMap {
       let kp = kp.normalize();
       let pp = Path::new(path);
       let pp = pp.normalize();
-      kp.ends_with(pp) || pp.ends_with(kp)
+      kp.ends_with(&pp) || pp.ends_with(kp)
     })
   }
 
