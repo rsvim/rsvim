@@ -8,6 +8,7 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
+use std::path::Path;
 use std::time::Duration;
 
 #[test]
