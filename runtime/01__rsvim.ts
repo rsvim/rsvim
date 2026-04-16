@@ -1152,6 +1152,50 @@ export class RsvimOpt {
   }
 
   /**
+   * Get the _syntax-parser-lib-path_ option. Global option.
+   *
+   * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   *
+   * When {@link expandTab} is `false`, this option is not been used.
+   *
+   *
+   * @returns {string}
+   *
+   * @defaultValue `8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'shift-width' option.
+   * const value = Rsvim.opt.shiftWidth;
+   * ```
+   */
+  get syntaxParserLibPath(): string {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_shift_width();
+  }
+
+  /**
+   * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
+   *
+   *
+   * @param {boolean} value - The _expand-tab_ option.
+   * @throws Throws {@link !TypeError} if value is not an integer.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'shift-width' option.
+   * Rsvim.opt.shiftWidth = 4;
+   * ```
+   */
+  set shiftWidth(value: number) {
+    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
+    value = boundByIntegers(value, [1, 255]);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_shift_width(value);
+  }
+
+  /**
    * Get the _tab-stop_ option. This option is also known as
    * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
    * Local to buffer.
