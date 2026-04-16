@@ -15,8 +15,8 @@ pub trait PathExt {
   /// Normalize file path and resolve symbolic link.
   fn canonicalize(&self) -> Result<PathBuf>;
 
-  /// Normalize file path, without resolving symbolic link.
-  fn normalize_without_symbolic(&self) -> Cow<'_, Path>;
+  // /// Normalize file path, without resolving symbolic link.
+  // fn normalize_without_symbolic(&self) -> Cow<'_, Path>;
 
   /// Absolutize file path, relative to current directory.
   fn absolutize(&self) -> Result<Cow<'_, Path>>;
@@ -30,9 +30,9 @@ impl PathExt for Path {
     normpath::PathExt::normalize(self).map(|p| p.into_path_buf())
   }
 
-  fn normalize_without_symbolic(&self) -> Cow<'_, Path> {
-    sugar_path::SugarPath::normalize(self)
-  }
+  // fn normalize_without_symbolic(&self) -> Cow<'_, Path> {
+  //   sugar_path::SugarPath::normalize(self)
+  // }
 
   fn absolutize(&self) -> Result<Cow<'_, Path>> {
     let cwd = std::env::current_dir()?;
