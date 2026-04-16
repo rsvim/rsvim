@@ -298,8 +298,9 @@ pub fn get_syntax_parser_lib_path(
     .loader()
     .treesitter_parser_lib_path()
     .to_string_lossy()
-    .to_v8(scope);
+    .to_string();
   trace!("get_syntax_parser_lib_path: {:?}", value);
+  let value = value.to_v8(scope);
   rv.set(value.into());
 }
 
