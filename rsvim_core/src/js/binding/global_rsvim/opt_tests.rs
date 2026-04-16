@@ -772,3 +772,153 @@ mod tests_shift_width {
     Ok(())
   }
 }
+
+#[cfg(test)]
+mod tests_syntax_parser_lib_path {
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn success1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  const value = Rsvim.opt.syntaxParserLibPath;
+  Rsvim.opt.syntaxParserLibPath = ".";
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let syntax_manager = lock!(event_loop.syntax_manager);
+      let global_local_options = syntax_manager.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), 4);
+
+      let contents = lock!(event_loop.cmdline_text);
+      let actual = contents.message().rope().to_string();
+      assert!(actual.trim().is_empty());
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn success2() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.shiftWidth = 10000;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), 255);
+
+      let contents = lock!(event_loop.cmdline_text);
+      let n = contents.message_history().len();
+      assert_eq!(n, 0);
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.shiftWidth = 1.123;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffer_manager);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+
+      let mut contents = lock!(event_loop.cmdline_text);
+      let n = contents.message_history().len();
+      assert_eq!(n, 1);
+      let actual = contents.message_history_mut().pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(actual.contains(
+        r####""Rsvim.opt.shiftWidth" value must be an integer, but found"####
+      ));
+    }
+
+    Ok(())
+  }
+}

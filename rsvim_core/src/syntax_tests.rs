@@ -23,13 +23,13 @@ mod tests_getter_setter {
   #[test]
   #[cfg_attr(miri, ignore)]
   fn file_ext1() {
-    let mut syn_manager = SyntaxManager::new();
-    syn_manager
+    let mut syntax_manager = SyntaxManager::new();
+    syntax_manager
       .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let actual = syn_manager.get_id_by_file_ext("rs");
+    let actual = syntax_manager.get_id_by_file_ext("rs");
     assert!(actual.is_some());
     assert_eq!(actual.unwrap(), "rust");
-    let actual = syn_manager.get_file_ext_by_id("rust");
+    let actual = syntax_manager.get_file_ext_by_id("rust");
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("rs"));
   }
@@ -37,23 +37,23 @@ mod tests_getter_setter {
   #[test]
   #[cfg_attr(miri, ignore)]
   fn file_ext2() {
-    let mut syn_manager = SyntaxManager::new();
-    syn_manager
+    let mut syntax_manager = SyntaxManager::new();
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "cc".to_compact_string());
-    syn_manager
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "cpp".to_compact_string());
-    syn_manager
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "c++".to_compact_string());
-    syn_manager
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "hh".to_compact_string());
-    syn_manager
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "hpp".to_compact_string());
-    syn_manager
+    syntax_manager
       .insert_file_ext("cpp".to_compact_string(), "h++".to_compact_string());
-    let actual = syn_manager.get_id_by_file_ext("hpp");
+    let actual = syntax_manager.get_id_by_file_ext("hpp");
     assert!(actual.is_some());
     assert_eq!(actual.unwrap(), "cpp");
-    let actual = syn_manager.get_file_ext_by_id("cpp");
+    let actual = syntax_manager.get_file_ext_by_id("cpp");
     assert!(actual.is_some());
     assert!(actual.unwrap().contains("cc"));
     assert!(actual.unwrap().contains("cpp"));
@@ -1169,17 +1169,17 @@ mod tests_grammar_loader {
 
   fn _run_loader(grammar_path: &str, hint: &str) {
     let grammar_path = Path::new(grammar_path);
-    let syn_manager = SyntaxManager::to_arc(SyntaxManager::new());
+    let syntax_manager = SyntaxManager::to_arc(SyntaxManager::new());
     let req = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = load_syntax_grammar(syn_manager.clone(), &req);
+    let grammar = load_syntax_grammar(syntax_manager.clone(), &req);
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
     let metainfo = grammar.unwrap();
     info!("{}:{:?}", hint, metainfo);
 
-    let grammar = load_syntax_grammar(syn_manager.clone(), &req);
+    let grammar = load_syntax_grammar(syntax_manager.clone(), &req);
     info!("{}:{:?}", hint, grammar);
     assert!(grammar.is_ok());
     let metainfo = grammar.unwrap();
@@ -1230,17 +1230,17 @@ mod tests_grammar_loader {
 
     let grammar_path = assert_fs::TempDir::new().unwrap();
 
-    let syn_loader = SyntaxLoader::new();
+    let syntax_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_grammar(&opts);
+    let grammar = syntax_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
     }
 
-    let grammar = syn_loader.load_grammar(&opts);
+    let grammar = syntax_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed1:{:?}", e)
@@ -1261,17 +1261,17 @@ mod tests_grammar_loader {
   "word": "identifier"
 }"###).unwrap();
 
-    let syn_loader = SyntaxLoader::new();
+    let syntax_loader = SyntaxLoader::new();
     let opts = SyntaxLoadGrammarRequest {
       grammar_path: grammar_path.to_path_buf(),
     };
-    let grammar = syn_loader.load_grammar(&opts);
+    let grammar = syntax_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
     }
 
-    let grammar = syn_loader.load_grammar(&opts);
+    let grammar = syntax_loader.load_grammar(&opts);
     assert!(grammar.is_err());
     if let Err(e) = grammar {
       info!("failed2:{:?}", e)
