@@ -774,10 +774,10 @@ export declare class RsvimOpt {
      */
     get shiftWidth(): number;
     /**
-     * Set the _expand-tab_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
+     * Set the _shift-width_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
      *
      *
-     * @param {boolean} value - The _expand-tab_ option.
+     * @param {number} value - The _shift-width_ option.
      * @throws Throws {@link !TypeError} if value is not an integer.
      *
      * @example
@@ -787,6 +787,37 @@ export declare class RsvimOpt {
      * ```
      */
     set shiftWidth(value: number);
+    /**
+     * Get the _syntax-parser-lib-path_ option. Global option.
+     *
+     * By default the syntax parser libs are stored in `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers` folder. `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
+     *
+     * @see {@link Configuration | https://rsvim.github.io/docs/manual/configuration}
+     *
+     * @returns {string}
+     *
+     * @defaultValue `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers`
+     *
+     * @example
+     * ```javascript
+     * // Get the 'syntax-parser-lib-path' option.
+     * const value = Rsvim.opt.syntaxParserLibPath;
+     * ```
+     */
+    get syntaxParserLibPath(): string;
+    /**
+     * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
+     *
+     * @param {string} value - The _syntax-parser-lib-path_ option.
+     * @throws Throws {@link !TypeError} if value is not an string.
+     *
+     * @example
+     * ```javascript
+     * // Set the 'syntax-parser-lib-path' option.
+     * Rsvim.opt.syntaxParserLibPath = ".";
+     * ```
+     */
+    set syntaxParserLibPath(value: string);
     /**
      * Get the _tab-stop_ option. This option is also known as
      * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
