@@ -72,7 +72,7 @@ pub fn make_buffer_from_tmpfile_and_syntax(
   let file_extension = filename
     .extension()
     .map(|e| e.to_string_lossy().to_compact_string());
-  let absolute_filename = filename.normalize().unwrap().to_path_buf();
+  let absolute_filename = filename.normalize().unwrap().into_path_buf();
   let buf = Buffer::_new(
     opts,
     terminal_size,
@@ -140,7 +140,7 @@ pub fn make_syntax_and_colorscheme(
     .unwrap();
 
   let filename = tmpfile.path();
-  let absolute_filename = filename.absolutize().unwrap();
+  let absolute_filename = filename.normalize().unwrap();
   let file_content = std::fs::read_to_string(&absolute_filename).unwrap();
 
   let mut text_rope_builder: RopeBuilder = RopeBuilder::new();
