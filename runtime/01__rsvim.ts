@@ -1156,7 +1156,7 @@ export class RsvimOpt {
    *
    * By default the syntax parser libs are stored in `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers` folder. `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
    *
-   * @see {@link Configuration | https://rsvim.github.io/docs/manual/configuration}
+   * @see [Rsvim Configuration](https://rsvim.github.io/docs/manual/configuration)
    *
    * @returns {string}
    *
