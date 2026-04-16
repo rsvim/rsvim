@@ -356,7 +356,7 @@ class Format(Cmd):
         for file in ["00__web", "01__rsvim"]:
             src_file = f"./rsvim_core/src/js/runtime/{file}.js"
             dest_file = f"./rsvim_core/src/js/runtime/{file}.min.js"
-            cmd = f"terser {src_file} -o {dest_file}"
+            cmd = f"terser {src_file} --keep-classnames --keep-fnames -o {dest_file}"
             run(cmd)
 
         # Post-process .d.ts files to avoid boring lint warnings
