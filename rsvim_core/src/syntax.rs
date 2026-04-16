@@ -7,7 +7,6 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use itertools::Itertools;
 use itertools::process_results;
-use normpath::PathExt;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -424,11 +423,7 @@ impl SyntaxLoader {
         .ok_or(err())?;
       let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
       let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
-      let path = grammar_path
-        .join(path)
-        .normalize()
-        .map_err(|_e| err())?
-        .into_path_buf();
+      let path = grammar_path.join(path).normalize().to_path_buf();
       let file_types = grammar
         .get("file-types")
         .ok_or(err())?
