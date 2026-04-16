@@ -1154,20 +1154,18 @@ export class RsvimOpt {
   /**
    * Get the _syntax-parser-lib-path_ option. Global option.
    *
-   * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
-   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   * By default the syntax parser libs are stored in `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers` folder. `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
    *
-   * When {@link expandTab} is `false`, this option is not been used.
-   *
+   * @see {@link Configuration | https://rsvim.github.io/docs/manual/configuration}
    *
    * @returns {string}
    *
-   * @defaultValue `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers`, `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
+   * @defaultValue `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers`
    *
    * @example
    * ```javascript
-   * // Get the 'shift-width' option.
-   * const value = Rsvim.opt.shiftWidth;
+   * // Get the 'syntax-parser-lib-path' option.
+   * const value = Rsvim.opt.syntaxParserLibPath;
    * ```
    */
   get syntaxParserLibPath(): string {
@@ -1178,14 +1176,13 @@ export class RsvimOpt {
   /**
    * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
    *
-   *
-   * @param {} value - The _expand-tab_ option.
-   * @throws Throws {@link !TypeError} if value is not an integer.
+   * @param {string} value - The _syntax-parser-lib-path_ option.
+   * @throws Throws {@link !TypeError} if value is not an string.
    *
    * @example
    * ```javascript
-   * // Set the 'shift-width' option.
-   * Rsvim.opt.shiftWidth = 4;
+   * // Set the 'syntax-parser-lib-path' option.
+   * Rsvim.opt.syntaxParserLibPath = ".";
    * ```
    */
   set syntaxParserLibPath(value: string) {
