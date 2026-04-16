@@ -1,2 +1,4 @@
+exclude = ["tests_and_benchmarks"]
+
 [formatting]
 reorder_keys = true
