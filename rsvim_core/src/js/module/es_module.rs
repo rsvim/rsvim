@@ -256,7 +256,7 @@ impl JsFuture for EsModuleFuture {
       let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
       // Transform v8's ModuleRequest into Rust string.
-      let base = paths::parent_or_remain(&base).to_string_lossy();
+      let base = paths::maybe_parent(&base).to_string_lossy();
       let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
       let specifier =
         match resolve_import(&base, &specifier, import_map.clone()) {
