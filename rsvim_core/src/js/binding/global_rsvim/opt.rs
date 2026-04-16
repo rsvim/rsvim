@@ -315,9 +315,8 @@ pub fn set_syntax_parser_lib_path<'s>(
   trace!("set_syntax_parser_lib_path: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let syntax_manager = state_rc.borrow().syntax_manager.clone();
-  let mut syntax_manager = lock!(syntax_manager);
-
+  let syntax_manager = lock!(syntax_manager);
   syntax_manager
     .loader()
-    .set_treesitter_parser_lib_path(Path::new(value).to_path_buf());
+    .set_treesitter_parser_lib_path(Path::new(&value).to_path_buf());
 }
