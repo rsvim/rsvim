@@ -98,7 +98,6 @@ serde_json = { workspace = true }
 smallvec = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
-sugar_path = { workspace = true }
 taffy = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = [

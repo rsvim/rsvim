@@ -2957,7 +2957,6 @@ dependencies = [
  "smallvec",
  "strum",
  "strum_macros",
- "sugar_path",
  "swc_atoms",
  "swc_bundler",
  "swc_common",
@@ -3377,16 +3376,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "sugar_path"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36fe837e881ad5c3b60fadeb8e9b0bc5c907c4b7d84b4415a7f0bbc3f9073631"
-dependencies = [
- "memchr",
- "smallvec",
 ]
 
 [[package]]

@@ -35,11 +35,10 @@ impl PathExt for Path {
   // }
 
   fn absolutize(&self) -> Result<Cow<'_, Path>> {
-    let cwd = std::env::current_dir()?;
-    Ok(sugar_path::SugarPath::absolutize_with(self, cwd))
+    path_absolutize::Absolutize::absolutize(self)
   }
 
-  fn absolutize_with(&self, cwd: &Path) -> Cow<'_, Path> {
-    sugar_path::SugarPath::absolutize_with(self, cwd)
+  fn absolutize_with(&self, cwd: &Path) -> Result<Cow<'_, Path>> {
+    path_absolutize::Absolutize::absolutize_from(self, cwd)
   }
 }
