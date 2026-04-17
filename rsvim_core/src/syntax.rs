@@ -7,7 +7,6 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use itertools::Itertools;
 use itertools::process_results;
-use normpath::PathExt;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;

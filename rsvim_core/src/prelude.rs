@@ -15,6 +15,7 @@ pub use crate::rect_from_layout;
 pub use crate::rect_from_size;
 pub use crate::size;
 pub use crate::size_as;
+pub use crate::util::paths::PathExt;
 pub use crate::util::ringbuf::DeRingBuffer;
 pub use crate::util::ringbuf::RingBuffer;
 pub use foldhash::HashMap as FoldMap;
