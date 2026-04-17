@@ -524,8 +524,9 @@ fn save_loaded_grammars(
     let injection_query =
       metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
-      metadata.name.clone(),
+      &metadata.name,
       grammar.clone(),
+      &metadata.file_types,
       highlight_query,
       tags_query,
       injection_query,
@@ -721,15 +722,10 @@ impl SyntaxManager {
     ];
 
     for grammar_binding in grammar_bindings {
-      for file_ext in grammar_binding.file_types.iter() {
-        it.insert_file_ext(
-          grammar_binding.grammar_name.clone(),
-          file_ext.clone(),
-        );
-      }
       it.insert_grammar(
-        grammar_binding.grammar_name.clone(),
+        &grammar_binding.grammar_name,
         grammar_binding.language,
+        &grammar_binding.file_types,
         grammar_binding.highlight_query,
         grammar_binding.tags_query,
         grammar_binding.injection_query,
@@ -795,30 +791,41 @@ impl SyntaxManager {
 impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
-    grammar_name: CompactString,
+    grammar_name: &str,
     grammar: Language,
-    file_types: Vec<CompactString>,
+    file_types: &Vec<CompactString>,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
   ) {
-    self.grammars.insert(grammar_name.clone(), grammar);
+    self
+      .grammars
+      .insert(grammar_name.to_compact_string(), grammar);
     if let Some(hl) = highlight_query {
-      self.highlight_queries.insert(grammar_name.clone(), hl);
+      self
+        .highlight_queries
+        .insert(grammar_name.to_compact_string(), hl);
     }
     if let Some(tag) = tags_query {
-      self.tags_queries.insert(grammar_name.clone(), tag);
+      self
+        .tags_queries
+        .insert(grammar_name.to_compact_string(), tag);
     }
     if let Some(injection) = injection_query {
       self
         .injection_queries
-        .insert(grammar_name.clone(), injection);
+        .insert(grammar_name.to_compact_string(), injection);
     }
-    self.name2fext.entry(grammar_name.clone()).or_default();
-    let exts = self.name2fext.get_mut(&grammar_name).unwrap();
+    self
+      .name2fext
+      .entry(grammar_name.to_compact_string())
+      .or_default();
+    let exts = self.name2fext.get_mut(grammar_name).unwrap();
     for ft in file_types.iter() {
       exts.insert(ft.clone());
-      self.fext2name.insert(ft.clone(), grammar_name.clone());
+      self
+        .fext2name
+        .insert(ft.clone(), grammar_name.to_compact_string());
     }
   }
 
