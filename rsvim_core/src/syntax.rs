@@ -775,14 +775,14 @@ impl SyntaxManager {
   //   self.fext2name.remove(ext);
   // }
 
-  pub fn get_file_ext_by_grammar_name(
+  pub fn get_file_types_by_grammar_name(
     &self,
     id: &str,
   ) -> Option<&FoldSet<CompactString>> {
     self.name2fext.get(id)
   }
 
-  pub fn get_grammar_name_by_file_ext(
+  pub fn get_grammar_name_by_file_types(
     &self,
     ext: &str,
   ) -> Option<&CompactString> {
