@@ -5,11 +5,11 @@ use std::borrow::Borrow;
 use std::cmp::Ord;
 
 #[derive(Default, Clone)]
-pub struct LiteSet<K, V> {
-  data: LiteMap<K, V>,
+pub struct LiteSet<V> {
+  data: LiteMap<V, bool>,
 }
 
-impl<K, V> LiteSet<K, V> {
+impl<V> LiteSet<V> {
   pub fn new() -> Self {
     Self {
       data: LiteMap::new(),
@@ -30,27 +30,41 @@ impl<K, V> LiteSet<K, V> {
     self.data.is_empty()
   }
 
-  pub fn first(&self) -> Option<(&K, &V)> {
-    self.data.first()
+  pub fn first(&self) -> Option<&V> {
+    self.data.first().map(|(k, _)| k)
   }
 
-  pub fn last(&self) -> Option<(&K, &V)> {
-    self.data.last()
-  }
-
-  pub fn get<Q>(&self, key: &Q) -> Option<&V>
-  where
-    K: Borrow<Q> + Ord,
-    Q: Ord + ?Sized,
-  {
-    self.data.get(key)
+  pub fn last(&self) -> Option<&V> {
+    self.data.last().map(|(k, _)| k)
   }
 
   pub fn contains_key<Q>(&self, key: &Q) -> bool
   where
-    K: Borrow<Q> + Ord,
+    V: Borrow<Q> + Ord,
     Q: Ord + ?Sized,
   {
     self.data.contains_key(key)
+  }
+
+  pub fn clear(&mut self) {
+    self.data.clear()
+  }
+
+  pub fn reserve(&mut self, additional: usize) {
+    self.data.reserve(additional)
+  }
+
+  pub fn insert(&mut self, value: V) -> bool
+  where
+    V: Ord,
+  {
+    self.data.insert(value, true).is_none()
+  }
+
+  pub fn remove(&mut self, value: &V) -> bool
+  where
+    V: Ord,
+  {
+    self.data.remove(value).is_none()
   }
 }
