@@ -750,30 +750,30 @@ impl SyntaxManager {
     self.loader.clone()
   }
 
-  /// Associate a grammar ID with a file extension.
-  ///
-  /// For example, a 'C++' grammar can be associate with below file
-  /// extensions:
-  /// - Feader files: hh, h++, hpp
-  /// - Source files: cc, c++, cpp
-  pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
-    self
-      .name2fext
-      .entry(id.clone())
-      .or_default()
-      .insert(ext.clone());
-    self.fext2name.entry(ext).or_insert(id);
-  }
-
-  /// Un-associate a grammar ID with a file extension.
-  pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
-    self
-      .name2fext
-      .entry(id.to_compact_string())
-      .or_default()
-      .remove(ext);
-    self.fext2name.remove(ext);
-  }
+  // /// Associate a grammar ID with a file extension.
+  // ///
+  // /// For example, a 'C++' grammar can be associate with below file
+  // /// extensions:
+  // /// - Feader files: hh, h++, hpp
+  // /// - Source files: cc, c++, cpp
+  // pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
+  //   self
+  //     .name2fext
+  //     .entry(id.clone())
+  //     .or_default()
+  //     .insert(ext.clone());
+  //   self.fext2name.entry(ext).or_insert(id);
+  // }
+  //
+  // /// Un-associate a grammar ID with a file extension.
+  // pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
+  //   self
+  //     .name2fext
+  //     .entry(id.to_compact_string())
+  //     .or_default()
+  //     .remove(ext);
+  //   self.fext2name.remove(ext);
+  // }
 
   pub fn get_file_ext_by_id(
     &self,
