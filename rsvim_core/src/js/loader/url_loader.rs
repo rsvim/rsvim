@@ -18,8 +18,6 @@
 // use sha::utils::DigestExt;
 // use path_absolutize::Absolutize;
 // use std::fs;
-// use std::path::Path;
-// use std::path::PathBuf;
 // use url::Url;
 
 // lazy_static! {

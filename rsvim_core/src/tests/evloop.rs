@@ -10,7 +10,6 @@ use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use std::cell::RefCell;
-use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::mpsc::Receiver;

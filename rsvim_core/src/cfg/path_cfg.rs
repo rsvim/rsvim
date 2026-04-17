@@ -1,7 +1,6 @@
 //! File path configs.
 
-use std::path::Path;
-use std::path::PathBuf;
+use crate::prelude::*;
 use std::sync::LazyLock;
 
 #[cfg(test)]

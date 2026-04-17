@@ -140,18 +140,16 @@ pub struct EventLoop {
 #[cfg(test)]
 fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
-    Some(Ok(Event::Key(key_event))) => {
+    Some(Ok(Event::Key(key_event)))
       if key_event.code == KeyCode::Char('d')
-        && key_event.kind == KeyEventKind::Press
-      {
-        bitflags_match!(key_event.modifiers, {
-          KeyModifiers::CONTROL => true,
-          _ => false
-        })
-      } else {
-        false
-      }
+        && key_event.kind == KeyEventKind::Press =>
+    {
+      bitflags_match!(key_event.modifiers, {
+        KeyModifiers::CONTROL => true,
+        _ => false
+      })
     }
+    Some(Ok(Event::Key(_key_event))) => false,
     _ => false,
   }
 }

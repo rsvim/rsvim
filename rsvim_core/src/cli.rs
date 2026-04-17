@@ -1,7 +1,7 @@
 //! Command line options.
 
+use crate::prelude::*;
 use clap::Parser;
-use std::path::PathBuf;
 
 const ABOUT: &str = "RSVIM - The VIM editor reinvented in Rust+TypeScript";
 
