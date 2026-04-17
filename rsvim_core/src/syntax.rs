@@ -7,7 +7,6 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use itertools::Itertools;
 use itertools::process_results;
-use normpath::PathExt;
 use ropey::Rope;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -422,11 +421,7 @@ impl SyntaxLoader {
         .ok_or(err())?;
       let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
       let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
-      let path = grammar_path
-        .join(path)
-        .normalize()
-        .map_err(|_e| err())?
-        .into_path_buf();
+      let path = grammar_path.join(path).canonicalize().map_err(|_e| err())?;
       let file_types = grammar
         .get("file-types")
         .ok_or(err())?
@@ -442,25 +437,13 @@ impl SyntaxLoader {
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
-        .map(|hl| {
-          grammar_path
-            .join(hl)
-            .normalize()
-            .map(|hl| hl.into_path_buf())
-            .map_err(|_e| err())
-        })
+        .map(|hl| grammar_path.join(hl).normalize().map_err(|_e| err()))
         .transpose()?;
       let tags = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
-        .map(|tg| {
-          grammar_path
-            .join(tg)
-            .normalize()
-            .map(|tg| tg.into_path_buf())
-            .map_err(|_e| err())
-        })
+        .map(|tg| grammar_path.join(tg).normalize().map_err(|_e| err()))
         .transpose()?;
       let injection_regex = grammar
         .get("injection-regex")

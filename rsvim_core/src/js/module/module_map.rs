@@ -249,17 +249,10 @@ impl ModuleMap {
     &self,
     path: &str,
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
-    use normpath::PathExt;
-
     self.by_path.iter().find(|(k, _v)| {
-      Path::new(k)
-        .normalize()
-        .unwrap()
-        .ends_with(Path::new(path).normalize().unwrap())
-        || Path::new(path)
-          .normalize()
-          .unwrap()
-          .ends_with(Path::new(*k).normalize().unwrap())
+      let kp = Path::new(k).canonicalize().unwrap();
+      let pp = Path::new(path).canonicalize().unwrap();
+      kp.ends_with(&pp) || pp.ends_with(kp)
     })
   }
 
