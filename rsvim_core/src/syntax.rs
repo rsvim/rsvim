@@ -551,8 +551,9 @@ async fn async_save_loaded_grammars(
     let injection_query =
       metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
-      metadata.name.clone(),
+      &metadata.name,
       grammar.clone(),
+      &metadata.file_types,
       highlight_query,
       tags_query,
       injection_query,
