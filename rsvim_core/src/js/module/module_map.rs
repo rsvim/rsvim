@@ -252,7 +252,7 @@ impl ModuleMap {
     self.by_path.iter().find(|(k, _v)| {
       let kp = Path::new(k).canonicalize().unwrap();
       let pp = Path::new(path).canonicalize().unwrap();
-      kp.ends_with(pp) || pp.ends_with(kp)
+      kp.ends_with(&pp) || pp.ends_with(kp)
     })
   }
 
