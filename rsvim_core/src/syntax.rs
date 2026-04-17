@@ -525,8 +525,8 @@ fn save_loaded_grammars(
       metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
       &metadata.name,
-      grammar.clone(),
       &metadata.file_types,
+      Some(grammar.clone()),
       highlight_query,
       tags_query,
       injection_query,
@@ -552,8 +552,8 @@ async fn async_save_loaded_grammars(
       metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
       &metadata.name,
-      grammar.clone(),
       &metadata.file_types,
+      Some(grammar.clone()),
       highlight_query,
       tags_query,
       injection_query,
@@ -725,8 +725,8 @@ impl SyntaxManager {
     for grammar_binding in grammar_bindings {
       it.insert_grammar(
         &grammar_binding.grammar_name,
-        grammar_binding.language,
         &grammar_binding.file_types,
+        Some(grammar_binding.language),
         grammar_binding.highlight_query,
         grammar_binding.tags_query,
         grammar_binding.injection_query,
@@ -793,8 +793,8 @@ impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
     grammar_name: &str,
-    grammar: Language,
     file_types: &Vec<CompactString>,
+    grammar: Option<Language>,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
