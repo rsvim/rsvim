@@ -793,7 +793,7 @@ impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
     grammar_name: &str,
-    file_types: &Vec<CompactString>,
+    file_types: &[CompactString],
     grammar: Option<Language>,
     highlight_query: Option<String>,
     tags_query: Option<String>,
