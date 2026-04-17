@@ -589,9 +589,9 @@ pub struct SyntaxManager {
   injection_queries: FoldMap<CompactString, String>,
 
   // Maps grammar name to file extensions
-  gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
+  name2fext: FoldMap<CompactString, FoldSet<CompactString>>,
   // Maps file extension to grammar name
-  ext2gid: FoldMap<CompactString, CompactString>,
+  fext2name: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(SyntaxManager);
@@ -604,8 +604,8 @@ impl Debug for SyntaxManager {
       .field("highlight_queries", &self.highlight_queries)
       .field("tags_queries", &self.tags_queries)
       .field("injection_queries", &self.injection_queries)
-      .field("grammarid2ext", &self.gid2ext)
-      .field("ext2grammarid", &self.ext2gid)
+      .field("name2ext", &self.name2fext)
+      .field("ext2name", &self.fext2name)
       .finish()
   }
 }
@@ -651,8 +651,8 @@ impl SyntaxManager {
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
       injection_queries: FoldMap::new(),
-      gid2ext: FoldMap::new(),
-      ext2gid: FoldMap::new(),
+      name2fext: FoldMap::new(),
+      fext2name: FoldMap::new(),
     }
   }
 
@@ -761,32 +761,32 @@ impl SyntaxManager {
   /// - Source files: cc, c++, cpp
   pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
     self
-      .gid2ext
+      .name2fext
       .entry(id.clone())
       .or_default()
       .insert(ext.clone());
-    self.ext2gid.entry(ext).or_insert(id);
+    self.fext2name.entry(ext).or_insert(id);
   }
 
   /// Un-associate a grammar ID with a file extension.
   pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
     self
-      .gid2ext
+      .name2fext
       .entry(id.to_compact_string())
       .or_default()
       .remove(ext);
-    self.ext2gid.remove(ext);
+    self.fext2name.remove(ext);
   }
 
   pub fn get_file_ext_by_id(
     &self,
     id: &str,
   ) -> Option<&FoldSet<CompactString>> {
-    self.gid2ext.get(id)
+    self.name2fext.get(id)
   }
 
   pub fn get_id_by_file_ext(&self, ext: &str) -> Option<&CompactString> {
-    self.ext2gid.get(ext)
+    self.fext2name.get(ext)
   }
 }
 // Language ID and file extensions }
@@ -814,7 +814,7 @@ impl SyntaxManager {
         .injection_queries
         .insert(grammar_name.clone(), injection);
     }
-    self.gid2ext.entry(grammar_name.clone()).or_default();
+    self.name2fext.entry(grammar_name.clone()).or_default();
   }
 
   pub fn get_grammar(&self, id: &str) -> Option<&Language> {
@@ -827,7 +827,7 @@ impl SyntaxManager {
 
   pub fn get_grammar_by_ext(&self, ext: &str) -> Option<&Language> {
     self
-      .ext2gid
+      .fext2name
       .get(ext)
       .map(|id| self.get_grammar(id))
       .unwrap_or(None)
@@ -835,7 +835,7 @@ impl SyntaxManager {
 
   pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
     self
-      .ext2gid
+      .fext2name
       .get(ext)
       .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
