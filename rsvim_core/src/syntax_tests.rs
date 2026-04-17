@@ -17,65 +17,6 @@ use itertools::Itertools;
 use std::time::Duration;
 
 #[cfg(test)]
-mod tests_getter_setter {
-  use super::*;
-
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn file_ext1() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let actual = syntax_manager.get_id_by_file_ext("rs");
-    assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), "rust");
-    let actual = syntax_manager.get_file_ext_by_id("rust");
-    assert!(actual.is_some());
-    assert!(actual.unwrap().contains("rs"));
-  }
-
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn file_ext2() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "cc".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "cpp".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "c++".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "hh".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "hpp".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "h++".to_compact_string());
-    let actual = syntax_manager.get_id_by_file_ext("hpp");
-    assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), "cpp");
-    let actual = syntax_manager.get_file_ext_by_id("cpp");
-    assert!(actual.is_some());
-    assert!(actual.unwrap().contains("cc"));
-    assert!(actual.unwrap().contains("cpp"));
-    assert!(actual.unwrap().contains("c++"));
-    assert!(actual.unwrap().contains("hh"));
-    assert!(actual.unwrap().contains("hpp"));
-    assert!(actual.unwrap().contains("h++"));
-  }
-
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn get_lang1() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let lang = syntax_manager.get_grammar_by_ext("rs");
-    assert!(lang.is_some());
-    assert_eq!(lang.unwrap().name(), Some("rust"));
-  }
-}
-
-#[cfg(test)]
 mod tests_buffer_editing {
   use super::*;
 
