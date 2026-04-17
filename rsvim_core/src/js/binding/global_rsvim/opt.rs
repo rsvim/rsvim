@@ -9,7 +9,6 @@ use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
-use std::path::Path;
 
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
