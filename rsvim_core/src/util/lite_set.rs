@@ -1,6 +1,8 @@
 //! LiteSet
 
 use litemap::LiteMap;
+use std::borrow::Borrow;
+use std::cmp::Ord;
 
 #[derive(Default, Clone)]
 pub struct LiteSet<K, V> {
@@ -34,5 +36,13 @@ impl<K, V> LiteSet<K, V> {
 
   pub fn last(&self) -> Option<(&K, &V)> {
     self.data.last()
+  }
+
+  pub fn get<Q>(&self, key: &Q) -> Option<&V>
+  where
+    K: Borrow<Q> + Ord,
+    Q: Ord + ?Sized,
+  {
+    self.data.get(key)
   }
 }
