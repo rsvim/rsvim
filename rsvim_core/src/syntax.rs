@@ -535,27 +535,26 @@ fn save_loaded_grammars(
 
 async fn async_save_loaded_grammars(
   syntax_manager: &SyntaxManagerArc,
-  metainfo: &SyntaxTreeSitterGrammarRepository,
+  repository: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
-  for grammar_metainfo in metainfo.grammars.iter() {
-    let highlight_query = match &grammar_metainfo.highlights {
+  for metadata in repository.grammars.iter() {
+    let highlight_query = match &metadata.highlights {
       Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
       None => None,
     };
-    let tags_query = match &grammar_metainfo.tags {
+    let tags_query = match &metadata.tags {
       Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
       None => None,
     };
+    let injection_query =
+      metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
-      grammar_metainfo.name.clone(),
+      metadata.name.clone(),
       grammar.clone(),
       highlight_query,
       tags_query,
-      grammar_metainfo
-        .injection_regex
-        .as_ref()
-        .map(|inj| inj.to_string()),
+      injection_query,
     );
   }
 }
