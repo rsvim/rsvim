@@ -45,4 +45,12 @@ impl<K, V> LiteSet<K, V> {
   {
     self.data.get(key)
   }
+
+  pub fn contains_key<Q>(&self, key: &Q) -> bool
+  where
+    K: Borrow<Q> + Ord,
+    Q: Ord + ?Sized,
+  {
+    self.data.contains_key(key)
+  }
 }
