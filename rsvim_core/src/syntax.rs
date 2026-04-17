@@ -799,9 +799,11 @@ impl SyntaxManager {
     tags_query: Option<String>,
     injection_query: Option<String>,
   ) {
-    self
-      .grammars
-      .insert(grammar_name.to_compact_string(), grammar);
+    if let Some(grammar) = grammar {
+      self
+        .grammars
+        .insert(grammar_name.to_compact_string(), grammar);
+    }
     if let Some(hl) = highlight_query {
       self
         .highlight_queries
