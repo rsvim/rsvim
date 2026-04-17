@@ -797,6 +797,7 @@ impl SyntaxManager {
     &mut self,
     grammar_name: CompactString,
     grammar: Language,
+    file_types: Vec<CompactString>,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
