@@ -588,9 +588,9 @@ pub struct SyntaxManager {
   tags_queries: FoldMap<CompactString, String>,
   injection_queries: FoldMap<CompactString, String>,
 
-  // Maps grammar ID to file extensions
+  // Maps grammar name to file extensions
   gid2ext: FoldMap<CompactString, FoldSet<CompactString>>,
-  // Maps file extension to grammar ID
+  // Maps file extension to grammar name
   ext2gid: FoldMap<CompactString, CompactString>,
 }
 
@@ -797,7 +797,7 @@ impl SyntaxManager {
     &mut self,
     grammar_name: CompactString,
     grammar: Language,
-    file_types: Vec<CompactString>,
+    // file_types: Vec<CompactString>,
     highlight_query: Option<String>,
     tags_query: Option<String>,
     injection_query: Option<String>,
