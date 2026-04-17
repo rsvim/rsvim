@@ -16,7 +16,6 @@ use crate::syntax::SyntaxEditNew;
 use crate::syntax::SyntaxManager;
 use assert_fs::NamedTempFile;
 use compact_str::ToCompactString;
-use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::sync::Arc;
