@@ -590,10 +590,10 @@ pub struct SyntaxManager {
   tags_queries: FoldMap<CompactString, String>,
   injection_queries: FoldMap<CompactString, String>,
 
-  // Maps grammar name to file extensions
-  name2fext: FoldMap<CompactString, FoldSet<CompactString>>,
-  // Maps file extension to grammar name
-  fext2name: FoldMap<CompactString, CompactString>,
+  // Maps grammar name to file types
+  name2ftypes: FoldMap<CompactString, FoldSet<CompactString>>,
+  // Maps file type to grammar name
+  ftype2name: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(SyntaxManager);
@@ -606,8 +606,8 @@ impl Debug for SyntaxManager {
       .field("highlight_queries", &self.highlight_queries)
       .field("tags_queries", &self.tags_queries)
       .field("injection_queries", &self.injection_queries)
-      .field("name2ext", &self.name2fext)
-      .field("ext2name", &self.fext2name)
+      .field("name2ftypes", &self.name2ftypes)
+      .field("ftype2name", &self.ftype2name)
       .finish()
   }
 }
@@ -653,8 +653,8 @@ impl SyntaxManager {
       highlight_queries: FoldMap::new(),
       tags_queries: FoldMap::new(),
       injection_queries: FoldMap::new(),
-      name2fext: FoldMap::new(),
-      fext2name: FoldMap::new(),
+      name2ftypes: FoldMap::new(),
+      ftype2name: FoldMap::new(),
     }
   }
 
@@ -779,14 +779,14 @@ impl SyntaxManager {
     &self,
     id: &str,
   ) -> Option<&FoldSet<CompactString>> {
-    self.name2fext.get(id)
+    self.name2ftypes.get(id)
   }
 
   pub fn get_grammar_name_by_file_types(
     &self,
     ext: &str,
   ) -> Option<&CompactString> {
-    self.fext2name.get(ext)
+    self.ftype2name.get(ext)
   }
 }
 // Language ID and file extensions }
@@ -823,14 +823,14 @@ impl SyntaxManager {
         .insert(grammar_name.to_compact_string(), injection);
     }
     self
-      .name2fext
+      .name2ftypes
       .entry(grammar_name.to_compact_string())
       .or_default();
-    let exts = self.name2fext.get_mut(grammar_name).unwrap();
+    let exts = self.name2ftypes.get_mut(grammar_name).unwrap();
     for ft in file_types.iter() {
       exts.insert(ft.clone());
       self
-        .fext2name
+        .ftype2name
         .insert(ft.clone(), grammar_name.to_compact_string());
     }
   }
@@ -845,7 +845,7 @@ impl SyntaxManager {
 
   pub fn get_grammar_by_ext(&self, ext: &str) -> Option<&Language> {
     self
-      .fext2name
+      .ftype2name
       .get(ext)
       .map(|id| self.get_grammar(id))
       .unwrap_or(None)
@@ -853,7 +853,7 @@ impl SyntaxManager {
 
   pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
     self
-      .fext2name
+      .ftype2name
       .get(ext)
       .map(|id| self.get_highlight_query(id))
       .unwrap_or(None)
