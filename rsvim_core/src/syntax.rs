@@ -509,24 +509,22 @@ impl SyntaxLoader {
 
 fn save_loaded_grammars(
   syntax_manager: &SyntaxManagerArc,
-  grammar_repository: &SyntaxTreeSitterGrammarRepository,
+  repository: &SyntaxTreeSitterGrammarRepository,
   grammar: &Language,
 ) {
-  for grammar_metadata in grammar_repository.grammars.iter() {
-    let highlight_query = match &grammar_metadata.highlights {
+  for metadata in repository.grammars.iter() {
+    let highlight_query = match &metadata.highlights {
       Some(highlights) => std::fs::read_to_string(highlights).ok(),
       None => None,
     };
-    let tags_query = match &grammar_metadata.tags {
+    let tags_query = match &metadata.tags {
       Some(tags) => std::fs::read_to_string(tags).ok(),
       None => None,
     };
-    let injection_query = grammar_metadata
-      .injection_regex
-      .as_ref()
-      .map(|inj| inj.to_string());
+    let injection_query =
+      metadata.injection_regex.as_ref().map(|inj| inj.to_string());
     lock!(syntax_manager).insert_grammar(
-      grammar_metadata.name.clone(),
+      metadata.name.clone(),
       grammar.clone(),
       highlight_query,
       tags_query,
