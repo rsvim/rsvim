@@ -1,6 +1,5 @@
 //! Common utils.
 
-pub mod lite_set;
 pub mod lock;
 pub mod paths;
 pub mod ringbuf;
