@@ -375,10 +375,12 @@ pub struct SyntaxTreeSitterGrammarMetadata {
   pub scope: CompactString,
   pub path: PathBuf,
   pub file_types: Vec<CompactString>,
-  pub highlight_path: Option<PathBuf>,
-  pub highlight_query: Option<String>,
+  pub highlights_path: Option<PathBuf>,
+  pub highlights_query: Option<String>,
   pub tags_path: Option<PathBuf>,
   pub tags_query: Option<String>,
+  pub injections_path: Option<PathBuf>,
+  pub injections_query: Option<String>,
   pub injection_regex: Option<String>,
 }
 
@@ -458,7 +460,7 @@ impl SyntaxLoader {
         scope: scope.to_compact_string(),
         path,
         file_types,
-        highlight_path: highlights,
+        highlights_path: highlights,
         tags_path: tags,
         injection_regex,
       };
@@ -515,7 +517,7 @@ fn save_loaded_grammars(
   grammar: &Language,
 ) {
   for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlight_path {
+    let highlight_query = match &metadata.highlights_path {
       Some(highlights) => std::fs::read_to_string(highlights).ok(),
       None => None,
     };
@@ -542,7 +544,7 @@ async fn async_save_loaded_grammars(
   grammar: &Language,
 ) {
   for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlight_path {
+    let highlight_query = match &metadata.highlights_path {
       Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
       None => None,
     };
