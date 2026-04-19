@@ -420,19 +420,22 @@ impl SyntaxLoader {
       .as_array()
       .ok_or(err())?;
 
-    let mut grammars_metainfo =
-      Vec::with_capacity(tree_sitter_json_grammars.len());
-    for grammar in tree_sitter_json_grammars {
-      let name = grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
-      let camelcase = grammar
+    let mut grammars = Vec::with_capacity(tree_sitter_json_grammars.len());
+    for ts_grammar in tree_sitter_json_grammars {
+      let name = ts_grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
+      let camelcase = ts_grammar
         .get("camelcase")
         .ok_or(err())?
         .as_str()
         .ok_or(err())?;
-      let scope = grammar.get("scope").ok_or(err())?.as_str().ok_or(err())?;
-      let path = grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
+      let scope = ts_grammar
+        .get("scope")
+        .ok_or(err())?
+        .as_str()
+        .ok_or(err())?;
+      let path = ts_grammar.get("path").ok_or(err())?.as_str().ok_or(err())?;
       let path = grammar_path.join(path).canonicalize().map_err(|_e| err())?;
-      let file_types = grammar
+      let file_types = ts_grammar
         .get("file-types")
         .ok_or(err())?
         .as_array()
@@ -443,30 +446,30 @@ impl SyntaxLoader {
         .iter()
         .map(|ft| ft.to_compact_string())
         .collect_vec();
-      let highlights_path = grammar
+      let highlights_path = ts_grammar
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
         .map(|hl| grammar_path.join(hl).normalize().map_err(|_e| err()))
         .transpose()?;
-      let tags_path = grammar
+      let tags_path = ts_grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|tg| grammar_path.join(tg).normalize().map_err(|_e| err()))
         .transpose()?;
-      let injections_path = grammar
+      let injections_path = ts_grammar
         .get("injections")
         .map(|inj| inj.as_str().ok_or(err()))
         .transpose()?
         .map(|inj| grammar_path.join(inj).normalize().map_err(|_e| err()))
         .transpose()?;
-      let injection_regex = grammar
+      let injection_regex = ts_grammar
         .get("injection-regex")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|inj| inj.to_string());
-      let grammar_metainfo = SyntaxTreeSitterGrammarMetadata {
+      let metadata = SyntaxTreeSitterGrammarMetadata {
         name: name.to_compact_string(),
         camelcase: camelcase.to_compact_string(),
         scope: scope.to_compact_string(),
@@ -480,14 +483,14 @@ impl SyntaxLoader {
         injections_query: None,
         injection_regex,
       };
-      grammars_metainfo.push(grammar_metainfo);
+      grammars.push(metadata);
     }
 
     let src_path = grammar_path.join("src");
     let grammar_json_path = src_path.join("grammar.json");
 
     let metainfo = SyntaxTreeSitterGrammarRepository {
-      grammars: grammars_metainfo,
+      grammars,
       grammar_path: grammar_path.to_path_buf(),
       src_path,
       grammar_json_path,
