@@ -375,8 +375,10 @@ pub struct SyntaxTreeSitterGrammarMetadata {
   pub scope: CompactString,
   pub path: PathBuf,
   pub file_types: Vec<CompactString>,
-  pub highlights: Option<PathBuf>,
-  pub tags: Option<PathBuf>,
+  pub highlight_path: Option<PathBuf>,
+  pub highlight_query: Option<String>,
+  pub tags_path: Option<PathBuf>,
+  pub tags_query: Option<String>,
   pub injection_regex: Option<String>,
 }
 
@@ -456,8 +458,8 @@ impl SyntaxLoader {
         scope: scope.to_compact_string(),
         path,
         file_types,
-        highlights,
-        tags,
+        highlight_path: highlights,
+        tags_path: tags,
         injection_regex,
       };
       grammars_metainfo.push(grammar_metainfo);
@@ -513,11 +515,11 @@ fn save_loaded_grammars(
   grammar: &Language,
 ) {
   for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlights {
+    let highlight_query = match &metadata.highlight_path {
       Some(highlights) => std::fs::read_to_string(highlights).ok(),
       None => None,
     };
-    let tags_query = match &metadata.tags {
+    let tags_query = match &metadata.tags_path {
       Some(tags) => std::fs::read_to_string(tags).ok(),
       None => None,
     };
@@ -540,11 +542,11 @@ async fn async_save_loaded_grammars(
   grammar: &Language,
 ) {
   for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlights {
+    let highlight_query = match &metadata.highlight_path {
       Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
       None => None,
     };
-    let tags_query = match &metadata.tags {
+    let tags_query = match &metadata.tags_path {
       Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
       None => None,
     };
