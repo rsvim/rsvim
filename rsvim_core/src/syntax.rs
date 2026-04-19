@@ -387,8 +387,14 @@ pub struct SyntaxTreeSitterGrammarMetadata {
 #[derive(Debug, Clone)]
 pub struct SyntaxTreeSitterGrammarRepository {
   pub grammars: Vec<SyntaxTreeSitterGrammarMetadata>,
+
+  /// The `tree-sitter-c`, `tree-sitter-rust` grammar directory path.
   pub grammar_path: PathBuf,
+
+  /// The `src` directory path inside the grammar directory.
   pub src_path: PathBuf,
+
+  /// The `grammar.json` file path inside `src` directory.
   pub grammar_json_path: PathBuf,
 }
 
@@ -437,17 +443,23 @@ impl SyntaxLoader {
         .iter()
         .map(|ft| ft.to_compact_string())
         .collect_vec();
-      let highlights = grammar
+      let highlights_path = grammar
         .get("highlights")
         .map(|hl| hl.as_str().ok_or(err()))
         .transpose()?
         .map(|hl| grammar_path.join(hl).normalize().map_err(|_e| err()))
         .transpose()?;
-      let tags = grammar
+      let tags_path = grammar
         .get("tags")
         .map(|tg| tg.as_str().ok_or(err()))
         .transpose()?
         .map(|tg| grammar_path.join(tg).normalize().map_err(|_e| err()))
+        .transpose()?;
+      let injections_path = grammar
+        .get("injections")
+        .map(|inj| inj.as_str().ok_or(err()))
+        .transpose()?
+        .map(|inj| grammar_path.join(inj).normalize().map_err(|_e| err()))
         .transpose()?;
       let injection_regex = grammar
         .get("injection-regex")
@@ -460,8 +472,12 @@ impl SyntaxLoader {
         scope: scope.to_compact_string(),
         path,
         file_types,
-        highlights_path: highlights,
-        tags_path: tags,
+        highlights_path,
+        highlights_query: None,
+        tags_path,
+        tags_query: None,
+        injections_path,
+        injections_query: None,
         injection_regex,
       };
       grammars_metainfo.push(grammar_metainfo);
