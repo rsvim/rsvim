@@ -489,13 +489,13 @@ impl SyntaxLoader {
     let src_path = grammar_path.join("src");
     let grammar_json_path = src_path.join("grammar.json");
 
-    let metainfo = SyntaxTreeSitterGrammarRepository {
+    let repository = SyntaxTreeSitterGrammarRepository {
       grammars,
       grammar_path: grammar_path.to_path_buf(),
       src_path,
       grammar_json_path,
     };
-    Ok(metainfo)
+    Ok(repository)
   }
 
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
