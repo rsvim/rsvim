@@ -401,7 +401,7 @@ pub struct SyntaxTreeSitterGrammarRepository {
 impl SyntaxLoader {
   fn parse_metadata(
     grammar_path: &Path,
-    tree_sitter_json_grammars: &[serde_json::Value],
+    ts_json_grammars: &[serde_json::Value],
   ) -> TheResult<Vec<SyntaxTreeSitterGrammarMetadata>> {
     let err = || {
       TheErr::TreeSitterParserNotFound(
@@ -409,8 +409,8 @@ impl SyntaxLoader {
       )
     };
 
-    let mut grammars = Vec::with_capacity(tree_sitter_json_grammars.len());
-    for ts_grammar in tree_sitter_json_grammars {
+    let mut grammars = Vec::with_capacity(ts_json_grammars.len());
+    for ts_grammar in ts_json_grammars {
       let name = ts_grammar.get("name").ok_or(err())?.as_str().ok_or(err())?;
       let camelcase = ts_grammar
         .get("camelcase")
@@ -480,7 +480,7 @@ impl SyntaxLoader {
 
   fn parse_repository(
     grammar_path: &Path,
-    tree_sitter_json_text: &str,
+    ts_json_text: &str,
   ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
     let err = || {
       TheErr::TreeSitterParserNotFound(
@@ -488,7 +488,7 @@ impl SyntaxLoader {
       )
     };
     let tree_sitter_json_data: serde_json::Value =
-      serde_json::from_str(tree_sitter_json_text).map_err(|_e| err())?;
+      serde_json::from_str(ts_json_text).map_err(|_e| err())?;
 
     let tree_sitter_json_grammars = tree_sitter_json_data
       .get("grammars")
@@ -519,10 +519,10 @@ impl SyntaxLoader {
       )
     };
 
-    let tree_sitter_json_path = grammar_path.join("tree-sitter.json");
-    let tree_sitter_json_text =
-      std::fs::read_to_string(tree_sitter_json_path).map_err(|_e| err())?;
-    Self::parse_repository(grammar_path, &tree_sitter_json_text)
+    let ts_json_path = grammar_path.join("tree-sitter.json");
+    let ts_json_text =
+      std::fs::read_to_string(ts_json_path).map_err(|_e| err())?;
+    Self::parse_repository(grammar_path, &ts_json_text)
   }
 
   async fn async_parse_grammar_repository(
@@ -534,12 +534,11 @@ impl SyntaxLoader {
       )
     };
 
-    let tree_sitter_json_path = grammar_path.join("tree-sitter.json");
-    let tree_sitter_json_text =
-      tokio::fs::read_to_string(tree_sitter_json_path)
-        .await
-        .map_err(|_e| err())?;
-    Self::parse_repository(grammar_path, &tree_sitter_json_text)
+    let ts_json_path = grammar_path.join("tree-sitter.json");
+    let ts_json_text = tokio::fs::read_to_string(ts_json_path)
+      .await
+      .map_err(|_e| err())?;
+    Self::parse_repository(grammar_path, &ts_json_text)
   }
 
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
