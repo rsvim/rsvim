@@ -510,6 +510,46 @@ impl SyntaxLoader {
     Ok(repository)
   }
 
+  fn load_query(repository: &mut SyntaxTreeSitterGrammarRepository) {
+    for grammar in repository.grammars.iter_mut() {
+      grammar.highlights_query = match &grammar.highlights_path {
+        Some(highlights_path) => std::fs::read_to_string(highlights_path).ok(),
+        None => None,
+      };
+      grammar.tags_query = match &grammar.tags_path {
+        Some(tags_path) => std::fs::read_to_string(tags_path).ok(),
+        None => None,
+      };
+      grammar.injections_query = match &grammar.injections_path {
+        Some(injections_path) => std::fs::read_to_string(injections_path).ok(),
+        None => None,
+      };
+    }
+  }
+
+  async fn async_load_query(
+    repository: &mut SyntaxTreeSitterGrammarRepository,
+  ) {
+    for grammar in repository.grammars.iter_mut() {
+      grammar.highlights_query = match &grammar.highlights_path {
+        Some(highlights_path) => {
+          tokio::fs::read_to_string(highlights_path).await.ok()
+        }
+        None => None,
+      };
+      grammar.tags_query = match &grammar.tags_path {
+        Some(tags_path) => tokio::fs::read_to_string(tags_path).await.ok(),
+        None => None,
+      };
+      grammar.injections_query = match &grammar.injections_path {
+        Some(injections_path) => {
+          tokio::fs::read_to_string(injections_path).await.ok()
+        }
+        None => None,
+      };
+    }
+  }
+
   fn parse_grammar_repository(
     grammar_path: &Path,
   ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
@@ -522,7 +562,9 @@ impl SyntaxLoader {
     let ts_json_path = grammar_path.join("tree-sitter.json");
     let ts_json_text =
       std::fs::read_to_string(ts_json_path).map_err(|_e| err())?;
-    Self::parse_repository(grammar_path, &ts_json_text)
+    let mut repository = Self::parse_repository(grammar_path, &ts_json_text)?;
+    Self::load_query(&mut repository);
+    Ok(repository)
   }
 
   async fn async_parse_grammar_repository(
@@ -538,17 +580,16 @@ impl SyntaxLoader {
     let ts_json_text = tokio::fs::read_to_string(ts_json_path)
       .await
       .map_err(|_e| err())?;
-    Self::parse_repository(grammar_path, &ts_json_text)
+    let mut repository = Self::parse_repository(grammar_path, &ts_json_text)?;
+    Self::async_load_query(&mut repository).await;
+    Ok(repository)
   }
 
   /// Load the tree-sitter parser/grammar (`Language`) FFI dynamic library.
   pub fn load_grammar(
     &self,
     req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarRepository,
-    /* grammar */ Language,
-  )> {
+  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
     let metainfo = Self::parse_grammar_repository(req.grammar_path.as_path())?;
     let compile_cfg =
       CompileConfig::new(metainfo.src_path.as_path(), None, None);
@@ -564,10 +605,7 @@ impl SyntaxLoader {
   pub async fn async_load_grammar(
     &self,
     req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<(
-    /* metainfo */ SyntaxTreeSitterGrammarRepository,
-    /* grammar */ Language,
-  )> {
+  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
     let metainfo =
       Self::async_parse_grammar_repository(req.grammar_path.as_path()).await?;
     let compile_cfg =
@@ -582,67 +620,12 @@ impl SyntaxLoader {
   }
 }
 
-fn save_loaded_grammars(
-  syntax_manager: &SyntaxManagerArc,
-  repository: &SyntaxTreeSitterGrammarRepository,
-  grammar: &Language,
-) {
-  for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlights_path {
-      Some(highlights) => std::fs::read_to_string(highlights).ok(),
-      None => None,
-    };
-    let tags_query = match &metadata.tags_path {
-      Some(tags) => std::fs::read_to_string(tags).ok(),
-      None => None,
-    };
-    let injection_query =
-      metadata.injection_regex.as_ref().map(|inj| inj.to_string());
-    lock!(syntax_manager).insert_grammar(
-      &metadata.name,
-      &metadata.file_types,
-      Some(grammar.clone()),
-      highlight_query,
-      tags_query,
-      injection_query,
-    );
-  }
-}
-
-async fn async_save_loaded_grammars(
-  syntax_manager: &SyntaxManagerArc,
-  repository: &SyntaxTreeSitterGrammarRepository,
-  grammar: &Language,
-) {
-  for metadata in repository.grammars.iter() {
-    let highlight_query = match &metadata.highlights_path {
-      Some(highlights) => tokio::fs::read_to_string(highlights).await.ok(),
-      None => None,
-    };
-    let tags_query = match &metadata.tags_path {
-      Some(tags) => tokio::fs::read_to_string(tags).await.ok(),
-      None => None,
-    };
-    let injection_query =
-      metadata.injection_regex.as_ref().map(|inj| inj.to_string());
-    lock!(syntax_manager).insert_grammar(
-      &metadata.name,
-      &metadata.file_types,
-      Some(grammar.clone()),
-      highlight_query,
-      tags_query,
-      injection_query,
-    );
-  }
-}
-
 pub fn load_syntax_grammar(
   syntax_manager: SyntaxManagerArc,
   req: &SyntaxLoadGrammarRequest,
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syntax_loader = lock!(syntax_manager).loader();
   let (metainfo, grammar) = syntax_loader.load_grammar(req)?;
-  save_loaded_grammars(&syntax_manager, &metainfo, &grammar);
   Ok(metainfo)
 }
 
@@ -652,7 +635,6 @@ pub async fn async_load_syntax_grammar(
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syntax_loader = lock!(syntax_manager).loader();
   let (metainfo, grammar) = syntax_loader.async_load_grammar(req).await?;
-  async_save_loaded_grammars(&syntax_manager, &metainfo, &grammar).await;
   Ok(metainfo)
 }
 
