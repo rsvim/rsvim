@@ -880,6 +880,20 @@ impl SyntaxManager {
     }
   }
 
+  pub fn get_tags_query(&self, name: &str) -> Option<&String> {
+    match self.metadatas.get(name) {
+      Some(mdata) => mdata.tags_query.as_ref(),
+      None => None,
+    }
+  }
+
+  pub fn get_injections_query(&self, name: &str) -> Option<&String> {
+    match self.metadatas.get(name) {
+      Some(mdata) => mdata.injections_query.as_ref(),
+      None => None,
+    }
+  }
+
   pub fn get_grammar_name_by_file_type(
     &self,
     file_type: &str,
