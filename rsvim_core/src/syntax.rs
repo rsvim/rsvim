@@ -589,7 +589,10 @@ impl SyntaxLoader {
   pub fn load_grammar(
     &self,
     req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
+  ) -> TheResult<(
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
+    /* grammar */ Language,
+  )> {
     let metainfo = Self::parse_grammar_repository(req.grammar_path.as_path())?;
     let compile_cfg =
       CompileConfig::new(metainfo.src_path.as_path(), None, None);
@@ -605,7 +608,10 @@ impl SyntaxLoader {
   pub async fn async_load_grammar(
     &self,
     req: &SyntaxLoadGrammarRequest,
-  ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
+  ) -> TheResult<(
+    /* metainfo */ SyntaxTreeSitterGrammarRepository,
+    /* grammar */ Language,
+  )> {
     let metainfo =
       Self::async_parse_grammar_repository(req.grammar_path.as_path()).await?;
     let compile_cfg =
@@ -626,6 +632,7 @@ pub fn load_syntax_grammar(
 ) -> TheResult<SyntaxTreeSitterGrammarRepository> {
   let syntax_loader = lock!(syntax_manager).loader();
   let (metainfo, grammar) = syntax_loader.load_grammar(req)?;
+  lock!(syntax_manager).insert_grammar(metainfo, grammar);
   Ok(metainfo)
 }
 
@@ -641,16 +648,14 @@ pub async fn async_load_syntax_grammar(
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
 
-  // loaded_parsers: FoldMap<CompactString, SyntaxLoadedParser>,
+  // Loaded grammars (parsers)
   grammars: FoldMap<CompactString, Language>,
-  highlight_queries: FoldMap<CompactString, String>,
-  tags_queries: FoldMap<CompactString, String>,
-  injection_queries: FoldMap<CompactString, String>,
 
-  // Maps grammar name to file types
-  name2ftypes: FoldMap<CompactString, FoldSet<CompactString>>,
-  // Maps file type to grammar name
-  ftype2name: FoldMap<CompactString, CompactString>,
+  // Loaded grammar metadata
+  metadatas: FoldMap<CompactString, SyntaxTreeSitterGrammarMetadata>,
+
+  // Maps file types to grammar names
+  ftypes2names: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(SyntaxManager);
@@ -660,11 +665,7 @@ impl Debug for SyntaxManager {
     f.debug_struct("SyntaxManager")
       .field("loader", &self.loader)
       .field("grammars", &self.grammars.keys())
-      .field("highlight_queries", &self.highlight_queries)
-      .field("tags_queries", &self.tags_queries)
-      .field("injection_queries", &self.injection_queries)
-      .field("name2ftypes", &self.name2ftypes)
-      .field("ftype2name", &self.ftype2name)
+      .field("ftypes2names", &self.ftypes2names)
       .finish()
   }
 }
@@ -711,7 +712,7 @@ impl SyntaxManager {
       tags_queries: FoldMap::new(),
       injection_queries: FoldMap::new(),
       name2ftypes: FoldMap::new(),
-      ftype2name: FoldMap::new(),
+      ftypes2names: FoldMap::new(),
     }
   }
 
@@ -843,7 +844,7 @@ impl SyntaxManager {
     &self,
     ext: &str,
   ) -> Option<&CompactString> {
-    self.ftype2name.get(ext)
+    self.ftypes2names.get(ext)
   }
 }
 // Language ID and file extensions }
@@ -852,85 +853,63 @@ impl SyntaxManager {
 impl SyntaxManager {
   pub fn insert_grammar(
     &mut self,
-    grammar_name: &str,
-    file_types: &[CompactString],
-    grammar: Option<Language>,
-    highlight_query: Option<String>,
-    tags_query: Option<String>,
-    injection_query: Option<String>,
+    repository: SyntaxTreeSitterGrammarRepository,
+    grammar: Language,
   ) {
-    if let Some(grammar) = grammar {
+    for metadata in repository.grammars.iter() {
+      self.grammars.insert(metadata.name.clone(), grammar.clone());
       self
-        .grammars
-        .insert(grammar_name.to_compact_string(), grammar);
+        .metadatas
+        .insert(metadata.name.clone(), metadata.clone());
+      for ftype in metadata.file_types.iter() {
+        self
+          .ftypes2names
+          .insert(ftype.clone(), metadata.name.clone());
+      }
     }
-    if let Some(hl) = highlight_query {
-      self
-        .highlight_queries
-        .insert(grammar_name.to_compact_string(), hl);
+  }
+
+  pub fn get_grammar(&self, name: &str) -> Option<&Language> {
+    self.grammars.get(name)
+  }
+
+  pub fn get_highlights_query(&self, name: &str) -> Option<&String> {
+    match self.metadatas.get(name) {
+      Some(mdata) => mdata.highlights_query.as_ref(),
+      None => None,
     }
-    if let Some(tag) = tags_query {
-      self
-        .tags_queries
-        .insert(grammar_name.to_compact_string(), tag);
-    }
-    if let Some(injection) = injection_query {
-      self
-        .injection_queries
-        .insert(grammar_name.to_compact_string(), injection);
-    }
+  }
+
+  pub fn get_grammar_name_by_file_type(
+    &self,
+    file_type: &str,
+  ) -> Option<&Language> {
     self
-      .name2ftypes
-      .entry(grammar_name.to_compact_string())
-      .or_default();
-    let exts = self.name2ftypes.get_mut(grammar_name).unwrap();
-    for ft in file_types.iter() {
-      exts.insert(ft.clone());
-      self
-        .ftype2name
-        .insert(ft.clone(), grammar_name.to_compact_string());
-    }
-  }
-
-  pub fn get_grammar(&self, id: &str) -> Option<&Language> {
-    self.grammars.get(id)
-  }
-
-  pub fn get_highlight_query(&self, id: &str) -> Option<&String> {
-    self.highlight_queries.get(id)
-  }
-
-  pub fn get_grammar_by_ext(&self, ext: &str) -> Option<&Language> {
-    self
-      .ftype2name
-      .get(ext)
-      .map(|id| self.get_grammar(id))
-      .unwrap_or(None)
-  }
-
-  pub fn get_highlight_query_by_ext(&self, ext: &str) -> Option<&String> {
-    self
-      .ftype2name
-      .get(ext)
-      .map(|id| self.get_highlight_query(id))
+      .ftypes2names
+      .get(file_type)
+      .map(|name| self.get_grammar(name))
       .unwrap_or(None)
   }
 
   /// Load/create a new Syntax by file extension.
   pub fn make_syntax_by_ext(
     &self,
-    file_extension: &Option<CompactString>,
+    file_type: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
-    if let Some(ext) = file_extension
-      && let Some(grammar) = self.get_grammar_by_ext(ext)
+    if let Some(ext) = file_type
+      && let Some(grammar) = self.get_grammar_name_by_file_type(ext)
     {
       trace!(
-        "Load syntax by file ext:{:?} grammar:{:?}",
-        file_extension,
+        "Load syntax by file type:{:?} grammar:{:?}",
+        file_type,
         grammar.name()
       );
-      let highlight_query = self.get_highlight_query_by_ext(ext);
-      match Syntax::new(grammar, highlight_query) {
+      let highlights_query = self
+        .ftypes2names
+        .get(ext)
+        .map(|name| self.get_highlights_query(name))
+        .unwrap_or(None);
+      match Syntax::new(grammar, highlights_query) {
         Ok(syntax) => Ok(Some(syntax)),
         Err(e) => Err(TheErr::LoadSyntaxFailed(ext.clone(), e)),
       }
