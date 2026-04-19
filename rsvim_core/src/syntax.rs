@@ -488,7 +488,7 @@ impl SyntaxLoader {
       )
     };
     let tree_sitter_json_data: serde_json::Value =
-      serde_json::from_str(&tree_sitter_json_text).map_err(|_e| err())?;
+      serde_json::from_str(tree_sitter_json_text).map_err(|_e| err())?;
 
     let tree_sitter_json_grammars = tree_sitter_json_data
       .get("grammars")
