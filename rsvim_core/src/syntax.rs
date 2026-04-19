@@ -835,16 +835,16 @@ impl SyntaxManager {
 
   pub fn get_file_types_by_grammar_name(
     &self,
-    id: &str,
+    name: &str,
   ) -> Option<&FoldSet<CompactString>> {
-    self.name2ftypes.get(id)
+    self.name2ftypes.get(name)
   }
 
   pub fn get_grammar_name_by_file_types(
     &self,
-    ext: &str,
+    file_type: &str,
   ) -> Option<&CompactString> {
-    self.ftypes2names.get(ext)
+    self.ftypes2names.get(file_type)
   }
 }
 // Language ID and file extensions }
