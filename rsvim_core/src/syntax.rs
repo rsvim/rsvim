@@ -671,38 +671,6 @@ impl Debug for SyntaxManager {
   }
 }
 
-#[cfg(test)]
-// WARNING: This is for testing only
-struct _BuiltinTreeSitterGrammar {
-  pub grammar_name: CompactString,
-  pub language: Language,
-  pub highlight_query: Option<String>,
-  pub tags_query: Option<String>,
-  pub injection_query: Option<String>,
-  pub file_types: Vec<CompactString>,
-}
-
-#[cfg(test)]
-impl _BuiltinTreeSitterGrammar {
-  pub fn new(
-    grammar_name: &str,
-    language: Language,
-    highlight_query: Option<String>,
-    tags_query: Option<String>,
-    injection_query: Option<String>,
-    file_types: Vec<CompactString>,
-  ) -> Self {
-    Self {
-      grammar_name: grammar_name.to_compact_string(),
-      language,
-      highlight_query,
-      tags_query,
-      injection_query,
-      file_types,
-    }
-  }
-}
-
 // Language ID and file extensions {
 impl SyntaxManager {
   fn _new() -> Self {
