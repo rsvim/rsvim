@@ -914,8 +914,11 @@ impl SyntaxManager {
   pub fn get_file_types_by_grammar_name(
     &self,
     name: &str,
-  ) -> Option<&FoldSet<CompactString>> {
-    self.name2ftypes.get(name)
+  ) -> Option<&Vec<CompactString>> {
+    match self.metadatas.get(name) {
+      Some(mdata) => Some(&mdata.file_types),
+      None => None,
+    }
   }
 
   pub fn get_grammar_name_by_file_types(
