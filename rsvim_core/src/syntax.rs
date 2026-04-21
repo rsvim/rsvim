@@ -909,14 +909,11 @@ impl SyntaxManager {
     grammar: Language,
   ) {
     for metadata in repository.grammars.iter() {
-      self.grammars.insert(metadata.name.clone(), grammar.clone());
-      self
-        .metadatas
-        .insert(metadata.name.clone(), metadata.clone());
+      let name = metadata.name;
+      self.grammars.insert(name.clone(), grammar.clone());
+      self.metadatas.insert(name.clone(), metadata.clone());
       for ftype in metadata.file_types.iter() {
-        self
-          .ftypes2names
-          .insert(ftype.clone(), metadata.name.clone());
+        self.ftypes2names.insert(ftype.clone(), name.clone());
       }
     }
   }
