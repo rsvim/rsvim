@@ -21,11 +21,11 @@ mod tests_syntax_manager {
   use super::*;
 
   #[cfg_attr(miri, ignore)]
-  fn rust_err1() {
+  fn getter1() {
     test_log_init();
     let syntax_manager = SyntaxManager::new();
 
-    let inputs = vec![
+    let inputs = [
       (
         "c",
         vec!["c", "h"],
