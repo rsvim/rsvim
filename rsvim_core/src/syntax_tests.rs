@@ -20,6 +20,7 @@ use std::time::Duration;
 mod tests_syntax_manager {
   use super::*;
 
+  #[test]
   #[cfg_attr(miri, ignore)]
   fn getter1() {
     test_log_init();
