@@ -812,7 +812,10 @@ impl SyntaxManager {
             camelcase: "Html".to_compact_string(),
             scope: "".to_compact_string(),
             path: Path::new(".").to_path_buf(),
-            file_types: vec!["toml".to_compact_string()],
+            file_types: vec![
+              "htm".to_compact_string(),
+              "html".to_compact_string(),
+            ],
             highlights_path: Some(
               Path::new("queries/highlights.scm").to_path_buf(),
             ),
