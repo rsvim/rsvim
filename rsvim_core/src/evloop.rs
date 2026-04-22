@@ -938,8 +938,8 @@ impl EventLoop {
                   .map(|gm| gm.name.to_string())
                   .collect_vec();
                 jsrt_forwarder_tx
-                  .send(JsMessage::LoadTreeSitterGrammarResp(
-                    chan::LoadTreeSitterGrammarResp {
+                  .send(JsMessage::LoadTreeSitterParserResp(
+                    chan::LoadTreeSitterParserResp {
                       task_id: req.task_id,
                       maybe_result: Some(Ok(
                         postcard::to_allocvec(&grammar_names).unwrap(),
@@ -950,8 +950,8 @@ impl EventLoop {
               }
               Err(e) => {
                 jsrt_forwarder_tx
-                  .send(JsMessage::LoadTreeSitterGrammarResp(
-                    chan::LoadTreeSitterGrammarResp {
+                  .send(JsMessage::LoadTreeSitterParserResp(
+                    chan::LoadTreeSitterParserResp {
                       task_id: req.task_id,
                       maybe_result: Some(Err(e)),
                     },
