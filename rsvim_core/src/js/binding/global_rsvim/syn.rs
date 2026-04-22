@@ -42,7 +42,10 @@ pub fn load_treesitter_parser_sync<'s>(
             .iter()
             .map(|grammar| grammar.name.to_string())
             .collect::<Vec<String>>();
-          trace!("Rsvim.syn.loadTreeSitterParser result:{:?}", parser_names);
+          trace!(
+            "Rsvim.syn.loadTreeSitterParserSync result:{:?}",
+            parser_names
+          );
           let parser_names =
             parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
           rv.set(parser_names.into());
