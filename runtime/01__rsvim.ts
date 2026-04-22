@@ -1361,10 +1361,15 @@ export class RsvimSyn {
   async loadTreeSitterParser(
     options: RsvimSyn.LoadTreeSitterParserOptions,
   ): Promise<string[]> {
-    exitCode = exitCode ?? 0;
-    checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.rt_exit(exitCode);
+    checkIsObject(options, `"Rsvim.syn.loadTreeSitterParser" options`);
+    checkIsString(
+      options.grammarPath,
+      `"Rsvim.syn.loadTreeSitterParser" grammarPath option`,
+    );
+    const parserNames =
+      // @ts-ignore Ignore warning
+      await __InternalRsvimGlobalObject.syn_load_tree_sitter_parser(options);
+    return parserNames;
   }
 }
 
