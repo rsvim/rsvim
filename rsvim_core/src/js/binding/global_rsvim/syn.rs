@@ -83,7 +83,7 @@ pub fn load_treesitter_grammar<'s>(
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
   let grammar_path = Path::new(&options.grammar_path);
-  pending::create_syn_load_treesitter_grammar(
+  pending::create_syn_load_treesitter_parser(
     &mut state,
     task_id,
     grammar_path,
