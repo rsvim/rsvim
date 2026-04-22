@@ -939,8 +939,9 @@ impl EventLoop {
                     let grammar_names = metainfo
                       .grammars
                       .iter()
-                      .map(|gm| gm.name.to_string())
+                      .map(|grammar| grammar.name.to_string())
                       .collect_vec();
+                    trace!("Load tree-sitter grammars:{:?}", grammar_names);
                     jsrt_forwarder_tx
                       .send(JsMessage::LoadTreeSitterParserResp(
                         chan::LoadTreeSitterParserResp {

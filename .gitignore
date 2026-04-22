@@ -27,3 +27,6 @@ generated-typedocs
 # Snapshot
 RSVIM_SNAPSHOT.BIN
 RSVIM_VERSION.TXT
+
+# Build binaries
+*.dylib

@@ -13,10 +13,13 @@ async fn test_load1() -> IoResult<()> {
   let terminal_rows = 10_u16;
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(1000))];
+
+  // The runtime path is "./rsvim_core", so we need to prepend ".." for it.
   let src: &str = r#"
   Rsvim.opt.syntaxParserLibPath = ".test-tree-sitter-parsers";
   try {
-    await Rsvim.syn.loadTreeSitterParser({ grammarPath: "./tests_and_benchmarks/tree-sitter-c" });
+    const parsers = await Rsvim.syn.loadTreeSitterParser({ grammarPath: "../tests_and_benchmarks/tree-sitter-c" });
+    Rsvim.cmd.echo(parsers);
   } catch (e) {
     Rsvim.cmd.echo(e);
   }
@@ -36,9 +39,14 @@ async fn test_load1() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.cmdline_text);
+    let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 0);
+    assert_eq!(n, 1);
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert!(actual.contains("Failed to open file"));
   }
 
   Ok(())

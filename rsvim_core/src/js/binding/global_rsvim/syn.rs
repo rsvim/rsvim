@@ -41,7 +41,9 @@ pub fn load_treesitter_parser_sync<'s>(
             .grammars
             .iter()
             .map(|gm| gm.name.to_string())
-            .collect::<Vec<String>>()
+            .collect::<Vec<String>>();
+          trace!("Rsvim.syn.loadTreeSitterParser result:{:?}", grammar_names);
+          let grammar_names = grammar_names
             .to_v8(scope, |scope, grammar_name| {
               grammar_name.to_v8(scope).into()
             });
