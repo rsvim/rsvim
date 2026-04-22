@@ -147,6 +147,7 @@ export class Rsvim {
   readonly fs = new RsvimFs();
   readonly opt = new RsvimOpt();
   readonly rt = new RsvimRt();
+  readonly syn = new RsvimSyn();
 }
 
 /**
@@ -1324,6 +1325,61 @@ export class RsvimRt {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
+}
+
+/**
+ * The `Rsvim.syn` global object for javascript runtime (editor process).
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.syn'.
+ * const syn = Rsvim.syn;
+ * ```
+ *
+ * @category Editor APIs
+ * @hideconstructor
+ */
+export class RsvimSyn {
+  /**
+   * Load tree-sitter parsers.
+   *
+   * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
+   *
+   * @param {LoadTreeSitterParserOptions} options - (Optional) The editor process exit with this exit code, by default with code `0`.
+   *
+   * @returns {string[]} It returns all the loaded parser names.
+   *
+   * @throws Throws {@link !TypeError} if `options` is an invalid option, throws {@link !Error} if failed to load.
+   *
+   * @example
+   * ```javascript
+   * // Load `tree-sitter-c` parser.
+   * const parserNames = await Rsvim.syn.loadTreeSitterParser({grammarPath: "./tree-sitter-c"});
+   * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
+   * ```
+   */
+  async loadTreeSitterParser(
+    options: RsvimSyn.LoadTreeSitterParserOptions,
+  ): Promise<string[]> {
+    exitCode = exitCode ?? 0;
+    checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.rt_exit(exitCode);
+  }
+}
+
+export namespace RsvimSyn {
+  /**
+   * Options to load a tree-sitter parser.
+   *
+   * @see {@link RsvimSyn.loadTreeSitterParser}
+   */
+  export type LoadTreeSitterParserOptions = {
+    /**
+     * The tree-sitter parser path to load.
+     */
+    grammarPath: string;
+  };
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {
