@@ -260,6 +260,22 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "rt_exit", global_rsvim::rt::exit);
   }
 
+  // For `Rsvim.syn`
+  {
+    set_function_to(
+      scope,
+      vim,
+      "syn_load_tree_sitter_parser",
+      global_rsvim::syn::load_treesitter_parser,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "syn_load_tree_sitter_parser_sync",
+      global_rsvim::syn::load_treesitter_parser_sync,
+    );
+  }
+
   context
 }
 
