@@ -38,6 +38,7 @@ export declare class Rsvim {
     readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
+    readonly syn: RsvimSyn;
 }
 /**
  * The `Rsvim.buf` global object for Vim buffers.
@@ -927,6 +928,71 @@ export declare class RsvimRt {
      * ```
      */
     exit(exitCode?: number): void;
+}
+/**
+ * The `Rsvim.syn` global object for javascript runtime (editor process).
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.syn'.
+ * const syn = Rsvim.syn;
+ * ```
+ *
+ * @category Editor APIs
+ * @hideconstructor
+ */
+export declare class RsvimSyn {
+    /**
+     * Load tree-sitter parsers.
+     *
+     * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
+     *
+     * @param {LoadTreeSitterParserOptions} options - Load options.
+     *
+     * @returns {string[]} It returns all the loaded parser names.
+     *
+     * @throws Throws {@link !TypeError} if `options` is an invalid option, throws {@link !Error} if failed to load.
+     *
+     * @example
+     * ```javascript
+     * // Load `tree-sitter-c` parser.
+     * const parserNames = await Rsvim.syn.loadTreeSitterParser({grammarPath: "./tree-sitter-c"});
+     * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
+     * ```
+     */
+    loadTreeSitterParser(options: RsvimSyn.LoadTreeSitterParserOptions): Promise<string[]>;
+    /**
+     * Load tree-sitter parsers synchronizely.
+     *
+     * @see {@link loadTreeSitterParser}
+     *
+     * @param {LoadTreeSitterParserOptions} options - Load options.
+     *
+     * @returns {string[]} It returns all the loaded parser names.
+     *
+     * @throws Throws {@link !TypeError} if `options` is an invalid option, throws {@link !Error} if failed to load.
+     *
+     * @example
+     * ```javascript
+     * // Load `tree-sitter-c` parser synchronizely.
+     * const parserNames = Rsvim.syn.loadTreeSitterParserSync({grammarPath: "./tree-sitter-c"});
+     * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
+     * ```
+     */
+    loadTreeSitterParserSync(options: RsvimSyn.LoadTreeSitterParserOptions): string[];
+}
+export declare namespace RsvimSyn {
+    /**
+     * Options to load a tree-sitter parser.
+     *
+     * @see {@link RsvimSyn.loadTreeSitterParser}
+     */
+    type LoadTreeSitterParserOptions = {
+        /**
+         * The tree-sitter parser path to load.
+         */
+        grammarPath: string;
+    };
 }
 declare global {
     var Rsvim: Rsvim;
