@@ -12,7 +12,7 @@ async fn test_load1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(1000))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(10000))];
 
   // The runtime path is "./rsvim_core", so we need to prepend ".." for it.
   let src: &str = r#"
@@ -23,6 +23,7 @@ async fn test_load1() -> IoResult<()> {
   } catch (e) {
     Rsvim.cmd.echo(e);
   }
+  Rsvim.rt.exit(0);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -60,7 +61,7 @@ async fn test_load_sync1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(1000))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(10000))];
 
   // The runtime path is "./rsvim_core", so we need to prepend ".." for it.
   let src: &str = r#"
@@ -71,6 +72,7 @@ async fn test_load_sync1() -> IoResult<()> {
   } catch (e) {
     Rsvim.cmd.echo(e);
   }
+  Rsvim.rt.exit(0);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
