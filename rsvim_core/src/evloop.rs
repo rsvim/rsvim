@@ -39,6 +39,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
 use crate::ui::widget::WidgetContext;
+use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -925,30 +926,49 @@ impl EventLoop {
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
 
           self.detached_tracker.spawn(async move {
-            let load_req = SyntaxLoadGrammarRequest {
-              grammar_path: req.grammar_path,
-            };
-            let load_result =
-              syntax::async_load_syntax_grammar(syn_manager, &load_req).await;
-            match load_result {
-              Ok(metainfo) => {
-                let grammar_names = metainfo
-                  .grammars
-                  .iter()
-                  .map(|gm| gm.name.to_string())
-                  .collect_vec();
-                jsrt_forwarder_tx
-                  .send(JsMessage::LoadTreeSitterParserResp(
-                    chan::LoadTreeSitterParserResp {
-                      task_id: req.task_id,
-                      maybe_result: Some(Ok(
-                        postcard::to_allocvec(&grammar_names).unwrap(),
-                      )),
-                    },
-                  ))
-                  .unwrap();
+            match req.grammar_path.absolutize() {
+              Ok(grammar_path) => {
+                let load_req = SyntaxLoadGrammarRequest {
+                  grammar_path: grammar_path.to_path_buf(),
+                };
+                let load_result =
+                  syntax::async_load_syntax_grammar(syn_manager, &load_req)
+                    .await;
+                match load_result {
+                  Ok(metainfo) => {
+                    let grammar_names = metainfo
+                      .grammars
+                      .iter()
+                      .map(|grammar| grammar.name.to_string())
+                      .collect_vec();
+                    trace!("Load tree-sitter grammars:{:?}", grammar_names);
+                    jsrt_forwarder_tx
+                      .send(JsMessage::LoadTreeSitterParserResp(
+                        chan::LoadTreeSitterParserResp {
+                          task_id: req.task_id,
+                          maybe_result: Some(Ok(
+                            postcard::to_allocvec(&grammar_names).unwrap(),
+                          )),
+                        },
+                      ))
+                      .unwrap();
+                  }
+                  Err(e) => {
+                    jsrt_forwarder_tx
+                      .send(JsMessage::LoadTreeSitterParserResp(
+                        chan::LoadTreeSitterParserResp {
+                          task_id: req.task_id,
+                          maybe_result: Some(Err(e)),
+                        },
+                      ))
+                      .unwrap();
+                  }
+                }
               }
-              Err(e) => {
+              Err(_e) => {
+                let e = TheErr::TreeSitterParserNotFound(
+                  req.grammar_path.to_string_lossy().to_compact_string(),
+                );
                 jsrt_forwarder_tx
                   .send(JsMessage::LoadTreeSitterParserResp(
                     chan::LoadTreeSitterParserResp {

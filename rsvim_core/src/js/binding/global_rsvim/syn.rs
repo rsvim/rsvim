@@ -13,8 +13,8 @@ use crate::syntax::SyntaxLoadGrammarRequest;
 pub use load::SynLoadTreeSitterParserFuture;
 pub use load::SynLoadTreeSitterParserOptions;
 
-/// Javascript `loadTreeSitterGrammarSync` API.
-pub fn load_treesitter_grammar_sync<'s>(
+/// Javascript `loadTreeSitterParserSync` API.
+pub fn load_treesitter_parser_sync<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -24,34 +24,46 @@ pub fn load_treesitter_grammar_sync<'s>(
     scope,
     args.get(0).to_object(scope).unwrap(),
   );
-  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
+  trace!("Rsvim.syn.loadTreeSitterParserSync:{:?}", options);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
-  let load_req = SyntaxLoadGrammarRequest {
-    grammar_path: Path::new(&options.grammar_path).to_path_buf(),
-  };
-  match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req) {
-    Ok(metainfo) => {
-      let grammar_names = metainfo
-        .grammars
-        .iter()
-        .map(|gm| gm.name.to_string())
-        .collect::<Vec<String>>()
-        .to_v8(scope, |scope, grammar_name| {
-          grammar_name.to_v8(scope).into()
-        });
-      rv.set(grammar_names.into());
+  match Path::new(&options.grammar_path).absolutize() {
+    Ok(grammar_path) => {
+      let load_req = SyntaxLoadGrammarRequest {
+        grammar_path: grammar_path.to_path_buf(),
+      };
+      match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req)
+      {
+        Ok(metainfo) => {
+          let parser_names = metainfo
+            .grammars
+            .iter()
+            .map(|grammar| grammar.name.to_string())
+            .collect::<Vec<String>>();
+          trace!(
+            "Rsvim.syn.loadTreeSitterParserSync result:{:?}",
+            parser_names
+          );
+          let parser_names =
+            parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
+          rv.set(parser_names.into());
+        }
+        Err(e) => {
+          binding::throw_exception(scope, &e);
+        }
+      }
     }
-    Err(e) => {
+    Err(_e) => {
+      let e = TheErr::TreeSitterParserNotFound(options.grammar_path.clone());
       binding::throw_exception(scope, &e);
     }
   }
 }
 
-/// Javascript `loadTreeSitterGrammar` API.
-pub fn load_treesitter_grammar<'s>(
+/// Javascript `loadTreeSitterParser` API.
+pub fn load_treesitter_parser<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -61,7 +73,7 @@ pub fn load_treesitter_grammar<'s>(
     scope,
     args.get(0).to_object(scope).unwrap(),
   );
-  trace!("Rsvim.syn.loadTreeSitterGrammarSync:{:?}", options);
+  trace!("Rsvim.syn.loadTreeSitterParser:{:?}", options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);

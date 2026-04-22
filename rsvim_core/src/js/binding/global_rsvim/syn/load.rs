@@ -69,14 +69,15 @@ impl JsFuture for SynLoadTreeSitterParserFuture {
     // Otherwise, get the result and deserialize it.
     let result = result.unwrap();
 
-    // Deserialize bytes into a loaded grammar name.
-    let grammar_id = postcard::from_bytes::<String>(&result).unwrap();
-    let grammar_id = grammar_id.to_v8(scope);
+    // Deserialize bytes into a list of parser names.
+    let parser_names = postcard::from_bytes::<Vec<String>>(&result).unwrap();
+    let parser_names =
+      parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
 
     self
       .promise
       .open(scope)
-      .resolve(scope, grammar_id.into())
+      .resolve(scope, parser_names.into())
       .unwrap();
   }
 }
