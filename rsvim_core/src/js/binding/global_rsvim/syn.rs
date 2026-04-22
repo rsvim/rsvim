@@ -29,22 +29,31 @@ pub fn load_treesitter_parser_sync<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
-  let load_req = SyntaxLoadGrammarRequest {
-    grammar_path: Path::new(&options.grammar_path).to_path_buf(),
-  };
-  match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req) {
-    Ok(metainfo) => {
-      let grammar_names = metainfo
-        .grammars
-        .iter()
-        .map(|gm| gm.name.to_string())
-        .collect::<Vec<String>>()
-        .to_v8(scope, |scope, grammar_name| {
-          grammar_name.to_v8(scope).into()
-        });
-      rv.set(grammar_names.into());
+  match Path::new(&options.grammar_path).absolutize() {
+    Ok(grammar_path) => {
+      let load_req = SyntaxLoadGrammarRequest {
+        grammar_path: grammar_path.to_path_buf(),
+      };
+      match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req)
+      {
+        Ok(metainfo) => {
+          let grammar_names = metainfo
+            .grammars
+            .iter()
+            .map(|gm| gm.name.to_string())
+            .collect::<Vec<String>>()
+            .to_v8(scope, |scope, grammar_name| {
+              grammar_name.to_v8(scope).into()
+            });
+          rv.set(grammar_names.into());
+        }
+        Err(e) => {
+          binding::throw_exception(scope, &e);
+        }
+      }
     }
-    Err(e) => {
+    Err(_e) => {
+      let e = TheErr::TreeSitterParserNotFound(options.grammar_path.clone());
       binding::throw_exception(scope, &e);
     }
   }
