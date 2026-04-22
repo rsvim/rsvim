@@ -919,7 +919,7 @@ impl EventLoop {
         MasterMessage::SyntaxEditResp(resp) => {
           trace!("Recv SyntaxEditResp:{:?}", resp.buffer_id);
         }
-        MasterMessage::LoadTreeSitterGrammarReq(req) => {
+        MasterMessage::LoadTreeSitterParserReq(req) => {
           trace!("Recv LoadTreeSitterGrammarReq:{:?}", req.task_id);
           let syn_manager = self.syntax_manager.clone();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();

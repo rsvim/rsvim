@@ -39,8 +39,8 @@ pub enum MasterMessage {
   /// Response master for syntax parsing complete.
   SyntaxEditResp(SyntaxEditResp),
 
-  /// Js runtime ask master to load tree-sitter grammar/parser.
-  LoadTreeSitterGrammarReq(LoadTreeSitterGrammarReq),
+  /// Js runtime ask master to load tree-sitter parser.
+  LoadTreeSitterParserReq(LoadTreeSitterParserReq),
 }
 
 #[derive(Debug)]
@@ -94,7 +94,7 @@ pub struct SyntaxEditResp {
 }
 
 #[derive(Debug)]
-pub struct LoadTreeSitterGrammarReq {
+pub struct LoadTreeSitterParserReq {
   pub task_id: TaskId,
   pub grammar_path: PathBuf,
 }
