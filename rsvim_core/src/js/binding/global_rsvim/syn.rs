@@ -10,8 +10,8 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
-pub use load::SynLoadTreeSitterGrammarFuture;
-pub use load::SynLoadTreeSitterGrammarOptions;
+pub use load::SynLoadTreeSitterParserFuture;
+pub use load::SynLoadTreeSitterParserOptions;
 
 /// Javascript `loadTreeSitterGrammarSync` API.
 pub fn load_treesitter_grammar_sync<'s>(
@@ -20,7 +20,7 @@ pub fn load_treesitter_grammar_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+  let options = SynLoadTreeSitterParserOptions::from_v8(
     scope,
     args.get(0).to_object(scope).unwrap(),
   );
@@ -57,7 +57,7 @@ pub fn load_treesitter_grammar<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options = SynLoadTreeSitterGrammarOptions::from_v8(
+  let options = SynLoadTreeSitterParserOptions::from_v8(
     scope,
     args.get(0).to_object(scope).unwrap(),
   );
@@ -71,7 +71,7 @@ pub fn load_treesitter_grammar<'s>(
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = SynLoadTreeSitterGrammarFuture {
+      let fut = SynLoadTreeSitterParserFuture {
         promise: promise.clone(),
         maybe_result,
       };
