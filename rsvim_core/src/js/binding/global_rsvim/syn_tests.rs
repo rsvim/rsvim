@@ -46,7 +46,7 @@ async fn test_load1() -> IoResult<()> {
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Failed to open file"));
+    assert_eq!(actual, "c");
   }
 
   Ok(())
