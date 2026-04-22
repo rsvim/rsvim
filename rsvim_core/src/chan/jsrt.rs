@@ -33,8 +33,8 @@ pub enum JsMessage {
   /// Master send js runtime the result of fs write
   FsWriteResp(FsWriteResp),
 
-  /// Master send js runtime the result of load tree-sitter grammar/parser.
-  LoadTreeSitterGrammarResp(LoadTreeSitterGrammarResp),
+  /// Master send js runtime the result of load tree-sitter parser.
+  LoadTreeSitterParserResp(LoadTreeSitterParserResp),
 }
 
 #[derive(Debug)]
@@ -85,7 +85,7 @@ pub struct FsWriteResp {
 }
 
 #[derive(Debug)]
-pub struct LoadTreeSitterGrammarResp {
+pub struct LoadTreeSitterParserResp {
   pub task_id: TaskId,
 
   // type: `Vec<String>`

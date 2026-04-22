@@ -106,7 +106,7 @@ pub fn create_fs_write(
   );
 }
 
-pub fn create_syn_load_treesitter_grammar(
+pub fn create_syn_load_treesitter_parser(
   state: &mut JsRuntimeState,
   task_id: TaskId,
   grammar_path: &Path,
@@ -115,7 +115,7 @@ pub fn create_syn_load_treesitter_grammar(
   state.pending_tasks.insert(task_id, cb);
   chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::LoadTreeSitterGrammarReq(chan::LoadTreeSitterGrammarReq {
+    MasterMessage::LoadTreeSitterParserReq(chan::LoadTreeSitterParserReq {
       task_id,
       grammar_path: grammar_path.to_path_buf(),
     }),
