@@ -17,61 +17,82 @@ use itertools::Itertools;
 use std::time::Duration;
 
 #[cfg(test)]
-mod tests_getter_setter {
+mod tests_syntax_manager {
   use super::*;
 
   #[test]
   #[cfg_attr(miri, ignore)]
-  fn file_ext1() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let actual = syntax_manager.get_id_by_file_ext("rs");
-    assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), "rust");
-    let actual = syntax_manager.get_file_ext_by_id("rust");
-    assert!(actual.is_some());
-    assert!(actual.unwrap().contains("rs"));
-  }
+  fn getter1() {
+    test_log_init();
+    let syntax_manager = SyntaxManager::new();
 
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn file_ext2() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "cc".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "cpp".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "c++".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "hh".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "hpp".to_compact_string());
-    syntax_manager
-      .insert_file_ext("cpp".to_compact_string(), "h++".to_compact_string());
-    let actual = syntax_manager.get_id_by_file_ext("hpp");
-    assert!(actual.is_some());
-    assert_eq!(actual.unwrap(), "cpp");
-    let actual = syntax_manager.get_file_ext_by_id("cpp");
-    assert!(actual.is_some());
-    assert!(actual.unwrap().contains("cc"));
-    assert!(actual.unwrap().contains("cpp"));
-    assert!(actual.unwrap().contains("c++"));
-    assert!(actual.unwrap().contains("hh"));
-    assert!(actual.unwrap().contains("hpp"));
-    assert!(actual.unwrap().contains("h++"));
-  }
+    let inputs = [
+      (
+        "c",
+        vec!["c", "h"],
+        Some("queries/highlights.scm"),
+        Some("queries/tags.scm"),
+        None,
+      ),
+      (
+        "rust",
+        vec!["rs"],
+        Some("queries/highlights.scm"),
+        Some("queries/tags.scm"),
+        Some("queries/injections.scm"),
+      ),
+      (
+        "markdown",
+        vec!["md", "mdown"],
+        Some("queries/highlights.scm"),
+        None,
+        Some("queries/injections.scm"),
+      ),
+      (
+        "toml",
+        vec!["toml"],
+        Some("queries/highlights.scm"),
+        None,
+        None,
+      ),
+      (
+        "html",
+        vec!["html", "htm"],
+        Some("queries/highlights.scm"),
+        None,
+        None,
+      ),
+    ];
 
-  #[test]
-  #[cfg_attr(miri, ignore)]
-  fn get_lang1() {
-    let mut syntax_manager = SyntaxManager::new();
-    syntax_manager
-      .insert_file_ext("rust".to_compact_string(), "rs".to_compact_string());
-    let lang = syntax_manager.get_grammar_by_ext("rs");
-    assert!(lang.is_some());
-    assert_eq!(lang.unwrap().name(), Some("rust"));
+    for input in inputs.iter() {
+      let name = input.0;
+      let expect_file_types =
+        input.1.iter().map(|i| i.to_compact_string()).collect_vec();
+      let expect_highlights_path = input.2;
+      let expect_tags_path = input.3;
+      let expect_injections_path = input.4;
+
+      let actual_grammar = syntax_manager.get_grammar(name);
+      assert!(actual_grammar.is_some());
+      let actual_file_types =
+        syntax_manager.get_file_types_by_grammar_name(name);
+      assert_eq!(
+        actual_file_types.map(|ft| ft.iter().cloned().collect::<FoldSet<_>>()),
+        Some(expect_file_types.iter().cloned().collect::<FoldSet<_>>())
+      );
+      let actual_highlights_query = syntax_manager.get_highlights_query(name);
+      assert_eq!(
+        actual_highlights_query.is_some(),
+        expect_highlights_path.is_some()
+      );
+      let actual_tags_query = syntax_manager.get_tags_query(name);
+      assert_eq!(actual_tags_query.is_some(), expect_tags_path.is_some());
+      let actual_injections_query = syntax_manager.get_injections_query(name);
+      assert_eq!(
+        actual_injections_query.is_some(),
+        expect_injections_path.is_some()
+      );
+    }
   }
 }
 
