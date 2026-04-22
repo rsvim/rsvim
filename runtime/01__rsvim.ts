@@ -1345,7 +1345,7 @@ export class RsvimSyn {
    *
    * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
    *
-   * @param {LoadTreeSitterParserOptions} options - (Optional) The editor process exit with this exit code, by default with code `0`.
+   * @param {LoadTreeSitterParserOptions} options - Load options.
    *
    * @returns {string[]} It returns all the loaded parser names.
    *
@@ -1369,6 +1369,38 @@ export class RsvimSyn {
     const parserNames =
       // @ts-ignore Ignore warning
       await __InternalRsvimGlobalObject.syn_load_tree_sitter_parser(options);
+    return parserNames;
+  }
+
+  /**
+   * Load tree-sitter parsers synchronizely.
+   *
+   * @see {@link loadTreeSitterParser}
+   *
+   * @param {LoadTreeSitterParserOptions} options - Load options.
+   *
+   * @returns {string[]} It returns all the loaded parser names.
+   *
+   * @throws Throws {@link !TypeError} if `options` is an invalid option, throws {@link !Error} if failed to load.
+   *
+   * @example
+   * ```javascript
+   * // Load `tree-sitter-c` parser synchronizely.
+   * const parserNames = Rsvim.syn.loadTreeSitterParserSync({grammarPath: "./tree-sitter-c"});
+   * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
+   * ```
+   */
+  loadTreeSitterParserSync(
+    options: RsvimSyn.LoadTreeSitterParserOptions,
+  ): string[] {
+    checkIsObject(options, `"Rsvim.syn.loadTreeSitterParserSync" options`);
+    checkIsString(
+      options.grammarPath,
+      `"Rsvim.syn.loadTreeSitterParserSync" grammarPath option`,
+    );
+    const parserNames =
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.syn_load_tree_sitter_parser_sync(options);
     return parserNames;
   }
 }
