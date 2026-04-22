@@ -106,7 +106,7 @@ pub fn create_fs_write(
   );
 }
 
-pub fn create_syn_load_treesitter_grammar(
+pub fn create_syn_load_treesitter_parser(
   state: &mut JsRuntimeState,
   task_id: TaskId,
   grammar_path: &Path,
