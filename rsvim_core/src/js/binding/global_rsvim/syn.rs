@@ -37,17 +37,15 @@ pub fn load_treesitter_parser_sync<'s>(
       match syntax::load_syntax_grammar(state.syntax_manager.clone(), &load_req)
       {
         Ok(metainfo) => {
-          let grammar_names = metainfo
+          let parser_names = metainfo
             .grammars
             .iter()
-            .map(|gm| gm.name.to_string())
+            .map(|grammar| grammar.name.to_string())
             .collect::<Vec<String>>();
-          trace!("Rsvim.syn.loadTreeSitterParser result:{:?}", grammar_names);
-          let grammar_names = grammar_names
-            .to_v8(scope, |scope, grammar_name| {
-              grammar_name.to_v8(scope).into()
-            });
-          rv.set(grammar_names.into());
+          trace!("Rsvim.syn.loadTreeSitterParser result:{:?}", parser_names);
+          let parser_names =
+            parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
+          rv.set(parser_names.into());
         }
         Err(e) => {
           binding::throw_exception(scope, &e);
