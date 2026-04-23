@@ -907,8 +907,9 @@ impl SyntaxManager {
     }
   }
 
-  pub fn get_all_grammar_names(&self) -> Vec<String> {
+  pub fn get_all_grammar_names(&self) -> Vec<CompactString> {
     self._internal_check();
+    self.grammars.keys().cloned().collect_vec()
   }
 
   pub fn get_grammar(&self, name: &str) -> Option<&Language> {
@@ -944,6 +945,7 @@ impl SyntaxManager {
     &self,
     name: &str,
   ) -> Option<&Vec<CompactString>> {
+    self._internal_check();
     match self.metadatas.get(name) {
       Some(mdata) => Some(&mdata.file_types),
       None => None,
@@ -954,6 +956,7 @@ impl SyntaxManager {
     &self,
     file_type: &str,
   ) -> Option<&CompactString> {
+    self._internal_check();
     self.ftypes2names.get(file_type)
   }
 
