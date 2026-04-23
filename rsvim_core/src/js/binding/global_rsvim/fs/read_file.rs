@@ -25,13 +25,13 @@ pub async fn async_fs_read_file(path: &Path) -> TheResult<Vec<u8>> {
   }
 }
 
-pub struct FsReadFuture {
+pub struct FsReadFileFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub buffer_store: v8::SharedRef<v8::BackingStore>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for FsReadFuture {
+impl JsFuture for FsReadFileFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|FsReadFuture|");
 
