@@ -118,6 +118,8 @@ async fn test_list1() -> IoResult<()> {
   try {
     const parsers = Rsvim.syn.loadParserSync({ grammarPath: "../tests_and_benchmarks/tree-sitter-python" });
     Rsvim.cmd.echo(parsers);
+    const allParsers = Rsvim.syn.listParsers();
+    Rsvim.cmd.echo(allParsers);
   } catch (e) {
     Rsvim.cmd.echo(e);
   }
@@ -140,12 +142,18 @@ async fn test_list1() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
-    let actual = contents.message_history_mut().pop();
-    info!("actual:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "python");
+    assert_eq!(n, 2);
+    let actual1 = contents.message_history_mut().pop();
+    info!("actual1:{:?}", actual1);
+    assert!(actual1.is_some());
+    let actual1 = actual1.unwrap();
+    assert_eq!(actual1, "python");
+
+    let actual2 = contents.message_history_mut().pop();
+    info!("actual2:{:?}", actual2);
+    assert!(actual2.is_some());
+    let actual2 = actual2.unwrap();
+    assert_eq!(actual2, "python");
   }
 
   Ok(())

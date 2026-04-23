@@ -1399,6 +1399,40 @@ export class RsvimSyn {
       __InternalRsvimGlobalObject.syn_load_parser_sync(options);
     return parserNames;
   }
+
+  /**
+   * List all loaded tree-sitter parsers.
+   *
+   * @returns {string[]} It returns all the loaded parser names.
+   *
+   * @example
+   * ```javascript
+   * // Print all loaded parser names.
+   * const allParserNames = Rsvim.syn.listParsers();
+   * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
+   * ```
+   */
+  listParsers(): string[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.syn_list_parsers();
+  }
+
+  /**
+   * Get tree-sitter parser metadata by parser name.
+   *
+   * @returns {string[]} It returns all the loaded parser names.
+   *
+   * @example
+   * ```javascript
+   * // Print all loaded parser names.
+   * const allParserNames = Rsvim.syn.listParsers();
+   * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
+   * ```
+   */
+  listParsers(): string[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.syn_list_parsers();
+  }
 }
 
 export namespace RsvimSyn {
@@ -1408,6 +1442,18 @@ export namespace RsvimSyn {
    * @see {@link RsvimSyn.loadParser}
    */
   export type LoadParserOptions = {
+    /**
+     * The tree-sitter parser path to load.
+     */
+    grammarPath: string;
+  };
+
+  /**
+   * Options to load a tree-sitter parser.
+   *
+   * @see {@link RsvimSyn.getParserMetadata}
+   */
+  export type ParserMetadata = {
     /**
      * The tree-sitter parser path to load.
      */

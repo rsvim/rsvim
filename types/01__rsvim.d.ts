@@ -980,6 +980,19 @@ export declare class RsvimSyn {
      * ```
      */
     loadParserSync(options: RsvimSyn.LoadParserOptions): string[];
+    /**
+     * List all loaded tree-sitter parsers.
+     *
+     * @returns {string[]} It returns all the loaded parser names.
+     *
+     * @example
+     * ```javascript
+     * // Print all loaded parser names.
+     * const allParserNames = Rsvim.syn.listParsers();
+     * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
+     * ```
+     */
+    listParsers(): string[];
 }
 export declare namespace RsvimSyn {
     /**
@@ -988,6 +1001,17 @@ export declare namespace RsvimSyn {
      * @see {@link RsvimSyn.loadParser}
      */
     type LoadParserOptions = {
+        /**
+         * The tree-sitter parser path to load.
+         */
+        grammarPath: string;
+    };
+    /**
+     * Options to load a tree-sitter parser.
+     *
+     * @see {@link RsvimSyn.loadParser}
+     */
+    type ParserMetadata = {
         /**
          * The tree-sitter parser path to load.
          */
