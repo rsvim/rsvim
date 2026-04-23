@@ -69,8 +69,10 @@ pub fn load_treesitter_parser<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options =
-    SynLoadParserOptions::from_v8(scope, args.get(0).to_object(scope).unwrap());
+  let options = SynLoadTreeSitterParserOptions::from_v8(
+    scope,
+    args.get(0).to_object(scope).unwrap(),
+  );
   trace!("Rsvim.syn.loadParser:{:?}", options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
@@ -81,7 +83,7 @@ pub fn load_treesitter_parser<'s>(
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = SynLoadParserFuture {
+      let fut = SynLoadTreeSitterParserFuture {
         promise: promise.clone(),
         maybe_result,
       };
