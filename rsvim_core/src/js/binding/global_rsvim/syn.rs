@@ -154,14 +154,17 @@ pub fn get_parser_metadata<'s>(
         file_types: metadata.file_types.clone(),
         highlights_path: metadata
           .highlights_path
+          .clone()
           .map(|p| p.to_string_lossy().to_compact_string()),
         highlights_query: metadata.highlights_query.clone(),
         tags_path: metadata
           .tags_path
+          .clone()
           .map(|p| p.to_string_lossy().to_compact_string()),
         tags_query: metadata.tags_query.clone(),
         injections_path: metadata
           .injections_path
+          .clone()
           .map(|p| p.to_string_lossy().to_compact_string()),
         injections_query: metadata.injections_query.clone(),
         injection_regex: metadata.injection_regex.clone(),
