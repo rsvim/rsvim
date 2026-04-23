@@ -27,11 +27,14 @@ pub enum MasterMessage {
   /// Js runtime ask master to open file.
   FsOpenReq(FsOpenReq),
 
-  /// Js runtime ask master to read file.
+  /// Js runtime ask master to read file with buffer.
   FsReadReq(FsReadReq),
 
   /// Js runtime ask master to write file.
   FsWriteReq(FsWriteReq),
+
+  /// Js runtime ask master to read file into data bytes.
+  FsReadFileReq(FsReadFileReq),
 
   /// Ask master to parse text for a syntax editing.
   SyntaxEditReq(SyntaxEditReq),
@@ -81,6 +84,12 @@ pub struct FsWriteReq {
   pub task_id: TaskId,
   pub fd: usize,
   pub buf: Vec<u8>,
+}
+
+#[derive(Debug)]
+pub struct FsReadFileReq {
+  pub task_id: TaskId,
+  pub path: PathBuf,
 }
 
 #[derive(Debug)]

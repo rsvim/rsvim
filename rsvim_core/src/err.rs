@@ -84,7 +84,10 @@ pub enum TheErr {
   OpenFileFailed(CompactString, IoErr),
 
   #[error("Failed to read file `{0}`: {1}.")]
-  ReadFileFailed(usize, IoErr),
+  ReadFileByFdFailed(usize, IoErr),
+
+  #[error("Failed to read file `{0}`: {1}.")]
+  ReadFileByPathFailed(CompactString, IoErr),
 
   #[error("Failed to write file `{0}`: {1}.")]
   WriteFileFailed(usize, IoErr),

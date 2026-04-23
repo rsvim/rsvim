@@ -1,30 +1,25 @@
-//! Read APIs.
+//! Read file APIs.
 
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
+use compact_str::ToCompactString;
 
-pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
-  use std::io::Read;
-
-  let mut file = handle::std_from_fd(fd);
-  let mut buf: Vec<u8> = vec![0; bufsize];
-  let n = match file.read(&mut buf) {
-    Ok(n) => n,
-    Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
-  };
-  debug_assert!(n <= buf.capacity());
-  unsafe {
-    buf.set_len(n);
+pub fn fs_read_file(path: &Path) -> TheResult<Vec<u8>> {
+  match std::fs::read(path) {
+    Ok(buf) => Ok(buf),
+    Err(e) => Err(TheErr::ReadFileByPathFailed(
+      path.to_string_lossy().to_compact_string(),
+      e,
+    )),
   }
-  handle::std_to_fd(file);
-  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
-
-  Ok(buf)
 }
 
-pub async fn async_fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
+pub async fn async_fs_read_file(
+  fd: usize,
+  bufsize: usize,
+) -> TheResult<Vec<u8>> {
   use tokio::io::AsyncReadExt;
 
   let mut file = handle::tokio_from_fd(fd);
