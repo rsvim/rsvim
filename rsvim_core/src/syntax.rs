@@ -671,6 +671,156 @@ impl Debug for SyntaxManager {
   }
 }
 
+#[cfg(test)]
+static TEST_GRAMMARS: std::sync::LazyLock<
+  Vec<(SyntaxTreeSitterGrammarRepository, Language)>,
+> = std::sync::LazyLock::new(|| {
+  vec![
+    (
+      SyntaxTreeSitterGrammarRepository {
+        grammars: vec![SyntaxTreeSitterGrammarMetadata {
+          name: "c".to_compact_string(),
+          camelcase: "C".to_compact_string(),
+          scope: "".to_compact_string(),
+          path: Path::new(".").to_path_buf(),
+          file_types: vec!["c".to_compact_string(), "h".to_compact_string()],
+          highlights_path: Some(
+            Path::new("queries/highlights.scm").to_path_buf(),
+          ),
+          highlights_query: Some(tree_sitter_c::HIGHLIGHT_QUERY.to_string()),
+          tags_path: Some(Path::new("queries/tags.scm").to_path_buf()),
+          tags_query: Some(tree_sitter_c::TAGS_QUERY.to_string()),
+          injections_path: None,
+          injections_query: None,
+          injection_regex: None,
+        }],
+        grammar_path: Path::new(".").to_path_buf(),
+        src_path: Path::new(".").to_path_buf(),
+        grammar_json_path: Path::new(".").to_path_buf(),
+      },
+      tree_sitter_c::LANGUAGE.into(),
+    ),
+    (
+      SyntaxTreeSitterGrammarRepository {
+        grammars: vec![SyntaxTreeSitterGrammarMetadata {
+          name: "rust".to_compact_string(),
+          camelcase: "Rust".to_compact_string(),
+          scope: "".to_compact_string(),
+          path: Path::new(".").to_path_buf(),
+          file_types: vec!["rs".to_compact_string()],
+          highlights_path: Some(
+            Path::new("queries/highlights.scm").to_path_buf(),
+          ),
+          highlights_query: Some(
+            tree_sitter_rust::HIGHLIGHTS_QUERY.to_string(),
+          ),
+          tags_path: Some(Path::new("queries/tags.scm").to_path_buf()),
+          tags_query: Some(tree_sitter_rust::TAGS_QUERY.to_string()),
+          injections_path: Some(
+            Path::new("queries/injections.scm").to_path_buf(),
+          ),
+          injections_query: Some(
+            tree_sitter_rust::INJECTIONS_QUERY.to_string(),
+          ),
+          injection_regex: None,
+        }],
+        grammar_path: Path::new(".").to_path_buf(),
+        src_path: Path::new(".").to_path_buf(),
+        grammar_json_path: Path::new(".").to_path_buf(),
+      },
+      tree_sitter_rust::LANGUAGE.into(),
+    ),
+    (
+      SyntaxTreeSitterGrammarRepository {
+        grammars: vec![SyntaxTreeSitterGrammarMetadata {
+          name: "markdown".to_compact_string(),
+          camelcase: "Markdown".to_compact_string(),
+          scope: "".to_compact_string(),
+          path: Path::new(".").to_path_buf(),
+          file_types: vec![
+            "md".to_compact_string(),
+            "mdown".to_compact_string(),
+          ],
+          highlights_path: Some(
+            Path::new("queries/highlights.scm").to_path_buf(),
+          ),
+          highlights_query: Some(
+            tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string(),
+          ),
+          tags_path: None,
+          tags_query: None,
+          injections_path: Some(
+            Path::new("queries/injections.scm").to_path_buf(),
+          ),
+          injections_query: Some(
+            tree_sitter_md::INJECTION_QUERY_BLOCK.to_string(),
+          ),
+          injection_regex: None,
+        }],
+        grammar_path: Path::new(".").to_path_buf(),
+        src_path: Path::new(".").to_path_buf(),
+        grammar_json_path: Path::new(".").to_path_buf(),
+      },
+      tree_sitter_md::LANGUAGE.into(),
+    ),
+    (
+      SyntaxTreeSitterGrammarRepository {
+        grammars: vec![SyntaxTreeSitterGrammarMetadata {
+          name: "toml".to_compact_string(),
+          camelcase: "Toml".to_compact_string(),
+          scope: "".to_compact_string(),
+          path: Path::new(".").to_path_buf(),
+          file_types: vec!["toml".to_compact_string()],
+          highlights_path: Some(
+            Path::new("queries/highlights.scm").to_path_buf(),
+          ),
+          highlights_query: Some(
+            tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string(),
+          ),
+          tags_path: None,
+          tags_query: None,
+          injections_path: None,
+          injections_query: None,
+          injection_regex: None,
+        }],
+        grammar_path: Path::new(".").to_path_buf(),
+        src_path: Path::new(".").to_path_buf(),
+        grammar_json_path: Path::new(".").to_path_buf(),
+      },
+      tree_sitter_toml_ng::LANGUAGE.into(),
+    ),
+    (
+      SyntaxTreeSitterGrammarRepository {
+        grammars: vec![SyntaxTreeSitterGrammarMetadata {
+          name: "html".to_compact_string(),
+          camelcase: "Html".to_compact_string(),
+          scope: "".to_compact_string(),
+          path: Path::new(".").to_path_buf(),
+          file_types: vec![
+            "htm".to_compact_string(),
+            "html".to_compact_string(),
+          ],
+          highlights_path: Some(
+            Path::new("queries/highlights.scm").to_path_buf(),
+          ),
+          highlights_query: Some(
+            tree_sitter_html::HIGHLIGHTS_QUERY.to_string(),
+          ),
+          tags_path: None,
+          tags_query: None,
+          injections_path: None,
+          injections_query: None,
+          injection_regex: None,
+        }],
+        grammar_path: Path::new(".").to_path_buf(),
+        src_path: Path::new(".").to_path_buf(),
+        grammar_json_path: Path::new(".").to_path_buf(),
+      },
+      tree_sitter_html::LANGUAGE.into(),
+    ),
+  ]
+});
+
 // Language ID and file extensions {
 impl SyntaxManager {
   fn _new() -> Self {
@@ -691,153 +841,8 @@ impl SyntaxManager {
   pub fn new() -> Self {
     let mut it = Self::_new();
 
-    let bundled_grammars = [
-      (
-        SyntaxTreeSitterGrammarRepository {
-          grammars: vec![SyntaxTreeSitterGrammarMetadata {
-            name: "c".to_compact_string(),
-            camelcase: "C".to_compact_string(),
-            scope: "".to_compact_string(),
-            path: Path::new(".").to_path_buf(),
-            file_types: vec!["c".to_compact_string(), "h".to_compact_string()],
-            highlights_path: Some(
-              Path::new("queries/highlights.scm").to_path_buf(),
-            ),
-            highlights_query: Some(tree_sitter_c::HIGHLIGHT_QUERY.to_string()),
-            tags_path: Some(Path::new("queries/tags.scm").to_path_buf()),
-            tags_query: Some(tree_sitter_c::TAGS_QUERY.to_string()),
-            injections_path: None,
-            injections_query: None,
-            injection_regex: None,
-          }],
-          grammar_path: Path::new(".").to_path_buf(),
-          src_path: Path::new(".").to_path_buf(),
-          grammar_json_path: Path::new(".").to_path_buf(),
-        },
-        tree_sitter_c::LANGUAGE,
-      ),
-      (
-        SyntaxTreeSitterGrammarRepository {
-          grammars: vec![SyntaxTreeSitterGrammarMetadata {
-            name: "rust".to_compact_string(),
-            camelcase: "Rust".to_compact_string(),
-            scope: "".to_compact_string(),
-            path: Path::new(".").to_path_buf(),
-            file_types: vec!["rs".to_compact_string()],
-            highlights_path: Some(
-              Path::new("queries/highlights.scm").to_path_buf(),
-            ),
-            highlights_query: Some(
-              tree_sitter_rust::HIGHLIGHTS_QUERY.to_string(),
-            ),
-            tags_path: Some(Path::new("queries/tags.scm").to_path_buf()),
-            tags_query: Some(tree_sitter_rust::TAGS_QUERY.to_string()),
-            injections_path: Some(
-              Path::new("queries/injections.scm").to_path_buf(),
-            ),
-            injections_query: Some(
-              tree_sitter_rust::INJECTIONS_QUERY.to_string(),
-            ),
-            injection_regex: None,
-          }],
-          grammar_path: Path::new(".").to_path_buf(),
-          src_path: Path::new(".").to_path_buf(),
-          grammar_json_path: Path::new(".").to_path_buf(),
-        },
-        tree_sitter_rust::LANGUAGE,
-      ),
-      (
-        SyntaxTreeSitterGrammarRepository {
-          grammars: vec![SyntaxTreeSitterGrammarMetadata {
-            name: "markdown".to_compact_string(),
-            camelcase: "Markdown".to_compact_string(),
-            scope: "".to_compact_string(),
-            path: Path::new(".").to_path_buf(),
-            file_types: vec![
-              "md".to_compact_string(),
-              "mdown".to_compact_string(),
-            ],
-            highlights_path: Some(
-              Path::new("queries/highlights.scm").to_path_buf(),
-            ),
-            highlights_query: Some(
-              tree_sitter_md::HIGHLIGHT_QUERY_BLOCK.to_string(),
-            ),
-            tags_path: None,
-            tags_query: None,
-            injections_path: Some(
-              Path::new("queries/injections.scm").to_path_buf(),
-            ),
-            injections_query: Some(
-              tree_sitter_md::INJECTION_QUERY_BLOCK.to_string(),
-            ),
-            injection_regex: None,
-          }],
-          grammar_path: Path::new(".").to_path_buf(),
-          src_path: Path::new(".").to_path_buf(),
-          grammar_json_path: Path::new(".").to_path_buf(),
-        },
-        tree_sitter_md::LANGUAGE,
-      ),
-      (
-        SyntaxTreeSitterGrammarRepository {
-          grammars: vec![SyntaxTreeSitterGrammarMetadata {
-            name: "toml".to_compact_string(),
-            camelcase: "Toml".to_compact_string(),
-            scope: "".to_compact_string(),
-            path: Path::new(".").to_path_buf(),
-            file_types: vec!["toml".to_compact_string()],
-            highlights_path: Some(
-              Path::new("queries/highlights.scm").to_path_buf(),
-            ),
-            highlights_query: Some(
-              tree_sitter_toml_ng::HIGHLIGHTS_QUERY.to_string(),
-            ),
-            tags_path: None,
-            tags_query: None,
-            injections_path: None,
-            injections_query: None,
-            injection_regex: None,
-          }],
-          grammar_path: Path::new(".").to_path_buf(),
-          src_path: Path::new(".").to_path_buf(),
-          grammar_json_path: Path::new(".").to_path_buf(),
-        },
-        tree_sitter_toml_ng::LANGUAGE,
-      ),
-      (
-        SyntaxTreeSitterGrammarRepository {
-          grammars: vec![SyntaxTreeSitterGrammarMetadata {
-            name: "html".to_compact_string(),
-            camelcase: "Html".to_compact_string(),
-            scope: "".to_compact_string(),
-            path: Path::new(".").to_path_buf(),
-            file_types: vec![
-              "htm".to_compact_string(),
-              "html".to_compact_string(),
-            ],
-            highlights_path: Some(
-              Path::new("queries/highlights.scm").to_path_buf(),
-            ),
-            highlights_query: Some(
-              tree_sitter_html::HIGHLIGHTS_QUERY.to_string(),
-            ),
-            tags_path: None,
-            tags_query: None,
-            injections_path: None,
-            injections_query: None,
-            injection_regex: None,
-          }],
-          grammar_path: Path::new(".").to_path_buf(),
-          src_path: Path::new(".").to_path_buf(),
-          grammar_json_path: Path::new(".").to_path_buf(),
-        },
-        tree_sitter_html::LANGUAGE,
-      ),
-    ];
-
-    for grammar in bundled_grammars {
-      it.insert_grammar(grammar.0, grammar.1.into());
+    for grammar in TEST_GRAMMARS.iter() {
+      it.insert_grammar(grammar.0.clone(), grammar.1.clone());
     }
 
     it
@@ -855,48 +860,6 @@ impl SyntaxManager {
 
   pub fn loader(&self) -> SyntaxLoaderArc {
     self.loader.clone()
-  }
-
-  // /// Associate a grammar ID with a file extension.
-  // ///
-  // /// For example, a 'C++' grammar can be associate with below file
-  // /// extensions:
-  // /// - Feader files: hh, h++, hpp
-  // /// - Source files: cc, c++, cpp
-  // pub fn insert_file_ext(&mut self, id: CompactString, ext: CompactString) {
-  //   self
-  //     .name2fext
-  //     .entry(id.clone())
-  //     .or_default()
-  //     .insert(ext.clone());
-  //   self.fext2name.entry(ext).or_insert(id);
-  // }
-  //
-  // /// Un-associate a grammar ID with a file extension.
-  // pub fn remove_file_ext(&mut self, id: &str, ext: &str) {
-  //   self
-  //     .name2fext
-  //     .entry(id.to_compact_string())
-  //     .or_default()
-  //     .remove(ext);
-  //   self.fext2name.remove(ext);
-  // }
-
-  pub fn get_file_types_by_grammar_name(
-    &self,
-    name: &str,
-  ) -> Option<&Vec<CompactString>> {
-    match self.metadatas.get(name) {
-      Some(mdata) => Some(&mdata.file_types),
-      None => None,
-    }
-  }
-
-  pub fn get_grammar_name_by_file_types(
-    &self,
-    file_type: &str,
-  ) -> Option<&CompactString> {
-    self.ftypes2names.get(file_type)
   }
 }
 // Language ID and file extensions }
@@ -918,11 +881,52 @@ impl SyntaxManager {
     }
   }
 
+  fn _internal_check(&self) {
+    debug_assert_eq!(self.grammars.len(), self.metadatas.len());
+
+    if cfg!(debug_assertions) {
+      for (name, _) in self.grammars.iter() {
+        debug_assert!(self.metadatas.contains_key(name));
+      }
+      for (name, _) in self.metadatas.iter() {
+        debug_assert!(self.grammars.contains_key(name));
+      }
+      for (ftype, name) in self.ftypes2names.iter() {
+        debug_assert!(self.metadatas.contains_key(name));
+        debug_assert!(self.grammars.contains_key(name));
+        debug_assert!(
+          self
+            .metadatas
+            .get(name)
+            .unwrap()
+            .file_types
+            .iter()
+            .any(|ft| ft == ftype)
+        );
+      }
+    }
+  }
+
+  pub fn list_grammar_names(&self) -> Vec<CompactString> {
+    self._internal_check();
+    self.grammars.keys().cloned().collect_vec()
+  }
+
   pub fn get_grammar(&self, name: &str) -> Option<&Language> {
+    self._internal_check();
     self.grammars.get(name)
   }
 
+  pub fn get_metadata(
+    &self,
+    name: &str,
+  ) -> Option<&SyntaxTreeSitterGrammarMetadata> {
+    self._internal_check();
+    self.metadatas.get(name)
+  }
+
   pub fn get_highlights_query(&self, name: &str) -> Option<&String> {
+    self._internal_check();
     match self.metadatas.get(name) {
       Some(mdata) => mdata.highlights_query.as_ref(),
       None => None,
@@ -930,6 +934,7 @@ impl SyntaxManager {
   }
 
   pub fn get_tags_query(&self, name: &str) -> Option<&String> {
+    self._internal_check();
     match self.metadatas.get(name) {
       Some(mdata) => mdata.tags_query.as_ref(),
       None => None,
@@ -937,8 +942,20 @@ impl SyntaxManager {
   }
 
   pub fn get_injections_query(&self, name: &str) -> Option<&String> {
+    self._internal_check();
     match self.metadatas.get(name) {
       Some(mdata) => mdata.injections_query.as_ref(),
+      None => None,
+    }
+  }
+
+  pub fn get_file_types_by_grammar_name(
+    &self,
+    name: &str,
+  ) -> Option<&Vec<CompactString>> {
+    self._internal_check();
+    match self.metadatas.get(name) {
+      Some(mdata) => Some(&mdata.file_types),
       None => None,
     }
   }
@@ -946,7 +963,13 @@ impl SyntaxManager {
   pub fn get_grammar_name_by_file_type(
     &self,
     file_type: &str,
-  ) -> Option<&Language> {
+  ) -> Option<&CompactString> {
+    self._internal_check();
+    self.ftypes2names.get(file_type)
+  }
+
+  pub fn get_grammar_by_file_type(&self, file_type: &str) -> Option<&Language> {
+    self._internal_check();
     self
       .ftypes2names
       .get(file_type)
@@ -960,7 +983,7 @@ impl SyntaxManager {
     file_type: &Option<CompactString>,
   ) -> TheResult<Option<Syntax>> {
     if let Some(ext) = file_type
-      && let Some(grammar) = self.get_grammar_name_by_file_type(ext)
+      && let Some(grammar) = self.get_grammar_by_file_type(ext)
     {
       trace!(
         "Load syntax by file type:{:?} grammar:{:?}",

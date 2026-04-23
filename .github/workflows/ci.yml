@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: 'recursive'
+          submodules: recursive
       - uses: davidlattimore/wild-action@latest
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -90,7 +90,7 @@ jobs:
         run: rustup component add clippy
       - uses: actions/checkout@v6
         with:
-          submodules: 'recursive'
+          submodules: recursive
       - name: Test
         run: cargo test --color=never --workspace
       - name: Test (--no-default-features)
@@ -110,7 +110,7 @@ jobs:
         run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
         with:
-          submodules: 'recursive'
+          submodules: recursive
       - uses: taiki-e/install-action@cargo-llvm-cov
         if: ${{ matrix.os != 'windows-11-arm' }}
       - uses: taiki-e/install-action@nextest

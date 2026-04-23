@@ -265,14 +265,26 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
-      "syn_load_tree_sitter_parser",
+      "syn_load_parser",
       global_rsvim::syn::load_treesitter_parser,
     );
     set_function_to(
       scope,
       vim,
-      "syn_load_tree_sitter_parser_sync",
-      global_rsvim::syn::load_treesitter_parser_sync,
+      "syn_load_parser_sync",
+      global_rsvim::syn::load_parser_sync,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "syn_list_parsers",
+      global_rsvim::syn::list_parsers,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "syn_get_parser_metadata",
+      global_rsvim::syn::get_parser_metadata,
     );
   }
 
