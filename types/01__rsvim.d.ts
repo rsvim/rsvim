@@ -947,7 +947,7 @@ export declare class RsvimSyn {
      *
      * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
      *
-     * @param {LoadTreeSitterParserOptions} options - Load options.
+     * @param {LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -956,17 +956,17 @@ export declare class RsvimSyn {
      * @example
      * ```javascript
      * // Load `tree-sitter-c` parser.
-     * const parserNames = await Rsvim.syn.loadTreeSitterParser({grammarPath: "./tree-sitter-c"});
+     * const parserNames = await Rsvim.syn.loadParser({grammarPath: "./tree-sitter-c"});
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadTreeSitterParser(options: RsvimSyn.LoadTreeSitterParserOptions): Promise<string[]>;
+    loadParser(options: RsvimSyn.LoadParserOptions): Promise<string[]>;
     /**
      * Load tree-sitter parsers synchronizely.
      *
-     * @see {@link loadTreeSitterParser}
+     * @see {@link loadParser}
      *
-     * @param {LoadTreeSitterParserOptions} options - Load options.
+     * @param {LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -975,19 +975,19 @@ export declare class RsvimSyn {
      * @example
      * ```javascript
      * // Load `tree-sitter-c` parser synchronizely.
-     * const parserNames = Rsvim.syn.loadTreeSitterParserSync({grammarPath: "./tree-sitter-c"});
+     * const parserNames = Rsvim.syn.loadParserSync({grammarPath: "./tree-sitter-c"});
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadTreeSitterParserSync(options: RsvimSyn.LoadTreeSitterParserOptions): string[];
+    loadParserSync(options: RsvimSyn.LoadParserOptions): string[];
 }
 export declare namespace RsvimSyn {
     /**
      * Options to load a tree-sitter parser.
      *
-     * @see {@link RsvimSyn.loadTreeSitterParser}
+     * @see {@link RsvimSyn.loadParser}
      */
-    type LoadTreeSitterParserOptions = {
+    type LoadParserOptions = {
         /**
          * The tree-sitter parser path to load.
          */

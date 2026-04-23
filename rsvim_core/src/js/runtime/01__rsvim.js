@@ -1071,7 +1071,7 @@ export class RsvimSyn {
      *
      * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
      *
-     * @param {LoadTreeSitterParserOptions} options - Load options.
+     * @param {LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -1080,24 +1080,24 @@ export class RsvimSyn {
      * @example
      * ```javascript
      * // Load `tree-sitter-c` parser.
-     * const parserNames = await Rsvim.syn.loadTreeSitterParser({grammarPath: "./tree-sitter-c"});
+     * const parserNames = await Rsvim.syn.loadParser({grammarPath: "./tree-sitter-c"});
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    async loadTreeSitterParser(options) {
-        checkIsObject(options, `"Rsvim.syn.loadTreeSitterParser" options`);
-        checkIsString(options.grammarPath, `"Rsvim.syn.loadTreeSitterParser" grammarPath option`);
+    async loadParser(options) {
+        checkIsObject(options, `"Rsvim.syn.loadParser" options`);
+        checkIsString(options.grammarPath, `"Rsvim.syn.loadParser" grammarPath option`);
         const parserNames = 
         // @ts-ignore Ignore warning
-        await __InternalRsvimGlobalObject.syn_load_tree_sitter_parser(options);
+        await __InternalRsvimGlobalObject.syn_load_parser(options);
         return parserNames;
     }
     /**
      * Load tree-sitter parsers synchronizely.
      *
-     * @see {@link loadTreeSitterParser}
+     * @see {@link loadParser}
      *
-     * @param {LoadTreeSitterParserOptions} options - Load options.
+     * @param {LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -1106,16 +1106,16 @@ export class RsvimSyn {
      * @example
      * ```javascript
      * // Load `tree-sitter-c` parser synchronizely.
-     * const parserNames = Rsvim.syn.loadTreeSitterParserSync({grammarPath: "./tree-sitter-c"});
+     * const parserNames = Rsvim.syn.loadParserSync({grammarPath: "./tree-sitter-c"});
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadTreeSitterParserSync(options) {
-        checkIsObject(options, `"Rsvim.syn.loadTreeSitterParserSync" options`);
-        checkIsString(options.grammarPath, `"Rsvim.syn.loadTreeSitterParserSync" grammarPath option`);
+    loadParserSync(options) {
+        checkIsObject(options, `"Rsvim.syn.loadParserSync" options`);
+        checkIsString(options.grammarPath, `"Rsvim.syn.loadParserSync" grammarPath option`);
         const parserNames = 
         // @ts-ignore Ignore warning
-        __InternalRsvimGlobalObject.syn_load_tree_sitter_parser_sync(options);
+        __InternalRsvimGlobalObject.syn_load_parser_sync(options);
         return parserNames;
     }
 }
