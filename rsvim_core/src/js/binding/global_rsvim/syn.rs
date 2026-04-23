@@ -62,18 +62,16 @@ pub fn load_parser_sync<'s>(
   }
 }
 
-/// Javascript `loadTreeSitterParser` API.
+/// Javascript `loadParser` API.
 pub fn load_treesitter_parser<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options = SynLoadTreeSitterParserOptions::from_v8(
-    scope,
-    args.get(0).to_object(scope).unwrap(),
-  );
-  trace!("Rsvim.syn.loadTreeSitterParser:{:?}", options);
+  let options =
+    SynLoadParserOptions::from_v8(scope, args.get(0).to_object(scope).unwrap());
+  trace!("Rsvim.syn.loadParser:{:?}", options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -83,7 +81,7 @@ pub fn load_treesitter_parser<'s>(
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = SynLoadTreeSitterParserFuture {
+      let fut = SynLoadParserFuture {
         promise: promise.clone(),
         maybe_result,
       };
@@ -95,7 +93,7 @@ pub fn load_treesitter_parser<'s>(
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
   let grammar_path = Path::new(&options.grammar_path);
-  pending::create_syn_load_treesitter_parser(
+  pending::create_syn_load_parser(
     &mut state,
     task_id,
     grammar_path,

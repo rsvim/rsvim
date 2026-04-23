@@ -280,6 +280,12 @@ pub fn create_new_context<'s, 'b>(
       "syn_list_parsers",
       global_rsvim::syn::list_parsers,
     );
+    set_function_to(
+      scope,
+      vim,
+      "syn_get_parser_metadata",
+      global_rsvim::syn::get_parser_metadata,
+    );
   }
 
   context
