@@ -16,8 +16,8 @@ pub use load::SynLoadTreeSitterParserFuture;
 pub use load::SynLoadTreeSitterParserOptions;
 pub use metadata::SynTreeSitterParserMetadata;
 
-/// Javascript `loadTreeSitterParserSync` API.
-pub fn load_treesitter_parser_sync<'s>(
+/// Javascript `loadParserSync` API.
+pub fn load_parser_sync<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -27,7 +27,7 @@ pub fn load_treesitter_parser_sync<'s>(
     scope,
     args.get(0).to_object(scope).unwrap(),
   );
-  trace!("Rsvim.syn.loadTreeSitterParserSync:{:?}", options);
+  trace!("Rsvim.syn.loadParserSync:{:?}", options);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
@@ -45,10 +45,7 @@ pub fn load_treesitter_parser_sync<'s>(
             .iter()
             .map(|grammar| grammar.name.to_string())
             .collect::<Vec<String>>();
-          trace!(
-            "Rsvim.syn.loadTreeSitterParserSync result:{:?}",
-            parser_names
-          );
+          trace!("Rsvim.syn.loadParserSync result:{:?}", parser_names);
           let parser_names =
             parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
           rv.set(parser_names.into());

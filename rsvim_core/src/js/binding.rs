@@ -274,6 +274,12 @@ pub fn create_new_context<'s, 'b>(
       "syn_load_tree_sitter_parser_sync",
       global_rsvim::syn::load_treesitter_parser_sync,
     );
+    set_function_to(
+      scope,
+      vim,
+      "syn_list_parsers",
+      global_rsvim::syn::list_parsers,
+    );
   }
 
   context
