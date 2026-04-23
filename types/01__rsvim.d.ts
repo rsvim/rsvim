@@ -947,7 +947,7 @@ export declare class RsvimSyn {
      *
      * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
      *
-     * @param {LoadParserOptions} options - Load options.
+     * @param {RsvimSyn.LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -966,7 +966,7 @@ export declare class RsvimSyn {
      *
      * @see {@link loadParser}
      *
-     * @param {LoadParserOptions} options - Load options.
+     * @param {RsvimSyn.LoadParserOptions} options - Load options.
      *
      * @returns {string[]} It returns all the loaded parser names.
      *
@@ -1048,31 +1048,31 @@ export declare namespace RsvimSyn {
          */
         fileTypes: string[];
         /**
-         * The tree-sitter parser highlights query path, optional.
+         * The tree-sitter parser highlights query path.
          */
         highlightsPath?: string;
         /**
-         * The tree-sitter parser highlights query, optional.
+         * The tree-sitter parser highlights query.
          */
         highlightsQuery?: string;
         /**
-         * The tree-sitter parser tags query path, optional.
+         * The tree-sitter parser tags query path.
          */
         tagsPath?: string;
         /**
-         * The tree-sitter parser tags query, optional.
+         * The tree-sitter parser tags query.
          */
         tagsQuery?: string;
         /**
-         * The tree-sitter parser injections query path, optional.
+         * The tree-sitter parser injections query path.
          */
         injectionsPath?: string;
         /**
-         * The tree-sitter parser injections query, optional.
+         * The tree-sitter parser injections query.
          */
         injectionsQuery?: string;
         /**
-         * The tree-sitter parser injection regex, optional.
+         * The tree-sitter parser injection regex.
          */
         injectionRegex?: string;
     };
