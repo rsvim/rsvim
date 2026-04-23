@@ -1137,18 +1137,21 @@ export class RsvimSyn {
     /**
      * Get tree-sitter parser metadata by parser name.
      *
-     * @returns {string[]} It returns all the loaded parser names.
+     * @param {string} name - The parser's name.
+     *
+     * @returns {RsvimSyn.ParserMetadata | undefined} It returns all the loaded parser names.
      *
      * @example
      * ```javascript
-     * // Print all loaded parser names.
-     * const allParserNames = Rsvim.syn.listParsers();
-     * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
+     * // Get parser metadata by name.
+     * const parserMetadata = Rsvim.syn.getParserMetadata("rust");
+     * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
      * ```
      */
-    listParsers() {
+    getParserMetadata(name) {
+        checkIsString(name, `"Rsvim.syn.getParserMetadata" name`);
         // @ts-ignore Ignore warning
-        return __InternalRsvimGlobalObject.syn_list_parsers();
+        return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
 }
 (function (globalThis) {

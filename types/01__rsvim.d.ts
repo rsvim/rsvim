@@ -993,6 +993,21 @@ export declare class RsvimSyn {
      * ```
      */
     listParsers(): string[];
+    /**
+     * Get tree-sitter parser metadata by parser name.
+     *
+     * @param {string} name - The parser's name.
+     *
+     * @returns {RsvimSyn.ParserMetadata | undefined} It returns all the loaded parser names.
+     *
+     * @example
+     * ```javascript
+     * // Get parser metadata by name.
+     * const parserMetadata = Rsvim.syn.getParserMetadata("rust");
+     * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
+     * ```
+     */
+    getParserMetadata(name: string): RsvimSyn.ParserMetadata | undefined;
 }
 export declare namespace RsvimSyn {
     /**
@@ -1007,15 +1022,59 @@ export declare namespace RsvimSyn {
         grammarPath: string;
     };
     /**
-     * Options to load a tree-sitter parser.
+     * Tree-sitter parser metadata.
      *
-     * @see {@link RsvimSyn.loadParser}
+     * @see {@link RsvimSyn.getParserMetadata}
      */
     type ParserMetadata = {
         /**
-         * The tree-sitter parser path to load.
+         * The tree-sitter parser name.
          */
-        grammarPath: string;
+        name: string;
+        /**
+         * The tree-sitter parser name's camelcase.
+         */
+        camelcase: string;
+        /**
+         * The tree-sitter parser scope.
+         */
+        scope: string;
+        /**
+         * The tree-sitter parser path.
+         */
+        path: string;
+        /**
+         * The tree-sitter parser file types.
+         */
+        fileTypes: string[];
+        /**
+         * The tree-sitter parser highlights query path, optional.
+         */
+        highlightsPath?: string;
+        /**
+         * The tree-sitter parser highlights query, optional.
+         */
+        highlightsQuery?: string;
+        /**
+         * The tree-sitter parser tags query path, optional.
+         */
+        tagsPath?: string;
+        /**
+         * The tree-sitter parser tags query, optional.
+         */
+        tagsQuery?: string;
+        /**
+         * The tree-sitter parser injections query path, optional.
+         */
+        injectionsPath?: string;
+        /**
+         * The tree-sitter parser injections query, optional.
+         */
+        injectionsQuery?: string;
+        /**
+         * The tree-sitter parser injection regex, optional.
+         */
+        injectionRegex?: string;
     };
 }
 declare global {
