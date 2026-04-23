@@ -18,7 +18,7 @@ async fn test_load1() -> IoResult<()> {
   let src: &str = r#"
   Rsvim.opt.syntaxParserLibPath = ".test-tree-sitter-parsers";
   try {
-    const parsers = await Rsvim.syn.loadTreeSitterParser({ grammarPath: "../tests_and_benchmarks/tree-sitter-c" });
+    const parsers = await Rsvim.syn.loadParser({ grammarPath: "../tests_and_benchmarks/tree-sitter-c" });
     Rsvim.cmd.echo(parsers);
   } catch (e) {
     Rsvim.cmd.echo(e);
@@ -67,7 +67,7 @@ async fn test_load_sync1() -> IoResult<()> {
   let src: &str = r#"
   Rsvim.opt.syntaxParserLibPath = ".test-tree-sitter-parsers";
   try {
-    const parsers = Rsvim.syn.loadTreeSitterParserSync({ grammarPath: "../tests_and_benchmarks/tree-sitter-python" });
+    const parsers = Rsvim.syn.loadParserSync({ grammarPath: "../tests_and_benchmarks/tree-sitter-python" });
     Rsvim.cmd.echo(parsers);
   } catch (e) {
     Rsvim.cmd.echo(e);
@@ -116,7 +116,7 @@ async fn test_list1() -> IoResult<()> {
   let src: &str = r#"
   Rsvim.opt.syntaxParserLibPath = ".test-tree-sitter-parsers";
   try {
-    const parsers = Rsvim.syn.loadTreeSitterParserSync({ grammarPath: "../tests_and_benchmarks/tree-sitter-python" });
+    const parsers = Rsvim.syn.loadParserSync({ grammarPath: "../tests_and_benchmarks/tree-sitter-python" });
     Rsvim.cmd.echo(parsers);
   } catch (e) {
     Rsvim.cmd.echo(e);

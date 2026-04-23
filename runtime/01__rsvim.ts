@@ -1366,7 +1366,7 @@ export class RsvimSyn {
     );
     const parserNames =
       // @ts-ignore Ignore warning
-      await __InternalRsvimGlobalObject.syn_load_tree_sitter_parser(options);
+      await __InternalRsvimGlobalObject.syn_load_parser(options);
     return parserNames;
   }
 
@@ -1396,7 +1396,7 @@ export class RsvimSyn {
     );
     const parserNames =
       // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.syn_load_tree_sitter_parser_sync(options);
+      __InternalRsvimGlobalObject.syn_load_parser_sync(options);
     return parserNames;
   }
 }
