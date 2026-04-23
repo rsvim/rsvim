@@ -11,8 +11,10 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
+use compact_str::ToCompactString;
 pub use load::SynLoadTreeSitterParserFuture;
 pub use load::SynLoadTreeSitterParserOptions;
+pub use metadata::SynTreeSitterParserMetadata;
 
 /// Javascript `loadTreeSitterParserSync` API.
 pub fn load_treesitter_parser_sync<'s>(
@@ -141,16 +143,34 @@ pub fn get_parser_metadata<'s>(
 
   let syntax_manager = state.syntax_manager.clone();
   let syntax_manager = lock!(syntax_manager);
-  match syntax_manager.get_metadata(parser_name) {
+  match syntax_manager.get_metadata(&parser_name) {
     Some(metadata) => {
       trace!("Rsvim.syn.getParserMetadata result:{:?}", metadata);
+      let metadata1 = SynTreeSitterParserMetadata {
+        name: metadata.name.clone(),
+        camelcase: metadata.camelcase.clone(),
+        scope: metadata.scope.clone(),
+        path: metadata.path.to_string_lossy().to_compact_string(),
+        file_types: metadata.file_types.clone(),
+        highlights_path: metadata
+          .highlights_path
+          .map(|p| p.to_string_lossy().to_compact_string()),
+        highlights_query: metadata.highlights_query.clone(),
+        tags_path: metadata
+          .tags_path
+          .map(|p| p.to_string_lossy().to_compact_string()),
+        tags_query: metadata.tags_query.clone(),
+        injections_path: metadata
+          .injections_path
+          .map(|p| p.to_string_lossy().to_compact_string()),
+        injections_query: metadata.injections_query.clone(),
+        injection_regex: metadata.injection_regex.clone(),
+      };
+      let metadata1 = metadata1.to_v8(scope);
+      rv.set(metadata1.into());
     }
     None => {
       rv.set_undefined();
     }
   }
-  trace!("Rsvim.syn.listParsers result:{:?}", metadata);
-  let parser_names =
-    metadata.to_v8(scope, |scope, name| name.to_v8(scope).into());
-  rv.set(parser_names.into());
 }
