@@ -2,7 +2,6 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 use compact_str::ToCompactString;
 
@@ -16,26 +15,14 @@ pub fn fs_read_file(path: &Path) -> TheResult<Vec<u8>> {
   }
 }
 
-pub async fn async_fs_read_file(
-  fd: usize,
-  bufsize: usize,
-) -> TheResult<Vec<u8>> {
-  use tokio::io::AsyncReadExt;
-
-  let mut file = handle::tokio_from_fd(fd);
-  let mut buf: Vec<u8> = vec![0; bufsize];
-  let n = match file.read(&mut buf).await {
-    Ok(n) => n,
-    Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
-  };
-  debug_assert!(n <= buf.capacity());
-  unsafe {
-    buf.set_len(n);
+pub async fn async_fs_read_file(path: &Path) -> TheResult<Vec<u8>> {
+  match tokio::fs::read(path).await {
+    Ok(buf) => Ok(buf),
+    Err(e) => Err(TheErr::ReadFileByPathFailed(
+      path.to_string_lossy().to_compact_string(),
+      e,
+    )),
   }
-  handle::tokio_to_fd(file).await;
-  trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
-
-  Ok(buf)
 }
 
 pub struct FsReadFuture {
