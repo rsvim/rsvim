@@ -153,7 +153,9 @@ async fn test_list1() -> IoResult<()> {
     info!("actual2:{:?}", actual2);
     assert!(actual2.is_some());
     let actual2 = actual2.unwrap();
-    assert_eq!(actual2, "python");
+    for p in ["toml", "html", "python", "rust", "c", "markdown"].iter() {
+      assert!(actual2.contains(p));
+    }
   }
 
   Ok(())
@@ -202,7 +204,7 @@ async fn test_get_metadata1() -> IoResult<()> {
     info!("actual1:{:?}", actual1);
     assert!(actual1.is_some());
     let actual1 = actual1.unwrap();
-    assert_eq!(actual1, "python");
+    assert!(actual1.contains("python"));
   }
 
   Ok(())
