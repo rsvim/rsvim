@@ -1345,7 +1345,7 @@ export class RsvimSyn {
    *
    * @see [tree-sitter - List of parsers](https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers)
    *
-   * @param {LoadParserOptions} options - Load options.
+   * @param {RsvimSyn.LoadParserOptions} options - Load options.
    *
    * @returns {string[]} It returns all the loaded parser names.
    *
@@ -1375,7 +1375,7 @@ export class RsvimSyn {
    *
    * @see {@link loadParser}
    *
-   * @param {LoadParserOptions} options - Load options.
+   * @param {RsvimSyn.LoadParserOptions} options - Load options.
    *
    * @returns {string[]} It returns all the loaded parser names.
    *
