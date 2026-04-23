@@ -907,7 +907,7 @@ impl SyntaxManager {
     }
   }
 
-  pub fn get_all_grammar_names(&self) -> Vec<CompactString> {
+  pub fn list_grammar_names(&self) -> Vec<CompactString> {
     self._internal_check();
     self.grammars.keys().cloned().collect_vec()
   }
@@ -915,6 +915,14 @@ impl SyntaxManager {
   pub fn get_grammar(&self, name: &str) -> Option<&Language> {
     self._internal_check();
     self.grammars.get(name)
+  }
+
+  pub fn get_metadata(
+    &self,
+    name: &str,
+  ) -> Option<&SyntaxTreeSitterGrammarMetadata> {
+    self._internal_check();
+    self.metadatas.get(name)
   }
 
   pub fn get_highlights_query(&self, name: &str) -> Option<&String> {

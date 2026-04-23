@@ -1,6 +1,7 @@
 //! Syntax APIs.
 
 pub mod load;
+pub mod metadata;
 
 use crate::js;
 use crate::js::JsRuntime;
@@ -103,4 +104,53 @@ pub fn load_treesitter_parser<'s>(
   );
 
   rv.set(promise.into());
+}
+
+/// Javascript `listParsers` API.
+pub fn list_parsers<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 0);
+  trace!("Rsvim.syn.listParsers");
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
+
+  let syntax_manager = state.syntax_manager.clone();
+  let parser_names = lock!(syntax_manager).list_grammar_names();
+  trace!("Rsvim.syn.listParsers result:{:?}", parser_names);
+  let parser_names =
+    parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
+  rv.set(parser_names.into());
+}
+
+/// Javascript `getParserMetadata` API.
+pub fn get_parser_metadata<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let parser_name = args.get(0).to_rust_string_lossy(scope);
+  trace!("Rsvim.syn.getParserMetadata:{:?}", parser_name);
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
+
+  let syntax_manager = state.syntax_manager.clone();
+  let syntax_manager = lock!(syntax_manager);
+  match syntax_manager.get_metadata(parser_name) {
+    Some(metadata) => {
+      trace!("Rsvim.syn.getParserMetadata result:{:?}", metadata);
+    }
+    None => {
+      rv.set_undefined();
+    }
+  }
+  trace!("Rsvim.syn.listParsers result:{:?}", metadata);
+  let parser_names =
+    metadata.to_v8(scope, |scope, name| name.to_v8(scope).into());
+  rv.set(parser_names.into());
 }
