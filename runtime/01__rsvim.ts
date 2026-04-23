@@ -1420,18 +1420,22 @@ export class RsvimSyn {
   /**
    * Get tree-sitter parser metadata by parser name.
    *
-   * @returns {string[]} It returns all the loaded parser names.
+   * @param {string} name - The parser's name.
+   *
+   * @returns {RsvimSyn.ParserMetadata | undefined} It returns all the loaded parser names.
    *
    * @example
    * ```javascript
-   * // Print all loaded parser names.
-   * const allParserNames = Rsvim.syn.listParsers();
-   * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
+   * // Get parser metadata by name.
+   * const parserMetadata = Rsvim.syn.getParserMetadata("rust");
+   * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
    * ```
    */
-  listParsers(): string[] {
+  getParserMetadata(name: string): RsvimSyn.ParserMetadata | undefined {
+    checkIsString(name, `"Rsvim.syn.getParserMetadata" name`);
+
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.syn_list_parsers();
+    return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
   }
 }
 
@@ -1449,15 +1453,70 @@ export namespace RsvimSyn {
   };
 
   /**
-   * Options to load a tree-sitter parser.
+   * Tree-sitter parser metadata.
    *
    * @see {@link RsvimSyn.getParserMetadata}
    */
   export type ParserMetadata = {
     /**
-     * The tree-sitter parser path to load.
+     * The tree-sitter parser name.
      */
-    grammarPath: string;
+    name: string;
+
+    /**
+     * The tree-sitter parser name's camelcase.
+     */
+    camelcase: string;
+
+    /**
+     * The tree-sitter parser scope.
+     */
+    scope: string;
+
+    /**
+     * The tree-sitter parser path.
+     */
+    path: string;
+
+    /**
+     * The tree-sitter parser file types.
+     */
+    fileTypes: string[];
+
+    /**
+     * The tree-sitter parser highlights query path, optional.
+     */
+    highlightsPath?: string;
+
+    /**
+     * The tree-sitter parser highlights query, optional.
+     */
+    highlightsQuery?: string;
+
+    /**
+     * The tree-sitter parser tags query path, optional.
+     */
+    tagsPath?: string;
+
+    /**
+     * The tree-sitter parser tags query, optional.
+     */
+    tagsQuery?: string;
+
+    /**
+     * The tree-sitter parser injections query path, optional.
+     */
+    injectionsPath?: string;
+
+    /**
+     * The tree-sitter parser injections query, optional.
+     */
+    injectionsQuery?: string;
+
+    /**
+     * The tree-sitter parser injection regex, optional.
+     */
+    injectionRegex?: string;
   };
 }
 
