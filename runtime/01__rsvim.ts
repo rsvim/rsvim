@@ -1484,37 +1484,37 @@ export namespace RsvimSyn {
     fileTypes: string[];
 
     /**
-     * The tree-sitter parser highlights query path, optional.
+     * The tree-sitter parser highlights query path.
      */
     highlightsPath?: string;
 
     /**
-     * The tree-sitter parser highlights query, optional.
+     * The tree-sitter parser highlights query.
      */
     highlightsQuery?: string;
 
     /**
-     * The tree-sitter parser tags query path, optional.
+     * The tree-sitter parser tags query path.
      */
     tagsPath?: string;
 
     /**
-     * The tree-sitter parser tags query, optional.
+     * The tree-sitter parser tags query.
      */
     tagsQuery?: string;
 
     /**
-     * The tree-sitter parser injections query path, optional.
+     * The tree-sitter parser injections query path.
      */
     injectionsPath?: string;
 
     /**
-     * The tree-sitter parser injections query, optional.
+     * The tree-sitter parser injections query.
      */
     injectionsQuery?: string;
 
     /**
-     * The tree-sitter parser injection regex, optional.
+     * The tree-sitter parser injection regex.
      */
     injectionRegex?: string;
   };
