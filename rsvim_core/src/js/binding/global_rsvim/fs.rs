@@ -256,12 +256,10 @@ pub fn read_file<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
-  debug_assert!(args.get(1).is_array_buffer());
-  let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.read: {:?}, {:?}", file_wrapper, buf);
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  trace!("RsvimFs.readFile: {:?}", filename);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
