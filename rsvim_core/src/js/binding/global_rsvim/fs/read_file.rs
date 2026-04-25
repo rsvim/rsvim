@@ -47,18 +47,14 @@ impl JsFuture for FsReadFileFuture {
 
     // Otherwise, resolve the promise passing the result.
     let data = result.unwrap();
+    let buf = v8::ArrayBuffer::new(scope, data.len());
+    let buffer_store = buf.get_backing_store();
 
     // Copy the slice's bytes into v8's typed-array backing store.
     for (i, b) in data.iter().enumerate() {
-      self.buffer_store[i].set(*b);
+      buffer_store[i].set(*b);
     }
 
-    let bytes_read = v8::Integer::new(scope, data.len() as i32);
-
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, bytes_read.into())
-      .unwrap();
+    self.promise.open(scope).resolve(scope, buf.into()).unwrap();
   }
 }
