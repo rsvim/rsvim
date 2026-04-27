@@ -832,32 +832,16 @@ impl EventLoop {
           trace!("Recv FsReadFileReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            match req.path.absolutize() {
-              Ok(filepath) => {
-                let maybe_result = async_fs_read_file(&filepath).await;
-                jsrt_forwarder_tx
-                  .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
-                    task_id: req.task_id,
-                    maybe_result: match maybe_result {
-                      Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
-                      Err(e) => Some(Err(e)),
-                    },
-                  }))
-                  .unwrap();
-              }
-              Err(e) => {
-                let e = TheErr::FileNotFound(
-                  req.path.to_string_lossy().to_compact_string(),
-                  e,
-                );
-                jsrt_forwarder_tx
-                  .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
-                    task_id: req.task_id,
-                    maybe_result: Some(Err(e)),
-                  }))
-                  .unwrap();
-              }
-            }
+            let maybe_result = async_fs_read_file(&filepath).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .unwrap();
           });
         }
         MasterMessage::SyntaxEditReq(req) => {

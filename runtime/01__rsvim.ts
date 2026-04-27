@@ -614,20 +614,17 @@ export class RsvimFs {
   /**
    * Read a file in binary mode, i.e. into an array of bytes buffer, without open/close a file descriptor/handle.
    *
-   * @param {string} fileName - File name to read.
+   * @param {string} path - File path to read.
    * @returns {Promise<Uint8Array>} It resolves to {@link !Uint8Array} that contains all the file contents as bytes array.
    *
    * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
    *
    * @example
    * ```javascript
-   * const file = await Rsvim.fs.open("README.md");
+   * const buffer = await Rsvim.fs.readFile("README.md");
    * ```
    */
-  async readFile(
-    path: string,
-    options?: RsvimFs.OpenOptions,
-  ): Promise<RsvimFs.File> {
+  async readFile(path: string): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
