@@ -334,16 +334,4 @@ pub fn read_file_sync<'s>(
       binding::throw_exception(scope, &e);
     }
   }
-
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
-  match fs_read(fd, buf.byte_length()) {
-    Ok(data) => {
-      let buffer_store = buf.get_backing_store();
-      for (i, b) in data.iter().enumerate() {
-        buffer_store[i].set(*b);
-      }
-      rv.set_int32(data.len() as i32);
-    }
-    Err(e) => binding::throw_exception(scope, &e),
-  }
 }
