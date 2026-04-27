@@ -832,7 +832,7 @@ impl EventLoop {
           trace!("Recv FsReadFileReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let maybe_result = async_fs_read_file(&filepath).await;
+            let maybe_result = async_fs_read_file(req.path.as_path()).await;
             jsrt_forwarder_tx
               .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
                 task_id: req.task_id,
