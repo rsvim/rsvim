@@ -26,7 +26,6 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::wrap_cppgc_handle;
-use compact_str::ToCompactString;
 use itertools::Itertools;
 
 /// `Rsvim.fs.open` API.
