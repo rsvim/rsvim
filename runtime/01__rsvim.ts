@@ -610,6 +610,47 @@ export class RsvimFs {
     const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
     return new RsvimFs.File(handle);
   }
+
+  /**
+   * Read a file in binary mode, i.e. into an array of bytes buffer, without open/close a file descriptor/handle.
+   *
+   * @param {string} fileName - File name to read.
+   * @returns {Promise<Uint8Array>} It resolves to {@link !Uint8Array} that contains all the file contents as bytes array.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+   *
+   * @example
+   * ```javascript
+   * const file = await Rsvim.fs.open("README.md");
+   * ```
+   */
+  async readFile(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): Promise<RsvimFs.File> {
+    checkIsString(path, `"Rsvim.fs.open" path`);
+
+    options = options ?? { read: true };
+    checkIsObject(options, `"Rsvim.fs.open" options`);
+    setDefaultFields(options, {
+      append: false,
+      create: false,
+      createNew: false,
+      read: false,
+      truncate: false,
+      write: false,
+    });
+    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
+
+    // @ts-ignore Ignore warning
+    const handle = await __InternalRsvimGlobalObject.fs_open(path, options);
+    return new RsvimFs.File(handle);
+  }
 }
 
 export namespace RsvimFs {
