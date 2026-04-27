@@ -264,41 +264,33 @@ pub fn read_file<'s>(
   let filename = args.get(0).to_rust_string_lossy(scope);
   trace!("RsvimFs.readFile: {:?}", filename);
 
-  match Path::new(&filename).absolutize() {
-    Ok(filepath) => {
-      let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
-      let promise = promise_resolver.get_promise(scope);
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
 
-      let state_rc = JsRuntime::state(scope);
-      let read_cb = {
-        let promise = v8::Global::new(scope, promise_resolver);
-        let state_rc = state_rc.clone();
-        move |maybe_result: Option<TheResult<Vec<u8>>>| {
-          let fut = FsReadFileFuture {
-            promise: promise.clone(),
-            maybe_result,
-          };
-          let mut state = state_rc.borrow_mut();
-          state.pending_futures.push(Box::new(fut));
-        }
+  let state_rc = JsRuntime::state(scope);
+  let read_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = FsReadFileFuture {
+        promise: promise.clone(),
+        maybe_result,
       };
-
       let mut state = state_rc.borrow_mut();
-      let task_id = js::TaskId::next();
-      pending::create_fs_read_file(
-        &mut state,
-        task_id,
-        &filepath,
-        Box::new(read_cb),
-      );
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
 
-      rv.set(promise.into());
-    }
-    Err(e) => {
-      let e = TheErr::FileNotFound(filename.to_compact_string(), e);
-      binding::throw_exception(scope, &e);
-    }
-  }
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_fs_read_file(
+    &mut state,
+    task_id,
+    &Path::new(&filename),
+    Box::new(read_cb),
+  );
+
+  rv.set(promise.into());
 }
 
 /// `Rsvim.fs.readFileSync` API.
