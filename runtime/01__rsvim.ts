@@ -641,7 +641,7 @@ export class RsvimFs {
    *
    * @example
    * ```javascript
-   * const buffer = await Rsvim.fs.readFile("README.md");
+   * const buffer = Rsvim.fs.readFileSync("README.md");
    * ```
    */
   readFileSync(path: string): Uint8Array {
