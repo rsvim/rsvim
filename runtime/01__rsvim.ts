@@ -637,7 +637,7 @@ export class RsvimFs {
    * @param {string} path
    * @returns {Uint8Array}
    *
-   * @throws Throws {@link !TypeError} or {@link Error}.
+   * @throws
    *
    * @example
    * ```javascript
