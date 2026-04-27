@@ -304,25 +304,19 @@ pub fn read_file_sync<'s>(
   let filename = args.get(0).to_rust_string_lossy(scope);
   trace!("RsvimFs.readFileSync: {:?}", filename);
 
-  match Path::new(&filename).absolutize() {
-    Ok(filepath) => match fs_read_file(&filepath) {
-      Ok(data) => {
-        let buf = v8::ArrayBuffer::new(scope, data.len());
-        let buffer_store = buf.get_backing_store();
+  match fs_read_file(&Path::new(&filename)) {
+    Ok(data) => {
+      let buf = v8::ArrayBuffer::new(scope, data.len());
+      let buffer_store = buf.get_backing_store();
 
-        // Copy the slice's bytes into v8's typed-array backing store.
-        for (i, b) in data.iter().enumerate() {
-          buffer_store[i].set(*b);
-        }
+      // Copy the slice's bytes into v8's typed-array backing store.
+      for (i, b) in data.iter().enumerate() {
+        buffer_store[i].set(*b);
+      }
 
-        rv.set(buf.into());
-      }
-      Err(e) => {
-        binding::throw_exception(scope, &e);
-      }
-    },
+      rv.set(buf.into());
+    }
     Err(e) => {
-      let e = TheErr::FileNotFound(filename.to_compact_string(), e);
       binding::throw_exception(scope, &e);
     }
   }
