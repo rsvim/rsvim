@@ -26,6 +26,7 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::wrap_cppgc_handle;
+use compact_str::ToCompactString;
 use itertools::Itertools;
 
 /// `Rsvim.fs.open` API.
@@ -294,7 +295,7 @@ pub fn read_file<'s>(
       rv.set(promise.into());
     }
     Err(e) => {
-      let e = TheErr::TreeSitterParserNotFound(options.grammar_path.clone());
+      let e = TheErr::FileNotFound(filename.to_compact_string(), e);
       binding::throw_exception(scope, &e);
     }
   }
