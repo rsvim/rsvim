@@ -624,29 +624,31 @@ export class RsvimFs {
    * const buffer = await Rsvim.fs.readFile("README.md");
    * ```
    */
-  async readFile(path: string): Promise<RsvimFs.File> {
-    checkIsString(path, `"Rsvim.fs.open" path`);
-
-    options = options ?? { read: true };
-    checkIsObject(options, `"Rsvim.fs.open" options`);
-    setDefaultFields(options, {
-      append: false,
-      create: false,
-      createNew: false,
-      read: false,
-      truncate: false,
-      write: false,
-    });
-    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
-    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
-    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
-    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
-    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
-    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
+  async readFile(path: string): Promise<Uint8Array> {
+    checkIsString(path, `"Rsvim.fs.readFile" path`);
 
     // @ts-ignore Ignore warning
-    const handle = await __InternalRsvimGlobalObject.fs_open(path, options);
-    return new RsvimFs.File(handle);
+    return await __InternalRsvimGlobalObject.fs_read_file(path);
+  }
+
+  /**
+   * The sync version of {@link readFile}.
+   *
+   * @param {string} path
+   * @returns {Uint8Array}
+   *
+   * @throws Throws {@link !TypeError} or {@link Error}.
+   *
+   * @example
+   * ```javascript
+   * const buffer = await Rsvim.fs.readFile("README.md");
+   * ```
+   */
+  readFileSync(path: string): Uint8Array {
+    checkIsString(path, `"Rsvim.fs.readFileSync" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_read_file_sync(path);
   }
 }
 
@@ -808,7 +810,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * Sync version of {@link read}.
+     * The sync version of {@link read}.
      *
      * @param {Uint8Array} buf
      * @returns {number}
