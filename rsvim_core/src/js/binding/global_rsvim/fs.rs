@@ -285,7 +285,7 @@ pub fn read_file<'s>(
   pending::create_fs_read_file(
     &mut state,
     task_id,
-    &Path::new(&filename),
+    Path::new(&filename),
     Box::new(read_cb),
   );
 
@@ -303,7 +303,7 @@ pub fn read_file_sync<'s>(
   let filename = args.get(0).to_rust_string_lossy(scope);
   trace!("RsvimFs.readFileSync: {:?}", filename);
 
-  match fs_read_file(&Path::new(&filename)) {
+  match fs_read_file(Path::new(&filename)) {
     Ok(data) => {
       let buf = v8::ArrayBuffer::new(scope, data.len());
       let buffer_store = buf.get_backing_store();
