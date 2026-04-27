@@ -863,7 +863,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * Sync version of {@link write}.
+     * The sync version of {@link write}.
      *
      * @param {Uint8Array} buf
      * @returns {number}
