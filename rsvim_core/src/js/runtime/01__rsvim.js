@@ -487,7 +487,7 @@ export class RsvimFs {
     readFileSync(path) {
         checkIsString(path, `"Rsvim.fs.readFileSync" path`);
         // @ts-ignore Ignore warning
-        return await __InternalRsvimGlobalObject.fs_read_file_sync(path);
+        return __InternalRsvimGlobalObject.fs_read_file_sync(path);
     }
 }
 (function (RsvimFs) {
