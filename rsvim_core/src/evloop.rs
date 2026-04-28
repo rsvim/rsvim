@@ -839,7 +839,7 @@ impl EventLoop {
               .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
+                  Ok(buf) => Some(Ok(buf)),
                   Err(e) => Some(Err(e)),
                 },
               }))
@@ -856,7 +856,7 @@ impl EventLoop {
               .send(JsMessage::FsReadTextFileResp(chan::FsReadTextFileResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
+                  Ok(buf) => Some(Ok(postcard::to_allocvec(&buf).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
