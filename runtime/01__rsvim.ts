@@ -650,6 +650,46 @@ export class RsvimFs {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.fs_read_file_sync(path);
   }
+
+  /**
+   * Read a file in text mode, i.e. into a string, without open/close a file descriptor/handle.
+   *
+   * @param {string} path - File path to read.
+   * @returns {Promise<string>} It resolves to text string that contains all the file contents.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+   *
+   * @example
+   * ```javascript
+   * const payload = await Rsvim.fs.readTextFile("README.md");
+   * ```
+   */
+  async readTextFile(path: string): Promise<string> {
+    checkIsString(path, `"Rsvim.fs.readTextFile" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_read_text_file(path);
+  }
+
+  /**
+   * The sync version of {@link readTextFile}.
+   *
+   * @param {string} path
+   * @returns {string}
+   *
+   * @throws
+   *
+   * @example
+   * ```javascript
+   * const payload = Rsvim.fs.readTextFileSync("README.md");
+   * ```
+   */
+  readTextFileSync(path: string): string {
+    checkIsString(path, `"Rsvim.fs.readTextFileSync" path`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_read_text_file_sync(path);
+  }
 }
 
 export namespace RsvimFs {
