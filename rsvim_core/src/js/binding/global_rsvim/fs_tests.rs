@@ -656,7 +656,7 @@ async fn test_read_text_file1() -> IoResult<()> {
     let n = contents.message_history().len();
     assert_eq!(n, 1);
     let actual = contents.message_history_mut().pop().unwrap();
-    assert_eq!(actual, "[object ArrayBuffer]");
+    assert_eq!(actual, "Hello, World!");
   }
 
   Ok(())
@@ -702,7 +702,7 @@ async fn test_read_text_file2() -> IoResult<()> {
     let n = contents.message_history().len();
     assert_eq!(n, 1);
     let actual = contents.message_history_mut().pop().unwrap();
-    assert_eq!(actual, "[object ArrayBuffer]");
+    assert_eq!(actual, "Hello, World!");
   }
 
   Ok(())
