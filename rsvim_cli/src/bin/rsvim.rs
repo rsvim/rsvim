@@ -34,8 +34,6 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   .unwrap()
   .into_boxed_slice()
 });
-// const RSVIM_SNAPSHOT: &[u8] =
-//   include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
   let version_tags =
