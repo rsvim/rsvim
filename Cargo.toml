@@ -93,6 +93,7 @@ tree-sitter-md = "0.5"
 tree-sitter-rust = "0.24"
 tree-sitter-toml-ng = "0.7"
 unicode-width = "0.2"
+zstd = "0.13"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
