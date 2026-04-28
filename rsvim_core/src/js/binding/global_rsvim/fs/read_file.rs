@@ -53,6 +53,7 @@ impl JsFuture for FsReadFileFuture {
 
     // Otherwise, resolve the promise passing the result.
     let data = result.unwrap();
+    trace!("FsReadFileFuture data.len:{}, data:{:?}", data.len(), data);
     let buf = v8::ArrayBuffer::new(scope, data.len());
     let buffer_store = buf.get_backing_store();
 
