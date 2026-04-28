@@ -5,6 +5,7 @@ pub mod handle;
 pub mod open;
 pub mod read;
 pub mod read_file;
+pub mod read_text_file;
 pub mod write;
 
 use crate::get_cppgc_handle;

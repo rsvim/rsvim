@@ -844,6 +844,22 @@ impl EventLoop {
               .unwrap();
           });
         }
+        MasterMessage::FsReadTextFileReq(req) => {
+          trace!("Recv FsReadTextFileReq:{:?}", req.task_id);
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_result = async_fs_read_file(req.path.as_path()).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .unwrap();
+          });
+        }
         MasterMessage::SyntaxEditReq(req) => {
           trace!("Recv SyntaxEditReq:{:?}", req.buffer_id);
           if let Some(buf) = lock!(self.buffer_manager).get(&req.buffer_id) {

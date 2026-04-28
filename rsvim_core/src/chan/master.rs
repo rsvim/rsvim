@@ -36,6 +36,9 @@ pub enum MasterMessage {
   /// Js runtime ask master to read file into data bytes.
   FsReadFileReq(FsReadFileReq),
 
+  /// Js runtime ask master to read text file into string.
+  FsReadTextFileReq(FsReadTextFileReq),
+
   /// Ask master to parse text for a syntax editing.
   SyntaxEditReq(SyntaxEditReq),
 
@@ -88,6 +91,12 @@ pub struct FsWriteReq {
 
 #[derive(Debug)]
 pub struct FsReadFileReq {
+  pub task_id: TaskId,
+  pub path: PathBuf,
+}
+
+#[derive(Debug)]
+pub struct FsReadTextFileReq {
   pub task_id: TaskId,
   pub path: PathBuf,
 }
