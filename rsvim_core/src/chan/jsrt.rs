@@ -33,6 +33,9 @@ pub enum JsMessage {
   /// Master send js runtime the result of fs read_file
   FsReadFileResp(FsReadFileResp),
 
+  /// Master send js runtime the result of fs read_text_file
+  FsReadTextFileResp(FsReadTextFileResp),
+
   /// Master send js runtime the result of fs write
   FsWriteResp(FsWriteResp),
 
@@ -81,6 +84,14 @@ pub struct FsReadResp {
 
 #[derive(Debug)]
 pub struct FsReadFileResp {
+  pub task_id: TaskId,
+
+  // type: `Vec<u8>`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct FsReadTextFileResp {
   pub task_id: TaskId,
 
   // type: `Vec<u8>`
