@@ -367,6 +367,62 @@ export declare class RsvimFs {
      * ```
      */
     openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
+    /**
+     * Read a file in binary mode, i.e. into an array of bytes buffer, without open/close a file descriptor/handle.
+     *
+     * @param {string} path - File path to read.
+     * @returns {Promise<Uint8Array>} It resolves to {@link !Uint8Array} that contains all the file contents as bytes array.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+     *
+     * @example
+     * ```javascript
+     * const buffer = await Rsvim.fs.readFile("README.md");
+     * ```
+     */
+    readFile(path: string): Promise<Uint8Array>;
+    /**
+     * The sync version of {@link readFile}.
+     *
+     * @param {string} path
+     * @returns {Uint8Array}
+     *
+     * @throws
+     *
+     * @example
+     * ```javascript
+     * const buffer = Rsvim.fs.readFileSync("README.md");
+     * ```
+     */
+    readFileSync(path: string): Uint8Array;
+    /**
+     * Read a file in text mode, i.e. into a string, without open/close a file descriptor/handle.
+     *
+     * @param {string} path - File path to read.
+     * @returns {Promise<string>} It resolves to text string that contains all the file contents.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+     *
+     * @example
+     * ```javascript
+     * const payload = await Rsvim.fs.readTextFile("README.md");
+     * ```
+     */
+    readTextFile(path: string): Promise<string>;
+    /**
+     * The sync version of {@link readTextFile}.
+     *
+     * @param {string} path
+     * @returns {string}
+     *
+     * @throws
+     *
+     * @example
+     * ```javascript
+     * const payload = Rsvim.fs.readTextFileSync("README.md");
+     * ```
+     */
+    readTextFileSync(path: string): string;
 }
 export declare namespace RsvimFs {
     /**
@@ -492,7 +548,7 @@ export declare namespace RsvimFs {
          */
         read(buf: Uint8Array): Promise<number>;
         /**
-         * Sync version of {@link read}.
+         * The sync version of {@link read}.
          *
          * @param {Uint8Array} buf
          * @returns {number}
@@ -529,7 +585,7 @@ export declare namespace RsvimFs {
          */
         write(buf: Uint8Array): Promise<number>;
         /**
-         * Sync version of {@link write}.
+         * The sync version of {@link write}.
          *
          * @param {Uint8Array} buf
          * @returns {number}

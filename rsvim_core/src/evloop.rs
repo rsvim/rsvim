@@ -20,6 +20,8 @@ use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
 use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::binding::global_rsvim::fs::read::async_fs_read;
+use crate::js::binding::global_rsvim::fs::read_file::async_fs_read_file;
+use crate::js::binding::global_rsvim::fs::read_text_file::async_fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::write::async_fs_write;
 use crate::js::command::CommandManager;
 use crate::js::command::CommandManagerArc;
@@ -786,7 +788,8 @@ impl EventLoop {
           trace!("Recv FsOpenReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let maybe_result = async_fs_open(&req.path, req.options).await;
+            let maybe_result =
+              async_fs_open(req.path.as_path(), req.options).await;
             jsrt_forwarder_tx
               .send(JsMessage::FsOpenResp(chan::FsOpenResp {
                 task_id: req.task_id,
@@ -821,6 +824,39 @@ impl EventLoop {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
                   Ok(n) => Some(Ok(postcard::to_allocvec(&n).unwrap())),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .unwrap();
+          });
+        }
+        MasterMessage::FsReadFileReq(req) => {
+          trace!("Recv FsReadFileReq:{:?}", req.task_id);
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_result = async_fs_read_file(req.path.as_path()).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsReadFileResp(chan::FsReadFileResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(buf) => Some(Ok(buf)),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .unwrap();
+          });
+        }
+        MasterMessage::FsReadTextFileReq(req) => {
+          trace!("Recv FsReadTextFileReq:{:?}", req.task_id);
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_result =
+              async_fs_read_text_file(req.path.as_path()).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsReadTextFileResp(chan::FsReadTextFileResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(buf) => Some(Ok(postcard::to_allocvec(&buf).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))

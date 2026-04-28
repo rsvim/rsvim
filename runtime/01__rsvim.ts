@@ -610,6 +610,86 @@ export class RsvimFs {
     const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
     return new RsvimFs.File(handle);
   }
+
+  /**
+   * Read a file in binary mode, i.e. into an array of bytes buffer, without open/close a file descriptor/handle.
+   *
+   * @param {string} path - File path to read.
+   * @returns {Promise<Uint8Array>} It resolves to {@link !Uint8Array} that contains all the file contents as bytes array.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+   *
+   * @example
+   * ```javascript
+   * const buffer = await Rsvim.fs.readFile("README.md");
+   * ```
+   */
+  async readFile(path: string): Promise<Uint8Array> {
+    checkIsString(path, `"Rsvim.fs.readFile" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_read_file(path);
+  }
+
+  /**
+   * The sync version of {@link readFile}.
+   *
+   * @param {string} path
+   * @returns {Uint8Array}
+   *
+   * @throws
+   *
+   * @example
+   * ```javascript
+   * const buffer = Rsvim.fs.readFileSync("README.md");
+   * ```
+   */
+  readFileSync(path: string): Uint8Array {
+    checkIsString(path, `"Rsvim.fs.readFileSync" path`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_read_file_sync(path);
+  }
+
+  /**
+   * Read a file in text mode, i.e. into a string, without open/close a file descriptor/handle.
+   *
+   * @param {string} path - File path to read.
+   * @returns {Promise<string>} It resolves to text string that contains all the file contents.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to read the file.
+   *
+   * @example
+   * ```javascript
+   * const payload = await Rsvim.fs.readTextFile("README.md");
+   * ```
+   */
+  async readTextFile(path: string): Promise<string> {
+    checkIsString(path, `"Rsvim.fs.readTextFile" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_read_text_file(path);
+  }
+
+  /**
+   * The sync version of {@link readTextFile}.
+   *
+   * @param {string} path
+   * @returns {string}
+   *
+   * @throws
+   *
+   * @example
+   * ```javascript
+   * const payload = Rsvim.fs.readTextFileSync("README.md");
+   * ```
+   */
+  readTextFileSync(path: string): string {
+    checkIsString(path, `"Rsvim.fs.readTextFileSync" path`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_read_text_file_sync(path);
+  }
 }
 
 export namespace RsvimFs {
@@ -770,7 +850,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * Sync version of {@link read}.
+     * The sync version of {@link read}.
      *
      * @param {Uint8Array} buf
      * @returns {number}
@@ -823,7 +903,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * Sync version of {@link write}.
+     * The sync version of {@link write}.
      *
      * @param {Uint8Array} buf
      * @returns {number}

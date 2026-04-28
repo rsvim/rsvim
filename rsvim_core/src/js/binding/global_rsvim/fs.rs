@@ -4,6 +4,8 @@ pub mod close;
 pub mod handle;
 pub mod open;
 pub mod read;
+pub mod read_file;
+pub mod read_text_file;
 pub mod write;
 
 use crate::get_cppgc_handle;
@@ -17,6 +19,10 @@ use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::fs_open;
 use crate::js::binding::global_rsvim::fs::read::FsReadFuture;
 use crate::js::binding::global_rsvim::fs::read::fs_read;
+use crate::js::binding::global_rsvim::fs::read_file::FsReadFileFuture;
+use crate::js::binding::global_rsvim::fs::read_file::fs_read_file;
+use crate::js::binding::global_rsvim::fs::read_text_file::FsReadTextFileFuture;
+use crate::js::binding::global_rsvim::fs::read_text_file::fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::write::FsWriteFuture;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
@@ -246,5 +252,137 @@ pub fn write_sync<'s>(
       rv.set_int32(bytes_written as i32);
     }
     Err(e) => binding::throw_exception(scope, &e),
+  }
+}
+
+/// `Rsvim.fs.readFile` API.
+pub fn read_file<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  trace!("RsvimFs.readFile: {:?}", filename);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let read_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = FsReadFileFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_fs_read_file(
+    &mut state,
+    task_id,
+    Path::new(&filename),
+    Box::new(read_cb),
+  );
+
+  rv.set(promise.into());
+}
+
+/// `Rsvim.fs.readFileSync` API.
+pub fn read_file_sync<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  trace!("RsvimFs.readFileSync: {:?}", filename);
+
+  match fs_read_file(Path::new(&filename)) {
+    Ok(data) => {
+      let buf = v8::ArrayBuffer::new(scope, data.len());
+      let buffer_store = buf.get_backing_store();
+
+      // Copy the slice's bytes into v8's typed-array backing store.
+      for (i, b) in data.iter().enumerate() {
+        buffer_store[i].set(*b);
+      }
+
+      rv.set(buf.into());
+    }
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
+}
+
+/// `Rsvim.fs.readTextFile` API.
+pub fn read_text_file<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  trace!("RsvimFs.readTextFile: {:?}", filename);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let read_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = FsReadTextFileFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_fs_read_text_file(
+    &mut state,
+    task_id,
+    Path::new(&filename),
+    Box::new(read_cb),
+  );
+
+  rv.set(promise.into());
+}
+
+/// `Rsvim.fs.readTextFileSync` API.
+pub fn read_text_file_sync<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  trace!("RsvimFs.readTextFileSync: {:?}", filename);
+
+  match fs_read_text_file(Path::new(&filename)) {
+    Ok(data) => {
+      let data = v8::String::new(scope, &data).unwrap();
+
+      rv.set(data.into());
+    }
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
   }
 }
