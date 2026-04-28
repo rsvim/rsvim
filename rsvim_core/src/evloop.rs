@@ -787,7 +787,8 @@ impl EventLoop {
           trace!("Recv FsOpenReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let maybe_result = async_fs_open(&req.path, req.options).await;
+            let maybe_result =
+              async_fs_open(req.path.as_path(), req.options).await;
             jsrt_forwarder_tx
               .send(JsMessage::FsOpenResp(chan::FsOpenResp {
                 task_id: req.task_id,
