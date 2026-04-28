@@ -541,6 +541,7 @@ async fn test_read_file1() -> IoResult<()> {
     r#"
   const buf = await Rsvim.fs.readFile({:?});
   Rsvim.cmd.echo(buf);
+  Rsvim.cmd.echo(buf.byteLength);
     "#,
     tmpfile.path()
   );
@@ -562,9 +563,13 @@ async fn test_read_file1() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
+
     let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "[object ArrayBuffer]");
+
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, format!("{}", "Hello, World!".len()));
   }
 
   Ok(())
@@ -587,6 +592,7 @@ async fn test_read_file2() -> IoResult<()> {
     r#"
   const buf = Rsvim.fs.readFileSync({:?});
   Rsvim.cmd.echo(buf);
+  Rsvim.cmd.echo(buf.byteLength);
     "#,
     tmpfile.path()
   );
@@ -608,9 +614,13 @@ async fn test_read_file2() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
+
     let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "[object ArrayBuffer]");
+
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, format!("{}", "Hello, World!".len()));
   }
 
   Ok(())
