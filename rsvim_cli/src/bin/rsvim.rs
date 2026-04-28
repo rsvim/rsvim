@@ -118,7 +118,7 @@ fn main() -> IoResult<()> {
       startup_moment,
       startup_unix_epoch,
       cli_opts,
-      SnapshotData::new(RSVIM_SNAPSHOT),
+      SnapshotData::new(&RSVIM_SNAPSHOT),
     )?;
 
     // Initialize.
