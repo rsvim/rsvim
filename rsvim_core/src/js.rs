@@ -749,6 +749,18 @@ pub mod boost {
               .unwrap();
             read_cb(resp.maybe_result);
           }
+          JsMessage::FsReadTextFileResp(resp) => {
+            trace!("Recv FsReadTextFileResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut read_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            read_cb(resp.maybe_result);
+          }
           JsMessage::LoadTreeSitterParserResp(resp) => {
             trace!("Recv LoadTreeSitterGrammarResp:{:?}", resp.task_id);
             debug_assert!(
