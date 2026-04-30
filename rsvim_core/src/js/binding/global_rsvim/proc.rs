@@ -14,11 +14,25 @@ use std::ffi::OsStr;
 use std::ffi::OsString;
 
 #[derive(Debug, Clone)]
+pub struct SubProcessExitStatus {
+  pub code: Option<i32>,
+  pub success: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct SubProcessOutput {
+  pub exit_status: SubProcessExitStatus,
+  pub stdout: Vec<u8>,
+  pub stderr: Vec<u8>,
+}
+
+#[derive(Debug, Clone)]
 pub struct Command {
   pub program: OsString,
   pub args: Vec<OsString>,
   pub current_dir: Option<OsString>,
   pub envs: Vec<OsString>,
+  pub output: SubProcessOutput,
 }
 
 /// Javascript `loadParserSync` API.
