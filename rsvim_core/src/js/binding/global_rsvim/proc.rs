@@ -1,8 +1,5 @@
 //! Sub-process APIs.
 
-pub mod load;
-pub mod metadata;
-
 use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
@@ -11,10 +8,15 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::syntax;
 use crate::syntax::SyntaxLoadGrammarRequest;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
-pub use load::SynLoadTreeSitterParserFuture;
-pub use load::SynLoadTreeSitterParserOptions;
-pub use metadata::SynTreeSitterParserMetadata;
+use std::ffi::OsStr;
+
+#[derive(Debug, Clone)]
+pub struct Command {
+  pub exec_path: PathBuf,
+  pub args: Vec<CompactString>,
+}
 
 /// Javascript `loadParserSync` API.
 pub fn load_parser_sync<'s>(
