@@ -11,11 +11,14 @@ use crate::syntax::SyntaxLoadGrammarRequest;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::ffi::OsStr;
+use std::ffi::OsString;
 
 #[derive(Debug, Clone)]
 pub struct Command {
-  pub exec_path: PathBuf,
-  pub args: Vec<CompactString>,
+  pub program: OsString,
+  pub args: Vec<OsString>,
+  pub current_dir: Option<OsString>,
+  pub envs: Vec<OsString>,
 }
 
 /// Javascript `loadParserSync` API.
