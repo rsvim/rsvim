@@ -1,4 +1,3 @@
-use git2::Repository;
 use rsvim_core::js::JsRuntimeForSnapshot;
 use rsvim_core::js::v8_version;
 use rsvim_core::prelude::*;
@@ -32,12 +31,10 @@ fn version() {
   };
 
   // git commit
-  let git_commit = match Repository::open(&workspace_dir) {
+  let git_commit = match gix::open(&workspace_dir) {
     Ok(repo) => {
-      let head = repo.head().unwrap();
-      let oid = head.target().unwrap();
-      let commit = repo.find_commit(oid).unwrap();
-      let id = commit.id();
+      let head_id = repo.head_id().unwrap();
+      let id = head_id.shorten_or_id();
       let id = id.to_string();
       println!("{LOG} Git id:{:?}", id);
       Some(id[0..8].to_string())
