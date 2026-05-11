@@ -58,7 +58,7 @@ tikv-jemallocator = { workspace = true, optional = true }
 rsvim_core = { workspace = true }
 
 foldhash = { workspace = true }
-git2 = { workspace = true }
+gix = { workspace = true }
 swc_core = { workspace = true }
 toml = { workspace = true, features = ["fast_hash"] }
 # zstd = { workspace = true }
