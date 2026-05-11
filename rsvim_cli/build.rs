@@ -37,7 +37,7 @@ fn version() {
       let id = head_id.shorten_or_id();
       let id = id.to_string();
       println!("{LOG} Git id:{:?}", id);
-      Some(id[0..8].to_string())
+      Some(id)
     }
     Err(e) => {
       println!("{LOG} Git error:{:?}", e);
