@@ -27,7 +27,7 @@ impl FileResource {
 
 impl Closable for FileResource {
   fn close(&mut self) {
-    self.data.take();
+    let _ = self.data.take();
   }
 
   fn is_closed(&self) -> bool {
