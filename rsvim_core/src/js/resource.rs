@@ -5,6 +5,7 @@ pub mod file;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use file::FileResource;
+use std::collections::btree_map::Keys;
 use std::fmt::Debug;
 
 // ResourceId start from 1.
@@ -22,6 +23,13 @@ pub enum Resource {
 pub struct ResourceTable {
   resources: BTreeMap<ResourceId, Resource>,
 }
+
+pub type ResourceTableKeys<'a> =
+  std::collections::btree_map::Keys<'a, ResourceId, Resource>;
+pub type ResourceTableValues<'a> =
+  std::collections::btree_map::Values<'a, ResourceId, Resource>;
+pub type ResourceTableIter<'a> =
+  std::collections::btree_map::Iter<'a, ResourceId, Resource>;
 
 impl ResourceTable {
   pub fn new() -> Self {
@@ -43,5 +51,21 @@ impl ResourceTable {
 
   pub fn get_mut(&mut self, rid: &ResourceId) -> Option<&mut Resource> {
     self.resources.get_mut(rid)
+  }
+
+  pub fn keys(&self) -> ResourceTableKeys<'_> {
+    self.resources.keys()
+  }
+
+  pub fn values(&self) -> ResourceTableValues<'_> {
+    self.resources.values()
+  }
+
+  pub fn iter(&self) -> ResourceTableIter<'_> {
+    self.resources.iter()
+  }
+
+  pub fn remove(&mut self, rid: &ResourceId) -> Option<Resource> {
+    self.resources.remove(rid)
   }
 }
