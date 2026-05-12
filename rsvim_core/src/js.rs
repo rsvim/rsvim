@@ -19,6 +19,7 @@ pub mod hook;
 pub mod loader;
 pub mod module;
 pub mod pending;
+pub mod resource;
 pub mod transpiler;
 
 #[cfg(test)]
