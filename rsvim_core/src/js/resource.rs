@@ -5,7 +5,6 @@ pub mod file;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use file::FileResource;
-use std::collections::btree_map::Keys;
 use std::fmt::Debug;
 
 // ResourceId start from 1.
