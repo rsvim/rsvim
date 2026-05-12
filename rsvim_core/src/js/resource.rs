@@ -23,7 +23,7 @@ pub struct ResourceTable {
   resources: BTreeMap<ResourceId, Resource>,
 }
 
-rc_refcell_ptr!(ResourceTable);
+arc_mutex_ptr!(ResourceTable);
 
 pub type ResourceTableKeys<'a> =
   std::collections::btree_map::Keys<'a, ResourceId, Resource>;
