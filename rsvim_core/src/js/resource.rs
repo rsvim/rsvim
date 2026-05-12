@@ -53,6 +53,10 @@ impl ResourceTable {
     self.resources.get_mut(rid)
   }
 
+  pub fn remove(&mut self, rid: &ResourceId) -> Option<Resource> {
+    self.resources.remove(rid)
+  }
+
   pub fn keys(&self) -> ResourceTableKeys<'_> {
     self.resources.keys()
   }
@@ -63,9 +67,5 @@ impl ResourceTable {
 
   pub fn iter(&self) -> ResourceTableIter<'_> {
     self.resources.iter()
-  }
-
-  pub fn remove(&mut self, rid: &ResourceId) -> Option<Resource> {
-    self.resources.remove(rid)
   }
 }
