@@ -57,6 +57,8 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
+use resource::ResourceTable;
+use resource::ResourceTableArc;
 pub use snapshot::*;
 use std::rc::Rc;
 use std::sync::Once;
@@ -380,6 +382,7 @@ pub mod boost {
     pub syntax_manager: SyntaxManagerArc,
     pub colorscheme_manager: ColorSchemeManagerArc,
     pub command_manager: CommandManagerArc,
+    pub resource_table: ResourceTableArc,
     // Data Access for RSVIM }
   }
 
@@ -481,6 +484,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
+        resource_table: ResourceTable::to_arc(ResourceTable::new()),
       });
 
       isolate.set_slot(state.clone());
@@ -559,6 +563,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
+        resource_table: ResourceTable::to_arc(ResourceTable::new()),
       });
 
       isolate.set_slot(state.clone());
