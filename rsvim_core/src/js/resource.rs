@@ -44,8 +44,9 @@ impl Debug for FileResource {
         "as_handle",
         &self
           .data
+          .as_ref()
           .map(|f| format!("{:?}", f.as_handle()))
-          .unwrap_or("none"),
+          .unwrap_or("none".to_string()),
       )
       .finish()
   }
