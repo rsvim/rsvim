@@ -15,9 +15,12 @@ pub trait Closable: Sized + Debug {
 
 pub enum Resource {}
 
-pub struct FileDescriptor {}
+pub struct FileResource {
+  data: Option<std::fs::File>,
+}
 
-#[derive(Debug)]
-pub struct ChildProcess {}
+pub struct ChildProcessResource {
+  data: Option<std::process::Child>,
+}
 
 pub struct ResourceTable {}
