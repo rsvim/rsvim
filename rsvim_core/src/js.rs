@@ -57,7 +57,6 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
-use resource::ResourceTable;
 use resource::ResourceTableArc;
 pub use snapshot::*;
 use std::rc::Rc;
