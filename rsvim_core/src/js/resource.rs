@@ -29,4 +29,11 @@ impl ResourceTable {
       resources: BTreeMap::new(),
     }
   }
+
+  pub fn add_file(&mut self, data: std::fs::File) -> ResourceId {
+    let f = FileResource::new(data);
+    let rid = f.id();
+    self.resources.insert(f.id(), Resource::File(f));
+    rid
+  }
 }
