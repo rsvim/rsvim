@@ -42,7 +42,6 @@ use crate::structural_id_impl;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
-pub use build::*;
 use command::CommandManagerArc;
 use err::JsError;
 use err::report_js_error;
@@ -58,6 +57,7 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
+pub use snapshot::*;
 use std::rc::Rc;
 use std::sync::Once;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -199,7 +199,7 @@ fn init_builtin_modules(scope: &mut v8::PinScope) {
 ///
 /// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
-pub mod build {
+pub mod snapshot {
   use super::*;
 
   /// The state for js runtime of snapshot.
