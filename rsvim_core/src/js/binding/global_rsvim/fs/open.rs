@@ -4,6 +4,8 @@ use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
+use crate::js::resource::ResourceId;
+use crate::js::resource::ResourceTable;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
@@ -109,7 +111,11 @@ impl StructToV8 for FsOpenOptions {
   }
 }
 
-pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+pub fn fs_open(
+  resource_table: &mut ResourceTable,
+  path: &Path,
+  opts: FsOpenOptions,
+) -> TheResult<ResourceId> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -119,7 +125,7 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(handle::std_to_fd(file)),
+    Ok(file) => Ok(resource_table.add_file(file)),
     Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
       e,
