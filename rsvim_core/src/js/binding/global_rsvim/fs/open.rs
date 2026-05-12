@@ -183,8 +183,8 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let fd = postcard::from_bytes::<usize>(&result).unwrap();
-    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
+    let rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
+    let file_wrapper = wrap_cppgc_handle!(scope, Some(rid), Option<usize>);
 
     self
       .promise
