@@ -467,6 +467,7 @@ impl EventLoop {
       syntax_manager,
       colorscheme_manager,
       command_manager,
+      resource_table,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -497,7 +498,8 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager,
+      command_manager.clone(),
+      resource_table.clone(),
     );
 
     Ok(EventLoop {
@@ -511,6 +513,8 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
+      command_manager,
+      resource_table,
       writer,
       cancellation_token,
       detached_tracker,
