@@ -16,6 +16,14 @@ impl FileResource {
       data,
     }
   }
+
+  pub fn data(&self) -> &std::fs::File {
+    &self.data
+  }
+
+  pub fn data_mut(&mut self) -> &mut std::fs::File {
+    &mut self.data
+  }
 }
 
 impl Resourcify for FileResource {
