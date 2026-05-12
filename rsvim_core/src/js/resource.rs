@@ -11,13 +11,7 @@ structural_id_impl!(i32, ResourceId, 1);
 
 /// Resourcify
 pub trait Resourcify: Sized + Debug {
-  /// Resource ID.
   fn id(&self) -> ResourceId;
-
-  /// All resources are closable.
-  fn close(&mut self);
-
-  fn is_closed(&self) -> bool;
 }
 
 pub enum Resource {
