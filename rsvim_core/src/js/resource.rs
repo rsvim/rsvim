@@ -2,6 +2,7 @@
 
 pub mod file;
 
+use crate::prelude::*;
 use crate::structural_id_impl;
 use file::FileResource;
 use std::fmt::Debug;
@@ -18,4 +19,14 @@ pub enum Resource {
   File(FileResource),
 }
 
-pub struct ResourceTable {}
+pub struct ResourceTable {
+  resources: BTreeMap<ResourceId, Resource>,
+}
+
+impl ResourceTable {
+  pub fn new() -> Self {
+    Self {
+      resources: BTreeMap::new(),
+    }
+  }
+}
