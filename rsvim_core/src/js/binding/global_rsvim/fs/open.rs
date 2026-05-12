@@ -3,7 +3,6 @@
 use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::prelude::*;
 use crate::to_v8_prop;
