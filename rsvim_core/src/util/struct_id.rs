@@ -121,7 +121,7 @@ macro_rules! structural_id_impl {
   };
 
   (@unsigned $ty:tt,$name:tt,$initial:expr) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
     pub struct $name($ty);
 
     structural_id_impl!(@ord $name, $ty);
@@ -136,7 +136,7 @@ macro_rules! structural_id_impl {
   };
 
   (@signed $ty:tt,$name:tt,$initial:expr) => {
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
     pub struct $name($ty);
 
     structural_id_impl!(@ord $name, $ty);
@@ -168,7 +168,7 @@ macro_rules! structural_id_impl {
   };
 
   (str,$name:tt) => {
-    #[derive(Clone, PartialEq, Eq, Hash)]
+    #[derive(Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
     pub struct $name(CompactString);
 
     structural_id_impl!(@eq $name, CompactString);
