@@ -428,6 +428,7 @@ pub mod boost {
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
+      resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -484,7 +485,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
-        resource_table: ResourceTable::to_arc(ResourceTable::new()),
+        resource_table,
       });
 
       isolate.set_slot(state.clone());
@@ -523,6 +524,7 @@ pub mod boost {
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
+      resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -563,7 +565,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
-        resource_table: ResourceTable::to_arc(ResourceTable::new()),
+        resource_table,
       });
 
       isolate.set_slot(state.clone());

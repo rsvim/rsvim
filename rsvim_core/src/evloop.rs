@@ -26,6 +26,8 @@ use crate::js::binding::global_rsvim::fs::write::async_fs_write;
 use crate::js::command::CommandManager;
 use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
+use crate::js::resource::ResourceTable;
+use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateContext;
@@ -108,6 +110,10 @@ pub struct EventLoop {
   pub syntax_manager: SyntaxManagerArc,
   /// Colorschemes.
   pub colorscheme_manager: ColorSchemeManagerArc,
+  /// Vim commands.
+  pub command_manager: CommandManagerArc,
+  /// Resources.
+  pub resource_table: ResourceTableArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -171,6 +177,7 @@ impl EventLoop {
     /* syntax_manager */ SyntaxManagerArc,
     /* colorscheme_manager */ ColorSchemeManagerArc,
     /* command_manager */ CommandManagerArc,
+    /* resource_table */ ResourceTableArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -219,6 +226,7 @@ impl EventLoop {
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
     let command_manager = CommandManager::to_arc(CommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
+    let resource_table = ResourceTable::to_arc(ResourceTable::new());
 
     // State
     let state_machine = State::default();
@@ -274,6 +282,7 @@ impl EventLoop {
       syntax_manager,
       colorscheme_manager,
       command_manager,
+      resource_table,
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
@@ -301,6 +310,7 @@ impl EventLoop {
       syntax_manager,
       colorscheme_manager,
       command_manager,
+      resource_table,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -326,7 +336,8 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager,
+      command_manager.clone(),
+      resource_table.clone(),
     );
 
     Ok(EventLoop {
@@ -340,6 +351,8 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
+      command_manager,
+      resource_table,
       writer,
       cancellation_token,
       detached_tracker,
@@ -373,6 +386,7 @@ impl EventLoop {
       syntax_manager,
       colorscheme_manager,
       command_manager,
+      resource_table,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -402,7 +416,8 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager,
+      command_manager.clone(),
+      resource_table.clone(),
     );
 
     Ok(EventLoop {
@@ -416,6 +431,8 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
+      command_manager,
+      resource_table,
       writer,
       cancellation_token,
       detached_tracker,

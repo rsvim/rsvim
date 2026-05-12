@@ -15,10 +15,12 @@ pub trait Resourcify: Sized + Debug {
   fn id(&self) -> ResourceId;
 }
 
+#[derive(Debug)]
 pub enum Resource {
   File(FileResource),
 }
 
+#[derive(Debug)]
 pub struct ResourceTable {
   resources: BTreeMap<ResourceId, Resource>,
 }
