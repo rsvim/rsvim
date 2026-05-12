@@ -134,9 +134,10 @@ pub fn fs_open(
 }
 
 pub async fn async_fs_open(
+  resource_table: &mut ResourceTable,
   path: &Path,
   opts: FsOpenOptions,
-) -> TheResult<usize> {
+) -> TheResult<ResourceId> {
   match tokio::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -148,8 +149,8 @@ pub async fn async_fs_open(
     .await
   {
     Ok(file) => {
-      let fd = handle::tokio_to_fd(file).await;
-      Ok(fd)
+      let file = file.into_std().await;
+      Ok(resource_table.add_file(file))
     }
     Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
