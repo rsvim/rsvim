@@ -36,4 +36,12 @@ impl ResourceTable {
     self.resources.insert(f.id(), Resource::File(f));
     rid
   }
+
+  pub fn get(&self, rid: &ResourceId) -> Option<&Resource> {
+    self.resources.get(rid)
+  }
+
+  pub fn get_mut(&mut self, rid: &ResourceId) -> Option<&mut Resource> {
+    self.resources.get_mut(rid)
+  }
 }
