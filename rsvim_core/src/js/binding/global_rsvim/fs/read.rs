@@ -17,23 +17,25 @@ pub fn fs_read(
 
   let res = lock!(resource_table).get(&rid);
   debug_assert!(res.is_some());
-  let res = res.unwrap();
-  if let Resource::File(res) = res {
-    let mut handle = lock!(res.data());
-    let mut buf: Vec<u8> = vec![0; bufsize];
-    let n = match handle.read(&mut buf) {
-      Ok(n) => n,
-      Err(e) => return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e)),
-    };
-    debug_assert!(n <= buf.capacity());
-    unsafe {
-      buf.set_len(n);
-    }
-    trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
+  match res.unwrap() {
+    Resource::File(res) => {
+      let handle = res.data();
+      let mut handle = lock!(handle);
+      let mut buf: Vec<u8> = vec![0; bufsize];
+      let n = match handle.read(&mut buf) {
+        Ok(n) => n,
+        Err(e) => {
+          return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e));
+        }
+      };
+      debug_assert!(n <= buf.capacity());
+      unsafe {
+        buf.set_len(n);
+      }
+      trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
-    Ok(buf)
-  } else {
-    unreachable!()
+      Ok(buf)
+    }
   }
 }
 
@@ -46,23 +48,25 @@ pub async fn async_fs_read(
 
   let res = lock!(resource_table).get(&rid);
   debug_assert!(res.is_some());
-  let res = res.unwrap();
-  if let Resource::File(res) = res {
-    let mut handle = lock!(res.data());
-    let mut buf: Vec<u8> = vec![0; bufsize];
-    let n = match handle.read(&mut buf) {
-      Ok(n) => n,
-      Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
-    };
-    debug_assert!(n <= buf.capacity());
-    unsafe {
-      buf.set_len(n);
-    }
-    trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
+  match res.unwrap() {
+    Resource::File(res) => {
+      let handle = res.data();
+      let mut handle = lock!(handle);
+      let mut buf: Vec<u8> = vec![0; bufsize];
+      let n = match handle.read(&mut buf) {
+        Ok(n) => n,
+        Err(e) => {
+          return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e));
+        }
+      };
+      debug_assert!(n <= buf.capacity());
+      unsafe {
+        buf.set_len(n);
+      }
+      trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
-    Ok(buf)
-  } else {
-    unreachable!()
+      Ok(buf)
+    }
   }
 }
 
