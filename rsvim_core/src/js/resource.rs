@@ -7,7 +7,7 @@ pub mod text_decoder;
 use crate::prelude::*;
 use crate::structural_id_impl;
 use child_process::ChildProcessResource;
-use child_process::CommandProcessResource;
+use child_process::ProcCommandResource;
 use file::FileResource;
 use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
@@ -24,7 +24,11 @@ pub trait Resourcify: Sized + Debug + Clone {
 pub enum Resource {
   File(FileResource),
   TextDecoder(TextDecoderResource),
-  CommandProcess(CommandProcessResource),
+
+  /// We name it "ProcCommand" to distinguish with the Vim ex command struct
+  /// "Command".
+  ProcCommand(ProcCommandResource),
+
   ChildProcess(ChildProcessResource),
 }
 
@@ -33,7 +37,7 @@ impl Resourcify for Resource {
     match self {
       Resource::File(r) => r.id(),
       Resource::TextDecoder(r) => r.id(),
-      Resource::CommandProcess(r) => r.id(),
+      Resource::ProcCommand(r) => r.id(),
       Resource::ChildProcess(r) => r.id(),
     }
   }

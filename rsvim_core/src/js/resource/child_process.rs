@@ -10,12 +10,14 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 #[derive(Clone)]
-pub struct CommandProcessResource {
+/// We name it "ProcCommand" to distinguish with the Vim ex command struct
+/// "Command".
+pub struct ProcCommandResource {
   id: ResourceId,
   data: Arc<Mutex<Command>>,
 }
 
-impl CommandProcessResource {
+impl ProcCommandResource {
   pub fn new(data: Command) -> Self {
     Self {
       id: ResourceId::next(),
@@ -28,13 +30,13 @@ impl CommandProcessResource {
   }
 }
 
-impl Resourcify for CommandProcessResource {
+impl Resourcify for ProcCommandResource {
   fn id(&self) -> ResourceId {
     self.id
   }
 }
 
-impl Debug for CommandProcessResource {
+impl Debug for ProcCommandResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("CommandResource")
       .field("id", &self.id)
