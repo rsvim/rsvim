@@ -86,7 +86,7 @@ pub struct FsReadReq {
 #[derive(Debug)]
 pub struct FsWriteReq {
   pub task_id: TaskId,
-  pub fd: usize,
+  pub file_rid: ResourceId,
   pub buf: Vec<u8>,
 }
 
