@@ -22,7 +22,7 @@ use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::binding::global_rsvim::fs::read::fs_read;
 use crate::js::binding::global_rsvim::fs::read_file::async_fs_read_file;
 use crate::js::binding::global_rsvim::fs::read_text_file::async_fs_read_text_file;
-use crate::js::binding::global_rsvim::fs::write::async_fs_write;
+use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::command::CommandManager;
 use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
@@ -826,9 +826,11 @@ impl EventLoop {
         }
         MasterMessage::FsReadReq(req) => {
           trace!("Recv FsReadReq:{:?}", req.task_id);
+          let resource_table = self.resource_table.clone();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let maybe_result = fs_read(req.fd, req.bufsize);
+            let maybe_result =
+              fs_read(resource_table, req.file_rid, req.bufsize);
             jsrt_forwarder_tx
               .send(JsMessage::FsReadResp(chan::FsReadResp {
                 task_id: req.task_id,
