@@ -5,7 +5,6 @@ use crate::js::binding;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
-use crate::prelude::*;
 
 pub fn fs_read(
   resource_table: ResourceTableArc,
@@ -14,9 +13,12 @@ pub fn fs_read(
 ) -> TheResult<Vec<u8>> {
   use std::io::Read;
 
-  let mut file = handle::std_from_fd(fd);
+  let handle = lock!(resource_table).get(&rid);
+  debug_assert!(handle.is_some());
+  let handle = handle.unwrap();
+  let mut handle = lock!(handle);
   let mut buf: Vec<u8> = vec![0; bufsize];
-  let n = match file.read(&mut buf) {
+  let n = match handle.read(&mut buf) {
     Ok(n) => n,
     Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
   };
@@ -24,7 +26,6 @@ pub fn fs_read(
   unsafe {
     buf.set_len(n);
   }
-  handle::std_to_fd(file);
   trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
   Ok(buf)
