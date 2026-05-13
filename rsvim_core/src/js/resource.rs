@@ -1,5 +1,6 @@
 //! Resource.
 
+pub mod command;
 pub mod file;
 pub mod text_decoder;
 

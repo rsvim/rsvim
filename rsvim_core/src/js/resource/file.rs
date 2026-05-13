@@ -4,24 +4,25 @@ use crate::js::resource::ResourceId;
 use crate::js::resource::Resourcify;
 use crate::prelude::*;
 use std::fmt::Debug;
+use std::fs::File;
 use std::sync::Arc;
 use std::sync::Mutex;
 
 #[derive(Clone)]
 pub struct FileResource {
   id: ResourceId,
-  data: Arc<Mutex<std::fs::File>>,
+  data: Arc<Mutex<File>>,
 }
 
 impl FileResource {
-  pub fn new(data: std::fs::File) -> Self {
+  pub fn new(data: File) -> Self {
     Self {
       id: ResourceId::next(),
       data: Arc::new(Mutex::new(data)),
     }
   }
 
-  pub fn data(&self) -> Arc<Mutex<std::fs::File>> {
+  pub fn data(&self) -> Arc<Mutex<File>> {
     self.data.clone()
   }
 }
