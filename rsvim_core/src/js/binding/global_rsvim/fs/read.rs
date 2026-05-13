@@ -15,7 +15,7 @@ pub fn fs_read(
 ) -> TheResult<Vec<u8>> {
   use std::io::Read;
 
-  let res = lock!(resource_table).get(&rid);
+  let res = lock!(resource_table).get(&rid).cloned();
   debug_assert!(res.is_some());
   match res.unwrap() {
     Resource::File(res) => {
@@ -46,7 +46,7 @@ pub async fn async_fs_read(
 ) -> TheResult<Vec<u8>> {
   use std::io::Read;
 
-  let res = lock!(resource_table).get(&rid);
+  let res = lock!(resource_table).get(&rid).cloned();
   debug_assert!(res.is_some());
   match res.unwrap() {
     Resource::File(res) => {

@@ -15,7 +15,7 @@ pub trait Resourcify: Sized + Debug {
   fn id(&self) -> ResourceId;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Resource {
   File(FileResource),
 }
