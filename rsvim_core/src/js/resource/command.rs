@@ -3,7 +3,6 @@
 use crate::js::resource::ResourceId;
 use crate::js::resource::Resourcify;
 use crate::prelude::*;
-use itertools::Itertools;
 use std::fmt::Debug;
 use std::process::Child;
 use std::process::Command;
@@ -68,7 +67,6 @@ impl Resourcify for ChildProcessResource {
   }
 }
 
-#[cfg(not(target_family = "windows"))]
 impl Debug for ChildProcessResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("ChildProcessResource")
