@@ -1,4 +1,4 @@
-//! Command resource.
+//! Command and child-process resource.
 
 use crate::js::resource::ResourceId;
 use crate::js::resource::Resourcify;
@@ -10,12 +10,12 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 #[derive(Clone)]
-pub struct CommandResource {
+pub struct CommandProcessResource {
   id: ResourceId,
   data: Arc<Mutex<Command>>,
 }
 
-impl CommandResource {
+impl CommandProcessResource {
   pub fn new(data: Command) -> Self {
     Self {
       id: ResourceId::next(),
@@ -28,13 +28,13 @@ impl CommandResource {
   }
 }
 
-impl Resourcify for CommandResource {
+impl Resourcify for CommandProcessResource {
   fn id(&self) -> ResourceId {
     self.id
   }
 }
 
-impl Debug for CommandResource {
+impl Debug for CommandProcessResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("CommandResource")
       .field("id", &self.id)
