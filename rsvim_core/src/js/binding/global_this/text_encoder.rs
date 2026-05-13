@@ -1,19 +1,20 @@
 //! `TextEncoder` APIs.
 
-use crate::get_cppgc_handle;
 use crate::is_v8_bool;
+use crate::is_v8_int;
 use crate::is_v8_str;
+use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::converter::*;
+use crate::js::resource::Resource;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
-use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
 use encoding_rs::Encoding;
 use itertools::Itertools;
-use std::cell::RefCell;
 
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
@@ -236,12 +237,16 @@ pub fn create_stream_decoder<'s>(
     label, ignore_bom
   );
 
-  let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
 
-  let decoder_wrapper =
-    wrap_cppgc_handle!(scope, decoder_handle, RefCell<Decoder>);
+  let decoder_handle = create_decoder_impl(&label, ignore_bom);
+  let decoder_rid = lock!(resource_table).add_text_decoder(decoder_handle);
+  let decoder_rid = Into::<i32>::into(decoder_rid);
+  let decoder_rid = decoder_rid.to_v8(scope);
 
-  rv.set(decoder_wrapper.into());
+  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
+  rv.set(decoder_rid.into());
 }
 
 /// `TextDecoder.decode` API.
@@ -258,10 +263,9 @@ pub fn decode_stream<'s>(
     .iter()
     .map(|b| b.get())
     .collect_vec();
-  debug_assert!(args.get(1).is_object());
-  let decoder_wrapper = args.get(1).to_object(scope).unwrap();
-  let decoder = get_cppgc_handle!(scope, decoder_wrapper, RefCell<Decoder>);
-  let mut decoder = decoder.borrow_mut();
+  debug_assert!(is_v8_int!(args.get(1)));
+  let decoder_rid = i32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
+  let decoder_rid = ResourceId::from(decoder_rid);
   debug_assert!(is_v8_bool!(args.get(2)));
   let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
   debug_assert!(is_v8_bool!(args.get(3)));
@@ -271,5 +275,38 @@ pub fn decode_stream<'s>(
     data, fatal, stream
   );
 
-  decode_impl(scope, &mut rv, &mut decoder, &data, fatal, stream);
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  let decoder_handle = lock!(resource_table).get(&decoder_rid).cloned();
+  debug_assert!(decoder_handle.is_some());
+  match decoder_handle.unwrap() {
+    Resource::TextDecoder(res) => {
+      let decoder = res.data();
+      let mut decoder = lock!(decoder);
+      decode_impl(scope, &mut rv, &mut decoder, &data, fatal, stream);
+    }
+    _ => unreachable!(),
+  }
+}
+
+pub fn close_stream_decoder<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut _rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_int!(args.get(0)));
+  let decoder_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let decoder_rid = ResourceId::from(decoder_rid);
+  trace!("|close_stream_decoder| decoder_rid:{:?}", decoder_rid);
+
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  let mut decoder_handle = lock!(resource_table).remove(&decoder_rid);
+  debug_assert!(decoder_handle.is_some());
+
+  // Drop decoder handle
+  decoder_handle.take();
 }

@@ -19,6 +19,7 @@ pub mod hook;
 pub mod loader;
 pub mod module;
 pub mod pending;
+pub mod resource;
 pub mod transpiler;
 
 #[cfg(test)]
@@ -41,7 +42,6 @@ use crate::structural_id_impl;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
-pub use build::*;
 use command::CommandManagerArc;
 use err::JsError;
 use err::report_js_error;
@@ -57,6 +57,8 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
+use resource::ResourceTableArc;
+pub use snapshot::*;
 use std::rc::Rc;
 use std::sync::Once;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -198,7 +200,7 @@ fn init_builtin_modules(scope: &mut v8::PinScope) {
 ///
 /// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
-pub mod build {
+pub mod snapshot {
   use super::*;
 
   /// The state for js runtime of snapshot.
@@ -379,6 +381,7 @@ pub mod boost {
     pub syntax_manager: SyntaxManagerArc,
     pub colorscheme_manager: ColorSchemeManagerArc,
     pub command_manager: CommandManagerArc,
+    pub resource_table: ResourceTableArc,
     // Data Access for RSVIM }
   }
 
@@ -424,6 +427,7 @@ pub mod boost {
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
+      resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -480,6 +484,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
+        resource_table,
       });
 
       isolate.set_slot(state.clone());
@@ -518,6 +523,7 @@ pub mod boost {
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
       command_manager: CommandManagerArc,
+      resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -558,6 +564,7 @@ pub mod boost {
         syntax_manager,
         colorscheme_manager,
         command_manager,
+        resource_table,
       });
 
       isolate.set_slot(state.clone());

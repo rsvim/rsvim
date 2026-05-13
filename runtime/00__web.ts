@@ -216,7 +216,7 @@ export namespace TextEncoder {
  */
 export class TextDecoder {
   /** @hidden */
-  #handle: any;
+  #rid: number | null | undefined;
   /** @hidden */
   #encoding: string;
   /** @hidden */
@@ -315,9 +315,9 @@ export class TextDecoder {
     this.#fatal = options.fatal as boolean;
     this.#ignoreBOM = options.ignoreBOM as boolean;
 
-    // The #handle is actually created when calling `decode` API.
+    // The #rid is actually created when calling `decode` API.
     // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
-    this.#handle = null;
+    this.#rid = null;
   }
 
   /**
@@ -369,7 +369,7 @@ export class TextDecoder {
 
     try {
       // For non-stream, single pass decoding,
-      if (!stream && this.#handle === null) {
+      if (!stream && this.#rid === null) {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.global_encoding_decode_single(
           buffer,
@@ -379,8 +379,8 @@ export class TextDecoder {
         );
       }
 
-      if (this.#handle === null) {
-        this.#handle =
+      if (this.#rid === null) {
+        this.#rid =
           // @ts-ignore Ignore warning
           __InternalRsvimGlobalObject.global_encoding_create_stream_decoder(
             this.#encoding,
@@ -391,13 +391,17 @@ export class TextDecoder {
       // @ts-ignore Ignore warning
       return __InternalRsvimGlobalObject.global_encoding_decode_stream(
         buffer,
-        this.#handle,
+        this.#rid,
         this.#fatal,
         stream,
       );
     } finally {
-      if (!stream && this.#handle !== null) {
-        this.#handle = null;
+      if (!stream && this.#rid !== null) {
+        // @ts-ignore Ignore warning
+        __InternalRsvimGlobalObject.global_encoding_close_stream_decoder(
+          this.#rid,
+        );
+        this.#rid = null;
       }
     }
   }

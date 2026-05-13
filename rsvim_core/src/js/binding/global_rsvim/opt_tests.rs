@@ -777,10 +777,10 @@ mod tests_shift_width {
 mod tests_syntax_parser_lib_path {
   use super::*;
 
-  #[cfg(not(target_os = "windows"))]
+  #[cfg(not(target_family = "windows"))]
   const TREE_SITTER_LIB: &str = "tree-sitter/lib";
 
-  #[cfg(target_os = "windows")]
+  #[cfg(target_family = "windows")]
   const TREE_SITTER_LIB: &str = "tree-sitter\\lib";
 
   #[tokio::test]

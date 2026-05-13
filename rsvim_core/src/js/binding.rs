@@ -110,6 +110,12 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
+      "global_encoding_close_stream_decoder",
+      global_this::text_encoder::close_stream_decoder,
+    );
+    set_function_to(
+      scope,
+      vim,
       "global_queue_microtask",
       global_this::microtask::queue_microtask,
     );

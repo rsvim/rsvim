@@ -3,6 +3,7 @@
 use crate::buf::BufferId;
 use crate::js::err::JsError;
 use crate::js::module::ModulePath;
+use crate::js::resource::ResourceId;
 use compact_str::CompactString;
 use std::borrow::Cow;
 use tree_sitter::LanguageError;
@@ -84,13 +85,13 @@ pub enum TheErr {
   OpenFileFailed(CompactString, IoErr),
 
   #[error("Failed to read file `{0}`: {1}.")]
-  ReadFileByFdFailed(usize, IoErr),
+  ReadFileByRidFailed(ResourceId, IoErr),
 
   #[error("Failed to read file `{0}`: {1}.")]
   ReadFileByPathFailed(CompactString, IoErr),
 
   #[error("Failed to write file `{0}`: {1}.")]
-  WriteFileFailed(usize, IoErr),
+  WriteFileByRidFailed(ResourceId, IoErr),
 
   #[error("Invalid data.")]
   DataInvalid,

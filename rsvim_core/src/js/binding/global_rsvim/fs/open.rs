@@ -3,11 +3,11 @@
 use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
+use crate::js::resource::ResourceId;
+use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 
 // Attribute names.
@@ -110,7 +110,11 @@ impl StructToV8 for FsOpenOptions {
   }
 }
 
-pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+pub fn fs_open(
+  resource_table: ResourceTableArc,
+  path: &Path,
+  opts: FsOpenOptions,
+) -> TheResult<ResourceId> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -120,7 +124,10 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(handle::std_to_fd(file)),
+    Ok(file) => {
+      let mut resource_table = lock!(resource_table);
+      Ok(resource_table.add_file(file))
+    }
     Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
       e,
@@ -129,9 +136,10 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
 }
 
 pub async fn async_fs_open(
+  resource_table: ResourceTableArc,
   path: &Path,
   opts: FsOpenOptions,
-) -> TheResult<usize> {
+) -> TheResult<ResourceId> {
   match tokio::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -143,8 +151,9 @@ pub async fn async_fs_open(
     .await
   {
     Ok(file) => {
-      let fd = handle::tokio_to_fd(file).await;
-      Ok(fd)
+      let file = file.into_std().await;
+      let mut resource_table = lock!(resource_table);
+      Ok(resource_table.add_file(file))
     }
     Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
@@ -177,13 +186,14 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let fd = postcard::from_bytes::<usize>(&result).unwrap();
-    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
+    let file_rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
+    let file_rid = Into::<i32>::into(file_rid);
+    let file_rid = file_rid.to_v8(scope);
 
     self
       .promise
       .open(scope)
-      .resolve(scope, file_wrapper.into())
+      .resolve(scope, file_rid.into())
       .unwrap();
   }
 }

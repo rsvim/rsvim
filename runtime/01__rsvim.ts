@@ -758,11 +758,11 @@ export namespace RsvimFs {
    */
   export class File {
     /** @hidden */
-    #handle: any;
+    #rid: number | null | undefined;
 
     /** @hidden */
-    constructor(handle: any) {
-      this.#handle = handle;
+    constructor(rid: number) {
+      this.#rid = rid;
     }
 
     /**
@@ -781,11 +781,11 @@ export namespace RsvimFs {
      * ```
      */
     close(): void {
-      if (!isNull(this.#handle)) {
+      if (!isNull(this.#rid)) {
         // @ts-ignore Ignore warning
-        __InternalRsvimGlobalObject.fs_close(this.#handle);
+        __InternalRsvimGlobalObject.fs_close(this.#rid);
       }
-      this.#handle = null;
+      this.#rid = null;
     }
 
     /**
@@ -815,7 +815,7 @@ export namespace RsvimFs {
      * ```
      */
     get isDisposed(): boolean {
-      return isNull(this.#handle);
+      return isNull(this.#rid);
     }
 
     /**
@@ -843,7 +843,7 @@ export namespace RsvimFs {
 
       // @ts-ignore Ignore warning
       const n = await __InternalRsvimGlobalObject.fs_read(
-        this.#handle,
+        this.#rid,
         buf.buffer,
       );
       return n;
@@ -869,7 +869,7 @@ export namespace RsvimFs {
       checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
+      return __InternalRsvimGlobalObject.fs_read_sync(this.#rid, buf.buffer);
     }
 
     /**
@@ -896,7 +896,7 @@ export namespace RsvimFs {
 
       // @ts-ignore Ignore warning
       const n = await __InternalRsvimGlobalObject.fs_write(
-        this.#handle,
+        this.#rid,
         buf.buffer,
       );
       return n;
@@ -921,10 +921,7 @@ export namespace RsvimFs {
       checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_write_sync(
-        this.#handle,
-        buf.buffer,
-      );
+      return __InternalRsvimGlobalObject.fs_write_sync(this.#rid, buf.buffer);
     }
   }
 }

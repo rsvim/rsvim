@@ -1,14 +1,14 @@
 //! APIs for `Rsvim.fs` namespace.
 
 pub mod close;
-pub mod handle;
+// pub mod fd;
 pub mod open;
 pub mod read;
 pub mod read_file;
 pub mod read_text_file;
 pub mod write;
 
-use crate::get_cppgc_handle;
+use crate::is_v8_int;
 use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
@@ -27,8 +27,8 @@ use crate::js::binding::global_rsvim::fs::write::FsWriteFuture;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
 use crate::js::pending;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
-use crate::wrap_cppgc_handle;
 use itertools::Itertools;
 
 /// `Rsvim.fs.open` API.
@@ -88,11 +88,15 @@ pub fn open_sync<'s>(
     FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
   let filename = Path::new(&filename);
-  match fs_open(filename, options) {
-    Ok(fd) => {
-      let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
-      rv.set(file_wrapper.into());
+  match fs_open(resource_table, filename, options) {
+    Ok(file_rid) => {
+      let file_rid = Into::<i32>::into(file_rid);
+      let file_rid = file_rid.to_v8(scope);
+      rv.set(file_rid.into());
     }
     Err(e) => {
       binding::throw_exception(scope, &e);
@@ -107,10 +111,15 @@ pub fn close<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let file_wrapper = args.get(0);
-  trace!("Rsvim.fs.close");
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  trace!("Rsvim.fs.close:{:?}", file_rid);
+  let file_rid = ResourceId::from(file_rid);
 
-  fs_close(scope, file_wrapper.to_object(scope).unwrap());
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  fs_close(resource_table, file_rid);
 }
 
 /// `File.read` API.
@@ -120,11 +129,13 @@ pub fn read<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(args.length() == 2);
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.read: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.read: {:?}, {:?}", file_rid, buf);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -145,13 +156,12 @@ pub fn read<'s>(
     }
   };
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
   pending::create_fs_read(
     &mut state,
     task_id,
-    fd,
+    file_rid,
     buf.byte_length(),
     Box::new(read_cb),
   );
@@ -166,14 +176,17 @@ pub fn read_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.readSync: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.readSync: {:?}, {:?}", file_rid, buf);
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
-  match fs_read(fd, buf.byte_length()) {
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  match fs_read(resource_table, file_rid, buf.byte_length()) {
     Ok(data) => {
       let buffer_store = buf.get_backing_store();
       for (i, b) in data.iter().enumerate() {
@@ -192,8 +205,9 @@ pub fn write<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
   let buf = buf
@@ -201,7 +215,7 @@ pub fn write<'s>(
     .iter()
     .map(|b| b.get())
     .collect_vec();
-  trace!("RsvimFs.write: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.write: {:?}, {:?}", file_rid, buf);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -220,10 +234,15 @@ pub fn write<'s>(
     }
   };
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
-  pending::create_fs_write(&mut state, task_id, fd, buf, Box::new(write_cb));
+  pending::create_fs_write(
+    &mut state,
+    task_id,
+    file_rid,
+    buf,
+    Box::new(write_cb),
+  );
 
   rv.set(promise.into());
 }
@@ -235,8 +254,9 @@ pub fn write_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
   let buf = buf
@@ -244,10 +264,12 @@ pub fn write_sync<'s>(
     .iter()
     .map(|b| b.get())
     .collect_vec();
-  trace!("RsvimFs.writeSync: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.writeSync: {:?}, {:?}", file_rid, buf);
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
-  match fs_write(fd, buf) {
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  match fs_write(resource_table, file_rid, buf) {
     Ok(bytes_written) => {
       rv.set_int32(bytes_written as i32);
     }
