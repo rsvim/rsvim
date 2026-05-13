@@ -177,7 +177,7 @@ export class TextEncoder {
  */
 export class TextDecoder {
     /** @hidden */
-    #handle;
+    #rid;
     /** @hidden */
     #encoding;
     /** @hidden */
@@ -264,9 +264,9 @@ export class TextDecoder {
         this.#encoding = encoding;
         this.#fatal = options.fatal;
         this.#ignoreBOM = options.ignoreBOM;
-        // The #handle is actually created when calling `decode` API.
+        // The #rid is actually created when calling `decode` API.
         // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
-        this.#handle = null;
+        this.#rid = null;
     }
     /**
      * Decode a bytes array to string text. The bytes array can be a {@link !ArrayBuffer}, {@link !TypedArray} or {@link !DataView}.
@@ -311,21 +311,23 @@ export class TextDecoder {
         const stream = options.stream;
         try {
             // For non-stream, single pass decoding,
-            if (!stream && this.#handle === null) {
+            if (!stream && this.#rid === null) {
                 // @ts-ignore Ignore warning
                 return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
             }
-            if (this.#handle === null) {
-                this.#handle =
+            if (this.#rid === null) {
+                this.#rid =
                     // @ts-ignore Ignore warning
                     __InternalRsvimGlobalObject.global_encoding_create_stream_decoder(this.#encoding, this.#ignoreBOM);
             }
             // @ts-ignore Ignore warning
-            return __InternalRsvimGlobalObject.global_encoding_decode_stream(buffer, this.#handle, this.#fatal, stream);
+            return __InternalRsvimGlobalObject.global_encoding_decode_stream(buffer, this.#rid, this.#fatal, stream);
         }
         finally {
-            if (!stream && this.#handle !== null) {
-                this.#handle = null;
+            if (!stream && this.#rid !== null) {
+                // @ts-ignore Ignore warning
+                __InternalRsvimGlobalObject.global_encoding_close_stream_decoder(this.#rid);
+                this.#rid = null;
             }
         }
     }

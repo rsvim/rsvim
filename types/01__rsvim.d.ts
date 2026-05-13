@@ -485,7 +485,7 @@ export declare namespace RsvimFs {
     class File {
         #private;
         /** @hidden */
-        constructor(handle: any);
+        constructor(rid: number);
         /**
          * Close the file.
          *
