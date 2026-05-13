@@ -1,6 +1,6 @@
 //! Sub-process APIs.
 
-pub mod command;
+pub mod proc_command;
 
 use crate::js;
 use crate::js::JsRuntime;

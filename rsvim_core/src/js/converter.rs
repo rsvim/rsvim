@@ -559,3 +559,10 @@ macro_rules! is_v8_int {
     $value.is_int32() || $value.is_uint32()
   };
 }
+
+#[macro_export]
+macro_rules! is_v8_array {
+  ($value:expr) => {
+    $value.is_array()
+  };
+}
