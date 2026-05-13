@@ -27,7 +27,6 @@ use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
-use crate::wrap_cppgc_handle;
 use itertools::Itertools;
 
 /// `Rsvim.fs.open` API.

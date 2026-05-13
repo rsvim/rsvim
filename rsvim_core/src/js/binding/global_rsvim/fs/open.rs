@@ -8,7 +8,6 @@ use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTable;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 
 // Attribute names.
@@ -183,13 +182,14 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
-    let file_wrapper = wrap_cppgc_handle!(scope, Some(rid), Option<usize>);
+    let file_rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
+    let file_rid = Into::<i32>::into(file_rid);
+    let file_rid = file_rid.to_v8(scope);
 
     self
       .promise
       .open(scope)
-      .resolve(scope, file_wrapper.into())
+      .resolve(scope, file_rid.into())
       .unwrap();
   }
 }
