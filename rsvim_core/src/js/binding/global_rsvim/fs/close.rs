@@ -6,7 +6,8 @@ use crate::prelude::*;
 
 pub fn fs_close<'s>(resource_table: ResourceTableArc, file_rid: ResourceId) {
   let mut resource_table = lock!(resource_table);
-  let file_handle = resource_table.remove(&file_rid);
+  let mut file_handle = resource_table.remove(&file_rid);
   debug_assert!(file_handle.is_some());
   // Drop file handle, i.e. close the file
+  file_handle.take();
 }
