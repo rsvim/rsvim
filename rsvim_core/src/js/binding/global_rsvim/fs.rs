@@ -90,7 +90,7 @@ pub fn open_sync<'s>(
   let resource_table = state_rc.borrow().resource_table.clone();
 
   let filename = Path::new(&filename);
-  match fs_open(&mut lock!(resource_table), filename, options) {
+  match fs_open(resource_table, filename, options) {
     Ok(file_rid) => {
       let file_rid = Into::<i32>::into(file_rid);
       let file_rid = file_rid.to_v8(scope);

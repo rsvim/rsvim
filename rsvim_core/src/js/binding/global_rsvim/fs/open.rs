@@ -6,6 +6,7 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTable;
+use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use compact_str::ToCompactString;
@@ -111,7 +112,7 @@ impl StructToV8 for FsOpenOptions {
 }
 
 pub fn fs_open(
-  resource_table: &mut ResourceTable,
+  resource_table: ResourceTableArc,
   path: &Path,
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
@@ -124,7 +125,10 @@ pub fn fs_open(
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(resource_table.add_file(file)),
+    Ok(file) => {
+      let mut resource_table = lock!(resource_table);
+      Ok(resource_table.add_file(file))
+    }
     Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
       e,
@@ -133,7 +137,7 @@ pub fn fs_open(
 }
 
 pub async fn async_fs_open(
-  resource_table: &mut ResourceTable,
+  resource_table: ResourceTableArc,
   path: &Path,
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
@@ -149,6 +153,7 @@ pub async fn async_fs_open(
   {
     Ok(file) => {
       let file = file.into_std().await;
+      let mut resource_table = lock!(resource_table);
       Ok(resource_table.add_file(file))
     }
     Err(e) => Err(TheErr::OpenFileFailed(
