@@ -35,6 +35,7 @@ pub fn fs_read(
 
       Ok(buf)
     }
+    _ => unreachable!(),
   }
 }
 

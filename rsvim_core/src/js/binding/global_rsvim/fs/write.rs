@@ -29,6 +29,7 @@ pub fn fs_write(
 
       Ok(n)
     }
+    _ => unreachable!(),
   }
 }
 
