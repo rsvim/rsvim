@@ -6,6 +6,8 @@ pub mod text_decoder;
 
 use crate::prelude::*;
 use crate::structural_id_impl;
+use command::ChildProcessResource;
+use command::CommandResource;
 use file::FileResource;
 use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
@@ -22,6 +24,8 @@ pub trait Resourcify: Sized + Debug + Clone {
 pub enum Resource {
   File(FileResource),
   TextDecoder(TextDecoderResource),
+  Command(CommandResource),
+  ChildProcess(ChildProcessResource),
 }
 
 impl Resourcify for Resource {
@@ -29,6 +33,8 @@ impl Resourcify for Resource {
     match self {
       Resource::File(r) => r.id(),
       Resource::TextDecoder(r) => r.id(),
+      Resource::Command(r) => r.id(),
+      Resource::ChildProcess(r) => r.id(),
     }
   }
 }
