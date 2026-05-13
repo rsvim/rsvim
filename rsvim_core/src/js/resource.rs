@@ -13,7 +13,7 @@ use text_decoder::TextDecoderResource;
 structural_id_impl!(i32, ResourceId, 1);
 
 /// Resourcify
-pub trait Resourcify: Sized + Debug {
+pub trait Resourcify: Sized + Debug + Clone {
   fn id(&self) -> ResourceId;
 }
 
@@ -21,6 +21,15 @@ pub trait Resourcify: Sized + Debug {
 pub enum Resource {
   File(FileResource),
   TextDecoder(TextDecoderResource),
+}
+
+impl Resourcify for Resource {
+  fn id(&self) -> ResourceId {
+    match self {
+      Resource::File(r) => r.id(),
+      Resource::TextDecoder(r) => r.id(),
+    }
+  }
 }
 
 #[derive(Debug)]
