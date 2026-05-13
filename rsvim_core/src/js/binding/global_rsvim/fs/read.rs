@@ -2,6 +2,7 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::fd::as_raw_fd;
 use crate::js::resource::Resource;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
@@ -22,7 +23,7 @@ pub fn fs_read(
     let mut buf: Vec<u8> = vec![0; bufsize];
     let n = match handle.read(&mut buf) {
       Ok(n) => n,
-      Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
+      Err(e) => return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e)),
     };
     debug_assert!(n <= buf.capacity());
     unsafe {
@@ -41,7 +42,7 @@ pub async fn async_fs_read(
   rid: ResourceId,
   bufsize: usize,
 ) -> TheResult<Vec<u8>> {
-  use tokio::io::AsyncReadExt;
+  use std::io::Read;
 
   let res = lock!(resource_table).get(&rid);
   debug_assert!(res.is_some());
@@ -49,7 +50,7 @@ pub async fn async_fs_read(
   if let Resource::File(res) = res {
     let mut handle = lock!(res.data());
     let mut buf: Vec<u8> = vec![0; bufsize];
-    let n = match handle.read(&mut buf).await {
+    let n = match handle.read(&mut buf) {
       Ok(n) => n,
       Err(e) => return Err(TheErr::ReadFileByFdFailed(fd, e)),
     };
@@ -57,7 +58,6 @@ pub async fn async_fs_read(
     unsafe {
       buf.set_len(n);
     }
-    handle::tokio_to_fd(file).await;
     trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
     Ok(buf)
