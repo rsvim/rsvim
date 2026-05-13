@@ -54,16 +54,16 @@ impl StructFromV8 for ProcCommandOptions {
     );
     let args_value = obj.get(scope, args_name.into()).unwrap();
     debug_assert!(args_value.is_array());
-    let args_value = match v8::Local::<v8::Array>::try_from(args_value) {
-      Ok(args) => (0..args.length())
+    let args = match v8::Local::<v8::Array>::try_from(args_value) {
+      Ok(args_array) => (0..args_array.length())
         .map(|i| {
-          let arg = args.get_index(scope, i).unwrap();
+          let arg = args_array.get_index(scope, i).unwrap();
           arg.to_rust_string_lossy(scope).to_compact_string()
         })
         .collect_vec(),
       Err(_) => unreachable!(),
     };
-    builder.args(args_value);
+    builder.args(args);
 
     from_v8_prop!(builder, obj, scope, CompactString, cwd, optional);
     from_v8_prop!(builder, obj, scope, bool, clear_env);
@@ -77,16 +77,36 @@ impl StructFromV8 for ProcCommandOptions {
     );
     let envs_value = obj.get(scope, envs_name.into()).unwrap();
     debug_assert!(envs_value.is_object());
-    let args_value = match v8::Local::<v8::Array>::try_from(envs_value) {
-      Ok(args) => (0..args.length())
-        .map(|i| {
-          let arg = args.get_index(scope, i).unwrap();
-          arg.to_rust_string_lossy(scope).to_compact_string()
-        })
-        .collect_vec(),
-      Err(_) => unreachable!(),
+    let envs_value = envs_value.to_object(scope).unwrap();
+    let envs = match envs_value.get_property_names(
+      scope,
+      v8::GetPropertyNamesArgsBuilder::new()
+        .mode(v8::KeyCollectionMode::OwnOnly)
+        .build(),
+    ) {
+      Some(keys_array) => {
+        let mut envs: FoldMap<CompactString, CompactString> =
+          FoldMap::with_capacity(keys_array.length() as usize);
+
+        for i in 0..keys_array.length() {
+          let k = match keys_array.get_index(scope, i) {
+            Some(k) => k,
+            None => continue,
+          };
+          let v = match envs_value.get(scope, k) {
+            Some(v) => v,
+            None => continue,
+          };
+          envs.insert(
+            k.to_rust_string_lossy(scope).to_compact_string(),
+            v.to_rust_string_lossy(scope).to_compact_string(),
+          );
+        }
+        envs
+      }
+      None => FoldMap::new(),
     };
-    builder.args(args_value);
+    builder.envs(envs);
 
     builder.build().unwrap()
   }
