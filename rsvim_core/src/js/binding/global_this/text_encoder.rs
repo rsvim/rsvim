@@ -3,6 +3,7 @@
 use crate::get_cppgc_handle;
 use crate::is_v8_bool;
 use crate::is_v8_str;
+use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -236,12 +237,16 @@ pub fn create_stream_decoder<'s>(
     label, ignore_bom
   );
 
-  let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
 
-  let decoder_wrapper =
-    wrap_cppgc_handle!(scope, decoder_handle, RefCell<Decoder>);
+  let decoder = create_decoder_impl(&label, ignore_bom);
+  let decoder_rid = lock!(resource_table).add_text_decoder(decoder);
+  let decoder_rid = Into::<i32>::into(decoder_rid);
+  let decoder_rid = decoder_rid.to_v8(scope);
 
-  rv.set(decoder_wrapper.into());
+  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
+  rv.set(decoder_rid.into());
 }
 
 /// `TextDecoder.decode` API.
