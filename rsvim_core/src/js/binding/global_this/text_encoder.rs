@@ -1,6 +1,5 @@
 //! `TextEncoder` APIs.
 
-use crate::get_cppgc_handle;
 use crate::is_v8_bool;
 use crate::is_v8_int;
 use crate::is_v8_str;
@@ -10,14 +9,12 @@ use crate::js::converter::*;
 use crate::js::resource::Resource;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
-use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
 use encoding_rs::Encoding;
 use itertools::Itertools;
-use std::cell::RefCell;
 
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
