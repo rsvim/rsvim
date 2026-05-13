@@ -37,35 +37,8 @@ impl Resourcify for CommandResource {
 
 impl Debug for CommandResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let data = lock!(self.data);
     f.debug_struct("CommandResource")
       .field("id", &self.id)
-      .field("program", &data.get_program().to_string_lossy())
-      .field(
-        "args",
-        &data
-          .get_args()
-          .into_iter()
-          .map(|a| a.to_string_lossy().clone())
-          .collect_vec(),
-      )
-      .field("cwd", &data.get_current_dir())
-      .field(
-        "envs",
-        &data
-          .get_envs()
-          .into_iter()
-          .map(|e| {
-            format!(
-              "{}={}",
-              e.0.to_string_lossy().to_string(),
-              e.1
-                .map(|v| v.to_string_lossy().to_string())
-                .unwrap_or("".to_string())
-            )
-          })
-          .collect_vec(),
-      )
       .finish()
   }
 }
@@ -95,24 +68,11 @@ impl Resourcify for ChildProcessResource {
   }
 }
 
-#[cfg(target_family = "windows")]
-impl Debug for ChildProcessResource {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    use std::os::windows::io::AsHandle;
-    f.debug_struct("ChildProcessResource")
-      .field("id", &self.id)
-      .field("as_handle", &lock!(self.data).as_handle())
-      .finish()
-  }
-}
-
 #[cfg(not(target_family = "windows"))]
 impl Debug for ChildProcessResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    use std::os::fd::AsFd;
     f.debug_struct("ChildProcessResource")
       .field("id", &self.id)
-      .field("as_fd", &lock!(self.data).as_fd())
       .finish()
   }
 }
