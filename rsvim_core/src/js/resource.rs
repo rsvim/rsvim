@@ -52,10 +52,6 @@ impl ResourceTable {
     self.resources.get(rid)
   }
 
-  pub fn get_mut(&mut self, rid: &ResourceId) -> Option<&mut Resource> {
-    self.resources.get_mut(rid)
-  }
-
   pub fn remove(&mut self, rid: &ResourceId) -> Option<Resource> {
     self.resources.remove(rid)
   }
