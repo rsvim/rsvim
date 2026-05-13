@@ -161,7 +161,7 @@ pub fn read<'s>(
   pending::create_fs_read(
     &mut state,
     task_id,
-    fd,
+    file_rid,
     buf.byte_length(),
     Box::new(read_cb),
   );
