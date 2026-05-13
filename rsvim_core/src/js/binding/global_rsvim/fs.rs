@@ -8,6 +8,7 @@ pub mod read_text_file;
 pub mod write;
 
 use crate::get_cppgc_handle;
+use crate::is_v8_int;
 use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
@@ -26,6 +27,7 @@ use crate::js::binding::global_rsvim::fs::write::FsWriteFuture;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
 use crate::js::pending;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use itertools::Itertools;
 
@@ -109,10 +111,15 @@ pub fn close<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let file_wrapper = args.get(0);
-  trace!("Rsvim.fs.close");
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  trace!("Rsvim.fs.close:{:?}", file_rid);
+  let file_rid = ResourceId::from(file_rid);
 
-  fs_close(scope, file_wrapper.to_object(scope).unwrap());
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  fs_close(resource_table, file_rid);
 }
 
 /// `File.read` API.
