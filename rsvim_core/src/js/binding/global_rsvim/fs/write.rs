@@ -2,37 +2,34 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
+use crate::js::resource::Resource;
+use crate::js::resource::ResourceId;
+use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 
-pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
+pub fn fs_write(
+  resource_table: ResourceTableArc,
+  rid: ResourceId,
+  buf: Vec<u8>,
+) -> TheResult<usize> {
   use std::io::Write;
 
-  let mut file = handle::std_from_fd(fd);
-  let n = match file.write(&buf) {
-    Ok(n) => n,
-    Err(e) => return Err(TheErr::WriteFileFailed(fd, e)),
-  };
-  debug_assert!(n <= buf.len());
-  handle::std_to_fd(file);
-  trace!("|fs_write| n:{},buf:{:?}", n, buf);
+  let res = lock!(resource_table).get(&rid).cloned();
+  debug_assert!(res.is_some());
+  match res.unwrap() {
+    Resource::File(res) => {
+      let handle = res.data();
+      let mut handle = lock!(handle);
+      let n = match handle.write(&buf) {
+        Ok(n) => n,
+        Err(e) => return Err(TheErr::WriteFileByRidFailed(rid, e)),
+      };
+      debug_assert!(n <= buf.len());
+      trace!("|fs_write| n:{},buf:{:?}", n, buf);
 
-  Ok(n)
-}
-
-pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
-  use tokio::io::AsyncWriteExt;
-
-  let mut file = handle::tokio_from_fd(fd);
-  let n = match file.write(&buf).await {
-    Ok(n) => n,
-    Err(e) => return Err(TheErr::WriteFileFailed(fd, e)),
-  };
-  debug_assert!(n <= buf.len());
-  handle::tokio_to_fd(file).await;
-  trace!("|async_fs_write| n:{},buf:{:?}", n, buf);
-
-  Ok(n)
+      Ok(n)
+    }
+  }
 }
 
 pub struct FsWriteFuture {

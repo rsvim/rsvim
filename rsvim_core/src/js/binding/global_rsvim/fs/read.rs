@@ -2,7 +2,6 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::fd::as_raw_fd;
 use crate::js::resource::Resource;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
@@ -25,7 +24,7 @@ pub fn fs_read(
       let n = match handle.read(&mut buf) {
         Ok(n) => n,
         Err(e) => {
-          return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e));
+          return Err(TheErr::ReadFileByRidFailed(rid, e));
         }
       };
       debug_assert!(n <= buf.capacity());
@@ -33,37 +32,6 @@ pub fn fs_read(
         buf.set_len(n);
       }
       trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
-
-      Ok(buf)
-    }
-  }
-}
-
-pub async fn async_fs_read(
-  resource_table: ResourceTableArc,
-  rid: ResourceId,
-  bufsize: usize,
-) -> TheResult<Vec<u8>> {
-  use std::io::Read;
-
-  let res = lock!(resource_table).get(&rid).cloned();
-  debug_assert!(res.is_some());
-  match res.unwrap() {
-    Resource::File(res) => {
-      let handle = res.data();
-      let mut handle = lock!(handle);
-      let mut buf: Vec<u8> = vec![0; bufsize];
-      let n = match handle.read(&mut buf) {
-        Ok(n) => n,
-        Err(e) => {
-          return Err(TheErr::ReadFileByFdFailed(as_raw_fd(&handle), e));
-        }
-      };
-      debug_assert!(n <= buf.capacity());
-      unsafe {
-        buf.set_len(n);
-      }
-      trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
       Ok(buf)
     }

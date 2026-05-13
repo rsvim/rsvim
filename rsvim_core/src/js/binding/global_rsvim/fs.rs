@@ -176,14 +176,17 @@ pub fn read_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.readSync: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.readSync: {:?}, {:?}", file_rid, buf);
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
-  match fs_read(fd, buf.byte_length()) {
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  match fs_read(resource_table, file_rid, buf.byte_length()) {
     Ok(data) => {
       let buffer_store = buf.get_backing_store();
       for (i, b) in data.iter().enumerate() {
