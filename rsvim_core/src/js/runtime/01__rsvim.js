@@ -534,10 +534,10 @@ export class RsvimFs {
      */
     class File {
         /** @hidden */
-        #handle;
+        #rid;
         /** @hidden */
-        constructor(handle) {
-            this.#handle = handle;
+        constructor(rid) {
+            this.#rid = rid;
         }
         /**
          * Close the file.
@@ -555,11 +555,11 @@ export class RsvimFs {
          * ```
          */
         close() {
-            if (!isNull(this.#handle)) {
+            if (!isNull(this.#rid)) {
                 // @ts-ignore Ignore warning
-                __InternalRsvimGlobalObject.fs_close(this.#handle);
+                __InternalRsvimGlobalObject.fs_close(this.#rid);
             }
-            this.#handle = null;
+            this.#rid = null;
         }
         /**
          * Close the file with `using` without `close` API.
@@ -587,7 +587,7 @@ export class RsvimFs {
          * ```
          */
         get isDisposed() {
-            return isNull(this.#handle);
+            return isNull(this.#rid);
         }
         /**
          * Read a file into a buffer.
@@ -612,7 +612,7 @@ export class RsvimFs {
         async read(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
             // @ts-ignore Ignore warning
-            const n = await __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+            const n = await __InternalRsvimGlobalObject.fs_read(this.#rid, buf.buffer);
             return n;
         }
         /**
@@ -634,7 +634,7 @@ export class RsvimFs {
         readSync(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
             // @ts-ignore Ignore warning
-            return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
+            return __InternalRsvimGlobalObject.fs_read_sync(this.#rid, buf.buffer);
         }
         /**
          * Write a buffer into a file.
@@ -658,7 +658,7 @@ export class RsvimFs {
         async write(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
             // @ts-ignore Ignore warning
-            const n = await __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
+            const n = await __InternalRsvimGlobalObject.fs_write(this.#rid, buf.buffer);
             return n;
         }
         /**
@@ -679,7 +679,7 @@ export class RsvimFs {
         writeSync(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
             // @ts-ignore Ignore warning
-            return __InternalRsvimGlobalObject.fs_write_sync(this.#handle, buf.buffer);
+            return __InternalRsvimGlobalObject.fs_write_sync(this.#rid, buf.buffer);
         }
     }
     RsvimFs.File = File;

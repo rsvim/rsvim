@@ -6,6 +6,7 @@ use crate::js::JsRuntimeState;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use tokio::time::Instant;
 
@@ -77,7 +78,7 @@ pub fn create_fs_open(
 pub fn create_fs_read(
   state: &mut JsRuntimeState,
   task_id: TaskId,
-  fd: usize,
+  file_rid: ResourceId,
   bufsize: usize,
   cb: TaskCallback,
 ) {
@@ -86,7 +87,7 @@ pub fn create_fs_read(
     state.master_tx.clone(),
     MasterMessage::FsReadReq(chan::FsReadReq {
       task_id,
-      fd,
+      file_rid,
       bufsize,
     }),
   );
@@ -127,14 +128,18 @@ pub fn create_fs_read_text_file(
 pub fn create_fs_write(
   state: &mut JsRuntimeState,
   task_id: TaskId,
-  fd: usize,
+  file_rid: ResourceId,
   buf: Vec<u8>,
   cb: TaskCallback,
 ) {
   state.pending_tasks.insert(task_id, cb);
   chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsWriteReq(chan::FsWriteReq { task_id, fd, buf }),
+    MasterMessage::FsWriteReq(chan::FsWriteReq {
+      task_id,
+      file_rid,
+      buf,
+    }),
   );
 }
 
