@@ -1,13 +1,12 @@
 //! Sub-process command.
 
 use crate::from_v8_prop;
-use crate::is_v8_array;
 use crate::js::converter::*;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use std::collections::HashMap;
+use itertools::Itertools;
 
 /// Command option names.
 pub const ARGS: &str = "args";
@@ -17,16 +16,14 @@ pub const ENVS: &str = "envs";
 pub const STDIN: &str = "stdin";
 
 /// Default command options.
-pub const ARGS_DEFAULT: Vec<String> = vec![];
 pub const CWD_DEFAULT: Option<CompactString> = None;
 pub const CLEAR_ENV_DEFAULT: bool = false;
-pub const ENVS_DEFAULT: HashMap<CompactString, CompactString> = HashMap::new();
 pub const STDIN_DEFAULT: &str = "null";
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct ProcCommandOptions {
-  #[builder(default = ARGS_DEFAULT)]
-  pub args: Vec<String>,
+  #[builder(default = Vec::new())]
+  pub args: Vec<CompactString>,
 
   #[builder(default = CWD_DEFAULT)]
   pub cwd: Option<CompactString>,
@@ -34,8 +31,8 @@ pub struct ProcCommandOptions {
   #[builder(default = CLEAR_ENV_DEFAULT)]
   pub clear_env: bool,
 
-  #[builder(default = ENVS_DEFAULT)]
-  pub envs: bool,
+  #[builder(default = FoldMap::new())]
+  pub envs: FoldMap<CompactString, CompactString>,
 
   #[builder(default = STDIN_DEFAULT.to_compact_string())]
   pub stdin: CompactString,
@@ -56,10 +53,40 @@ impl StructFromV8 for ProcCommandOptions {
         .unwrap_or(false)
     );
     let args_value = obj.get(scope, args_name.into()).unwrap();
-    debug_assert!(is_v8_array!(args_value));
+    debug_assert!(args_value.is_array());
+    let args_value = match v8::Local::<v8::Array>::try_from(args_value) {
+      Ok(args) => (0..args.length())
+        .map(|i| {
+          let arg = args.get_index(scope, i).unwrap();
+          arg.to_rust_string_lossy(scope).to_compact_string()
+        })
+        .collect_vec(),
+      Err(_) => unreachable!(),
+    };
+    builder.args(args_value);
 
-    from_v8_prop!(builder, obj, scope, bool, force);
-    from_v8_prop!(builder, obj, scope, CompactString, alias, optional);
+    from_v8_prop!(builder, obj, scope, CompactString, cwd, optional);
+    from_v8_prop!(builder, obj, scope, bool, clear_env);
+
+    // envs
+    let envs_name = ENVS.to_v8(scope);
+    debug_assert!(
+      obj
+        .has_own_property(scope, envs_name.into())
+        .unwrap_or(false)
+    );
+    let envs_value = obj.get(scope, envs_name.into()).unwrap();
+    debug_assert!(envs_value.is_object());
+    let args_value = match v8::Local::<v8::Array>::try_from(envs_value) {
+      Ok(args) => (0..args.length())
+        .map(|i| {
+          let arg = args.get_index(scope, i).unwrap();
+          arg.to_rust_string_lossy(scope).to_compact_string()
+        })
+        .collect_vec(),
+      Err(_) => unreachable!(),
+    };
+    builder.args(args_value);
 
     builder.build().unwrap()
   }
