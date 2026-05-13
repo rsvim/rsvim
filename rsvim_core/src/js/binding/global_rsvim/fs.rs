@@ -87,11 +87,15 @@ pub fn open_sync<'s>(
     FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
+  let state_rc = JsRuntime::state(scope);
+  let resource_table = state_rc.borrow().resource_table.clone();
+
   let filename = Path::new(&filename);
-  match fs_open(filename, options) {
-    Ok(fd) => {
-      let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
-      rv.set(file_wrapper.into());
+  match fs_open(&mut lock!(resource_table), filename, options) {
+    Ok(file_rid) => {
+      let file_rid = Into::<i32>::into(file_rid);
+      let file_rid = file_rid.to_v8(scope);
+      rv.set(file_rid.into());
     }
     Err(e) => {
       binding::throw_exception(scope, &e);
