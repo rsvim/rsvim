@@ -5,7 +5,6 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::resource::ResourceId;
-use crate::js::resource::ResourceTable;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use crate::to_v8_prop;
