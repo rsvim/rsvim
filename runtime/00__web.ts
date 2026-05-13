@@ -397,6 +397,10 @@ export class TextDecoder {
       );
     } finally {
       if (!stream && this.#handle !== null) {
+        // @ts-ignore Ignore warning
+        __InternalRsvimGlobalObject.global_encoding_close_stream_decoder(
+          this.#handle,
+        );
         this.#handle = null;
       }
     }
