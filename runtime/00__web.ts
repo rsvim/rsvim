@@ -216,7 +216,7 @@ export namespace TextEncoder {
  */
 export class TextDecoder {
   /** @hidden */
-  #handle: any;
+  #handle: number | null | undefined;
   /** @hidden */
   #encoding: string;
   /** @hidden */

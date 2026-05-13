@@ -37,6 +37,7 @@ impl Debug for FileResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     use std::os::windows::io::AsHandle;
     f.debug_struct("FileResource")
+      .field("id", &self.id)
       .field("as_handle", &lock!(self.data).as_handle())
       .finish()
   }
@@ -47,6 +48,7 @@ impl Debug for FileResource {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     use std::os::fd::AsFd;
     f.debug_struct("FileResource")
+      .field("id", &self.id)
       .field("as_fd", &lock!(self.data).as_fd())
       .finish()
   }
