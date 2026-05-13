@@ -2,10 +2,16 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
+use crate::js::resource::ResourceId;
+use crate::js::resource::ResourceTableArc;
+use crate::prelude::*;
 use crate::prelude::*;
 
-pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
+pub fn fs_read(
+  resource_table: ResourceTableArc,
+  rid: ResourceId,
+  bufsize: usize,
+) -> TheResult<Vec<u8>> {
   use std::io::Read;
 
   let mut file = handle::std_from_fd(fd);
