@@ -22,7 +22,7 @@ pub enum Resource {
 
 #[derive(Debug)]
 pub struct ResourceTable {
-  resources: BTreeMap<ResourceId, Resource>,
+  resources: FoldMap<ResourceId, Resource>,
 }
 
 arc_mutex_ptr!(ResourceTable);
@@ -37,7 +37,7 @@ pub type ResourceTableIter<'a> =
 impl ResourceTable {
   pub fn new() -> Self {
     Self {
-      resources: BTreeMap::new(),
+      resources: FoldMap::new(),
     }
   }
 
@@ -54,17 +54,5 @@ impl ResourceTable {
 
   pub fn remove(&mut self, rid: &ResourceId) -> Option<Resource> {
     self.resources.remove(rid)
-  }
-
-  pub fn keys(&self) -> ResourceTableKeys<'_> {
-    self.resources.keys()
-  }
-
-  pub fn values(&self) -> ResourceTableValues<'_> {
-    self.resources.values()
-  }
-
-  pub fn iter(&self) -> ResourceTableIter<'_> {
-    self.resources.iter()
   }
 }

@@ -130,11 +130,13 @@ pub fn read<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(args.length() == 2);
+  debug_assert!(is_v8_int!(args.get(0)));
+  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.read: {:?}, {:?}", file_wrapper, buf);
+  trace!("RsvimFs.read: {:?}, {:?}", file_rid, buf);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -155,7 +157,6 @@ pub fn read<'s>(
     }
   };
 
-  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
   pending::create_fs_read(

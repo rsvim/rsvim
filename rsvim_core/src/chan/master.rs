@@ -5,6 +5,7 @@ use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -78,7 +79,7 @@ pub struct FsOpenReq {
 #[derive(Debug)]
 pub struct FsReadReq {
   pub task_id: TaskId,
-  pub fd: usize,
+  pub file_rid: ResourceId,
   pub bufsize: usize,
 }
 

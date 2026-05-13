@@ -6,6 +6,7 @@ use crate::js::JsRuntimeState;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use tokio::time::Instant;
 
@@ -77,7 +78,7 @@ pub fn create_fs_open(
 pub fn create_fs_read(
   state: &mut JsRuntimeState,
   task_id: TaskId,
-  fd: usize,
+  file_rid: ResourceId,
   bufsize: usize,
   cb: TaskCallback,
 ) {
