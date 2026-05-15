@@ -2,7 +2,6 @@
 
 use crate::buf::BufferId;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 
