@@ -42,8 +42,9 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: davidlattimore/wild-action@latest
-      - name: Install Rust
-        run: rustup component add rust-src clippy
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src,clippy
       - name: Check out 'current' branch
         uses: actions/checkout@v6
         with:
@@ -89,8 +90,9 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: davidlattimore/wild-action@latest
-      - name: Install Rust
-        run: rustup component add rust-src clippy
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src,clippy
       - name: Check out 'current' branch
         uses: actions/checkout@v6
         with:

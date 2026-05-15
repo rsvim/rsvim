@@ -85,8 +85,8 @@ fn make_tree(
   tree.set_global_local_options(window_opts);
   let window_style = Style {
     size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0_f32),
+      width: taffy::prelude::percent(1.0_f32),
     },
     ..Default::default()
   };

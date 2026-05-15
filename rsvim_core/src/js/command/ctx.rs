@@ -2,7 +2,6 @@
 
 use crate::buf::BufferId;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 
@@ -44,10 +43,31 @@ impl StructToV8 for CommandContext {
     debug_assert!(self.current_buffer_id > 0);
     debug_assert!(self.current_window_id > 0);
 
-    to_v8_prop!(self, obj, scope, bang);
-    to_v8_prop!(self, obj, scope, args, Vec);
-    to_v8_prop!(self, obj, scope, current_buffer_id);
-    to_v8_prop!(self, obj, scope, current_window_id);
+    // bang
+    let bang_value = self.bang.to_v8(scope);
+    crate::js::binding::set_property_to(scope, obj, BANG, bang_value.into());
+
+    // args
+    let args_value = self.args.to_v8(scope, |scope, i| i.to_v8(scope).into());
+    crate::js::binding::set_property_to(scope, obj, ARGS, args_value.into());
+
+    // currentBufferId
+    let current_buffer_id_value = self.current_buffer_id.to_v8(scope);
+    crate::js::binding::set_property_to(
+      scope,
+      obj,
+      CURRENT_BUFFER_ID,
+      current_buffer_id_value.into(),
+    );
+
+    // currentWindowId
+    let current_window_id_value = self.current_window_id.to_v8(scope);
+    crate::js::binding::set_property_to(
+      scope,
+      obj,
+      CURRENT_WINDOW_ID,
+      current_window_id_value.into(),
+    );
 
     obj
   }

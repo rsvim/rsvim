@@ -81,8 +81,8 @@ fn raw_move_position_by1() {
 
   let style2 = Style {
     size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0_f32),
+      width: taffy::prelude::percent(1.0_f32),
     },
     ..Default::default()
   };
@@ -171,8 +171,8 @@ fn raw_move_position_to1() {
 
   let style2 = Style {
     size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0_f32),
+      width: taffy::prelude::percent(1.0_f32),
     },
     ..Default::default()
   };
@@ -261,8 +261,8 @@ fn reserved_move_position_by1() {
 
   let style2 = Style {
     size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0_f32),
+      width: taffy::prelude::percent(1.0_f32),
     },
     ..Default::default()
   };
@@ -368,8 +368,8 @@ fn reserved_move_position_to1() {
 
   let style2 = Style {
     size: taffy::Size {
-      height: taffy::prelude::percent(1.0),
-      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0_f32),
+      width: taffy::prelude::percent(1.0_f32),
     },
     ..Default::default()
   };

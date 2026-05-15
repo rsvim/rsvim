@@ -67,9 +67,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: Swatinem/rust-cache@v2
-      - name: Install Rust
-        run: |
-          rustup component add rust-src clippy
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src,clippy
       - name: Cargo Build
         run: |
           cargo build --profile nightly
