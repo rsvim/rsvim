@@ -15,6 +15,7 @@ rust-version.workspace = true
 version.workspace = true
 
 [lib]
+proc-macro = true
 
 [dependencies]
 anyhow = "1"
