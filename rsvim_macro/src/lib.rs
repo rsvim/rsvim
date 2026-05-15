@@ -8,6 +8,6 @@ use syn::parse_macro_input;
 /// For `js::converter`
 pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("to_v8_obj:{:?}", input);
+  println!("to_v8:{:?}", input);
   TokenStream::default()
 }
