@@ -3,7 +3,6 @@
 use crate::from_v8_prop;
 use crate::js::binding;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use std::str::FromStr;
 
 /// Command attribute name.
