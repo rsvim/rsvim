@@ -3,7 +3,6 @@
 use crate::from_v8_prop;
 use crate::js::binding;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 
 /// Command option names.
