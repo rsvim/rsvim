@@ -20,7 +20,7 @@ version.workspace = true
 anyhow = "1"
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "1", features = ["extra-traits"] }
+syn = { version = "2", features = ["extra-traits"] }
 
 [lints]
 workspace = true
