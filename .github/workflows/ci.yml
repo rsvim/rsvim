@@ -81,8 +81,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        # os: [ubuntu-22.04-arm, macos-15-intel, windows-11-arm]
-        os: [ubuntu-22.04-arm, windows-11-arm]
+        os: [ubuntu-22.04-arm, macos-15-intel, windows-11-arm]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: Swatinem/rust-cache@v2

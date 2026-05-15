@@ -1,8 +1,8 @@
 //! Ex command attributes.
 
 use crate::from_v8_prop;
+use crate::js::binding;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use std::str::FromStr;
 
 /// Command attribute name.
@@ -99,8 +99,13 @@ impl StructToV8 for CommandAttributes {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, bang);
-    to_v8_prop!(self, obj, scope, nargs);
+    // bang
+    let bang_value = self.bang.to_v8(scope);
+    binding::set_property_to(scope, obj, BANG, bang_value.into());
+
+    // nargs
+    let nargs_value = self.nargs.to_v8(scope);
+    binding::set_property_to(scope, obj, NARGS, nargs_value.into());
 
     obj
   }
