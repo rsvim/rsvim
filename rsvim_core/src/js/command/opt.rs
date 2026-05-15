@@ -1,8 +1,8 @@
 //! Ex command options.
 
 use crate::from_v8_prop;
+use crate::js::binding;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 
 /// Command option names.
@@ -43,8 +43,14 @@ impl StructToV8 for CommandOptions {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, force);
-    to_v8_prop!(self, obj, scope, alias, optional);
+    // force
+    let force_value = self.force.to_v8(scope);
+    binding::set_property_to(scope, obj, FORCE, force_value.into());
+
+    if let Some(alias) = &self.alias {
+      let alias_value = alias.to_v8(scope);
+      binding::set_property_to(scope, obj, ALIAS, alias_value.into());
+    }
 
     obj
   }

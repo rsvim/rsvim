@@ -1,6 +1,7 @@
 //! Ex command runtime context.
 
 use crate::buf::BufferId;
+use crate::js::binding;
 use crate::js::converter::*;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
@@ -45,15 +46,15 @@ impl StructToV8 for CommandContext {
 
     // bang
     let bang_value = self.bang.to_v8(scope);
-    crate::js::binding::set_property_to(scope, obj, BANG, bang_value.into());
+    binding::set_property_to(scope, obj, BANG, bang_value.into());
 
     // args
     let args_value = self.args.to_v8(scope, |scope, i| i.to_v8(scope).into());
-    crate::js::binding::set_property_to(scope, obj, ARGS, args_value.into());
+    binding::set_property_to(scope, obj, ARGS, args_value.into());
 
     // currentBufferId
     let current_buffer_id_value = self.current_buffer_id.to_v8(scope);
-    crate::js::binding::set_property_to(
+    binding::set_property_to(
       scope,
       obj,
       CURRENT_BUFFER_ID,
@@ -62,7 +63,7 @@ impl StructToV8 for CommandContext {
 
     // currentWindowId
     let current_window_id_value = self.current_window_id.to_v8(scope);
-    crate::js::binding::set_property_to(
+    binding::set_property_to(
       scope,
       obj,
       CURRENT_WINDOW_ID,
