@@ -1,6 +1,324 @@
-## [0.1.2-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.1..v0.1.2-alpha.1) - 2025-08-28
+## [0.1.3-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.2..0.1.3-alpha.1) - 2026-05-18
 
-[6b2e14ea](https://github.com/rsvim/rsvim/commit/6b2e14ea3e91b9074116a796e0119f4427efb7b7)...[b8c8f11a](https://github.com/rsvim/rsvim/commit/b8c8f11a90e7520f56704f6880e97d1be20eaeec)
+[79d7cd5c](https://github.com/rsvim/rsvim/commit/79d7cd5cc7a93d9633a6df603379e3b5714b79e5)...[8e597fbf](https://github.com/rsvim/rsvim/commit/8e597fbf7085f6f686addefccd17b8ad1822485c)
+
+### <!-- 0 -->Features
+
+- *(js)* Support dynamic import (#631) ([3cefaae7](https://github.com/rsvim/rsvim/commit/3cefaae7140bfcae23a035927afbb4a5f69bc0e0)) by @linrongbin16 ([#631](https://github.com/rsvim/rsvim/pull/631))
+
+- *(js)* (fully?) support ES module and npm package resolving (#664) ([271d5c55](https://github.com/rsvim/rsvim/commit/271d5c55406da89f9ed287eaa90592de20f75697)) by @linrongbin16 ([#664](https://github.com/rsvim/rsvim/pull/664))
+
+- *(api)* Add "setInterval" api (#675) ([094cb971](https://github.com/rsvim/rsvim/commit/094cb9710bde5d91633b16dc9357beafff0dc719)) by @linrongbin16 ([#675](https://github.com/rsvim/rsvim/pull/675))
+
+- *(api)* Add "queueMicrotask" and "reportError" api (#681) ([439ad8e4](https://github.com/rsvim/rsvim/commit/439ad8e41ef2a076be256ef607039d73c6c8ffda)) by @linrongbin16 ([#681](https://github.com/rsvim/rsvim/pull/681))
+
+- *(api)* Add "Rsvim.cmd.create" apis (#687) ([2107eb8d](https://github.com/rsvim/rsvim/commit/2107eb8da98e16c40951d65e6c248d9b7bbe056d)) by @linrongbin16 ([#687](https://github.com/rsvim/rsvim/pull/687))
+
+- *(cmd)* Impl command alias and v8/rust converter (#698) ([c2a7772a](https://github.com/rsvim/rsvim/commit/c2a7772a9d30ef20960aca3a01a938a5daed0a75)) by @linrongbin16 ([#698](https://github.com/rsvim/rsvim/pull/698))
+
+- *(cmd)* Run user registered ex commands (#728) ([f9ba4da9](https://github.com/rsvim/rsvim/commit/f9ba4da96c928756dea27b2118b55c6ec0839ce0)) by @linrongbin16 ([#728](https://github.com/rsvim/rsvim/pull/728))
+
+- *(fs)* Add `Rsvim.fs` open, openSync, close APIs (#738) ([896a5e9d](https://github.com/rsvim/rsvim/commit/896a5e9d5751678dc2d68e91e28795c99573a89a)) by @linrongbin16 ([#738](https://github.com/rsvim/rsvim/pull/738))
+
+- *(encoding)* Add "TextEncoder" and refactor js converter (#741) ([74078120](https://github.com/rsvim/rsvim/commit/74078120a04efc6e42b66b91f793f408f5245240)) by @linrongbin16 ([#741](https://github.com/rsvim/rsvim/pull/741))
+
+- *(encoding)* Add "TextDecoder" (#749) ([c3b87beb](https://github.com/rsvim/rsvim/commit/c3b87beb6ea6e1689007e11e2bce57645c241c04)) by @linrongbin16 ([#749](https://github.com/rsvim/rsvim/pull/749))
+
+- *(fs)* Add fs read api (#751) ([05cb7aec](https://github.com/rsvim/rsvim/commit/05cb7aec058f1e9e4721b2c7954db6e426173963)) by @linrongbin16 ([#751](https://github.com/rsvim/rsvim/pull/751))
+
+- *(fs)* Add fs write api (#757) ([9d9af6b7](https://github.com/rsvim/rsvim/commit/9d9af6b7a800777acc7e45cc6aba8677e6f63aa7)) by @linrongbin16 ([#757](https://github.com/rsvim/rsvim/pull/757))
+
+- *(types)* Add global declarations for typescript types (#761) ([f014a223](https://github.com/rsvim/rsvim/commit/f014a2234f2ce9bf07957e48c3e7a62afa56339a)) by @linrongbin16 ([#761](https://github.com/rsvim/rsvim/pull/761))
+
+- *(types)* Publish .d.ts declarations as @rsvim/types (#762) ([7c185501](https://github.com/rsvim/rsvim/commit/7c185501abda8fb57445b27a2a971bfe75e1e0c5)) by @linrongbin16 ([#762](https://github.com/rsvim/rsvim/pull/762))
+
+- *(cmd)* Add "CommandContext" (#764) ([4255a14d](https://github.com/rsvim/rsvim/commit/4255a14d5e1f619e1ad6e70c6f27abca50ecf5f7)) by @linrongbin16 ([#764](https://github.com/rsvim/rsvim/pull/764))
+
+- *(buf)* Save editing changes to undo manager (#858) ([feb4b43b](https://github.com/rsvim/rsvim/commit/feb4b43bade3bd269855de871b9f01c82c7cfbee)) by @linrongbin16 ([#858](https://github.com/rsvim/rsvim/pull/858))
+
+- *(undo)* Revert text rope with undo history (#869) ([ac583d9f](https://github.com/rsvim/rsvim/commit/ac583d9fff9fa1df9b39593b446cadea51169d77)) by @linrongbin16 ([#869](https://github.com/rsvim/rsvim/pull/869))
+
+- *(syn)* Parse buffer text with tree-sitter syntax parser (#878) ([a263585d](https://github.com/rsvim/rsvim/commit/a263585d812f4ca0191b816746a9a909b31c7a9d)) by @linrongbin16 ([#878](https://github.com/rsvim/rsvim/pull/878))
+
+- *(syn)* Syntax parser parse text payload in async task (#886) ([3253369c](https://github.com/rsvim/rsvim/commit/3253369c6d783dbd80716fb73aecc4a4b3d81fdc)) by @linrongbin16 ([#886](https://github.com/rsvim/rsvim/pull/886))
+
+- *(syn)* Add editing changes and pend for parsing (#897) ([b272548f](https://github.com/rsvim/rsvim/commit/b272548f90a0b02432a595eb94e982b71ddc8d40)) by @linrongbin16 ([#897](https://github.com/rsvim/rsvim/pull/897))
+
+- *(hl)* Add highlight (#912) ([66366645](https://github.com/rsvim/rsvim/commit/66366645c05965d1cd5a2d30e0ededc3a4617eeb)) by @linrongbin16 ([#912](https://github.com/rsvim/rsvim/pull/912))
+
+- *(hl)* Add default highlight (#920) ([7d905f06](https://github.com/rsvim/rsvim/commit/7d905f0678904553fba3845bb7045ead9ecc2b35)) by @linrongbin16 ([#920](https://github.com/rsvim/rsvim/pull/920))
+
+- *(hl)* Resolve specific highlight per language with fallback (#933) ([1a1961ba](https://github.com/rsvim/rsvim/commit/1a1961ba514e77bc912a2e890cd19bb152702ed4)) by @linrongbin16 ([#933](https://github.com/rsvim/rsvim/pull/933))
+
+- *(syn)* Execute highlight query when parsing syntax (#945) ([dcf25acf](https://github.com/rsvim/rsvim/commit/dcf25acf62cbbcb9f1878fa3420d510333527072)) by @linrongbin16 ([#945](https://github.com/rsvim/rsvim/pull/945))
+
+- *(hl)* Write captured highlight into canvas (#964) ([b835204f](https://github.com/rsvim/rsvim/commit/b835204f5a076785461347b77268397a6996d731)) by @linrongbin16 ([#964](https://github.com/rsvim/rsvim/pull/964))
+
+- *(ui)* Render canvas with color (#974) ([bec16a5c](https://github.com/rsvim/rsvim/commit/bec16a5c77565733eae0936d4a1b9ef721a5e2a1)) by @linrongbin16 ([#974](https://github.com/rsvim/rsvim/pull/974))
+
+- *(hl)* Add markup colors (#975) ([e1bd4389](https://github.com/rsvim/rsvim/commit/e1bd438989f53beed53293652c0f274d780e21c3)) by @linrongbin16 ([#975](https://github.com/rsvim/rsvim/pull/975))
+
+- *(opt)* Add "fix-end-of-line" option (#998) ([e9ba928a](https://github.com/rsvim/rsvim/commit/e9ba928a76719155c9fb556774c469ce2cd87277)) by @linrongbin16 ([#998](https://github.com/rsvim/rsvim/pull/998))
+
+- *(syn)* Load tree-sitter grammar/parser (#1041) ([500edd2a](https://github.com/rsvim/rsvim/commit/500edd2a0797e062d218d9b284de9a170384ac46)) by @linrongbin16 ([#1041](https://github.com/rsvim/rsvim/pull/1041))
+
+- *(api)* Add "syntaxParserLibPath" option (#1046) ([748b3bed](https://github.com/rsvim/rsvim/commit/748b3bed5a5bc867dad4510eef9a049b1485a4f9)) by @linrongbin16 ([#1046](https://github.com/rsvim/rsvim/pull/1046))
+
+- *(syn)* Add "loadTreeSitterParser" apis (#1056) ([1baaaf12](https://github.com/rsvim/rsvim/commit/1baaaf12f39a40552b1fa09d829ab3fbb59887c2)) by @linrongbin16 ([#1056](https://github.com/rsvim/rsvim/pull/1056))
+
+- *(syn)* More apis for syntax (#1058) ([b7dd027a](https://github.com/rsvim/rsvim/commit/b7dd027aad3ff05dae7d6aa1017e22d546f7e9e3)) by @linrongbin16 ([#1058](https://github.com/rsvim/rsvim/pull/1058))
+
+- *(fs)* Add "readFile" and "readTextFile" api (#1065) ([0a12d990](https://github.com/rsvim/rsvim/commit/0a12d9900e2467ada0636269dbd3c8873684f013)) by @linrongbin16 ([#1065](https://github.com/rsvim/rsvim/pull/1065))
+
+
+### <!-- 1 -->Bug Fixes
+
+- *(js)* Fix pending imports counting (#661) ([00b00e71](https://github.com/rsvim/rsvim/commit/00b00e71c16c1fb9bf50e23f55c12d0b3275dbcc)) by @linrongbin16 ([#661](https://github.com/rsvim/rsvim/pull/661))
+
+- *(js)* Fix panic when failed to resolve modules in static imports (#671) ([d9b30caa](https://github.com/rsvim/rsvim/commit/d9b30caa4157cdbbe548fba1b708cf9f65e88443)) by @linrongbin16 ([#671](https://github.com/rsvim/rsvim/pull/671))
+
+- *(module)* Fix es module resolution (#683) ([d09dd17d](https://github.com/rsvim/rsvim/commit/d09dd17dcdba507ad27cdf2164c1e890502f4078)) by @linrongbin16 ([#683](https://github.com/rsvim/rsvim/pull/683))
+
+- *(js)* Fix module evaluation thrown exceptions (#688) ([936a8716](https://github.com/rsvim/rsvim/commit/936a871610568885d42263bd502b44855d64ca1d)) by @linrongbin16 ([#688](https://github.com/rsvim/rsvim/pull/688))
+
+- *(task)* Track missing detach-able tasks (#696) ([f696d299](https://github.com/rsvim/rsvim/commit/f696d29920119eafb6a70283b2657c4e9cc12380)) by @linrongbin16 ([#696](https://github.com/rsvim/rsvim/pull/696))
+
+- *(message)* Append waiting messages to message history (#736) ([2f06414b](https://github.com/rsvim/rsvim/commit/2f06414ba353106dd7fc7793d175be0233fb11af)) by @linrongbin16 ([#736](https://github.com/rsvim/rsvim/pull/736))
+
+- *(cmd)* Allow command calls async/await api (#758) ([39d41637](https://github.com/rsvim/rsvim/commit/39d41637cf931623dcc7ed881c02359ecc00d601)) by @linrongbin16 ([#758](https://github.com/rsvim/rsvim/pull/758))
+
+- *(api)* Refactor typescript configs and fix Float16Array type (#759) ([bdb509c1](https://github.com/rsvim/rsvim/commit/bdb509c1a519a8f659617e87086addb866a7aacd)) by @linrongbin16 ([#759](https://github.com/rsvim/rsvim/pull/759))
+
+- *(ui)* Fix relative position/size of sub-components in command-line (#816) ([7020dfe2](https://github.com/rsvim/rsvim/commit/7020dfe2a8a1e79032fd86627ea28d32b49a7539)) by @linrongbin16 ([#816](https://github.com/rsvim/rsvim/pull/816))
+
+- *(ui)* Fix default window and command-line layout (#817) ([8d2c54bb](https://github.com/rsvim/rsvim/commit/8d2c54bb4d82f33c1eb91f43b29f2de0521ec0a3)) by @linrongbin16 ([#817](https://github.com/rsvim/rsvim/pull/817))
+
+- *(undo)* Record cursor positions before and after editing operations (#868) ([19e04fc9](https://github.com/rsvim/rsvim/commit/19e04fc95a825b627d6e19e08a79f5ac29dee241)) by @linrongbin16 ([#868](https://github.com/rsvim/rsvim/pull/868))
+
+- *(syn)* Trigger next syntax parsing immediately if has more pendings (#890) ([fc655b49](https://github.com/rsvim/rsvim/commit/fc655b49246149b50256e651adb5f4e4f723898f)) by @linrongbin16 ([#890](https://github.com/rsvim/rsvim/pull/890))
+
+- *(syn)* Fix syntax highlight query duplicate start point (#949) ([e51c705e](https://github.com/rsvim/rsvim/commit/e51c705e3df19bbe06178472e200ff7b02bed0d8)) by @linrongbin16 ([#949](https://github.com/rsvim/rsvim/pull/949))
+
+- *(hl)* Render ui foreground/background for empty spaces (#967) ([886b6502](https://github.com/rsvim/rsvim/commit/886b6502d00f225fcfef6f40b56dc196308c7282)) by @linrongbin16 ([#967](https://github.com/rsvim/rsvim/pull/967))
+
+- *(ui)* Refactor canvas cells fill (#971) ([f37accbd](https://github.com/rsvim/rsvim/commit/f37accbdb9e9cbd9574486aaddccdc2bcdb37ed7)) by @linrongbin16 ([#971](https://github.com/rsvim/rsvim/pull/971))
+
+- *(ui)* Fix viewport search (#992) ([58a7ac61](https://github.com/rsvim/rsvim/commit/58a7ac619ec1227e454890725ce8a17c6a47251d)) by @linrongbin16 ([#992](https://github.com/rsvim/rsvim/pull/992))
+
+- *(ui)* Fix cmdline colorscheme (#1011) ([539bdce3](https://github.com/rsvim/rsvim/commit/539bdce3c26a64cdd00091680e081830597096f4)) by @linrongbin16 ([#1011](https://github.com/rsvim/rsvim/pull/1011))
+
+
+### <!-- 2 -->Performance Improvements
+
+- *(cargo)* Prefer faster speed over bin size (#635) ([edbb36f2](https://github.com/rsvim/rsvim/commit/edbb36f2d87b2fdc4eb0022454dca98bbb47807e)) by @linrongbin16 ([#635](https://github.com/rsvim/rsvim/pull/635))
+
+- *(snapshot)* Disable compress on snapshot (#636) ([2538c56b](https://github.com/rsvim/rsvim/commit/2538c56b5b0bf05011683dc4f5c0300c958251f2)) by @linrongbin16 ([#636](https://github.com/rsvim/rsvim/pull/636))
+
+- *(js)* Avoid duplicate loop tick when waiting for dynamic import loaders (#654) ([2e92d017](https://github.com/rsvim/rsvim/commit/2e92d017211c8a7884fe7ccd7783ce2714d6cc74)) by @linrongbin16 ([#654](https://github.com/rsvim/rsvim/pull/654))
+
+- *(alloc)* Add optional custom allocator (#663) ([288e35b7](https://github.com/rsvim/rsvim/commit/288e35b76c0424c2fba7833d0e212635d5b2db48)) by @linrongbin16 ([#663](https://github.com/rsvim/rsvim/pull/663))
+
+- *(opts)* Reduce internal options data types (#714) ([34ed2d7e](https://github.com/rsvim/rsvim/commit/34ed2d7eab57e566faa979d5050f27deef8bc58f)) by @linrongbin16 ([#714](https://github.com/rsvim/rsvim/pull/714))
+
+- *(text)* Cache cloned lines with LRU + Rc<String> (#716) ([a103f711](https://github.com/rsvim/rsvim/commit/a103f7116a1f4c2f63c2e88624b8e4a97334f617)) by @linrongbin16 ([#716](https://github.com/rsvim/rsvim/pull/716))
+
+- *(msg)* Drain master/js messages to reduce memory allocation (#718) ([1b994234](https://github.com/rsvim/rsvim/commit/1b9942349a18b51b005d55f561963b4615e0661d)) by @linrongbin16 ([#718](https://github.com/rsvim/rsvim/pull/718))
+
+- *(js)* Improve module linear lookup with hash map (#734) ([31fbb689](https://github.com/rsvim/rsvim/commit/31fbb6897846af78584d4305673598b07828e948)) by @linrongbin16 ([#734](https://github.com/rsvim/rsvim/pull/734))
+
+- *(buf)* Revert back to "lru" cache instead of "clru" (#735) ([91d58876](https://github.com/rsvim/rsvim/commit/91d5887615aaaf47fcd42937276774614dc48f96)) by @linrongbin16 ([#735](https://github.com/rsvim/rsvim/pull/735))
+
+- *(ui)* Avoid too many Vector allocations in window drawing (#968) ([72f8dfc5](https://github.com/rsvim/rsvim/commit/72f8dfc5b6374979cab7e3c7d824b9c7f5a85283)) by @linrongbin16 ([#968](https://github.com/rsvim/rsvim/pull/968))
+
+- *(ui)* Reduce Vector allocation in canvas (#970) ([c4c404cd](https://github.com/rsvim/rsvim/commit/c4c404cd0f24ec08b765954cbb462a0a6708322a)) by @linrongbin16 ([#970](https://github.com/rsvim/rsvim/pull/970))
+
+- *(ui)* Reduce vec allocation in canvas shader (#972) ([76a0a9fb](https://github.com/rsvim/rsvim/commit/76a0a9fba14381569f64de9ab0b2537c9766f52c)) by @linrongbin16 ([#972](https://github.com/rsvim/rsvim/pull/972))
+
+- *(ui)* Detect dirty cells with range based bitmap (#978) ([61c751b2](https://github.com/rsvim/rsvim/commit/61c751b2f3a0af724398695933533fd5dab96497)) by @linrongbin16 ([#978](https://github.com/rsvim/rsvim/pull/978))
+
+- *(lock)* Switch to std mutex (#997) ([866e8794](https://github.com/rsvim/rsvim/commit/866e87940b4303b3dcafb4f463c41a358daf238c)) by @linrongbin16 ([#997](https://github.com/rsvim/rsvim/pull/997))
+
+- *(ui)* Bring back binary search on words when "linebreak=true" (#1010) ([83b7038c](https://github.com/rsvim/rsvim/commit/83b7038cc17bff596e70f048665ba3f1d2b100e4)) by @linrongbin16 ([#1010](https://github.com/rsvim/rsvim/pull/1010))
+
+- *(ui)* Cache rope query result to avoid duplicate calculation (#1007) ([ae381544](https://github.com/rsvim/rsvim/commit/ae381544700a29308f017768df8e9870ad7e84a6)) by @linrongbin16 ([#1007](https://github.com/rsvim/rsvim/pull/1007))
+
+- *(ui)* Reuse canvas shader buffers (#1028) ([7ca6940e](https://github.com/rsvim/rsvim/commit/7ca6940e8f3bd7858cbb1f79579c93a2ae61fcd2)) by @linrongbin16 ([#1028](https://github.com/rsvim/rsvim/pull/1028))
+
+- *(js)* Minify runtime api library (#1045) ([dfc416e9](https://github.com/rsvim/rsvim/commit/dfc416e98e6f7d826d9859a30b6a91294453e7a9)) by @linrongbin16 ([#1045](https://github.com/rsvim/rsvim/pull/1045))
+
+
+### <!-- 3 -->Code Refactoring
+
+- *(enum)* Refactor options with "strum" crate (#629) ([d3128f19](https://github.com/rsvim/rsvim/commit/d3128f193e10db93ba5e85cfbba9a166fb059bff)) by @linrongbin16 ([#629](https://github.com/rsvim/rsvim/pull/629))
+
+- *(options)* Use "strum" for "FileEncodingOption" serialization (#630) ([1152b043](https://github.com/rsvim/rsvim/commit/1152b04321ac8cfaf758367e519e22e7fa3bfc88)) by @linrongbin16 ([#630](https://github.com/rsvim/rsvim/pull/630))
+
+- *(js)* Simplify the async event loop of js runtime (#651) ([f355840a](https://github.com/rsvim/rsvim/commit/f355840a5e72a3a69dde94b5ddabfb9eaae6c3b0)) by @linrongbin16 ([#651](https://github.com/rsvim/rsvim/pull/651))
+
+- *(config)* Moves global "PathConfig" variable into "EventLoop" (#668) ([ed076762](https://github.com/rsvim/rsvim/commit/ed07676208bfb85062fb7b4de8ca700d969c9395)) by @linrongbin16 ([#668](https://github.com/rsvim/rsvim/pull/668))
+
+- *(ts)* Rewrite ts APIs with "interface" instead of "class" (#670) ([46158d1e](https://github.com/rsvim/rsvim/commit/46158d1ea14b39fe5dbf74ea837c009f7e4e1df0)) by @linrongbin16 ([#670](https://github.com/rsvim/rsvim/pull/670))
+
+- *(string)* Avoid string clones (#674) ([a448333b](https://github.com/rsvim/rsvim/commit/a448333b2c843fa59e32688660c84160a064314b)) by @linrongbin16 ([#674](https://github.com/rsvim/rsvim/pull/674))
+
+- *(cmd)* Refactor `Rsvim.cmd.list` and add `Rsvim.cmd.get` (#712) ([ccba7dd7](https://github.com/rsvim/rsvim/commit/ccba7dd7bf47796ae2956608ce4e102ca2f5a9a8)) by @linrongbin16 ([#712](https://github.com/rsvim/rsvim/pull/712))
+
+- *(opt)* Remove duplicated "num_traits::clamp" calls (#715) ([0fcc568f](https://github.com/rsvim/rsvim/commit/0fcc568feee2c7b91d4da3be64b76ffaef2f9883)) by @linrongbin16 ([#715](https://github.com/rsvim/rsvim/pull/715))
+
+- *(error)* Migrate all errors, anyhow to thiserror (#717) ([502d3e5d](https://github.com/rsvim/rsvim/commit/502d3e5d4aba93ba8db8489f1c53bc26763c6691)) by @linrongbin16 ([#717](https://github.com/rsvim/rsvim/pull/717))
+
+- *(timer)* Migrate timer "delay" field from u64 to u32 (#721) ([5b08f45b](https://github.com/rsvim/rsvim/commit/5b08f45b2f0208e0904d04bea53c9185214a933f)) by @linrongbin16 ([#721](https://github.com/rsvim/rsvim/pull/721))
+
+- *(bits)* Refactor multiple booleans with bitflags (#723) ([229a5857](https://github.com/rsvim/rsvim/commit/229a585740978c23a700815f9cefea72ea53cce1)) by @linrongbin16 ([#723](https://github.com/rsvim/rsvim/pull/723))
+
+- *(opts)* Use paste! lower/upper/camel to reduce duplicated macro arguments (#727) ([1a3443a9](https://github.com/rsvim/rsvim/commit/1a3443a9803df33aea05414c8ab4f35cea7effcc)) by @linrongbin16 ([#727](https://github.com/rsvim/rsvim/pull/727))
+
+- *(buf)* Refactor internal cache inside buffer (#732) ([d4bbfa16](https://github.com/rsvim/rsvim/commit/d4bbfa1608567759b5293705990c1e2aafc76170)) by @linrongbin16 ([#732](https://github.com/rsvim/rsvim/pull/732))
+
+- *(init)* Refactor event loop initialization (#737) ([766fddf2](https://github.com/rsvim/rsvim/commit/766fddf29de9a8381a1a28fcb668278043ba586a)) by @linrongbin16 ([#737](https://github.com/rsvim/rsvim/pull/737))
+
+- *(msg)* Migrate to unbounded channels for non blocking sending (#739) ([ed983260](https://github.com/rsvim/rsvim/commit/ed983260b0145c8a194522b46bc1020a7a3495e6)) by @linrongbin16 ([#739](https://github.com/rsvim/rsvim/pull/739))
+
+- *(const)* Remove unused const (#740) ([a9a4242a](https://github.com/rsvim/rsvim/commit/a9a4242a40475577cd7c9b1f12e6c37a2c73211a)) by @linrongbin16 ([#740](https://github.com/rsvim/rsvim/pull/740))
+
+- *(types)* Refactor typescript api types (#760) ([62412d53](https://github.com/rsvim/rsvim/commit/62412d53dcd5ac90ed14f5ae29ebb746d586af4e)) by @linrongbin16 ([#760](https://github.com/rsvim/rsvim/pull/760))
+
+- *(js)* Add "async" keyword for async functions (#765) ([e246d3ab](https://github.com/rsvim/rsvim/commit/e246d3abae69f87c8dfcf6cb7b5c0c9bf44bfb58)) by @linrongbin16 ([#765](https://github.com/rsvim/rsvim/pull/765))
+
+- *(js)* Keep typedoc comments for .d.ts declarations (#766) ([772acf3e](https://github.com/rsvim/rsvim/commit/772acf3e6cd79504a222c06ea1229f9aab19eaea)) by @linrongbin16 ([#766](https://github.com/rsvim/rsvim/pull/766))
+
+- *(err)* Use "CompactString" for error message (#774) ([61d7a9bb](https://github.com/rsvim/rsvim/commit/61d7a9bb3f458fec3bd6762a37636427594ea7b7)) by @linrongbin16 ([#774](https://github.com/rsvim/rsvim/pull/774))
+
+- *(ui)* Refactor logical shape and actual shape calculation (#778) ([e5419cac](https://github.com/rsvim/rsvim/commit/e5419cac40c10fb4ceb2585592d8ed0a7ae166ca)) by @linrongbin16 ([#778](https://github.com/rsvim/rsvim/pull/778))
+
+- *(ui)* Refactor geo macros (#785) ([faa994fb](https://github.com/rsvim/rsvim/commit/faa994fbdf9308c95bcae66e12d29a79d3245caf)) by @linrongbin16 ([#785](https://github.com/rsvim/rsvim/pull/785))
+
+- *(ui)* Refactor geo types and constructors (#796) ([cb9aeb66](https://github.com/rsvim/rsvim/commit/cb9aeb6690c8a501b4607cb93858abaf34b9fcbb)) by @linrongbin16 ([#796](https://github.com/rsvim/rsvim/pull/796))
+
+- *(ui)* Refactor geo coordinates (#804) ([bf2aeebc](https://github.com/rsvim/rsvim/commit/bf2aeebc769d50d2674e8833ab3f9e1d6282d117)) by @linrongbin16 ([#804](https://github.com/rsvim/rsvim/pull/804))
+
+- *(ui)* Remove unused "depth" property on node (#805) ([1edd086f](https://github.com/rsvim/rsvim/commit/1edd086ff5de221ba54532978e46f45fe5aa0390)) by @linrongbin16 ([#805](https://github.com/rsvim/rsvim/pull/805))
+
+- *(test)* Refactor common utility functions in unit test (#808) ([2185566c](https://github.com/rsvim/rsvim/commit/2185566c2bc5a12a7bef8ef97e5bd5a9cc48fb72)) by @linrongbin16 ([#808](https://github.com/rsvim/rsvim/pull/808))
+
+- *(test)* Fix window shape constructor in unit test (#814) ([3c2d14e3](https://github.com/rsvim/rsvim/commit/3c2d14e3f8d01060a64eb4107145ec1784c313c7)) by @linrongbin16 ([#814](https://github.com/rsvim/rsvim/pull/814))
+
+- *(ui)* Refactor relative shape to absolute shape conversion (#815) ([a51b3321](https://github.com/rsvim/rsvim/commit/a51b3321cf8b3be51fb105b06c30328132985f47)) by @linrongbin16 ([#815](https://github.com/rsvim/rsvim/pull/815))
+
+- *(ui)* Rename "RootContainer" to "Panel" and drop duplicates (#818) ([9b6cef8e](https://github.com/rsvim/rsvim/commit/9b6cef8e16b1b35d48bca635e2ba2f60d2ff1cc1)) by @linrongbin16 ([#818](https://github.com/rsvim/rsvim/pull/818))
+
+- *(ui)* Removes unused "z-index" attribute in tree node (#820) ([01fd9c0d](https://github.com/rsvim/rsvim/commit/01fd9c0da7ba6ef1ee5434f2f1a0f98f94846d71)) by @linrongbin16 ([#820](https://github.com/rsvim/rsvim/pull/820))
+
+- *(cmdline)* Add cmdline clear input method (#825) ([02d4907d](https://github.com/rsvim/rsvim/commit/02d4907d8df5ab3b9e63a323deee62aec4eee5b2)) by @linrongbin16 ([#825](https://github.com/rsvim/rsvim/pull/825))
+
+- *(ui)* Use "U16Size" instead of "U16Rect" for more precise parameter (#826) ([94b2beb7](https://github.com/rsvim/rsvim/commit/94b2beb7a70350f293c3ab70a46b3b9f370ebd36)) by @linrongbin16 ([#826](https://github.com/rsvim/rsvim/pull/826))
+
+- *(ui)* Remove "root_node" parameter from tree constructor method (#829) ([a9041fb7](https://github.com/rsvim/rsvim/commit/a9041fb751c4de35219699d650882b8326bb4577)) by @linrongbin16 ([#829](https://github.com/rsvim/rsvim/pull/829))
+
+- *(ui)* Introduce taffy as layout engine (#830) ([00074292](https://github.com/rsvim/rsvim/commit/000742920af5fe9b8762d7865f76d4bbf1b1279d)) by @linrongbin16 ([#830](https://github.com/rsvim/rsvim/pull/830))
+
+- *(lazy)* Replace std "LazyLock" with once_cell "Lazy" with parking_lot (#855) ([717a2d45](https://github.com/rsvim/rsvim/commit/717a2d459c8645e275233a618bb7094fff76fe58)) by @linrongbin16 ([#855](https://github.com/rsvim/rsvim/pull/855))
+
+- *(id)* Refactor integer id with struct for type safe (#856) ([308e3934](https://github.com/rsvim/rsvim/commit/308e3934c7f5f8877df1771157c8005fac819a91)) by @linrongbin16 ([#856](https://github.com/rsvim/rsvim/pull/856))
+
+- *(ringbuf)* Refactor single and double ended ring buffer (#871) ([17d2bbe2](https://github.com/rsvim/rsvim/commit/17d2bbe2220c722f2068fc262bb19a9cf78ce1d7)) by @linrongbin16 ([#871](https://github.com/rsvim/rsvim/pull/871))
+
+- *(text)* Refactor text editing api (#874) ([06efd29a](https://github.com/rsvim/rsvim/commit/06efd29a70fdb2504a90a812c548f5df916ca40c)) by @linrongbin16 ([#874](https://github.com/rsvim/rsvim/pull/874))
+
+- *(deps)* Remove unused "swc_sourcemap" crate (#875) ([1c64b90c](https://github.com/rsvim/rsvim/commit/1c64b90c52dea2625a1bc7b72d850d8ae6cc6cbe)) by @linrongbin16 ([#875](https://github.com/rsvim/rsvim/pull/875))
+
+- *(id)* Go back to initial if hit max value (#876) ([9baaada2](https://github.com/rsvim/rsvim/commit/9baaada2f4909287c0c93fcf337315277d2949b2)) by @linrongbin16 ([#876](https://github.com/rsvim/rsvim/pull/876))
+
+- *(text)* Refactor remove text api (#877) ([76f280ff](https://github.com/rsvim/rsvim/commit/76f280ff8ba7cfbfcdea54b2cf6bef0d8b5da44c)) by @linrongbin16 ([#877](https://github.com/rsvim/rsvim/pull/877))
+
+- *(syn)* Add editings to syntax pending job queue and send "SyntaxEditReq" message (#884) ([c182f7b5](https://github.com/rsvim/rsvim/commit/c182f7b5c1ab0b991474fab9517301afb02bc925)) by @linrongbin16 ([#884](https://github.com/rsvim/rsvim/pull/884))
+
+- *(buf)* Replace "Rc<String>" with "arcstr::ArcStr" (#887) ([7368272b](https://github.com/rsvim/rsvim/commit/7368272b08adfaad2c05e793737e9ef6e950f931)) by @linrongbin16 ([#887](https://github.com/rsvim/rsvim/pull/887))
+
+- *(buf)* Refactor text removable chars range api (#896) ([45388a16](https://github.com/rsvim/rsvim/commit/45388a16e1b06d5db37a91089e0a73787868b408)) by @linrongbin16 ([#896](https://github.com/rsvim/rsvim/pull/896))
+
+- *(undo)* Add cursor char position before and after editing (#899) ([db6cafc9](https://github.com/rsvim/rsvim/commit/db6cafc9ce40d70e401340772220518642baa02e)) by @linrongbin16 ([#899](https://github.com/rsvim/rsvim/pull/899))
+
+- *(undo)* Save cursor char position to undo manager (#900) ([0397ff8a](https://github.com/rsvim/rsvim/commit/0397ff8aaacfc6f3d433cd21c884ab7f2bac6ff5)) by @linrongbin16 ([#900](https://github.com/rsvim/rsvim/pull/900))
+
+- *(hl)* Add treesitter Query (#930) ([c6d2f0d1](https://github.com/rsvim/rsvim/commit/c6d2f0d1e187461773cf1b5681f9f37563a4cf8f)) by @linrongbin16 ([#930](https://github.com/rsvim/rsvim/pull/930))
+
+- *(cli)* Refactor cli version info (#954) ([85944a59](https://github.com/rsvim/rsvim/commit/85944a5990ee35b904cf9d3e9b89d2f09cf015f1)) by @linrongbin16 ([#954](https://github.com/rsvim/rsvim/pull/954))
+
+- *(syn)* Capture highlight names (#955) ([4494c27a](https://github.com/rsvim/rsvim/commit/4494c27ae7481452e0b8be87d724b47f3fc87844)) by @linrongbin16 ([#955](https://github.com/rsvim/rsvim/pull/955))
+
+- *(hl)* Add default color name (#956) ([b7f78c46](https://github.com/rsvim/rsvim/commit/b7f78c4601ecc6844a1aeafff960bbcee1d3bd09)) by @linrongbin16 ([#956](https://github.com/rsvim/rsvim/pull/956))
+
+- *(hl)* Refactor captured query byte indexing to char indexing for better response (#957) ([f96e94de](https://github.com/rsvim/rsvim/commit/f96e94de04bfd8a634f48b8755e746e35123d44e)) by @linrongbin16 ([#957](https://github.com/rsvim/rsvim/pull/957))
+
+- *(hl)* Refactor highlight resolve (#958) ([622f3337](https://github.com/rsvim/rsvim/commit/622f333760411ab715b65fd803319e084d638285)) by @linrongbin16 ([#958](https://github.com/rsvim/rsvim/pull/958))
+
+- *(ui)* Fill dirty_rows in canvas without for-loop (#973) ([fb57233c](https://github.com/rsvim/rsvim/commit/fb57233cffdd93f73241e188b403948b6d5e89f3)) by @linrongbin16 ([#973](https://github.com/rsvim/rsvim/pull/973))
+
+- *(color)* Rename "ui.foreground" to "ui.text" (#976) ([702aa919](https://github.com/rsvim/rsvim/commit/702aa919642501c228912adeef46ebff4f161d12)) by @linrongbin16 ([#976](https://github.com/rsvim/rsvim/pull/976))
+
+- *(buf)* Make end-of-line char detection api public  (#981) ([8f30fed4](https://github.com/rsvim/rsvim/commit/8f30fed44b9eb5ab3db293195138044cc9db2e26)) by @linrongbin16 ([#981](https://github.com/rsvim/rsvim/pull/981))
+
+- *(cursor)* Remove useless legacy logic when scrolling window/viewport (#988) ([1c4a828e](https://github.com/rsvim/rsvim/commit/1c4a828ed24675bb3ceac9a1baae79ab60362c5a)) by @linrongbin16 ([#988](https://github.com/rsvim/rsvim/pull/988))
+
+- *(ui)* Refactor viewport line processing logic when wrap=false (#989) ([81a95589](https://github.com/rsvim/rsvim/commit/81a955891ab3c9d7c906d20fb20f49a4e7f94fad)) by @linrongbin16 ([#989](https://github.com/rsvim/rsvim/pull/989))
+
+- *(ui)* Refactor line processing logic when wrap=true & linebreak=false (#990) ([3891fc9d](https://github.com/rsvim/rsvim/commit/3891fc9d02855e7f06cfe44b5414b46ef6d8dcd2)) by @linrongbin16 ([#990](https://github.com/rsvim/rsvim/pull/990))
+
+- *(ui)* Use "Arc" on colorscheme to avoid structure clone (#1008) ([1229fc00](https://github.com/rsvim/rsvim/commit/1229fc00e858f525ae8a470685647875f36597e9)) by @linrongbin16 ([#1008](https://github.com/rsvim/rsvim/pull/1008))
+
+- *(state)* Rename "StateDataAccess" to "StateContext" (#1009) ([5f3f8c76](https://github.com/rsvim/rsvim/commit/5f3f8c7683fb5ee5ca3307c3fe4cd687ead822e9)) by @linrongbin16 ([#1009](https://github.com/rsvim/rsvim/pull/1009))
+
+- *(cli)* Restore clap cli options (#1018) ([6a4fc24f](https://github.com/rsvim/rsvim/commit/6a4fc24ff74f12a745a3f9944f6c5276b1dbf2fb)) by @linrongbin16 ([#1018](https://github.com/rsvim/rsvim/pull/1018))
+
+- *(color)* Split "syn"/"color" module, drop "parking_lot" from tokio (#1019) ([e0e4e4d0](https://github.com/rsvim/rsvim/commit/e0e4e4d015ebf9369203b1cacaa71ab1fcc0fb83)) by @linrongbin16 ([#1019](https://github.com/rsvim/rsvim/pull/1019))
+
+- *(ui)* Stop hide and recover cursor if text is not changed (#1025) ([025857d5](https://github.com/rsvim/rsvim/commit/025857d5a57f13cd809185c70b842da8c1b619b4)) by @linrongbin16 ([#1025](https://github.com/rsvim/rsvim/pull/1025))
+
+- *(syn)* Rename "language" to "grammar" (#1020) ([858312a9](https://github.com/rsvim/rsvim/commit/858312a95a2921bbf2ee8605659892956b31bb39)) by @linrongbin16 ([#1020](https://github.com/rsvim/rsvim/pull/1020))
+
+- *(syn)* Use "parser-lib-path" option when building tree-sitter parsers (#1043) ([16db29dd](https://github.com/rsvim/rsvim/commit/16db29dddb881df331a94531493e1580287025a2)) by @linrongbin16 ([#1043](https://github.com/rsvim/rsvim/pull/1043))
+
+- *(syn)* Refactor tree-sitter loader "parser-lib-path" (#1044) ([13ccd408](https://github.com/rsvim/rsvim/commit/13ccd408f9b042f318fa1a7b7604a7e1f0a48c84)) by @linrongbin16 ([#1044](https://github.com/rsvim/rsvim/pull/1044))
+
+- *(util)* Refactor file path extension utils (#1053) ([01f47187](https://github.com/rsvim/rsvim/commit/01f4718700bff04ccac698c068533e9eddd39e94)) by @linrongbin16 ([#1053](https://github.com/rsvim/rsvim/pull/1053))
+
+- *(syn)* Associate tree-sitter file types with parser (#1054) ([262cf531](https://github.com/rsvim/rsvim/commit/262cf531d315cac27a642eced849cbd9d37c368b)) by @linrongbin16 ([#1054](https://github.com/rsvim/rsvim/pull/1054))
+
+- *(syn)* Rename "grammar" word to "parser" for user api (#1055) ([534df50b](https://github.com/rsvim/rsvim/commit/534df50b89f43528c0230f55dc53165fe29c7471)) by @linrongbin16 ([#1055](https://github.com/rsvim/rsvim/pull/1055))
+
+- *(resource)* Add resource table to manage file/child process/sockets (#1078) ([becb1bd8](https://github.com/rsvim/rsvim/commit/becb1bd8a28285b09419fa1445fe3692d560b866)) by @linrongbin16 ([#1078](https://github.com/rsvim/rsvim/pull/1078))
+
+- *(js)* Add "ToV8" macro to reduce duplicated code logic (#1086) ([53e6757b](https://github.com/rsvim/rsvim/commit/53e6757bb5cdea118cae99e0a8f5d0ada1c07620)) by @linrongbin16 ([#1086](https://github.com/rsvim/rsvim/pull/1086))
+
+
+### <!-- 5 -->Testing
+
+- *(js)* Test empty arguments for import.meta.resolve (#666) ([d75dbdbc](https://github.com/rsvim/rsvim/commit/d75dbdbc2f2a301c71f909ee9394b8b3669132ee)) by @linrongbin16 ([#666](https://github.com/rsvim/rsvim/pull/666))
+
+- *(js)* Fix module map tests (#669) ([567b2a29](https://github.com/rsvim/rsvim/commit/567b2a29726c4b99d203f723fc9b4613bc662ddc)) by @linrongbin16 ([#669](https://github.com/rsvim/rsvim/pull/669))
+
+- *(module)* Fix lazy initialized "FsModuleLoader" in testing (#685) ([a928730c](https://github.com/rsvim/rsvim/commit/a928730c83453e1884ebbd2060500ccf2cf4ea5f)) by @linrongbin16 ([#685](https://github.com/rsvim/rsvim/pull/685))
+
+- *(js)* Add 1 test case for invalid js scripts error (#695) ([214a2ae9](https://github.com/rsvim/rsvim/commit/214a2ae9c52f121e3cd7575709c84a0994a76d04)) by @linrongbin16 ([#695](https://github.com/rsvim/rsvim/pull/695))
+
+- *(undo)* Test undo with buffer editing (#898) ([b0fb17d7](https://github.com/rsvim/rsvim/commit/b0fb17d72f557998dd46e34c79715019a0804b79)) by @linrongbin16 ([#898](https://github.com/rsvim/rsvim/pull/898))
+
+- *(syn)* Test syntax parsing when buffer editing (#901) ([d527e52c](https://github.com/rsvim/rsvim/commit/d527e52c7095977d3f23ce9d524da61cedb69250)) by @linrongbin16 ([#901](https://github.com/rsvim/rsvim/pull/901))
+
+- *(syn)* Add more tests for syntax parsing when editing buffers (#902) ([ece51d00](https://github.com/rsvim/rsvim/commit/ece51d00b2a305bc9abefe1dfce21878c3f66f97)) by @linrongbin16 ([#902](https://github.com/rsvim/rsvim/pull/902))
+
+- *(hl)* Add more failure hl tests (#934) ([6398ac22](https://github.com/rsvim/rsvim/commit/6398ac222e4ba4d2af610abe047f32fd57a7f72e)) by @linrongbin16 ([#934](https://github.com/rsvim/rsvim/pull/934))
+
+- *(hl)* Print canvas highlights (#965) ([2365ab09](https://github.com/rsvim/rsvim/commit/2365ab0984b26e385482909f3511d86e800415b9)) by @linrongbin16 ([#965](https://github.com/rsvim/rsvim/pull/965))
+
+- *(ui)* Use random input to test "Viewport::search" (#1012) ([e1ac962f](https://github.com/rsvim/rsvim/commit/e1ac962f0c2ba075d34c9ab1f0777dfa5efc381c)) by @linrongbin16 ([#1012](https://github.com/rsvim/rsvim/pull/1012))
+
+- *(syn)* Test syntax grammar loader (#1032) ([37a7432d](https://github.com/rsvim/rsvim/commit/37a7432d565eff99ba0d174b35d5eb578a178dad)) by @linrongbin16 ([#1032](https://github.com/rsvim/rsvim/pull/1032))
+
+## [0.1.2-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.1-beta.1..v0.1.2-alpha.1) - 2025-08-28
+
+[31ea70b5](https://github.com/rsvim/rsvim/commit/31ea70b58d406cfaacf277f5cf4ae6f5fea6b502)...[b8c8f11a](https://github.com/rsvim/rsvim/commit/b8c8f11a90e7520f56704f6880e97d1be20eaeec)
 
 ### <!-- 1 -->Bug Fixes
 
@@ -430,11 +748,15 @@
 
 - *(viewport)* More practical algorithm for 'linebreak=true' (#379) ([d48a9ea4](https://github.com/rsvim/rsvim/commit/d48a9ea40b77b82950efba3db063e8899caf5460)) by @linrongbin16 ([#379](https://github.com/rsvim/rsvim/pull/379))
 
-## [0.1.1-alpha.8](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.5..v0.1.1-alpha.8) - 2024-10-19
-
-[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)...[feafb680](https://github.com/rsvim/rsvim/commit/feafb680893ffdece400e1b17b7cb02b18a3ffc8)
+## unreleased
 
 ### <!-- 0 -->Features
+
+- *(poc)* Create async task queue (#92) ([02eeb427](https://github.com/rsvim/rsvim/commit/02eeb4276896ccb1a0920c5370c179a734d35a02)) by @linrongbin16 ([#92](https://github.com/rsvim/rsvim/pull/92))
+
+- *(starting)* Input files (#100) ([0f341174](https://github.com/rsvim/rsvim/commit/0f341174121a701cd9e11b03e2c0656d48cd4ff8)) by @linrongbin16 ([#100](https://github.com/rsvim/rsvim/pull/100))
+
+- *(script)* Add js runtime (#109) ([da718832](https://github.com/rsvim/rsvim/commit/da718832eb301ad75080396de04fc5f989d59d0f)) by @linrongbin16 ([#109](https://github.com/rsvim/rsvim/pull/109))
 
 - *(script)* Read config file (#116) ([2fc10292](https://github.com/rsvim/rsvim/commit/2fc10292f6416ea76b47e8115776caedcbbeded0)) by @linrongbin16 ([#116](https://github.com/rsvim/rsvim/pull/116))
 
@@ -465,6 +787,8 @@
 
 ### <!-- 1 -->Bug Fixes
 
+- *(buffer)* Fix file loading (#102) ([d39ea753](https://github.com/rsvim/rsvim/commit/d39ea753ebf5c7f11aa4a2206f8c3d665618522e)) by @linrongbin16 ([#102](https://github.com/rsvim/rsvim/pull/102))
+
 - *(canvas)* Fix dirty detection and tests, update help (#119) ([986f8b33](https://github.com/rsvim/rsvim/commit/986f8b33b81df0e375d0a2dc16ef97f9e8c6373a)) by @linrongbin16 ([#119](https://github.com/rsvim/rsvim/pull/119))
 
 - *(shutdown)* Detached and blocked tracker (#169) ([2b45cf74](https://github.com/rsvim/rsvim/commit/2b45cf740863b2994d6f0cdb4a0fa27bded8316e)) by @linrongbin16 ([#169](https://github.com/rsvim/rsvim/pull/169))
@@ -482,6 +806,12 @@
 
 
 ### <!-- 3 -->Code Refactoring
+
+- Move main to bin (#17) ([33fc0e4a](https://github.com/rsvim/rsvim/commit/33fc0e4a94cea41a1d9f7186903f95d28815f455)) by @linrongbin16 ([#17](https://github.com/rsvim/rsvim/pull/17))
+
+- *(poc)* Refactor code, add docs (#71) ([6d9cc7f3](https://github.com/rsvim/rsvim/commit/6d9cc7f3cf673a3947e1261d48885acac8695e98)) by @linrongbin16 ([#71](https://github.com/rsvim/rsvim/pull/71))
+
+- Rename 'Terminal' to 'Canvas' (#74) ([aafad5ca](https://github.com/rsvim/rsvim/commit/aafad5ca88205f41c81832a33d5101c077e4160b)) by @linrongbin16 ([#74](https://github.com/rsvim/rsvim/pull/74))
 
 - *(main)* Explicitly create tokio runtime instead of the `main` macro (#120) ([ef87ffd4](https://github.com/rsvim/rsvim/commit/ef87ffd4dd7669e297c0d7773050245760f86f7c)) by @linrongbin16 ([#120](https://github.com/rsvim/rsvim/pull/120))
 
@@ -518,34 +848,4 @@
 - *(js)* Simplify built-in module as single file (#200) ([ec414499](https://github.com/rsvim/rsvim/commit/ec41449959907f7425e1aa6b5fcf67e83252634e)) by @linrongbin16 ([#200](https://github.com/rsvim/rsvim/pull/200))
 
 - *(js)* Refactor context data index (#202) ([b15e932d](https://github.com/rsvim/rsvim/commit/b15e932df295be606ffd6ed0428ea77b850effc8)) by @linrongbin16 ([#202](https://github.com/rsvim/rsvim/pull/202))
-
-## [0.1.1-alpha.5](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.3..v0.1.1-alpha.5) - 2024-09-13
-
-[909f5f9f](https://github.com/rsvim/rsvim/commit/909f5f9f9ad6d4287d6a66371458c52a5a15b442)...[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)
-
-### <!-- 0 -->Features
-
-- *(script)* Add js runtime (#109) ([da718832](https://github.com/rsvim/rsvim/commit/da718832eb301ad75080396de04fc5f989d59d0f)) by @linrongbin16 ([#109](https://github.com/rsvim/rsvim/pull/109))
-
-## unreleased
-
-### <!-- 0 -->Features
-
-- *(poc)* Create async task queue (#92) ([02eeb427](https://github.com/rsvim/rsvim/commit/02eeb4276896ccb1a0920c5370c179a734d35a02)) by @linrongbin16 ([#92](https://github.com/rsvim/rsvim/pull/92))
-
-- *(starting)* Input files (#100) ([0f341174](https://github.com/rsvim/rsvim/commit/0f341174121a701cd9e11b03e2c0656d48cd4ff8)) by @linrongbin16 ([#100](https://github.com/rsvim/rsvim/pull/100))
-
-
-### <!-- 1 -->Bug Fixes
-
-- *(buffer)* Fix file loading (#102) ([d39ea753](https://github.com/rsvim/rsvim/commit/d39ea753ebf5c7f11aa4a2206f8c3d665618522e)) by @linrongbin16 ([#102](https://github.com/rsvim/rsvim/pull/102))
-
-
-### <!-- 3 -->Code Refactoring
-
-- Move main to bin (#17) ([33fc0e4a](https://github.com/rsvim/rsvim/commit/33fc0e4a94cea41a1d9f7186903f95d28815f455)) by @linrongbin16 ([#17](https://github.com/rsvim/rsvim/pull/17))
-
-- *(poc)* Refactor code, add docs (#71) ([6d9cc7f3](https://github.com/rsvim/rsvim/commit/6d9cc7f3cf673a3947e1261d48885acac8695e98)) by @linrongbin16 ([#71](https://github.com/rsvim/rsvim/pull/71))
-
-- Rename 'Terminal' to 'Canvas' (#74) ([aafad5ca](https://github.com/rsvim/rsvim/commit/aafad5ca88205f41c81832a33d5101c077e4160b)) by @linrongbin16 ([#74](https://github.com/rsvim/rsvim/pull/74))
 
