@@ -65,3 +65,17 @@ toml = { workspace = true, features = ["fast_hash"] }
 
 [lints]
 workspace = true
+
+[package.metadata.release]
+allow-branch = ["main"]
+pre-release-commit-message = "chore(release): {{version}}"
+pre-release-hook = [
+  "sh",
+  "-c",
+  "cd .. && git-cliff --tag {{version}} --output CHANGELOG.md",
+]
+release = true
+shared-version = true
+tag = true
+tag-message = "chore(release): {{version}}"
+tag-name = "v{{version}}"
