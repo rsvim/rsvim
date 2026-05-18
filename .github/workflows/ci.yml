@@ -133,8 +133,14 @@ jobs:
     name: Build
     strategy:
       matrix:
-        profile: ["--release", "--profile nightly"]
-    runs-on: ubuntu-22.04
+        include:
+          - os: ubuntu-22.04
+            profile: --release
+          - os: ubuntu-22.04
+            profile: --profile nightly
+          - os: windows-2022
+            profile: --release
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: davidlattimore/wild-action@latest
