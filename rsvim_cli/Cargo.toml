@@ -72,7 +72,7 @@ pre-release-commit-message = "chore(release): {{version}}"
 pre-release-hook = [
   "sh",
   "-c",
-  "'git-cliff --tag {{version}} --output CHANGELOG.md'",
+  "cd .. && git-cliff --tag {{version}} --output CHANGELOG.md",
 ]
 release = true
 shared-version = true
