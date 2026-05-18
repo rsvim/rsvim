@@ -11,6 +11,18 @@ use syn::parse_macro_input;
 /// data values and array with plain values.
 pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("to_v8:{:?}", input.data);
+  match input.data {
+    syn::Data::Struct(struct_data) => match struct_data.fields {
+      syn::Fields::Named(named_field) => {
+        for (i, named) in named_field.named.iter().enumerate() {
+          if let Some(named_ident) = &named.ident {
+            println!("ToV8 [{}]:{} ({:?})", i, named_ident, named_ident);
+          }
+        }
+      }
+      _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
+    },
+    _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
+  }
   TokenStream::default()
 }
