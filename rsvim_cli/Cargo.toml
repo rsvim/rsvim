@@ -70,14 +70,9 @@ workspace = true
 allow-branch = ["main"]
 pre-release-commit-message = "chore(release): {{version}}"
 pre-release-hook = [
-  "git-cliff",
-  "--tag",
-  "{{version}}",
-  "--workdir",
-  "..",
-  "--output",
-  "../CHANGELOG.md",
-  "--verbose",
+  "sh",
+  "-c",
+  "'git-cliff --tag {{version}} --output CHANGELOG.md'",
 ]
 release = true
 shared-version = true
