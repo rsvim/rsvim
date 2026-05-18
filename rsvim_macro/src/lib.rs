@@ -14,10 +14,10 @@ use syn::parse_macro_input;
 pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
-  let input_ident = input.ident;
-  println!("ToV8 input_ident: {}({:?})", input_ident, input_ident);
+  let struct_ident = input.ident;
+  println!("ToV8 struct_ident: {}({:?})", struct_ident, struct_ident);
 
-  let input_named_fields = match input.data {
+  let struct_named_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
       _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
@@ -25,24 +25,53 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
   };
 
-  let input_fields = input_named_fields
+  let is_option = |field_type: &syn::Type| match field_type {
+    syn::Type::Path(p) => match p.path.segments.last() {
+      Some(seg) => seg.ident == "Option",
+      None => false,
+    },
+    _ => false,
+  };
+
+  let non_optional_fields = struct_named_fields
     .iter()
-    .filter_map(|n| n.ident.clone())
+    .filter(|n| !is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let input_field_uppercases = input_named_fields
+  let non_optional_fields_uppercase = struct_named_fields
     .iter()
-    .filter_map(|n| n.ident.clone())
+    .filter(|n| !is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let input_field_values = input_named_fields
+  let non_optional_fields_value = struct_named_fields
     .iter()
-    .filter_map(|n| n.ident.clone())
+    .filter(|n| !is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}_value", i))
+    .collect::<Vec<_>>();
+
+  let optional_fields = struct_named_fields
+    .iter()
+    .filter(|n| is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .collect::<Vec<_>>();
+  let optional_fields_uppercase = struct_named_fields
+    .iter()
+    .filter(|n| is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let optional_fields_value = struct_named_fields
+    .iter()
+    .filter(|n| is_option(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
   quote! {
 
-  impl crate::js::converter::StructToV8 for #input_ident {
+  impl crate::js::converter::StructToV8 for #struct_ident {
     fn to_v8<'s>(
       &self,
       scope: &mut v8::PinScope<'s, '_>,
@@ -51,8 +80,16 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
       #(
       {
-        let #input_field_values = self.#input_fields.to_v8(scope);
-        crate::js::binding::set_property_to(scope, obj, #input_field_uppercases, #input_field_values.into());
+        let #non_optional_fields_value = self.#non_optional_fields.to_v8(scope);
+        crate::js::binding::set_property_to(scope, obj, #non_optional_fields_uppercase, #non_optional_fields_value.into());
+      }
+      )*
+
+      #(
+      {
+        if let Some(#optional_fields_value) = self.#optional_fields.to_v8(scope) {
+          crate::js::binding::set_property_to(scope, obj, #optional_fields_uppercase, #optional_fields_value.into());
+        }
       }
       )*
 
