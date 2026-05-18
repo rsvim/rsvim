@@ -15,7 +15,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
-  let struct_named_fields = match input.data {
+  let struct_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
       _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
@@ -39,54 +39,54 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let non_optional_fields = struct_named_fields
+  let non_optional_names = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let non_optional_fields_uppercase = struct_named_fields
+  let non_optional_uppercases = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let non_optional_fields_value = struct_named_fields
+  let non_optional_values = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
-  let optional_fields = struct_named_fields
+  let optional_names = struct_fields
     .iter()
     .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let optional_fields_uppercase = struct_named_fields
+  let optional_uppercases = struct_fields
     .iter()
     .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let optional_fields_value = struct_named_fields
+  let optional_values = struct_fields
     .iter()
     .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
-  let vec_fields = struct_named_fields
+  let vec_names = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let vec_fields_uppercase = struct_named_fields
+  let vec_uppercases = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let vec_fields_value = struct_named_fields
+  let vec_values = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
@@ -104,24 +104,24 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
       #(
       {
-        let #non_optional_fields_value = self.#non_optional_fields.to_v8(scope);
-        crate::js::binding::set_property_to(scope, obj, #non_optional_fields_uppercase, #non_optional_fields_value.into());
+        let #non_optional_values = self.#non_optional_names.to_v8(scope);
+        crate::js::binding::set_property_to(scope, obj, #non_optional_uppercases, #non_optional_values.into());
       }
       )*
 
       #(
       {
-        if let Some(#optional_fields) = &self.#optional_fields {
-          let #optional_fields_value = #optional_fields.to_v8(scope);
-          crate::js::binding::set_property_to(scope, obj, #optional_fields_uppercase, #optional_fields_value.into());
+        if let Some(#optional_names) = &self.#optional_names {
+          let #optional_values = #optional_names.to_v8(scope);
+          crate::js::binding::set_property_to(scope, obj, #optional_uppercases, #optional_values.into());
         }
       }
       )*
 
       #(
       {
-        let #vec_fields_value = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope).into());
-        crate::js::binding::set_property_to(scope, obj, #vec_fields_uppercase, #vec_fields_value.into());
+        let #vec_values = self.#vec_names.to_v8(scope, |scope, i| i.to_v8(scope).into());
+        crate::js::binding::set_property_to(scope, obj, #vec_uppercases, #vec_values.into());
       }
       )*
 
