@@ -1,6 +1,6 @@
 allow-branch = ["main"]
 pre-release-commit-message = "chore(release): {{version}}"
-pre-release-hook = [""]
+pre-release-hook = ["ls"]
 release = true
 shared-version = true
 tag = true
