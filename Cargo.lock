@@ -3887,6 +3887,7 @@ dependencies = [
  "regex",
  "roaring",
  "ropey",
+ "rsvim_macro",
  "serde",
  "serde_json",
  "smallvec",
@@ -3933,6 +3934,15 @@ dependencies = [
  "tree-sitter-toml-ng",
  "unicode-width",
  "v8",
+]
+
+[[package]]
+name = "rsvim_macro"
+version = "0.1.2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
