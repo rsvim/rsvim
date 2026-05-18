@@ -31,38 +31,64 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
+  let is_vec = |field_type: &syn::Type| match field_type {
+    syn::Type::Path(p) => match p.path.segments.last() {
+      Some(seg) => seg.ident == "Vec",
+      None => false,
+    },
+    _ => false,
+  };
+
   let non_optional_fields = struct_named_fields
     .iter()
-    .filter(|n| !is_option(&n.ty))
+    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
   let non_optional_fields_uppercase = struct_named_fields
     .iter()
-    .filter(|n| !is_option(&n.ty))
+    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let non_optional_fields_value = struct_named_fields
     .iter()
-    .filter(|n| !is_option(&n.ty))
+    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
   let optional_fields = struct_named_fields
     .iter()
-    .filter(|n| is_option(&n.ty))
+    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
   let optional_fields_uppercase = struct_named_fields
     .iter()
-    .filter(|n| is_option(&n.ty))
+    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let optional_fields_value = struct_named_fields
     .iter()
-    .filter(|n| is_option(&n.ty))
+    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}_value", i))
+    .collect::<Vec<_>>();
+
+  let vec_fields = struct_named_fields
+    .iter()
+    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .collect::<Vec<_>>();
+  let vec_fields_uppercase = struct_named_fields
+    .iter()
+    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let vec_fields_value = struct_named_fields
+    .iter()
+    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
@@ -91,6 +117,14 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
         }
       }
       )*
+
+      #(
+      {
+        let #vec_fields_value = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope).into());
+        crate::js::binding::set_property_to(scope, obj, #vec_fields_uppercase, #vec_fields_value.into());
+      }
+      )*
+
 
       obj
     }
