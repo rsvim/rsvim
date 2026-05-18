@@ -1,6 +1,5 @@
 allow-branch = ["main"]
 pre-release-commit-message = "chore(release): {{version}}"
-pre-release-hook = ["git-cliff", "--tag", "{{version}}"]
 release = true
 shared-version = true
 tag = true

@@ -1,6 +1,18 @@
 allow-branch = ["main"]
 pre-release-commit-message = "chore(release): {{version}}"
-pre-release-hook = ["ls"]
+pre-release-hook = [
+  "git-cliff",
+  "--tag",
+  "{{version}}",
+  "--config",
+  "../cliff.toml",
+  "--workdir",
+  "..",
+  "--repository",
+  "..",
+  "--output",
+  "../CHANGELOG.md",
+]
 release = true
 shared-version = true
 tag = true
