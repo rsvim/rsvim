@@ -430,7 +430,7 @@ class Release(Cmd):
         env("GIT_CLIFF_WORKDIR", f"{cwd}")
         env("GIT_CLIFF_REPOSITORY", f"{cwd}")
         env("GIT_CLIFF_OUTPUT", f"{cwd / 'CHANGELOG.md'}")
-        cmd = f"cargo release {args.level}"
+        cmd = f"cargo release {args.level} --workspace"
         if args.execute:
             cmd = f"{cmd} --execute --no-verify"
         run(cmd)
