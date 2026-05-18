@@ -100,12 +100,14 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       &self,
       scope: &mut v8::PinScope<'s, '_>,
     ) -> v8::Local<'s, v8::Object> {
+      use crate::js::binding;
+
       let obj = v8::Object::new(scope);
 
       #(
       {
         let #values = self.#names.to_v8(scope);
-        crate::js::binding::set_property_to(scope, obj, #uppercases, #values.into());
+        binding::set_property_to(scope, obj, #uppercases, #values.into());
       }
       )*
 
@@ -113,7 +115,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       {
         if let Some(#optional_names) = &self.#optional_names {
           let #optional_values = #optional_names.to_v8(scope);
-          crate::js::binding::set_property_to(scope, obj, #optional_uppercases, #optional_values.into());
+          binding::set_property_to(scope, obj, #optional_uppercases, #optional_values.into());
         }
       }
       )*
@@ -121,7 +123,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       #(
       {
         let #vec_values = self.#vec_names.to_v8(scope, |scope, i| i.to_v8(scope).into());
-        crate::js::binding::set_property_to(scope, obj, #vec_uppercases, #vec_values.into());
+        binding::set_property_to(scope, obj, #vec_uppercases, #vec_values.into());
       }
       )*
 
