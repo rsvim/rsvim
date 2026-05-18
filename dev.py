@@ -427,23 +427,6 @@ class Release(Cmd):
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
-        bumped_version = subprocess.run(
-            ["cargo", "release", "version", args.level, "--workspace"],
-            capture_output=True,
-            text=True,
-        )
-        bumped_keyword = "Upgrading workspace to version"
-        next_version = None
-        for line in bumped_version.stderr.splitlines():
-            assert isinstance(line, str)
-            if line.strip().startswith(bumped_keyword):
-                trimmed_line = line.strip()
-                next_version = trimmed_line[len(bumped_keyword) :].strip()
-                break
-
-        cmd = f"git-cliff --tag {next_version} --output CHANGELOG.md"
-        run(cmd)
-
         cmd = f"cargo release --workspace {args.level}"
 
         cmd = f"cargo release {args.level} --workspace"
