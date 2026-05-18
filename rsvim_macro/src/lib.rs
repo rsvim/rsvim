@@ -1,6 +1,8 @@
 //! The macros for RSVIM text editor core.
 
 use proc_macro::TokenStream;
+use quote::format_ident;
+use quote::quote;
 use syn::DeriveInput;
 use syn::parse_macro_input;
 
@@ -12,26 +14,53 @@ use syn::parse_macro_input;
 pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
-  println!("ToV8 input_ident: {}({:?})", input.ident, input.ident);
+  let input_ident = input.ident;
+  println!("ToV8 input_ident: {}({:?})", input_ident, input_ident);
 
-  match input.data {
+  let input_named_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
-      syn::Fields::Named(named_field) => {
-        for (i, named) in named_field.named.iter().enumerate() {
-          if let Some(named_ident) = &named.ident {
-            println!(
-              "ToV8 named_field [{}]:{} ({:?})",
-              i, named_ident, named_ident
-            );
-          }
-        }
-      }
+      syn::Fields::Named(named_field) => named_field.named,
       _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
     },
     _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
+  };
+
+  let input_fields = input_named_fields
+    .iter()
+    .filter_map(|n| n.ident.clone())
+    .collect::<Vec<_>>();
+  let input_field_uppercases = input_named_fields
+    .iter()
+    .filter_map(|n| n.ident.clone())
+    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let input_field_values = input_named_fields
+    .iter()
+    .filter_map(|n| n.ident.clone())
+    .map(|i| format_ident!("{}_value", i))
+    .collect::<Vec<_>>();
+
+  let expanded = quote! {
+
+  impl crate::js::converter::StructToV8 for #input_ident {
+    fn to_v8<'s>(
+      &self,
+      scope: &mut v8::PinScope<'s, '_>,
+    ) -> v8::Local<'s, v8::Object> {
+      let obj = v8::Object::new(scope);
+
+      #(
+      {
+        let #input_field_values = self.#input_fields.to_v8(scope);
+        crate::js::binding::set_property_to(scope, obj, #input_field_uppercases, #input_field_values.into());
+      }
+      )*
+
+      obj
+    }
   }
 
-  // let expanded = quote! {};
+  };
 
   TokenStream::default()
 }
