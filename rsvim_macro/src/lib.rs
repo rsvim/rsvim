@@ -40,7 +40,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
-  let expanded = quote! {
+  quote! {
 
   impl crate::js::converter::StructToV8 for #input_ident {
     fn to_v8<'s>(
@@ -60,7 +60,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     }
   }
 
-  };
+  }.into()
 
-  TokenStream::default()
+  // TokenStream::default()
 }
