@@ -432,8 +432,8 @@ class Release(Cmd):
             capture_output=True,
             text=True,
         )
-        print("next_version:")
-        print(next_version.stdout)
+        logging.info("next_version:")
+        logging.info(next_version.stdout)
         # cmd = f"git-cliff "
 
         cmd = f"cargo release --workspace {args.level}"
