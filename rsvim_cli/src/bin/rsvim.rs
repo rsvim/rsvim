@@ -24,26 +24,12 @@ use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tokio::time::Instant;
 
-#[cfg(target_family = "windows")]
-const RSVIM_SNAPSHOT: &[u8] = include_bytes!(concat!(
-  env!("CARGO_MANIFEST_DIR"),
-  "\\..\\RSVIM_SNAPSHOT.BIN"
-));
-
-#[cfg(not(target_family = "windows"))]
 const RSVIM_SNAPSHOT: &[u8] = include_bytes!(concat!(
   env!("CARGO_MANIFEST_DIR"),
   "/../RSVIM_SNAPSHOT.BIN"
 ));
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
-  #[cfg(target_family = "windows")]
-  let version_tags = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "\\..\\RSVIM_VERSION.TXT"
-  ));
-
-  #[cfg(not(target_family = "windows"))]
   let version_tags =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../RSVIM_VERSION.TXT"));
 
