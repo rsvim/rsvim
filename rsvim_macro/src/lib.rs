@@ -11,9 +11,6 @@ use syn::parse_macro_input;
 /// data values and array with plain values.
 pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("to_v8:{:?}", input);
-  for attr in input.attrs {
-    println!("to_v8 attr:{:?}", attr);
-  }
+  println!("to_v8:{:?}", input.data);
   TokenStream::default()
 }
