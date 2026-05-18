@@ -15,8 +15,6 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
-  println!("ToV8 struct_ident: {}({:?})", struct_ident, struct_ident);
-
   let struct_named_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
