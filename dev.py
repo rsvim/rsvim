@@ -432,14 +432,16 @@ class Release(Cmd):
             capture_output=True,
             text=True,
         )
-        logging.info("next_version:")
+        logging.info("next_version.stdout:")
         logging.info(next_version.stdout)
+        logging.info("next_version.stderr:")
+        logging.info(next_version.stderr)
         # cmd = f"git-cliff "
 
-        cmd = f"cargo release --workspace {args.level}"
-        if args.execute:
-            cmd = f"{cmd} --execute --no-verify"
-        run(cmd)
+        # cmd = f"cargo release --workspace {args.level}"
+        # if args.execute:
+        #     cmd = f"{cmd} --execute --no-verify"
+        # run(cmd)
 
 
 # npm
