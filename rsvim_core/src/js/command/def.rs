@@ -66,19 +66,3 @@ impl StructFromV8CallbackArguments for CommandDefinition {
     }
   }
 }
-
-// impl StructToV8 for CommandDefinition {
-//   fn to_v8<'s>(
-//     &self,
-//     scope: &mut v8::PinScope<'s, '_>,
-//   ) -> v8::Local<'s, v8::Object> {
-//     let obj = v8::Object::new(scope);
-//
-//     to_v8_prop!(self, obj, scope, name);
-//     to_v8_prop!(self, obj, scope, callback);
-//     to_v8_prop!(self, obj, scope, attributes);
-//     to_v8_prop!(self, obj, scope, options);
-//
-//     obj
-//   }
-// }
