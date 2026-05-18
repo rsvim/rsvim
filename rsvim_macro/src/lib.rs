@@ -131,6 +131,4 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }
 
   }.into()
-
-  // TokenStream::default()
 }
