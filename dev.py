@@ -11,6 +11,7 @@ import os
 import pathlib
 import platform
 import shutil
+import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -425,6 +426,15 @@ class Release(Cmd):
         cwd = pathlib.Path.cwd()
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
+
+        next_version = subprocess.run(
+            ["cargo", "release", "version", args.level, "--workspace"],
+            capture_output=True,
+            text=True,
+        )
+        print("next_version:")
+        print(next_version.stdout)
+        # cmd = f"git-cliff "
 
         cmd = f"cargo release --workspace {args.level}"
         if args.execute:
