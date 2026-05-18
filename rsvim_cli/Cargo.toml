@@ -73,6 +73,8 @@ pre-release-hook = [
   "git-cliff",
   "--tag",
   "{{version}}",
+  "--workdir",
+  "..",
   "--output",
   "../CHANGELOG.md",
 ]
