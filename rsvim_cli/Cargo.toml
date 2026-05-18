@@ -77,8 +77,6 @@ pre-release-hook = [
   "../cliff.toml",
   "--workdir",
   "..",
-  "--repository",
-  "..",
   "--output",
   "../CHANGELOG.md",
 ]
