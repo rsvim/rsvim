@@ -426,7 +426,7 @@ class Release(Cmd):
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
-        cmd = f"cargo release {args.level}"
+        cmd = f"cargo release --workspace {args.level}"
         if args.execute:
             cmd = f"{cmd} --execute --no-verify"
         run(cmd)
