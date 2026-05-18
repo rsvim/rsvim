@@ -39,18 +39,18 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let non_optional_names = struct_fields
+  let names = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let non_optional_uppercases = struct_fields
+  let uppercases = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let non_optional_values = struct_fields
+  let values = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
@@ -104,8 +104,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
       #(
       {
-        let #non_optional_values = self.#non_optional_names.to_v8(scope);
-        crate::js::binding::set_property_to(scope, obj, #non_optional_uppercases, #non_optional_values.into());
+        let #values = self.#names.to_v8(scope);
+        crate::js::binding::set_property_to(scope, obj, #uppercases, #values.into());
       }
       )*
 
