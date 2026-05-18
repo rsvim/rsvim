@@ -87,7 +87,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
       #(
       {
-        if let Some(#optional_fields_value) = self.#optional_fields.to_v8(scope) {
+        if let Some(#optional_fields) = self.#optional_fields {
+          let #optional_fields_value = #optional_fields.to_v8(scope);
           crate::js::binding::set_property_to(scope, obj, #optional_fields_uppercase, #optional_fields_value.into());
         }
       }
