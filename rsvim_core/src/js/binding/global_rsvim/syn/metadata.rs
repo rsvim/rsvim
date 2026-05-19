@@ -1,7 +1,6 @@
 //! Tree-sitter parser metadata
 
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
@@ -32,7 +31,9 @@ pub const INJECTIONS_PATH_DEFAULT: Option<CompactString> = None;
 pub const INJECTIONS_QUERY_DEFAULT: Option<String> = None;
 pub const INJECTION_REGEX_DEFAULT: Option<String> = None;
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+)]
 pub struct SynTreeSitterParserMetadata {
   #[builder(default = NAME_DEFAULT.to_compact_string())]
   pub name: CompactString,
@@ -69,28 +70,4 @@ pub struct SynTreeSitterParserMetadata {
 
   #[builder(default = INJECTION_REGEX_DEFAULT)]
   pub injection_regex: Option<String>,
-}
-
-impl StructToV8 for SynTreeSitterParserMetadata {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, name);
-    to_v8_prop!(self, obj, scope, camelcase);
-    to_v8_prop!(self, obj, scope, scope);
-    to_v8_prop!(self, obj, scope, path);
-    to_v8_prop!(self, obj, scope, file_types, Vec);
-    to_v8_prop!(self, obj, scope, highlights_path, optional);
-    to_v8_prop!(self, obj, scope, highlights_query, optional);
-    to_v8_prop!(self, obj, scope, tags_path, optional);
-    to_v8_prop!(self, obj, scope, tags_query, optional);
-    to_v8_prop!(self, obj, scope, injections_path, optional);
-    to_v8_prop!(self, obj, scope, injections_query, optional);
-    to_v8_prop!(self, obj, scope, injection_regex, optional);
-
-    obj
-  }
 }
