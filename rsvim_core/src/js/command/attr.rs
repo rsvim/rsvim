@@ -82,8 +82,9 @@ type js_command_attr_Nargs = Nargs;
 impl StructFromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Object>,
+    obj: v8::Local<'s, v8::Value>,
   ) -> Self {
+    let obj = obj.to_object(scope).unwrap();
     let mut builder = CommandAttributesBuilder::default();
 
     from_v8_prop!(builder, obj, scope, bool, bang);
