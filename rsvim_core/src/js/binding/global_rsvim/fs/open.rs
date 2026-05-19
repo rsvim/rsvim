@@ -7,7 +7,6 @@ use crate::js::converter::*;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
-use crate::to_v8_prop;
 use compact_str::ToCompactString;
 
 // Attribute names.
@@ -74,12 +73,12 @@ pub fn fs_open(
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
   match std::fs::OpenOptions::new()
-    .append(opts.append())
-    .create(opts.create())
-    .create_new(opts.create_new())
-    .read(opts.read())
-    .truncate(opts.truncate())
-    .write(opts.write())
+    .append(opts.append)
+    .create(opts.create)
+    .create_new(opts.create_new)
+    .read(opts.read)
+    .truncate(opts.truncate)
+    .write(opts.write)
     .open(path)
   {
     Ok(file) => {
@@ -99,12 +98,12 @@ pub async fn async_fs_open(
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
   match tokio::fs::OpenOptions::new()
-    .append(opts.append())
-    .create(opts.create())
-    .create_new(opts.create_new())
-    .read(opts.read())
-    .truncate(opts.truncate())
-    .write(opts.write())
+    .append(opts.append)
+    .create(opts.create)
+    .create_new(opts.create_new)
+    .read(opts.read)
+    .truncate(opts.truncate)
+    .write(opts.write)
     .open(path)
     .await
   {
