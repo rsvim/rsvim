@@ -26,16 +26,20 @@ impl U32ToV8 for u32 {
 pub trait U32FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl U32FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.uint32_value(scope).unwrap()
+    value
+      .to_integer(scope)
+      .unwrap()
+      .uint32_value(scope)
+      .unwrap()
   }
 }
 
@@ -58,16 +62,16 @@ impl I32ToV8 for i32 {
 pub trait I32FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl I32FromV8 for i32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.int32_value(scope).unwrap()
+    value.to_integer(scope).unwrap().int32_value(scope).unwrap()
   }
 }
 
@@ -90,16 +94,16 @@ impl NodeIdToV8 for NodeId {
 pub trait NodeIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl NodeIdFromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    NodeId::from(value.int32_value(scope).unwrap())
+    NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
