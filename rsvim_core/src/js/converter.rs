@@ -126,16 +126,16 @@ impl BufferIdToV8 for BufferId {
 pub trait BufferIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl BufferIdFromV8 for BufferId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    BufferId::from(value.int32_value(scope).unwrap())
+    BufferId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
@@ -158,16 +158,16 @@ impl TimerIdToV8 for TimerId {
 pub trait TimerIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl TimerIdFromV8 for TimerId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    TimerId::from(value.int32_value(scope).unwrap())
+    TimerId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
