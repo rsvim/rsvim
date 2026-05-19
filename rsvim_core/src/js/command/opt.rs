@@ -26,8 +26,9 @@ pub struct CommandOptions {
 impl StructFromV8 for CommandOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Object>,
+    obj: v8::Local<'s, v8::Value>,
   ) -> Self {
+    let obj = obj.to_object(scope).unwrap();
     let mut builder = CommandOptionsBuilder::default();
 
     from_v8_prop!(builder, obj, scope, bool, force);
