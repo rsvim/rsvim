@@ -59,7 +59,7 @@ pub fn create_timer<'s>(
 
   // Get timer's delay time in millis.
   debug_assert!(is_v8_int!(args.get(1)));
-  let delay = u32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
+  let delay = u32::from_v8(scope, args.get(1));
   // Get timer's repeated.
   debug_assert!(is_v8_bool!(args.get(2)));
   let repeated = bool::from_v8(scope, args.get(2).to_boolean(scope));
