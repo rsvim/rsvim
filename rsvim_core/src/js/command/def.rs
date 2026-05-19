@@ -7,7 +7,6 @@ use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use rsvim_macro::ToV8;
 use std::fmt::Debug;
 use std::rc::Rc;
 
@@ -19,7 +18,7 @@ pub const CALLBACK: &str = "callback";
 pub const ATTRIBUTES: &str = "attributes";
 pub const OPTIONS: &str = "options";
 
-#[derive(Clone, ToV8)]
+#[derive(Clone, rsvim_macro::ToV8)]
 pub struct CommandDefinition {
   pub name: CompactString,
   pub callback: CommandCallback,

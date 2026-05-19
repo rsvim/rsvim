@@ -2,7 +2,6 @@
 
 use crate::from_v8_prop;
 use crate::js::converter::*;
-use rsvim_macro::ToV8;
 use std::str::FromStr;
 
 /// Command attribute name.
@@ -66,7 +65,9 @@ impl StringToV8 for Nargs {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder, ToV8)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+)]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
   pub bang: bool,

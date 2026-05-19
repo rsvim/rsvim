@@ -7,7 +7,6 @@ use crate::js::converter::*;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
-use crate::to_v8_prop;
 use compact_str::ToCompactString;
 
 // Attribute names.
@@ -26,52 +25,28 @@ pub const READ_DEFAULT: bool = false;
 pub const TRUNCATE_DEFAULT: bool = false;
 pub const WRITE_DEFAULT: bool = false;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+)]
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
   #[builder(default = APPEND_DEFAULT)]
-  append: bool,
+  pub append: bool,
 
   #[builder(default = CREATE_DEFAULT)]
-  create: bool,
+  pub create: bool,
 
   #[builder(default = CREATE_NEW_DEFAULT)]
-  create_new: bool,
+  pub create_new: bool,
 
   #[builder(default = READ_DEFAULT)]
-  read: bool,
+  pub read: bool,
 
   #[builder(default = TRUNCATE_DEFAULT)]
-  truncate: bool,
+  pub truncate: bool,
 
   #[builder(default = WRITE_DEFAULT)]
-  write: bool,
-}
-
-impl FsOpenOptions {
-  pub fn append(&self) -> bool {
-    self.append
-  }
-
-  pub fn create(&self) -> bool {
-    self.create
-  }
-
-  pub fn create_new(&self) -> bool {
-    self.create_new
-  }
-
-  pub fn read(&self) -> bool {
-    self.read
-  }
-
-  pub fn truncate(&self) -> bool {
-    self.truncate
-  }
-
-  pub fn write(&self) -> bool {
-    self.write
-  }
+  pub write: bool,
 }
 
 impl StructFromV8 for FsOpenOptions {
@@ -92,36 +67,18 @@ impl StructFromV8 for FsOpenOptions {
   }
 }
 
-impl StructToV8 for FsOpenOptions {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, append, ());
-    to_v8_prop!(self, obj, scope, create, ());
-    to_v8_prop!(self, obj, scope, create_new, ());
-    to_v8_prop!(self, obj, scope, read, ());
-    to_v8_prop!(self, obj, scope, truncate, ());
-    to_v8_prop!(self, obj, scope, write, ());
-
-    obj
-  }
-}
-
 pub fn fs_open(
   resource_table: ResourceTableArc,
   path: &Path,
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
   match std::fs::OpenOptions::new()
-    .append(opts.append())
-    .create(opts.create())
-    .create_new(opts.create_new())
-    .read(opts.read())
-    .truncate(opts.truncate())
-    .write(opts.write())
+    .append(opts.append)
+    .create(opts.create)
+    .create_new(opts.create_new)
+    .read(opts.read)
+    .truncate(opts.truncate)
+    .write(opts.write)
     .open(path)
   {
     Ok(file) => {
@@ -141,12 +98,12 @@ pub async fn async_fs_open(
   opts: FsOpenOptions,
 ) -> TheResult<ResourceId> {
   match tokio::fs::OpenOptions::new()
-    .append(opts.append())
-    .create(opts.create())
-    .create_new(opts.create_new())
-    .read(opts.read())
-    .truncate(opts.truncate())
-    .write(opts.write())
+    .append(opts.append)
+    .create(opts.create)
+    .create_new(opts.create_new)
+    .read(opts.read)
+    .truncate(opts.truncate)
+    .write(opts.write)
     .open(path)
     .await
   {
