@@ -14,11 +14,11 @@ license = "Vim"
 readme = "README.md"
 repository = "https://github.com/rsvim/rsvim"
 rust-version = "1.89.0"
-version = "0.1.3-alpha.1"
+version = "0.1.3-alpha.2"
 
 [workspace.dependencies]
-rsvim_core = { version = "0.1.3-alpha.1", path = "./rsvim_core" }
-rsvim_macro = { version = "0.1.3-alpha.1", path = "./rsvim_macro" }
+rsvim_core = { version = "0.1.3-alpha.2", path = "./rsvim_core" }
+rsvim_macro = { version = "0.1.3-alpha.2", path = "./rsvim_macro" }
 
 arcstr = { version = "1.2", features = ["std"] }
 ascii = "1.1"

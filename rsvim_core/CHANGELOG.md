@@ -1,6 +1,6 @@
-## [0.1.3-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.2..0.1.3-alpha.1) - 2026-05-19
+## [0.1.3-alpha.2](https://github.com/rsvim/rsvim/compare/v0.1.2..0.1.3-alpha.2) - 2026-05-19
 
-[79d7cd5c](https://github.com/rsvim/rsvim/commit/79d7cd5cc7a93d9633a6df603379e3b5714b79e5)...[1f2ca2c9](https://github.com/rsvim/rsvim/commit/1f2ca2c997dbbaef05ddbf8e7019c95a534d975e)
+[79d7cd5c](https://github.com/rsvim/rsvim/commit/79d7cd5cc7a93d9633a6df603379e3b5714b79e5)...[d751dae1](https://github.com/rsvim/rsvim/commit/d751dae1099e76e65093b7faee0305b6cfc57737)
 
 ### <!-- 0 -->Features
 
