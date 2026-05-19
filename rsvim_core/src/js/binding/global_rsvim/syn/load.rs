@@ -5,7 +5,6 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
@@ -14,7 +13,9 @@ pub const GRAMMAR_PATH: &str = "grammarPath";
 // Defaults
 pub const GRAMMAR_PATH_DEFAULT: &str = "";
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+)]
 pub struct SynLoadTreeSitterParserOptions {
   #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
   pub grammar_path: CompactString,
@@ -30,19 +31,6 @@ impl StructFromV8 for SynLoadTreeSitterParserOptions {
     from_v8_prop!(builder, obj, scope, CompactString, grammar_path);
 
     builder.build().unwrap()
-  }
-}
-
-impl StructToV8 for SynLoadTreeSitterParserOptions {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, grammar_path);
-
-    obj
   }
 }
 
