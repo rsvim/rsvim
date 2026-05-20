@@ -61,7 +61,7 @@ impl StringToV8 for Nargs {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
+  ) -> v8::Local<'s, v8::Value> {
     self.to_string().to_v8(scope)
   }
 }
