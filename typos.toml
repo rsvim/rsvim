@@ -11,6 +11,7 @@ extend-ignore-words-re = [
 [files]
 extend-exclude = [
   "CHANGELOG.md",
+  "CHANGELOG.md.bak",
   "dev.py",
   "*_tests.rs",
   "tests_and_benchmarks",
