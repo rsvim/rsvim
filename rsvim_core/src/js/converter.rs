@@ -267,8 +267,8 @@ impl StringToV8 for String {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -276,8 +276,8 @@ impl StringToV8 for CompactString {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -349,7 +349,7 @@ pub trait VecToV8<T> {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
     f: F,
-  ) -> v8::Local<'s, v8::Array>
+  ) -> v8::Local<'s, v8::Value>
   where
     F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
 }
@@ -359,7 +359,7 @@ impl<T> VecToV8<T> for Vec<T> {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
     f: F,
-  ) -> v8::Local<'s, v8::Array>
+  ) -> v8::Local<'s, v8::Value>
   where
     F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
   {
@@ -367,7 +367,7 @@ impl<T> VecToV8<T> for Vec<T> {
       .iter()
       .map(|v| f(scope, v))
       .collect::<Vec<v8::Local<'s, v8::Value>>>();
-    v8::Array::new_with_elements(scope, &elements)
+    v8::Array::new_with_elements(scope, &elements).into()
   }
 }
 
