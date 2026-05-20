@@ -107,7 +107,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       #(
       {
         let #values = self.#names.to_v8(scope);
-        binding::set_property_to(scope, obj, #uppercases, #values.into());
+        binding::set_property_to(scope, obj, #uppercases, #values);
       }
       )*
 
@@ -115,15 +115,15 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       {
         if let Some(#optional_names) = &self.#optional_names {
           let #optional_values = #optional_names.to_v8(scope);
-          binding::set_property_to(scope, obj, #optional_uppercases, #optional_values.into());
+          binding::set_property_to(scope, obj, #optional_uppercases, #optional_values);
         }
       }
       )*
 
       #(
       {
-        let #vec_values = self.#vec_names.to_v8(scope, |scope, i| i.to_v8(scope).into());
-        binding::set_property_to(scope, obj, #vec_uppercases, #vec_values.into());
+        let #vec_values = self.#vec_names.to_v8(scope, |scope, i| i.to_v8(scope));
+        binding::set_property_to(scope, obj, #vec_uppercases, #vec_values);
       }
       )*
 

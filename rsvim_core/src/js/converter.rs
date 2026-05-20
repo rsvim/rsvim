@@ -407,7 +407,7 @@ pub trait StructToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 pub trait StructFromV8 {
@@ -461,7 +461,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
       debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
       let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
       from_v8_prop!{@assert_each($ty, [< $prop _value>])};
@@ -471,7 +471,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
       if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
         let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
         from_v8_prop!{@assert_each($ty, [< $prop _value>])};
