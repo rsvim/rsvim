@@ -39,8 +39,8 @@ impl Debug for CommandDefinition {
   }
 }
 
-impl StructFromV8Args for CommandDefinition {
-  fn from_v8_args<'s>(
+impl FromV8CallbackArgs for CommandDefinition {
+  fn from_v8_callback_args<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Self {

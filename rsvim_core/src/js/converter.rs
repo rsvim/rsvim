@@ -24,6 +24,30 @@ pub trait VecToV8<T> {
     F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
 }
 
+pub trait FromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self;
+}
+
+pub trait VecFromV8<T> {
+  fn from_v8<'s, F>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+    f: F,
+  ) -> Vec<T>
+  where
+    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T;
+}
+
+pub trait FromV8CallbackArgs {
+  fn from_v8_callback_args<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    args: v8::FunctionCallbackArguments<'s>,
+  ) -> Self;
+}
+
 impl ToV8 for u32 {
   fn to_v8<'s>(
     &self,
@@ -33,14 +57,7 @@ impl ToV8 for u32 {
   }
 }
 
-pub trait U32FromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl U32FromV8 for u32 {
+impl FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -63,14 +80,7 @@ impl ToV8 for i32 {
   }
 }
 
-pub trait I32FromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl I32FromV8 for i32 {
+impl FromV8 for i32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -89,14 +99,7 @@ impl ToV8 for NodeId {
   }
 }
 
-pub trait NodeIdFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl NodeIdFromV8 for NodeId {
+impl FromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -115,14 +118,7 @@ impl ToV8 for BufferId {
   }
 }
 
-pub trait BufferIdFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl BufferIdFromV8 for BufferId {
+impl FromV8 for BufferId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -141,14 +137,7 @@ impl ToV8 for TimerId {
   }
 }
 
-pub trait TimerIdFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl TimerIdFromV8 for TimerId {
+impl FromV8 for TimerId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -167,14 +156,7 @@ impl ToV8 for f64 {
   }
 }
 
-pub trait F64FromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl F64FromV8 for f64 {
+impl FromV8 for f64 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -198,14 +180,7 @@ impl ToV8 for bool {
   }
 }
 
-pub trait BoolFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl BoolFromV8 for bool {
+impl FromV8 for bool {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -242,14 +217,7 @@ impl ToV8 for CompactString {
   }
 }
 
-pub trait StringFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl StringFromV8 for String {
+impl FromV8 for String {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -259,7 +227,7 @@ impl StringFromV8 for String {
   }
 }
 
-impl StringFromV8 for CompactString {
+impl FromV8 for CompactString {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -282,14 +250,7 @@ impl ToV8 for Rc<v8::Global<v8::Function>> {
   }
 }
 
-pub trait CallbackFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-impl CallbackFromV8 for Rc<v8::Global<v8::Function>> {
+impl FromV8 for Rc<v8::Global<v8::Function>> {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
@@ -317,16 +278,6 @@ impl<T> VecToV8<T> for Vec<T> {
   }
 }
 
-pub trait VecFromV8<T> {
-  fn from_v8<'s, F>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-    f: F,
-  ) -> Vec<T>
-  where
-    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T;
-}
-
 impl<T> VecFromV8<T> for Vec<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
@@ -347,20 +298,6 @@ impl<T> VecFromV8<T> for Vec<T> {
     }
     v
   }
-}
-
-pub trait StructFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-pub trait StructFromV8Args {
-  fn from_v8_args<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    args: v8::FunctionCallbackArguments<'s>,
-  ) -> Self;
 }
 
 /// Property from_v8 helpers
