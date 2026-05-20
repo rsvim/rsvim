@@ -297,7 +297,7 @@ pub fn close_stream_decoder<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let decoder_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let decoder_rid = i32::from_v8(scope, args.get(0));
   let decoder_rid = ResourceId::from(decoder_rid);
   trace!("|close_stream_decoder| decoder_rid:{:?}", decoder_rid);
 
