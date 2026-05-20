@@ -97,9 +97,9 @@ pub fn encode_into<'s>(
 
   let result = v8::Object::new(scope);
   let read_value = (read as u32).to_v8(scope);
-  binding::set_property_to(scope, result, "read", read_value.into());
+  binding::set_property_to(scope, result, "read", read_value);
   let written_value = (written as u32).to_v8(scope);
-  binding::set_property_to(scope, result, "written", written_value.into());
+  binding::set_property_to(scope, result, "written", written_value);
 
   rv.set(result.into());
 }
