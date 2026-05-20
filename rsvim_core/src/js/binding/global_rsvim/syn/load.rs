@@ -21,7 +21,7 @@ pub struct SynLoadTreeSitterParserOptions {
   pub grammar_path: CompactString,
 }
 
-impl StructFromV8 for SynLoadTreeSitterParserOptions {
+impl FromV8 for SynLoadTreeSitterParserOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     obj: v8::Local<'s, v8::Value>,
