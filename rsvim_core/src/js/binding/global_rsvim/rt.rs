@@ -15,7 +15,7 @@ pub fn exit<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let exit_code = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let exit_code = i32::from_v8(scope, args.get(0));
   trace!("exit: {:?}", exit_code);
 
   let state_rc = JsRuntime::state(scope);

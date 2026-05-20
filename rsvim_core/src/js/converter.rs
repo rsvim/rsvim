@@ -105,6 +105,7 @@ impl NodeIdFromV8 for NodeId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
+    debug_assert!(value.is_int32() || value.is_uint32());
     NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -137,6 +138,7 @@ impl BufferIdFromV8 for BufferId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
+    debug_assert!(value.is_int32() || value.is_uint32());
     BufferId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
