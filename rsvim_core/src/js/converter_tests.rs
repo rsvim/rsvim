@@ -51,7 +51,7 @@ fn test_bool1() {
 
   let a2 = false;
   let obj2 = a2.to_v8(scope);
-  let val2 = bool::from_v8(scope, obj2.into());
+  let val2 = bool::from_v8(scope, obj2);
   assert!(!val2);
 }
 
