@@ -11,15 +11,15 @@ pub trait U32ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl U32ToV8 for u32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new_from_unsigned(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new_from_unsigned(scope, *self).into()
   }
 }
 
@@ -48,15 +48,15 @@ pub trait I32ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl I32ToV8 for i32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, *self).into()
   }
 }
 
