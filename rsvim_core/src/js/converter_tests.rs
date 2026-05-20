@@ -10,12 +10,12 @@ fn test_integer1() {
 
   let a1 = 10_i32;
   let obj1 = a1.to_v8(scope);
-  let val1 = i32::from_v8(scope, obj1);
+  let val1 = i32::from_v8(scope, obj1.into());
   assert_eq!(val1, a1);
 
   let a2 = 10_u32;
   let obj2 = a2.to_v8(scope);
-  let val2 = u32::from_v8(scope, obj2);
+  let val2 = u32::from_v8(scope, obj2.into());
   assert_eq!(val2, a2);
 }
 
@@ -28,12 +28,12 @@ fn test_number1() {
 
   let a1 = 1.23_f64;
   let obj1 = a1.to_v8(scope);
-  let val1 = f64::from_v8(scope, obj1);
+  let val1 = f64::from_v8(scope, obj1.into());
   assert_eq!(val1, a1);
 
   let a2 = 8_f64;
   let obj2 = a2.to_v8(scope);
-  let val2 = f64::from_v8(scope, obj2);
+  let val2 = f64::from_v8(scope, obj2.into());
   assert_eq!(val2, a2);
 }
 
@@ -46,12 +46,12 @@ fn test_bool1() {
 
   let a1 = true;
   let obj1 = a1.to_v8(scope);
-  let val1 = bool::from_v8(scope, obj1);
+  let val1 = bool::from_v8(scope, obj1.into());
   assert!(val1);
 
   let a2 = false;
   let obj2 = a2.to_v8(scope);
-  let val2 = bool::from_v8(scope, obj2);
+  let val2 = bool::from_v8(scope, obj2.into());
   assert!(!val2);
 }
 
@@ -64,7 +64,7 @@ fn test_string1() {
 
   let a1 = "Hello".to_string();
   let obj1 = a1.to_v8(scope);
-  let val1 = String::from_v8(scope, obj1);
+  let val1 = String::from_v8(scope, obj1.into());
   assert_eq!(val1, a1);
 }
 
@@ -77,14 +77,13 @@ fn test_array1() {
 
   let a1: Vec<i32> = vec![1, 2, 3];
   let obj1 = a1.to_v8(scope, |scope, a| a.to_v8(scope).into());
-  let val1 = Vec::from_v8(scope, obj1, |scope, v| {
-    i32::from_v8(scope, v.to_integer(scope).unwrap())
-  });
+  let val1 =
+    Vec::from_v8(scope, obj1.into(), |scope, v| i32::from_v8(scope, v));
   assert_eq!(val1, a1);
 
   let a2: Vec<String> = vec!["a".to_string(), "b".to_string(), "c".to_string()];
   let obj2 = a2.to_v8(scope, |scope, a| a.to_v8(scope).into());
   let val2 =
-    Vec::from_v8(scope, obj2, |scope, v| v.to_rust_string_lossy(scope));
+    Vec::from_v8(scope, obj2.into(), |scope, v| v.to_rust_string_lossy(scope));
   assert_eq!(val2, a2);
 }

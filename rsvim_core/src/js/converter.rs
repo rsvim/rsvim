@@ -26,16 +26,21 @@ impl U32ToV8 for u32 {
 pub trait U32FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl U32FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.uint32_value(scope).unwrap()
+    debug_assert!(value.is_int32() || value.is_uint32());
+    value
+      .to_integer(scope)
+      .unwrap()
+      .uint32_value(scope)
+      .unwrap()
   }
 }
 
@@ -58,16 +63,17 @@ impl I32ToV8 for i32 {
 pub trait I32FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl I32FromV8 for i32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.int32_value(scope).unwrap()
+    debug_assert!(value.is_int32() || value.is_uint32());
+    value.to_integer(scope).unwrap().int32_value(scope).unwrap()
   }
 }
 
@@ -90,16 +96,17 @@ impl NodeIdToV8 for NodeId {
 pub trait NodeIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl NodeIdFromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    NodeId::from(value.int32_value(scope).unwrap())
+    debug_assert!(value.is_int32() || value.is_uint32());
+    NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
@@ -122,16 +129,17 @@ impl BufferIdToV8 for BufferId {
 pub trait BufferIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl BufferIdFromV8 for BufferId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    BufferId::from(value.int32_value(scope).unwrap())
+    debug_assert!(value.is_int32() || value.is_uint32());
+    BufferId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
@@ -154,16 +162,17 @@ impl TimerIdToV8 for TimerId {
 pub trait TimerIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl TimerIdFromV8 for TimerId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    TimerId::from(value.int32_value(scope).unwrap())
+    debug_assert!(value.is_int32() || value.is_uint32());
+    TimerId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
@@ -186,16 +195,22 @@ impl F64ToV8 for f64 {
 pub trait F64FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Number>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl F64FromV8 for f64 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Number>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.number_value(scope).unwrap()
+    debug_assert!(
+      value.is_number()
+        || value.is_number_object()
+        || value.is_int32()
+        || value.is_uint32()
+    );
+    value.to_number(scope).unwrap().number_value(scope).unwrap()
   }
 }
 
@@ -218,16 +233,17 @@ impl BoolToV8 for bool {
 pub trait BoolFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Boolean>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl BoolFromV8 for bool {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Boolean>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.boolean_value(scope)
+    debug_assert!(value.is_boolean() || value.is_boolean_object());
+    value.to_boolean(scope).boolean_value(scope)
   }
 }
 
@@ -268,25 +284,31 @@ impl StringToV8 for CompactString {
 pub trait StringFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl StringFromV8 for String {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.to_rust_string_lossy(scope)
+    debug_assert!(value.is_string() || value.is_string_object());
+    value.to_string(scope).unwrap().to_rust_string_lossy(scope)
   }
 }
 
 impl StringFromV8 for CompactString {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.to_rust_string_lossy(scope).to_compact_string()
+    debug_assert!(value.is_string() || value.is_string_object());
+    value
+      .to_string(scope)
+      .unwrap()
+      .to_rust_string_lossy(scope)
+      .to_compact_string()
   }
 }
 
@@ -352,7 +374,7 @@ impl<T> VecToV8<T> for Vec<T> {
 pub trait VecFromV8<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Array>,
+    value: v8::Local<'s, v8::Value>,
     f: F,
   ) -> Vec<T>
   where
@@ -362,12 +384,14 @@ pub trait VecFromV8<T> {
 impl<T> VecFromV8<T> for Vec<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
-    elements: v8::Local<'s, v8::Array>,
+    elements: v8::Local<'s, v8::Value>,
     f: F,
   ) -> Vec<T>
   where
     F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T,
   {
+    debug_assert!(elements.is_array());
+    let elements = v8::Local::<v8::Array>::try_from(elements).unwrap();
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
     for i in 0..n {
@@ -389,7 +413,7 @@ pub trait StructToV8 {
 pub trait StructFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Object>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
@@ -408,7 +432,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, bool, $prop:tt)) => {
-    $prop.to_boolean($scope)
+    $prop.to_boolean($scope).into()
   };
 
   (@assert_each(String, $prop:tt)) => {
@@ -416,7 +440,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, String, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   (@assert_each(CompactString, $prop:tt)) => {
@@ -424,7 +448,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, CompactString, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
@@ -432,7 +456,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {

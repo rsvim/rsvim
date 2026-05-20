@@ -49,9 +49,10 @@ pub enum Nargs {
 impl StringFromV8 for Nargs {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    let nargs = value.to_rust_string_lossy(scope);
+    debug_assert!(value.is_string() || value.is_string_object());
+    let nargs = value.to_string(scope).unwrap().to_rust_string_lossy(scope);
     Nargs::from_str(&nargs).unwrap()
   }
 }
@@ -82,8 +83,11 @@ type js_command_attr_Nargs = Nargs;
 impl StructFromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Object>,
+    obj: v8::Local<'s, v8::Value>,
   ) -> Self {
+    debug_assert!(obj.is_object() || obj.is_object_template());
+    let obj = obj.to_object(scope).unwrap();
+
     let mut builder = CommandAttributesBuilder::default();
 
     from_v8_prop!(builder, obj, scope, bool, bang);

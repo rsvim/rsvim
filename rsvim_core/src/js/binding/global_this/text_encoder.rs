@@ -209,9 +209,9 @@ pub fn decode_single<'s>(
   debug_assert!(is_v8_str!(args.get(1)));
   let label = args.get(1).to_rust_string_lossy(scope);
   debug_assert!(is_v8_bool!(args.get(2)));
-  let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
+  let fatal = bool::from_v8(scope, args.get(2));
   debug_assert!(is_v8_bool!(args.get(3)));
-  let ignore_bom = bool::from_v8(scope, args.get(3).to_boolean(scope));
+  let ignore_bom = bool::from_v8(scope, args.get(3));
   trace!(
     "|decode_single| data:{:?}, label:{:?}, fatal:{:?}, ignore_bom:{:?}",
     data, label, fatal, ignore_bom
@@ -231,7 +231,7 @@ pub fn create_stream_decoder<'s>(
   debug_assert!(is_v8_str!(args.get(0)));
   let label = args.get(0).to_rust_string_lossy(scope);
   debug_assert!(is_v8_bool!(args.get(1)));
-  let ignore_bom = bool::from_v8(scope, args.get(1).to_boolean(scope));
+  let ignore_bom = bool::from_v8(scope, args.get(1));
   trace!(
     "|create_stream_decoder| label:{:?}, ignore_bom:{:?}",
     label, ignore_bom
@@ -264,12 +264,12 @@ pub fn decode_stream<'s>(
     .map(|b| b.get())
     .collect_vec();
   debug_assert!(is_v8_int!(args.get(1)));
-  let decoder_rid = i32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
+  let decoder_rid = i32::from_v8(scope, args.get(1));
   let decoder_rid = ResourceId::from(decoder_rid);
   debug_assert!(is_v8_bool!(args.get(2)));
-  let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
+  let fatal = bool::from_v8(scope, args.get(2));
   debug_assert!(is_v8_bool!(args.get(3)));
-  let stream = bool::from_v8(scope, args.get(3).to_boolean(scope));
+  let stream = bool::from_v8(scope, args.get(3));
   trace!(
     "|decode_stream| data:{:?}, fatal:{:?}, stream:{:?}",
     data, fatal, stream
@@ -297,7 +297,7 @@ pub fn close_stream_decoder<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let decoder_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let decoder_rid = i32::from_v8(scope, args.get(0));
   let decoder_rid = ResourceId::from(decoder_rid);
   trace!("|close_stream_decoder| decoder_rid:{:?}", decoder_rid);
 

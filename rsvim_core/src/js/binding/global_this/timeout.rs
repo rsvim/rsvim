@@ -59,10 +59,10 @@ pub fn create_timer<'s>(
 
   // Get timer's delay time in millis.
   debug_assert!(is_v8_int!(args.get(1)));
-  let delay = u32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
+  let delay = u32::from_v8(scope, args.get(1));
   // Get timer's repeated.
   debug_assert!(is_v8_bool!(args.get(2)));
-  let repeated = bool::from_v8(scope, args.get(2).to_boolean(scope));
+  let repeated = bool::from_v8(scope, args.get(2));
 
   // NOTE: Don't delete this part of code, it shows how to convert function
   // arguments into an array of values.
@@ -124,8 +124,7 @@ pub fn clear_timer<'s>(
   debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
   debug_assert!(is_v8_int!(args.get(0)));
-  let timer_id =
-    TimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let timer_id = TimerId::from_v8(scope, args.get(0));
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();
