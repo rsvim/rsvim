@@ -299,8 +299,7 @@ pub fn get_syntax_parser_lib_path(
     .to_string_lossy()
     .to_string();
   trace!("get_syntax_parser_lib_path: {:?}", value);
-  let value = value.to_v8(scope);
-  rv.set(value.into());
+  rv.set(value.to_v8(scope));
 }
 
 /// Set the _syntax-parser-lib-path_ option.
