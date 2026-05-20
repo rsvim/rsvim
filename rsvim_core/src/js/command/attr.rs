@@ -49,9 +49,10 @@ pub enum Nargs {
 impl StringFromV8 for Nargs {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    let nargs = value.to_rust_string_lossy(scope);
+    debug_assert!(value.is_string() || value.is_string_object());
+    let nargs = value.to_string(scope).unwrap().to_rust_string_lossy(scope);
     Nargs::from_str(&nargs).unwrap()
   }
 }
@@ -60,7 +61,7 @@ impl StringToV8 for Nargs {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
+  ) -> v8::Local<'s, v8::Value> {
     self.to_string().to_v8(scope)
   }
 }
