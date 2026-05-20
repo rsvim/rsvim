@@ -99,7 +99,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
     fn to_v8<'s>(
       &self,
       scope: &mut v8::PinScope<'s, '_>,
-    ) -> v8::Local<'s, v8::Object> {
+    ) -> v8::Local<'s, v8::Value> {
       use crate::js::binding;
 
       let obj = v8::Object::new(scope);
@@ -128,7 +128,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       )*
 
 
-      obj
+      obj.into()
     }
   }
 
