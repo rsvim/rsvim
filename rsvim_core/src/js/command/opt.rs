@@ -23,7 +23,7 @@ pub struct CommandOptions {
   pub alias: Option<CompactString>,
 }
 
-impl StructFromV8 for CommandOptions {
+impl FromV8 for CommandOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     obj: v8::Local<'s, v8::Value>,

@@ -80,7 +80,7 @@ pub struct CommandAttributes {
 #[allow(non_camel_case_types)]
 type js_command_attr_Nargs = Nargs;
 
-impl StructFromV8 for CommandAttributes {
+impl FromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     obj: v8::Local<'s, v8::Value>,

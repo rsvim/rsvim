@@ -49,7 +49,7 @@ pub struct FsOpenOptions {
   pub write: bool,
 }
 
-impl StructFromV8 for FsOpenOptions {
+impl FromV8 for FsOpenOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     obj: v8::Local<'s, v8::Value>,
