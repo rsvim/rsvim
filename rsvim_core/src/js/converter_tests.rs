@@ -46,7 +46,7 @@ fn test_bool1() {
 
   let a1 = true;
   let obj1 = a1.to_v8(scope);
-  let val1 = bool::from_v8(scope, obj1.into());
+  let val1 = bool::from_v8(scope, obj1);
   assert!(val1);
 
   let a2 = false;
@@ -64,7 +64,7 @@ fn test_string1() {
 
   let a1 = "Hello".to_string();
   let obj1 = a1.to_v8(scope);
-  let val1 = String::from_v8(scope, obj1.into());
+  let val1 = String::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 }
 

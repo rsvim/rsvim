@@ -227,16 +227,17 @@ impl BoolToV8 for bool {
 pub trait BoolFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Boolean>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl BoolFromV8 for bool {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Boolean>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.boolean_value(scope)
+    debug_assert!(value.is_boolean() || value.is_boolean_object());
+    value.to_boolean(scope).boolean_value(scope)
   }
 }
 
