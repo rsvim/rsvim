@@ -331,15 +331,17 @@ impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
 pub trait CallbackFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Function>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl CallbackFromV8 for Rc<v8::Global<v8::Function>> {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Function>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
+    debug_assert!(value.is_function() || value.is_function_template());
+    let value = v8::Local::<'s, v8::Function>::try_from(value).unwrap();
     Rc::new(v8::Global::new(scope, value))
   }
 }
