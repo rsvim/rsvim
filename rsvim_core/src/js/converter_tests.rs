@@ -82,7 +82,7 @@ fn test_array1() {
   assert_eq!(val1, a1);
 
   let a2: Vec<String> = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-  let obj2 = a2.to_v8(scope, |scope, a| a.to_v8(scope).into());
+  let obj2 = a2.to_v8(scope, |scope, a| a.to_v8(scope));
   let val2 =
     Vec::from_v8(scope, obj2.into(), |scope, v| v.to_rust_string_lossy(scope));
   assert_eq!(val2, a2);

@@ -85,7 +85,7 @@ pub fn list(
   let commands = command_manager
     .keys()
     .collect::<Vec<&CompactString>>()
-    .to_v8(scope, |scope, cmd| cmd.to_v8(scope).into());
+    .to_v8(scope, |scope, cmd| cmd.to_v8(scope));
 
   rv.set(commands.into());
 }
