@@ -264,12 +264,12 @@ pub fn decode_stream<'s>(
     .map(|b| b.get())
     .collect_vec();
   debug_assert!(is_v8_int!(args.get(1)));
-  let decoder_rid = i32::from_v8(scope, args.get(1).to_integer(scope).unwrap());
+  let decoder_rid = i32::from_v8(scope, args.get(1));
   let decoder_rid = ResourceId::from(decoder_rid);
   debug_assert!(is_v8_bool!(args.get(2)));
-  let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
+  let fatal = bool::from_v8(scope, args.get(2));
   debug_assert!(is_v8_bool!(args.get(3)));
-  let stream = bool::from_v8(scope, args.get(3).to_boolean(scope));
+  let stream = bool::from_v8(scope, args.get(3));
   trace!(
     "|decode_stream| data:{:?}, fatal:{:?}, stream:{:?}",
     data, fatal, stream
