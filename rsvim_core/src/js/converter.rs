@@ -316,15 +316,15 @@ pub trait CallbackToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Function>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Function> {
-    v8::Local::new(scope, Rc::unwrap_or_clone(self.clone()))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Local::new(scope, Rc::unwrap_or_clone(self.clone())).into()
   }
 }
 
