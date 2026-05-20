@@ -67,7 +67,7 @@ impl JsFuture for SynLoadTreeSitterParserFuture {
     self
       .promise
       .open(scope)
-      .resolve(scope, parser_names.into())
+      .resolve(scope, parser_names)
       .unwrap();
   }
 }
