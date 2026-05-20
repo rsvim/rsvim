@@ -246,7 +246,7 @@ pub fn create_stream_decoder<'s>(
   let decoder_rid = decoder_rid.to_v8(scope);
 
   trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
-  rv.set(decoder_rid.into());
+  rv.set(decoder_rid);
 }
 
 /// `TextDecoder.decode` API.
