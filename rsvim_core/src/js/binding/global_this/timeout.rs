@@ -124,8 +124,7 @@ pub fn clear_timer<'s>(
   debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
   debug_assert!(is_v8_int!(args.get(0)));
-  let timer_id =
-    TimerId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let timer_id = TimerId::from_v8(scope, args.get(0));
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();
