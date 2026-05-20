@@ -97,7 +97,7 @@ pub fn set_tab_stop<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let value = u32::from_v8(scope, args.get(0));
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
@@ -166,7 +166,7 @@ pub fn set_shift_width<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let value = u32::from_v8(scope, args.get(0));
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
