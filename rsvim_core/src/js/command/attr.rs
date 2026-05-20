@@ -46,7 +46,7 @@ pub enum Nargs {
   Any,
 }
 
-impl StringFromV8 for Nargs {
+impl FromV8 for Nargs {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
