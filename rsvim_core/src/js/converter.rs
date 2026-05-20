@@ -218,15 +218,15 @@ pub trait BoolToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Boolean>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl BoolToV8 for bool {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Boolean> {
-    v8::Boolean::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Boolean::new(scope, *self).into()
   }
 }
 
@@ -251,15 +251,15 @@ pub trait StringToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl StringToV8 for str {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
