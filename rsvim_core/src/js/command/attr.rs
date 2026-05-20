@@ -57,7 +57,7 @@ impl StringFromV8 for Nargs {
   }
 }
 
-impl StringToV8 for Nargs {
+impl ToV8 for Nargs {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
