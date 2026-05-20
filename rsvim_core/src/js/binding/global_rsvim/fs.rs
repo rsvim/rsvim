@@ -41,8 +41,7 @@ pub fn open<'s>(
   debug_assert!(is_v8_str!(args.get(0)));
   let filename = args.get(0).to_rust_string_lossy(scope);
   debug_assert!(args.get(1).is_object());
-  let options =
-    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
+  let options = FsOpenOptions::from_v8(scope, args.get(1));
   trace!("Rsvim.fs.open:{:?} {:?}", filename, options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();

@@ -56,6 +56,7 @@ impl StructFromV8 for FsOpenOptions {
   ) -> Self {
     debug_assert!(obj.is_object() || obj.is_object_template());
     let obj = obj.to_object(scope).unwrap();
+
     let mut builder = FsOpenOptionsBuilder::default();
 
     from_v8_prop!(builder, obj, scope, bool, append);
