@@ -45,7 +45,7 @@ pub fn load_parser_sync<'s>(
           trace!("Rsvim.syn.loadParserSync result:{:?}", parser_names);
           let parser_names =
             parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
-          rv.set(parser_names.into());
+          rv.set(parser_names);
         }
         Err(e) => {
           binding::throw_exception(scope, &e);
@@ -115,7 +115,7 @@ pub fn list_parsers<'s>(
   let parser_names = lock!(syntax_manager).list_grammar_names();
   trace!("Rsvim.syn.listParsers result:{:?}", parser_names);
   let parser_names = parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
-  rv.set(parser_names.into());
+  rv.set(parser_names);
 }
 
 /// Javascript `getParserMetadata` API.
@@ -160,7 +160,7 @@ pub fn get_parser_metadata<'s>(
         injection_regex: metadata.injection_regex.clone(),
       };
       let metadata1 = metadata1.to_v8(scope);
-      rv.set(metadata1.into());
+      rv.set(metadata1);
     }
     None => {
       rv.set_undefined();
