@@ -243,9 +243,9 @@ pub fn create_stream_decoder<'s>(
   let decoder_handle = create_decoder_impl(&label, ignore_bom);
   let decoder_rid = lock!(resource_table).add_text_decoder(decoder_handle);
   let decoder_rid = Into::<i32>::into(decoder_rid);
+  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
   let decoder_rid = decoder_rid.to_v8(scope);
 
-  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
   rv.set(decoder_rid);
 }
 
