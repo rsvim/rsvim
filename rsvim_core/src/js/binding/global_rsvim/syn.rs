@@ -23,10 +23,7 @@ pub fn load_parser_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options = SynLoadTreeSitterParserOptions::from_v8(
-    scope,
-    args.get(0).to_object(scope).unwrap(),
-  );
+  let options = SynLoadTreeSitterParserOptions::from_v8(scope, args.get(0));
   trace!("Rsvim.syn.loadParserSync:{:?}", options);
 
   let state_rc = JsRuntime::state(scope);
@@ -69,10 +66,7 @@ pub fn load_treesitter_parser<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let options = SynLoadTreeSitterParserOptions::from_v8(
-    scope,
-    args.get(0).to_object(scope).unwrap(),
-  );
+  let options = SynLoadTreeSitterParserOptions::from_v8(scope, args.get(0));
   trace!("Rsvim.syn.loadParser:{:?}", options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
