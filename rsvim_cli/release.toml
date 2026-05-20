@@ -7,7 +7,7 @@ pre-release-hook = [
   "--tag",
   "{{version}}",
   "--output",
-  "CHANGELOG.md",
+  "../CHANGELOG.md",
 ]
 release = true
 shared-version = true
