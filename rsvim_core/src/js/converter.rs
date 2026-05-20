@@ -278,25 +278,31 @@ impl StringToV8 for CompactString {
 pub trait StringFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl StringFromV8 for String {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.to_rust_string_lossy(scope)
+    debug_assert!(value.is_string() || value.is_string_object());
+    value.to_string(scope).unwrap().to_rust_string_lossy(scope)
   }
 }
 
 impl StringFromV8 for CompactString {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.to_rust_string_lossy(scope).to_compact_string()
+    debug_assert!(value.is_string() || value.is_string_object());
+    value
+      .to_string(scope)
+      .unwrap()
+      .to_rust_string_lossy(scope)
+      .to_compact_string()
   }
 }
 
