@@ -447,7 +447,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new(scope, [< $prop:snake:upper >]).unwrap();
       debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
       let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
       from_v8_prop!{@assert_each($ty, [< $prop _value>])};
@@ -457,7 +457,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new(scope, [< $prop:snake:upper >]).unwrap();
       if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
         let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
         from_v8_prop!{@assert_each($ty, [< $prop _value>])};
