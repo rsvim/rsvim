@@ -147,15 +147,15 @@ pub trait TimerIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl TimerIdToV8 for TimerId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, Into::<i32>::into(*self))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, Into::<i32>::into(*self)).into()
   }
 }
 
