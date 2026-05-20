@@ -95,7 +95,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
   quote! {
 
-  impl crate::js::converter::StructToV8 for #struct_ident {
+  impl crate::js::converter::ToV8 for #struct_ident {
     fn to_v8<'s>(
       &self,
       scope: &mut v8::PinScope<'s, '_>,
