@@ -129,7 +129,7 @@ pub fn read<'s>(
   debug_assert!(args.length() == 2);
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
