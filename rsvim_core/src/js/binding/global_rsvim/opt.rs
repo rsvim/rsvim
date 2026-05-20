@@ -191,7 +191,7 @@ pub fn get_file_encoding(
   let value = buffer_manager.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _file-encoding_ option.
@@ -227,7 +227,7 @@ pub fn get_file_format(
   let value = buffer_manager.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _file-format_ option.
@@ -300,7 +300,7 @@ pub fn get_syntax_parser_lib_path(
     .to_string();
   trace!("get_syntax_parser_lib_path: {:?}", value);
   let value = value.to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _syntax-parser-lib-path_ option.
