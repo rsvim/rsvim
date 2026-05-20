@@ -180,15 +180,15 @@ pub trait F64ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl F64ToV8 for f64 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number> {
-    v8::Number::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Number::new(scope, *self).into()
   }
 }
 
