@@ -83,8 +83,7 @@ pub fn open_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
-  let options =
-    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
+  let options = FsOpenOptions::from_v8(scope, args.get(1));
   trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
   let state_rc = JsRuntime::state(scope);
