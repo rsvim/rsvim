@@ -96,16 +96,17 @@ impl NodeIdToV8 for NodeId {
 pub trait NodeIdFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl NodeIdFromV8 for NodeId {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Integer>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    NodeId::from(value.int32_value(scope).unwrap())
+    debug_assert!(value.is_int32() || value.is_uint32());
+    NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
 
