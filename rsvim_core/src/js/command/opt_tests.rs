@@ -12,7 +12,7 @@ fn test1() {
 
   let a1 = CommandOptionsBuilder::default().build().unwrap();
   let obj1 = a1.to_v8(scope);
-  let val1 = CommandOptions::from_v8(scope, obj1.into());
+  let val1 = CommandOptions::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
   let a2 = CommandOptionsBuilder::default()
@@ -20,6 +20,6 @@ fn test1() {
     .build()
     .unwrap();
   let obj2 = a2.to_v8(scope);
-  let val2 = CommandOptions::from_v8(scope, obj2.into());
+  let val2 = CommandOptions::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }

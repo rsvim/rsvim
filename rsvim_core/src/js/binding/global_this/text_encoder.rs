@@ -97,9 +97,9 @@ pub fn encode_into<'s>(
 
   let result = v8::Object::new(scope);
   let read_value = (read as u32).to_v8(scope);
-  binding::set_property_to(scope, result, "read", read_value.into());
+  binding::set_property_to(scope, result, "read", read_value);
   let written_value = (written as u32).to_v8(scope);
-  binding::set_property_to(scope, result, "written", written_value.into());
+  binding::set_property_to(scope, result, "written", written_value);
 
   rv.set(result.into());
 }
@@ -243,10 +243,10 @@ pub fn create_stream_decoder<'s>(
   let decoder_handle = create_decoder_impl(&label, ignore_bom);
   let decoder_rid = lock!(resource_table).add_text_decoder(decoder_handle);
   let decoder_rid = Into::<i32>::into(decoder_rid);
+  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
   let decoder_rid = decoder_rid.to_v8(scope);
 
-  trace!("|create_stream_decoder| rid:{:?}", decoder_rid);
-  rv.set(decoder_rid.into());
+  rv.set(decoder_rid);
 }
 
 /// `TextDecoder.decode` API.

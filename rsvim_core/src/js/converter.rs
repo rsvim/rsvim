@@ -11,15 +11,15 @@ pub trait U32ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl U32ToV8 for u32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new_from_unsigned(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new_from_unsigned(scope, *self).into()
   }
 }
 
@@ -48,15 +48,15 @@ pub trait I32ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl I32ToV8 for i32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, *self).into()
   }
 }
 
@@ -81,15 +81,15 @@ pub trait NodeIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl NodeIdToV8 for NodeId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, Into::<i32>::into(*self))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, Into::<i32>::into(*self)).into()
   }
 }
 
@@ -114,15 +114,15 @@ pub trait BufferIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl BufferIdToV8 for BufferId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, Into::<i32>::into(*self))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, Into::<i32>::into(*self)).into()
   }
 }
 
@@ -147,15 +147,15 @@ pub trait TimerIdToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl TimerIdToV8 for TimerId {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, Into::<i32>::into(*self))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, Into::<i32>::into(*self)).into()
   }
 }
 
@@ -180,15 +180,15 @@ pub trait F64ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl F64ToV8 for f64 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Number> {
-    v8::Number::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Number::new(scope, *self).into()
   }
 }
 
@@ -218,15 +218,15 @@ pub trait BoolToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Boolean>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl BoolToV8 for bool {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Boolean> {
-    v8::Boolean::new(scope, *self)
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Boolean::new(scope, *self).into()
   }
 }
 
@@ -251,15 +251,15 @@ pub trait StringToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl StringToV8 for str {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -267,8 +267,8 @@ impl StringToV8 for String {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -276,8 +276,8 @@ impl StringToV8 for CompactString {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
-    v8::String::new(scope, self).unwrap()
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -316,15 +316,15 @@ pub trait CallbackToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Function>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Function> {
-    v8::Local::new(scope, Rc::unwrap_or_clone(self.clone()))
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Local::new(scope, Rc::unwrap_or_clone(self.clone())).into()
   }
 }
 
@@ -349,7 +349,7 @@ pub trait VecToV8<T> {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
     f: F,
-  ) -> v8::Local<'s, v8::Array>
+  ) -> v8::Local<'s, v8::Value>
   where
     F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
 }
@@ -359,7 +359,7 @@ impl<T> VecToV8<T> for Vec<T> {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
     f: F,
-  ) -> v8::Local<'s, v8::Array>
+  ) -> v8::Local<'s, v8::Value>
   where
     F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
   {
@@ -367,7 +367,7 @@ impl<T> VecToV8<T> for Vec<T> {
       .iter()
       .map(|v| f(scope, v))
       .collect::<Vec<v8::Local<'s, v8::Value>>>();
-    v8::Array::new_with_elements(scope, &elements)
+    v8::Array::new_with_elements(scope, &elements).into()
   }
 }
 
@@ -407,7 +407,7 @@ pub trait StructToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 pub trait StructFromV8 {
@@ -461,7 +461,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
       debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
       let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
       from_v8_prop!{@assert_each($ty, [< $prop _value>])};
@@ -471,7 +471,7 @@ macro_rules! from_v8_prop {
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
     paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
       if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
         let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
         from_v8_prop!{@assert_each($ty, [< $prop _value>])};

@@ -61,7 +61,7 @@ pub fn create<'s>(
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match result {
-    Ok(Some(removed)) => rv.set(removed.to_v8(scope).into()),
+    Ok(Some(removed)) => rv.set(removed.to_v8(scope)),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
       binding::throw_exception(scope, &e);
@@ -85,9 +85,9 @@ pub fn list(
   let commands = command_manager
     .keys()
     .collect::<Vec<&CompactString>>()
-    .to_v8(scope, |scope, cmd| cmd.to_v8(scope).into());
+    .to_v8(scope, |scope, cmd| cmd.to_v8(scope));
 
-  rv.set(commands.into());
+  rv.set(commands);
 }
 
 /// `Rsvim.cmd.get` API.
@@ -105,7 +105,7 @@ pub fn get<'s>(
   let state = state_rc.borrow_mut();
   let command_manager = lock!(state.command_manager);
   match command_manager.get(&name) {
-    Some(def) => rv.set(def.to_v8(scope).into()),
+    Some(def) => rv.set(def.to_v8(scope)),
     None => rv.set_undefined(),
   }
 }
@@ -125,7 +125,7 @@ pub fn remove<'s>(
   let state = state_rc.borrow_mut();
   let mut command_manager = lock!(state.command_manager);
   match command_manager.remove(&name) {
-    Some(removed) => rv.set(removed.to_v8(scope).into()),
+    Some(removed) => rv.set(removed.to_v8(scope)),
     None => rv.set_undefined(),
   }
 }

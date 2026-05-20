@@ -62,12 +62,12 @@ impl JsFuture for SynLoadTreeSitterParserFuture {
     // Deserialize bytes into a list of parser names.
     let parser_names = postcard::from_bytes::<Vec<String>>(&result).unwrap();
     let parser_names =
-      parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
+      parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
 
     self
       .promise
       .open(scope)
-      .resolve(scope, parser_names.into())
+      .resolve(scope, parser_names)
       .unwrap();
   }
 }

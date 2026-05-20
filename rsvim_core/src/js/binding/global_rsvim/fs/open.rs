@@ -150,10 +150,6 @@ impl JsFuture for FsOpenFuture {
     let file_rid = Into::<i32>::into(file_rid);
     let file_rid = file_rid.to_v8(scope);
 
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, file_rid.into())
-      .unwrap();
+    self.promise.open(scope).resolve(scope, file_rid).unwrap();
   }
 }

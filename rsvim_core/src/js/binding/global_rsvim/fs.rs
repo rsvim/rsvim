@@ -94,7 +94,7 @@ pub fn open_sync<'s>(
     Ok(file_rid) => {
       let file_rid = Into::<i32>::into(file_rid);
       let file_rid = file_rid.to_v8(scope);
-      rv.set(file_rid.into());
+      rv.set(file_rid);
     }
     Err(e) => {
       binding::throw_exception(scope, &e);
