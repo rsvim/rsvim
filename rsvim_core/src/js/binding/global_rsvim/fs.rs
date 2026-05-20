@@ -110,7 +110,7 @@ pub fn close<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   trace!("Rsvim.fs.close:{:?}", file_rid);
   let file_rid = ResourceId::from(file_rid);
 
@@ -175,7 +175,7 @@ pub fn read_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
@@ -204,7 +204,7 @@ pub fn write<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
@@ -253,7 +253,7 @@ pub fn write_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
