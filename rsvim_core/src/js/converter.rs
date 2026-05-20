@@ -432,7 +432,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, bool, $prop:tt)) => {
-    $prop.to_boolean($scope)
+    $prop.to_boolean($scope).into()
   };
 
   (@assert_each(String, $prop:tt)) => {
@@ -440,7 +440,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, String, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   (@assert_each(CompactString, $prop:tt)) => {
@@ -448,7 +448,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, CompactString, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
@@ -456,7 +456,7 @@ macro_rules! from_v8_prop {
   };
 
   (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
-    $prop.to_string($scope).unwrap()
+    $prop.to_string($scope).unwrap().into()
   };
 
   ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
