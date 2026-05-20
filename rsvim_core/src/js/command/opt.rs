@@ -28,6 +28,7 @@ impl StructFromV8 for CommandOptions {
     scope: &mut v8::PinScope<'s, '_>,
     obj: v8::Local<'s, v8::Value>,
   ) -> Self {
+    debug_assert!(obj.is_object() || obj.is_object_template());
     let obj = obj.to_object(scope).unwrap();
     let mut builder = CommandOptionsBuilder::default();
 
