@@ -195,16 +195,22 @@ impl F64ToV8 for f64 {
 pub trait F64FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Number>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self;
 }
 
 impl F64FromV8 for f64 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Number>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    value.number_value(scope).unwrap()
+    debug_assert!(
+      value.is_number()
+        || value.is_number_object()
+        || value.is_int32()
+        || value.is_uint32()
+    );
+    value.to_number(scope).unwrap().number_value(scope).unwrap()
   }
 }
 
