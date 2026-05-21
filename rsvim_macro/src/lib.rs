@@ -150,7 +150,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
   };
 
-  let is_option = |field_type: &syn::Type| match field_type {
+  let _is_option = |field_type: &syn::Type| match field_type {
     syn::Type::Path(p) => match p.path.segments.last() {
       Some(seg) => seg.ident == "Option",
       None => false,
@@ -158,7 +158,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let is_vec = |field_type: &syn::Type| match field_type {
+  let _is_vec = |field_type: &syn::Type| match field_type {
     syn::Type::Path(p) => match p.path.segments.last() {
       Some(seg) => seg.ident == "Vec",
       None => false,
@@ -209,42 +209,6 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
-  let optional_fields = struct_fields
-    .iter()
-    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .collect::<Vec<_>>();
-  let optional_uppercases = struct_fields
-    .iter()
-    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
-    .collect::<Vec<_>>();
-  let optional_values = struct_fields
-    .iter()
-    .filter(|n| is_option(&n.ty) && !is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_value", i))
-    .collect::<Vec<_>>();
-
-  let vec_fields = struct_fields
-    .iter()
-    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .collect::<Vec<_>>();
-  let vec_uppercases = struct_fields
-    .iter()
-    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
-    .collect::<Vec<_>>();
-  let vec_values = struct_fields
-    .iter()
-    .filter(|n| !is_option(&n.ty) && is_vec(&n.ty))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_value", i))
-    .collect::<Vec<_>>();
-
   quote! {
 
   impl crate::js::converter::FromV8 for #struct_ident {
@@ -269,26 +233,9 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #bool_values = obj.get(scope, #bool_names.into()).unwrap();
         debug_assert!(#bool_values.is_boolean() || #bool_values.is_boolean_object());
         let #bool_values = #bool_values.to_boolean(scope);
-        builder.#bool_fields(bool::from_v8(scope, #bool_values.into()));
+        builder.#bool_fields(#bool_types::from_v8(scope, #bool_values.into()));
       }
       )*
-
-      #(
-      {
-        if let Some(#optional_fields) = &self.#optional_fields {
-          let #optional_values = #optional_fields.to_v8(scope);
-          binding::set_property_to(scope, obj, #optional_uppercases, #optional_values);
-        }
-      }
-      )*
-
-      #(
-      {
-        let #vec_values = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope));
-        binding::set_property_to(scope, obj, #vec_uppercases, #vec_values);
-      }
-      )*
-
 
       obj.into()
     }
