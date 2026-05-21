@@ -135,7 +135,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-#[proc_macro_derive(FromV8, attributes(v8_type))]
+#[proc_macro_derive(FromV8, attributes(from_v8_type))]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
@@ -293,4 +293,16 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   }
 
   }.into()
+}
+
+#[proc_macro_attribute(from_v8_type)]
+pub fn from_v8_type(
+  input: TokenStream,
+  annotated_item: TokenStream,
+) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+
+  println!("from_v8_type input:{:?}", input);
+  println!("from_v8_type annotated_item:{:?}", annotated_item);
+  TokenStream::default()
 }
