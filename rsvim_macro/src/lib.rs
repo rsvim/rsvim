@@ -292,7 +292,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
           let #optional_bool_values = obj.get(scope, #optional_bool_names.into()).unwrap();
           debug_assert!(#optional_bool_values.is_boolean() || #optional_bool_values.is_boolean_object());
           let #optional_bool_values = #optional_bool_values.to_boolean(scope);
-          builder.#optional_bool_fields(#optional_bool_types::from_v8(scope, #optional_bool_values.into()));
+          builder.#optional_bool_fields(Some(#optional_bool_types::from_v8(scope, #optional_bool_values.into())));
         }
       }
       )*
@@ -317,7 +317,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
           let #optional_string_values = obj.get(scope, #optional_string_names.into()).unwrap();
           debug_assert!(#optional_string_values.is_string() || #optional_string_values.is_string_object());
           let #optional_string_values = #optional_string_values.to_string(scope).unwrap();
-          builder.#optional_string_fields(#optional_string_types::from_v8(scope, #optional_string_values.into()));
+          builder.#optional_string_fields(Some(#optional_string_types::from_v8(scope, #optional_string_values.into())));
         }
       }
       )*
