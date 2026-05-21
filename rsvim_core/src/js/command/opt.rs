@@ -1,6 +1,5 @@
 //! Ex command options.
 
-use crate::from_v8_prop;
 use crate::js::converter::*;
 use compact_str::CompactString;
 
