@@ -139,7 +139,6 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("from_v8:{:?}", input);
 
   let struct_ident = input.ident;
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
