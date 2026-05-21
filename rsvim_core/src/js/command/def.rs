@@ -51,7 +51,7 @@ impl FromV8CallbackArgs for CommandDefinition {
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     debug_assert!(args.get(2).is_object());
-    let attributes = CommandAttributes::from_v8(scope, args.get(2).into());
+    let attributes = CommandAttributes::from_v8(scope, args.get(2));
     debug_assert!(args.get(3).is_object());
     let options = CommandOptions::from_v8(scope, args.get(3));
 
