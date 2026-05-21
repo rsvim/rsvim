@@ -240,11 +240,11 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     &string_tokens.value,
   );
   let (
-    optional_string_fields,
-    optional_string_names,
-    optional_string_types,
-    optional_string_uppercases,
-    optional_string_values,
+    optional_string_field,
+    optional_string_name,
+    optional_string_type,
+    optional_string_uppercase,
+    optional_string_value,
   ) = (
     &optional_string_tokens.field,
     &optional_string_tokens.name,
@@ -306,12 +306,12 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // optional string
       #(
       {
-        let #optional_string_names = v8::String::new(scope, #optional_string_uppercases).unwrap();
-        if obj.has_own_property(scope, #optional_string_names.into()).unwrap_or(false) {
-          let #optional_string_values = obj.get(scope, #optional_string_names.into()).unwrap();
-          debug_assert!(#optional_string_values.is_string() || #optional_string_values.is_string_object());
-          let #optional_string_values = #optional_string_values.to_string(scope).unwrap();
-          builder.#optional_string_fields(Some(#optional_string_types::from_v8(scope, #optional_string_values.into())));
+        let #optional_string_name = v8::String::new(scope, #optional_string_uppercase).unwrap();
+        if obj.has_own_property(scope, #optional_string_name.into()).unwrap_or(false) {
+          let #optional_string_value = obj.get(scope, #optional_string_name.into()).unwrap();
+          debug_assert!(#optional_string_value.is_string() || #optional_string_value.is_string_object());
+          let #optional_string_value = #optional_string_value.to_string(scope).unwrap();
+          builder.#optional_string_field(Some(#optional_string_type::from_v8(scope, #optional_string_value.into())));
         }
       }
       )*
