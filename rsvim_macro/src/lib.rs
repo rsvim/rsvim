@@ -176,7 +176,28 @@ impl FromV8Tokens {
       res.field.push(ident.clone());
 
       let ty_ident = match &f.ty {
-        syn::Type::Path(p) => p.path.segments.last().unwrap().ident.clone(),
+        syn::Type::Path(p) => {
+          let seg = p.path.segments.last().unwrap();
+          if seg.ident == "Option" || seg.ident == "Vec" {
+            match &seg.arguments {
+              syn::PathArguments::AngleBracketed(angle) => {
+                match angle.args.last().unwrap() {
+                  // Match inner type here
+                  syn::GenericArgument::Type(syn::Type::Path(inner_p)) => {
+                    inner_p.path.segments.last().unwrap().ident.clone()
+                  }
+                  _ => unreachable!(
+                    "Expected TypePath inside GenericArgument::Type for field {}",
+                    ident
+                  ),
+                }
+              }
+              _ => unreachable!("Expected AngleBracketed for field {}", ident),
+            }
+          } else {
+            seg.ident.clone()
+          }
+        }
         _ => unreachable!("Expected TypePath for field {}", ident),
       };
       res.r#type.push(ty_ident);
