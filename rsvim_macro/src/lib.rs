@@ -32,9 +32,9 @@ fn has_attr(field: &syn::Field, attr_name: &str) -> bool {
 }
 
 struct ToV8Tokens {
-  fields: Vec<syn::Ident>,
-  uppercases: Vec<syn::Ident>,
-  values: Vec<syn::Ident>,
+  field: Vec<syn::Ident>,
+  uppercase: Vec<syn::Ident>,
+  value: Vec<syn::Ident>,
 }
 
 impl ToV8Tokens {
@@ -46,17 +46,17 @@ impl ToV8Tokens {
     F: Fn(&syn::Field) -> bool,
   {
     let mut res = Self {
-      fields: vec![],
-      uppercases: vec![],
-      values: vec![],
+      field: vec![],
+      uppercase: vec![],
+      value: vec![],
     };
     for f in fields.filter(|&f| predicate(f)) {
       let ident = f.ident.clone().unwrap();
       res
-        .uppercases
+        .uppercase
         .push(format_ident!("{}", ident.to_string().to_uppercase()));
-      res.values.push(format_ident!("{}_value", ident));
-      res.fields.push(ident);
+      res.value.push(format_ident!("{}_value", ident));
+      res.field.push(ident);
     }
     res
   }
@@ -89,12 +89,12 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let vec = ToV8Tokens::collect(struct_fields.iter(), is_vec);
 
   // Destructure for `quote!` use
-  let (fields, uppercases, values) =
-    (&plain.fields, &plain.uppercases, &plain.values);
-  let (optional_fields, optional_uppercases, optional_values) =
-    (&optional.fields, &optional.uppercases, &optional.values);
-  let (vec_fields, vec_uppercases, vec_values) =
-    (&vec.fields, &vec.uppercases, &vec.values);
+  let (field, uppercase, value) =
+    (&plain.field, &plain.uppercase, &plain.value);
+  let (optional_fields, optional_uppercase, optional_value) =
+    (&optional.field, &optional.uppercase, &optional.value);
+  let (vec_fields, vec_uppercase, vec_value) =
+    (&vec.field, &vec.uppercase, &vec.value);
 
   quote! {
 
@@ -110,8 +110,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       // plain
       #(
       {
-        let #values = self.#fields.to_v8(scope);
-        binding::set_property_to(scope, obj, #uppercases, #values);
+        let #value = self.#field.to_v8(scope);
+        binding::set_property_to(scope, obj, #uppercase, #value);
       }
       )*
 
@@ -119,8 +119,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       #(
       {
         if let Some(#optional_fields) = &self.#optional_fields {
-          let #optional_values = #optional_fields.to_v8(scope);
-          binding::set_property_to(scope, obj, #optional_uppercases, #optional_values);
+          let #optional_value = #optional_fields.to_v8(scope);
+          binding::set_property_to(scope, obj, #optional_uppercase, #optional_value);
         }
       }
       )*
@@ -128,8 +128,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       // vec
       #(
       {
-        let #vec_values = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope));
-        binding::set_property_to(scope, obj, #vec_uppercases, #vec_values);
+        let #vec_value = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope));
+        binding::set_property_to(scope, obj, #vec_uppercase, #vec_value);
       }
       )*
 
