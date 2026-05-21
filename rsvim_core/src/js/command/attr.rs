@@ -70,11 +70,11 @@ impl ToV8 for Nargs {
 )]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
-  #[from_v8_type(bool)]
+  #[from_v8_bool]
   pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
-  #[from_v8_type(string)]
+  #[from_v8_string]
   pub nargs: Nargs,
 }
 
