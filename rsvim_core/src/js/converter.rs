@@ -1,6 +1,10 @@
 //! Converters between rust and v8 values.
 
 use crate::buf::BufferId;
+use crate::is_v8_bool;
+use crate::is_v8_int;
+use crate::is_v8_number;
+use crate::is_v8_str;
 use crate::js::TimerId;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
@@ -62,7 +66,7 @@ impl FromV8 for u32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     value
       .to_integer(scope)
       .unwrap()
@@ -85,7 +89,7 @@ impl FromV8 for i32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     value.to_integer(scope).unwrap().int32_value(scope).unwrap()
   }
 }
@@ -104,7 +108,7 @@ impl FromV8 for NodeId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -123,7 +127,7 @@ impl FromV8 for BufferId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     BufferId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -142,7 +146,7 @@ impl FromV8 for TimerId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     TimerId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -161,12 +165,7 @@ impl FromV8 for f64 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(
-      value.is_number()
-        || value.is_number_object()
-        || value.is_int32()
-        || value.is_uint32()
-    );
+    debug_assert!(is_v8_number!(value));
     value.to_number(scope).unwrap().number_value(scope).unwrap()
   }
 }
@@ -185,7 +184,7 @@ impl FromV8 for bool {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_boolean() || value.is_boolean_object());
+    debug_assert!(is_v8_bool!(value));
     value.to_boolean(scope).boolean_value(scope)
   }
 }
@@ -318,6 +317,16 @@ macro_rules! is_v8_bool {
 macro_rules! is_v8_int {
   ($value:expr) => {
     $value.is_int32() || $value.is_uint32()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_number {
+  ($value:expr) => {
+    $value.is_number()
+      || $value.is_number_object()
+      || $value.is_int32()
+      || $value.is_uint32()
   };
 }
 
