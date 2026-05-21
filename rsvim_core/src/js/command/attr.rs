@@ -1,6 +1,5 @@
 //! Ex command attributes.
 
-use crate::from_v8_prop;
 use crate::js::converter::*;
 use std::str::FromStr;
 
@@ -67,32 +66,20 @@ impl ToV8 for Nargs {
 }
 
 #[derive(
-  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
 )]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
+  #[from_v8_bool]
   pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
+  #[from_v8_string]
   pub nargs: Nargs,
-}
-
-#[allow(non_camel_case_types)]
-type js_command_attr_Nargs = Nargs;
-
-impl FromV8 for CommandAttributes {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    debug_assert!(obj.is_object() || obj.is_object_template());
-    let obj = obj.to_object(scope).unwrap();
-
-    let mut builder = CommandAttributesBuilder::default();
-
-    from_v8_prop!(builder, obj, scope, bool, bang);
-    from_v8_prop!(builder, obj, scope, js_command_attr_Nargs, nargs);
-
-    builder.build().unwrap()
-  }
 }
