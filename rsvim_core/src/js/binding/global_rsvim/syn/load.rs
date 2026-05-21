@@ -1,6 +1,5 @@
 //! Load tree-sitter grammar APIs.
 
-use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
@@ -14,26 +13,18 @@ pub const GRAMMAR_PATH: &str = "grammarPath";
 pub const GRAMMAR_PATH_DEFAULT: &str = "";
 
 #[derive(
-  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
 )]
 pub struct SynLoadTreeSitterParserOptions {
   #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
+  #[from_v8_string]
   pub grammar_path: CompactString,
-}
-
-impl FromV8 for SynLoadTreeSitterParserOptions {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    debug_assert!(obj.is_object_template() || obj.is_object());
-    let obj = obj.to_object(scope).unwrap();
-    let mut builder = SynLoadTreeSitterParserOptionsBuilder::default();
-
-    from_v8_prop!(builder, obj, scope, CompactString, grammar_path);
-
-    builder.build().unwrap()
-  }
 }
 
 pub struct SynLoadTreeSitterParserFuture {
