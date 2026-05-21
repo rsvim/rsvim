@@ -300,63 +300,6 @@ impl<T> VecFromV8<T> for Vec<T> {
   }
 }
 
-/// Property from_v8 helpers
-#[macro_export]
-macro_rules! from_v8_prop {
-  (@assert_each(bool, $prop:tt)) => {
-    debug_assert!($crate::is_v8_bool!($prop));
-  };
-
-  (@each($scope:ident, bool, $prop:tt)) => {
-    $prop.to_boolean($scope).into()
-  };
-
-  (@assert_each(String, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, String, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  (@assert_each(CompactString, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, CompactString, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
-    paste::paste! {
-      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
-      debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
-      let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
-      from_v8_prop!{@assert_each($ty, [< $prop _value>])};
-      $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
-    }
-  };
-
-  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
-    paste::paste! {
-      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
-      if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
-        let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
-        from_v8_prop!{@assert_each($ty, [< $prop _value>])};
-        $builder.$prop(Some($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} )));
-      }
-    }
-  };
-}
-
 #[macro_export]
 macro_rules! is_v8_str {
   ($value:expr) => {
@@ -375,5 +318,12 @@ macro_rules! is_v8_bool {
 macro_rules! is_v8_int {
   ($value:expr) => {
     $value.is_int32() || $value.is_uint32()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_func {
+  ($value:expr) => {
+    $value.is_function() || $value.is_function_template()
   };
 }
