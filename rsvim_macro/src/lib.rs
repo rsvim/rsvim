@@ -185,6 +185,17 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
+  let bool_types = struct_fields
+    .iter()
+    .filter(|n| is_bool(&n.ty))
+    .map(|n| match &n.ty {
+      syn::Type::Path(p) => match p.path.segments.last() {
+        Some(seg) => seg.ident.clone(),
+        _ => unreachable!(),
+      },
+      _ => unreachable!(),
+    })
+    .collect::<Vec<_>>();
   let bool_uppercases = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
