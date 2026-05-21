@@ -267,9 +267,6 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // bool
       #(
       {
-        let #bool_values = self.#bool_fields.to_v8(scope);
-        binding::set_property_to(scope, obj, #bool_uppercases, #bool_values);
-
         let #bool_names = v8::String::new(scope, #bool_uppercases).unwrap();
         debug_assert!(obj.has_own_property(scope, #bool_names.into()).unwrap_or(false));
         let #bool_values = obj.get(scope, #bool_names.into()).unwrap();
@@ -282,9 +279,6 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // string
       #(
       {
-        let #string_values = self.#string_fields.to_v8(scope);
-        binding::set_property_to(scope, obj, #string_uppercases, #string_values);
-
         let #string_names = v8::String::new(scope, #string_uppercases).unwrap();
         debug_assert!(obj.has_own_property(scope, #string_names.into()).unwrap_or(false));
         let #string_values = obj.get(scope, #string_names.into()).unwrap();
