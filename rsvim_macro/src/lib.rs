@@ -141,6 +141,50 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
+struct FromV8Tokens {
+  fields: Vec<syn::Ident>,
+  names: Vec<syn::Ident>,
+  types: Vec<syn::Ident>,
+  uppercases: Vec<syn::Ident>,
+  values: Vec<syn::Ident>,
+}
+
+impl FromV8Tokens {
+  /// Collects all related identifiers in a single pass over the filtered fields.
+  fn collect<'a, F>(
+    fields: impl Iterator<Item = &'a syn::Field>,
+    predicate: F,
+  ) -> Self
+  where
+    F: Fn(&syn::Field) -> bool,
+  {
+    let mut res = Self {
+      fields: vec![],
+      names: vec![],
+      types: vec![],
+      uppercases: vec![],
+      values: vec![],
+    };
+
+    for f in fields.filter(|&f| predicate(f)) {
+      let ident = f.ident.clone().unwrap();
+      res.names.push(format_ident!("{}_name", ident));
+      res
+        .uppercases
+        .push(format_ident!("{}", ident.to_string().to_uppercase()));
+      res.values.push(format_ident!("{}_value", ident));
+      res.fields.push(ident.clone());
+
+      let ty_ident = match &f.ty {
+        syn::Type::Path(p) => p.path.segments.last().unwrap().ident.clone(),
+        _ => unreachable!("Expected TypePath for field {}", ident),
+      };
+      res.types.push(ty_ident);
+    }
+    res
+  }
+}
+
 #[proc_macro_derive(FromV8, attributes(from_v8_bool, from_v8_string))]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
@@ -148,13 +192,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   let struct_ident = input.ident;
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
-  let struct_fields = match input.data {
-    syn::Data::Struct(struct_data) => match struct_data.fields {
-      syn::Fields::Named(named_field) => named_field.named,
-      _ => unreachable!("Failed to derive FromV8 on non-named field!"),
-    },
-    _ => unreachable!("Failed to derive FromV8 on non-struct data!"),
-  };
+  let struct_fields = get_struct_fields(&input.data);
 
   let _is_option = |field_type: &syn::Type| match field_type {
     syn::Type::Path(p) => match p.path.segments.last() {
@@ -172,89 +210,34 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let is_bool = |field: &syn::Field| {
-    field
-      .attrs
-      .iter()
-      .any(|a| a.path().is_ident("from_v8_bool"))
-  };
+  let bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
+    has_attr(f, "from_v8_bool")
+  });
+  let string_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
+    has_attr(f, "from_v8_string")
+  });
 
-  let is_string = |field: &syn::Field| {
-    field
-      .attrs
-      .iter()
-      .any(|a| a.path().is_ident("from_v8_string"))
-  };
-
-  let bool_fields = struct_fields
-    .iter()
-    .filter(|n| is_bool(n))
-    .map(|n| n.ident.clone().unwrap())
-    .collect::<Vec<_>>();
-  let bool_names = struct_fields
-    .iter()
-    .filter(|n| is_bool(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_name", i))
-    .collect::<Vec<_>>();
-  let bool_types = struct_fields
-    .iter()
-    .filter(|n| is_bool(n))
-    .map(|n| match &n.ty {
-      syn::Type::Path(p) => match p.path.segments.last() {
-        Some(seg) => seg.ident.clone(),
-        _ => unreachable!(),
-      },
-      _ => unreachable!(),
-    })
-    .collect::<Vec<_>>();
-  let bool_uppercases = struct_fields
-    .iter()
-    .filter(|n| is_bool(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
-    .collect::<Vec<_>>();
-  let bool_values = struct_fields
-    .iter()
-    .filter(|n| is_bool(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_value", i))
-    .collect::<Vec<_>>();
-
-  let string_fields = struct_fields
-    .iter()
-    .filter(|n| is_string(n))
-    .map(|n| n.ident.clone().unwrap())
-    .collect::<Vec<_>>();
-  let string_names = struct_fields
-    .iter()
-    .filter(|n| is_string(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_name", i))
-    .collect::<Vec<_>>();
-  let string_types = struct_fields
-    .iter()
-    .filter(|n| is_string(n))
-    .map(|n| match &n.ty {
-      syn::Type::Path(p) => match p.path.segments.last() {
-        Some(seg) => seg.ident.clone(),
-        _ => unreachable!(),
-      },
-      _ => unreachable!(),
-    })
-    .collect::<Vec<_>>();
-  let string_uppercases = struct_fields
-    .iter()
-    .filter(|n| is_string(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
-    .collect::<Vec<_>>();
-  let string_values = struct_fields
-    .iter()
-    .filter(|n| is_string(n))
-    .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_value", i))
-    .collect::<Vec<_>>();
+  // Destructure for `quote!` use
+  let (bool_fields, bool_names, bool_types, bool_uppercases, bool_values) = (
+    &bool_tokens.fields,
+    &bool_tokens.names,
+    &bool_tokens.types,
+    &bool_tokens.uppercases,
+    &bool_tokens.values,
+  );
+  let (
+    string_fields,
+    string_names,
+    string_types,
+    string_uppercases,
+    string_values,
+  ) = (
+    &string_tokens.fields,
+    &string_tokens.names,
+    &string_tokens.types,
+    &string_tokens.uppercases,
+    &string_tokens.values,
+  );
 
   quote! {
 
