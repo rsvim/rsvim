@@ -1,6 +1,5 @@
 //! Ex command attributes.
 
-use crate::from_v8_prop;
 use crate::js::converter::*;
 use std::str::FromStr;
 
@@ -74,6 +73,7 @@ pub struct CommandAttributes {
   pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
+  #[derive(rsvim_macro::FromV8String)]
   pub nargs: Nargs,
 }
 

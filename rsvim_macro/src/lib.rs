@@ -139,6 +139,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
+  println!("from_v8:{:?}", input);
 
   let struct_ident = input.ident;
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
@@ -198,13 +199,48 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .collect::<Vec<_>>();
   let bool_uppercases = struct_fields
     .iter()
-    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
+    .filter(|n| is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let bool_values = struct_fields
     .iter()
-    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
+    .filter(|n| is_bool(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}_value", i))
+    .collect::<Vec<_>>();
+
+  let stringify_fields = struct_fields
+    .iter()
+    .filter(|n| !is_bool(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .collect::<Vec<_>>();
+  let stringify_names = struct_fields
+    .iter()
+    .filter(|n| !is_bool(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let stringify_types = struct_fields
+    .iter()
+    .filter(|n| !is_bool(&n.ty))
+    .map(|n| match &n.ty {
+      syn::Type::Path(p) => match p.path.segments.last() {
+        Some(seg) => seg.ident.clone(),
+        _ => unreachable!(),
+      },
+      _ => unreachable!(),
+    })
+    .collect::<Vec<_>>();
+  let stringify_uppercases = struct_fields
+    .iter()
+    .filter(|n| !is_bool(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let stringify_values = struct_fields
+    .iter()
+    .filter(|n| !is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
@@ -237,9 +273,30 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       }
       )*
 
+      // stringify
+      #(
+      {
+        let #stringify_values = self.#stringify_fields.to_v8(scope);
+        binding::set_property_to(scope, obj, #stringify_uppercases, #stringify_values);
+
+        let #stringify_names = v8::String::new(scope, #stringify_uppercases).unwrap();
+        debug_assert!(obj.has_own_property(scope, #stringify_names.into()).unwrap_or(false));
+        let #stringify_values = obj.get(scope, #stringify_names.into()).unwrap();
+        debug_assert!(#stringify_values.is_string() || #stringify_values.is_string_object());
+        let #stringify_values = #stringify_values.to_string(scope).unwrap();
+        builder.#stringify_fields(#stringify_types::from_v8(scope, #stringify_values.into()));
+      }
+      )*
+
       obj.into()
     }
   }
 
   }.into()
+}
+
+#[proc_macro_derive(FromV8String)]
+/// Helper tag for "FromV8" macro.
+pub fn from_v8_string(_input: TokenStream) -> TokenStream {
+  TokenStream::default()
 }
