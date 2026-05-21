@@ -26,48 +26,40 @@ pub const TRUNCATE_DEFAULT: bool = false;
 pub const WRITE_DEFAULT: bool = false;
 
 #[derive(
-  Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
 )]
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
   #[builder(default = APPEND_DEFAULT)]
+  #[from_v8_bool]
   pub append: bool,
 
   #[builder(default = CREATE_DEFAULT)]
+  #[from_v8_bool]
   pub create: bool,
 
   #[builder(default = CREATE_NEW_DEFAULT)]
+  #[from_v8_bool]
   pub create_new: bool,
 
   #[builder(default = READ_DEFAULT)]
+  #[from_v8_bool]
   pub read: bool,
 
   #[builder(default = TRUNCATE_DEFAULT)]
+  #[from_v8_bool]
   pub truncate: bool,
 
   #[builder(default = WRITE_DEFAULT)]
+  #[from_v8_bool]
   pub write: bool,
-}
-
-impl FromV8 for FsOpenOptions {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    debug_assert!(obj.is_object() || obj.is_object_template());
-    let obj = obj.to_object(scope).unwrap();
-
-    let mut builder = FsOpenOptionsBuilder::default();
-
-    from_v8_prop!(builder, obj, scope, bool, append);
-    from_v8_prop!(builder, obj, scope, bool, create);
-    from_v8_prop!(builder, obj, scope, bool, create_new);
-    from_v8_prop!(builder, obj, scope, bool, read);
-    from_v8_prop!(builder, obj, scope, bool, truncate);
-    from_v8_prop!(builder, obj, scope, bool, write);
-
-    builder.build().unwrap()
-  }
 }
 
 pub fn fs_open(
