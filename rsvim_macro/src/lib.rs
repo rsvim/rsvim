@@ -18,9 +18,9 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let struct_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
-      _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
+      _ => unreachable!("Failed to derive ToV8 on non-named field!"),
     },
-    _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
+    _ => unreachable!("Failed to derive ToV8 on non-struct data!"),
   };
 
   let is_option = |field_type: &syn::Type| match field_type {
@@ -146,9 +146,9 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let struct_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
-      _ => unreachable!("Failed to derive ToV8 macro on non-named field!"),
+      _ => unreachable!("Failed to derive FromV8 on non-named field!"),
     },
-    _ => unreachable!("Failed to derive ToV8 macro on non-struct data!"),
+    _ => unreachable!("Failed to derive FromV8 on non-struct data!"),
   };
 
   let _is_option = |field_type: &syn::Type| match field_type {
