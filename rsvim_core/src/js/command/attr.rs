@@ -66,7 +66,13 @@ impl ToV8 for Nargs {
 }
 
 #[derive(
-  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
 )]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
