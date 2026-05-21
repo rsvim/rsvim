@@ -1,6 +1,5 @@
 //! Open file APIs.
 
-use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
