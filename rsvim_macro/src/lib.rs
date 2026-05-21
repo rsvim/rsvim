@@ -141,6 +141,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
+  let struct_ident_builder = format_ident!("{}Builder", struct_ident);
   let struct_fields = match input.data {
     syn::Data::Struct(struct_data) => match struct_data.fields {
       syn::Fields::Named(named_field) => named_field.named,
@@ -165,18 +166,32 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let fields = struct_fields
+  let is_bool = |field_type: &syn::Type| match field_type {
+    syn::Type::Path(p) => match p.path.segments.last() {
+      Some(seg) => seg.ident == "bool",
+      None => false,
+    },
+    _ => false,
+  };
+
+  let bool_fields = struct_fields
     .iter()
-    .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
+    .filter(|n| is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let uppercases = struct_fields
+  let bool_names = struct_fields
+    .iter()
+    .filter(|n| is_bool(&n.ty))
+    .map(|n| n.ident.clone().unwrap())
+    .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
+    .collect::<Vec<_>>();
+  let bool_uppercases = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let values = struct_fields
+  let bool_values = struct_fields
     .iter()
     .filter(|n| !is_option(&n.ty) && !is_vec(&n.ty))
     .map(|n| n.ident.clone().unwrap())
@@ -221,19 +236,27 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   quote! {
 
-  impl crate::js::converter::ToV8 for #struct_ident {
-    fn to_v8<'s>(
-      &self,
+  impl crate::js::converter::FromV8 for #struct_ident {
+    fn from_v8<'s>(
       scope: &mut v8::PinScope<'s, '_>,
-    ) -> v8::Local<'s, v8::Value> {
-      use crate::js::binding;
+      obj: v8::Local<'s, v8::Value>,
+    ) -> Self {
+      debug_assert!(obj.is_object() || obj.is_object_template());
+      let obj = obj.to_object(scope).unwrap();
 
-      let obj = v8::Object::new(scope);
+      let mut builder = #struct_ident_builder::default();
+
 
       #(
       {
-        let #values = self.#fields.to_v8(scope);
-        binding::set_property_to(scope, obj, #uppercases, #values);
+        let #bool_values = self.#bool_fields.to_v8(scope);
+        binding::set_property_to(scope, obj, #bool_uppercases, #bool_values);
+
+        let #bool_names = v8::String::new(scope, #bool_uppercases).unwrap();
+        debug_assert!(obj.has_own_property(scope, #bool_names.into()).unwrap_or(false));
+        let #bool_values = $obj.get(scope, #bool_names.into()).unwrap();
+        debug_assert!(#bool_values.is_boolean() || #bool_values.is_boolean_object());
+        $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
       }
       )*
 
