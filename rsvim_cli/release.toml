@@ -2,8 +2,10 @@ allow-branch = ["main"]
 pre-release-commit-message = "chore(release): {{version}}"
 pre-release-hook = [
   "git-cliff",
-  "--workdir",
-  "../",
+  "--repository",
+  "..",
+  "--config",
+  "../cliff.toml",
   "--tag",
   "{{version}}",
   "--output",
