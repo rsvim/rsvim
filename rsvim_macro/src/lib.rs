@@ -247,6 +247,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       let mut builder = #struct_ident_builder::default();
 
 
+      // bool
       #(
       {
         let #bool_values = self.#bool_fields.to_v8(scope);
@@ -254,9 +255,10 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
         let #bool_names = v8::String::new(scope, #bool_uppercases).unwrap();
         debug_assert!(obj.has_own_property(scope, #bool_names.into()).unwrap_or(false));
-        let #bool_values = $obj.get(scope, #bool_names.into()).unwrap();
+        let #bool_values = obj.get(scope, #bool_names.into()).unwrap();
         debug_assert!(#bool_values.is_boolean() || #bool_values.is_boolean_object());
-        $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
+        let #bool_values = #bool_values.to_boolean(scope);
+        builder.#bool_fields(bool::from_v8(scope, #bool_values.into()));
       }
       )*
 
