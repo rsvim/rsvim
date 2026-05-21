@@ -135,7 +135,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-#[proc_macro_derive(FromV8)]
+#[proc_macro_derive(FromV8, attributes(from_v8))]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
@@ -210,18 +210,18 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
-  let stringify_fields = struct_fields
+  let string_fields = struct_fields
     .iter()
     .filter(|n| !is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
-  let stringify_names = struct_fields
+  let string_names = struct_fields
     .iter()
     .filter(|n| !is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let stringify_types = struct_fields
+  let string_types = struct_fields
     .iter()
     .filter(|n| !is_bool(&n.ty))
     .map(|n| match &n.ty {
@@ -232,13 +232,13 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       _ => unreachable!(),
     })
     .collect::<Vec<_>>();
-  let stringify_uppercases = struct_fields
+  let string_uppercases = struct_fields
     .iter()
     .filter(|n| !is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
-  let stringify_values = struct_fields
+  let string_values = struct_fields
     .iter()
     .filter(|n| !is_bool(&n.ty))
     .map(|n| n.ident.clone().unwrap())
@@ -273,18 +273,18 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       }
       )*
 
-      // stringify
+      // string
       #(
       {
-        let #stringify_values = self.#stringify_fields.to_v8(scope);
-        binding::set_property_to(scope, obj, #stringify_uppercases, #stringify_values);
+        let #string_values = self.#string_fields.to_v8(scope);
+        binding::set_property_to(scope, obj, #string_uppercases, #string_values);
 
-        let #stringify_names = v8::String::new(scope, #stringify_uppercases).unwrap();
-        debug_assert!(obj.has_own_property(scope, #stringify_names.into()).unwrap_or(false));
-        let #stringify_values = obj.get(scope, #stringify_names.into()).unwrap();
-        debug_assert!(#stringify_values.is_string() || #stringify_values.is_string_object());
-        let #stringify_values = #stringify_values.to_string(scope).unwrap();
-        builder.#stringify_fields(#stringify_types::from_v8(scope, #stringify_values.into()));
+        let #string_names = v8::String::new(scope, #string_uppercases).unwrap();
+        debug_assert!(obj.has_own_property(scope, #string_names.into()).unwrap_or(false));
+        let #string_values = obj.get(scope, #string_names.into()).unwrap();
+        debug_assert!(#string_values.is_string() || #string_values.is_string_object());
+        let #string_values = #string_values.to_string(scope).unwrap();
+        builder.#string_fields(#string_types::from_v8(scope, #string_values.into()));
       }
       )*
 
