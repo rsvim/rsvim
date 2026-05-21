@@ -194,28 +194,22 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
   let struct_fields = get_struct_fields(&input.data);
 
-  let _is_option = |field_type: &syn::Type| match field_type {
-    syn::Type::Path(p) => match p.path.segments.last() {
-      Some(seg) => seg.ident == "Option",
-      None => false,
-    },
-    _ => false,
-  };
-
-  let _is_vec = |field_type: &syn::Type| match field_type {
-    syn::Type::Path(p) => match p.path.segments.last() {
-      Some(seg) => seg.ident == "Vec",
-      None => false,
-    },
-    _ => false,
-  };
+  let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
+  let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
   let bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    has_attr(f, "from_v8_bool")
+    has_attr(f, "from_v8_bool") && !is_option(f) && !is_vec(f)
+  });
+  let optional_bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
+    has_attr(f, "from_v8_bool") && is_option(f)
   });
   let string_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    has_attr(f, "from_v8_string")
+    has_attr(f, "from_v8_string") && !is_option(f) && !is_vec(f)
   });
+  let optional_string_tokens =
+    FromV8Tokens::collect(struct_fields.iter(), |f| {
+      has_attr(f, "from_v8_string") && is_option(f)
+    });
 
   // Destructure for `quote!` use
   let (bool_fields, bool_names, bool_types, bool_uppercases, bool_values) = (
@@ -224,6 +218,19 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     &bool_tokens.types,
     &bool_tokens.uppercases,
     &bool_tokens.values,
+  );
+  let (
+    optional_bool_fields,
+    optional_bool_names,
+    optional_bool_types,
+    optional_bool_uppercases,
+    optional_bool_values,
+  ) = (
+    &optional_bool_tokens.fields,
+    &optional_bool_tokens.names,
+    &optional_bool_tokens.types,
+    &optional_bool_tokens.uppercases,
+    &optional_bool_tokens.values,
   );
   let (
     string_fields,
@@ -237,6 +244,19 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     &string_tokens.types,
     &string_tokens.uppercases,
     &string_tokens.values,
+  );
+  let (
+    optional_string_fields,
+    optional_string_names,
+    optional_string_types,
+    optional_string_uppercases,
+    optional_string_values,
+  ) = (
+    &optional_string_tokens.fields,
+    &optional_string_tokens.names,
+    &optional_string_tokens.types,
+    &optional_string_tokens.uppercases,
+    &optional_string_tokens.values,
   );
 
   quote! {
@@ -264,6 +284,19 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       }
       )*
 
+      // optional bool
+      #(
+      {
+        let #optional_bool_names = v8::String::new(scope, #optional_bool_uppercases).unwrap();
+        if obj.has_own_property(scope, #optional_bool_names.into()).unwrap_or(false) {
+          let #optional_bool_values = obj.get(scope, #optional_bool_names.into()).unwrap();
+          debug_assert!(#optional_bool_values.is_boolean() || #optional_bool_values.is_boolean_object());
+          let #optional_bool_values = #optional_bool_values.to_boolean(scope);
+          builder.#optional_bool_fields(#optional_bool_types::from_v8(scope, #optional_bool_values.into()));
+        }
+      }
+      )*
+
       // string
       #(
       {
@@ -273,6 +306,19 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         debug_assert!(#string_values.is_string() || #string_values.is_string_object());
         let #string_values = #string_values.to_string(scope).unwrap();
         builder.#string_fields(#string_types::from_v8(scope, #string_values.into()));
+      }
+      )*
+
+      // optional string
+      #(
+      {
+        let #optional_string_names = v8::String::new(scope, #optional_string_uppercases).unwrap();
+        if obj.has_own_property(scope, #optional_string_names.into()).unwrap_or(false) {
+          let #optional_string_values = obj.get(scope, #optional_string_names.into()).unwrap();
+          debug_assert!(#optional_string_values.is_string() || #optional_string_values.is_string_object());
+          let #optional_string_values = #optional_string_values.to_string(scope).unwrap();
+          builder.#optional_string_fields(#optional_string_types::from_v8(scope, #optional_string_values.into()));
+        }
       }
       )*
 
