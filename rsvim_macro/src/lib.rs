@@ -8,9 +8,11 @@ use syn::parse_macro_input;
 
 #[proc_macro_derive(ToV8)]
 /// Convert rust struct to js object.
+///
 /// A js object is like a key-value map that contains multiple data fields. In
 /// most use cases, we try to keep these js objects to be simple when passing
 /// them between js and rust. Here are some rules:
+///
 /// - Js object only contains 1-layer, all the field values are not js object,
 ///   thus it is not nested.
 /// - All the field values can be either plain values such as
