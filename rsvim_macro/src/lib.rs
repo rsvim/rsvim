@@ -288,7 +288,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       }
       )*
 
-      obj.into()
+      builder.build().unwrap()
     }
   }
 
