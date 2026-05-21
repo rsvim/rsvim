@@ -85,8 +85,8 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 
   let plain =
     ToV8Tokens::collect(struct_fields.iter(), |f| !is_option(f) && !is_vec(f));
-  let optional = ToV8Tokens::collect(struct_fields.iter(), |f| is_option(f));
-  let vec = ToV8Tokens::collect(struct_fields.iter(), |f| is_vec(f));
+  let optional = ToV8Tokens::collect(struct_fields.iter(), is_option);
+  let vec = ToV8Tokens::collect(struct_fields.iter(), is_vec);
 
   // Destructure for `quote!` use
   let (fields, uppercases, values) =
