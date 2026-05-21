@@ -1,6 +1,5 @@
 //! Ex command options.
 
-use crate::js::converter::*;
 use compact_str::CompactString;
 
 /// Command option names.
@@ -29,19 +28,3 @@ pub struct CommandOptions {
   #[from_v8_string]
   pub alias: Option<CompactString>,
 }
-
-// impl FromV8 for CommandOptions {
-//   fn from_v8<'s>(
-//     scope: &mut v8::PinScope<'s, '_>,
-//     obj: v8::Local<'s, v8::Value>,
-//   ) -> Self {
-//     debug_assert!(obj.is_object() || obj.is_object_template());
-//     let obj = obj.to_object(scope).unwrap();
-//     let mut builder = CommandOptionsBuilder::default();
-//
-//     from_v8_prop!(builder, obj, scope, bool, force);
-//     from_v8_prop!(builder, obj, scope, CompactString, alias, optional);
-//
-//     builder.build().unwrap()
-//   }
-// }
