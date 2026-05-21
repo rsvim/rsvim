@@ -174,6 +174,13 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       .any(|a| a.path().is_ident("from_v8_bool"))
   };
 
+  let is_string = |field: &syn::Field| {
+    field
+      .attrs
+      .iter()
+      .any(|a| a.path().is_ident("from_v8_string"))
+  };
+
   let bool_fields = struct_fields
     .iter()
     .filter(|n| is_bool(&n))
@@ -181,13 +188,13 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .collect::<Vec<_>>();
   let bool_names = struct_fields
     .iter()
-    .filter(|n| is_bool(&n.ty))
+    .filter(|n| is_bool(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let bool_types = struct_fields
     .iter()
-    .filter(|n| is_bool(&n.ty))
+    .filter(|n| is_bool(&n))
     .map(|n| match &n.ty {
       syn::Type::Path(p) => match p.path.segments.last() {
         Some(seg) => seg.ident.clone(),
@@ -198,31 +205,31 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .collect::<Vec<_>>();
   let bool_uppercases = struct_fields
     .iter()
-    .filter(|n| is_bool(&n.ty))
+    .filter(|n| is_bool(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let bool_values = struct_fields
     .iter()
-    .filter(|n| is_bool(&n.ty))
+    .filter(|n| is_bool(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
 
   let string_fields = struct_fields
     .iter()
-    .filter(|n| !is_bool(&n.ty))
+    .filter(|n| is_string(&n))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
   let string_names = struct_fields
     .iter()
-    .filter(|n| !is_bool(&n.ty))
+    .filter(|n| is_string(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let string_types = struct_fields
     .iter()
-    .filter(|n| !is_bool(&n.ty))
+    .filter(|n| is_string(&n))
     .map(|n| match &n.ty {
       syn::Type::Path(p) => match p.path.segments.last() {
         Some(seg) => seg.ident.clone(),
@@ -233,13 +240,13 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .collect::<Vec<_>>();
   let string_uppercases = struct_fields
     .iter()
-    .filter(|n| !is_bool(&n.ty))
+    .filter(|n| is_string(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}", i.to_string().to_uppercase()))
     .collect::<Vec<_>>();
   let string_values = struct_fields
     .iter()
-    .filter(|n| !is_bool(&n.ty))
+    .filter(|n| is_string(&n))
     .map(|n| n.ident.clone().unwrap())
     .map(|i| format_ident!("{}_value", i))
     .collect::<Vec<_>>();
