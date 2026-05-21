@@ -190,7 +190,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .iter()
     .filter(|n| is_bool(n))
     .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
+    .map(|i| format_ident!("{}_name", i))
     .collect::<Vec<_>>();
   let bool_types = struct_fields
     .iter()
@@ -225,7 +225,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     .iter()
     .filter(|n| is_string(n))
     .map(|n| n.ident.clone().unwrap())
-    .map(|i| format_ident!("{}_name", i.to_string().to_uppercase()))
+    .map(|i| format_ident!("{}_name", i))
     .collect::<Vec<_>>();
   let string_types = struct_fields
     .iter()
