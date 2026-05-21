@@ -167,17 +167,16 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
     _ => false,
   };
 
-  let is_bool = |field_type: &syn::Type| match field_type {
-    syn::Type::Path(p) => match p.path.segments.last() {
-      Some(seg) => seg.ident == "bool",
-      None => false,
-    },
-    _ => false,
+  let is_bool = |field: &syn::Field| {
+    field
+      .attrs
+      .iter()
+      .any(|a| a.path().is_ident("from_v8_bool"))
   };
 
   let bool_fields = struct_fields
     .iter()
-    .filter(|n| is_bool(&n.ty))
+    .filter(|n| is_bool(&n))
     .map(|n| n.ident.clone().unwrap())
     .collect::<Vec<_>>();
   let bool_names = struct_fields
