@@ -13,8 +13,8 @@ use syn::parse_macro_input;
 /// When passing key-value map data between js and rust, we try to keep these
 /// data objects to be simple. Here are some rules:
 ///
-/// - Js object only contains 1-layer, all the field values are not js object,
-///   thus it is not nested.
+/// - Js object only contains 1-layer, all the field values are no more js
+///   object, i.e. the js object is not nested.
 /// - All the field values can be either plain values such as
 ///   boolean/string/etc, or js array that only contains plain values (again,
 ///   such as boolean/string/etc).
