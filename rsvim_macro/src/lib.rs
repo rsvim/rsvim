@@ -189,18 +189,21 @@ impl FromV8Tokens {
                     inner_p.path.segments.last().unwrap().ident.clone()
                   }
                   _ => unreachable!(
-                    "Expected TypePath inside GenericArgument::Type for field {}",
+                    "Expected syn::GenericArgument::Type(syn::Type::Path(...)) for {}",
                     ident
                   ),
                 }
               }
-              _ => unreachable!("Expected AngleBracketed for field {}", ident),
+              _ => unreachable!(
+                "Expected syn::PathArguments::AngleBracketed(...) for {}",
+                ident
+              ),
             }
           } else {
             seg.ident.clone()
           }
         }
-        _ => unreachable!("Expected TypePath for field {}", ident),
+        _ => unreachable!("Expected syn::Type::Path(...) for {}", ident),
       };
       res.r#type.push(ty_ident);
     }
@@ -370,13 +373,38 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 /// safe in the code base.
 ///
 /// This macro helps defining a new ID struct and generate all the methods it
-/// needs.
+/// needs. And ID by default starts from 0.
 pub fn incremental_id(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("incremental_id:{:?}", input);
-
   let struct_ident = input.ident;
-  println!("incremental_id struct_ident:{}", struct_ident);
+
+  let field = match input.data {
+    syn::Data::Struct(data) => match data.fields {
+      syn::Fields::Unnamed(fields) => fields.unnamed.first().unwrap().clone(),
+      _ => {
+        unreachable!("Expect syn::Fields::Unnamed(...) for {}", struct_ident)
+      }
+    },
+    _ => unreachable!("Expect syn::Data::Struct(...) for {}", struct_ident),
+  };
+
+  let field_ty = &field.ty;
+
+  let start_from_value: isize = field
+    .attrs
+    .iter()
+    .filter(|a| a.path().is_ident("start_from"))
+    .flat_map(|a| match a.parse_args::<syn::LitInt>() {
+      Ok(i) => Some(i.base10_parse::<isize>().unwrap()),
+      Err(_) => None,
+    })
+    .next()
+    .unwrap_or(0); // defaults to 0
+
+  println!(
+    "incremental_id ident:{}, ty:{:?}, start:{}",
+    struct_ident, field_ty, start_from_value
+  );
 
   TokenStream::default()
 }
