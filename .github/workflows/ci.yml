@@ -116,6 +116,9 @@ jobs:
           submodules: recursive
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
+      - name: Nextest (--no-default-features)
+        if: ${{ contains(matrix.os, 'ubuntu') }}
+        run: cargo nextest run --no-default-features --color=never --workspace
       - name: Nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
