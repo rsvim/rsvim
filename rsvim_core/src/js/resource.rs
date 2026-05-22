@@ -4,13 +4,13 @@ pub mod file;
 pub mod text_decoder;
 
 use crate::prelude::*;
-use crate::structural_id_impl;
 use file::FileResource;
 use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
 
 // ResourceId start from 1.
-structural_id_impl!(i32, ResourceId, 1);
+#[derive(Copy, Clone, rsvim_macro::IncrementalId)]
+pub struct ResourceId(#[start_from(1)] i32);
 
 /// Resourcify
 pub trait Resourcify: Sized + Debug + Clone {
