@@ -486,7 +486,7 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     },
     // unsigned integers
     "u8" | "u16" | "u32" | "u64" | "usize" => quote! {
-      impl std::maker::Copy for #struct_ident {}
+      impl std::marker::Copy for #struct_ident {}
       impl std::clone::Clone for #struct_ident {}
       impl std::cmp::PartialEq<#field_ty> for #struct_ident {
         fn eq(&self, other: &#field_ty) -> bool {
