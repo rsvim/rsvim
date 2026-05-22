@@ -426,8 +426,6 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
   let expanded = match field_ty.to_string().as_str() {
     // signed integers
     "i8" | "i16" | "i32" | "i64" | "isize" => quote! {
-      impl std::marker::Copy for #struct_ident {}
-      impl std::clone::Clone for #struct_ident {}
       impl std::cmp::PartialEq<#field_ty> for #struct_ident {
         fn eq(&self, other: &#field_ty) -> bool {
           self.0.eq(other)
@@ -486,8 +484,6 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     },
     // unsigned integers
     "u8" | "u16" | "u32" | "u64" | "usize" => quote! {
-      impl std::marker::Copy for #struct_ident {}
-      impl std::clone::Clone for #struct_ident {}
       impl std::cmp::PartialEq<#field_ty> for #struct_ident {
         fn eq(&self, other: &#field_ty) -> bool {
           self.0.eq(other)
