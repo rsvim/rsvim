@@ -409,6 +409,17 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     struct_ident, field_ty, start_from_value
   );
 
+  let field_ty = field_ty.to_string();
+  match field_ty.as_str() {
+    // signed integers
+    "i8" | "i16" | "i32" | "i64" | "isize" => {}
+    // unsigned integers
+    "u8" | "u16" | "u32" | "u64" | "usize" => {}
+    // strings
+    "String" | "CompactString" => {}
+    _ => unreachable!("Expect integer/string types for {}", struct_ident),
+  }
+
   TokenStream::default()
 }
 
