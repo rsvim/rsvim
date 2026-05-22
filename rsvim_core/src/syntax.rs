@@ -2,7 +2,6 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::structural_id_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use itertools::Itertools;
