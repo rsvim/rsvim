@@ -1,6 +1,11 @@
 //! Converters between rust and v8 values.
 
 use crate::buf::BufferId;
+use crate::is_v8_bool;
+use crate::is_v8_func;
+use crate::is_v8_int;
+use crate::is_v8_number;
+use crate::is_v8_str;
 use crate::js::TimerId;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
@@ -62,7 +67,7 @@ impl FromV8 for u32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     value
       .to_integer(scope)
       .unwrap()
@@ -85,7 +90,7 @@ impl FromV8 for i32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     value.to_integer(scope).unwrap().int32_value(scope).unwrap()
   }
 }
@@ -104,7 +109,7 @@ impl FromV8 for NodeId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     NodeId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -123,7 +128,7 @@ impl FromV8 for BufferId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     BufferId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -142,7 +147,7 @@ impl FromV8 for TimerId {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_int32() || value.is_uint32());
+    debug_assert!(is_v8_int!(value));
     TimerId::from(value.to_integer(scope).unwrap().int32_value(scope).unwrap())
   }
 }
@@ -161,12 +166,7 @@ impl FromV8 for f64 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(
-      value.is_number()
-        || value.is_number_object()
-        || value.is_int32()
-        || value.is_uint32()
-    );
+    debug_assert!(is_v8_number!(value));
     value.to_number(scope).unwrap().number_value(scope).unwrap()
   }
 }
@@ -185,7 +185,7 @@ impl FromV8 for bool {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_boolean() || value.is_boolean_object());
+    debug_assert!(is_v8_bool!(value));
     value.to_boolean(scope).boolean_value(scope)
   }
 }
@@ -222,7 +222,7 @@ impl FromV8 for String {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_string() || value.is_string_object());
+    debug_assert!(is_v8_str!(value));
     value.to_string(scope).unwrap().to_rust_string_lossy(scope)
   }
 }
@@ -232,7 +232,7 @@ impl FromV8 for CompactString {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_string() || value.is_string_object());
+    debug_assert!(is_v8_str!(value));
     value
       .to_string(scope)
       .unwrap()
@@ -255,7 +255,7 @@ impl FromV8 for Rc<v8::Global<v8::Function>> {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_function() || value.is_function_template());
+    debug_assert!(is_v8_func!(value));
     let value = v8::Local::<'s, v8::Function>::try_from(value).unwrap();
     Rc::new(v8::Global::new(scope, value))
   }
@@ -300,63 +300,6 @@ impl<T> VecFromV8<T> for Vec<T> {
   }
 }
 
-/// Property from_v8 helpers
-#[macro_export]
-macro_rules! from_v8_prop {
-  (@assert_each(bool, $prop:tt)) => {
-    debug_assert!($crate::is_v8_bool!($prop));
-  };
-
-  (@each($scope:ident, bool, $prop:tt)) => {
-    $prop.to_boolean($scope).into()
-  };
-
-  (@assert_each(String, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, String, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  (@assert_each(CompactString, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, CompactString, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
-    debug_assert!($crate::is_v8_str!($prop));
-  };
-
-  (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
-    $prop.to_string($scope).unwrap().into()
-  };
-
-  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
-    paste::paste! {
-      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
-      debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
-      let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
-      from_v8_prop!{@assert_each($ty, [< $prop _value>])};
-      $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
-    }
-  };
-
-  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
-    paste::paste! {
-      let [< $prop _name >] = v8::String::new($scope, [< $prop:snake:upper >]).unwrap();
-      if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
-        let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
-        from_v8_prop!{@assert_each($ty, [< $prop _value>])};
-        $builder.$prop(Some($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} )));
-      }
-    }
-  };
-}
-
 #[macro_export]
 macro_rules! is_v8_str {
   ($value:expr) => {
@@ -375,5 +318,22 @@ macro_rules! is_v8_bool {
 macro_rules! is_v8_int {
   ($value:expr) => {
     $value.is_int32() || $value.is_uint32()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_number {
+  ($value:expr) => {
+    $value.is_number()
+      || $value.is_number_object()
+      || $value.is_int32()
+      || $value.is_uint32()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_func {
+  ($value:expr) => {
+    $value.is_function() || $value.is_function_template()
   };
 }

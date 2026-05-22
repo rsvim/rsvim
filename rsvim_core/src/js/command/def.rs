@@ -1,5 +1,6 @@
 //! Ex command definition.
 
+use crate::is_v8_func;
 use crate::is_v8_str;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
@@ -47,7 +48,7 @@ impl FromV8CallbackArgs for CommandDefinition {
     debug_assert!(args.length() == 4);
     debug_assert!(is_v8_str!(args.get(0)));
     let name = args.get(0).to_rust_string_lossy(scope);
-    debug_assert!(args.get(1).is_function());
+    debug_assert!(is_v8_func!(args.get(1)));
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     debug_assert!(args.get(2).is_object());
