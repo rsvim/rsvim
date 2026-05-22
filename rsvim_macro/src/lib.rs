@@ -495,11 +495,9 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
                   .unwrap();
               Self::from(v)
           }
-
           pub const fn zero() -> Self {
               Self(0)
           }
-
           // This will emit methods only for signed integers
           #signed_methods
       }
