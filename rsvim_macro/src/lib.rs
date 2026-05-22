@@ -373,6 +373,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 /// needs.
 pub fn incremental_id(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
+  println!("incremental_id:{:?}", input);
 
   TokenStream::default()
 }
