@@ -138,6 +138,7 @@ class Clippy(Cmd):
             "-m",
             "--minimal-version",
             action="store_true",
+            dest="minimal_version",
             help="With minimal rust toolchain version 1.89.0",
         )
         self.clippy_parser.add_argument("-v", "--verbose", action="store_true")
@@ -178,6 +179,13 @@ class Test(Cmd):
         self.test_parser.add_argument(
             "-l", "--list", action="store_true", dest="list_test"
         )
+        self.test_parser.add_argument(
+            "-m",
+            "--minimal-version",
+            action="store_true",
+            dest="minimal_version",
+            help="With minimal rust toolchain version 1.89.0",
+        )
         self.test_parser.add_argument("name", nargs="*", default=[])
 
     def name(self) -> str:
@@ -190,14 +198,18 @@ class Test(Cmd):
         if args.list_test:
             self.list()
         else:
-            self.test(args.name, args.no_default_features)
+            self.test(args.name, args.no_default_features, args.minimal_version)
 
-    def test(self, name, no_default_features) -> None:
+    def test(self, name, no_default_features, minimal_version) -> None:
         sccache()
         rustflags()
         rust_backtrace()
         rsvim_log()
-        cmd = "cargo nextest run --no-capture"
+
+        if minimal_version:
+            cmd = "cargo +1.89 nextest run --no-capture"
+        else:
+            cmd = "cargo nextest run --no-capture"
 
         if no_default_features:
             cmd = f"{cmd} --no-default-features"
@@ -264,6 +276,13 @@ class Build(Cmd):
         )
         self.build_parser.add_argument("-r", "--release", action="store_true")
         self.build_parser.add_argument("-n", "--nightly", action="store_true")
+        self.build_parser.add_argument(
+            "-m",
+            "--minimal-version",
+            action="store_true",
+            dest="minimal_version",
+            help="With minimal rust toolchain version 1.89.0",
+        )
 
     def name(self) -> str:
         return self._name
@@ -274,7 +293,10 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        cmd = "cargo build"
+        if args.minimal_version:
+            cmd = "cargo +1.89 build"
+        else:
+            cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
         elif args.nightly:
