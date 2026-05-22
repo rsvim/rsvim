@@ -392,8 +392,6 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     _ => unreachable!("Expect syn::Type::Path(...) for {}", struct_ident),
   };
 
-  println!("incremental_id ident:{}, ty:{:?}", struct_ident, field_ty);
-
   let atomic_ty = match field_ty.to_string().as_str() {
     "i8" => quote!(std::sync::atomic::AtomicI8),
     "u8" => quote!(std::sync::atomic::AtomicU8),
