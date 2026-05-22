@@ -1,13 +1,15 @@
 //! The node structure of the internal tree.
 
 use crate::prelude::*;
-use crate::structural_id_impl;
 use crate::ui::tree::internal::context::TreeContextWk;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
 // NodeId starts from 100001
-structural_id_impl!(i32, NodeId, 100001);
+#[derive(
+  Copy, Clone, rsvim_macro::IncrementalId, serde::Serialize, serde::Deserialize,
+)]
+pub struct NodeId(#[start_from(100001)] i32);
 
 pub trait Inodify: Sized + Clone + Debug {
   fn id(&self) -> NodeId;

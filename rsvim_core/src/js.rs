@@ -38,7 +38,6 @@ use crate::cli::CliOptions;
 use crate::cmdltext::CmdlineTextArc;
 use crate::hl::ColorSchemeManagerArc;
 use crate::prelude::*;
-use crate::structural_id_impl;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
