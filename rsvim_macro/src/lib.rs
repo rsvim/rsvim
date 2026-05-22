@@ -479,14 +479,14 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
       }
       impl #struct_ident {
           pub fn next() -> Self {
-              static VALUE: #atomic_ty = #atomic_ty::new(#start_from_value as #field_ty);
+              static VALUE: #atomic_ty = #atomic_ty::new(#start_from_value);
               let v = VALUE
                   .fetch_update(
                       std::sync::atomic::Ordering::Relaxed,
                       std::sync::atomic::Ordering::Relaxed,
                       |x| {
                           Some(if x == #field_ty::MAX {
-                              #start_from_value as #field_ty
+                              #start_from_value
                           } else {
                               x + 1
                           })
