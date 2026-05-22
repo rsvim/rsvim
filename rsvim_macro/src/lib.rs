@@ -409,18 +409,142 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     struct_ident, field_ty, start_from_value
   );
 
-  let field_ty = field_ty.to_string();
-  match field_ty.as_str() {
-    // signed integers
-    "i8" | "i16" | "i32" | "i64" | "isize" => {}
-    // unsigned integers
-    "u8" | "u16" | "u32" | "u64" | "usize" => {}
-    // strings
-    "String" | "CompactString" => {}
-    _ => unreachable!("Expect integer/string types for {}", struct_ident),
-  }
+  let atomic_ty = match field_ty.to_string().as_str() {
+    "i8" => format_ident!("std::sync::atomic::AtomicI8"),
+    "u8" => format_ident!("std::sync::atomic::AtomicU8"),
+    "i16" => format_ident!("std::sync::atomic::AtomicI16"),
+    "u16" => format_ident!("std::sync::atomic::AtomicU16"),
+    "i32" => format_ident!("std::sync::atomic::AtomicI32"),
+    "u32" => format_ident!("std::sync::atomic::AtomicU32"),
+    "i64" => format_ident!("std::sync::atomic::AtomicI64"),
+    "u64" => format_ident!("std::sync::atomic::AtomicU64"),
+    "isize" => format_ident!("std::sync::atomic::AtomicIsize"),
+    "usize" => format_ident!("std::sync::atomic::AtomicUsize"),
+    _ => unreachable!("Expect integer type for {}", struct_ident),
+  };
 
-  TokenStream::default()
+  let expanded = match field_ty.to_string().as_str() {
+    // signed integers
+    "i8" | "i16" | "i32" | "i64" | "isize" => quote! {
+      impl std::maker::Copy for #struct_ident {}
+      impl std::clone::Clone for #struct_ident {}
+      impl std::cmp::PartialEq<#field_ty> for #struct_ident {
+        fn eq(&self, other: &#field_ty) -> bool {
+          self.0.eq(other)
+        }
+      }
+      impl std::cmp::PartialOrd<#field_ty> for #struct_ident {
+        fn partial_cmp(&self, other: &#field_ty) -> Option<std::cmp::Ordering> {
+          self.0.partial_cmp(other)
+        }
+      }
+      impl std::fmt::Debug for #struct_ident {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          f.write_fmt(format_args!("{:?}", self.0))
+        }
+      }
+      impl std::fmt::Display for #struct_ident {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          f.write_fmt(format_args!("{}", self.0))
+        }
+      }
+      impl From<#field_ty> for #struct_ident {
+        fn from(value: #field_ty) -> Self {
+          Self(value)
+        }
+      }
+      impl From<#struct_ident> for #field_ty {
+        fn from(value: #struct_ident) -> Self {
+          value.0
+        }
+      }
+      impl #struct_ident {
+        pub fn next() -> Self {
+          static VALUE: #atomic_ty = #atomic_ty::new(#start_from_value);
+          let v = VALUE
+            .fetch_update(
+              std::sync::atomic::Ordering::Relaxed,
+              std::sync::atomic::Ordering::Relaxed,
+              |x| {
+                Some(if x == #field_ty::MAX {
+                  #start_from_value
+                } else {
+                  x + 1
+                })
+              },
+            )
+            .unwrap();
+          Self::from(v)
+        }
+        pub const fn zero() -> Self {
+          Self(0)
+        }
+        pub const fn negative_one() -> Self {
+          Self(-1)
+        }
+      }
+    },
+    // unsigned integers
+    "u8" | "u16" | "u32" | "u64" | "usize" => quote! {
+      impl std::maker::Copy for #struct_ident {}
+      impl std::clone::Clone for #struct_ident {}
+      impl std::cmp::PartialEq<#field_ty> for #struct_ident {
+        fn eq(&self, other: &#field_ty) -> bool {
+          self.0.eq(other)
+        }
+      }
+      impl std::cmp::PartialOrd<#field_ty> for #struct_ident {
+        fn partial_cmp(&self, other: &#field_ty) -> Option<std::cmp::Ordering> {
+          self.0.partial_cmp(other)
+        }
+      }
+      impl std::fmt::Debug for #struct_ident {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          f.write_fmt(format_args!("{:?}", self.0))
+        }
+      }
+      impl std::fmt::Display for #struct_ident {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+          f.write_fmt(format_args!("{}", self.0))
+        }
+      }
+      impl From<#field_ty> for #struct_ident {
+        fn from(value: #field_ty) -> Self {
+          Self(value)
+        }
+      }
+      impl From<#struct_ident> for #field_ty {
+        fn from(value: #struct_ident) -> Self {
+          value.0
+        }
+      }
+      impl #struct_ident {
+        pub fn next() -> Self {
+          static VALUE: #atomic_ty = #atomic_ty::new(#start_from_value);
+          let v = VALUE
+            .fetch_update(
+              std::sync::atomic::Ordering::Relaxed,
+              std::sync::atomic::Ordering::Relaxed,
+              |x| {
+                Some(if x == #field_ty::MAX {
+                  #start_from_value
+                } else {
+                  x + 1
+                })
+              },
+            )
+            .unwrap();
+          Self::from(v)
+        }
+        pub const fn zero() -> Self {
+          Self(0)
+        }
+      }
+    },
+    _ => unreachable!("Expect integer types for {}", struct_ident),
+  };
+
+  expanded.into()
 }
 
 // incremental_id }}}
