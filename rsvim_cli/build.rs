@@ -83,8 +83,8 @@ fn version() {
     resolved = format!("{}swc_core={}\n", resolved, swc_core);
   }
 
-  let output_path =
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../RSVIM_VERSION.TXT");
+  let out_dir = std::env::var("OUT_DIR").unwrap();
+  let output_path = Path::new(&out_dir).join("RSVIM_VERSION.TXT");
   println!("{LOG} Writing version into {:?}...", output_path.as_path());
 
   std::fs::write(output_path.as_path(), resolved.as_bytes()).unwrap();
@@ -97,8 +97,8 @@ fn snapshot() {
   let mut vec = Vec::with_capacity(snapshot.len());
   vec.extend_from_slice(&snapshot);
 
-  let output_path =
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../RSVIM_SNAPSHOT.BIN");
+  let out_dir = std::env::var("OUT_DIR").unwrap();
+  let output_path = Path::new(&out_dir).join("RSVIM_SNAPSHOT.BIN");
   println!("{LOG} Writing snapshot into {:?}...", output_path.as_path());
   std::fs::write(output_path.as_path(), vec.into_boxed_slice()).unwrap();
 }
