@@ -493,7 +493,7 @@ if __name__ == "__main__":
         Format(subparsers),
         Miri(subparsers),
         Npm(subparsers),
-        Release(subparsers),
+        # Release(subparsers),
         Test(subparsers),
     ]
 
