@@ -2,6 +2,7 @@
 
 use crate::buf::BufferId;
 use crate::is_v8_bool;
+use crate::is_v8_func;
 use crate::is_v8_int;
 use crate::is_v8_number;
 use crate::is_v8_str;
@@ -221,7 +222,7 @@ impl FromV8 for String {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_string() || value.is_string_object());
+    debug_assert!(is_v8_str!(value));
     value.to_string(scope).unwrap().to_rust_string_lossy(scope)
   }
 }
@@ -231,7 +232,7 @@ impl FromV8 for CompactString {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_string() || value.is_string_object());
+    debug_assert!(is_v8_str!(value));
     value
       .to_string(scope)
       .unwrap()
@@ -254,7 +255,7 @@ impl FromV8 for Rc<v8::Global<v8::Function>> {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    debug_assert!(value.is_function() || value.is_function_template());
+    debug_assert!(is_v8_func!(value));
     let value = v8::Local::<'s, v8::Function>::try_from(value).unwrap();
     Rc::new(v8::Global::new(scope, value))
   }
