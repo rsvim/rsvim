@@ -388,7 +388,10 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     _ => unreachable!("Expect syn::Data::Struct(...) for {}", struct_ident),
   };
 
-  let field_ty = &field.ty;
+  let field_ty = match field.ty {
+    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.clone(),
+    _ => unreachable!("Expect syn::Type::Path(...) for {}", struct_ident),
+  };
 
   let start_from_value: isize = field
     .attrs
