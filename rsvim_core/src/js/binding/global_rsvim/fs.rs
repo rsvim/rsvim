@@ -41,8 +41,7 @@ pub fn open<'s>(
   debug_assert!(is_v8_str!(args.get(0)));
   let filename = args.get(0).to_rust_string_lossy(scope);
   debug_assert!(args.get(1).is_object());
-  let options =
-    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
+  let options = FsOpenOptions::from_v8(scope, args.get(1));
   trace!("Rsvim.fs.open:{:?} {:?}", filename, options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
@@ -84,8 +83,7 @@ pub fn open_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
-  let options =
-    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
+  let options = FsOpenOptions::from_v8(scope, args.get(1));
   trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
   let state_rc = JsRuntime::state(scope);
@@ -96,7 +94,7 @@ pub fn open_sync<'s>(
     Ok(file_rid) => {
       let file_rid = Into::<i32>::into(file_rid);
       let file_rid = file_rid.to_v8(scope);
-      rv.set(file_rid.into());
+      rv.set(file_rid);
     }
     Err(e) => {
       binding::throw_exception(scope, &e);
@@ -112,7 +110,7 @@ pub fn close<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   trace!("Rsvim.fs.close:{:?}", file_rid);
   let file_rid = ResourceId::from(file_rid);
 
@@ -131,7 +129,7 @@ pub fn read<'s>(
   debug_assert!(args.length() == 2);
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
@@ -177,7 +175,7 @@ pub fn read_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
@@ -206,7 +204,7 @@ pub fn write<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
@@ -255,7 +253,7 @@ pub fn write_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_int!(args.get(0)));
-  let file_rid = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let file_rid = i32::from_v8(scope, args.get(0));
   let file_rid = ResourceId::from(file_rid);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();

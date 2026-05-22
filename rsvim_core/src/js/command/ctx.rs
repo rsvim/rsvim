@@ -2,7 +2,6 @@
 
 use crate::buf::BufferId;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 
@@ -18,7 +17,9 @@ pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 pub const CURRENT_BUFFER_ID_DEFAULT: BufferId = BufferId::negative_one();
 pub const CURRENT_WINDOW_ID_DEFAULT: NodeId = NodeId::negative_one();
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
+)]
 pub struct CommandContext {
   #[builder(default = BANG_DEFAULT)]
   // bang
@@ -32,23 +33,4 @@ pub struct CommandContext {
 
   #[builder(default = CURRENT_WINDOW_ID_DEFAULT)]
   pub current_window_id: NodeId,
-}
-
-impl StructToV8 for CommandContext {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    debug_assert!(self.current_buffer_id > 0);
-    debug_assert!(self.current_window_id > 0);
-
-    to_v8_prop!(self, obj, scope, bang);
-    to_v8_prop!(self, obj, scope, args, Vec);
-    to_v8_prop!(self, obj, scope, current_buffer_id);
-    to_v8_prop!(self, obj, scope, current_window_id);
-
-    obj
-  }
 }

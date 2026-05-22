@@ -1,11 +1,11 @@
 //! Ex command definition.
 
+use crate::is_v8_func;
 use crate::is_v8_str;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
 use crate::prelude::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
@@ -19,7 +19,7 @@ pub const CALLBACK: &str = "callback";
 pub const ATTRIBUTES: &str = "attributes";
 pub const OPTIONS: &str = "options";
 
-#[derive(Clone)]
+#[derive(Clone, rsvim_macro::ToV8)]
 pub struct CommandDefinition {
   pub name: CompactString,
   pub callback: CommandCallback,
@@ -40,23 +40,21 @@ impl Debug for CommandDefinition {
   }
 }
 
-impl StructFromV8CallbackArguments for CommandDefinition {
-  fn from_v8_callback_arguments<'s>(
+impl FromV8CallbackArgs for CommandDefinition {
+  fn from_v8_callback_args<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Self {
     debug_assert!(args.length() == 4);
     debug_assert!(is_v8_str!(args.get(0)));
     let name = args.get(0).to_rust_string_lossy(scope);
-    debug_assert!(args.get(1).is_function());
+    debug_assert!(is_v8_func!(args.get(1)));
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     debug_assert!(args.get(2).is_object());
-    let attributes =
-      CommandAttributes::from_v8(scope, args.get(2).to_object(scope).unwrap());
+    let attributes = CommandAttributes::from_v8(scope, args.get(2));
     debug_assert!(args.get(3).is_object());
-    let options =
-      CommandOptions::from_v8(scope, args.get(3).to_object(scope).unwrap());
+    let options = CommandOptions::from_v8(scope, args.get(3));
 
     Self {
       name: name.to_compact_string(),
@@ -64,21 +62,5 @@ impl StructFromV8CallbackArguments for CommandDefinition {
       attributes,
       options,
     }
-  }
-}
-
-impl StructToV8 for CommandDefinition {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, name);
-    to_v8_prop!(self, obj, scope, callback);
-    to_v8_prop!(self, obj, scope, attributes);
-    to_v8_prop!(self, obj, scope, options);
-
-    obj
   }
 }

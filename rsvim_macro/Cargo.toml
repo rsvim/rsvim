@@ -1,0 +1,26 @@
+[package]
+authors.workspace = true
+categories.workspace = true
+description = "The (proc) macros for RSVIM text editor."
+documentation.workspace = true
+edition.workspace = true
+exclude.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "rsvim_macro"
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = { workspace = true }
+quote = { workspace = true }
+syn = { workspace = true, features = ["extra-traits"] }
+
+[lints]
+workspace = true

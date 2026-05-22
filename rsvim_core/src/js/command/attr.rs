@@ -1,8 +1,6 @@
 //! Ex command attributes.
 
-use crate::from_v8_prop;
 use crate::js::converter::*;
-use crate::to_v8_prop;
 use std::str::FromStr;
 
 /// Command attribute name.
@@ -47,61 +45,41 @@ pub enum Nargs {
   Any,
 }
 
-impl StringFromV8 for Nargs {
+impl FromV8 for Nargs {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::String>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
-    let nargs = value.to_rust_string_lossy(scope);
+    debug_assert!(value.is_string() || value.is_string_object());
+    let nargs = value.to_string(scope).unwrap().to_rust_string_lossy(scope);
     Nargs::from_str(&nargs).unwrap()
   }
 }
 
-impl StringToV8 for Nargs {
+impl ToV8 for Nargs {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::String> {
+  ) -> v8::Local<'s, v8::Value> {
     self.to_string().to_v8(scope)
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
+)]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
+  #[from_v8_bool]
   pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
+  #[from_v8_string]
   pub nargs: Nargs,
-}
-
-#[allow(non_camel_case_types)]
-type js_command_attr_Nargs = Nargs;
-
-impl StructFromV8 for CommandAttributes {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Object>,
-  ) -> Self {
-    let mut builder = CommandAttributesBuilder::default();
-
-    from_v8_prop!(builder, obj, scope, bool, bang);
-    from_v8_prop!(builder, obj, scope, js_command_attr_Nargs, nargs);
-
-    builder.build().unwrap()
-  }
-}
-
-impl StructToV8 for CommandAttributes {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, bang);
-    to_v8_prop!(self, obj, scope, nargs);
-
-    obj
-  }
 }

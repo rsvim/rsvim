@@ -1,11 +1,9 @@
 //! Load tree-sitter grammar APIs.
 
-use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
-use crate::to_v8_prop;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
@@ -14,36 +12,19 @@ pub const GRAMMAR_PATH: &str = "grammarPath";
 // Defaults
 pub const GRAMMAR_PATH_DEFAULT: &str = "";
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
+)]
 pub struct SynLoadTreeSitterParserOptions {
   #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
+  #[from_v8_string]
   pub grammar_path: CompactString,
-}
-
-impl StructFromV8 for SynLoadTreeSitterParserOptions {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    obj: v8::Local<'s, v8::Object>,
-  ) -> Self {
-    let mut builder = SynLoadTreeSitterParserOptionsBuilder::default();
-
-    from_v8_prop!(builder, obj, scope, CompactString, grammar_path);
-
-    builder.build().unwrap()
-  }
-}
-
-impl StructToV8 for SynLoadTreeSitterParserOptions {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_prop!(self, obj, scope, grammar_path);
-
-    obj
-  }
 }
 
 pub struct SynLoadTreeSitterParserFuture {
@@ -72,12 +53,12 @@ impl JsFuture for SynLoadTreeSitterParserFuture {
     // Deserialize bytes into a list of parser names.
     let parser_names = postcard::from_bytes::<Vec<String>>(&result).unwrap();
     let parser_names =
-      parser_names.to_v8(scope, |scope, name| name.to_v8(scope).into());
+      parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
 
     self
       .promise
       .open(scope)
-      .resolve(scope, parser_names.into())
+      .resolve(scope, parser_names)
       .unwrap();
   }
 }

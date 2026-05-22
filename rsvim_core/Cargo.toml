@@ -55,6 +55,8 @@ unicode = ["ropey/unicode_lines"]
 wasm = []
 
 [dependencies]
+rsvim_macro = { workspace = true }
+
 arcstr = { workspace = true, features = ["std"] }
 ascii = { workspace = true }
 async-trait = { workspace = true }

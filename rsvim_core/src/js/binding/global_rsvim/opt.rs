@@ -34,7 +34,7 @@ pub fn set_wrap<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_bool!(args.get(0)));
-  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
+  let value = bool::from_v8(scope, args.get(0));
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -66,7 +66,7 @@ pub fn set_line_break<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_bool!(args.get(0)));
-  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
+  let value = bool::from_v8(scope, args.get(0));
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -97,7 +97,7 @@ pub fn set_tab_stop<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let value = u32::from_v8(scope, args.get(0));
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
@@ -132,7 +132,7 @@ pub fn set_expand_tab<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_bool!(args.get(0)));
-  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
+  let value = bool::from_v8(scope, args.get(0));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
@@ -166,7 +166,7 @@ pub fn set_shift_width<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_int!(args.get(0)));
-  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
+  let value = u32::from_v8(scope, args.get(0));
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
@@ -191,7 +191,7 @@ pub fn get_file_encoding(
   let value = buffer_manager.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _file-encoding_ option.
@@ -227,7 +227,7 @@ pub fn get_file_format(
   let value = buffer_manager.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
   let value = value.to_compact_string().to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _file-format_ option.
@@ -273,7 +273,7 @@ pub fn set_fix_end_of_line<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(is_v8_bool!(args.get(0)));
-  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
+  let value = bool::from_v8(scope, args.get(0));
   trace!("set_fix_end_of_line: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffer_manager = state_rc.borrow().buffer_manager.clone();
@@ -300,7 +300,7 @@ pub fn get_syntax_parser_lib_path(
     .to_string();
   trace!("get_syntax_parser_lib_path: {:?}", value);
   let value = value.to_v8(scope);
-  rv.set(value.into());
+  rv.set(value);
 }
 
 /// Set the _syntax-parser-lib-path_ option.
