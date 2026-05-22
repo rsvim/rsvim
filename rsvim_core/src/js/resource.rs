@@ -9,7 +9,9 @@ use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
 
 // ResourceId start from 1.
-#[derive(Copy, Clone, rsvim_macro::IncrementalId)]
+#[derive(
+  Copy, Clone, rsvim_macro::IncrementalId, serde::Serialize, serde::Deserialize,
+)]
 pub struct ResourceId(#[start_from(1)] i32);
 
 /// Resourcify
