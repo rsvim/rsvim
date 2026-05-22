@@ -350,7 +350,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
 // incremental_id {{{
 
-#[proc_macro_derive(IncrementalId)]
+#[proc_macro_derive(IncrementalId, attributes(start_from))]
 /// Generate incremental ID.
 ///
 /// We don't simply use integer types such as `usize`, `i32` as ID, because we
@@ -374,6 +374,9 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 pub fn incremental_id(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   println!("incremental_id:{:?}", input);
+
+  let struct_ident = input.ident;
+  println!("incremental_id struct_ident:{}", struct_ident);
 
   TokenStream::default()
 }
