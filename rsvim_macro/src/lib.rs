@@ -428,9 +428,19 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
             self.0.eq(other)
           }
         }
+        impl std::cmp::PartialEq<#struct_ident> for #struct_ident {
+          fn eq(&self, other: &#struct_ident) -> bool {
+            self.0.eq(other.0)
+          }
+        }
         impl std::cmp::PartialOrd<#field_ty> for #struct_ident {
           fn partial_cmp(&self, other: &#field_ty) -> Option<std::cmp::Ordering> {
             self.0.partial_cmp(other)
+          }
+        }
+        impl std::cmp::PartialOrd<#struct_ident> for #struct_ident {
+          fn partial_cmp(&self, other: &#struct_ident) -> Option<std::cmp::Ordering> {
+            self.0.partial_cmp(other.0)
           }
         }
         impl std::fmt::Debug for #struct_ident {
