@@ -80,10 +80,16 @@ pub trait JsFuture {
 }
 
 // TimerId start from 1.
-structural_id_impl!(i32, TimerId, 1);
+#[derive(
+  Copy, Clone, rsvim_macro::IncrementalId, serde::Serialize, serde::Deserialize,
+)]
+pub struct TimerId(#[start_from(1)] i32);
 
 // TaskId start from 1.
-structural_id_impl!(usize, TaskId, 1);
+#[derive(
+  Copy, Clone, rsvim_macro::IncrementalId, serde::Serialize, serde::Deserialize,
+)]
+pub struct TaskId(#[start_from(1)] usize);
 
 /// Snapshot data.
 pub struct SnapshotData {
