@@ -6,6 +6,8 @@ use quote::quote;
 use syn::DeriveInput;
 use syn::parse_macro_input;
 
+// js::converter {{{
+
 fn get_struct_fields(
   data: &syn::Data,
 ) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
@@ -343,3 +345,36 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   }.into()
 }
+
+// js::converter }}}
+
+// incremental_id {{{
+
+#[proc_macro_derive(IncrementalId)]
+/// Generate incremental ID.
+///
+/// We don't simply use integer types such as `usize`, `i32` as ID, because we
+/// can have multiple ID scopes such as buffer ID, window ID and other task
+/// IDs.
+/// When these different scopes working together, it can be possible that an ID
+/// is passed to a different scope which it doesn't belong. So we usually want
+/// to define the ID with a struct type such as:
+///
+/// ```
+/// pub struct BufferId(i32);
+/// pub struct WindowId(i32);
+/// pub struct SyntaxId(usize);
+/// ```
+///
+/// Even the IDs still use the same `usize` internal data type, they are type
+/// safe in the code base.
+///
+/// This macro helps defining a new ID struct and generate all the methods it
+/// needs.
+pub fn incremental_id(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+
+  TokenStream::default()
+}
+
+// incremental_id }}}
