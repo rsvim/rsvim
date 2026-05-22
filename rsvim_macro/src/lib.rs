@@ -447,6 +447,7 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
               self.0 == other.0
           }
       }
+      impl std::cmp::Eq for #struct_ident {}
       impl std::cmp::PartialOrd<#field_ty> for #struct_ident {
           fn partial_cmp(&self, other: &#field_ty) -> Option<std::cmp::Ordering> {
               self.0.partial_cmp(other)
@@ -456,6 +457,16 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
           fn partial_cmp(&self, other: &#struct_ident) -> Option<std::cmp::Ordering> {
               self.0.partial_cmp(&other.0)
           }
+      }
+      impl std::cmp::Ord for #struct_ident {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+          self.0.cmp(&other.0)
+        }
+      }
+      impl std::hash::Hash for #struct_ident {
+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+            self.0.hash(state);
+        }
       }
       impl std::fmt::Debug for #struct_ident {
           fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
