@@ -410,23 +410,23 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
   );
 
   let atomic_ty = match field_ty.to_string().as_str() {
-    "i8" => format_ident!("std::sync::atomic::AtomicI8"),
-    "u8" => format_ident!("std::sync::atomic::AtomicU8"),
-    "i16" => format_ident!("std::sync::atomic::AtomicI16"),
-    "u16" => format_ident!("std::sync::atomic::AtomicU16"),
-    "i32" => format_ident!("std::sync::atomic::AtomicI32"),
-    "u32" => format_ident!("std::sync::atomic::AtomicU32"),
-    "i64" => format_ident!("std::sync::atomic::AtomicI64"),
-    "u64" => format_ident!("std::sync::atomic::AtomicU64"),
-    "isize" => format_ident!("std::sync::atomic::AtomicIsize"),
-    "usize" => format_ident!("std::sync::atomic::AtomicUsize"),
+    "i8" => quote!(std::sync::atomic::AtomicI8),
+    "u8" => quote!(std::sync::atomic::AtomicU8),
+    "i16" => quote!(std::sync::atomic::AtomicI16),
+    "u16" => quote!(std::sync::atomic::AtomicU16),
+    "i32" => quote!(std::sync::atomic::AtomicI32),
+    "u32" => quote!(std::sync::atomic::AtomicU32),
+    "i64" => quote!(std::sync::atomic::AtomicI64),
+    "u64" => quote!(std::sync::atomic::AtomicU64),
+    "isize" => quote!(std::sync::atomic::AtomicIsize),
+    "usize" => quote!(std::sync::atomic::AtomicUsize),
     _ => unreachable!("Expect integer type for {}", struct_ident),
   };
 
   let expanded = match field_ty.to_string().as_str() {
     // signed integers
     "i8" | "i16" | "i32" | "i64" | "isize" => quote! {
-      impl std::maker::Copy for #struct_ident {}
+      impl std::marker::Copy for #struct_ident {}
       impl std::clone::Clone for #struct_ident {}
       impl std::cmp::PartialEq<#field_ty> for #struct_ident {
         fn eq(&self, other: &#field_ty) -> bool {
