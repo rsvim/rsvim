@@ -155,8 +155,6 @@ impl SyntaxCapture {
 }
 
 // SyntaxId starts from 1.
-// structural_id_impl!(usize, SyntaxId, 1);
-
 #[derive(Copy, Clone, rsvim_macro::IncrementalId)]
 pub struct SyntaxId(#[start_from(1)] usize);
 
