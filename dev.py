@@ -426,9 +426,14 @@ class Release(Cmd):
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
-        cmd = f"cargo release --workspace {args.level}"
+        # First publish "rsvim_macro" as it is used by other crates.
+        cmd = f"cargo release --package rsvim_macro {args.level}"
+        if args.execute:
+            cmd = f"{cmd} --execute --no-verify"
+        run(cmd)
 
-        cmd = f"cargo release {args.level} --workspace"
+        # Then publish other crates.
+        cmd = f"cargo release --package rsvim_core --package rsvim {args.level}"
         if args.execute:
             cmd = f"{cmd} --execute --no-verify"
         run(cmd)
@@ -488,7 +493,7 @@ if __name__ == "__main__":
         Format(subparsers),
         Miri(subparsers),
         Npm(subparsers),
-        Release(subparsers),
+        # Release(subparsers),
         Test(subparsers),
     ]
 
