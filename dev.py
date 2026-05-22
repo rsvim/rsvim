@@ -134,6 +134,12 @@ class Clippy(Cmd):
             aliases=[self._alias],
             help="cargo clippy",
         )
+        self.clippy_parser.add_argument(
+            "-m",
+            "--minimal-version",
+            action="store_true",
+            help="With minimal rust toolchain version 1.89.0",
+        )
         self.clippy_parser.add_argument("-v", "--verbose", action="store_true")
 
     def name(self) -> str:
@@ -145,7 +151,11 @@ class Clippy(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        cmd = "cargo clippy --workspace --all-targets"
+
+        if args.minimal_version:
+            cmd = "cargo +1.89 clippy --workspace --all-targets"
+        else:
+            cmd = "cargo clippy --workspace --all-targets"
         if args.verbose:
             cmd = f"{cmd} --verbose"
         run(cmd)
