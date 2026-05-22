@@ -135,7 +135,7 @@ class Clippy(Cmd):
             help="cargo clippy",
         )
         self.clippy_parser.add_argument(
-            "-m",
+            "-MV",
             "--minimal-version",
             action="store_true",
             dest="minimal_version",
@@ -180,7 +180,7 @@ class Test(Cmd):
             "-l", "--list", action="store_true", dest="list_test"
         )
         self.test_parser.add_argument(
-            "-m",
+            "-MV",
             "--minimal-version",
             action="store_true",
             dest="minimal_version",
@@ -277,7 +277,7 @@ class Build(Cmd):
         self.build_parser.add_argument("-r", "--release", action="store_true")
         self.build_parser.add_argument("-n", "--nightly", action="store_true")
         self.build_parser.add_argument(
-            "-m",
+            "-MV",
             "--minimal-version",
             action="store_true",
             dest="minimal_version",
