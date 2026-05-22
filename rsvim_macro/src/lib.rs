@@ -377,8 +377,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 pub fn incremental_id(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let struct_ident = input.ident;
-
-  let field = match input.data {
+  let struct_field = match input.data {
     syn::Data::Struct(data) => match data.fields {
       syn::Fields::Unnamed(fields) => fields.unnamed.first().unwrap().clone(),
       _ => {
@@ -388,15 +387,12 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     _ => unreachable!("Expect syn::Data::Struct(...) for {}", struct_ident),
   };
 
-  let field_ty = match field.ty {
+  let field_ty = match struct_field.ty {
     syn::Type::Path(p) => p.path.segments.last().unwrap().ident.clone(),
     _ => unreachable!("Expect syn::Type::Path(...) for {}", struct_ident),
   };
 
-  println!(
-    "incremental_id ident:{}, ty:{:?}, start:{}",
-    struct_ident, field_ty, start_from_value
-  );
+  println!("incremental_id ident:{}, ty:{:?}", struct_ident, field_ty);
 
   let atomic_ty = match field_ty.to_string().as_str() {
     "i8" => quote!(std::sync::atomic::AtomicI8),
@@ -415,7 +411,7 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
   let expanded = match field_ty.to_string().as_str() {
     // signed integers
     "i8" | "i16" | "i32" | "i64" | "isize" => {
-      let start_from_value: isize = field
+      let start_from_value: isize = struct_field
         .attrs
         .iter()
         .filter(|a| a.path().is_ident("start_from"))
@@ -486,7 +482,7 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
     }
     // unsigned integers
     "u8" | "u16" | "u32" | "u64" | "usize" => {
-      let start_from_value: usize = field
+      let start_from_value: usize = struct_field
         .attrs
         .iter()
         .filter(|a| a.path().is_ident("start_from"))
