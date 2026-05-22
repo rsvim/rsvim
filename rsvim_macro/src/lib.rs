@@ -6,6 +6,8 @@ use quote::quote;
 use syn::DeriveInput;
 use syn::parse_macro_input;
 
+// js::converter {{{
+
 fn get_struct_fields(
   data: &syn::Data,
 ) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
@@ -187,18 +189,21 @@ impl FromV8Tokens {
                     inner_p.path.segments.last().unwrap().ident.clone()
                   }
                   _ => unreachable!(
-                    "Expected TypePath inside GenericArgument::Type for field {}",
+                    "Expected syn::GenericArgument::Type(syn::Type::Path(...)) for {}",
                     ident
                   ),
                 }
               }
-              _ => unreachable!("Expected AngleBracketed for field {}", ident),
+              _ => unreachable!(
+                "Expected syn::PathArguments::AngleBracketed(...) for {}",
+                ident
+              ),
             }
           } else {
             seg.ident.clone()
           }
         }
-        _ => unreachable!("Expected TypePath for field {}", ident),
+        _ => unreachable!("Expected syn::Type::Path(...) for {}", ident),
       };
       res.r#type.push(ty_ident);
     }
@@ -343,3 +348,160 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   }.into()
 }
+
+// js::converter }}}
+
+// incremental_id {{{
+
+#[proc_macro_derive(IncrementalId, attributes(start_from))]
+/// Generate incremental ID.
+///
+/// We don't simply use integer types such as `usize`, `i32` as ID, because we
+/// can have multiple ID scopes such as buffer ID, window ID and other task
+/// IDs.
+/// When these different scopes working together, it can be possible that an ID
+/// is passed to a different scope which it doesn't belong. So we usually want
+/// to define the ID with a struct type such as:
+///
+/// ```
+/// pub struct BufferId(i32);
+/// pub struct WindowId(i32);
+/// pub struct SyntaxId(usize);
+/// ```
+///
+/// Even the IDs still use the same `usize` internal data type, they are type
+/// safe in the code base.
+///
+/// This macro helps defining a new ID struct and generate all the methods it
+/// needs. And ID by default starts from 0.
+pub fn incremental_id(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let struct_ident = input.ident;
+  let struct_field = match input.data {
+    syn::Data::Struct(data) => match data.fields {
+      syn::Fields::Unnamed(fields) => fields.unnamed.first().unwrap().clone(),
+      _ => {
+        unreachable!("Expect syn::Fields::Unnamed(...) for {}", struct_ident)
+      }
+    },
+    _ => unreachable!("Expect syn::Data::Struct(...) for {}", struct_ident),
+  };
+
+  let field_ty = match struct_field.ty {
+    syn::Type::Path(p) => p.path.segments.last().unwrap().ident.clone(),
+    _ => unreachable!("Expect syn::Type::Path(...) for {}", struct_ident),
+  };
+  let field_ty_str = field_ty.to_string();
+  let is_signed = matches!(
+    field_ty_str.as_str(),
+    "i8" | "i16" | "i32" | "i64" | "isize"
+  );
+  let is_unsigned = matches!(
+    field_ty_str.as_str(),
+    "u8" | "u16" | "u32" | "u64" | "usize"
+  );
+  if !is_signed && !is_unsigned {
+    unreachable!("Expect integer type for {}", struct_ident);
+  }
+
+  let atomic_ty = match field_ty.to_string().as_str() {
+    "i8" => quote!(std::sync::atomic::AtomicI8),
+    "u8" => quote!(std::sync::atomic::AtomicU8),
+    "i16" => quote!(std::sync::atomic::AtomicI16),
+    "u16" => quote!(std::sync::atomic::AtomicU16),
+    "i32" => quote!(std::sync::atomic::AtomicI32),
+    "u32" => quote!(std::sync::atomic::AtomicU32),
+    "i64" => quote!(std::sync::atomic::AtomicI64),
+    "u64" => quote!(std::sync::atomic::AtomicU64),
+    "isize" => quote!(std::sync::atomic::AtomicIsize),
+    "usize" => quote!(std::sync::atomic::AtomicUsize),
+    _ => unreachable!("Expect integer type for {}", struct_ident),
+  };
+
+  let start_from_value = struct_field
+    .attrs
+    .iter()
+    .filter(|a| a.path().is_ident("start_from"))
+    .find_map(|a| a.parse_args::<syn::LitInt>().ok())
+    .map(|lit| quote!(#lit))
+    .unwrap_or_else(|| quote!(0)); // Default to 0 token
+
+  let signed_methods = if is_signed {
+    quote! {
+        pub const fn negative_one() -> Self {
+            Self(-1)
+        }
+    }
+  } else {
+    quote!()
+  };
+
+  quote! {
+      impl std::cmp::PartialEq<#field_ty> for #struct_ident {
+          fn eq(&self, other: &#field_ty) -> bool {
+              self.0.eq(other)
+          }
+      }
+      impl std::cmp::PartialEq<#struct_ident> for #struct_ident {
+          fn eq(&self, other: &#struct_ident) -> bool {
+              self.0 == other.0
+          }
+      }
+      impl std::cmp::PartialOrd<#field_ty> for #struct_ident {
+          fn partial_cmp(&self, other: &#field_ty) -> Option<std::cmp::Ordering> {
+              self.0.partial_cmp(other)
+          }
+      }
+      impl std::cmp::PartialOrd<#struct_ident> for #struct_ident {
+          fn partial_cmp(&self, other: &#struct_ident) -> Option<std::cmp::Ordering> {
+              self.0.partial_cmp(&other.0)
+          }
+      }
+      impl std::fmt::Debug for #struct_ident {
+          fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+              f.write_fmt(format_args!("{:?}", self.0))
+          }
+      }
+      impl std::fmt::Display for #struct_ident {
+          fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+              f.write_fmt(format_args!("{}", self.0))
+          }
+      }
+      impl From<#field_ty> for #struct_ident {
+          fn from(value: #field_ty) -> Self {
+              Self(value)
+          }
+      }
+      impl From<#struct_ident> for #field_ty {
+          fn from(value: #struct_ident) -> Self {
+              value.0
+          }
+      }
+      impl #struct_ident {
+          pub fn next() -> Self {
+              static VALUE: #atomic_ty = #atomic_ty::new(#start_from_value);
+              let v = VALUE
+                  .fetch_update(
+                      std::sync::atomic::Ordering::Relaxed,
+                      std::sync::atomic::Ordering::Relaxed,
+                      |x| {
+                          Some(if x == #field_ty::MAX {
+                              #start_from_value
+                          } else {
+                              x + 1
+                          })
+                      },
+                  )
+                  .unwrap();
+              Self::from(v)
+          }
+          pub const fn zero() -> Self {
+              Self(0)
+          }
+          // This will emit methods only for signed integers
+          #signed_methods
+      }
+  }.into()
+}
+
+// incremental_id }}}
