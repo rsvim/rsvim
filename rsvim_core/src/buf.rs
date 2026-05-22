@@ -17,7 +17,6 @@ mod unicode_tests;
 use crate::hl::ColorSchemeArc;
 use crate::hl::ColorSchemeManagerWk;
 use crate::prelude::*;
-use crate::structural_id_impl;
 use crate::syntax::Syntax;
 use crate::syntax::SyntaxManagerWk;
 use compact_str::CompactString;
@@ -31,7 +30,10 @@ use tokio::time::Instant;
 use undo::Undo;
 
 // BufferId starts from 1.
-structural_id_impl!(i32, BufferId, 1);
+#[derive(
+  Copy, Clone, rsvim_macro::IncrementalId, serde::Serialize, serde::Deserialize,
+)]
+pub struct BufferId(#[start_from(1)] i32);
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
