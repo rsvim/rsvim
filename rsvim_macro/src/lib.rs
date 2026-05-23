@@ -516,3 +516,34 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
 }
 
 // incremental_id }}}
+
+// arc/rc pointers {{{
+
+#[proc_macro_derive(ArcMutexPtr)]
+/// Generate `Arc<Mutex<...>>` pointer for a struct type.
+pub fn arc_mutex_ptr(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  println!("arc_mutex_ptr:{:?}", input);
+
+  let struct_ident = input.ident;
+  let arc_ident = format_ident!("{}Arc", struct_ident);
+  let weak_ident = format_ident!("{}Wk", struct_ident);
+  let mutex_guard_ident = format_ident!("{}MutexGuard", struct_ident);
+
+  quote! {
+
+  pub type #arc_ident = std::sync::Arc<std::sync::Mutex<#struct_ident>>;
+  pub type #weak_ident = std::sync::Weak<std::sync::Mutex<#struct_ident>>;
+  pub type #mutex_guard_ident<'a> = std::sync::MutexGuard<'a, #struct_ident>;
+
+  impl #struct_ident {
+    pub fn to_arc(value: #struct_ident) -> #arc_ident {
+      std::sync::Arc::new(std::sync::Mutex::new(value))
+    }
+  }
+
+  }
+  .into()
+}
+
+// arc/rc pointers }}}

@@ -6,6 +6,7 @@ use crate::prelude::*;
 use ropey::Rope;
 use std::fmt::Debug;
 
+#[derive(rsvim_macro::ArcMutexPtr)]
 /// Temporary contents except buffers.
 pub struct CmdlineText {
   // Cmdline input text
@@ -17,8 +18,6 @@ pub struct CmdlineText {
   // Cmdline message history
   message_history: RingBuffer<String>,
 }
-
-arc_mutex_ptr!(CmdlineText);
 
 impl CmdlineText {
   pub fn new(canvas_size: U16Size) -> Self {
