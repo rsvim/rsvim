@@ -523,7 +523,6 @@ pub fn incremental_id(input: TokenStream) -> TokenStream {
 /// Generate `Arc<Mutex<...>>` pointer for a struct type.
 pub fn arc_mutex_ptr(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("arc_mutex_ptr:{:?}", input);
 
   let struct_ident = input.ident;
   let arc_ident = format_ident!("{}Arc", struct_ident);
@@ -539,6 +538,54 @@ pub fn arc_mutex_ptr(input: TokenStream) -> TokenStream {
   impl #struct_ident {
     pub fn to_arc(value: #struct_ident) -> #arc_ident {
       std::sync::Arc::new(std::sync::Mutex::new(value))
+    }
+  }
+
+  }
+  .into()
+}
+
+#[proc_macro_derive(ArcPtr)]
+/// Generate `Arc<...>` pointer for a struct type.
+pub fn arc_ptr(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+
+  let struct_ident = input.ident;
+  let arc_ident = format_ident!("{}Arc", struct_ident);
+  let weak_ident = format_ident!("{}Wk", struct_ident);
+
+  quote! {
+
+  pub type #arc_ident = std::sync::Arc<#struct_ident>;
+  pub type #weak_ident = std::sync::Weak<#struct_ident>;
+
+  impl #struct_ident {
+    pub fn to_arc(value: #struct_ident) -> #arc_ident {
+      std::sync::Arc::new(value)
+    }
+  }
+
+  }
+  .into()
+}
+
+#[proc_macro_derive(RcRefCellPtr)]
+/// Generate `Rc<RefCell<...>>` pointer for a struct type.
+pub fn rc_refcell_ptr(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+
+  let struct_ident = input.ident;
+  let rc_ident = format_ident!("{}Rc", struct_ident);
+  let weak_ident = format_ident!("{}Wk", struct_ident);
+
+  quote! {
+
+  pub type #rc_ident = std::rc::Rc<std::cell::RefCell<#struct_ident>>;
+  pub type #weak_ident = std::rc::Weak<std::cell::RefCell<#struct_ident>>;
+
+  impl #struct_ident {
+    pub fn to_rc(value: #struct_ident) -> #rc_ident {
+      std::rc::Rc::new(std::cell::RefCell::new(value))
     }
   }
 
