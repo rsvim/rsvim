@@ -727,16 +727,16 @@ pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
   quote! {
       #input
 
-      impl #impl_generics Inodify for #struct_ident #ty_generics #where_clause {
-          fn id(&self) -> NodeId {
+      impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+          fn id(&self) -> crate::ui::tree::internal::NodeId {
               self.__node.id()
           }
 
-          fn shape(&self) -> IRect {
+          fn shape(&self) -> crate::coord::IRect {
               self.__node.shape()
           }
 
-          fn actual_shape(&self) -> U16Rect {
+          fn actual_shape(&self) -> crate::coord::U16Rect {
               self.__node.actual_shape()
           }
 
@@ -748,7 +748,7 @@ pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
               self.__node.enabled()
           }
 
-          fn truncate_policy(&self) -> TruncatePolicy {
+          fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
               self.__node.truncate_policy()
           }
       }
