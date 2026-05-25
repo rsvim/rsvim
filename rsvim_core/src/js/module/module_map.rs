@@ -53,14 +53,13 @@ pub enum ImportKind {
   Dynamic(v8::Global<v8::PromiseResolver>),
 }
 
+#[derive(rsvim_macro::RcRefCellPtr)]
 /// Module graph.
 pub struct ModuleGraph {
   kind: ImportKind,
   root_rc: EsModuleRc,
   same_origin: Vec<v8::Global<v8::PromiseResolver>>,
 }
-
-rc_refcell_ptr!(ModuleGraph);
 
 impl Debug for ModuleGraph {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

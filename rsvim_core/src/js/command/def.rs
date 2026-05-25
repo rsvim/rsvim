@@ -5,7 +5,6 @@ use crate::is_v8_str;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
-use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
@@ -19,15 +18,13 @@ pub const CALLBACK: &str = "callback";
 pub const ATTRIBUTES: &str = "attributes";
 pub const OPTIONS: &str = "options";
 
-#[derive(Clone, rsvim_macro::ToV8)]
+#[derive(Clone, rsvim_macro::ToV8, rsvim_macro::RcPtr)]
 pub struct CommandDefinition {
   pub name: CompactString,
   pub callback: CommandCallback,
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
 }
-
-rc_ptr!(CommandDefinition);
 
 impl Debug for CommandDefinition {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

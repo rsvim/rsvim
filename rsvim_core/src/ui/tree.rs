@@ -72,7 +72,7 @@ widgetable_enum_impl!(
   CmdlineMessage
 );
 
-#[derive(Clone)]
+#[derive(Clone, rsvim_macro::ArcMutexPtr)]
 /// The UI widget tree.
 ///
 /// This tree manages all UI components and renders them on the canvas, each
@@ -148,8 +148,6 @@ pub struct Tree {
 }
 
 pub type TreeIter<'a> = ItreeIter<'a, Node>;
-
-arc_mutex_ptr!(Tree);
 
 impl Debug for Tree {
   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

@@ -136,13 +136,11 @@ pub struct SyntaxCaptureMultipleValues {
 pub type SyntaxCaptureMap =
   FoldMap<SyntaxCapturePoint, SyntaxCaptureMultipleValues>;
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcPtr)]
 pub struct SyntaxCapture {
   // Maps start_point to all its captured nodes.
   nodes: SyntaxCaptureMap,
 }
-
-arc_ptr!(SyntaxCapture);
 
 impl SyntaxCapture {
   pub fn new(nodes: SyntaxCaptureMap) -> Self {
@@ -322,11 +320,10 @@ impl Syntax {
 // pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 // pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
+#[derive(rsvim_macro::ArcPtr)]
 pub struct SyntaxLoader {
   loader: Mutex<Loader>,
 }
-
-arc_ptr!(SyntaxLoader);
 
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
@@ -648,6 +645,7 @@ pub async fn async_load_syntax_grammar(
   Ok(metainfo)
 }
 
+#[derive(rsvim_macro::ArcMutexPtr)]
 pub struct SyntaxManager {
   loader: SyntaxLoaderArc,
 
@@ -660,8 +658,6 @@ pub struct SyntaxManager {
   // Maps file types to grammar names
   ftypes2names: FoldMap<CompactString, CompactString>,
 }
-
-arc_mutex_ptr!(SyntaxManager);
 
 impl Debug for SyntaxManager {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -206,7 +206,7 @@ pub struct Highlight {
   pub attrs: Attributes,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::ArcPtr)]
 pub struct ColorScheme {
   // Name.
   name: CompactString,
@@ -217,8 +217,6 @@ pub struct ColorScheme {
   // Highlights
   highlights: FoldMap<CompactString, Highlight>,
 }
-
-arc_ptr!(ColorScheme);
 
 fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {
@@ -481,7 +479,7 @@ impl ColorScheme {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 pub struct ColorSchemeManager {
   // Maps colorscheme name => colorscheme
   colors: FoldMap<CompactString, ColorSchemeArc>,
@@ -489,8 +487,6 @@ pub struct ColorSchemeManager {
   // Current global colorscheme name.
   color_name: CompactString,
 }
-
-arc_mutex_ptr!(ColorSchemeManager);
 
 pub type ColorSchemeManagerKeys<'a> =
   std::collections::hash_map::Keys<'a, CompactString, ColorSchemeArc>;

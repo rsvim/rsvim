@@ -35,7 +35,7 @@ use undo::Undo;
 )]
 pub struct BufferId(#[start_from(1)] i32);
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
 ///
 /// It contains several internal data:
@@ -69,8 +69,6 @@ pub struct Buffer {
   // Text editing version
   editing_version: isize,
 }
-
-arc_mutex_ptr!(Buffer);
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use
@@ -206,7 +204,7 @@ impl Buffer {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 /// The manager for all normal (file) buffers.
 ///
 /// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
@@ -226,8 +224,6 @@ pub struct BufferManager {
   // ColorScheme manager
   colorscheme_manager: ColorSchemeManagerWk,
 }
-
-arc_mutex_ptr!(BufferManager);
 
 impl BufferManager {
   pub fn new(

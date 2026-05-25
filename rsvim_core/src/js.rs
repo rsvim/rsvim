@@ -208,12 +208,11 @@ fn init_builtin_modules(scope: &mut v8::PinScope) {
 pub mod snapshot {
   use super::*;
 
+  #[derive(rsvim_macro::RcRefCellPtr)]
   /// The state for js runtime of snapshot.
   pub struct JsRuntimeStateForSnapshot {
     pub context: Option<v8::Global<v8::Context>>,
   }
-
-  rc_refcell_ptr!(JsRuntimeStateForSnapshot);
 
   /// The js runtime for snapshot.
   ///
@@ -349,6 +348,7 @@ pub mod boost {
     pub v8_flags: Vec<String>,
   }
 
+  #[derive(rsvim_macro::RcRefCellPtr)]
   /// The state of js runtime.
   pub struct JsRuntimeState {
     /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -389,8 +389,6 @@ pub mod boost {
     pub resource_table: ResourceTableArc,
     // Data Access for RSVIM }
   }
-
-  rc_refcell_ptr!(JsRuntimeState);
 
   /// Javascript runtime.
   ///

@@ -34,12 +34,10 @@ impl Resourcify for Resource {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 pub struct ResourceTable {
   resources: FoldMap<ResourceId, Resource>,
 }
-
-arc_mutex_ptr!(ResourceTable);
 
 // pub type ResourceTableKeys<'a> =
 //   std::collections::btree_map::Keys<'a, ResourceId, Resource>;

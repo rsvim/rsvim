@@ -16,7 +16,7 @@ use crate::util::paths;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::RcRefCellPtr)]
 /// ES Module.
 pub struct EsModule {
   /// Module path on local file system.
@@ -30,8 +30,6 @@ pub struct EsModule {
   /// Whether this module is dynamically import.
   is_dynamic_import: bool,
 }
-
-rc_refcell_ptr!(EsModule);
 
 impl EsModule {
   pub fn new(

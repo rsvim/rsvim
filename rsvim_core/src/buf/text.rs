@@ -24,7 +24,7 @@ use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::ops::Range;
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,
@@ -36,8 +36,6 @@ pub struct Text {
   cached_width: RefCell<CachedWidth>,
   cached_lines: RefCell<CachedLines>,
 }
-
-arc_mutex_ptr!(Text);
 
 impl Text {
   pub fn new(opts: BufferOptions, canvas_size: U16Size, rope: Rope) -> Self {
