@@ -827,3 +827,40 @@ pub fn inodify_enum(input: TokenStream) -> TokenStream {
 }
 
 // ui::tree::internal::Inodify }}}
+
+// coord {{{
+
+// Struct to hold and validate inputs for point!(x, y)
+struct GeoPointInput {
+  x: syn::Expr,
+  y: syn::Expr,
+}
+
+impl syn::parse::Parse for GeoPointInput {
+  fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    let x: syn::Expr = input.parse()?;
+    let _: syn::Token![,] = input.parse()?;
+    let y: syn::Expr = input.parse()?;
+
+    if !input.is_empty() {
+      return Err(syn::Error::new(
+        input.span(),
+        "Expected exactly two arguments: point!(x, y)",
+      ));
+    }
+
+    Ok(GeoPointInput { x, y })
+  }
+}
+
+#[proc_macro]
+pub fn geo_point(input: TokenStream) -> TokenStream {
+  let GeoPointInput { x, y } = parse_macro_input!(input as GeoPointInput);
+
+  quote! {
+      geo::point!(x: #x, y: #y)
+  }
+  .into()
+}
+
+// coord }}}
