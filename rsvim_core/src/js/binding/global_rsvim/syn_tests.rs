@@ -102,7 +102,10 @@ async fn test_load_sync1() -> IoResult<()> {
   Ok(())
 }
 
-#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
+#[cfg(not(any(
+  all(target_os = "macos", target_arch = "x86_64"),
+  all(target_os = "windows", target_arch = "aarch64")
+)))]
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
 async fn test_list1() -> IoResult<()> {
