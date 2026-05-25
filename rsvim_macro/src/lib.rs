@@ -935,12 +935,12 @@ pub fn geo_rect(input: TokenStream) -> TokenStream {
 }
 
 // For `geo_rect_as!(expr, ty)`
-struct RectAsInput {
+struct GeoRectAsInput {
   expr: syn::Expr,
   ty: syn::Type,
 }
 
-impl syn::parse::Parse for RectAsInput {
+impl syn::parse::Parse for GeoRectAsInput {
   fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
     let expr: syn::Expr = input.parse()?;
     let _: syn::Token![,] = input.parse()?;
@@ -951,13 +951,13 @@ impl syn::parse::Parse for RectAsInput {
       "Expected exactly two arguments for `geo_rect_as!(expr, ty)` macro"
     );
 
-    Ok(RectAsInput { expr, ty })
+    Ok(GeoRectAsInput { expr, ty })
   }
 }
 
 #[proc_macro]
-pub fn rect_as(input: TokenStream) -> TokenStream {
-  let RectAsInput { expr, ty } = parse_macro_input!(input as RectAsInput);
+pub fn geo_rect_as(input: TokenStream) -> TokenStream {
+  let GeoRectAsInput { expr, ty } = parse_macro_input!(input as GeoRectAsInput);
 
   quote! {
       geo::Rect::new(
