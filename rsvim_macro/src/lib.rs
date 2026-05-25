@@ -725,6 +725,7 @@ pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
     input.generics.split_for_impl();
 
   quote! {
+
   #input
 
   impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
@@ -747,6 +748,7 @@ pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
       self.__node.truncate_policy()
     }
   }
+
   }
   .into()
 }
