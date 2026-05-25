@@ -843,7 +843,7 @@ impl syn::parse::Parse for GeoPointInput {
     let y: syn::Expr = input.parse()?;
     assert!(
       input.is_empty(),
-      "Expected exactly two arguments for `geo_point!(x, y)`"
+      "Expected exactly two arguments for `geo_point!(x, y)` macro!"
     );
 
     Ok(GeoPointInput { x, y })
@@ -873,7 +873,7 @@ impl syn::parse::Parse for GeoPointAsInput {
     let ty: syn::Type = input.parse()?;
     assert!(
       input.is_empty(),
-      "Expected exactly two arguments for `geo_point_as!(expr, ty)`"
+      "Expected exactly two arguments for `geo_point_as!(expr, ty)` macro!"
     );
 
     Ok(GeoPointAsInput { expr, ty })
@@ -889,6 +889,51 @@ pub fn geo_point_as(input: TokenStream) -> TokenStream {
       geo::point!(x: #expr.x() as #ty, y: #expr.y() as #ty)
   }
   .into()
+}
+
+struct RectInput {
+  args: Vec<syn::Expr>,
+}
+
+impl syn::parse::Parse for RectInput {
+  fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    let punctuated =
+      syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated(input)?;
+    let args: Vec<syn::Expr> = punctuated.into_iter().collect();
+    assert!(
+      args.len() == 2 || args.len() == 4,
+      "Expected either 2 or 4 arguments for `geo_rect!(l, t, r, b)` or `geo_rect!(min, max)` macro!"
+    );
+
+    Ok(RectInput { args })
+  }
+}
+
+#[proc_macro]
+pub fn rect(input: TokenStream) -> TokenStream {
+  let RectInput { args } = parse_macro_input!(input as RectInput);
+
+  match args.len() {
+    4 => {
+      let left = &args[0];
+      let top = &args[1];
+      let right = &args[2];
+      let bottom = &args[3];
+      quote! {
+          geo::Rect::new((#left, #top), (#right, #bottom))
+      }
+      .into()
+    }
+    2 => {
+      let min = &args[0];
+      let max = &args[1];
+      quote! {
+          geo::Rect::new(#min, #max)
+      }
+      .into()
+    }
+    _ => unreachable!(),
+  }
 }
 
 // coord }}}
