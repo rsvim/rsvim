@@ -693,3 +693,71 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 }
 
 // state::Stateful }}}
+
+// ui::tree::internal::Inodify {{{
+
+#[proc_macro_derive(Inodify, attributes(inode))]
+/// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
+pub fn inodeable(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let struct_ident = &input.ident;
+
+  let fields = match &input.data {
+    syn::Data::Struct(struct_data) => match &struct_data.fields {
+      syn::Fields::Named(fields) => &fields.named,
+      _ => unreachable!("Failed to derive macro on non-named field!"),
+    },
+    _ => unreachable!("Failed to derive macro on non-struct data!"),
+  };
+
+  let mut target_field_ident = None;
+  for field in fields {
+    for attr in &field.attrs {
+      // Check if the attribute path matches "inode"
+      if attr.path().is_ident("inode") {
+        assert!(
+          target_field_ident.is_none(),
+          "#[inode] attribute is only allowed for once!"
+        );
+        // Store the field's name (e.g., `__node`)
+        target_field_ident = Some(field.ident.as_ref().unwrap());
+      }
+    }
+  }
+  let node_field = match target_field_ident {
+    Some(ident) => ident,
+    None => {
+      unreachable!("Missing #[inode] attribute!")
+    }
+  };
+
+  let (impl_generics, ty_generics, where_clause) =
+    input.generics.split_for_impl();
+
+  quote! {
+  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
+      self.#node_field.id()
+    }
+    fn shape(&self) -> crate::coord::IRect {
+      self.#node_field.shape()
+    }
+
+    fn actual_shape(&self) -> crate::coord::U16Rect {
+      self.#node_field.actual_shape()
+    }
+    fn zindex(&self) -> usize {
+      self.#node_field.zindex()
+    }
+    fn enabled(&self) -> bool {
+      self.#node_field.enabled()
+    }
+    fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
+      self.#node_field.truncate_policy()
+    }
+  }
+  }
+  .into()
+}
+
+// ui::tree::internal::Inodify }}}
