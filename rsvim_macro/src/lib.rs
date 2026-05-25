@@ -843,7 +843,7 @@ impl syn::parse::Parse for GeoPointInput {
     let y: syn::Expr = input.parse()?;
     assert!(
       input.is_empty(),
-      "Expected exactly two arguments for `point!(x, y)`"
+      "Expected exactly two arguments for `geo_point!(x, y)`"
     );
 
     Ok(GeoPointInput { x, y })
@@ -873,7 +873,7 @@ impl syn::parse::Parse for GeoPointAsInput {
     let ty: syn::Type = input.parse()?;
     assert!(
       input.is_empty(),
-      "Expected exactly two arguments for `point_as!(expr, ty)`"
+      "Expected exactly two arguments for `geo_point_as!(expr, ty)`"
     );
 
     Ok(GeoPointAsInput { expr, ty })
