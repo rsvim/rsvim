@@ -710,15 +710,7 @@ pub fn inodify(_attr: TokenStream, item: TokenStream) -> TokenStream {
         syn::parse_quote! { __node: crate::ui::tree::internal::InodeBase },
       );
     }
-    syn::Fields::Unit => {
-      input.fields = syn::Fields::Named(
-        syn::parse_quote! { { __node: crate::ui::tree::internal::InodeBase } },
-      );
-      input.semi_token = None; // Remove trailing semicolon
-    }
-    syn::Fields::Unnamed(_) => {
-      unreachable!("Failed to derive macro on unnamed data!")
-    }
+    _ => unreachable!("Failed to derive macro on non-named data!"),
   }
 
   // Handle generics safely if struct has lifetimes or type parameters
