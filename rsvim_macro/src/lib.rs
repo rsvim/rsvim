@@ -696,7 +696,7 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 // ui::tree::internal::Inodify {{{
 
-#[proc_macro_derive(Inodify, attributes(inode))]
+#[proc_macro_derive(Inodify, attributes(inode_base))]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
 pub fn inodeable(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
@@ -713,11 +713,11 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
   let mut target_field_ident = None;
   for field in fields {
     for attr in &field.attrs {
-      // Check if the attribute path matches "inode"
-      if attr.path().is_ident("inode") {
+      // Check if the attribute path matches "inode_base"
+      if attr.path().is_ident("inode_base") {
         assert!(
           target_field_ident.is_none(),
-          "#[inode] attribute is only allowed for once!"
+          "#[inode_base] attribute is only allowed for once!"
         );
         // Store the field's name (e.g., `__node`)
         target_field_ident = Some(field.ident.as_ref().unwrap());
@@ -727,7 +727,7 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
   let field_ident = match target_field_ident {
     Some(ident) => ident,
     None => {
-      unreachable!("Missing #[inode] attribute!")
+      unreachable!("Missing #[inode_base] attribute!")
     }
   };
 

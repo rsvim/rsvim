@@ -6,7 +6,7 @@ use taffy::Style;
 // Test node
 #[derive(Clone, Debug, rsvim_macro::Inodify)]
 struct TestNode {
-  #[inode]
+  #[inode_base]
   pub __node: InodeBase,
 }
 
