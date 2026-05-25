@@ -36,11 +36,10 @@ fn version() {
       let head_id = repo.head_id().unwrap();
       let id = head_id.shorten_or_id();
       let id = id.to_string();
-      println!("{LOG} Git id:{:?}", id);
       Some(id)
     }
     Err(e) => {
-      println!("{LOG} Git error:{:?}", e);
+      println!("{LOG} Failed to fetch git commit:{:?}", e);
       None
     }
   };
@@ -56,12 +55,12 @@ fn version() {
         Some(core.unwrap().trim_start_matches("=").to_string())
       }
       Err(e) => {
-        println!("{LOG} Parse Cargo.toml error:{:?}", e);
+        println!("{LOG} Failed to parse swc_core version:{:?}", e);
         None
       }
     },
     Err(e) => {
-      println!("{LOG} Read Cargo.toml error:{:?}", e);
+      println!("{LOG} Failed to parse swc_core version:{:?}", e);
       None
     }
   };
