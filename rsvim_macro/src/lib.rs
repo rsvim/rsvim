@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use syn::DeriveInput;
+use syn::ItemStruct;
 use syn::parse_macro_input;
 
 // js::converter {{{
@@ -696,13 +697,63 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 // ui::tree::internal::Inodify {{{
 
-#[proc_macro_derive(Inodify)]
+#[proc_macro_attribute]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodify(input: TokenStream) -> TokenStream {
-  let input = parse_macro_input!(input as DeriveInput);
+pub fn inodify(_attr: TokenStream, item: TokenStream) -> TokenStream {
+  let mut input = parse_macro_input!(item as ItemStruct);
   let struct_ident = input.ident.clone();
-  println!("inodify {}: {:?}", struct_ident, input);
-  TokenStream::default()
+
+  // Inject `__node` field into struct definition.
+  match &mut input.fields {
+    syn::Fields::Named(fields) => {
+      // Append the field to a standard named struct: struct Foo { ... }
+      fields.named.push(syn::parse_quote! { __node: InodeBase });
+    }
+    syn::Fields::Unit => {
+      // Convert a unit struct (struct Foo;) into a named struct
+      input.fields =
+        syn::Fields::Named(syn::parse_quote! { { __node: InodeBase } });
+      input.semi_token = None; // Remove trailing semicolon
+    }
+    syn::Fields::Unnamed(_) => {
+      unreachable!("Failed to derive macro on unnamed data!")
+    }
+  }
+
+  // Handle generics safely if struct has lifetimes or type parameters
+  let (impl_generics, ty_generics, where_clause) =
+    input.generics.split_for_impl();
+
+  quote! {
+      #input
+
+      impl #impl_generics Inodify for #struct_ident #ty_generics #where_clause {
+          fn id(&self) -> NodeId {
+              self.__node.id()
+          }
+
+          fn shape(&self) -> IRect {
+              self.__node.shape()
+          }
+
+          fn actual_shape(&self) -> U16Rect {
+              self.__node.actual_shape()
+          }
+
+          fn zindex(&self) -> usize {
+              self.__node.zindex()
+          }
+
+          fn enabled(&self) -> bool {
+              self.__node.enabled()
+          }
+
+          fn truncate_policy(&self) -> TruncatePolicy {
+              self.__node.truncate_policy()
+          }
+      }
+  }
+  .into()
 }
 
 // ui::tree::internal::Inodify }}}
