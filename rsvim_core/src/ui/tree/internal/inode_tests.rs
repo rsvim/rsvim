@@ -1,17 +1,15 @@
 use super::inode::*;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 // use crate::tests::log::init as test_log_init;
 use taffy::Style;
 
 // Test node
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, rsvim_macro::Inodify)]
 struct TestNode {
+  #[inode]
   pub __node: InodeBase,
 }
-
-inodify_impl!(TestNode);
 
 impl TestNode {
   pub fn new(id: NodeId, ctx: TreeContextWk) -> Self {
