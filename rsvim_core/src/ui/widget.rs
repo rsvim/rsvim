@@ -35,6 +35,5 @@ pub trait Widgetable {
   /// Draw the widget to canvas, on the specific shape.
   fn draw(&self, _canvas: &mut Canvas, _context: &WidgetContext) {
     // Do nothing.
-    // trace!("draw canvas");
   }
 }
