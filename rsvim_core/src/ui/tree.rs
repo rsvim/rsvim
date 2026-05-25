@@ -26,7 +26,7 @@ use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widgetable_enum_impl;
+// use crate::widgetable_enum_impl;
 pub use internal::*;
 use std::fmt::Debug;
 use std::fmt::Formatter;
@@ -60,17 +60,17 @@ inodify_enum_impl!(
   CmdlineMessage
 );
 
-widgetable_enum_impl!(
-  Node,
-  Panel,
-  Cursor,
-  Window,
-  WindowContent,
-  Cmdline,
-  CmdlineIndicator,
-  CmdlineInput,
-  CmdlineMessage
-);
+// widgetable_enum_impl!(
+//   Node,
+//   Panel,
+//   Cursor,
+//   Window,
+//   WindowContent,
+//   Cmdline,
+//   CmdlineIndicator,
+//   CmdlineInput,
+//   CmdlineMessage
+// );
 
 #[derive(Clone, rsvim_macro::ArcMutexPtr)]
 /// The UI widget tree.
