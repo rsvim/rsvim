@@ -699,15 +699,22 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodify(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
   let mut input = parse_macro_input!(item as ItemStruct);
   let struct_ident = input.ident.clone();
+
+  // Check visibility
+  let vis = if attr.is_empty() {
+    syn::Visibility::Inherited
+  } else {
+    syn::parse::<syn::Visibility>(attr).unwrap()
+  };
 
   // Inject `__node` field into struct definition.
   match &mut input.fields {
     syn::Fields::Named(fields) => {
       fields.named.push(
-        syn::parse_quote! { __node: crate::ui::tree::internal::InodeBase },
+        syn::parse_quote! { #vis __node: crate::ui::tree::internal::InodeBase },
       );
     }
     _ => unreachable!("Failed to derive macro on non-named data!"),
