@@ -1,7 +1,6 @@
 //! Vim window's text content widget.
 
 use crate::buf::BufferWk;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -9,15 +8,13 @@ use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
+#[rsvim_macro::inodify]
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
 pub struct WindowContent {
-  __node: InodeBase,
   buffer: BufferWk,
   viewport: ViewportWk,
 }
-
-inodify_impl!(WindowContent);
 
 impl WindowContent {
   /// Make window content.
