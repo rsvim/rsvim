@@ -671,15 +671,15 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
   quote! {
 
-  impl Stateful for #enum_ident {
-    fn handle(&self, context: &StateContext, event: Event) -> State {
+  impl crate::state::Stateful for #enum_ident {
+    fn handle(&self, context: &crate::state::StateContext, event: crossterm::event::Event) -> crate::state::State {
       match self {
         #(
           #enum_ident::#enum_variant(s) => s.handle(context, event),
         )*
       }
     }
-    fn handle_op(&self, context: &StateContext, op: Operation) -> State {
+    fn handle_op(&self, context: &crate::state::StateContext, op: crate::state::ops::Operation) -> crate::state::State {
       match self {
         #(
           #enum_ident::#enum_variant(s) => s.handle_op(context, op),
@@ -693,3 +693,137 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 }
 
 // state::Stateful }}}
+
+// ui::tree::internal::Inodify {{{
+
+#[proc_macro_derive(Inodify, attributes(inode_base))]
+/// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
+pub fn inodeable(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let struct_ident = &input.ident;
+
+  let fields = match &input.data {
+    syn::Data::Struct(struct_data) => match &struct_data.fields {
+      syn::Fields::Named(fields) => &fields.named,
+      _ => unreachable!("Failed to derive macro on non-named field!"),
+    },
+    _ => unreachable!("Failed to derive macro on non-struct data!"),
+  };
+
+  let mut target_field_ident = None;
+  for field in fields {
+    for attr in &field.attrs {
+      if attr.path().is_ident("inode_base") {
+        assert!(
+          target_field_ident.is_none(),
+          "Attribute is only allowed for once!"
+        );
+        target_field_ident = Some(field.ident.as_ref().unwrap());
+      }
+    }
+  }
+  let field_ident = match target_field_ident {
+    Some(ident) => ident,
+    None => {
+      unreachable!("Missing attribute!")
+    }
+  };
+
+  let (impl_generics, ty_generics, where_clause) =
+    input.generics.split_for_impl();
+
+  quote! {
+  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
+      self.#field_ident.id()
+    }
+    fn shape(&self) -> crate::coord::IRect {
+      self.#field_ident.shape()
+    }
+
+    fn actual_shape(&self) -> crate::coord::U16Rect {
+      self.#field_ident.actual_shape()
+    }
+    fn zindex(&self) -> usize {
+      self.#field_ident.zindex()
+    }
+    fn enabled(&self) -> bool {
+      self.#field_ident.enabled()
+    }
+    fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
+      self.#field_ident.truncate_policy()
+    }
+  }
+  }
+  .into()
+}
+
+#[proc_macro_derive(InodifyEnum)]
+/// Generate enum disaptcher for `rsvim_core::ui::tree::internal::Inodify` trait.
+pub fn inodify_enum(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let enum_ident = input.ident;
+  let enum_variant = match &input.data {
+    syn::Data::Enum(enum_data) => enum_data
+      .variants
+      .iter()
+      .map(|v| v.ident.clone())
+      .collect::<Vec<_>>(),
+    _ => unreachable!("Failed to derive macro on non-enum data!"),
+  };
+
+  let (impl_generics, ty_generics, where_clause) =
+    input.generics.split_for_impl();
+
+  quote! {
+
+  impl #impl_generics crate::ui::tree::internal::Inodify for #enum_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.id(),
+        )*
+      }
+    }
+    fn shape(&self) -> crate::coord::IRect {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.shape(),
+        )*
+      }
+    }
+    fn actual_shape(&self) -> crate::coord::U16Rect {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.actual_shape(),
+        )*
+      }
+    }
+    fn zindex(&self) -> usize {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.zindex(),
+        )*
+      }
+    }
+    fn enabled(&self) -> bool {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.enabled(),
+        )*
+      }
+    }
+    fn truncate_policy(&self) -> TruncatePolicy {
+      match self {
+        #(
+          #enum_ident::#enum_variant(e) => e.truncate_policy(),
+        )*
+      }
+    }
+  }
+
+  }
+  .into()
+}
+
+// ui::tree::internal::Inodify }}}

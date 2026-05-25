@@ -1,12 +1,12 @@
 use super::itree::*;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use taffy::Style;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, rsvim_macro::Inodify)]
 struct TestValue {
+  #[inode_base]
   pub __node: InodeBase,
 }
 
@@ -17,8 +17,6 @@ impl TestValue {
     }
   }
 }
-
-inodify_impl!(TestValue);
 
 #[test]
 fn new() {

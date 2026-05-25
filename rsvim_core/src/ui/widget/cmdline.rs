@@ -8,7 +8,6 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::cmdltext::CmdlineTextWk;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -19,9 +18,10 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// The Vim command-line.
 pub struct Cmdline {
+  #[inode_base]
   __node: InodeBase,
   options: WindowOptions,
 
@@ -34,8 +34,6 @@ pub struct Cmdline {
   input_cursor_viewport: CursorViewportArc,
   message_viewport: ViewportArc,
 }
-
-inodify_impl!(Cmdline);
 
 impl Cmdline {
   pub fn new(

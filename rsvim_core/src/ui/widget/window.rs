@@ -9,7 +9,6 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -19,8 +18,9 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use opt::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 pub struct Window {
+  #[inode_base]
   __node: InodeBase,
   options: WindowOptions,
 
@@ -30,8 +30,6 @@ pub struct Window {
   viewport: ViewportArc,
   cursor_viewport: CursorViewportArc,
 }
-
-inodify_impl!(Window);
 
 impl Window {
   pub fn new(

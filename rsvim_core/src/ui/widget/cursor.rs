@@ -1,6 +1,5 @@
 //! Cursor widget.
 
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::canvas;
 use crate::ui::canvas::Canvas;
@@ -15,16 +14,15 @@ pub const BLINKING: bool = false;
 pub const HIDDEN: bool = false;
 pub const CURSOR_STYLE: CursorStyle = CursorStyle::SteadyBlock;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// Cursor widget.
 pub struct Cursor {
+  #[inode_base]
   __node: InodeBase,
   blinking: bool,
   hidden: bool,
   cursor_style: CursorStyle,
 }
-
-inodify_impl!(Cursor);
 
 impl Cursor {
   pub fn new(
