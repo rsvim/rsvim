@@ -881,7 +881,7 @@ impl syn::parse::Parse for GeoPointAsInput {
 }
 
 #[proc_macro]
-pub fn point_as(input: TokenStream) -> TokenStream {
+pub fn geo_point_as(input: TokenStream) -> TokenStream {
   let GeoPointAsInput { expr, ty } =
     parse_macro_input!(input as GeoPointAsInput);
 
