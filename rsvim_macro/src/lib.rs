@@ -622,6 +622,7 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 // ui::widgetable {{{
 
 #[proc_macro_derive(WidgetableEnum)]
+/// Generate enum disaptcher for `rsvim_core::ui::widget::Widgetable` trait.
 pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let enum_ident = input.ident;
