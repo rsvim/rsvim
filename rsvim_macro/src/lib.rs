@@ -830,7 +830,7 @@ pub fn inodify_enum(input: TokenStream) -> TokenStream {
 
 // coord {{{
 
-// For `point!(x, y)`
+// For `geo_point!(x, y)`
 struct GeoPointInput {
   x: syn::Expr,
   y: syn::Expr,
@@ -860,7 +860,7 @@ pub fn geo_point(input: TokenStream) -> TokenStream {
   .into()
 }
 
-// For `point_as!(x, y)`
+// For `geo_point_as!(x, y)`
 struct GeoPointAsInput {
   expr: syn::Expr,
   ty: syn::Type,
