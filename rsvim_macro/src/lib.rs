@@ -624,8 +624,8 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(WidgetableEnum)]
 pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("widgetable_enum:{:?}", input);
-  let struct_ident = input.ident;
+  let enum_ident = input.ident;
+  println!("widgetable_enum:{}", enum_ident);
 
   // 1. Ensure the macro is being applied to an enum
   let data_enum = match &input.data {
