@@ -1,6 +1,5 @@
 //! Root container is the root node in the widget tree.
 
-use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
