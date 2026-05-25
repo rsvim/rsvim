@@ -619,7 +619,7 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 
 // arc/rc pointers }}}
 
-// ui::widgetable {{{
+// ui::widget::Widgetable {{{
 
 #[proc_macro_derive(WidgetableEnum)]
 /// Generate enum disaptcher for `rsvim_core::ui::widget::Widgetable` trait.
@@ -632,7 +632,7 @@ pub fn widgetable_enum(input: TokenStream) -> TokenStream {
       .iter()
       .map(|v| v.ident.clone())
       .collect::<Vec<_>>(),
-    _ => unreachable!("Failed to derive macro on non-enum field!"),
+    _ => unreachable!("Failed to derive macro on non-enum data!"),
   };
 
   quote! {
@@ -651,4 +651,45 @@ pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   .into()
 }
 
-// ui::widgetable }}}
+// ui::widget::Widgetable }}}
+
+// state::Stateful {{{
+
+#[proc_macro_derive(StatefulEnum)]
+/// Generate enum disaptcher for `rsvim_core::state::Stateful` trait.
+pub fn stateful_enum(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let enum_ident = input.ident;
+  let enum_variant = match &input.data {
+    syn::Data::Enum(enum_data) => enum_data
+      .variants
+      .iter()
+      .map(|v| v.ident.clone())
+      .collect::<Vec<_>>(),
+    _ => unreachable!("Failed to derive macro on non-enum data!"),
+  };
+
+  quote! {
+
+  impl Stateful for #enum_ident {
+    fn handle(&self, context: &StateContext, event: Event) -> State {
+      match self {
+        #(
+          #enum_ident::#enum_variant(s) => s.handle(context, event),
+        )*
+      }
+    }
+    fn handle_op(&self, context: &StateContext, op: Operation) -> State {
+      match self {
+        #(
+          #enum_ident::#enum_variant(s) => s.handle_op(context, op),
+        )*
+      }
+    }
+  }
+
+  }
+  .into()
+}
+
+// state::Stateful }}}

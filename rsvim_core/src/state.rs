@@ -76,31 +76,9 @@ pub trait Stateful {
   fn handle_op(&self, context: &StateContext, op: Operation) -> State;
 }
 
-/// Generate enum dispatcher for `Stateful`.
-#[macro_export]
-macro_rules! stateful_enum_impl {
-  ($enum:ident, $($variant:tt),*) => {
-    impl Stateful for $enum {
-      fn handle(&self, context: &StateContext, event: Event) -> State {
-        match self {
-          $(
-            $enum::$variant(e) => e.handle(context, event),
-          )*
-        }
-      }
-
-      fn handle_op(&self, context: &StateContext, op: Operation) -> State {
-        match self {
-          $(
-            $enum::$variant(e) => e.handle_op(context, op),
-          )*
-        }
-      }
-    }
-  }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(
+  Debug, Copy, Clone, PartialEq, Eq, Hash, rsvim_macro::StatefulEnum,
+)]
 /// The value holder for each state machine.
 pub enum State {
   Normal(Normal),
@@ -113,19 +91,6 @@ pub enum State {
   CmdlineSearchBackward(CmdlineSearchBackward),
   Terminal(Terminal),
 }
-
-stateful_enum_impl!(
-  State,
-  Normal,
-  Visual,
-  Select,
-  OperatorPending,
-  Insert,
-  CmdlineEx,
-  CmdlineSearchForward,
-  CmdlineSearchBackward,
-  Terminal
-);
 
 impl Default for State {
   /// Returns the default FMS state, by default it's the [`Normal`] editing
