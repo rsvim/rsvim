@@ -4,7 +4,6 @@ use proc_macro::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use syn::DeriveInput;
-use syn::ItemStruct;
 use syn::parse_macro_input;
 
 // js::converter {{{
