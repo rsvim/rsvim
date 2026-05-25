@@ -108,21 +108,6 @@ where
   }
 }
 
-#[macro_export]
-macro_rules! rect {
-  ($left:expr, $top:expr, $right:expr, $bottom:expr) => {
-    $crate::coord::Rect::new(($left, $top), ($right, $bottom))
-  };
-
-  (($left:expr, $top:expr),($right:expr, $bottom:expr)) => {
-    $crate::coord::Rect::new(($left, $top), ($right, $bottom))
-  };
-
-  ($min:expr, $max:expr) => {
-    $crate::coord::Rect::new($min, $max)
-  };
-}
-
 /// Convert the generic type `T` inside `geo::Rect<T>` to another type `U`.
 #[macro_export]
 macro_rules! rect_as {
