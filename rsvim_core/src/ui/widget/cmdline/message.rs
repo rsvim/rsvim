@@ -10,15 +10,14 @@ use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// Commandline message.
 pub struct CmdlineMessage {
+  #[inode_base]
   __node: InodeBase,
   cmdline_text: CmdlineTextWk,
   viewport: ViewportWk,
 }
-
-inodify_impl!(CmdlineMessage);
 
 impl CmdlineMessage {
   pub fn new(
