@@ -841,13 +841,10 @@ impl syn::parse::Parse for GeoPointInput {
     let x: syn::Expr = input.parse()?;
     let _: syn::Token![,] = input.parse()?;
     let y: syn::Expr = input.parse()?;
-
-    if !input.is_empty() {
-      return Err(syn::Error::new(
-        input.span(),
-        "Expected exactly two arguments for `point!(x, y)`",
-      ));
-    }
+    assert!(
+      input.is_empty(),
+      "Expected exactly two arguments for `point!(x, y)`"
+    );
 
     Ok(GeoPointInput { x, y })
   }
@@ -874,13 +871,10 @@ impl syn::parse::Parse for GeoPointAsInput {
     let expr: syn::Expr = input.parse()?;
     let _: syn::Token![,] = input.parse()?;
     let ty: syn::Type = input.parse()?;
-
-    if !input.is_empty() {
-      return Err(syn::Error::new(
-        input.span(),
-        "Expected exactly two arguments for `point_as!(expr, ty)`",
-      ));
-    }
+    assert!(
+      input.is_empty(),
+      "Expected exactly two arguments for `point_as!(expr, ty)`"
+    );
 
     Ok(GeoPointAsInput { expr, ty })
   }
