@@ -697,10 +697,10 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 // ui::tree::internal::Inodify {{{
 
-#[proc_macro_attribute]
+#[proc_macro_derive(Inodify)]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodify(_attr: TokenStream, item: TokenStream) -> TokenStream {
-  let mut input = parse_macro_input!(item as ItemStruct);
+pub fn inodify(input: TokenStream) -> TokenStream {
+  let mut input = parse_macro_input!(input as ItemStruct);
   let struct_ident = input.ident.clone();
 
   // Inject `__node` field into struct definition.
