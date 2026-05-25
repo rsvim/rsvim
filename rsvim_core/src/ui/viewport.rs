@@ -112,7 +112,7 @@ impl LineViewport {
   }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, rsvim_macro::ArcPtr)]
 /// The cursor viewport to maintain the positions.
 ///
 /// As explained in [`Viewport`], ASCII control codes and other unicode chars
@@ -134,8 +134,6 @@ pub struct CursorViewport {
   // Column index.
   column_idx: u16,
 }
-
-arc_ptr!(CursorViewport);
 
 impl CursorViewport {
   /// Make new instance.
@@ -388,7 +386,7 @@ impl CursorViewport {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::ArcPtr)]
 // spellchecker:off
 /// The viewport for a buffer.
 ///
@@ -635,8 +633,6 @@ pub struct Viewport {
   // Maps `line_idx` (in the buffer) => its line-wise viewports.
   lines: LiteMap<usize, LineViewport>,
 }
-
-arc_ptr!(Viewport);
 
 impl Viewport {
   /// Calculate viewport downward, from top to bottom.

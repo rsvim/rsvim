@@ -206,7 +206,7 @@ pub struct Highlight {
   pub attrs: Attributes,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::ArcPtr)]
 pub struct ColorScheme {
   // Name.
   name: CompactString,
@@ -217,8 +217,6 @@ pub struct ColorScheme {
   // Highlights
   highlights: FoldMap<CompactString, Highlight>,
 }
-
-arc_ptr!(ColorScheme);
 
 fn parse_color(s: &str, prefix: &str, key: &str) -> TheResult<Color> {
   let parse_hex = |x| {

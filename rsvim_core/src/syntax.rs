@@ -136,13 +136,11 @@ pub struct SyntaxCaptureMultipleValues {
 pub type SyntaxCaptureMap =
   FoldMap<SyntaxCapturePoint, SyntaxCaptureMultipleValues>;
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcPtr)]
 pub struct SyntaxCapture {
   // Maps start_point to all its captured nodes.
   nodes: SyntaxCaptureMap,
 }
-
-arc_ptr!(SyntaxCapture);
 
 impl SyntaxCapture {
   pub fn new(nodes: SyntaxCaptureMap) -> Self {
@@ -322,11 +320,10 @@ impl Syntax {
 // pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 // pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
+#[derive(rsvim_macro::ArcPtr)]
 pub struct SyntaxLoader {
   loader: Mutex<Loader>,
 }
-
-arc_ptr!(SyntaxLoader);
 
 #[derive(Debug, Clone)]
 pub struct SyntaxLoadGrammarRequest {
