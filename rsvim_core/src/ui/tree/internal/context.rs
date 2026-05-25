@@ -314,7 +314,7 @@ pub enum TruncatePolicy {
   RESERVED,
 }
 
-#[derive(Clone)]
+#[derive(Clone, rsvim_macro::RcRefCellPtr)]
 pub struct TreeContext {
   ta: Ta,
 
@@ -331,8 +331,6 @@ pub struct TreeContext {
   root_changes: usize,
   names: FoldMap<NodeId, &'static str>,
 }
-
-rc_refcell_ptr!(TreeContext);
 
 impl Debug for TreeContext {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
