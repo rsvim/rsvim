@@ -706,8 +706,10 @@ pub fn inodify(_attr: TokenStream, item: TokenStream) -> TokenStream {
   // Inject `__node` field into struct definition.
   match &mut input.fields {
     syn::Fields::Named(fields) => {
-      // Append the field to a standard named struct: struct Foo { ... }
-      fields.named.push(syn::parse_quote! { __node: InodeBase });
+      // Append "__node" field
+      fields.named.push(
+        syn::parse_quote! { __node: crate::ui::tree::internal::InodeBase },
+      );
     }
     syn::Fields::Unit => {
       // Convert a unit struct (struct Foo;) into a named struct
