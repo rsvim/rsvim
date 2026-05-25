@@ -4,7 +4,7 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use taffy::Style;
 
-#[derive(Clone, Debug, rsvim_macro::Inodify)]
+#[derive(Clone, Debug, rsvim_macro::Inodeable)]
 struct TestValue {
   #[inode]
   pub __node: InodeBase,

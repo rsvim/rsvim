@@ -3,7 +3,7 @@
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
-#[derive(Debug, Clone, rsvim_macro::Inodify)]
+#[derive(Debug, Clone, rsvim_macro::Inodeable)]
 /// Logical node that renders nothing but give a cerntain shape for its
 /// descendant nodes.
 pub struct Panel {

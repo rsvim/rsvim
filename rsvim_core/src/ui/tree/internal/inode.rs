@@ -11,7 +11,7 @@ use std::fmt::Debug;
 )]
 pub struct NodeId(#[start_from(100001)] i32);
 
-pub trait Inodify: Sized + Clone + Debug {
+pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> NodeId;
 
   fn shape(&self) -> IRect;
@@ -25,11 +25,11 @@ pub trait Inodify: Sized + Clone + Debug {
   fn truncate_policy(&self) -> TruncatePolicy;
 }
 
-/// Generate getter/setter for `Inodify`.
+/// Generate getter/setter for `Inodeable`.
 #[macro_export]
 macro_rules! inodify_impl {
   ($name:ty) => {
-    impl Inodify for $name {
+    impl Inodeable for $name {
       fn id(&self) -> NodeId {
         self.__node.id()
       }
@@ -57,11 +57,11 @@ macro_rules! inodify_impl {
   };
 }
 
-/// Generate enum dispatcher for `Inodify`.
+/// Generate enum dispatcher for `Inodeable`.
 #[macro_export]
 macro_rules! inodify_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
-    impl Inodify for $enum {
+    impl Inodeable for $enum {
       fn id(&self) -> NodeId {
         match self {
           $(
@@ -129,7 +129,7 @@ impl InodeBase {
   }
 }
 
-impl Inodify for InodeBase {
+impl Inodeable for InodeBase {
   fn id(&self) -> NodeId {
     self.id
   }

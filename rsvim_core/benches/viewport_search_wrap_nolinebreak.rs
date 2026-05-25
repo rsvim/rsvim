@@ -14,7 +14,7 @@ use rsvim_core::buf::BufferArc;
 use rsvim_core::buf::opt::BufferOptions;
 use rsvim_core::buf::opt::BufferOptionsBuilder;
 use rsvim_core::prelude::*;
-use rsvim_core::ui::tree::Inodify;
+use rsvim_core::ui::tree::Inodeable;
 use rsvim_core::ui::tree::NodeId;
 use rsvim_core::ui::tree::Tree;
 use rsvim_core::ui::viewport::CursorViewport;

@@ -695,11 +695,11 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 // state::Stateful }}}
 
-// ui::tree::internal::Inodify {{{
+// ui::tree::internal::Inodeable {{{
 
-#[proc_macro_derive(Inodify, attributes(inode))]
-/// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodify(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(Inodeable, attributes(inode))]
+/// Generate inode body for `rsvim_core::ui::tree::internal::Inodeable` trait.
+pub fn inodeable(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let struct_ident = &input.ident;
 
@@ -718,7 +718,7 @@ pub fn inodify(input: TokenStream) -> TokenStream {
       if attr.path().is_ident("inode") {
         assert!(
           target_field_ident.is_none(),
-          "[inode] attribute is only allowed to use once!"
+          "#[inode] attribute is only allowed for once!"
         );
         // Store the field's name (e.g., `__node`)
         target_field_ident = Some(field.ident.as_ref().unwrap());
@@ -728,7 +728,7 @@ pub fn inodify(input: TokenStream) -> TokenStream {
   let node_field = match target_field_ident {
     Some(ident) => ident,
     None => {
-      unreachable!("Missing #[inode] attribute with #[derive(Inodify)] macro!")
+      unreachable!("Missing #[inode] attribute!")
     }
   };
 
@@ -736,7 +736,7 @@ pub fn inodify(input: TokenStream) -> TokenStream {
     input.generics.split_for_impl();
 
   quote! {
-  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+  impl #impl_generics crate::ui::tree::internal::Inodeable for #struct_ident #ty_generics #where_clause {
     fn id(&self) -> crate::ui::tree::internal::NodeId {
       self.#node_field.id()
     }
@@ -761,4 +761,4 @@ pub fn inodify(input: TokenStream) -> TokenStream {
   .into()
 }
 
-// ui::tree::internal::Inodify }}}
+// ui::tree::internal::Inodeable }}}
