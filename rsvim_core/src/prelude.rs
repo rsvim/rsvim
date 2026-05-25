@@ -1,14 +1,10 @@
 //! Prelude.
 
-pub use crate::arc_mutex_ptr;
-pub use crate::arc_ptr;
 pub use crate::coord::*;
 pub use crate::err::*;
 pub use crate::lock;
 pub use crate::point;
 pub use crate::point_as;
-pub use crate::rc_ptr;
-pub use crate::rc_refcell_ptr;
 pub use crate::rect;
 pub use crate::rect_as;
 pub use crate::rect_from_layout;

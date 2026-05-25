@@ -18,7 +18,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::ArcMutexPtr)]
 /// Logical canvas.
 ///
 /// It manages both the current frame and the last frame as a screenshot, and internally uses a
@@ -31,8 +31,6 @@ pub struct Canvas {
   prev_frame: Frame,
   shaders: Arc<Mutex<Vec<ShaderCommand>>>,
 }
-
-arc_mutex_ptr!(Canvas);
 
 impl Canvas {
   /// Make new canvas with terminal actual size.
