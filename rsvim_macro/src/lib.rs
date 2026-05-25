@@ -632,7 +632,7 @@ pub fn widgetable_enum(input: TokenStream) -> TokenStream {
       .iter()
       .map(|v| v.ident.clone())
       .collect::<Vec<_>>(),
-    _ => unreachable!("Failed to derive macro on non-enum field!"),
+    _ => unreachable!("Failed to derive macro on non-enum data!"),
   };
 
   quote! {
