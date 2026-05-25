@@ -2,7 +2,6 @@
 
 use crate::cmdltext::CmdlineTextWk;
 use crate::lock;
-use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
