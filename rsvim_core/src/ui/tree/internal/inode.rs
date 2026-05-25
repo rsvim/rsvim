@@ -25,38 +25,6 @@ pub trait Inodify: Sized + Clone + Debug {
   fn truncate_policy(&self) -> TruncatePolicy;
 }
 
-/// Generate getter/setter for `Inodify`.
-#[macro_export]
-macro_rules! inodify_impl {
-  ($name:ty) => {
-    impl Inodify for $name {
-      fn id(&self) -> NodeId {
-        self.__node.id()
-      }
-
-      fn shape(&self) -> IRect {
-        self.__node.shape()
-      }
-
-      fn actual_shape(&self) -> U16Rect {
-        self.__node.actual_shape()
-      }
-
-      fn zindex(&self) -> usize {
-        self.__node.zindex()
-      }
-
-      fn enabled(&self) -> bool {
-        self.__node.enabled()
-      }
-
-      fn truncate_policy(&self) -> TruncatePolicy {
-        self.__node.truncate_policy()
-      }
-    }
-  };
-}
-
 /// Generate enum dispatcher for `Inodify`.
 #[macro_export]
 macro_rules! inodify_enum_impl {
