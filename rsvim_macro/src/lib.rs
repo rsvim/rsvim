@@ -618,3 +618,15 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 }
 
 // arc/rc pointers }}}
+
+// ui::widgetable {{{
+
+#[proc_macro_derive(DispatchWidgetable)]
+pub fn dispatch_widgetable(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  println!("dispatch_widgetable:{:?}", input);
+
+  TokenStream::default()
+}
+
+// ui::widgetable }}}
