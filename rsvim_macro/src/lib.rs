@@ -625,8 +625,7 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let enum_ident = input.ident;
-
-  let enum_variants = match &input.data {
+  let enum_variant = match &input.data {
     syn::Data::Enum(enum_data) => {
       let mut vars = vec![];
       for var in &enum_data.variants {
@@ -636,16 +635,23 @@ pub fn widgetable_enum(input: TokenStream) -> TokenStream {
     }
     _ => unreachable!("Failed to derive macro on non-enum field!"),
   };
-  println!(
-    "widgetable_enum:{}, vars:{:?}",
-    enum_ident,
-    enum_variants
-      .iter()
-      .map(|v| v.to_string())
-      .collect::<Vec<_>>()
-  );
 
-  TokenStream::default()
+  quote! {
+
+  impl Widgetable for #enum_ident {
+    fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
+      match self {
+        #(
+        {
+          #enum_ident::#enum_variant(w) => w.draw(canvas, context),
+        }
+        )*
+      }
+    }
+  }
+
+  }
+  .into()
 }
 
 // ui::widgetable }}}
