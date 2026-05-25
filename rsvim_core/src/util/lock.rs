@@ -1,22 +1,5 @@
 //! Mutex utility.
 
-/// Generate Arc<_> pointers.
-#[macro_export]
-macro_rules! arc_ptr {
-  ($name:ident) => {
-    paste::paste! {
-      pub type [<$name Arc>] = std::sync::Arc<$name>;
-      pub type [<$name Wk>] = std::sync::Weak<$name>;
-
-      impl $name {
-        pub fn to_arc(value: $name) -> [<$name Arc>] {
-          std::sync::Arc::new(value)
-        }
-      }
-    }
-  };
-}
-
 #[macro_export]
 macro_rules! lock {
   ($id:expr) => {

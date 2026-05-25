@@ -1,6 +1,5 @@
 //! Prelude.
 
-pub use crate::arc_ptr;
 pub use crate::coord::*;
 pub use crate::err::*;
 pub use crate::lock;
