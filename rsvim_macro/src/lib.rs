@@ -625,33 +625,25 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let enum_ident = input.ident;
-  println!("widgetable_enum:{}", enum_ident);
 
-  // 1. Ensure the macro is being applied to an enum
-  let data_enum = match &input.data {
-    syn::Data::Enum(data) => data,
-    _ => unreachable!("Failed to derive macro on non-named field!"),
-  };
-
-  // 2. Iterate through each variant of the enum (e.g., Panel, Cursor, etc.)
-  for variant in &data_enum.variants {
-    let variant_name = &variant.ident;
-    println!("Variant Name: {}", variant_name);
-
-    // 3. Iterate through the fields *inside* this specific variant
-    // Since your enum uses tuple-like variants (e.g., Panel(Panel)),
-    // they fall under Fields::Unnamed.
-    match &variant.fields {
-      syn::Fields::Unnamed(fields) => {
-        for field in &fields.unnamed {
-          let field_type = &field.ty;
-          // This will print the type, e.g., "Panel", "Cursor"
-          println!(" -> Contains field type: {:?}", field_type);
-        }
+  let enum_variants = match &input.data {
+    syn::Data::Enum(enum_data) => {
+      let mut vars = vec![];
+      for var in &enum_data.variants {
+        vars.push(var.ident.clone());
       }
-      _ => unreachable!(""),
+      vars
     }
-  }
+    _ => unreachable!("Failed to derive macro on non-enum field!"),
+  };
+  println!(
+    "widgetable_enum:{}, vars:{:?}",
+    enum_ident,
+    enum_variants
+      .iter()
+      .map(|v| v.to_string())
+      .collect::<Vec<_>>()
+  );
 
   TokenStream::default()
 }
