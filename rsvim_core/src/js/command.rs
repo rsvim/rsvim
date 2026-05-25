@@ -71,7 +71,7 @@ impl JsFuture for CommandFuture {
   }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, rsvim_macro::ArcMutexPtr)]
 pub struct CommandManager {
   // Maps from command "name" to its "definition".
   commands: BTreeMap<CompactString, CommandDefinitionRc>,
@@ -79,8 +79,6 @@ pub struct CommandManager {
   // Maps from command "alias" to its "name".
   aliases: FoldMap<CompactString, CompactString>,
 }
-
-arc_mutex_ptr!(CommandManager);
 
 pub type CommandManagerKeys<'a> =
   std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
