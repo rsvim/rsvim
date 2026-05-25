@@ -12,8 +12,6 @@ pub struct Panel {
   // __node: InodeBase,
 }
 
-// inodify_impl!(Panel);
-
 impl Panel {
   pub fn new(id: NodeId, ctx: TreeContextWk) -> Self {
     Panel {
