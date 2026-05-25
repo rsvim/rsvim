@@ -481,7 +481,7 @@ impl ColorScheme {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, rsvim_macro::ArcMutexPtr)]
 pub struct ColorSchemeManager {
   // Maps colorscheme name => colorscheme
   colors: FoldMap<CompactString, ColorSchemeArc>,
@@ -489,8 +489,6 @@ pub struct ColorSchemeManager {
   // Current global colorscheme name.
   color_name: CompactString,
 }
-
-arc_mutex_ptr!(ColorSchemeManager);
 
 pub type ColorSchemeManagerKeys<'a> =
   std::collections::hash_map::Keys<'a, CompactString, ColorSchemeArc>;

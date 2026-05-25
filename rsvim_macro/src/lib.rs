@@ -593,4 +593,28 @@ pub fn rc_refcell_ptr(input: TokenStream) -> TokenStream {
   .into()
 }
 
+#[proc_macro_derive(RcPtr)]
+/// Generate `Rc<...>` pointer for a struct type.
+pub fn rc_ptr(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+
+  let struct_ident = input.ident;
+  let rc_ident = format_ident!("{}Rc", struct_ident);
+  let weak_ident = format_ident!("{}Wk", struct_ident);
+
+  quote! {
+
+  pub type #rc_ident = std::rc::Rc<#struct_ident>;
+  pub type #weak_ident = std::rc::Weak<#struct_ident>;
+
+  impl #struct_ident {
+    pub fn to_rc(value: #struct_ident) -> #rc_ident {
+      std::rc::Rc::new(value)
+    }
+  }
+
+  }
+  .into()
+}
+
 // arc/rc pointers }}}
