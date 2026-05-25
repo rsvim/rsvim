@@ -26,7 +26,6 @@ use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widgetable_enum_impl;
 pub use internal::*;
 use std::fmt::Debug;
 use std::fmt::Formatter;
@@ -35,7 +34,7 @@ use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::WidgetableEnum)]
 /// The value holder for each widget.
 pub enum Node {
   Panel(Panel),
@@ -49,18 +48,6 @@ pub enum Node {
 }
 
 inodify_enum_impl!(
-  Node,
-  Panel,
-  Cursor,
-  Window,
-  WindowContent,
-  Cmdline,
-  CmdlineIndicator,
-  CmdlineInput,
-  CmdlineMessage
-);
-
-widgetable_enum_impl!(
   Node,
   Panel,
   Cursor,

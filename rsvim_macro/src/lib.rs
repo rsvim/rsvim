@@ -8,15 +8,15 @@ use syn::parse_macro_input;
 
 // js::converter {{{
 
-fn get_struct_fields(
+fn get_named_fields(
   data: &syn::Data,
 ) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
   match data {
     syn::Data::Struct(struct_data) => match &struct_data.fields {
       syn::Fields::Named(named_field) => &named_field.named,
-      _ => panic!("Failed to derive macro on non-named field!"),
+      _ => unreachable!("Failed to derive macro on non-named field!"),
     },
-    _ => panic!("Failed to derive macro on non-struct data!"),
+    _ => unreachable!("Failed to derive macro on non-struct data!"),
   }
 }
 
@@ -80,7 +80,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
-  let struct_fields = get_struct_fields(&input.data);
+  let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
@@ -218,7 +218,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   let struct_ident = input.ident;
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
-  let struct_fields = get_struct_fields(&input.data);
+  let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
@@ -618,3 +618,37 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 }
 
 // arc/rc pointers }}}
+
+// ui::widgetable {{{
+
+#[proc_macro_derive(WidgetableEnum)]
+/// Generate enum disaptcher for `rsvim_core::ui::widget::Widgetable` trait.
+pub fn widgetable_enum(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let enum_ident = input.ident;
+  let enum_variant = match &input.data {
+    syn::Data::Enum(enum_data) => enum_data
+      .variants
+      .iter()
+      .map(|v| v.ident.clone())
+      .collect::<Vec<_>>(),
+    _ => unreachable!("Failed to derive macro on non-enum field!"),
+  };
+
+  quote! {
+
+  impl Widgetable for #enum_ident {
+    fn draw(&self, canvas: &mut Canvas, context: &WidgetContext) {
+      match self {
+        #(
+          #enum_ident::#enum_variant(w) => w.draw(canvas, context),
+        )*
+      }
+    }
+  }
+
+  }
+  .into()
+}
+
+// ui::widgetable }}}
