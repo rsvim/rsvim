@@ -674,14 +674,14 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
   impl Stateful for #enum_ident {
     fn handle(&self, context: &StateContext, event: Event) -> State {
       match self {
-        $(
+        #(
           #enum_ident::#enum_variant(s) => s.handle(context, event),
         )*
       }
     }
     fn handle_op(&self, context: &StateContext, op: Operation) -> State {
       match self {
-        $(
+        #(
           #enum_ident::#enum_variant(s) => s.handle_op(context, op),
         )*
       }
