@@ -11,7 +11,7 @@ fn version() {
   let debug_env = std::env::var("DEBUG").unwrap_or("0".to_string());
   let host = std::env::var("HOST").unwrap_or("unknown".to_string());
   println!(
-    "{LOG} Env profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    "{LOG} Env: profile={:?}, opt_level={:?}, debug={:?}, host={:?}",
     profile_env, opt_level_env, debug_env, host
   );
 
@@ -66,7 +66,7 @@ fn version() {
   let v8_version = v8_version();
 
   println!(
-    "{LOG} Resolved profile:{:?}, host:{:?}, version:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
+    "{LOG} Resolved: profile={:?}, host={:?}, version={:?}, git_commit={:?}, v8={:?}, swc_core={:?}",
     profile, host, version, git_commit, v8_version, swc_core
   );
 
