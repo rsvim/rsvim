@@ -830,7 +830,7 @@ pub fn inodify_enum(input: TokenStream) -> TokenStream {
 
 // coord {{{
 
-// Struct to hold and validate inputs for point!(x, y)
+// For `point!(x, y)`
 struct GeoPointInput {
   x: syn::Expr,
   y: syn::Expr,
@@ -845,7 +845,7 @@ impl syn::parse::Parse for GeoPointInput {
     if !input.is_empty() {
       return Err(syn::Error::new(
         input.span(),
-        "Expected exactly two arguments: point!(x, y)",
+        "Expected exactly two arguments for `point!(x, y)`",
       ));
     }
 
@@ -859,6 +859,40 @@ pub fn geo_point(input: TokenStream) -> TokenStream {
 
   quote! {
       geo::point!(x: #x, y: #y)
+  }
+  .into()
+}
+
+// For `point_as!(x, y)`
+struct GeoPointAsInput {
+  expr: syn::Expr,
+  ty: syn::Type,
+}
+
+impl syn::parse::Parse for GeoPointAsInput {
+  fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    let expr: syn::Expr = input.parse()?;
+    let _: syn::Token![,] = input.parse()?;
+    let ty: syn::Type = input.parse()?;
+
+    if !input.is_empty() {
+      return Err(syn::Error::new(
+        input.span(),
+        "Expected exactly two arguments for `point_as!(expr, ty)`",
+      ));
+    }
+
+    Ok(GeoPointAsInput { expr, ty })
+  }
+}
+
+#[proc_macro]
+pub fn point_as(input: TokenStream) -> TokenStream {
+  let GeoPointAsInput { expr, ty } =
+    parse_macro_input!(input as GeoPointAsInput);
+
+  quote! {
+      geo::point!(x: #expr.x() as #ty, y: #expr.y() as #ty)
   }
   .into()
 }
