@@ -1,7 +1,6 @@
 //! Commandline's input content widget.
 
 use crate::cmdltext::CmdlineTextWk;
-use crate::inodify_impl;
 use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -10,15 +9,14 @@ use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// Commandline input content.
 pub struct CmdlineInput {
+  #[inode_base]
   __node: InodeBase,
   cmdline_text: CmdlineTextWk,
   viewport: ViewportWk,
 }
-
-inodify_impl!(CmdlineInput);
 
 impl CmdlineInput {
   pub fn new(

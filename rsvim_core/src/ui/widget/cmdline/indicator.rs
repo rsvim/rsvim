@@ -1,7 +1,6 @@
 //! Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 
 use crate::buf::unicode::char_is_whitespace;
-use crate::inodify_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
@@ -32,14 +31,13 @@ impl std::fmt::Display for CmdlineIndicatorSymbol {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 pub struct CmdlineIndicator {
+  #[inode_base]
   __node: InodeBase,
   symbol: CmdlineIndicatorSymbol,
 }
-
-inodify_impl!(CmdlineIndicator);
 
 impl CmdlineIndicator {
   pub fn new(
