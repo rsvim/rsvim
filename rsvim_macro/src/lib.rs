@@ -736,15 +736,15 @@ pub fn inodify(input: TokenStream) -> TokenStream {
     input.generics.split_for_impl();
 
   quote! {
-  impl #impl_generics Inodify for #struct_ident #ty_generics #where_clause {
-    fn id(&self) -> NodeId {
+  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
       self.#node_field.id()
     }
-    fn shape(&self) -> IRect {
+    fn shape(&self) -> crate::coord::IRect {
       self.#node_field.shape()
     }
 
-    fn actual_shape(&self) -> U16Rect {
+    fn actual_shape(&self) -> crate::coord::U16Rect {
       self.#node_field.actual_shape()
     }
     fn zindex(&self) -> usize {
@@ -753,7 +753,7 @@ pub fn inodify(input: TokenStream) -> TokenStream {
     fn enabled(&self) -> bool {
       self.#node_field.enabled()
     }
-    fn truncate_policy(&self) -> TruncatePolicy {
+    fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
       self.#node_field.truncate_policy()
     }
   }
