@@ -8,15 +8,15 @@ use syn::parse_macro_input;
 
 // js::converter {{{
 
-fn get_struct_fields(
+fn get_named_fields(
   data: &syn::Data,
 ) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
   match data {
     syn::Data::Struct(struct_data) => match &struct_data.fields {
       syn::Fields::Named(named_field) => &named_field.named,
-      _ => panic!("Failed to derive macro on non-named field!"),
+      _ => unreachable!("Failed to derive macro on non-named field!"),
     },
-    _ => panic!("Failed to derive macro on non-struct data!"),
+    _ => unreachable!("Failed to derive macro on non-struct data!"),
   }
 }
 
@@ -80,7 +80,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
-  let struct_fields = get_struct_fields(&input.data);
+  let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
@@ -218,7 +218,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   let struct_ident = input.ident;
   let struct_ident_builder = format_ident!("{}Builder", struct_ident);
-  let struct_fields = get_struct_fields(&input.data);
+  let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
@@ -625,6 +625,33 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   println!("widgetable_enum:{:?}", input);
+  let struct_ident = input.ident;
+
+  // 1. Ensure the macro is being applied to an enum
+  let data_enum = match &input.data {
+    syn::Data::Enum(data) => data,
+    _ => unreachable!("Failed to derive macro on non-named field!"),
+  };
+
+  // 2. Iterate through each variant of the enum (e.g., Panel, Cursor, etc.)
+  for variant in &data_enum.variants {
+    let variant_name = &variant.ident;
+    println!("Variant Name: {}", variant_name);
+
+    // 3. Iterate through the fields *inside* this specific variant
+    // Since your enum uses tuple-like variants (e.g., Panel(Panel)),
+    // they fall under Fields::Unnamed.
+    match &variant.fields {
+      syn::Fields::Unnamed(fields) => {
+        for field in &fields.unnamed {
+          let field_type = &field.ty;
+          // This will print the type, e.g., "Panel", "Cursor"
+          println!(" -> Contains field type: {:?}", field_type);
+        }
+      }
+      _ => unreachable!(""),
+    }
+  }
 
   TokenStream::default()
 }
