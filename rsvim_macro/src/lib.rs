@@ -621,10 +621,10 @@ pub fn rc_ptr(input: TokenStream) -> TokenStream {
 
 // ui::widgetable {{{
 
-#[proc_macro_derive(DispatchWidgetable)]
-pub fn dispatch_widgetable(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(WidgetableEnum)]
+pub fn widgetable_enum(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
-  println!("dispatch_widgetable:{:?}", input);
+  println!("widgetable_enum:{:?}", input);
 
   TokenStream::default()
 }

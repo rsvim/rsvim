@@ -35,7 +35,7 @@ use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::WidgetableEnum)]
 /// The value holder for each widget.
 pub enum Node {
   Panel(Panel),
