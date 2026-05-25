@@ -891,27 +891,23 @@ pub fn geo_point_as(input: TokenStream) -> TokenStream {
   .into()
 }
 
-struct RectInput {
+struct GeoRectInput {
   args: Vec<syn::Expr>,
 }
 
-impl syn::parse::Parse for RectInput {
+impl syn::parse::Parse for GeoRectInput {
   fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
     let punctuated =
       syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated(input)?;
     let args: Vec<syn::Expr> = punctuated.into_iter().collect();
-    assert!(
-      args.len() == 2 || args.len() == 4,
-      "Expected either 2 or 4 arguments for `geo_rect!(l, t, r, b)` or `geo_rect!(min, max)` macro!"
-    );
 
-    Ok(RectInput { args })
+    Ok(GeoRectInput { args })
   }
 }
 
 #[proc_macro]
-pub fn rect(input: TokenStream) -> TokenStream {
-  let RectInput { args } = parse_macro_input!(input as RectInput);
+pub fn geo_rect(input: TokenStream) -> TokenStream {
+  let GeoRectInput { args } = parse_macro_input!(input as GeoRectInput);
 
   match args.len() {
     4 => {
@@ -932,7 +928,9 @@ pub fn rect(input: TokenStream) -> TokenStream {
       }
       .into()
     }
-    _ => unreachable!(),
+    _ => unreachable!(
+      "Expected either 2 or 4 arguments for `geo_rect!(l, t, r, b)` or `geo_rect!(min, max)` macro!"
+    ),
   }
 }
 
