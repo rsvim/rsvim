@@ -3,7 +3,6 @@
 pub use crate::coord::*;
 pub use crate::err::*;
 pub use crate::lock;
-pub use crate::rect_as;
 pub use crate::rect_from_layout;
 pub use crate::rect_from_size;
 pub use crate::size;
@@ -24,6 +23,7 @@ pub use log::warn;
 pub use rsvim_macro::geo_point as point;
 pub use rsvim_macro::geo_point_as as point_as;
 pub use rsvim_macro::geo_rect as rect;
+pub use rsvim_macro::geo_rect_as as rect_as;
 pub use std::collections::BTreeMap;
 pub use std::collections::BTreeSet;
 pub use std::path::Path;

@@ -108,17 +108,6 @@ where
   }
 }
 
-/// Convert the generic type `T` inside `geo::Rect<T>` to another type `U`.
-#[macro_export]
-macro_rules! rect_as {
-  ($r:ident, $ty:ty) => {
-    $crate::coord::Rect::new(
-      ($r.min().x as $ty, $r.min().y as $ty),
-      ($r.max().x as $ty, $r.max().y as $ty),
-    ) as $crate::coord::Rect<$ty>
-  };
-}
-
 #[macro_export]
 macro_rules! size {
   ($width:expr, $height:expr) => {
