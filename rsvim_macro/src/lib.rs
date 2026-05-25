@@ -697,58 +697,66 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 // ui::tree::internal::Inodify {{{
 
-#[proc_macro_attribute]
+#[proc_macro_derive(Inodify, attributes(inode))]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
-  let mut input = parse_macro_input!(item as ItemStruct);
-  let struct_ident = input.ident.clone();
+pub fn inodify(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let struct_ident = &input.ident;
 
-  // Check visibility
-  let vis = if attr.is_empty() {
-    syn::Visibility::Inherited
-  } else {
-    syn::parse::<syn::Visibility>(attr).unwrap()
+  let fields = match &input.data {
+    syn::Data::Struct(struct_data) => match &struct_data.fields {
+      syn::Fields::Named(fields) => &fields.named,
+      _ => unreachable!("Failed to derive macro on non-named field!"),
+    },
+    _ => unreachable!("Failed to derive macro on non-struct data!"),
   };
 
-  // Inject `__node` field into struct definition.
-  match &mut input.fields {
-    syn::Fields::Named(fields) => {
-      fields.named.push(
-        syn::parse_quote! { #vis __node: crate::ui::tree::internal::InodeBase },
-      );
+  let mut target_field_ident = None;
+  for field in fields {
+    for attr in &field.attrs {
+      // Check if the attribute path matches "inode"
+      if attr.path().is_ident("inode") {
+        assert!(
+          target_field_ident.is_none(),
+          "[inode] attribute is only allowed to use once!"
+        );
+        // Store the field's name (e.g., `__node`)
+        target_field_ident = Some(field.ident.as_ref().unwrap());
+      }
     }
-    _ => unreachable!("Failed to derive macro on non-named data!"),
   }
+  let node_field = match target_field_ident {
+    Some(ident) => ident,
+    None => {
+      unreachable!("Missing #[inode] attribute with #[derive(Inodify)] macro!")
+    }
+  };
 
-  // Handle generics safely if struct has lifetimes or type parameters
   let (impl_generics, ty_generics, where_clause) =
     input.generics.split_for_impl();
 
   quote! {
-
-  #input
-
-  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
-    fn id(&self) -> crate::ui::tree::internal::NodeId {
-      self.__node.id()
+  impl #impl_generics Inodify for #struct_ident #ty_generics #where_clause {
+    fn id(&self) -> NodeId {
+      self.#node_field.id()
     }
-    fn shape(&self) -> crate::coord::IRect {
-      self.__node.shape()
+    fn shape(&self) -> IRect {
+      self.#node_field.shape()
     }
-    fn actual_shape(&self) -> crate::coord::U16Rect {
-      self.__node.actual_shape()
+
+    fn actual_shape(&self) -> U16Rect {
+      self.#node_field.actual_shape()
     }
     fn zindex(&self) -> usize {
-      self.__node.zindex()
+      self.#node_field.zindex()
     }
     fn enabled(&self) -> bool {
-      self.__node.enabled()
+      self.#node_field.enabled()
     }
-    fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
-      self.__node.truncate_policy()
+    fn truncate_policy(&self) -> TruncatePolicy {
+      self.#node_field.truncate_policy()
     }
   }
-
   }
   .into()
 }
