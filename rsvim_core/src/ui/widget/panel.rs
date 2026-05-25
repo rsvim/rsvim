@@ -5,14 +5,14 @@ use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// Logical node that renders nothing but give a cerntain shape for its
 /// descendant nodes.
 pub struct Panel {
-  __node: InodeBase,
+  // __node: InodeBase,
 }
 
-inodify_impl!(Panel);
+// inodify_impl!(Panel);
 
 impl Panel {
   pub fn new(id: NodeId, ctx: TreeContextWk) -> Self {
