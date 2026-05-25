@@ -725,33 +725,28 @@ pub fn inodify(attr: TokenStream, item: TokenStream) -> TokenStream {
     input.generics.split_for_impl();
 
   quote! {
-      #input
+  #input
 
-      impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
-          fn id(&self) -> crate::ui::tree::internal::NodeId {
-              self.__node.id()
-          }
-
-          fn shape(&self) -> crate::coord::IRect {
-              self.__node.shape()
-          }
-
-          fn actual_shape(&self) -> crate::coord::U16Rect {
-              self.__node.actual_shape()
-          }
-
-          fn zindex(&self) -> usize {
-              self.__node.zindex()
-          }
-
-          fn enabled(&self) -> bool {
-              self.__node.enabled()
-          }
-
-          fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
-              self.__node.truncate_policy()
-          }
-      }
+  impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
+      self.__node.id()
+    }
+    fn shape(&self) -> crate::coord::IRect {
+      self.__node.shape()
+    }
+    fn actual_shape(&self) -> crate::coord::U16Rect {
+      self.__node.actual_shape()
+    }
+    fn zindex(&self) -> usize {
+      self.__node.zindex()
+    }
+    fn enabled(&self) -> bool {
+      self.__node.enabled()
+    }
+    fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
+      self.__node.truncate_policy()
+    }
+  }
   }
   .into()
 }
