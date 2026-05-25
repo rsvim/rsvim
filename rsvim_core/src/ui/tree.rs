@@ -4,7 +4,6 @@ pub mod internal;
 
 use crate::buf::BufferWk;
 use crate::cmdltext::CmdlineTextWk;
-use crate::inodify_enum_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -34,7 +33,9 @@ use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 
-#[derive(Debug, Clone, rsvim_macro::WidgetableEnum)]
+#[derive(
+  Debug, Clone, rsvim_macro::WidgetableEnum, rsvim_macro::InodifyEnum,
+)]
 /// The value holder for each widget.
 pub enum Node {
   Panel(Panel),
@@ -46,18 +47,6 @@ pub enum Node {
   CmdlineInput(CmdlineInput),
   CmdlineMessage(CmdlineMessage),
 }
-
-inodify_enum_impl!(
-  Node,
-  Panel,
-  Cursor,
-  Window,
-  WindowContent,
-  Cmdline,
-  CmdlineIndicator,
-  CmdlineInput,
-  CmdlineMessage
-);
 
 #[derive(Clone, rsvim_macro::ArcMutexPtr)]
 /// The UI widget tree.

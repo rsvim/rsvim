@@ -772,70 +772,51 @@ pub fn inodify_enum(input: TokenStream) -> TokenStream {
     _ => unreachable!("Failed to derive macro on non-enum data!"),
   };
 
+  let (impl_generics, ty_generics, where_clause) =
+    input.generics.split_for_impl();
+
   quote! {
 
-  impl Stateful for #enum_ident {
-    fn handle(&self, context: &StateContext, event: Event) -> State {
+  impl #impl_generics crate::ui::tree::internal::Inodify for #enum_ident #ty_generics #where_clause {
+    fn id(&self) -> crate::ui::tree::internal::NodeId {
       match self {
         #(
-          #enum_ident::#enum_variant(s) => s.handle(context, event),
+          #enum_ident::#enum_variant(e) => e.id(),
         )*
       }
     }
-    fn handle_op(&self, context: &StateContext, op: Operation) -> State {
+    fn shape(&self) -> crate::coord::IRect {
       match self {
         #(
-          #enum_ident::#enum_variant(s) => s.handle_op(context, op),
+          #enum_ident::#enum_variant(e) => e.shape(),
         )*
       }
     }
-  }
-
-  impl Inodify for $enum {
-    fn id(&self) -> NodeId {
+    fn actual_shape(&self) -> crate::coord::U16Rect {
       match self {
-        $(
-          $enum::$variant(e) => e.id(),
+        #(
+          #enum_ident::#enum_variant(e) => e.actual_shape(),
         )*
       }
     }
-
-    fn shape(&self) -> IRect {
-      match self {
-        $(
-          $enum::$variant(e) => e.shape(),
-        )*
-      }
-    }
-
-    fn actual_shape(&self) -> U16Rect {
-      match self {
-        $(
-          $enum::$variant(e) => e.actual_shape(),
-        )*
-      }
-    }
-
     fn zindex(&self) -> usize {
       match self {
-        $(
-          $enum::$variant(e) => e.zindex(),
+        #(
+          #enum_ident::#enum_variant(e) => e.zindex(),
         )*
       }
     }
-
     fn enabled(&self) -> bool {
       match self {
-        $(
-          $enum::$variant(e) => e.enabled(),
+        #(
+          #enum_ident::#enum_variant(e) => e.enabled(),
         )*
       }
     }
-
     fn truncate_policy(&self) -> TruncatePolicy {
       match self {
-        $(
-          $enum::$variant(e) => e.truncate_policy(),
+        #(
+          #enum_ident::#enum_variant(e) => e.truncate_policy(),
         )*
       }
     }
