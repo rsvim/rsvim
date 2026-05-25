@@ -25,62 +25,6 @@ pub trait Inodify: Sized + Clone + Debug {
   fn truncate_policy(&self) -> TruncatePolicy;
 }
 
-/// Generate enum dispatcher for `Inodify`.
-#[macro_export]
-macro_rules! inodify_enum_impl {
-  ($enum:ident, $($variant:tt),*) => {
-    impl Inodify for $enum {
-      fn id(&self) -> NodeId {
-        match self {
-          $(
-            $enum::$variant(e) => e.id(),
-          )*
-        }
-      }
-
-      fn shape(&self) -> IRect {
-        match self {
-          $(
-            $enum::$variant(e) => e.shape(),
-          )*
-        }
-      }
-
-      fn actual_shape(&self) -> U16Rect {
-        match self {
-          $(
-            $enum::$variant(e) => e.actual_shape(),
-          )*
-        }
-      }
-
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
-      }
-
-      fn enabled(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.enabled(),
-          )*
-        }
-      }
-
-      fn truncate_policy(&self) -> TruncatePolicy {
-        match self {
-          $(
-            $enum::$variant(e) => e.truncate_policy(),
-          )*
-        }
-      }
-    }
-  }
-}
-
 #[derive(Debug, Clone)]
 pub struct InodeBase {
   id: NodeId,
