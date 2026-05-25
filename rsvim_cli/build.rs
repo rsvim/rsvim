@@ -66,8 +66,8 @@ fn version() {
   let v8_version = v8_version();
 
   println!(
-    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
-    version, profile, host, git_commit, v8_version, swc_core
+    "{LOG} Resolved profile:{:?}, host:{:?}, version:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
+    profile, host, version, git_commit, v8_version, swc_core
   );
 
   let mut resolved = format!(
