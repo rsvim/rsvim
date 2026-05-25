@@ -109,21 +109,6 @@ where
 }
 
 #[macro_export]
-macro_rules! point {
-  ($x:expr,$y:expr) => {
-    geo::point!(x: $x, y: $y)
-  };
-}
-
-/// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
-#[macro_export]
-macro_rules! point_as {
-  ($p:ident,$ty:ty) => {
-    geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
-  };
-}
-
-#[macro_export]
 macro_rules! rect {
   ($left:expr, $top:expr, $right:expr, $bottom:expr) => {
     $crate::coord::Rect::new(($left, $top), ($right, $bottom))
