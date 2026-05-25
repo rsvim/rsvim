@@ -671,15 +671,15 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
   quote! {
 
-  impl Stateful for #enum_ident {
-    fn handle(&self, context: &StateContext, event: Event) -> State {
+  impl crate::state::Stateful for #enum_ident {
+    fn handle(&self, context: &crate::state::StateContext, event: crossterm::event::Event) -> crate::state::State {
       match self {
         #(
           #enum_ident::#enum_variant(s) => s.handle(context, event),
         )*
       }
     }
-    fn handle_op(&self, context: &StateContext, op: Operation) -> State {
+    fn handle_op(&self, context: &crate::state::StateContext, op: crate::state::ops::Operation) -> crate::state::State {
       match self {
         #(
           #enum_ident::#enum_variant(s) => s.handle_op(context, op),
@@ -713,13 +713,11 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
   let mut target_field_ident = None;
   for field in fields {
     for attr in &field.attrs {
-      // Check if the attribute path matches "inode_base"
       if attr.path().is_ident("inode_base") {
         assert!(
           target_field_ident.is_none(),
-          "#[inode_base] attribute is only allowed for once!"
+          "Attribute is only allowed for once!"
         );
-        // Store the field's name (e.g., `__node`)
         target_field_ident = Some(field.ident.as_ref().unwrap());
       }
     }
@@ -727,7 +725,7 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
   let field_ident = match target_field_ident {
     Some(ident) => ident,
     None => {
-      unreachable!("Missing #[inode_base] attribute!")
+      unreachable!("Missing attribute!")
     }
   };
 
@@ -756,6 +754,93 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
       self.#field_ident.truncate_policy()
     }
   }
+  }
+  .into()
+}
+
+#[proc_macro_derive(InodifyEnum)]
+/// Generate enum disaptcher for `rsvim_core::ui::tree::internal::Inodify` trait.
+pub fn inodify_enum(input: TokenStream) -> TokenStream {
+  let input = parse_macro_input!(input as DeriveInput);
+  let enum_ident = input.ident;
+  let enum_variant = match &input.data {
+    syn::Data::Enum(enum_data) => enum_data
+      .variants
+      .iter()
+      .map(|v| v.ident.clone())
+      .collect::<Vec<_>>(),
+    _ => unreachable!("Failed to derive macro on non-enum data!"),
+  };
+
+  quote! {
+
+  impl Stateful for #enum_ident {
+    fn handle(&self, context: &StateContext, event: Event) -> State {
+      match self {
+        #(
+          #enum_ident::#enum_variant(s) => s.handle(context, event),
+        )*
+      }
+    }
+    fn handle_op(&self, context: &StateContext, op: Operation) -> State {
+      match self {
+        #(
+          #enum_ident::#enum_variant(s) => s.handle_op(context, op),
+        )*
+      }
+    }
+  }
+
+  impl Inodify for $enum {
+    fn id(&self) -> NodeId {
+      match self {
+        $(
+          $enum::$variant(e) => e.id(),
+        )*
+      }
+    }
+
+    fn shape(&self) -> IRect {
+      match self {
+        $(
+          $enum::$variant(e) => e.shape(),
+        )*
+      }
+    }
+
+    fn actual_shape(&self) -> U16Rect {
+      match self {
+        $(
+          $enum::$variant(e) => e.actual_shape(),
+        )*
+      }
+    }
+
+    fn zindex(&self) -> usize {
+      match self {
+        $(
+          $enum::$variant(e) => e.zindex(),
+        )*
+      }
+    }
+
+    fn enabled(&self) -> bool {
+      match self {
+        $(
+          $enum::$variant(e) => e.enabled(),
+        )*
+      }
+    }
+
+    fn truncate_policy(&self) -> TruncatePolicy {
+      match self {
+        $(
+          $enum::$variant(e) => e.truncate_policy(),
+        )*
+      }
+    }
+  }
+
   }
   .into()
 }
