@@ -8,10 +8,11 @@ use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::WidgetContext;
 use crate::ui::widget::Widgetable;
 
-#[rsvim_macro::inodify]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, rsvim_macro::Inodify)]
 /// The widget contains text contents for Vim window.
 pub struct WindowContent {
+  #[inode]
+  __node:: InodeBase,
   buffer: BufferWk,
   viewport: ViewportWk,
 }
