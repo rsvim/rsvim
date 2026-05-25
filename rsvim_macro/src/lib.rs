@@ -724,7 +724,7 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
       }
     }
   }
-  let node_field = match target_field_ident {
+  let field_ident = match target_field_ident {
     Some(ident) => ident,
     None => {
       unreachable!("Missing #[inode] attribute!")
@@ -737,23 +737,23 @@ pub fn inodeable(input: TokenStream) -> TokenStream {
   quote! {
   impl #impl_generics crate::ui::tree::internal::Inodify for #struct_ident #ty_generics #where_clause {
     fn id(&self) -> crate::ui::tree::internal::NodeId {
-      self.#node_field.id()
+      self.#field_ident.id()
     }
     fn shape(&self) -> crate::coord::IRect {
-      self.#node_field.shape()
+      self.#field_ident.shape()
     }
 
     fn actual_shape(&self) -> crate::coord::U16Rect {
-      self.#node_field.actual_shape()
+      self.#field_ident.actual_shape()
     }
     fn zindex(&self) -> usize {
-      self.#node_field.zindex()
+      self.#field_ident.zindex()
     }
     fn enabled(&self) -> bool {
-      self.#node_field.enabled()
+      self.#field_ident.enabled()
     }
     fn truncate_policy(&self) -> crate::ui::tree::internal::TruncatePolicy {
-      self.#node_field.truncate_policy()
+      self.#field_ident.truncate_policy()
     }
   }
   }
