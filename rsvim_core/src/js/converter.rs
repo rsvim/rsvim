@@ -59,14 +59,43 @@ where
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Value> {
-    use crate::js::binding;
-
     let obj = v8::Object::new(scope);
 
     for (k, v) in self.iter() {
       let name = v8::String::new(scope, k.to_string().as_str()).unwrap();
       let value = v.to_v8(scope);
-      binding::set_property_to(scope, obj, name.into(), value.into());
+      crate::js::binding::set_property_to(
+        scope,
+        obj,
+        name.into(),
+        value.into(),
+      );
+    }
+
+    obj.into()
+  }
+}
+
+impl<K, V> ToV8 for BTreeMap<K, V>
+where
+  K: ToV8 + ToString,
+  V: ToV8,
+{
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    let obj = v8::Object::new(scope);
+
+    for (k, v) in self.iter() {
+      let name = v8::String::new(scope, k.to_string().as_str()).unwrap();
+      let value = v.to_v8(scope);
+      crate::js::binding::set_property_to(
+        scope,
+        obj,
+        name.into(),
+        value.into(),
+      );
     }
 
     obj.into()
