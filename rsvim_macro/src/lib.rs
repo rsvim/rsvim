@@ -143,6 +143,22 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
+fn get_from_v8_type_attr(field: &syn::Field) -> Option<String> {
+  for attr in &field.attrs {
+    // Check if the attribute path is exactly "from_v8"
+    if attr.path().is_ident("from_v8") {
+      // Parse it as a list: from_v8(type_arg)
+      if let syn::Meta::List(meta_list) = &attr.meta {
+        // Parse the nested tokens into an identifier
+        if let Ok(ident) = meta_list.parse_args::<syn::Ident>() {
+          return Some(ident.to_string());
+        }
+      }
+    }
+  }
+  None
+}
+
 struct FromV8Tokens {
   field: Vec<syn::Ident>,
   name: Vec<syn::Ident>,
@@ -152,7 +168,6 @@ struct FromV8Tokens {
 }
 
 impl FromV8Tokens {
-  /// Collects all related identifiers in a single pass over the filtered fields.
   fn collect<'a, F>(
     fields: impl Iterator<Item = &'a syn::Field>,
     predicate: F,
@@ -184,7 +199,6 @@ impl FromV8Tokens {
             match &seg.arguments {
               syn::PathArguments::AngleBracketed(angle) => {
                 match angle.args.last().unwrap() {
-                  // Match inner type here
                   syn::GenericArgument::Type(syn::Type::Path(inner_p)) => {
                     inner_p.path.segments.last().unwrap().ident.clone()
                   }
@@ -211,7 +225,7 @@ impl FromV8Tokens {
   }
 }
 
-#[proc_macro_derive(FromV8, attributes(from_v8_bool, from_v8_string))]
+#[proc_macro_derive(FromV8, attributes(from_v8))]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
@@ -223,18 +237,23 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
+  // Match based on the string extracted from #[from_v8(type)]
   let bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    has_attr(f, "from_v8_bool") && !is_option(f) && !is_vec(f)
+    get_from_v8_type_attr(f).as_deref() == Some("bool")
+      && !is_option(f)
+      && !is_vec(f)
   });
   let optional_bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    has_attr(f, "from_v8_bool") && is_option(f)
+    get_from_v8_type_attr(f).as_deref() == Some("bool") && is_option(f)
   });
   let string_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    has_attr(f, "from_v8_string") && !is_option(f) && !is_vec(f)
+    get_from_v8_type_attr(f).as_deref() == Some("string")
+      && !is_option(f)
+      && !is_vec(f)
   });
   let optional_string_tokens =
     FromV8Tokens::collect(struct_fields.iter(), |f| {
-      has_attr(f, "from_v8_string") && is_option(f)
+      get_from_v8_type_attr(f).as_deref() == Some("string") && is_option(f)
     });
 
   // Destructure for `quote!` use
@@ -283,14 +302,13 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   impl crate::js::converter::FromV8 for #struct_ident {
     fn from_v8<'s>(
-      scope: &mut v8::PinScope<'s, '_>,
-      obj: v8::Local<'s, v8::Value>,
+        scope: &mut v8::PinScope<'s, '_>,
+        obj: v8::Local<'s, v8::Value>,
     ) -> Self {
       debug_assert!(obj.is_object() || obj.is_object_template());
       let obj = obj.to_object(scope).unwrap();
 
       let mut builder = #struct_ident_builder::default();
-
 
       // bool
       #(
