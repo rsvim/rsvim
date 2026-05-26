@@ -29,10 +29,6 @@ fn is_type_match(ty: &syn::Type, ident_name: &str) -> bool {
   false
 }
 
-fn has_attr(field: &syn::Field, attr_name: &str) -> bool {
-  field.attrs.iter().any(|a| a.path().is_ident(attr_name))
-}
-
 struct ToV8Tokens {
   field: Vec<syn::Ident>,
   uppercase: Vec<syn::Ident>,
