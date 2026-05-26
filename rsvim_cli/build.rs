@@ -11,7 +11,7 @@ fn version() {
   let debug_env = std::env::var("DEBUG").unwrap_or("0".to_string());
   let host = std::env::var("HOST").unwrap_or("unknown".to_string());
   println!(
-    "{LOG} Env profile:{:?}, opt_level:{:?}, debug:{:?}, host:{:?}",
+    "{LOG} Env: profile={:?}, opt_level={:?}, debug={:?}, host={:?}",
     profile_env, opt_level_env, debug_env, host
   );
 
@@ -36,11 +36,10 @@ fn version() {
       let head_id = repo.head_id().unwrap();
       let id = head_id.shorten_or_id();
       let id = id.to_string();
-      println!("{LOG} Git id:{:?}", id);
       Some(id)
     }
     Err(e) => {
-      println!("{LOG} Git error:{:?}", e);
+      println!("{LOG} Failed to fetch git commit:{:?}", e);
       None
     }
   };
@@ -52,24 +51,23 @@ fn version() {
       Ok(parsed_manifest) => {
         let deps = &parsed_manifest["workspace"]["dependencies"];
         let core = deps["swc_core"].as_str();
-        println!("{LOG} Swc core:{:?}", core);
         Some(core.unwrap().trim_start_matches("=").to_string())
       }
       Err(e) => {
-        println!("{LOG} Parse Cargo.toml error:{:?}", e);
+        println!("{LOG} Failed to parse swc_core version:{:?}", e);
         None
       }
     },
     Err(e) => {
-      println!("{LOG} Read Cargo.toml error:{:?}", e);
+      println!("{LOG} Failed to parse swc_core version:{:?}", e);
       None
     }
   };
   let v8_version = v8_version();
 
   println!(
-    "{LOG} Resolved version:{:?}, profile:{:?}, host:{:?}, git_commit:{:?}, v8:{:?}, swc_core:{:?}",
-    version, profile, host, git_commit, v8_version, swc_core
+    "{LOG} Resolved: profile={:?}, host={:?}, version={:?}, git_commit={:?}, v8={:?}, swc_core={:?}",
+    profile, host, version, git_commit, v8_version, swc_core
   );
 
   let mut resolved = format!(
