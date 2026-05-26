@@ -1,6 +1,5 @@
 //! Tree-sitter parser metadata
 
-use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 

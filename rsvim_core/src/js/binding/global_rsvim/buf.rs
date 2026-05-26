@@ -45,7 +45,7 @@ pub fn list(
   let bufs = buffer_manager
     .keys()
     .collect::<Vec<&BufferId>>()
-    .to_v8(scope, |scope, buf_id| buf_id.to_v8(scope));
+    .to_v8(scope);
 
   rv.set(bufs);
 }

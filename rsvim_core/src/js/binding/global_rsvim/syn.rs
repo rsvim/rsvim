@@ -43,8 +43,7 @@ pub fn load_parser_sync<'s>(
             .map(|grammar| grammar.name.to_string())
             .collect::<Vec<String>>();
           trace!("Rsvim.syn.loadParserSync result:{:?}", parser_names);
-          let parser_names =
-            parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
+          let parser_names = parser_names.to_v8(scope);
           rv.set(parser_names);
         }
         Err(e) => {
@@ -114,7 +113,7 @@ pub fn list_parsers<'s>(
   let syntax_manager = state.syntax_manager.clone();
   let parser_names = lock!(syntax_manager).list_grammar_names();
   trace!("Rsvim.syn.listParsers result:{:?}", parser_names);
-  let parser_names = parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
+  let parser_names = parser_names.to_v8(scope);
   rv.set(parser_names);
 }
 

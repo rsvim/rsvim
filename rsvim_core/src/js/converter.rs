@@ -19,16 +19,6 @@ pub trait ToV8 {
   ) -> v8::Local<'s, v8::Value>;
 }
 
-pub trait VecToV8<T> {
-  fn to_v8<'s, F>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-    f: F,
-  ) -> v8::Local<'s, v8::Value>
-  where
-    F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
-}
-
 pub trait FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
@@ -51,6 +41,31 @@ pub trait FromV8CallbackArgs {
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Self;
+}
+
+impl<T> ToV8 for Vec<T>
+where
+  T: ToV8,
+{
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    let elements = self
+      .iter()
+      .map(|v| v.to_v8(scope))
+      .collect::<Vec<v8::Local<'s, v8::Value>>>();
+    v8::Array::new_with_elements(scope, &elements).into()
+  }
+}
+
+impl<T: ToV8 + ?Sized> ToV8 for &T {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    (*self).to_v8(scope)
+  }
 }
 
 impl ToV8 for u32 {
@@ -258,23 +273,6 @@ impl FromV8 for Rc<v8::Global<v8::Function>> {
     debug_assert!(is_v8_func!(value));
     let value = v8::Local::<'s, v8::Function>::try_from(value).unwrap();
     Rc::new(v8::Global::new(scope, value))
-  }
-}
-
-impl<T> VecToV8<T> for Vec<T> {
-  fn to_v8<'s, F>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-    f: F,
-  ) -> v8::Local<'s, v8::Value>
-  where
-    F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
-  {
-    let elements = self
-      .iter()
-      .map(|v| f(scope, v))
-      .collect::<Vec<v8::Local<'s, v8::Value>>>();
-    v8::Array::new_with_elements(scope, &elements).into()
   }
 }
 
