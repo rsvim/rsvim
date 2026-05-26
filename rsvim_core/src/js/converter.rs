@@ -104,8 +104,8 @@ impl<T: ToV8 + ?Sized> ToV8 for &T {
 
 impl<K, V> FromV8 for FoldMap<K, V>
 where
-  K: ToV8 + Eq + Hash,
-  V: ToV8,
+  K: FromV8 + Eq + Hash,
+  V: FromV8,
 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
@@ -136,8 +136,8 @@ where
 
 impl<K, V> FromV8 for BTreeMap<K, V>
 where
-  K: ToV8 + Ord,
-  V: ToV8,
+  K: FromV8 + Ord,
+  V: FromV8,
 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
