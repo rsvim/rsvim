@@ -76,7 +76,7 @@ fn test_array1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1: Vec<i32> = vec![1, 2, 3];
-  let obj1 = a1.to_v8(scope, |scope, a| a.to_v8(scope));
+  let obj1 = a1.to_v8(scope);
   let val1 = Vec::from_v8(scope, obj1, |scope, v| i32::from_v8(scope, v));
   assert_eq!(val1, a1);
 
