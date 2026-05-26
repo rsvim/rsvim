@@ -161,7 +161,7 @@ impl FromV8Tokens {
       let ty_ident = match &f.ty {
         syn::Type::Path(p) => {
           let seg = p.path.segments.last().unwrap();
-          if seg.ident == "Option" || seg.ident == "Vec" {
+          if seg.ident == "Option" {
             match &seg.arguments {
               syn::PathArguments::AngleBracketed(angle) => {
                 match angle.args.last().unwrap() {
@@ -201,11 +201,8 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
-  let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
-  let tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    !is_option(f) && !is_vec(f)
-  });
+  let tokens = FromV8Tokens::collect(struct_fields.iter(), |f| !is_option(f));
   let optional_tokens = FromV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
