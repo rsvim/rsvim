@@ -65,7 +65,7 @@ where
     for (k, v) in self.iter() {
       let name = k.to_string();
       let value = v.to_v8(scope);
-      crate::js::binding::set_property_to(scope, obj, &name, value.into());
+      crate::js::binding::set_property_to(scope, obj, &name, value);
     }
 
     obj.into()
@@ -86,7 +86,7 @@ where
     for (k, v) in self.iter() {
       let name = k.to_string();
       let value = v.to_v8(scope);
-      crate::js::binding::set_property_to(scope, obj, &name, value.into());
+      crate::js::binding::set_property_to(scope, obj, &name, value);
     }
 
     obj.into()
@@ -152,7 +152,7 @@ where
       .unwrap();
 
     let length = keys.length();
-    let mut result = BTreeMap::with_capacity(length as usize);
+    let mut result = BTreeMap::new();
 
     for i in 0..length {
       let k = keys.get_index(scope, i).unwrap();
