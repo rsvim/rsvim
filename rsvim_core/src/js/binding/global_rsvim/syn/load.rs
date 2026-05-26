@@ -23,7 +23,7 @@ pub const GRAMMAR_PATH_DEFAULT: &str = "";
 )]
 pub struct SynLoadTreeSitterParserOptions {
   #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
-  #[from_v8_string]
+  #[from_v8(string)]
   pub grammar_path: CompactString,
 }
 
