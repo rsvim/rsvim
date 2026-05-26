@@ -111,6 +111,70 @@ impl<T: ToV8 + ?Sized> ToV8 for &T {
   }
 }
 
+impl<K, V> FromV8 for FoldMap<K, V>
+where
+  K: ToV8 + ToString,
+  V: ToV8,
+{
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    debug_assert!(value.is_object() || value.is_object_template());
+    let obj = v8::Local::<v8::Object>::try_from(value).unwrap();
+
+    // Fetch the object's own property keys as a V8 Array
+    let keys = obj
+      .get_own_property_names(scope, v8::GetPropertyNamesArgs::default())
+      .unwrap();
+
+    let length = keys.length();
+    let mut result = FoldMap::with_capacity(length as usize);
+
+    for i in 0..length {
+      let k = keys.get_index(scope, i).unwrap();
+      let v = obj.get(scope, k).unwrap();
+      let k = K::from_v8(scope, k);
+      let v = V::from_v8(scope, v);
+      result.insert(k, v);
+    }
+
+    result
+  }
+}
+
+impl<K, V> FromV8 for BTreeMap<K, V>
+where
+  K: ToV8 + ToString,
+  V: ToV8,
+{
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    debug_assert!(value.is_object() || value.is_object_template());
+    let obj = v8::Local::<v8::Object>::try_from(value).unwrap();
+
+    // Fetch the object's own property keys as a V8 Array
+    let keys = obj
+      .get_own_property_names(scope, v8::GetPropertyNamesArgs::default())
+      .unwrap();
+
+    let length = keys.length();
+    let mut result = BTreeMap::with_capacity(length as usize);
+
+    for i in 0..length {
+      let k = keys.get_index(scope, i).unwrap();
+      let v = obj.get(scope, k).unwrap();
+      let k = K::from_v8(scope, k);
+      let v = V::from_v8(scope, v);
+      result.insert(k, v);
+    }
+
+    result
+  }
+}
+
 impl ToV8 for u32 {
   fn to_v8<'s>(
     &self,
