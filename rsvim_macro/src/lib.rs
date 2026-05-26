@@ -139,20 +139,22 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-fn from_v8_attr(field: &syn::Field) -> String {
+fn from_v8_has_attr(field: &syn::Field, target_attr: &str) -> bool {
   for attr in &field.attrs {
     if attr.path().is_ident("from_v8") {
       if let syn::Meta::List(attr_metas) = &attr.meta {
         if let Ok(ident) = attr_metas.parse_args::<syn::Ident>() {
-          return ident.to_string();
+          return ident == target_attr;
         }
       }
+      unreachable!(
+        "Expect parameters in #[from_v8] attribute for {}",
+        field.ident.as_ref().unwrap()
+      );
     }
   }
-  unreachable!(
-    "Expect parameters in #[from_v8] attribute for {}",
-    field.ident.clone().unwrap()
-  );
+  // If the field doesn't have `#[from_v8]` attribute
+  false
 }
 
 struct FromV8Tokens {
@@ -235,17 +237,17 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   // Match based on the string extracted from #[from_v8(type)]
   let bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    from_v8_attr(f) == "bool" && !is_option(f) && !is_vec(f)
+    from_v8_has_attr(f, "bool") && !is_option(f) && !is_vec(f)
   });
   let optional_bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    from_v8_attr(f) == "bool" && is_option(f)
+    from_v8_has_attr(f, "bool") && is_option(f)
   });
   let string_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    from_v8_attr(f) == "string" && !is_option(f) && !is_vec(f)
+    from_v8_has_attr(f, "string") && !is_option(f) && !is_vec(f)
   });
   let optional_string_tokens =
     FromV8Tokens::collect(struct_fields.iter(), |f| {
-      from_v8_attr(f) == "string" && is_option(f)
+      from_v8_has_attr(f, "string") && is_option(f)
     });
 
   // Destructure for `quote!` use
