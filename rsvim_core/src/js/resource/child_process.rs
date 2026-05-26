@@ -3,17 +3,18 @@
 use crate::js::resource::ResourceId;
 use crate::js::resource::Resourcify;
 use crate::prelude::*;
-use std::fmt::Debug;
 use std::process::Child;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+#[derive_where::derive_where(Debug)]
 #[derive(Clone)]
 /// We name it "ProcCommand" to distinguish with the Vim ex command struct
 /// "Command".
 pub struct ProcCommandResource {
   id: ResourceId,
+  #[derive_where(skip)]
   data: Arc<Mutex<Command>>,
 }
 
@@ -36,17 +37,11 @@ impl Resourcify for ProcCommandResource {
   }
 }
 
-impl Debug for ProcCommandResource {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("CommandResource")
-      .field("id", &self.id)
-      .finish()
-  }
-}
-
+#[derive_where::derive_where(Debug)]
 #[derive(Clone)]
 pub struct ChildProcessResource {
   id: ResourceId,
+  #[derive_where(skip)]
   data: Arc<Mutex<Child>>,
 }
 
@@ -66,13 +61,5 @@ impl ChildProcessResource {
 impl Resourcify for ChildProcessResource {
   fn id(&self) -> ResourceId {
     self.id
-  }
-}
-
-impl Debug for ChildProcessResource {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("ChildProcessResource")
-      .field("id", &self.id)
-      .finish()
   }
 }
