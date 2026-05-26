@@ -143,20 +143,20 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-fn get_from_v8_type_attr(field: &syn::Field) -> Option<String> {
+fn get_from_v8_type_attr(field: &syn::Field) -> String {
   for attr in &field.attrs {
-    // Check if the attribute path is exactly "from_v8"
     if attr.path().is_ident("from_v8") {
-      // Parse it as a list: from_v8(type_arg)
-      if let syn::Meta::List(meta_list) = &attr.meta {
-        // Parse the nested tokens into an identifier
-        if let Ok(ident) = meta_list.parse_args::<syn::Ident>() {
-          return Some(ident.to_string());
+      if let syn::Meta::List(attr_metas) = &attr.meta {
+        if let Ok(ident) = attr_metas.parse_args::<syn::Ident>() {
+          return ident.to_string();
         }
       }
     }
   }
-  None
+  unreachable!(
+    "Expect parameters in #[from_v8] attribute for {}",
+    field.ident.clone().unwrap()
+  );
 }
 
 struct FromV8Tokens {
