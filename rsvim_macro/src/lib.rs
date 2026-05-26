@@ -310,9 +310,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #bool_name = v8::String::new(scope, #bool_uppercase).unwrap();
         debug_assert!(obj.has_own_property(scope, #bool_name.into()).unwrap_or(false));
         let #bool_value = obj.get(scope, #bool_name.into()).unwrap();
-        debug_assert!(#bool_value.is_boolean() || #bool_value.is_boolean_object());
-        let #bool_value = #bool_value.to_boolean(scope);
-        builder.#bool_field(#bool_type::from_v8(scope, #bool_value.into()));
+        builder.#bool_field(#bool_type::from_v8(scope, #bool_value));
       }
       )*
 
@@ -322,9 +320,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #optional_bool_name = v8::String::new(scope, #optional_bool_uppercase).unwrap();
         if obj.has_own_property(scope, #optional_bool_name.into()).unwrap_or(false) {
           let #optional_bool_value = obj.get(scope, #optional_bool_name.into()).unwrap();
-          debug_assert!(#optional_bool_value.is_boolean() || #optional_bool_value.is_boolean_object());
-          let #optional_bool_value = #optional_bool_value.to_boolean(scope);
-          builder.#optional_bool_field(Some(#optional_bool_type::from_v8(scope, #optional_bool_value.into())));
+          builder.#optional_bool_field(Some(#optional_bool_type::from_v8(scope, #optional_bool_value)));
         }
       }
       )*
@@ -335,9 +331,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #string_name = v8::String::new(scope, #string_uppercase).unwrap();
         debug_assert!(obj.has_own_property(scope, #string_name.into()).unwrap_or(false));
         let #string_value = obj.get(scope, #string_name.into()).unwrap();
-        debug_assert!(#string_value.is_string() || #string_value.is_string_object());
-        let #string_value = #string_value.to_string(scope).unwrap();
-        builder.#string_field(#string_type::from_v8(scope, #string_value.into()));
+        builder.#string_field(#string_type::from_v8(scope, #string_value));
       }
       )*
 
@@ -347,9 +341,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #optional_string_name = v8::String::new(scope, #optional_string_uppercase).unwrap();
         if obj.has_own_property(scope, #optional_string_name.into()).unwrap_or(false) {
           let #optional_string_value = obj.get(scope, #optional_string_name.into()).unwrap();
-          debug_assert!(#optional_string_value.is_string() || #optional_string_value.is_string_object());
-          let #optional_string_value = #optional_string_value.to_string(scope).unwrap();
-          builder.#optional_string_field(Some(#optional_string_type::from_v8(scope, #optional_string_value.into())));
+          builder.#optional_string_field(Some(#optional_string_type::from_v8(scope, #optional_string_value)));
         }
       }
       )*
