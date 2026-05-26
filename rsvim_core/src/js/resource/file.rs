@@ -2,7 +2,6 @@
 
 use crate::js::resource::ResourceId;
 use crate::js::resource::Resourcify;
-use crate::prelude::*;
 use std::sync::Arc;
 use std::sync::Mutex;
 
