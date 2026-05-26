@@ -37,27 +37,27 @@ pub const WRITE_DEFAULT: bool = false;
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
   #[builder(default = APPEND_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub append: bool,
 
   #[builder(default = CREATE_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub create: bool,
 
   #[builder(default = CREATE_NEW_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub create_new: bool,
 
   #[builder(default = READ_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub read: bool,
 
   #[builder(default = TRUNCATE_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub truncate: bool,
 
   #[builder(default = WRITE_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub write: bool,
 }
 

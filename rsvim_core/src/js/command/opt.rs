@@ -21,10 +21,10 @@ pub const ALIAS_DEFAULT: Option<CompactString> = None;
 )]
 pub struct CommandOptions {
   #[builder(default = FORCE_DEFAULT)]
-  #[from_v8_bool]
+  #[from_v8(bool)]
   pub force: bool,
 
   #[builder(default = ALIAS_DEFAULT)]
-  #[from_v8_string]
+  #[from_v8(string)]
   pub alias: Option<CompactString>,
 }
