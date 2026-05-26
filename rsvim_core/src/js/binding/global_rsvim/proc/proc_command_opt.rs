@@ -18,7 +18,15 @@ pub const CWD_DEFAULT: Option<CompactString> = None;
 pub const CLEAR_ENV_DEFAULT: bool = false;
 pub const STDIN_DEFAULT: &str = "null";
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  derive_builder::Builder,
+  rsvim_macro::ToV8,
+  rsvim_macro::FromV8,
+)]
 pub struct ProcCommandOptions {
   #[builder(default = Vec::new())]
   pub args: Vec<CompactString>,

@@ -26,13 +26,6 @@ pub trait FromV8 {
   ) -> Self;
 }
 
-pub trait VecFromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
 pub trait FromV8CallbackArgs {
   fn from_v8_callback_args<'s>(
     scope: &mut v8::PinScope<'s, '_>,
@@ -273,7 +266,7 @@ impl FromV8 for Rc<v8::Global<v8::Function>> {
   }
 }
 
-impl<T> VecFromV8 for Vec<T>
+impl<T> FromV8 for Vec<T>
 where
   T: FromV8,
 {
