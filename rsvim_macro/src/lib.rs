@@ -239,21 +239,17 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
 
   // Match based on the string extracted from #[from_v8(type)]
   let bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    get_from_v8_type_attr(f).as_deref() == Some("bool")
-      && !is_option(f)
-      && !is_vec(f)
+    get_from_v8_type_attr(f) == "bool" && !is_option(f) && !is_vec(f)
   });
   let optional_bool_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    get_from_v8_type_attr(f).as_deref() == Some("bool") && is_option(f)
+    get_from_v8_type_attr(f) == "bool" && is_option(f)
   });
   let string_tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    get_from_v8_type_attr(f).as_deref() == Some("string")
-      && !is_option(f)
-      && !is_vec(f)
+    get_from_v8_type_attr(f) == "string" && !is_option(f) && !is_vec(f)
   });
   let optional_string_tokens =
     FromV8Tokens::collect(struct_fields.iter(), |f| {
-      get_from_v8_type_attr(f).as_deref() == Some("string") && is_option(f)
+      get_from_v8_type_attr(f) == "string" && is_option(f)
     });
 
   // Destructure for `quote!` use
