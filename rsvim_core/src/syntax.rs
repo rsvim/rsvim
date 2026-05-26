@@ -142,6 +142,7 @@ pub struct Syntax {
   // buffer's `editing_version` when starts parsing the buffer.
   editing_version: isize,
 
+  #[derive_where(skip)]
   // Syntax parser
   parser: TreeSitterParserArc,
 
