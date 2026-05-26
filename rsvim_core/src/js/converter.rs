@@ -26,14 +26,11 @@ pub trait FromV8 {
   ) -> Self;
 }
 
-pub trait VecFromV8<T> {
-  fn from_v8<'s, F>(
+pub trait VecFromV8 {
+  fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-    f: F,
-  ) -> Vec<T>
-  where
-    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T;
+  ) -> Self;
 }
 
 pub trait FromV8CallbackArgs {
@@ -276,22 +273,21 @@ impl FromV8 for Rc<v8::Global<v8::Function>> {
   }
 }
 
-impl<T> VecFromV8<T> for Vec<T> {
-  fn from_v8<'s, F>(
+impl<T> VecFromV8 for Vec<T>
+where
+  T: FromV8,
+{
+  fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     elements: v8::Local<'s, v8::Value>,
-    f: F,
-  ) -> Vec<T>
-  where
-    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T,
-  {
+  ) -> Vec<T> {
     debug_assert!(elements.is_array());
     let elements = v8::Local::<v8::Array>::try_from(elements).unwrap();
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
     for i in 0..n {
       let e = elements.get_index(scope, i).unwrap();
-      let t = f(scope, e);
+      let t = T::from_v8(scope, e);
       v.push(t);
     }
     v
