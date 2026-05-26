@@ -7,6 +7,7 @@ use crate::is_v8_int;
 use crate::is_v8_number;
 use crate::is_v8_str;
 use crate::js::TimerId;
+use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -46,6 +47,29 @@ where
       .map(|v| v.to_v8(scope))
       .collect::<Vec<v8::Local<'s, v8::Value>>>();
     v8::Array::new_with_elements(scope, &elements).into()
+  }
+}
+
+impl<K, V> ToV8 for FoldMap<K, V>
+where
+  K: ToV8 + ToString,
+  V: ToV8,
+{
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    use crate::js::binding;
+
+    let obj = v8::Object::new(scope);
+
+    for (k, v) in self.iter() {
+      let name = v8::String::new(scope, k.to_string().as_str()).unwrap();
+      let value = v.to_v8(scope);
+      binding::set_property_to(scope, obj, name.into(), value.into());
+    }
+
+    obj.into()
   }
 }
 
