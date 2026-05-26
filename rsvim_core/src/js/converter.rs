@@ -79,7 +79,7 @@ where
 
 impl<K, V> ToV8 for BTreeMap<K, V>
 where
-  K: ToV8 + ToString + Eq + Hash,
+  K: ToV8 + ToString + Ord,
   V: ToV8,
 {
   fn to_v8<'s>(
@@ -146,7 +146,7 @@ where
 
 impl<K, V> FromV8 for BTreeMap<K, V>
 where
-  K: ToV8 + Eq + Hash,
+  K: ToV8 + Ord,
   V: ToV8,
 {
   fn from_v8<'s>(
