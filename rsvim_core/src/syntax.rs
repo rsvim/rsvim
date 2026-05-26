@@ -32,50 +32,17 @@ pub type TreeSitterParserArc = Arc<Mutex<Parser>>;
 pub type TreeSitterParserWk = Weak<Mutex<Parser>>;
 pub type TreeSitterParserMutexGuard<'a> = MutexGuard<'a, Parser>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SyntaxEditNew {
   pub payload: Rope,
   pub version: isize,
 }
 
-impl Debug for SyntaxEditNew {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxEditNew")
-      .field(
-        "payload",
-        &self
-          .payload
-          .get_line(0)
-          .map(|l| l.to_string())
-          .unwrap_or("".to_string()),
-      )
-      .field("version", &self.version)
-      .finish()
-  }
-}
-
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SyntaxEditUpdate {
   pub payload: Rope,
   pub input: InputEdit,
   pub version: isize,
-}
-
-impl Debug for SyntaxEditUpdate {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxEditUpdate")
-      .field(
-        "payload",
-        &self
-          .payload
-          .get_line(0)
-          .map(|l| l.to_string())
-          .unwrap_or("".to_string()),
-      )
-      .field("input", &self.input)
-      .field("version", &self.version)
-      .finish()
-  }
 }
 
 #[derive(Debug, Clone)]
@@ -158,6 +125,7 @@ impl SyntaxCapture {
 )]
 pub struct SyntaxId(#[start_from(1)] usize);
 
+#[derive_where::derive_where(Debug)]
 /// Buffer syntax.
 pub struct Syntax {
   id: SyntaxId,
@@ -166,6 +134,7 @@ pub struct Syntax {
   highlight_query: Option<TreeSitterQueryArc>,
   highlight_capture: Option<SyntaxCaptureArc>,
 
+  #[derive_where(skip)]
   // Parsed syntax tree
   tree: Option<Tree>,
 
@@ -191,25 +160,6 @@ pub struct Syntax {
   // `pending` job queue and wait for the **current** running task complete,
   // then starts the next new task.
   parsing: bool,
-}
-
-impl Debug for Syntax {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("Syntax")
-      .field(
-        "tree",
-        if self.tree.is_some() {
-          &"some"
-        } else {
-          &"none"
-        },
-      )
-      .field("editing_version", &self.editing_version)
-      .field("filetype", &self.filetype)
-      .field("pending_edits", &self.pending_edits)
-      .field("parsing", &self.parsing)
-      .finish()
-  }
 }
 
 impl Syntax {
@@ -320,8 +270,10 @@ impl Syntax {
 // pub type TreeSitterLoaderWk = Weak<Mutex<Loader>>;
 // pub type TreeSitterLoaderMutexGuard<'a> = MutexGuard<'a, Loader>;
 
+#[derive_where::derive_where(Debug)]
 #[derive(rsvim_macro::ArcPtr)]
 pub struct SyntaxLoader {
+  #[derive_where(skip)]
   loader: Mutex<Loader>,
 }
 
@@ -356,14 +308,6 @@ impl SyntaxLoader {
 
   pub fn set_treesitter_parser_lib_path(&self, parser_lib_path: PathBuf) {
     lock!(self.loader).parser_lib_path = parser_lib_path;
-  }
-}
-
-impl Debug for SyntaxLoader {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SyntaxLoader")
-      .field("parser_lib_path", &lock!(self.loader).parser_lib_path)
-      .finish()
   }
 }
 
