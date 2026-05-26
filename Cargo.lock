@@ -741,6 +741,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6"
 
 [[package]]
+name = "derive-where"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d08b3a0bcc0d079199cd476b2cae8435016ec11d1c0986c6901c5ac223041534"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "derive_builder"
 version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1695,7 +1706,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39eb0623e15e4cb83c02ce6a959e48fadd1ae3b715b36b5acc01816e01388c82"
 dependencies = [
  "bstr",
- "hashbrown 0.15.5",
+ "hashbrown 0.16.1",
 ]
 
 [[package]]
@@ -3863,6 +3874,7 @@ dependencies = [
  "criterion",
  "crossterm",
  "deno_core_icudata",
+ "derive-where",
  "derive_builder",
  "dirs",
  "encoding_rs",

@@ -4,17 +4,20 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use ropey::Rope;
-use std::fmt::Debug;
 
+#[derive_where::derive_where(Debug)]
 #[derive(rsvim_macro::ArcMutexPtr)]
 /// Temporary contents except buffers.
 pub struct CmdlineText {
+  #[derive_where(skip)]
   // Cmdline input text
   input: Text,
 
+  #[derive_where(skip)]
   // Cmdline message text
   message: Text,
 
+  #[derive_where(skip)]
   // Cmdline message history
   message_history: RingBuffer<String>,
 }
@@ -57,11 +60,5 @@ impl CmdlineText {
   /// Mutable command-line message history
   pub fn message_history_mut(&mut self) -> &mut RingBuffer<String> {
     &mut self.message_history
-  }
-}
-
-impl Debug for CmdlineText {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_str("TextContents")
   }
 }
