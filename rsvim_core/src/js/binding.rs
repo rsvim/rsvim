@@ -320,7 +320,7 @@ pub fn create_new_context<'s, 'b>(
 pub fn set_property_to(
   scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
-  name: &'static str,
+  name: &str,
   value: v8::Local<v8::Value>,
 ) {
   let key = v8::String::new(scope, name).unwrap();
@@ -347,7 +347,7 @@ pub fn set_constant_to(
 pub fn set_function_to(
   scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
-  name: &'static str,
+  name: &str,
   callback: impl v8::MapFnTo<v8::FunctionCallback>,
 ) {
   let key = v8::String::new(scope, name).unwrap();
@@ -361,7 +361,7 @@ pub fn set_function_to(
 pub fn create_object_under<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   target: v8::Local<v8::Object>,
-  name: &'static str,
+  name: &str,
 ) -> v8::Local<'s, v8::Object> {
   let template = v8::ObjectTemplate::new(scope);
   let key = v8::String::new(scope, name).unwrap();

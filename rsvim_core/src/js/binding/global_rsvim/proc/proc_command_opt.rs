@@ -1,6 +1,5 @@
 //! Child-process command options.
 
-use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;

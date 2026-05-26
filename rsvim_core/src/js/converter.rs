@@ -63,14 +63,9 @@ where
     let obj = v8::Object::new(scope);
 
     for (k, v) in self.iter() {
-      let name = v8::String::new(scope, k.to_string().as_str()).unwrap();
+      let name = k.to_string();
       let value = v.to_v8(scope);
-      crate::js::binding::set_property_to(
-        scope,
-        obj,
-        name.into(),
-        value.into(),
-      );
+      crate::js::binding::set_property_to(scope, obj, &name, value.into());
     }
 
     obj.into()
@@ -89,14 +84,9 @@ where
     let obj = v8::Object::new(scope);
 
     for (k, v) in self.iter() {
-      let name = v8::String::new(scope, k.to_string().as_str()).unwrap();
+      let name = k.to_string();
       let value = v.to_v8(scope);
-      crate::js::binding::set_property_to(
-        scope,
-        obj,
-        name.into(),
-        value.into(),
-      );
+      crate::js::binding::set_property_to(scope, obj, &name, value.into());
     }
 
     obj.into()
