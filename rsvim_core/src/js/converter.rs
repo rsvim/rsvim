@@ -11,6 +11,7 @@ use crate::prelude::*;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use std::hash::Hash;
 use std::rc::Rc;
 
 pub trait ToV8 {
@@ -52,7 +53,7 @@ where
 
 impl<K, V> ToV8 for FoldMap<K, V>
 where
-  K: ToV8 + ToString,
+  K: ToV8 + ToString + Eq + Hash,
   V: ToV8,
 {
   fn to_v8<'s>(
@@ -78,7 +79,7 @@ where
 
 impl<K, V> ToV8 for BTreeMap<K, V>
 where
-  K: ToV8 + ToString,
+  K: ToV8 + ToString + Eq + Hash,
   V: ToV8,
 {
   fn to_v8<'s>(
@@ -113,7 +114,7 @@ impl<T: ToV8 + ?Sized> ToV8 for &T {
 
 impl<K, V> FromV8 for FoldMap<K, V>
 where
-  K: ToV8 + ToString,
+  K: ToV8 + Eq + Hash,
   V: ToV8,
 {
   fn from_v8<'s>(
@@ -145,7 +146,7 @@ where
 
 impl<K, V> FromV8 for BTreeMap<K, V>
 where
-  K: ToV8 + ToString,
+  K: ToV8 + Eq + Hash,
   V: ToV8,
 {
   fn from_v8<'s>(
