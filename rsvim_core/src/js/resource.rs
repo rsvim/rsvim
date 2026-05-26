@@ -1,6 +1,5 @@
 //! Resource.
 
-pub mod child_process;
 pub mod file;
 pub mod text_decoder;
 
