@@ -79,20 +79,15 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
-  let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
-  let plain =
-    ToV8Tokens::collect(struct_fields.iter(), |f| !is_option(f) && !is_vec(f));
+  let plain = ToV8Tokens::collect(struct_fields.iter(), |f| !is_option(f));
   let optional = ToV8Tokens::collect(struct_fields.iter(), is_option);
-  let vec = ToV8Tokens::collect(struct_fields.iter(), is_vec);
 
   // Destructure for `quote!` use
   let (field, uppercase, value) =
     (&plain.field, &plain.uppercase, &plain.value);
   let (optional_fields, optional_uppercase, optional_value) =
     (&optional.field, &optional.uppercase, &optional.value);
-  let (vec_fields, vec_uppercase, vec_value) =
-    (&vec.field, &vec.uppercase, &vec.value);
 
   quote! {
 
@@ -122,15 +117,6 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
         }
       }
       )*
-
-      // vec
-      #(
-      {
-        let #vec_value = self.#vec_fields.to_v8(scope, |scope, i| i.to_v8(scope));
-        binding::set_property_to(scope, obj, #vec_uppercase, #vec_value);
-      }
-      )*
-
 
       obj.into()
     }
