@@ -76,10 +76,8 @@ impl ToV8 for Nargs {
 )]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
-  #[from_v8(bool)]
   pub bang: bool,
 
   #[builder(default = NARGS_DEFAULT)]
-  #[from_v8(string)]
   pub nargs: Nargs,
 }

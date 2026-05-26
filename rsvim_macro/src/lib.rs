@@ -139,24 +139,6 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-fn from_v8_has_attr(field: &syn::Field, target_attr: &str) -> bool {
-  for attr in &field.attrs {
-    if attr.path().is_ident("from_v8") {
-      if let syn::Meta::List(attr_metas) = &attr.meta {
-        if let Ok(ident) = attr_metas.parse_args::<syn::Ident>() {
-          return ident == target_attr;
-        }
-      }
-      unreachable!(
-        "Expect parameters in #[from_v8] attribute for {}",
-        field.ident.as_ref().unwrap()
-      );
-    }
-  }
-  // If the field doesn't have `#[from_v8]` attribute
-  false
-}
-
 struct FromV8Tokens {
   field: Vec<syn::Ident>,
   name: Vec<syn::Ident>,
@@ -223,7 +205,7 @@ impl FromV8Tokens {
   }
 }
 
-#[proc_macro_derive(FromV8, attributes(from_v8))]
+#[proc_macro_derive(FromV8)]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
@@ -235,7 +217,6 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
   let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
-  // Match based on the string extracted from #[from_v8(type)]
   let tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
     !is_option(f) && !is_vec(f)
   });
