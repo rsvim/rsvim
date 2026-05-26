@@ -34,6 +34,7 @@ clap = { version = "4.6", default-features = false, features = [
 compact_str = "0.9"
 criterion = { version = "0.8", features = ["async_tokio"] }
 crossterm = { version = "0.29", features = ["event-stream"] }
+derive-where = "1.6"
 derive_builder = "0.20"
 dirs = "6.0"
 encoding_rs = "0.8"

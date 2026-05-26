@@ -68,6 +68,7 @@ clap = { workspace = true, default-features = false, features = [
 ] }
 compact_str = { workspace = true }
 crossterm = { workspace = true, features = ["event-stream"] }
+derive-where = { workspace = true }
 derive_builder = { workspace = true }
 dirs = { workspace = true }
 encoding_rs = { workspace = true }
