@@ -4,6 +4,7 @@ pub mod buf;
 pub mod cmd;
 pub mod fs;
 pub mod opt;
+pub mod proc;
 pub mod rt;
 pub mod syn;
 

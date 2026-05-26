@@ -77,12 +77,11 @@ fn test_array1() {
 
   let a1: Vec<i32> = vec![1, 2, 3];
   let obj1 = a1.to_v8(scope);
-  let val1 = Vec::from_v8(scope, obj1, |scope, v| i32::from_v8(scope, v));
+  let val1 = Vec::<i32>::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
   let a2: Vec<String> = vec!["a".to_string(), "b".to_string(), "c".to_string()];
   let obj2 = a2.to_v8(scope);
-  let val2 =
-    Vec::from_v8(scope, obj2, |scope, v| v.to_rust_string_lossy(scope));
+  let val2 = Vec::<String>::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }

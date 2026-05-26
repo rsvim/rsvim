@@ -128,7 +128,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 struct FromV8Tokens {
   field: Vec<syn::Ident>,
   name: Vec<syn::Ident>,
-  r#type: Vec<syn::Ident>,
+  ty: Vec<syn::Type>,
   uppercase: Vec<syn::Ident>,
   value: Vec<syn::Ident>,
 }
@@ -144,7 +144,7 @@ impl FromV8Tokens {
     let mut res = Self {
       field: vec![],
       name: vec![],
-      r#type: vec![],
+      ty: vec![],
       uppercase: vec![],
       value: vec![],
     };
@@ -158,34 +158,32 @@ impl FromV8Tokens {
       res.value.push(format_ident!("{}_value", ident));
       res.field.push(ident.clone());
 
-      let ty_ident = match &f.ty {
+      let ty = match &f.ty {
         syn::Type::Path(p) => {
           let seg = p.path.segments.last().unwrap();
-          if seg.ident == "Option" || seg.ident == "Vec" {
+          if seg.ident == "Option" {
             match &seg.arguments {
               syn::PathArguments::AngleBracketed(angle) => {
                 match angle.args.last().unwrap() {
-                  syn::GenericArgument::Type(syn::Type::Path(inner_p)) => {
-                    inner_p.path.segments.last().unwrap().ident.clone()
-                  }
+                  syn::GenericArgument::Type(inner_ty) => inner_ty.clone(),
                   _ => unreachable!(
-                    "Expected syn::GenericArgument::Type(syn::Type::Path(...)) for {}",
+                    "Expected syn::GenericArgument::Type for {}",
                     ident
                   ),
                 }
               }
               _ => unreachable!(
-                "Expected syn::PathArguments::AngleBracketed(...) for {}",
+                "Expected syn::PathArguments::AngleBracketed for {}",
                 ident
               ),
             }
           } else {
-            seg.ident.clone()
+            f.ty.clone()
           }
         }
-        _ => unreachable!("Expected syn::Type::Path(...) for {}", ident),
+        _ => unreachable!("Expected syn::Type::Path for {}", ident),
       };
-      res.r#type.push(ty_ident);
+      res.ty.push(ty);
     }
     res
   }
@@ -201,18 +199,15 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let struct_fields = get_named_fields(&input.data);
 
   let is_option = |f: &syn::Field| is_type_match(&f.ty, "Option");
-  let is_vec = |f: &syn::Field| is_type_match(&f.ty, "Vec");
 
-  let tokens = FromV8Tokens::collect(struct_fields.iter(), |f| {
-    !is_option(f) && !is_vec(f)
-  });
+  let tokens = FromV8Tokens::collect(struct_fields.iter(), |f| !is_option(f));
   let optional_tokens = FromV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
   let (field, name, ty, uppercase, value) = (
     &tokens.field,
     &tokens.name,
-    &tokens.r#type,
+    &tokens.ty,
     &tokens.uppercase,
     &tokens.value,
   );
@@ -225,7 +220,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   ) = (
     &optional_tokens.field,
     &optional_tokens.name,
-    &optional_tokens.r#type,
+    &optional_tokens.ty,
     &optional_tokens.uppercase,
     &optional_tokens.value,
   );
@@ -248,7 +243,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #name = v8::String::new(scope, #uppercase).unwrap();
         debug_assert!(obj.has_own_property(scope, #name.into()).unwrap_or(false));
         let #value = obj.get(scope, #name.into()).unwrap();
-        builder.#field(#ty::from_v8(scope, #value));
+        builder.#field(<#ty as crate::js::converter::FromV8>::from_v8(scope, #value));
       }
       )*
 
@@ -258,7 +253,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
         let #optional_name = v8::String::new(scope, #optional_uppercase).unwrap();
         if obj.has_own_property(scope, #optional_name.into()).unwrap_or(false) {
           let #optional_value = obj.get(scope, #optional_name.into()).unwrap();
-          builder.#optional_field(Some(#optional_ty::from_v8(scope, #optional_value)));
+          builder.#optional_field(Some(<#optional_ty as crate::js::converter::FromV8>::from_v8(scope, #optional_value)));
         }
       }
       )*
