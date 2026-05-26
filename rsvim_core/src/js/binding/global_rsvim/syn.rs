@@ -43,8 +43,7 @@ pub fn load_parser_sync<'s>(
             .map(|grammar| grammar.name.to_string())
             .collect::<Vec<String>>();
           trace!("Rsvim.syn.loadParserSync result:{:?}", parser_names);
-          let parser_names =
-            parser_names.to_v8(scope, |scope, name| name.to_v8(scope));
+          let parser_names = parser_names.to_v8(scope);
           rv.set(parser_names);
         }
         Err(e) => {
