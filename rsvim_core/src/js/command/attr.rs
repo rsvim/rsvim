@@ -3,10 +3,6 @@
 use crate::js::converter::*;
 use std::str::FromStr;
 
-/// Command attribute name.
-pub const BANG: &str = "bang";
-pub const NARGS: &str = "nargs";
-
 /// Default values.
 pub const BANG_DEFAULT: bool = false;
 pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
