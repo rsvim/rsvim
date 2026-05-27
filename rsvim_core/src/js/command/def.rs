@@ -12,12 +12,6 @@ use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
-/// Command definition names.
-pub const NAME: &str = "name";
-pub const CALLBACK: &str = "callback";
-pub const ATTRIBUTES: &str = "attributes";
-pub const OPTIONS: &str = "options";
-
 #[derive(Clone, rsvim_macro::ToV8, rsvim_macro::RcPtr)]
 pub struct CommandDefinition {
   pub name: CompactString,
