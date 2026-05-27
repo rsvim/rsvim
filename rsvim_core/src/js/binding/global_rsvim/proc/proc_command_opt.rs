@@ -4,11 +4,6 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-/// Default command options.
-pub const CWD_DEFAULT: Option<CompactString> = None;
-pub const CLEAR_ENV_DEFAULT: bool = false;
-pub const STDIN_DEFAULT: &str = "null";
-
 #[derive(
   Debug,
   Clone,
@@ -19,18 +14,18 @@ pub const STDIN_DEFAULT: &str = "null";
   rsvim_macro::FromV8,
 )]
 pub struct ProcCommandOptions {
-  #[builder(default = Vec::new())]
+  #[builder(default = vec![])]
   pub args: Vec<CompactString>,
 
-  #[builder(default = CWD_DEFAULT)]
+  #[builder(default = None)]
   pub cwd: Option<CompactString>,
 
-  #[builder(default = CLEAR_ENV_DEFAULT)]
+  #[builder(default = false)]
   pub clear_env: bool,
 
   #[builder(default = FoldMap::new())]
   pub envs: FoldMap<CompactString, CompactString>,
 
-  #[builder(default = STDIN_DEFAULT.to_compact_string())]
+  #[builder(default = "null".to_compact_string())]
   pub stdin: CompactString,
 }

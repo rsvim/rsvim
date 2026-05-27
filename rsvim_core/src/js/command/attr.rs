@@ -3,10 +3,6 @@
 use crate::js::converter::*;
 use std::str::FromStr;
 
-/// Default values.
-pub const BANG_DEFAULT: bool = false;
-pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
-
 #[derive(
   Debug,
   Copy,
@@ -71,9 +67,9 @@ impl ToV8 for Nargs {
   rsvim_macro::FromV8,
 )]
 pub struct CommandAttributes {
-  #[builder(default = BANG_DEFAULT)]
+  #[builder(default = false)]
   pub bang: bool,
 
-  #[builder(default = NARGS_DEFAULT)]
+  #[builder(default = Nargs::Zero)]
   pub nargs: Nargs,
 }
