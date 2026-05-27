@@ -8,14 +8,6 @@ use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use compact_str::ToCompactString;
 
-// Default values.
-pub const APPEND_DEFAULT: bool = false;
-pub const CREATE_DEFAULT: bool = false;
-pub const CREATE_NEW_DEFAULT: bool = false;
-pub const READ_DEFAULT: bool = false;
-pub const TRUNCATE_DEFAULT: bool = false;
-pub const WRITE_DEFAULT: bool = false;
-
 #[derive(
   Debug,
   Copy,
@@ -28,22 +20,22 @@ pub const WRITE_DEFAULT: bool = false;
 )]
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 pub struct FsOpenOptions {
-  #[builder(default = APPEND_DEFAULT)]
+  #[builder(default = false)]
   pub append: bool,
 
-  #[builder(default = CREATE_DEFAULT)]
+  #[builder(default = false)]
   pub create: bool,
 
-  #[builder(default = CREATE_NEW_DEFAULT)]
+  #[builder(default = false)]
   pub create_new: bool,
 
-  #[builder(default = READ_DEFAULT)]
+  #[builder(default = false)]
   pub read: bool,
 
-  #[builder(default = TRUNCATE_DEFAULT)]
+  #[builder(default = false)]
   pub truncate: bool,
 
-  #[builder(default = WRITE_DEFAULT)]
+  #[builder(default = false)]
   pub write: bool,
 }
 
