@@ -7,9 +7,6 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-// Default value
-pub const GRAMMAR_PATH_DEFAULT: &str = "";
-
 #[derive(
   Debug,
   Clone,
@@ -20,7 +17,7 @@ pub const GRAMMAR_PATH_DEFAULT: &str = "";
   rsvim_macro::FromV8,
 )]
 pub struct SynLoadTreeSitterParserOptions {
-  #[builder(default = GRAMMAR_PATH_DEFAULT.to_compact_string())]
+  #[builder(default = "".to_compact_string())]
   pub grammar_path: CompactString,
 }
 
