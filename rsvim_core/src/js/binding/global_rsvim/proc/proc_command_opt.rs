@@ -5,6 +5,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 /// Default command options.
+pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 pub const CWD_DEFAULT: Option<CompactString> = None;
 pub const CLEAR_ENV_DEFAULT: bool = false;
 pub const STDIN_DEFAULT: &str = "null";
@@ -19,7 +20,7 @@ pub const STDIN_DEFAULT: &str = "null";
   rsvim_macro::FromV8,
 )]
 pub struct ProcCommandOptions {
-  #[builder(default = Vec::new())]
+  #[builder(default = ARGS_DEFAULT)]
   pub args: Vec<CompactString>,
 
   #[builder(default = CWD_DEFAULT)]
