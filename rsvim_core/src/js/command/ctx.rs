@@ -4,26 +4,20 @@ use crate::buf::BufferId;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 
-/// Default command attributes.
-pub const BANG_DEFAULT: bool = false;
-pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
-pub const CURRENT_BUFFER_ID_DEFAULT: BufferId = BufferId::negative_one();
-pub const CURRENT_WINDOW_ID_DEFAULT: NodeId = NodeId::negative_one();
-
 #[derive(
   Debug, Clone, PartialEq, Eq, derive_builder::Builder, rsvim_macro::ToV8,
 )]
 pub struct CommandContext {
-  #[builder(default = BANG_DEFAULT)]
+  #[builder(default = false)]
   // bang
   pub bang: bool,
 
-  #[builder(default = ARGS_DEFAULT)]
+  #[builder(default = vec![])]
   pub args: Vec<CompactString>,
 
-  #[builder(default = CURRENT_BUFFER_ID_DEFAULT)]
+  #[builder(default = BufferId::negative_one())]
   pub current_buffer_id: BufferId,
 
-  #[builder(default = CURRENT_WINDOW_ID_DEFAULT)]
+  #[builder(default = NodeId::negative_one())]
   pub current_window_id: NodeId,
 }
