@@ -1257,7 +1257,7 @@ pub fn _query(
   }
 }
 
-pub async fn parse_and_query(
+pub fn parse_and_query(
   ts_parser: TreeSitterParserArc,
   old_ts_tree: Option<Tree>,
   ts_highlight_query: Option<TreeSitterQueryArc>,

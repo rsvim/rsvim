@@ -936,15 +936,14 @@ impl EventLoop {
             let buffer_manager = self.buffer_manager.clone();
             let master_tx = self.master_tx.clone();
 
-            self.detached_tracker.spawn(async move {
+            self.detached_tracker.spawn_blocking(move || {
               let (parsed_tree, parsed_editing_version, highlight_capture) =
                 syntax::parse_and_query(
                   ts_parser,
                   ts_tree,
                   ts_highlight_query,
                   pending_edits,
-                )
-                .await;
+                );
 
               // If the buffer and its syntax remains the same
               if let Some(buf) = lock!(buffer_manager).get(&req.buffer_id) {
