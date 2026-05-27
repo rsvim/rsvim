@@ -1,6 +1,4 @@
 use quote::format_ident;
-use syn::DeriveInput;
-use syn::parse_macro_input;
 
 pub fn get_named_fields(
   data: &syn::Data,
