@@ -843,7 +843,7 @@ impl EventLoop {
           trace!("Recv FsWriteReq:{:?}", req.task_id);
           let resource_table = self.resource_table.clone();
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
-          self.detached_tracker.spawn(async move {
+          self.detached_tracker.spawn_blocking(move || {
             let maybe_result = fs_write(resource_table, req.file_rid, req.buf);
             jsrt_forwarder_tx
               .send(JsMessage::FsWriteResp(chan::FsWriteResp {
