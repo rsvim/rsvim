@@ -36,10 +36,10 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let optional = ToV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
-  let (field, uppercase, value) =
-    (&plain.field, &plain.uppercase, &plain.value);
-  let (optional_fields, optional_uppercase, optional_value) =
-    (&optional.field, &optional.uppercase, &optional.value);
+  let (field, lowercamelcase, value) =
+    (&plain.field, &plain.lowercamelcase, &plain.value);
+  let (optional_field, optional_lowercamelcase, optional_value) =
+    (&optional.field, &optional.lowercamelcase, &optional.value);
 
   quote! {
 
@@ -54,16 +54,16 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       #(
       {
         let #value = self.#field.to_v8(scope);
-        crate::js::binding::set_property_to(scope, obj, #uppercase, #value);
+        crate::js::binding::set_property_to(scope, obj, &#lowercamelcase, #value);
       }
       )*
 
       // optional
       #(
       {
-        if let Some(#optional_fields) = &self.#optional_fields {
-          let #optional_value = #optional_fields.to_v8(scope);
-          crate::js::binding::set_property_to(scope, obj, #optional_uppercase, #optional_value);
+        if let Some(#optional_field) = &self.#optional_field {
+          let #optional_value = #optional_field.to_v8(scope);
+          crate::js::binding::set_property_to(scope, obj, #optional_lowercamelcase, #optional_value);
         }
       }
       )*

@@ -1,3 +1,4 @@
+use heck::ToLowerCamelCase;
 use quote::format_ident;
 
 pub fn get_named_fields(
@@ -23,7 +24,7 @@ pub fn is_type_match(ty: &syn::Type, ident_name: &str) -> bool {
 
 pub struct ToV8Tokens {
   pub field: Vec<syn::Ident>,
-  pub uppercase: Vec<syn::Ident>,
+  pub lowercamelcase: Vec<String>,
   pub value: Vec<syn::Ident>,
 }
 
@@ -37,14 +38,14 @@ impl ToV8Tokens {
   {
     let mut res = Self {
       field: vec![],
-      uppercase: vec![],
+      lowercamelcase: vec![],
       value: vec![],
     };
     for f in fields.filter(|&f| predicate(f)) {
       let ident = f.ident.clone().unwrap();
       res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
+        .lowercamelcase
+        .push(ident.to_string().to_lower_camel_case());
       res.value.push(format_ident!("{}_value", ident));
       res.field.push(ident);
     }

@@ -3952,6 +3952,7 @@ dependencies = [
 name = "rsvim_macro"
 version = "0.1.3-alpha.2"
 dependencies = [
+ "heck",
  "proc-macro2",
  "quote",
  "syn",
