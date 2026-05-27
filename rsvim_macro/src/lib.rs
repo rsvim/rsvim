@@ -1,64 +1,14 @@
 //! The macros for RSVIM text editor core.
 
+mod js;
+
 use proc_macro::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use syn::DeriveInput;
 use syn::parse_macro_input;
 
-// js::converter {{{
-
-fn get_named_fields(
-  data: &syn::Data,
-) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
-  match data {
-    syn::Data::Struct(struct_data) => match &struct_data.fields {
-      syn::Fields::Named(named_field) => &named_field.named,
-      _ => unreachable!("Failed to derive macro on non-named field!"),
-    },
-    _ => unreachable!("Failed to derive macro on non-struct data!"),
-  }
-}
-
-fn is_type_match(ty: &syn::Type, ident_name: &str) -> bool {
-  if let syn::Type::Path(p) = ty {
-    if let Some(seg) = p.path.segments.last() {
-      return seg.ident == ident_name;
-    }
-  }
-  false
-}
-
-struct ToV8Tokens {
-  field: Vec<syn::Ident>,
-  uppercase: Vec<syn::Ident>,
-  value: Vec<syn::Ident>,
-}
-
-impl ToV8Tokens {
-  fn collect<'a, F>(
-    fields: impl Iterator<Item = &'a syn::Field>,
-    predicate: F,
-  ) -> Self
-  where
-    F: Fn(&syn::Field) -> bool,
-  {
-    let mut res = Self {
-      field: vec![],
-      uppercase: vec![],
-      value: vec![],
-    };
-    for f in fields.filter(|&f| predicate(f)) {
-      let ident = f.ident.clone().unwrap();
-      res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
-      res.value.push(format_ident!("{}_value", ident));
-      res.field.push(ident);
-    }
-    res
-  }
-}
+// js {{{
 
 #[proc_macro_derive(ToV8)]
 /// Convert rust struct to js object.
@@ -73,6 +23,8 @@ impl ToV8Tokens {
 ///   boolean/string/etc, or js array that only contains plain values (again,
 ///   such as boolean/string/etc).
 pub fn to_v8(input: TokenStream) -> TokenStream {
+  use js::*;
+
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
@@ -84,10 +36,10 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   let optional = ToV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
-  let (field, uppercase, value) =
-    (&plain.field, &plain.uppercase, &plain.value);
-  let (optional_fields, optional_uppercase, optional_value) =
-    (&optional.field, &optional.uppercase, &optional.value);
+  let (field, lowercamelcase, value) =
+    (&plain.field, &plain.lowercamelcase, &plain.value);
+  let (optional_field, optional_lowercamelcase, optional_value) =
+    (&optional.field, &optional.lowercamelcase, &optional.value);
 
   quote! {
 
@@ -96,24 +48,22 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       &self,
       scope: &mut v8::PinScope<'s, '_>,
     ) -> v8::Local<'s, v8::Value> {
-      use crate::js::binding;
-
       let obj = v8::Object::new(scope);
 
       // plain
       #(
       {
         let #value = self.#field.to_v8(scope);
-        binding::set_property_to(scope, obj, #uppercase, #value);
+        crate::js::binding::set_property_to(scope, obj, &#lowercamelcase, #value);
       }
       )*
 
       // optional
       #(
       {
-        if let Some(#optional_fields) = &self.#optional_fields {
-          let #optional_value = #optional_fields.to_v8(scope);
-          binding::set_property_to(scope, obj, #optional_uppercase, #optional_value);
+        if let Some(#optional_field) = &self.#optional_field {
+          let #optional_value = #optional_field.to_v8(scope);
+          crate::js::binding::set_property_to(scope, obj, #optional_lowercamelcase, #optional_value);
         }
       }
       )*
@@ -125,73 +75,11 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-struct FromV8Tokens {
-  field: Vec<syn::Ident>,
-  name: Vec<syn::Ident>,
-  ty: Vec<syn::Type>,
-  uppercase: Vec<syn::Ident>,
-  value: Vec<syn::Ident>,
-}
-
-impl FromV8Tokens {
-  fn collect<'a, F>(
-    fields: impl Iterator<Item = &'a syn::Field>,
-    predicate: F,
-  ) -> Self
-  where
-    F: Fn(&syn::Field) -> bool,
-  {
-    let mut res = Self {
-      field: vec![],
-      name: vec![],
-      ty: vec![],
-      uppercase: vec![],
-      value: vec![],
-    };
-
-    for f in fields.filter(|&f| predicate(f)) {
-      let ident = f.ident.clone().unwrap();
-      res.name.push(format_ident!("{}_name", ident));
-      res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
-      res.value.push(format_ident!("{}_value", ident));
-      res.field.push(ident.clone());
-
-      let ty = match &f.ty {
-        syn::Type::Path(p) => {
-          let seg = p.path.segments.last().unwrap();
-          if seg.ident == "Option" {
-            match &seg.arguments {
-              syn::PathArguments::AngleBracketed(angle) => {
-                match angle.args.last().unwrap() {
-                  syn::GenericArgument::Type(inner_ty) => inner_ty.clone(),
-                  _ => unreachable!(
-                    "Expected syn::GenericArgument::Type for {}",
-                    ident
-                  ),
-                }
-              }
-              _ => unreachable!(
-                "Expected syn::PathArguments::AngleBracketed for {}",
-                ident
-              ),
-            }
-          } else {
-            f.ty.clone()
-          }
-        }
-        _ => unreachable!("Expected syn::Type::Path for {}", ident),
-      };
-      res.ty.push(ty);
-    }
-    res
-  }
-}
-
 #[proc_macro_derive(FromV8)]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
+  use js::*;
+
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
@@ -204,24 +92,24 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let optional_tokens = FromV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
-  let (field, name, ty, uppercase, value) = (
+  let (field, name, ty, lowercamelcase, value) = (
     &tokens.field,
     &tokens.name,
     &tokens.ty,
-    &tokens.uppercase,
+    &tokens.lowercamelcase,
     &tokens.value,
   );
   let (
     optional_field,
     optional_name,
     optional_ty,
-    optional_uppercase,
+    optional_lowercamelcase,
     optional_value,
   ) = (
     &optional_tokens.field,
     &optional_tokens.name,
     &optional_tokens.ty,
-    &optional_tokens.uppercase,
+    &optional_tokens.lowercamelcase,
     &optional_tokens.value,
   );
 
@@ -240,7 +128,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // plain
       #(
       {
-        let #name = v8::String::new(scope, #uppercase).unwrap();
+        let #name = v8::String::new(scope, #lowercamelcase).unwrap();
         debug_assert!(obj.has_own_property(scope, #name.into()).unwrap_or(false));
         let #value = obj.get(scope, #name.into()).unwrap();
         builder.#field(<#ty as crate::js::converter::FromV8>::from_v8(scope, #value));
@@ -250,7 +138,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // optional
       #(
       {
-        let #optional_name = v8::String::new(scope, #optional_uppercase).unwrap();
+        let #optional_name = v8::String::new(scope, #optional_lowercamelcase).unwrap();
         if obj.has_own_property(scope, #optional_name.into()).unwrap_or(false) {
           let #optional_value = obj.get(scope, #optional_name.into()).unwrap();
           builder.#optional_field(Some(<#optional_ty as crate::js::converter::FromV8>::from_v8(scope, #optional_value)));
@@ -265,7 +153,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-// js::converter }}}
+// js }}}
 
 // incremental_id {{{
 
@@ -614,7 +502,7 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(Inodify, attributes(inode_base))]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodeable(input: TokenStream) -> TokenStream {
+pub fn inodify(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let struct_ident = &input.ident;
 

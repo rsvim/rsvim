@@ -7,34 +7,18 @@ use crate::js::command::opt::*;
 use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use std::fmt::Debug;
 use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
-/// Command definition names.
-pub const NAME: &str = "name";
-pub const CALLBACK: &str = "callback";
-pub const ATTRIBUTES: &str = "attributes";
-pub const OPTIONS: &str = "options";
-
+#[derive_where::derive_where(Debug)]
 #[derive(Clone, rsvim_macro::ToV8, rsvim_macro::RcPtr)]
 pub struct CommandDefinition {
   pub name: CompactString,
+  #[derive_where(skip)]
   pub callback: CommandCallback,
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
-}
-
-impl Debug for CommandDefinition {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("CommandDefinition")
-      .field(NAME, &self.name)
-      .field(CALLBACK, &"Rc<v8::Global<v8::Function>>")
-      .field(ATTRIBUTES, &self.attributes)
-      .field(OPTIONS, &self.options)
-      .finish()
-  }
 }
 
 impl FromV8CallbackArgs for CommandDefinition {

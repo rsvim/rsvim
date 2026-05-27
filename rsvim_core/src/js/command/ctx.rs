@@ -4,12 +4,6 @@ use crate::buf::BufferId;
 use crate::ui::tree::NodeId;
 use compact_str::CompactString;
 
-/// Command attribute name.
-pub const BANG: &str = "bang";
-pub const ARGS: &str = "args";
-pub const CURRENT_BUFFER_ID: &str = "currentBufferId";
-pub const CURRENT_WINDOW_ID: &str = "currentWindowId";
-
 /// Default command attributes.
 pub const BANG_DEFAULT: bool = false;
 pub const ARGS_DEFAULT: Vec<CompactString> = vec![];

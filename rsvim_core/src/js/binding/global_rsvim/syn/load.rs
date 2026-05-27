@@ -7,9 +7,7 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-pub const GRAMMAR_PATH: &str = "grammarPath";
-
-// Defaults
+// Default value
 pub const GRAMMAR_PATH_DEFAULT: &str = "";
 
 #[derive(
