@@ -8,7 +8,7 @@ use quote::quote;
 use syn::DeriveInput;
 use syn::parse_macro_input;
 
-// js::converter {{{
+// js {{{
 
 #[proc_macro_derive(ToV8)]
 /// Convert rust struct to js object.
@@ -23,7 +23,7 @@ use syn::parse_macro_input;
 ///   boolean/string/etc, or js array that only contains plain values (again,
 ///   such as boolean/string/etc).
 pub fn to_v8(input: TokenStream) -> TokenStream {
-  use js::converter::*;
+  use js::*;
 
   let input = parse_macro_input!(input as DeriveInput);
 
@@ -48,15 +48,13 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       &self,
       scope: &mut v8::PinScope<'s, '_>,
     ) -> v8::Local<'s, v8::Value> {
-      use crate::js::binding;
-
       let obj = v8::Object::new(scope);
 
       // plain
       #(
       {
         let #value = self.#field.to_v8(scope);
-        binding::set_property_to(scope, obj, #uppercase, #value);
+        crate::js::binding::set_property_to(scope, obj, #uppercase, #value);
       }
       )*
 
@@ -65,7 +63,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
       {
         if let Some(#optional_fields) = &self.#optional_fields {
           let #optional_value = #optional_fields.to_v8(scope);
-          binding::set_property_to(scope, obj, #optional_uppercase, #optional_value);
+          crate::js::binding::set_property_to(scope, obj, #optional_uppercase, #optional_value);
         }
       }
       )*
@@ -80,7 +78,7 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(FromV8)]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
-  use js::converter::*;
+  use js::*;
 
   let input = parse_macro_input!(input as DeriveInput);
 
@@ -155,7 +153,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-// js::converter }}}
+// js }}}
 
 // incremental_id {{{
 
