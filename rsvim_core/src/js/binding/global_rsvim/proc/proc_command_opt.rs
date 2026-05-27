@@ -4,13 +4,6 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-/// Command option names.
-pub const ARGS: &str = "args";
-pub const CWD: &str = "cwd";
-pub const CLEAR_ENV: &str = "clearEnv";
-pub const ENVS: &str = "envs";
-pub const STDIN: &str = "stdin";
-
 /// Default command options.
 pub const CWD_DEFAULT: Option<CompactString> = None;
 pub const CLEAR_ENV_DEFAULT: bool = false;

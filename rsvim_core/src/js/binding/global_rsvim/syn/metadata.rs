@@ -3,20 +3,7 @@
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-pub const NAME: &str = "name";
-pub const CAMELCASE: &str = "camelcase";
-pub const SCOPE: &str = "scope";
-pub const PATH: &str = "scope";
-pub const FILE_TYPES: &str = "fileTypes";
-pub const HIGHLIGHTS_PATH: &str = "highlightsPath";
-pub const HIGHLIGHTS_QUERY: &str = "highlightsQuery";
-pub const TAGS_PATH: &str = "tagsPath";
-pub const TAGS_QUERY: &str = "tagsQuery";
-pub const INJECTIONS_PATH: &str = "injectionsPath";
-pub const INJECTIONS_QUERY: &str = "injectionsQuery";
-pub const INJECTION_REGEX: &str = "injectionRegex";
-
-// Defaults
+// Default values
 pub const NAME_DEFAULT: &str = "";
 pub const CAMELCASE_DEFAULT: &str = "";
 pub const SCOPE_DEFAULT: &str = "";

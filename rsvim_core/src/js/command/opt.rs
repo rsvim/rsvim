@@ -2,10 +2,6 @@
 
 use compact_str::CompactString;
 
-/// Command option names.
-pub const FORCE: &str = "force";
-pub const ALIAS: &str = "alias";
-
 /// Default command options.
 pub const FORCE_DEFAULT: bool = true;
 pub const ALIAS_DEFAULT: Option<CompactString> = None;
