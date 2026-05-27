@@ -57,7 +57,7 @@ pub struct FromV8Tokens {
   pub field: Vec<syn::Ident>,
   pub name: Vec<syn::Ident>,
   pub ty: Vec<syn::Type>,
-  pub uppercase: Vec<syn::Ident>,
+  pub lowercamelcase: Vec<String>,
   pub value: Vec<syn::Ident>,
 }
 
@@ -73,7 +73,7 @@ impl FromV8Tokens {
       field: vec![],
       name: vec![],
       ty: vec![],
-      uppercase: vec![],
+      lowercamelcase: vec![],
       value: vec![],
     };
 
@@ -81,8 +81,8 @@ impl FromV8Tokens {
       let ident = f.ident.clone().unwrap();
       res.name.push(format_ident!("{}_name", ident));
       res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
+        .lowercamelcase
+        .push(ident.to_string().to_lower_camel_case());
       res.value.push(format_ident!("{}_value", ident));
       res.field.push(ident.clone());
 

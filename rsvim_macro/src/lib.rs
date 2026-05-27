@@ -92,24 +92,24 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
   let optional_tokens = FromV8Tokens::collect(struct_fields.iter(), is_option);
 
   // Destructure for `quote!` use
-  let (field, name, ty, uppercase, value) = (
+  let (field, name, ty, lowercamelcase, value) = (
     &tokens.field,
     &tokens.name,
     &tokens.ty,
-    &tokens.uppercase,
+    &tokens.lowercamelcase,
     &tokens.value,
   );
   let (
     optional_field,
     optional_name,
     optional_ty,
-    optional_uppercase,
+    optional_lowercamelcase,
     optional_value,
   ) = (
     &optional_tokens.field,
     &optional_tokens.name,
     &optional_tokens.ty,
-    &optional_tokens.uppercase,
+    &optional_tokens.lowercamelcase,
     &optional_tokens.value,
   );
 
@@ -128,7 +128,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // plain
       #(
       {
-        let #name = v8::String::new(scope, #uppercase).unwrap();
+        let #name = v8::String::new(scope, #lowercamelcase).unwrap();
         debug_assert!(obj.has_own_property(scope, #name.into()).unwrap_or(false));
         let #value = obj.get(scope, #name.into()).unwrap();
         builder.#field(<#ty as crate::js::converter::FromV8>::from_v8(scope, #value));
@@ -138,7 +138,7 @@ pub fn from_v8(input: TokenStream) -> TokenStream {
       // optional
       #(
       {
-        let #optional_name = v8::String::new(scope, #optional_uppercase).unwrap();
+        let #optional_name = v8::String::new(scope, #optional_lowercamelcase).unwrap();
         if obj.has_own_property(scope, #optional_name.into()).unwrap_or(false) {
           let #optional_value = obj.get(scope, #optional_name.into()).unwrap();
           builder.#optional_field(Some(<#optional_ty as crate::js::converter::FromV8>::from_v8(scope, #optional_value)));
