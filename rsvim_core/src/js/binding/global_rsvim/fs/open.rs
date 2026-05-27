@@ -8,14 +8,6 @@ use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use compact_str::ToCompactString;
 
-// Attribute names.
-pub const APPEND: &str = "append";
-pub const CREATE: &str = "create";
-pub const CREATE_NEW: &str = "createNew";
-pub const READ: &str = "read";
-pub const TRUNCATE: &str = "truncate";
-pub const WRITE: &str = "write";
-
 // Default values.
 pub const APPEND_DEFAULT: bool = false;
 pub const CREATE_DEFAULT: bool = false;
