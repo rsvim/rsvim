@@ -502,7 +502,7 @@ pub fn stateful_enum(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(Inodify, attributes(inode_base))]
 /// Generate inode body for `rsvim_core::ui::tree::internal::Inodify` trait.
-pub fn inodeable(input: TokenStream) -> TokenStream {
+pub fn inodify(input: TokenStream) -> TokenStream {
   let input = parse_macro_input!(input as DeriveInput);
   let struct_ident = &input.ident;
 
