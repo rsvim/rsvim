@@ -1,5 +1,7 @@
 //! The macros for RSVIM text editor core.
 
+mod js;
+
 use proc_macro::TokenStream;
 use quote::format_ident;
 use quote::quote;
@@ -7,58 +9,6 @@ use syn::DeriveInput;
 use syn::parse_macro_input;
 
 // js::converter {{{
-
-fn get_named_fields(
-  data: &syn::Data,
-) -> &syn::punctuated::Punctuated<syn::Field, syn::token::Comma> {
-  match data {
-    syn::Data::Struct(struct_data) => match &struct_data.fields {
-      syn::Fields::Named(named_field) => &named_field.named,
-      _ => unreachable!("Failed to derive macro on non-named field!"),
-    },
-    _ => unreachable!("Failed to derive macro on non-struct data!"),
-  }
-}
-
-fn is_type_match(ty: &syn::Type, ident_name: &str) -> bool {
-  if let syn::Type::Path(p) = ty {
-    if let Some(seg) = p.path.segments.last() {
-      return seg.ident == ident_name;
-    }
-  }
-  false
-}
-
-struct ToV8Tokens {
-  field: Vec<syn::Ident>,
-  uppercase: Vec<syn::Ident>,
-  value: Vec<syn::Ident>,
-}
-
-impl ToV8Tokens {
-  fn collect<'a, F>(
-    fields: impl Iterator<Item = &'a syn::Field>,
-    predicate: F,
-  ) -> Self
-  where
-    F: Fn(&syn::Field) -> bool,
-  {
-    let mut res = Self {
-      field: vec![],
-      uppercase: vec![],
-      value: vec![],
-    };
-    for f in fields.filter(|&f| predicate(f)) {
-      let ident = f.ident.clone().unwrap();
-      res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
-      res.value.push(format_ident!("{}_value", ident));
-      res.field.push(ident);
-    }
-    res
-  }
-}
 
 #[proc_macro_derive(ToV8)]
 /// Convert rust struct to js object.
@@ -73,6 +23,8 @@ impl ToV8Tokens {
 ///   boolean/string/etc, or js array that only contains plain values (again,
 ///   such as boolean/string/etc).
 pub fn to_v8(input: TokenStream) -> TokenStream {
+  use js::converter::*;
+
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
@@ -125,73 +77,11 @@ pub fn to_v8(input: TokenStream) -> TokenStream {
   }.into()
 }
 
-struct FromV8Tokens {
-  field: Vec<syn::Ident>,
-  name: Vec<syn::Ident>,
-  ty: Vec<syn::Type>,
-  uppercase: Vec<syn::Ident>,
-  value: Vec<syn::Ident>,
-}
-
-impl FromV8Tokens {
-  fn collect<'a, F>(
-    fields: impl Iterator<Item = &'a syn::Field>,
-    predicate: F,
-  ) -> Self
-  where
-    F: Fn(&syn::Field) -> bool,
-  {
-    let mut res = Self {
-      field: vec![],
-      name: vec![],
-      ty: vec![],
-      uppercase: vec![],
-      value: vec![],
-    };
-
-    for f in fields.filter(|&f| predicate(f)) {
-      let ident = f.ident.clone().unwrap();
-      res.name.push(format_ident!("{}_name", ident));
-      res
-        .uppercase
-        .push(format_ident!("{}", ident.to_string().to_uppercase()));
-      res.value.push(format_ident!("{}_value", ident));
-      res.field.push(ident.clone());
-
-      let ty = match &f.ty {
-        syn::Type::Path(p) => {
-          let seg = p.path.segments.last().unwrap();
-          if seg.ident == "Option" {
-            match &seg.arguments {
-              syn::PathArguments::AngleBracketed(angle) => {
-                match angle.args.last().unwrap() {
-                  syn::GenericArgument::Type(inner_ty) => inner_ty.clone(),
-                  _ => unreachable!(
-                    "Expected syn::GenericArgument::Type for {}",
-                    ident
-                  ),
-                }
-              }
-              _ => unreachable!(
-                "Expected syn::PathArguments::AngleBracketed for {}",
-                ident
-              ),
-            }
-          } else {
-            f.ty.clone()
-          }
-        }
-        _ => unreachable!("Expected syn::Type::Path for {}", ident),
-      };
-      res.ty.push(ty);
-    }
-    res
-  }
-}
-
 #[proc_macro_derive(FromV8)]
 /// Convert js object to rust struct.
 pub fn from_v8(input: TokenStream) -> TokenStream {
+  use js::converter::*;
+
   let input = parse_macro_input!(input as DeriveInput);
 
   let struct_ident = input.ident;
