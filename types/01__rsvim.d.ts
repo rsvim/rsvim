@@ -32,7 +32,7 @@
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimBuf {
+export declare const RsvimBuf: {
     /**
      * Get current buffer's ID.
      *
@@ -54,7 +54,7 @@ export declare class RsvimBuf {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current(): number | undefined;
+    readonly current: () => number | undefined;
     /**
      * List all buffers' IDs.
      *
@@ -73,7 +73,7 @@ export declare class RsvimBuf {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list(): number[];
+    readonly list: () => number[];
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -95,8 +95,8 @@ export declare class RsvimBuf {
      * }
      * ```
      */
-    writeSync(bufId: number): number;
-}
+    readonly writeSync: (bufId: number) => number;
+};
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -1124,14 +1124,78 @@ export declare namespace RsvimSyn {
  *
  * @category Global Object
  */
-export interface Rsvim {
-    readonly buf: RsvimBuf;
+export declare const Rsvim: {
+    readonly buf: {
+        /**
+         * Get current buffer's ID.
+         *
+         * The "current" buffer is the buffer that the window where your cursor is
+         * located is binded to.
+         *
+         * :::warning
+         * When the editor is not initialized, i.e. there's no buffer/window created. It
+         * will return `undefined`. Once the editor is initialized, there will always have a
+         * valid buffer binded to the "current" window (where your cursor is). It will return
+         * the valid buffer ID.
+         * :::
+         *
+         * @returns {(number | undefined)} It returns a valid buffer ID if the editor is initialized.
+         * Otherwise it returns `undefined` if the editor is not initialized.
+         *
+         * @example
+         * ```javascript
+         * const bufId = Rsvim.buf.current();
+         * ```
+         */
+        readonly current: () => number | undefined;
+        /**
+         * List all buffers' IDs.
+         *
+         * :::warning
+         * When the editor is not initialized, i.e. there's no buffer/window created. It
+         * will return an empty array. Once the editor is initialized, there will have at least 1
+         * buffer binded to the "current" window (where your cursor is). It will return all the
+         * buffer IDs as an array.
+         * :::
+         *
+         * @returns {number[]} All the buffers' IDs as an array. If there's no
+         * buffer (i.e. the editor is not initialized), it returns an empty array.
+         *
+         * @example
+         * ```javascript
+         * const bufIds = Rsvim.buf.list();
+         * ```
+         */
+        readonly list: () => number[];
+        /**
+         * Write (save) buffer's text contents to local filesystem synchronizely.
+         *
+         * @param {number} bufId - The buffer's ID that you want to write to filesystem.
+         *
+         * @returns {number} It returns a positive integer to indicate how many bytes
+         * have been written to the file, if written successfully.
+         *
+         * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer to file system.
+         *
+         * @example
+         * ```javascript
+         * const bufId = Rsvim.buf.currentBufferId();
+         * try {
+         *   const bytes = Rsvim.buf.writeSync(bufId);
+         *   Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+         * } catch (e) {
+         *   Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
+         * }
+         * ```
+         */
+        readonly writeSync: (bufId: number) => number;
+    };
     readonly cmd: RsvimCmd;
     readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
     readonly syn: RsvimSyn;
-}
+};
 declare global {
-    var Rsvim: Rsvim;
+    var Rsvim: typeof Rsvim;
 }
