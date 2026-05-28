@@ -1587,29 +1587,21 @@ export namespace RsvimSyn {
  *
  * @category Global Object
  */
-export interface Rsvim {
-  readonly buf: typeof RsvimBuf;
-  readonly cmd: RsvimCmd;
-  readonly fs: RsvimFs;
-  readonly opt: RsvimOpt;
-  readonly rt: RsvimRt;
-  readonly syn: RsvimSyn;
-}
-
-const RsvimObject: Rsvim = {
+export const Rsvim = {
   buf: RsvimBuf,
   cmd: new RsvimCmd(),
   fs: new RsvimFs(),
   opt: new RsvimOpt(),
   rt: new RsvimRt(),
   syn: new RsvimSyn(),
-};
+} as const;
 
-(function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = RsvimObject;
-})(globalThis as unknown as { Rsvim: Rsvim });
+(function (globalThis: { Rsvim: typeof Rsvim }) {
+  globalThis.Rsvim = Rsvim;
+})(globalThis as unknown as { Rsvim: typeof Rsvim });
 
 /// Declarations for .d.ts
 declare global {
-  var Rsvim: Rsvim;
+  // @ts-ignore Ignore warning
+  var Rsvim: typeof Rsvim;
 }
