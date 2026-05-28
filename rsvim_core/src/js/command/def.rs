@@ -9,14 +9,14 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
-pub type CommandCallback = Rc<v8::Global<v8::Function>>;
+pub type ExCommandCallback = Rc<v8::Global<v8::Function>>;
 
 #[derive_where::derive_where(Debug)]
 #[derive(Clone, rsvim_macro::ToV8, rsvim_macro::RcPtr)]
 pub struct ExCommandDefinition {
   pub name: CompactString,
   #[derive_where(skip)]
-  pub callback: CommandCallback,
+  pub callback: ExCommandCallback,
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
 }
