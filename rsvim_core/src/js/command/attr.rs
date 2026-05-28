@@ -66,7 +66,7 @@ impl ToV8 for Nargs {
   rsvim_macro::ToV8,
   rsvim_macro::FromV8,
 )]
-pub struct CommandAttributes {
+pub struct ExCommandAttributes {
   #[builder(default = false)]
   pub bang: bool,
 

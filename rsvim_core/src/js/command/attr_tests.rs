@@ -28,16 +28,16 @@ fn test_converter1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let a1 = CommandAttributesBuilder::default().build().unwrap();
+  let a1 = ExCommandAttributesBuilder::default().build().unwrap();
   let obj1 = a1.to_v8(scope);
-  let val1 = CommandAttributes::from_v8(scope, obj1);
+  let val1 = ExCommandAttributes::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
-  let a2 = CommandAttributesBuilder::default()
+  let a2 = ExCommandAttributesBuilder::default()
     .nargs(Nargs::Any)
     .build()
     .unwrap();
   let obj2 = a2.to_v8(scope);
-  let val2 = CommandAttributes::from_v8(scope, obj2);
+  let val2 = ExCommandAttributes::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }

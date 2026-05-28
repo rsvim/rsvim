@@ -17,8 +17,8 @@ pub struct ExCommandDefinition {
   pub name: CompactString,
   #[derive_where(skip)]
   pub callback: ExCommandCallback,
-  pub attributes: CommandAttributes,
-  pub options: CommandOptions,
+  pub attributes: ExCommandAttributes,
+  pub options: ExCommandOptions,
 }
 
 impl FromV8CallbackArgs for ExCommandDefinition {
@@ -33,9 +33,9 @@ impl FromV8CallbackArgs for ExCommandDefinition {
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     debug_assert!(args.get(2).is_object());
-    let attributes = CommandAttributes::from_v8(scope, args.get(2));
+    let attributes = ExCommandAttributes::from_v8(scope, args.get(2));
     debug_assert!(args.get(3).is_object());
-    let options = CommandOptions::from_v8(scope, args.get(3));
+    let options = ExCommandOptions::from_v8(scope, args.get(3));
 
     Self {
       name: name.to_compact_string(),

@@ -10,16 +10,16 @@ fn test1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let a1 = CommandOptionsBuilder::default().build().unwrap();
+  let a1 = ExCommandOptionsBuilder::default().build().unwrap();
   let obj1 = a1.to_v8(scope);
-  let val1 = CommandOptions::from_v8(scope, obj1);
+  let val1 = ExCommandOptions::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
-  let a2 = CommandOptionsBuilder::default()
+  let a2 = ExCommandOptionsBuilder::default()
     .alias(Some("w".to_compact_string()))
     .build()
     .unwrap();
   let obj2 = a2.to_v8(scope);
-  let val2 = CommandOptions::from_v8(scope, obj2);
+  let val2 = ExCommandOptions::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }

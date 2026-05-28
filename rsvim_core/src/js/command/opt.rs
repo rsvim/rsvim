@@ -11,7 +11,7 @@ use compact_str::CompactString;
   rsvim_macro::ToV8,
   rsvim_macro::FromV8,
 )]
-pub struct CommandOptions {
+pub struct ExCommandOptions {
   #[builder(default = true)]
   pub force: bool,
 
