@@ -23,9 +23,9 @@ pub mod resource;
 pub mod transpiler;
 
 #[cfg(test)]
-mod command_tests;
-#[cfg(test)]
 mod converter_tests;
+#[cfg(test)]
+mod ex_command_tests;
 #[cfg(test)]
 mod module_tests;
 
