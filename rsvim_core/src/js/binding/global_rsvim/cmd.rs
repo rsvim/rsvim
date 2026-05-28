@@ -4,7 +4,7 @@ use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::binding;
-use crate::js::command::def::CommandDefinition;
+use crate::js::command::def::ExCommandDefinition;
 use crate::js::converter::*;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
@@ -50,15 +50,17 @@ pub fn create<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  let def = CommandDefinition::from_v8_callback_args(scope, args);
+  let def = ExCommandDefinition::from_v8_callback_args(scope, args);
   trace!("Rsvim.cmd.create:{:?}", def);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut command_manager = lock!(state.command_manager);
 
-  let result = command_manager
-    .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
+  let result = command_manager.insert(
+    def.name.to_compact_string(),
+    ExCommandDefinition::to_rc(def),
+  );
 
   match result {
     Ok(Some(removed)) => rv.set(removed.to_v8(scope)),

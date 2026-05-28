@@ -22,7 +22,7 @@ use crate::js::execute_module;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use def::CommandDefinitionRc;
+use def::ExCommandDefinitionRc;
 use itertools::Itertools;
 
 #[derive(Debug, Clone)]
@@ -32,7 +32,7 @@ pub struct ExCommandFuture {
   pub name: CompactString,
   pub context: CommandContext,
   pub is_builtin_js: bool,
-  pub definition: Option<CommandDefinitionRc>,
+  pub definition: Option<ExCommandDefinitionRc>,
 }
 
 impl JsFuture for ExCommandFuture {
@@ -72,18 +72,18 @@ impl JsFuture for ExCommandFuture {
 #[derive(Debug, Default, rsvim_macro::ArcMutexPtr)]
 pub struct ExCommandManager {
   // Maps from command "name" to its "definition".
-  commands: BTreeMap<CompactString, CommandDefinitionRc>,
+  commands: BTreeMap<CompactString, ExCommandDefinitionRc>,
 
   // Maps from command "alias" to its "name".
   aliases: FoldMap<CompactString, CompactString>,
 }
 
 pub type CommandManagerKeys<'a> =
-  std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Keys<'a, CompactString, ExCommandDefinitionRc>;
 pub type CommandManagerValues<'a> =
-  std::collections::btree_map::Values<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Values<'a, CompactString, ExCommandDefinitionRc>;
 pub type CommandManagerIter<'a> =
-  std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Iter<'a, CompactString, ExCommandDefinitionRc>;
 
 impl ExCommandManager {
   pub fn is_empty(&self) -> bool {
@@ -94,7 +94,7 @@ impl ExCommandManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<CommandDefinitionRc> {
+  pub fn remove(&mut self, name: &str) -> Option<ExCommandDefinitionRc> {
     self.commands.remove(name)
   }
 
@@ -108,7 +108,7 @@ impl ExCommandManager {
   ///
   /// 1. It returns `Ok(None)` if registered successfully, and no conflicting
   ///    one exists.
-  /// 2. It returns `Ok(CommandDefinitionRc)` if registered successfully, and
+  /// 2. It returns `Ok(ExCommandDefinitionRc)` if registered successfully, and
   ///    previous one is been removed and returned. Note: this requires the
   ///    `force` option.
   /// 3. It returns `Err` if registered failed, because either command name or
@@ -116,8 +116,8 @@ impl ExCommandManager {
   pub fn insert(
     &mut self,
     name: CompactString,
-    definition: CommandDefinitionRc,
-  ) -> TheResult<Option<CommandDefinitionRc>> {
+    definition: ExCommandDefinitionRc,
+  ) -> TheResult<Option<ExCommandDefinitionRc>> {
     let alias = definition.options.alias.clone();
 
     if !definition.options.force {
@@ -139,7 +139,7 @@ impl ExCommandManager {
     Ok(maybe_old)
   }
 
-  pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
+  pub fn get(&self, name: &str) -> Option<ExCommandDefinitionRc> {
     self.commands.get(name).cloned()
   }
 
@@ -161,13 +161,13 @@ impl ExCommandManager {
 
   pub fn first_key_value(
     &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
+  ) -> Option<(&CompactString, &ExCommandDefinitionRc)> {
     self.commands.first_key_value()
   }
 
   pub fn last_key_value(
     &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
+  ) -> Option<(&CompactString, &ExCommandDefinitionRc)> {
     self.commands.last_key_value()
   }
 }

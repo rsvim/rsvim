@@ -13,7 +13,7 @@ pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
 #[derive_where::derive_where(Debug)]
 #[derive(Clone, rsvim_macro::ToV8, rsvim_macro::RcPtr)]
-pub struct CommandDefinition {
+pub struct ExCommandDefinition {
   pub name: CompactString,
   #[derive_where(skip)]
   pub callback: CommandCallback,
@@ -21,7 +21,7 @@ pub struct CommandDefinition {
   pub options: CommandOptions,
 }
 
-impl FromV8CallbackArgs for CommandDefinition {
+impl FromV8CallbackArgs for ExCommandDefinition {
   fn from_v8_callback_args<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
