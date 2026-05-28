@@ -32,7 +32,7 @@
  * @category Editor APIs
  * @hideconstructor
  */
-export interface RsvimBuf {
+export declare const RsvimBuf: {
     /**
      * Get current buffer's ID.
      *
@@ -54,7 +54,7 @@ export interface RsvimBuf {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current(): number | undefined;
+    readonly current: () => number | undefined;
     /**
      * List all buffers' IDs.
      *
@@ -73,7 +73,7 @@ export interface RsvimBuf {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list(): number[];
+    readonly list: () => number[];
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -95,8 +95,8 @@ export interface RsvimBuf {
      * }
      * ```
      */
-    writeSync(bufId: number): number;
-}
+    readonly writeSync: (bufId: number) => number;
+};
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -1125,7 +1125,7 @@ export declare namespace RsvimSyn {
  * @category Global Object
  */
 export interface Rsvim {
-    readonly buf: RsvimBuf;
+    readonly buf: typeof RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
