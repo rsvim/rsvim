@@ -32,7 +32,7 @@
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimBuf {
+export interface RsvimBuf {
     /**
      * Get current buffer's ID.
      *
