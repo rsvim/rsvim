@@ -1206,7 +1206,7 @@ export class RsvimSyn {
         return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
 }
-const RsvimObj = {
+const RsvimObject = {
     buf: new RsvimBuf(),
     cmd: new RsvimCmd(),
     fs: new RsvimFs(),
@@ -1215,5 +1215,5 @@ const RsvimObj = {
     syn: new RsvimSyn(),
 };
 (function (globalThis) {
-    globalThis.Rsvim = RsvimObj;
+    globalThis.Rsvim = RsvimObject;
 })(globalThis);
