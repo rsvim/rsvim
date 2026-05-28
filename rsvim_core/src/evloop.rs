@@ -111,7 +111,7 @@ pub struct EventLoop {
   /// Colorschemes.
   pub colorscheme_manager: ColorSchemeManagerArc,
   /// Vim commands.
-  pub command_manager: ExCommandManagerArc,
+  pub ex_command_manager: ExCommandManagerArc,
   /// Resources.
   pub resource_table: ResourceTableArc,
 
@@ -176,7 +176,7 @@ impl EventLoop {
     /* cmdline_text */ CmdlineTextArc,
     /* syntax_manager */ SyntaxManagerArc,
     /* colorscheme_manager */ ColorSchemeManagerArc,
-    /* command_manager */ ExCommandManagerArc,
+    /* ex_command_manager */ ExCommandManagerArc,
     /* resource_table */ ResourceTableArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -224,7 +224,8 @@ impl EventLoop {
       Arc::downgrade(&colorscheme_manager),
     );
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-    let command_manager = ExCommandManager::to_arc(ExCommandManager::default());
+    let ex_command_manager =
+      ExCommandManager::to_arc(ExCommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
     let resource_table = ResourceTable::to_arc(ResourceTable::new());
 
@@ -281,7 +282,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -309,7 +310,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       cancellation_token,
       detached_tracker,
@@ -336,7 +337,7 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager.clone(),
+      ex_command_manager.clone(),
       resource_table.clone(),
     );
 
@@ -351,7 +352,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       writer,
       cancellation_token,
@@ -385,7 +386,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       cancellation_token,
       detached_tracker,
@@ -416,7 +417,7 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager.clone(),
+      ex_command_manager.clone(),
       resource_table.clone(),
     );
 
@@ -431,7 +432,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       writer,
       cancellation_token,
@@ -466,7 +467,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       cancellation_token,
       detached_tracker,
@@ -498,7 +499,7 @@ impl EventLoop {
       cmdline_text.clone(),
       syntax_manager.clone(),
       colorscheme_manager.clone(),
-      command_manager.clone(),
+      ex_command_manager.clone(),
       resource_table.clone(),
     );
 
@@ -513,7 +514,7 @@ impl EventLoop {
       cmdline_text,
       syntax_manager,
       colorscheme_manager,
-      command_manager,
+      ex_command_manager,
       resource_table,
       writer,
       cancellation_token,

@@ -385,7 +385,7 @@ pub mod boost {
     pub cmdline_text: CmdlineTextArc,
     pub syntax_manager: SyntaxManagerArc,
     pub colorscheme_manager: ColorSchemeManagerArc,
-    pub command_manager: ExCommandManagerArc,
+    pub ex_command_manager: ExCommandManagerArc,
     pub resource_table: ResourceTableArc,
     // Data Access for RSVIM }
   }
@@ -429,7 +429,7 @@ pub mod boost {
       cmdline_text: CmdlineTextArc,
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
-      command_manager: ExCommandManagerArc,
+      ex_command_manager: ExCommandManagerArc,
       resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -486,7 +486,7 @@ pub mod boost {
         cmdline_text,
         syntax_manager,
         colorscheme_manager,
-        command_manager,
+        ex_command_manager,
         resource_table,
       });
 
@@ -525,7 +525,7 @@ pub mod boost {
       cmdline_text: CmdlineTextArc,
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
-      command_manager: ExCommandManagerArc,
+      ex_command_manager: ExCommandManagerArc,
       resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -566,7 +566,7 @@ pub mod boost {
         cmdline_text,
         syntax_manager,
         colorscheme_manager,
-        command_manager,
+        ex_command_manager,
         resource_table,
       });
 
@@ -686,9 +686,9 @@ pub mod boost {
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{:?}", req.payload);
             let mut state = state_rc.borrow_mut();
-            let command_manager = state.command_manager.clone();
-            let command_manager = lock!(command_manager);
-            if let Some(command_cb) = command_manager.parse(&req) {
+            let ex_command_manager = state.ex_command_manager.clone();
+            let ex_command_manager = lock!(ex_command_manager);
+            if let Some(command_cb) = ex_command_manager.parse(&req) {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message

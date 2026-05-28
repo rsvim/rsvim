@@ -55,7 +55,7 @@ pub fn create<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let mut command_manager = lock!(state.command_manager);
+  let mut command_manager = lock!(state.ex_command_manager);
 
   let result = command_manager.insert(
     def.name.to_compact_string(),
@@ -82,7 +82,7 @@ pub fn list(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let command_manager = lock!(state.command_manager);
+  let command_manager = lock!(state.ex_command_manager);
 
   let commands = command_manager
     .keys()
@@ -105,7 +105,7 @@ pub fn get<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let command_manager = lock!(state.command_manager);
+  let command_manager = lock!(state.ex_command_manager);
   match command_manager.get(&name) {
     Some(def) => rv.set(def.to_v8(scope)),
     None => rv.set_undefined(),
@@ -125,7 +125,7 @@ pub fn remove<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let mut command_manager = lock!(state.command_manager);
+  let mut command_manager = lock!(state.ex_command_manager);
   match command_manager.remove(&name) {
     Some(removed) => rv.set(removed.to_v8(scope)),
     None => rv.set_undefined(),
