@@ -1206,7 +1206,18 @@ export class RsvimSyn {
         return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
 }
-const RsvimObject = {
+/**
+ * The `Rsvim` global object.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim'.
+ * const vim = Rsvim;
+ * ```
+ *
+ * @category Global Object
+ */
+export const Rsvim = {
     buf: RsvimBuf,
     cmd: new RsvimCmd(),
     fs: new RsvimFs(),
@@ -1215,5 +1226,5 @@ const RsvimObject = {
     syn: new RsvimSyn(),
 };
 (function (globalThis) {
-    globalThis.Rsvim = RsvimObject;
+    globalThis.Rsvim = Rsvim;
 })(globalThis);
