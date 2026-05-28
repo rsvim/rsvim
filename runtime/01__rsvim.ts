@@ -1596,7 +1596,7 @@ export interface Rsvim {
   readonly syn: RsvimSyn;
 }
 
-const RsvimObj = {
+const RsvimObject = {
   buf: new RsvimBuf(),
   cmd: new RsvimCmd(),
   fs: new RsvimFs(),
@@ -1606,7 +1606,7 @@ const RsvimObj = {
 } as const;
 
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = RsvimObj;
+  globalThis.Rsvim = RsvimObject;
 })(globalThis as unknown as { Rsvim: Rsvim });
 
 /// Declarations for .d.ts
