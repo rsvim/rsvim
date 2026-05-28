@@ -4,7 +4,7 @@ use crate::cmdltext::CmdlineText;
 use crate::hl::ColorSchemeManager;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
-use crate::js::command::CommandManager;
+use crate::js::command::ExCommandManager;
 use crate::js::resource::ResourceTable;
 use crate::prelude::*;
 use crate::syntax::SyntaxManager;
@@ -39,7 +39,8 @@ pub fn make_js_runtime() -> JsRuntime {
     Arc::downgrade(&colorscheme_manager),
   ));
   let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-  let ex_commands_manager = CommandManager::to_arc(CommandManager::default());
+  let ex_commands_manager =
+    ExCommandManager::to_arc(ExCommandManager::default());
   let resource_table = ResourceTable::to_arc(ResourceTable::new());
 
   let startup_moment = Instant::now();

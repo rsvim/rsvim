@@ -70,7 +70,7 @@ impl JsFuture for ExCommandFuture {
 }
 
 #[derive(Debug, Default, rsvim_macro::ArcMutexPtr)]
-pub struct CommandManager {
+pub struct ExCommandManager {
   // Maps from command "name" to its "definition".
   commands: BTreeMap<CompactString, CommandDefinitionRc>,
 
@@ -85,7 +85,7 @@ pub type CommandManagerValues<'a> =
 pub type CommandManagerIter<'a> =
   std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
 
-impl CommandManager {
+impl ExCommandManager {
   pub fn is_empty(&self) -> bool {
     self.commands.is_empty()
   }
@@ -172,7 +172,7 @@ impl CommandManager {
   }
 }
 
-impl CommandManager {
+impl ExCommandManager {
   pub fn parse(&self, req: &ExCommandReq) -> Option<ExCommandFuture> {
     debug_assert_eq!(req.payload.trim(), req.payload);
 

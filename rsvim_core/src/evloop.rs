@@ -23,8 +23,8 @@ use crate::js::binding::global_rsvim::fs::read::fs_read;
 use crate::js::binding::global_rsvim::fs::read_file::async_fs_read_file;
 use crate::js::binding::global_rsvim::fs::read_text_file::async_fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
-use crate::js::command::CommandManager;
-use crate::js::command::CommandManagerArc;
+use crate::js::command::ExCommandManager;
+use crate::js::command::ExCommandManagerArc;
 use crate::js::module::async_load_import;
 use crate::js::resource::ResourceTable;
 use crate::js::resource::ResourceTableArc;
@@ -111,7 +111,7 @@ pub struct EventLoop {
   /// Colorschemes.
   pub colorscheme_manager: ColorSchemeManagerArc,
   /// Vim commands.
-  pub command_manager: CommandManagerArc,
+  pub command_manager: ExCommandManagerArc,
   /// Resources.
   pub resource_table: ResourceTableArc,
 
@@ -176,7 +176,7 @@ impl EventLoop {
     /* cmdline_text */ CmdlineTextArc,
     /* syntax_manager */ SyntaxManagerArc,
     /* colorscheme_manager */ ColorSchemeManagerArc,
-    /* command_manager */ CommandManagerArc,
+    /* command_manager */ ExCommandManagerArc,
     /* resource_table */ ResourceTableArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -224,7 +224,7 @@ impl EventLoop {
       Arc::downgrade(&colorscheme_manager),
     );
     let cmdline_text = CmdlineText::to_arc(CmdlineText::new(canvas_size));
-    let command_manager = CommandManager::to_arc(CommandManager::default());
+    let command_manager = ExCommandManager::to_arc(ExCommandManager::default());
     let buffer_manager = BufferManager::to_arc(buffer_manager);
     let resource_table = ResourceTable::to_arc(ResourceTable::new());
 

@@ -41,7 +41,7 @@ use crate::prelude::*;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
-use command::CommandManagerArc;
+use command::ExCommandManagerArc;
 use err::JsError;
 use err::report_js_error;
 use exception::ExceptionState;
@@ -385,7 +385,7 @@ pub mod boost {
     pub cmdline_text: CmdlineTextArc,
     pub syntax_manager: SyntaxManagerArc,
     pub colorscheme_manager: ColorSchemeManagerArc,
-    pub command_manager: CommandManagerArc,
+    pub command_manager: ExCommandManagerArc,
     pub resource_table: ResourceTableArc,
     // Data Access for RSVIM }
   }
@@ -429,7 +429,7 @@ pub mod boost {
       cmdline_text: CmdlineTextArc,
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
-      command_manager: CommandManagerArc,
+      command_manager: ExCommandManagerArc,
       resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
@@ -525,7 +525,7 @@ pub mod boost {
       cmdline_text: CmdlineTextArc,
       syntax_manager: SyntaxManagerArc,
       colorscheme_manager: ColorSchemeManagerArc,
-      command_manager: CommandManagerArc,
+      command_manager: ExCommandManagerArc,
       resource_table: ResourceTableArc,
     ) -> Self {
       // Fire up the v8 engine.
