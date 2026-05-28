@@ -4,7 +4,7 @@ use crate::cmdltext::CmdlineText;
 use crate::hl::ColorSchemeManager;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
-use crate::js::command::ExCommandManager;
+use crate::js::ex_command::ExCommandManager;
 use crate::js::resource::ResourceTable;
 use crate::prelude::*;
 use crate::syntax::SyntaxManager;

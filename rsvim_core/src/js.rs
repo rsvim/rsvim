@@ -11,9 +11,9 @@
 //! - V8 API Reference: <https://v8docs.nodesource.com/node-24.1/index.html>.
 
 pub mod binding;
-pub mod command;
 pub mod converter;
 pub mod err;
+pub mod ex_command;
 pub mod exception;
 pub mod hook;
 pub mod loader;
@@ -41,9 +41,9 @@ use crate::prelude::*;
 use crate::syntax::SyntaxManagerArc;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
-use command::ExCommandManagerArc;
 use err::JsError;
 use err::report_js_error;
+use ex_command::ExCommandManagerArc;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
 use hook::module_resolve_cb;

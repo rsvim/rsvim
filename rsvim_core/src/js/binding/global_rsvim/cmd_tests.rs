@@ -1,5 +1,5 @@
 use crate::cli::CliOptions;
-use crate::js::command::attr::Nargs;
+use crate::js::ex_command::attr::Nargs;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;

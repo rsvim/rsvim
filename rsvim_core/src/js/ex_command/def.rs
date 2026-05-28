@@ -2,9 +2,9 @@
 
 use crate::is_v8_func;
 use crate::is_v8_str;
-use crate::js::command::attr::*;
-use crate::js::command::opt::*;
 use crate::js::converter::*;
+use crate::js::ex_command::attr::*;
+use crate::js::ex_command::opt::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
