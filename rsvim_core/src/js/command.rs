@@ -25,11 +25,9 @@ use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
 use itertools::Itertools;
 
-const JS_COMMAND_NAME: &str = "js";
-
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
-pub struct CommandFuture {
+pub struct ExCommandFuture {
   pub task_id: TaskId,
   pub name: CompactString,
   pub context: CommandContext,
@@ -37,14 +35,14 @@ pub struct CommandFuture {
   pub definition: Option<CommandDefinitionRc>,
 }
 
-impl JsFuture for CommandFuture {
+impl JsFuture for ExCommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!(
-      "|CommandFuture| command name:{:?}({:?})",
+      "|ExCommandFuture| command name:{:?}({:?})",
       self.name, self.task_id
     );
     if self.is_builtin_js {
-      let filename = format!("<command-js:{}>", self.task_id);
+      let filename = format!("<ex-command:{}>", self.task_id);
       debug_assert_eq!(self.context.args.len(), 1);
       execute_module(scope, &filename, Some(self.context.args[0].trim()));
     } else {
@@ -175,7 +173,7 @@ impl CommandManager {
 }
 
 impl CommandManager {
-  pub fn parse(&self, req: &ExCommandReq) -> Option<CommandFuture> {
+  pub fn parse(&self, req: &ExCommandReq) -> Option<ExCommandFuture> {
     debug_assert_eq!(req.payload.trim(), req.payload);
 
     let mut context = CommandContextBuilder::default();
@@ -201,7 +199,7 @@ impl CommandManager {
       context.bang(true);
     }
 
-    let is_builtin_js = name == JS_COMMAND_NAME;
+    let is_builtin_js = name == "js";
     let task_id = TaskId::next();
 
     if is_builtin_js {
@@ -214,7 +212,7 @@ impl CommandManager {
       context.args(args);
       let context = context.build().unwrap();
 
-      Some(CommandFuture {
+      Some(ExCommandFuture {
         task_id,
         name,
         context,
@@ -239,7 +237,7 @@ impl CommandManager {
       let context = context.build().unwrap();
       let definition = Some(self.commands.get(&name).unwrap().clone());
 
-      Some(CommandFuture {
+      Some(ExCommandFuture {
         task_id,
         name,
         context,
