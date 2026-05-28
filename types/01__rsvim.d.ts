@@ -21,26 +21,6 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 /**
- * The `Rsvim` global object.
- *
- * @example
- * ```javascript
- * // Create a alias to 'Rsvim'.
- * const vim = Rsvim;
- * ```
- *
- * @category Global Object
- * @hideconstructor
- */
-export declare class Rsvim {
-    readonly buf: RsvimBuf;
-    readonly cmd: RsvimCmd;
-    readonly fs: RsvimFs;
-    readonly opt: RsvimOpt;
-    readonly rt: RsvimRt;
-    readonly syn: RsvimSyn;
-}
-/**
  * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
@@ -1132,6 +1112,25 @@ export declare namespace RsvimSyn {
          */
         injectionRegex?: string;
     };
+}
+/**
+ * The `Rsvim` global object.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim'.
+ * const vim = Rsvim;
+ * ```
+ *
+ * @category Global Object
+ */
+export interface Rsvim {
+    readonly buf: RsvimBuf;
+    readonly cmd: RsvimCmd;
+    readonly fs: RsvimFs;
+    readonly opt: RsvimOpt;
+    readonly rt: RsvimRt;
+    readonly syn: RsvimSyn;
 }
 declare global {
     var Rsvim: Rsvim;

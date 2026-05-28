@@ -130,27 +130,6 @@ function setDefaultFields(arg: object, defaults: object) {
 }
 
 /**
- * The `Rsvim` global object.
- *
- * @example
- * ```javascript
- * // Create a alias to 'Rsvim'.
- * const vim = Rsvim;
- * ```
- *
- * @category Global Object
- * @hideconstructor
- */
-export class Rsvim {
-  readonly buf = new RsvimBuf();
-  readonly cmd = new RsvimCmd();
-  readonly fs = new RsvimFs();
-  readonly opt = new RsvimOpt();
-  readonly rt = new RsvimRt();
-  readonly syn = new RsvimSyn();
-}
-
-/**
  * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
@@ -1597,8 +1576,37 @@ export namespace RsvimSyn {
   };
 }
 
+/**
+ * The `Rsvim` global object.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim'.
+ * const vim = Rsvim;
+ * ```
+ *
+ * @category Global Object
+ */
+export interface Rsvim {
+  readonly buf: RsvimBuf;
+  readonly cmd: RsvimCmd;
+  readonly fs: RsvimFs;
+  readonly opt: RsvimOpt;
+  readonly rt: RsvimRt;
+  readonly syn: RsvimSyn;
+}
+
+const RsvimObject = {
+  buf: new RsvimBuf(),
+  cmd: new RsvimCmd(),
+  fs: new RsvimFs(),
+  opt: new RsvimOpt(),
+  rt: new RsvimRt(),
+  syn: new RsvimSyn(),
+} as const;
+
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = new Rsvim();
+  globalThis.Rsvim = RsvimObject;
 })(globalThis as unknown as { Rsvim: Rsvim });
 
 /// Declarations for .d.ts
