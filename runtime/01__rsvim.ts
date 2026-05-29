@@ -1354,9 +1354,9 @@ export namespace RsvimProc {
    */
   export class Command {
     #execPath: string;
-    #options: any;
+    #options?: RsvimProc.CommandOptions;
 
-    constructor(execPath: string, options: any) {
+    constructor(execPath: string, options?: RsvimProc.CommandOptions) {
       this.#execPath = execPath;
       this.#options = options;
     }
