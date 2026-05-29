@@ -33,7 +33,30 @@ async fn test_new_command1() -> IoResult<()> {
   event_loop.shutdown()?;
 
   // After running
-  {}
+  {
+    let contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 0);
+    //
+    // let actual1 = contents.message_history_mut().pop();
+    // info!("actual1:{:?}", actual1);
+    // assert!(actual1.is_some());
+    // let actual1 = actual1.unwrap();
+    // assert_eq!(actual1, "c");
+    //
+    // let actual2 = contents.message_history_mut().pop();
+    // info!("actual2:{:?}", actual2);
+    // assert!(actual2.is_some());
+    // let actual2 = actual2.unwrap();
+    // assert_eq!(actual2, "C");
+    //
+    // let actual3 = contents.message_history_mut().pop();
+    // info!("actual3:{:?}", actual3);
+    // assert!(actual3.is_some());
+    // let actual3 = actual3.unwrap();
+    // assert!(actual3.contains("c"));
+    // assert!(actual3.contains("h"));
+  }
 
   Ok(())
 }
