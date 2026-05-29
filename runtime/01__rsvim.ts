@@ -1728,6 +1728,7 @@ export namespace Rsvim {
   export import cmd = RsvimCmd;
   export import fs = RsvimFs;
   export const opt = new RsvimOpt();
+  export import proc = RsvimProc;
   export import rt = RsvimRt;
   export import syn = RsvimSyn;
 }
