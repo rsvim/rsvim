@@ -1730,23 +1730,23 @@ export namespace RsvimSyn {
  * ```
  *
  * @category Global Object
+ * @hideconstructor
  */
-export namespace Rsvim {
-  export import buf = RsvimBuf;
-  export import cmd = RsvimCmd;
-  export import fs = RsvimFs;
-  export const opt = new RsvimOpt();
-  export import proc = RsvimProc;
-  export import rt = RsvimRt;
-  export import syn = RsvimSyn;
+export class Rsvim {
+  buf = RsvimBuf;
+  cmd = RsvimCmd;
+  fs = RsvimFs;
+  opt = new RsvimOpt();
+  proc = RsvimProc;
+  rt = RsvimRt;
+  syn = RsvimSyn;
 }
 
-(function (globalThis: { Rsvim: typeof Rsvim }) {
-  globalThis.Rsvim = Rsvim;
-})(globalThis as unknown as { Rsvim: typeof Rsvim });
+(function (globalThis: { Rsvim: Rsvim }) {
+  globalThis.Rsvim = new Rsvim();
+})(globalThis as unknown as { Rsvim: Rsvim });
 
 /// Declarations for .d.ts
 declare global {
-  // @ts-ignore Ignore warning
-  var Rsvim: typeof Rsvim;
+  var Rsvim: Rsvim;
 }

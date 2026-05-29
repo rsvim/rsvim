@@ -1190,16 +1190,17 @@ export declare namespace RsvimSyn {
  * ```
  *
  * @category Global Object
+ * @hideconstructor
  */
-export declare namespace Rsvim {
-    export import buf = RsvimBuf;
-    export import cmd = RsvimCmd;
-    export import fs = RsvimFs;
-    const opt: RsvimOpt;
-    export import proc = RsvimProc;
-    export import rt = RsvimRt;
-    export import syn = RsvimSyn;
+export declare class Rsvim {
+    buf: typeof RsvimBuf;
+    cmd: typeof RsvimCmd;
+    fs: typeof RsvimFs;
+    opt: RsvimOpt;
+    proc: typeof RsvimProc;
+    rt: typeof RsvimRt;
+    syn: typeof RsvimSyn;
 }
 declare global {
-    var Rsvim: typeof Rsvim;
+    var Rsvim: Rsvim;
 }

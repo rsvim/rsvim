@@ -1298,17 +1298,17 @@ export var RsvimSyn;
  * ```
  *
  * @category Global Object
+ * @hideconstructor
  */
-export var Rsvim;
-(function (Rsvim) {
-    Rsvim.buf = RsvimBuf;
-    Rsvim.cmd = RsvimCmd;
-    Rsvim.fs = RsvimFs;
-    Rsvim.opt = new RsvimOpt();
-    Rsvim.proc = RsvimProc;
-    Rsvim.rt = RsvimRt;
-    Rsvim.syn = RsvimSyn;
-})(Rsvim || (Rsvim = {}));
+export class Rsvim {
+    buf = RsvimBuf;
+    cmd = RsvimCmd;
+    fs = RsvimFs;
+    opt = new RsvimOpt();
+    proc = RsvimProc;
+    rt = RsvimRt;
+    syn = RsvimSyn;
+}
 (function (globalThis) {
-    globalThis.Rsvim = Rsvim;
+    globalThis.Rsvim = new Rsvim();
 })(globalThis);
