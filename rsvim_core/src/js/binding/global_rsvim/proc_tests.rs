@@ -15,6 +15,33 @@ async fn test_new_command1() -> IoResult<()> {
 
   let src: &str = r#"
   const cmd1 = new Rsvim.proc.Command("ls");
+  if (typeof cmd1 !== "object") {{
+    throw new Error("cmd1 is not object");
+  }}
+  if (!Array.isArray(cmd1.args) || cmd1.args.length > 0) {{
+    throw new Error("cmd1.args must be empty array");
+  }}
+  if (cmd1.clearEnv !== false) {{
+    throw new Error("cmd1.clearEnv must be false");
+  }}
+  if (cmd1.cwd !== null && cmd1.cwd !== undefined) {{
+    throw new Error("cmd1.clearEnv must be null or undefined");
+  }}
+  if (cmd1.detached !== false) {{
+    throw new Error("cmd1.detached must be false");
+  }}
+  if (typeof cmd1.env !== "object" || Object.keys(cmd1.env).length > 0) {{
+    throw new Error("cmd1.env must be empty object");
+  }}
+  if (cmd1.stdin !== "null") {{
+    throw new Error("cmd1.stdin is not 'null'");
+  }}
+  if (cmd1.stdout !== "piped") {{
+    throw new Error("cmd1.stdout is not 'piped'");
+  }}
+  if (cmd1.stderr !== "piped") {{
+    throw new Error("cmd1.stderr is not 'piped'");
+  }}
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
