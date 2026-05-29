@@ -1091,7 +1091,8 @@ export const RsvimOpt = {
  * @category General APIs
  * @hideconstructor
  */
-export class RsvimRt {
+export var RsvimRt;
+(function (RsvimRt) {
     /**
      * Exit editor.
      *
@@ -1113,13 +1114,14 @@ export class RsvimRt {
      * Rsvim.rt.exit(-1);
      * ```
      */
-    exit(exitCode) {
+    function exit(exitCode) {
         exitCode = exitCode ?? 0;
         checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
-}
+    RsvimRt.exit = exit;
+})(RsvimRt || (RsvimRt = {}));
 /**
  * The `Rsvim.syn` global object for javascript runtime (editor process).
  *
@@ -1132,7 +1134,8 @@ export class RsvimRt {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimSyn {
+export var RsvimSyn;
+(function (RsvimSyn) {
     /**
      * Load tree-sitter parsers.
      *
@@ -1151,7 +1154,7 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    async loadParser(options) {
+    async function loadParser(options) {
         checkIsObject(options, `"Rsvim.syn.loadParser" options`);
         checkIsString(options.grammarPath, `"Rsvim.syn.loadParser" grammarPath option`);
         const parserNames = 
@@ -1159,6 +1162,7 @@ export class RsvimSyn {
         await __InternalRsvimGlobalObject.syn_load_parser(options);
         return parserNames;
     }
+    RsvimSyn.loadParser = loadParser;
     /**
      * Load tree-sitter parsers synchronizely.
      *
@@ -1177,7 +1181,7 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadParserSync(options) {
+    function loadParserSync(options) {
         checkIsObject(options, `"Rsvim.syn.loadParserSync" options`);
         checkIsString(options.grammarPath, `"Rsvim.syn.loadParserSync" grammarPath option`);
         const parserNames = 
@@ -1185,6 +1189,7 @@ export class RsvimSyn {
         __InternalRsvimGlobalObject.syn_load_parser_sync(options);
         return parserNames;
     }
+    RsvimSyn.loadParserSync = loadParserSync;
     /**
      * List all loaded tree-sitter parsers.
      *
@@ -1197,10 +1202,11 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
      * ```
      */
-    listParsers() {
+    function listParsers() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.syn_list_parsers();
     }
+    RsvimSyn.listParsers = listParsers;
     /**
      * Get tree-sitter parser metadata by parser name.
      *
@@ -1215,12 +1221,13 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
      * ```
      */
-    getParserMetadata(name) {
+    function getParserMetadata(name) {
         checkIsString(name, `"Rsvim.syn.getParserMetadata" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
-}
+    RsvimSyn.getParserMetadata = getParserMetadata;
+})(RsvimSyn || (RsvimSyn = {}));
 /**
  * The `Rsvim` global object.
  *
@@ -1238,8 +1245,8 @@ export var Rsvim;
     Rsvim.cmd = RsvimCmd;
     Rsvim.fs = RsvimFs;
     Rsvim.opt = RsvimOpt;
-    Rsvim.rt = new RsvimRt();
-    Rsvim.syn = new RsvimSyn();
+    Rsvim.rt = RsvimRt;
+    Rsvim.syn = RsvimSyn;
 })(Rsvim || (Rsvim = {}));
 (function (globalThis) {
     globalThis.Rsvim = Rsvim;

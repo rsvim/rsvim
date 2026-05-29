@@ -819,7 +819,7 @@ export declare const RsvimOpt: {
  * @category General APIs
  * @hideconstructor
  */
-export declare class RsvimRt {
+export declare namespace RsvimRt {
     /**
      * Exit editor.
      *
@@ -841,7 +841,7 @@ export declare class RsvimRt {
      * Rsvim.rt.exit(-1);
      * ```
      */
-    exit(exitCode?: number): void;
+    function exit(exitCode?: number): void;
 }
 /**
  * The `Rsvim.syn` global object for javascript runtime (editor process).
@@ -855,7 +855,7 @@ export declare class RsvimRt {
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimSyn {
+export declare namespace RsvimSyn {
     /**
      * Load tree-sitter parsers.
      *
@@ -874,7 +874,7 @@ export declare class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadParser(options: RsvimSyn.LoadParserOptions): Promise<string[]>;
+    function loadParser(options: RsvimSyn.LoadParserOptions): Promise<string[]>;
     /**
      * Load tree-sitter parsers synchronizely.
      *
@@ -893,7 +893,7 @@ export declare class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadParserSync(options: RsvimSyn.LoadParserOptions): string[];
+    function loadParserSync(options: RsvimSyn.LoadParserOptions): string[];
     /**
      * List all loaded tree-sitter parsers.
      *
@@ -906,7 +906,7 @@ export declare class RsvimSyn {
      * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
      * ```
      */
-    listParsers(): string[];
+    function listParsers(): string[];
     /**
      * Get tree-sitter parser metadata by parser name.
      *
@@ -921,9 +921,7 @@ export declare class RsvimSyn {
      * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
      * ```
      */
-    getParserMetadata(name: string): RsvimSyn.ParserMetadata | undefined;
-}
-export declare namespace RsvimSyn {
+    function getParserMetadata(name: string): RsvimSyn.ParserMetadata | undefined;
     /**
      * Options to load a tree-sitter parser.
      *
@@ -1199,8 +1197,8 @@ export declare namespace Rsvim {
          */
         wrap: boolean;
     };
-    const rt: RsvimRt;
-    const syn: RsvimSyn;
+    export import rt = RsvimRt;
+    export import syn = RsvimSyn;
 }
 declare global {
     var Rsvim: typeof Rsvim;
