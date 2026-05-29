@@ -1408,6 +1408,14 @@ export namespace RsvimProc {
       this.#execPath = execPath;
       this.#options = options;
     }
+
+    get execPath(): string {
+      return this.#execPath;
+    }
+
+    get options(): RsvimProc.CommandOptions {
+      return this.#options;
+    }
   }
 
   /**
