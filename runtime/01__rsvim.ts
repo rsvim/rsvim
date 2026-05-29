@@ -139,7 +139,6 @@ function setDefaultFields(arg: object, defaults: object) {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export namespace RsvimBuf {
   /**
@@ -230,7 +229,6 @@ export namespace RsvimBuf {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export namespace RsvimCmd {
   /**
@@ -503,7 +501,6 @@ export namespace RsvimCmd {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
 export namespace RsvimFs {
   /**
@@ -940,7 +937,6 @@ export namespace RsvimOpt {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export const RsvimOpt = {
   /**
@@ -1341,6 +1337,32 @@ export const RsvimOpt = {
 } as const;
 
 /**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ */
+export namespace RsvimProc {
+  /**
+   * The command that can create a child process.
+   */
+  export class Command {
+    #execPath: string;
+    #options: any;
+
+    constructor(execPath: string, options: any) {
+      this.#execPath = execPath;
+      this.#options = options;
+    }
+  }
+}
+
+/**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
  * @example
@@ -1350,7 +1372,6 @@ export const RsvimOpt = {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
 export namespace RsvimRt {
   /**
@@ -1392,7 +1413,6 @@ export namespace RsvimRt {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export namespace RsvimSyn {
   /**
