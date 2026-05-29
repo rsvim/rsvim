@@ -1299,6 +1299,7 @@ export var Rsvim;
     Rsvim.cmd = RsvimCmd;
     Rsvim.fs = RsvimFs;
     Rsvim.opt = new RsvimOpt();
+    Rsvim.proc = RsvimProc;
     Rsvim.rt = RsvimRt;
     Rsvim.syn = RsvimSyn;
 })(Rsvim || (Rsvim = {}));

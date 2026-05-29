@@ -1194,6 +1194,7 @@ export declare namespace Rsvim {
     export import cmd = RsvimCmd;
     export import fs = RsvimFs;
     const opt: RsvimOpt;
+    export import proc = RsvimProc;
     export import rt = RsvimRt;
     export import syn = RsvimSyn;
 }
