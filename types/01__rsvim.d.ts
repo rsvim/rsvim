@@ -32,7 +32,7 @@
  * @category Editor APIs
  * @hideconstructor
  */
-export declare const RsvimBuf: {
+export declare namespace RsvimBuf {
     /**
      * Get current buffer's ID.
      *
@@ -54,7 +54,7 @@ export declare const RsvimBuf: {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    readonly current: () => number | undefined;
+    function current(): number | undefined;
     /**
      * List all buffers' IDs.
      *
@@ -73,7 +73,7 @@ export declare const RsvimBuf: {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    readonly list: () => number[];
+    function list(): number[];
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -95,8 +95,8 @@ export declare const RsvimBuf: {
      * }
      * ```
      */
-    readonly writeSync: (bufId: number) => number;
-};
+    function writeSync(bufId: number): number;
+}
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -109,7 +109,7 @@ export declare const RsvimBuf: {
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimCmd {
+export declare namespace RsvimCmd {
     /**
      * Create a ex command with a callback function.
      *
@@ -145,7 +145,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.create("write", write);
      * ```
      */
-    create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
+    function create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     /**
      * Echo message to the command-line.
      *
@@ -158,7 +158,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.echo("Hello Rsvim!");
      * ```
      */
-    echo(message: any): void;
+    function echo(message: any): void;
     /**
      * List all registered ex command names.
      *
@@ -175,7 +175,7 @@ export declare class RsvimCmd {
      * });
      * ```
      */
-    list(): string[];
+    function list(): string[];
     /**
      * Get ex command definition by name.
      *
@@ -191,7 +191,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.echo(`Command: ${def.name}`);
      * ```
      */
-    get(name: string): RsvimCmd.CommandDefinition | undefined;
+    function get(name: string): RsvimCmd.CommandDefinition | undefined;
     /**
      * Remove an ex command by name.
      *
@@ -212,9 +212,7 @@ export declare class RsvimCmd {
      * });
      * ```
      */
-    remove(name: string): RsvimCmd.CommandDefinition | undefined;
-}
-export declare namespace RsvimCmd {
+    function remove(name: string): RsvimCmd.CommandDefinition | undefined;
     /**
      * Command attributes.
      *
@@ -1124,78 +1122,14 @@ export declare namespace RsvimSyn {
  *
  * @category Global Object
  */
-export declare const Rsvim: {
-    readonly buf: {
-        /**
-         * Get current buffer's ID.
-         *
-         * The "current" buffer is the buffer that the window where your cursor is
-         * located is binded to.
-         *
-         * :::warning
-         * When the editor is not initialized, i.e. there's no buffer/window created. It
-         * will return `undefined`. Once the editor is initialized, there will always have a
-         * valid buffer binded to the "current" window (where your cursor is). It will return
-         * the valid buffer ID.
-         * :::
-         *
-         * @returns {(number | undefined)} It returns a valid buffer ID if the editor is initialized.
-         * Otherwise it returns `undefined` if the editor is not initialized.
-         *
-         * @example
-         * ```javascript
-         * const bufId = Rsvim.buf.current();
-         * ```
-         */
-        readonly current: () => number | undefined;
-        /**
-         * List all buffers' IDs.
-         *
-         * :::warning
-         * When the editor is not initialized, i.e. there's no buffer/window created. It
-         * will return an empty array. Once the editor is initialized, there will have at least 1
-         * buffer binded to the "current" window (where your cursor is). It will return all the
-         * buffer IDs as an array.
-         * :::
-         *
-         * @returns {number[]} All the buffers' IDs as an array. If there's no
-         * buffer (i.e. the editor is not initialized), it returns an empty array.
-         *
-         * @example
-         * ```javascript
-         * const bufIds = Rsvim.buf.list();
-         * ```
-         */
-        readonly list: () => number[];
-        /**
-         * Write (save) buffer's text contents to local filesystem synchronizely.
-         *
-         * @param {number} bufId - The buffer's ID that you want to write to filesystem.
-         *
-         * @returns {number} It returns a positive integer to indicate how many bytes
-         * have been written to the file, if written successfully.
-         *
-         * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer to file system.
-         *
-         * @example
-         * ```javascript
-         * const bufId = Rsvim.buf.currentBufferId();
-         * try {
-         *   const bytes = Rsvim.buf.writeSync(bufId);
-         *   Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
-         * } catch (e) {
-         *   Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
-         * }
-         * ```
-         */
-        readonly writeSync: (bufId: number) => number;
-    };
-    readonly cmd: RsvimCmd;
-    readonly fs: RsvimFs;
-    readonly opt: RsvimOpt;
-    readonly rt: RsvimRt;
-    readonly syn: RsvimSyn;
-};
+export declare namespace Rsvim {
+    export import buf = RsvimBuf;
+    export import cmd = RsvimCmd;
+    const fs: RsvimFs;
+    const opt: RsvimOpt;
+    const rt: RsvimRt;
+    const syn: RsvimSyn;
+}
 declare global {
     var Rsvim: typeof Rsvim;
 }

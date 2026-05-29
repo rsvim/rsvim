@@ -125,7 +125,8 @@ function setDefaultFields(arg, defaults) {
  * @category Editor APIs
  * @hideconstructor
  */
-export const RsvimBuf = {
+export var RsvimBuf;
+(function (RsvimBuf) {
     /**
      * Get current buffer's ID.
      *
@@ -147,10 +148,11 @@ export const RsvimBuf = {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current() {
+    function current() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_current();
-    },
+    }
+    RsvimBuf.current = current;
     /**
      * List all buffers' IDs.
      *
@@ -169,10 +171,11 @@ export const RsvimBuf = {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list() {
+    function list() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_list();
-    },
+    }
+    RsvimBuf.list = list;
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -194,12 +197,13 @@ export const RsvimBuf = {
      * }
      * ```
      */
-    writeSync(bufId) {
+    function writeSync(bufId) {
         checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
-    },
-};
+    }
+    RsvimBuf.writeSync = writeSync;
+})(RsvimBuf || (RsvimBuf = {}));
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -212,7 +216,8 @@ export const RsvimBuf = {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimCmd {
+export var RsvimCmd;
+(function (RsvimCmd) {
     /**
      * Create a ex command with a callback function.
      *
@@ -248,7 +253,7 @@ export class RsvimCmd {
      * Rsvim.cmd.create("write", write);
      * ```
      */
-    create(name, callback, attributes, options) {
+    function create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
         attributes = attributes ?? { bang: false, nargs: "0" };
@@ -264,6 +269,7 @@ export class RsvimCmd {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_create(name, callback, attributes, options);
     }
+    RsvimCmd.create = create;
     /**
      * Echo message to the command-line.
      *
@@ -276,11 +282,12 @@ export class RsvimCmd {
      * Rsvim.cmd.echo("Hello Rsvim!");
      * ```
      */
-    echo(message) {
+    function echo(message) {
         checkNotNull(message, `"Rsvim.cmd.echo" message`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.cmd_echo(message);
     }
+    RsvimCmd.echo = echo;
     /**
      * List all registered ex command names.
      *
@@ -297,10 +304,11 @@ export class RsvimCmd {
      * });
      * ```
      */
-    list() {
+    function list() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_list();
     }
+    RsvimCmd.list = list;
     /**
      * Get ex command definition by name.
      *
@@ -316,11 +324,12 @@ export class RsvimCmd {
      * Rsvim.cmd.echo(`Command: ${def.name}`);
      * ```
      */
-    get(name) {
+    function get(name) {
         checkIsString(name, `"Rsvim.cmd.get" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_get(name);
     }
+    RsvimCmd.get = get;
     /**
      * Remove an ex command by name.
      *
@@ -341,12 +350,13 @@ export class RsvimCmd {
      * });
      * ```
      */
-    remove(name) {
+    function remove(name) {
         checkIsString(name, `"Rsvim.cmd.remove" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_remove(name);
     }
-}
+    RsvimCmd.remove = remove;
+})(RsvimCmd || (RsvimCmd = {}));
 /**
  * The `Rsvim.fs` global object for file system and file IO.
  *
@@ -1217,14 +1227,15 @@ export class RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-    buf: RsvimBuf,
-    cmd: new RsvimCmd(),
-    fs: new RsvimFs(),
-    opt: new RsvimOpt(),
-    rt: new RsvimRt(),
-    syn: new RsvimSyn(),
-};
+export var Rsvim;
+(function (Rsvim) {
+    Rsvim.buf = RsvimBuf;
+    Rsvim.cmd = RsvimCmd;
+    Rsvim.fs = new RsvimFs();
+    Rsvim.opt = new RsvimOpt();
+    Rsvim.rt = new RsvimRt();
+    Rsvim.syn = new RsvimSyn();
+})(Rsvim || (Rsvim = {}));
 (function (globalThis) {
     globalThis.Rsvim = Rsvim;
 })(globalThis);
