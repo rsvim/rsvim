@@ -1361,6 +1361,62 @@ export namespace RsvimProc {
       this.#options = options;
     }
   }
+
+  /**
+   * Command options when creating a child-process command.
+   *
+   * @see {@link RsvimProc.Command}
+   */
+  export type CommandOptions = {
+    /**
+     * Command arguments.
+     *
+     * @defaultValue `[]`
+     */
+    args?: string[];
+
+    /**
+     * Current working directory.
+     *
+     * @defaultValue `undefined`
+     */
+    cwd?: string;
+
+    /**
+     * Whether clear environment variables when the command creating a child-process.
+     *
+     * @defaultValue `false`
+     */
+    clearEnv?: boolean;
+
+    /**
+     * Environment variables to pass to the child-process.
+     *
+     * @defaultValue `{}`
+     */
+    env?: Record<string, string>;
+
+    /**
+     * How `stdin` of spawned child process should be handled.
+     *
+     * @defaultValue `null`
+     */
+    stdin?: "piped" | "inherit" | "null";
+
+    /**
+     * How `stdout` of spawned child process should be handled.
+     *
+     * @defaultValue `piped`
+     */
+    stdout?: "piped" | "inherit" | "null";
+
+    /**
+     * How `stderr` of spawned child process should be handled.
+     *
+     * @defaultValue `piped`
+     */
+    stderr?: "piped" | "inherit" | "null";
+  };
 }
 
 /**
