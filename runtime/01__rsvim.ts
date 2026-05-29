@@ -1587,7 +1587,7 @@ export namespace RsvimSyn {
  */
 export namespace Rsvim {
   export import buf = RsvimBuf;
-  export const cmd = new RsvimCmd();
+  export import cmd = RsvimCmd;
   export const fs = new RsvimFs();
   export const opt = new RsvimOpt();
   export const rt = new RsvimRt();

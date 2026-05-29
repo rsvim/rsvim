@@ -109,7 +109,7 @@ export declare namespace RsvimBuf {
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimCmd {
+export declare namespace RsvimCmd {
     /**
      * Create a ex command with a callback function.
      *
@@ -145,7 +145,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.create("write", write);
      * ```
      */
-    create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
+    function create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     /**
      * Echo message to the command-line.
      *
@@ -158,7 +158,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.echo("Hello Rsvim!");
      * ```
      */
-    echo(message: any): void;
+    function echo(message: any): void;
     /**
      * List all registered ex command names.
      *
@@ -175,7 +175,7 @@ export declare class RsvimCmd {
      * });
      * ```
      */
-    list(): string[];
+    function list(): string[];
     /**
      * Get ex command definition by name.
      *
@@ -191,7 +191,7 @@ export declare class RsvimCmd {
      * Rsvim.cmd.echo(`Command: ${def.name}`);
      * ```
      */
-    get(name: string): RsvimCmd.CommandDefinition | undefined;
+    function get(name: string): RsvimCmd.CommandDefinition | undefined;
     /**
      * Remove an ex command by name.
      *
@@ -212,9 +212,7 @@ export declare class RsvimCmd {
      * });
      * ```
      */
-    remove(name: string): RsvimCmd.CommandDefinition | undefined;
-}
-export declare namespace RsvimCmd {
+    function remove(name: string): RsvimCmd.CommandDefinition | undefined;
     /**
      * Command attributes.
      *
@@ -1126,7 +1124,7 @@ export declare namespace RsvimSyn {
  */
 export declare namespace Rsvim {
     export import buf = RsvimBuf;
-    const cmd: RsvimCmd;
+    export import cmd = RsvimCmd;
     const fs: RsvimFs;
     const opt: RsvimOpt;
     const rt: RsvimRt;
