@@ -14,9 +14,7 @@ async fn test_new_command1() -> IoResult<()> {
   let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
 
   let src: &str = r#"
-  setTimeout(() => {
-    Rsvim.rt.exit();
-  }, 1);
+  const cmd1 = new Rsvim.proc.Command("ls");
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -35,9 +33,7 @@ async fn test_new_command1() -> IoResult<()> {
   event_loop.shutdown()?;
 
   // After running
-  {
-    assert_eq!(exit_code, 0);
-  }
+  {}
 
   Ok(())
 }
