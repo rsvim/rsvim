@@ -27,7 +27,7 @@ async fn test_new_command1() -> IoResult<()> {
   {}
 
   event_loop.initialize()?;
-  let exit_code = event_loop
+  event_loop
     .run_with_mock_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
