@@ -84,6 +84,12 @@ function checkIsObject(arg, msg) {
     }
 }
 /** @hidden */
+function checkIsArray(arg, msg) {
+    if (!Array.isArray(arg)) {
+        throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
+    }
+}
+/** @hidden */
 function checkIsUint8Array(arg, msg) {
     if (!(arg instanceof Uint8Array)) {
         throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
@@ -123,7 +129,6 @@ function setDefaultFields(arg, defaults) {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export var RsvimBuf;
 (function (RsvimBuf) {
@@ -214,7 +219,6 @@ export var RsvimBuf;
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export var RsvimCmd;
 (function (RsvimCmd) {
@@ -367,7 +371,6 @@ export var RsvimCmd;
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
 export var RsvimFs;
 (function (RsvimFs) {
@@ -703,7 +706,7 @@ export var RsvimFs;
  * @category Editor APIs
  * @hideconstructor
  */
-export const RsvimOpt = {
+export class RsvimOpt {
     /**
      * Get the _expand-tab_ option. Local to buffer.
      *
@@ -725,7 +728,7 @@ export const RsvimOpt = {
     get expandTab() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
-    },
+    }
     /**
      * Set the _expand-tab_ option.
      *
@@ -742,7 +745,7 @@ export const RsvimOpt = {
         checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_expand_tab(value);
-    },
+    }
     /**
      * Get the _file-encoding_ option. Local to buffer.
      *
@@ -766,7 +769,7 @@ export const RsvimOpt = {
     get fileEncoding() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_file_encoding();
-    },
+    }
     /**
      * Set the _file-encoding_ option.
      *
@@ -783,7 +786,7 @@ export const RsvimOpt = {
         checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-    },
+    }
     /**
      * Get the _file-format_ option. Local to buffer.
      *
@@ -814,7 +817,7 @@ export const RsvimOpt = {
     get fileFormat() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_file_format();
-    },
+    }
     /**
      * Set the _file-format_ option.
      *
@@ -831,7 +834,7 @@ export const RsvimOpt = {
         checkIsOptions(value, ["dos", "unix", "mac"], `"Rsvim.opt.fileFormat" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_file_format(value);
-    },
+    }
     /**
      * Get the _fix-end-of-line_ option. Local to buffer.
      *
@@ -852,7 +855,7 @@ export const RsvimOpt = {
     get fixEndOfLine() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_fix_end_of_line();
-    },
+    }
     /**
      * Set the _fix-end-of-line_ option.
      *
@@ -869,7 +872,7 @@ export const RsvimOpt = {
         checkIsBoolean(value, `"Rsvim.opt.fixEndOfLine" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_fix_end_of_line(value);
-    },
+    }
     /**
      * Get the _line-break_ option. This options is also known as
      * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
@@ -892,7 +895,7 @@ export const RsvimOpt = {
     get lineBreak() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_line_break();
-    },
+    }
     /**
      * Set the _line-break_ option.
      *
@@ -909,7 +912,7 @@ export const RsvimOpt = {
         checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_line_break(value);
-    },
+    }
     /**
      * Get the _shift-width_ option. Local to buffer.
      *
@@ -932,7 +935,7 @@ export const RsvimOpt = {
     get shiftWidth() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_shift_width();
-    },
+    }
     /**
      * Set the _shift-width_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
      *
@@ -951,7 +954,7 @@ export const RsvimOpt = {
         value = boundByIntegers(value, [1, 255]);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_shift_width(value);
-    },
+    }
     /**
      * Get the _syntax-parser-lib-path_ option. Global option.
      *
@@ -972,7 +975,7 @@ export const RsvimOpt = {
     get syntaxParserLibPath() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_syntax_parser_lib_path();
-    },
+    }
     /**
      * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
      *
@@ -989,7 +992,7 @@ export const RsvimOpt = {
         checkIsString(value, `"Rsvim.opt.syntaxParserLibPath" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_syntax_parser_lib_path(value);
-    },
+    }
     /**
      * Get the _tab-stop_ option. This option is also known as
      * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
@@ -1014,7 +1017,7 @@ export const RsvimOpt = {
     get tabStop() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_tab_stop();
-    },
+    }
     /**
      * Set the _tab-stop_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
      *
@@ -1032,7 +1035,7 @@ export const RsvimOpt = {
         value = boundByIntegers(value, [1, 255]);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_tab_stop(value);
-    },
+    }
     /**
      * Get the _wrap_ option. This option is also known as
      * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
@@ -1060,7 +1063,7 @@ export const RsvimOpt = {
     get wrap() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.opt_get_wrap();
-    },
+    }
     /**
      * Set the _wrap_ option.
      *
@@ -1077,8 +1080,67 @@ export const RsvimOpt = {
         checkIsBoolean(value, `"Rsvim.opt.wrap" value`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.opt_set_wrap(value);
-    },
-};
+    }
+}
+/**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ */
+export var RsvimProc;
+(function (RsvimProc) {
+    /**
+     * The command that can create a child process.
+     */
+    class Command {
+        #execPath;
+        #options;
+        constructor(execPath, options) {
+            checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
+            options = options ?? {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            };
+            checkIsObject(options, `"Rsvim.proc.Command" options`);
+            setDefaultFields(options, {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            });
+            checkIsArray(options.args, `"Rsvim.proc.Command" args option`);
+            checkIsBoolean(options.clearEnv, `"Rsvim.proc.Command" clearEnv option`);
+            checkIsBoolean(options.detached, `"Rsvim.proc.Command" detached option`);
+            checkIsObject(options.env, `"Rsvim.proc.Command" env option`);
+            checkIsOptions(options.stdin, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdin option`);
+            checkIsOptions(options.stdout, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdout option`);
+            checkIsOptions(options.stderr, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stderr option`);
+            this.#execPath = execPath;
+            this.#options = options;
+        }
+        get execPath() {
+            return this.#execPath;
+        }
+        get options() {
+            return this.#options;
+        }
+    }
+    RsvimProc.Command = Command;
+})(RsvimProc || (RsvimProc = {}));
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
@@ -1089,7 +1151,6 @@ export const RsvimOpt = {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
 export var RsvimRt;
 (function (RsvimRt) {
@@ -1132,7 +1193,6 @@ export var RsvimRt;
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export var RsvimSyn;
 (function (RsvimSyn) {
@@ -1244,7 +1304,8 @@ export var Rsvim;
     Rsvim.buf = RsvimBuf;
     Rsvim.cmd = RsvimCmd;
     Rsvim.fs = RsvimFs;
-    Rsvim.opt = RsvimOpt;
+    Rsvim.opt = new RsvimOpt();
+    Rsvim.proc = RsvimProc;
     Rsvim.rt = RsvimRt;
     Rsvim.syn = RsvimSyn;
 })(Rsvim || (Rsvim = {}));

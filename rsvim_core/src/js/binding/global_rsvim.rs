@@ -17,6 +17,8 @@ mod fs_tests;
 #[cfg(test)]
 mod opt_tests;
 #[cfg(test)]
+mod proc_tests;
+#[cfg(test)]
 mod rt_tests;
 #[cfg(test)]
 mod syn_tests;

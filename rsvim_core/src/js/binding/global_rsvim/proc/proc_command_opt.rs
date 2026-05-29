@@ -23,9 +23,18 @@ pub struct ProcCommandOptions {
   #[builder(default = false)]
   pub clear_env: bool,
 
+  #[builder(default = false)]
+  pub detached: bool,
+
   #[builder(default = FoldMap::new())]
-  pub envs: FoldMap<CompactString, CompactString>,
+  pub env: FoldMap<CompactString, CompactString>,
 
   #[builder(default = "null".to_compact_string())]
   pub stdin: CompactString,
+
+  #[builder(default = "piped".to_compact_string())]
+  pub stdout: CompactString,
+
+  #[builder(default = "piped".to_compact_string())]
+  pub stderr: CompactString,
 }
