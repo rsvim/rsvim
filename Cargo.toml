@@ -75,7 +75,7 @@ strum_macros = "0.28"
 syn = { version = "2", features = ["extra-traits"] }
 taffy = "0.10"
 thiserror = "2"
-tikv-jemallocator = "0.6"
+tikv-jemallocator = "0.7"
 tokio = { version = "1", features = [
   "fs",
   "io-std",
