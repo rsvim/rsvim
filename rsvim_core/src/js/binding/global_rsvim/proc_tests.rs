@@ -18,29 +18,35 @@ async fn test_new_command1() -> IoResult<()> {
   if (typeof cmd1 !== "object") {{
     throw new Error("cmd1 is not object");
   }}
-  if (!Array.isArray(cmd1.args) || cmd1.args.length > 0) {{
-    throw new Error("cmd1.args must be empty array");
+  if (cmd1.execPath !== "ls") {{
+    throw new Error("cmd1.execPath must be 'ls'");
   }}
-  if (cmd1.clearEnv !== false) {{
-    throw new Error("cmd1.clearEnv must be false");
+  if (typeof cmd1.options !== "object") {{
+    throw new Error("cmd1.options is not object");
   }}
-  if (cmd1.cwd !== null && cmd1.cwd !== undefined) {{
-    throw new Error("cmd1.clearEnv must be null or undefined");
+  if (!Array.isArray(cmd1.options.args) || cmd1.options.args.length > 0) {{
+    throw new Error("cmd1.options.args must be empty array");
   }}
-  if (cmd1.detached !== false) {{
-    throw new Error("cmd1.detached must be false");
+  if (cmd1.options.clearEnv !== false) {{
+    throw new Error("cmd1.options.clearEnv must be false");
   }}
-  if (typeof cmd1.env !== "object" || Object.keys(cmd1.env).length > 0) {{
-    throw new Error("cmd1.env must be empty object");
+  if (cmd1.options.cwd !== null && cmd1.options.cwd !== undefined) {{
+    throw new Error("cmd1.options.clearEnv must be null or undefined");
   }}
-  if (cmd1.stdin !== "null") {{
-    throw new Error("cmd1.stdin is not 'null'");
+  if (cmd1.options.detached !== false) {{
+    throw new Error("cmd1.options.detached must be false");
   }}
-  if (cmd1.stdout !== "piped") {{
-    throw new Error("cmd1.stdout is not 'piped'");
+  if (typeof cmd1.options.env !== "object" || Object.keys(cmd1.options.env).length > 0) {{
+    throw new Error("cmd1.options.env must be empty object");
   }}
-  if (cmd1.stderr !== "piped") {{
-    throw new Error("cmd1.stderr is not 'piped'");
+  if (cmd1.options.stdin !== "null") {{
+    throw new Error("cmd1.options.stdin is not 'null'");
+  }}
+  if (cmd1.options.stdout !== "piped") {{
+    throw new Error("cmd1.options.stdout is not 'piped'");
+  }}
+  if (cmd1.options.stderr !== "piped") {{
+    throw new Error("cmd1.options.stderr is not 'piped'");
   }}
     "#;
 
