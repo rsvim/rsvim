@@ -97,7 +97,7 @@ function checkIsObject(arg: any, msg: string) {
 
 /** @hidden */
 function checkIsArray(arg: any, msg: string) {
-  if (Array.isArray(arg)) {
+  if (!Array.isArray(arg)) {
     throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
   }
 }
