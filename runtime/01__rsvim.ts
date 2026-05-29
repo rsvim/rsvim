@@ -406,7 +406,7 @@ export namespace RsvimCmd {
      * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
      *
      * @defaultValue `false`
-,    */
+     */
     bang?: boolean;
 
     /**
@@ -419,7 +419,7 @@ export namespace RsvimCmd {
      * - `+`: At least 1 arguments are required.
      *
      * @defaultValue `0`
-,    */
+     */
     nargs?: "0" | "1" | "*" | "+" | "?";
   };
 
@@ -453,7 +453,7 @@ export namespace RsvimCmd {
    *
    * @see {@link RsvimCmd.create}
    * @see {@link CommandContext}
-,  */
+   */
   export type CommandCallback = (ctx: CommandContext) => Promise<void>;
 
   /**
@@ -685,7 +685,7 @@ export namespace RsvimFs {
      * Set the file for append mode.
      *
      * @defaultValue `false`
-,    */
+     */
     append?: boolean;
 
     /**
@@ -694,7 +694,7 @@ export namespace RsvimFs {
      * In order for the file to be created, `write` or `append` access must be used.
      *
      * @defaultValue `false`
-,    */
+     */
     create?: boolean;
 
     /**
@@ -703,29 +703,29 @@ export namespace RsvimFs {
      * If this option is set, `create` and `truncate` options are ignored.
      *
      * @defaultValue `false`
-,    */
+     */
     createNew?: boolean;
 
     /**
      * Set the file for read access.
      *
      * @defaultValue `false`
-,    */
+     */
     read?: boolean;
 
     /**
      * Open the file and truncate the file to `0` length if it already exists.
      *
      * @defaultValue `false`
-,    */
+     */
     truncate?: boolean;
 
     /**
-     * Set the file for write access. If the file already exists, any "write" calls on it will 
+     * Set the file for write access. If the file already exists, any "write" calls on it will
      * overwrite the contents, without truncating it.
      *
      * @defaultValue `false`
-,    */
+     */
     write?: boolean;
   };
 
@@ -1586,14 +1586,14 @@ export namespace RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-  buf: RsvimBuf,
-  cmd: new RsvimCmd(),
-  fs: new RsvimFs(),
-  opt: new RsvimOpt(),
-  rt: new RsvimRt(),
-  syn: new RsvimSyn(),
-} as const;
+export namespace Rsvim {
+  export import buf = RsvimBuf;
+  export const cmd = new RsvimCmd();
+  export const fs = new RsvimFs();
+  export const opt = new RsvimOpt();
+  export const rt = new RsvimRt();
+  export const syn = new RsvimSyn();
+}
 
 (function (globalThis: { Rsvim: typeof Rsvim }) {
   globalThis.Rsvim = Rsvim;
