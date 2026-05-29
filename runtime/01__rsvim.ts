@@ -1383,11 +1383,19 @@ export namespace RsvimProc {
     cwd?: string;
 
     /**
-     * Whether clear environment variables when the command creating a child-process.
+     * Whether to clear environment variables when the command creating a child-process.
      *
      * @defaultValue `false`
      */
     clearEnv?: boolean;
+
+    /**
+     * Whether to detach spawned child process from current process (editor process).
+     * This allows the spawned child process to continue running after current process exits.
+     *
+     * @defaultValue `false`
+     */
+    detached?: boolean;
 
     /**
      * Environment variables to pass to the child-process.
