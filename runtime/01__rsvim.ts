@@ -1587,14 +1587,14 @@ export namespace RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-  buf: RsvimBuf,
-  cmd: new RsvimCmd(),
-  fs: new RsvimFs(),
-  opt: new RsvimOpt(),
-  rt: new RsvimRt(),
-  syn: new RsvimSyn(),
-} as const;
+export namespace Rsvim {
+  export import buf = RsvimBuf;
+  export const cmd = new RsvimCmd();
+  export const fs = new RsvimFs();
+  export const opt = new RsvimOpt();
+  export const rt = new RsvimRt();
+  export const syn = new RsvimSyn();
+}
 
 (function (globalThis: { Rsvim: typeof Rsvim }) {
   globalThis.Rsvim = Rsvim;
