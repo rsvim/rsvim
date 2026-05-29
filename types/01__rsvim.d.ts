@@ -939,8 +939,64 @@ export declare namespace RsvimProc {
      */
     class Command {
         #private;
-        constructor(execPath: string, options: any);
+        constructor(execPath: string, options?: RsvimProc.CommandOptions);
     }
+    /**
+     * Command options when creating a child-process command.
+     *
+     * @see {@link RsvimProc.Command}
+     */
+    type CommandOptions = {
+        /**
+         * Command arguments.
+         *
+         * @defaultValue `[]`
+         */
+        args?: string[];
+        /**
+         * Current working directory.
+         *
+         * @defaultValue `undefined`
+         */
+        cwd?: string;
+        /**
+         * Whether to clear environment variables when the command creating a child-process.
+         *
+         * @defaultValue `false`
+         */
+        clearEnv?: boolean;
+        /**
+         * Whether to detach spawned child process from current process (editor process).
+         * This allows the spawned child process to continue running after current process exits.
+         *
+         * @defaultValue `false`
+         */
+        detached?: boolean;
+        /**
+         * Environment variables to pass to the child-process.
+         *
+         * @defaultValue `{}`
+         */
+        env?: Record<string, string>;
+        /**
+         * How `stdin` of spawned child process should be handled.
+         *
+         * @defaultValue `null`
+         */
+        stdin?: "piped" | "inherit" | "null";
+        /**
+         * How `stdout` of spawned child process should be handled.
+         *
+         * @defaultValue `piped`
+         */
+        stdout?: "piped" | "inherit" | "null";
+        /**
+         * How `stderr` of spawned child process should be handled.
+         *
+         * @defaultValue `piped`
+         */
+        stderr?: "piped" | "inherit" | "null";
+    };
 }
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).

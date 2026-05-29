@@ -84,6 +84,12 @@ function checkIsObject(arg, msg) {
     }
 }
 /** @hidden */
+function checkIsArray(arg, msg) {
+    if (Array.isArray(arg)) {
+        throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
+    }
+}
+/** @hidden */
 function checkIsUint8Array(arg, msg) {
     if (!(arg instanceof Uint8Array)) {
         throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
@@ -1096,6 +1102,33 @@ export var RsvimProc;
         #execPath;
         #options;
         constructor(execPath, options) {
+            checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
+            options = options ?? {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            };
+            checkIsObject(options, `"Rsvim.proc.Command" options`);
+            setDefaultFields(options, {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            });
+            checkIsArray(options.args, `"Rsvim.proc.Command" args option`);
+            checkIsBoolean(options.clearEnv, `"Rsvim.proc.Command" clearEnv option`);
+            checkIsBoolean(options.detached, `"Rsvim.proc.Command" detached option`);
+            checkIsObject(options.env, `"Rsvim.proc.Command" env option`);
+            checkIsOptions(options.stdin, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdin option`);
+            checkIsOptions(options.stdout, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdout option`);
+            checkIsOptions(options.stderr, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stderr option`);
             this.#execPath = execPath;
             this.#options = options;
         }
