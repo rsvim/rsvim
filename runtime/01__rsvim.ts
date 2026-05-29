@@ -942,7 +942,7 @@ export namespace RsvimOpt {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimOpt {
+export const RsvimOpt = {
   /**
    * Get the _expand-tab_ option. Local to buffer.
    *
@@ -964,7 +964,7 @@ export class RsvimOpt {
   get expandTab(): boolean {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_expand_tab();
-  }
+  },
 
   /**
    * Set the _expand-tab_ option.
@@ -982,7 +982,7 @@ export class RsvimOpt {
     checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_expand_tab(value);
-  }
+  },
 
   /**
    * Get the _file-encoding_ option. Local to buffer.
@@ -1007,7 +1007,7 @@ export class RsvimOpt {
   get fileEncoding(): RsvimOpt.FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
-  }
+  },
 
   /**
    * Set the _file-encoding_ option.
@@ -1025,7 +1025,7 @@ export class RsvimOpt {
     checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-  }
+  },
 
   /**
    * Get the _file-format_ option. Local to buffer.
@@ -1057,7 +1057,7 @@ export class RsvimOpt {
   get fileFormat(): RsvimOpt.FileFormatOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_format();
-  }
+  },
 
   /**
    * Set the _file-format_ option.
@@ -1079,7 +1079,7 @@ export class RsvimOpt {
     );
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
-  }
+  },
 
   /**
    * Get the _fix-end-of-line_ option. Local to buffer.
@@ -1101,7 +1101,7 @@ export class RsvimOpt {
   get fixEndOfLine(): boolean {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_fix_end_of_line();
-  }
+  },
 
   /**
    * Set the _fix-end-of-line_ option.
@@ -1119,7 +1119,7 @@ export class RsvimOpt {
     checkIsBoolean(value, `"Rsvim.opt.fixEndOfLine" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_fix_end_of_line(value);
-  }
+  },
 
   /**
    * Get the _line-break_ option. This options is also known as
@@ -1143,7 +1143,7 @@ export class RsvimOpt {
   get lineBreak(): boolean {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_line_break();
-  }
+  },
 
   /**
    * Set the _line-break_ option.
@@ -1161,7 +1161,7 @@ export class RsvimOpt {
     checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_line_break(value);
-  }
+  },
 
   /**
    * Get the _shift-width_ option. Local to buffer.
@@ -1185,7 +1185,7 @@ export class RsvimOpt {
   get shiftWidth(): number {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_shift_width();
-  }
+  },
 
   /**
    * Set the _shift-width_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
@@ -1205,7 +1205,7 @@ export class RsvimOpt {
     value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
-  }
+  },
 
   /**
    * Get the _syntax-parser-lib-path_ option. Global option.
@@ -1227,7 +1227,7 @@ export class RsvimOpt {
   get syntaxParserLibPath(): string {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_syntax_parser_lib_path();
-  }
+  },
 
   /**
    * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
@@ -1245,7 +1245,7 @@ export class RsvimOpt {
     checkIsString(value, `"Rsvim.opt.syntaxParserLibPath" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_syntax_parser_lib_path(value);
-  }
+  },
 
   /**
    * Get the _tab-stop_ option. This option is also known as
@@ -1271,7 +1271,7 @@ export class RsvimOpt {
   get tabStop(): number {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_tab_stop();
-  }
+  },
 
   /**
    * Set the _tab-stop_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
@@ -1290,7 +1290,7 @@ export class RsvimOpt {
     value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
-  }
+  },
 
   /**
    * Get the _wrap_ option. This option is also known as
@@ -1319,7 +1319,7 @@ export class RsvimOpt {
   get wrap(): boolean {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_wrap();
-  }
+  },
 
   /**
    * Set the _wrap_ option.
@@ -1337,8 +1337,8 @@ export class RsvimOpt {
     checkIsBoolean(value, `"Rsvim.opt.wrap" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
-  }
-}
+  },
+} as const;
 
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
@@ -1589,8 +1589,8 @@ export namespace RsvimSyn {
 export namespace Rsvim {
   export import buf = RsvimBuf;
   export import cmd = RsvimCmd;
-  export const fs = new RsvimFs();
-  export const opt = new RsvimOpt();
+  export import fs = RsvimFs;
+  export const opt = RsvimOpt;
   export const rt = new RsvimRt();
   export const syn = new RsvimSyn();
 }
