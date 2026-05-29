@@ -1221,14 +1221,15 @@ export class RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-    buf: RsvimBuf,
-    cmd: new RsvimCmd(),
-    fs: new RsvimFs(),
-    opt: new RsvimOpt(),
-    rt: new RsvimRt(),
-    syn: new RsvimSyn(),
-};
+export var Rsvim;
+(function (Rsvim) {
+    Rsvim.buf = RsvimBuf;
+    Rsvim.cmd = new RsvimCmd();
+    Rsvim.fs = new RsvimFs();
+    Rsvim.opt = new RsvimOpt();
+    Rsvim.rt = new RsvimRt();
+    Rsvim.syn = new RsvimSyn();
+})(Rsvim || (Rsvim = {}));
 (function (globalThis) {
     globalThis.Rsvim = Rsvim;
 })(globalThis);

@@ -1124,14 +1124,14 @@ export declare namespace RsvimSyn {
  *
  * @category Global Object
  */
-export declare const Rsvim: {
-    readonly buf: typeof RsvimBuf;
-    readonly cmd: RsvimCmd;
-    readonly fs: RsvimFs;
-    readonly opt: RsvimOpt;
-    readonly rt: RsvimRt;
-    readonly syn: RsvimSyn;
-};
+export declare namespace Rsvim {
+    export import buf = RsvimBuf;
+    const cmd: RsvimCmd;
+    const fs: RsvimFs;
+    const opt: RsvimOpt;
+    const rt: RsvimRt;
+    const syn: RsvimSyn;
+}
 declare global {
     var Rsvim: typeof Rsvim;
 }
