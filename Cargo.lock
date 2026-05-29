@@ -478,9 +478,9 @@ dependencies = [
 
 [[package]]
 name = "compact_str"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fdb1325a1cece981e8a296ab8f0f9b63ae357bd0784a9faaf548cc7b480707a"
+checksum = "9dfdd1c2274d9aa354115b09dc9a901d6c5576818cdf70d14cae2bdb47df00ab"
 dependencies = [
  "castaway",
  "cfg-if",
@@ -3315,7 +3315,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5632fcd47d4fdaf7ef5ee150c7001fa8ed814ce38d1a073536a366dbfc239aad"
 dependencies = [
  "cfg-if",
- "compact_str 0.9.0",
+ "compact_str 0.9.1",
  "fast-glob",
  "indexmap",
  "json-strip-comments",
@@ -3863,7 +3863,7 @@ dependencies = [
  "async-trait",
  "bitflags",
  "clap",
- "compact_str 0.9.0",
+ "compact_str 0.9.1",
  "criterion",
  "crossterm",
  "deno_core_icudata",
