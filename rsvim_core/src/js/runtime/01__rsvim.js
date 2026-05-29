@@ -1132,6 +1132,12 @@ export var RsvimProc;
             this.#execPath = execPath;
             this.#options = options;
         }
+        get execPath() {
+            return this.#execPath;
+        }
+        get options() {
+            return this.#options;
+        }
     }
     RsvimProc.Command = Command;
 })(RsvimProc || (RsvimProc = {}));

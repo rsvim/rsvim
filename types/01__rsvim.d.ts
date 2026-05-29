@@ -940,6 +940,8 @@ export declare namespace RsvimProc {
     class Command {
         #private;
         constructor(execPath: string, options?: RsvimProc.CommandOptions);
+        get execPath(): string;
+        get options(): RsvimProc.CommandOptions;
     }
     /**
      * Command options when creating a child-process command.
