@@ -141,7 +141,7 @@ function setDefaultFields(arg: object, defaults: object) {
  * @category Editor APIs
  * @hideconstructor
  */
-export const RsvimBuf = {
+export namespace RsvimBuf {
   /**
    * Get current buffer's ID.
    *
@@ -163,10 +163,10 @@ export const RsvimBuf = {
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  current(): number | undefined {
+  export function current(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
-  },
+  }
 
   /**
    * List all buffers' IDs.
@@ -186,10 +186,10 @@ export const RsvimBuf = {
    * const bufIds = Rsvim.buf.list();
    * ```
    */
-  list(): number[] {
+  export function list(): number[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_list();
-  },
+  }
 
   /**
    * Write (save) buffer's text contents to local filesystem synchronizely.
@@ -212,13 +212,13 @@ export const RsvimBuf = {
    * }
    * ```
    */
-  writeSync(bufId: number): number {
+  export function writeSync(bufId: number): number {
     checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_write_sync(bufId);
-  },
-} as const;
+  }
+}
 
 /**
  * The `Rsvim.cmd` global object for Ex commands.
@@ -232,7 +232,7 @@ export const RsvimBuf = {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimCmd {
+export namespace RsvimCmd {
   /**
    * Create a ex command with a callback function.
    *
@@ -268,7 +268,7 @@ export class RsvimCmd {
    * Rsvim.cmd.create("write", write);
    * ```
    */
-  create(
+  export function create(
     name: string,
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
@@ -318,7 +318,7 @@ export class RsvimCmd {
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  echo(message: any): void {
+  export function echo(message: any): void {
     checkNotNull(message, `"Rsvim.cmd.echo" message`);
 
     // @ts-ignore Ignore warning
@@ -341,7 +341,7 @@ export class RsvimCmd {
    * });
    * ```
    */
-  list(): string[] {
+  export function list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
   }
@@ -361,7 +361,7 @@ export class RsvimCmd {
    * Rsvim.cmd.echo(`Command: ${def.name}`);
    * ```
    */
-  get(name: string): RsvimCmd.CommandDefinition | undefined {
+  export function get(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.get" name`);
 
     // @ts-ignore Ignore warning
@@ -388,15 +388,13 @@ export class RsvimCmd {
    * });
    * ```
    */
-  remove(name: string): RsvimCmd.CommandDefinition | undefined {
+  export function remove(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.remove" name`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_remove(name);
   }
-}
 
-export namespace RsvimCmd {
   /**
    * Command attributes.
    *
@@ -1587,14 +1585,14 @@ export namespace RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-  buf: RsvimBuf,
-  cmd: new RsvimCmd(),
-  fs: new RsvimFs(),
-  opt: new RsvimOpt(),
-  rt: new RsvimRt(),
-  syn: new RsvimSyn(),
-} as const;
+export namespace Rsvim {
+  export import buf = RsvimBuf;
+  export import cmd = RsvimCmd;
+  export const fs = new RsvimFs();
+  export const opt = new RsvimOpt();
+  export const rt = new RsvimRt();
+  export const syn = new RsvimSyn();
+}
 
 (function (globalThis: { Rsvim: typeof Rsvim }) {
   globalThis.Rsvim = Rsvim;
