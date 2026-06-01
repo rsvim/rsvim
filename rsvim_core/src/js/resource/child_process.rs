@@ -10,15 +10,13 @@ use std::sync::Mutex;
 
 #[derive_where::derive_where(Debug)]
 #[derive(Clone)]
-/// We name it "ProcCommand" to distinguish with the Vim ex command struct
-/// "Command".
-pub struct ProcCommandResource {
+pub struct ChildProcessResource {
   id: ResourceId,
   #[derive_where(skip)]
   data: Arc<Mutex<Command>>,
 }
 
-impl ProcCommandResource {
+impl ChildProcessResource {
   pub fn new(data: Command) -> Self {
     Self {
       id: ResourceId::next(),
@@ -31,7 +29,7 @@ impl ProcCommandResource {
   }
 }
 
-impl Resourcify for ProcCommandResource {
+impl Resourcify for ChildProcessResource {
   fn id(&self) -> ResourceId {
     self.id
   }
