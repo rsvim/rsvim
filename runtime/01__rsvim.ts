@@ -149,7 +149,7 @@ function setDefaultFields(arg: object, defaults: object) {
  * @hideconstructor
  */
 export class Rsvim {
-  readonly buf = new RsvimBuf();
+  readonly buf = RsvimBuf;
   readonly cmd = new RsvimCmd();
   readonly fs = new RsvimFs();
   readonly opt = new RsvimOpt();
@@ -170,7 +170,7 @@ export class Rsvim {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimBuf {
+export namespace RsvimBuf {
   /**
    * Get current buffer's ID.
    *
@@ -192,7 +192,7 @@ export class RsvimBuf {
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  current(): number | undefined {
+  export function current(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
   }
@@ -215,7 +215,7 @@ export class RsvimBuf {
    * const bufIds = Rsvim.buf.list();
    * ```
    */
-  list(): number[] {
+  export function list(): number[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_list();
   }
@@ -241,7 +241,7 @@ export class RsvimBuf {
    * }
    * ```
    */
-  writeSync(bufId: number): number {
+  export function writeSync(bufId: number): number {
     checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
 
     // @ts-ignore Ignore warning
