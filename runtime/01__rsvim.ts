@@ -261,7 +261,7 @@ export namespace RsvimBuf {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimCmd {
+export namespace RsvimCmd {
   /**
    * Create a ex command with a callback function.
    *
@@ -297,7 +297,7 @@ export class RsvimCmd {
    * Rsvim.cmd.create("write", write);
    * ```
    */
-  create(
+  export function create(
     name: string,
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
@@ -347,7 +347,7 @@ export class RsvimCmd {
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  echo(message: any): void {
+  export function echo(message: any): void {
     checkNotNull(message, `"Rsvim.cmd.echo" message`);
 
     // @ts-ignore Ignore warning
@@ -370,7 +370,7 @@ export class RsvimCmd {
    * });
    * ```
    */
-  list(): string[] {
+  export function list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
   }
@@ -390,7 +390,7 @@ export class RsvimCmd {
    * Rsvim.cmd.echo(`Command: ${def.name}`);
    * ```
    */
-  get(name: string): RsvimCmd.CommandDefinition | undefined {
+  export function get(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.get" name`);
 
     // @ts-ignore Ignore warning
@@ -417,15 +417,13 @@ export class RsvimCmd {
    * });
    * ```
    */
-  remove(name: string): RsvimCmd.CommandDefinition | undefined {
+  export function remove(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.remove" name`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_remove(name);
   }
-}
 
-export namespace RsvimCmd {
   /**
    * Command attributes.
    *
