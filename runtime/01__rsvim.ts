@@ -1730,7 +1730,6 @@ export namespace RsvimSyn {
  * ```
  *
  * @category Global Object
- * @hideconstructor
  */
 export namespace Rsvim {
   export import buf = RsvimBuf;
