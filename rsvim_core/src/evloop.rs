@@ -1042,6 +1042,9 @@ impl EventLoop {
             }
           });
         }
+        MasterMessage::SpawnChildProcessReq(req) => {
+          trace!("Recv SpawnChildProcessReq:{:?}", req.task_id);
+        }
       }
     }
   }

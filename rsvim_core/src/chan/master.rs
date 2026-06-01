@@ -5,8 +5,10 @@ use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::binding::global_rsvim::proc::proc_command::ProcCommandOptions;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
+use compact_str::CompactString;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
 
@@ -48,6 +50,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to load tree-sitter parser.
   LoadTreeSitterParserReq(LoadTreeSitterParserReq),
+
+  /// Js runtime ask master to spawn a child process.
+  SpawnChildProcessReq(SpawnChildProcessReq),
 }
 
 #[derive(Debug)]
@@ -116,6 +121,13 @@ pub struct SyntaxEditResp {
 pub struct LoadTreeSitterParserReq {
   pub task_id: TaskId,
   pub grammar_path: PathBuf,
+}
+
+#[derive(Debug)]
+pub struct SpawnChildProcessReq {
+  pub task_id: TaskId,
+  pub exec_path: CompactString,
+  pub options: ProcCommandOptions,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
