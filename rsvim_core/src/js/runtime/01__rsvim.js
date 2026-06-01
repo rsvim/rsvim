@@ -78,6 +78,12 @@ function checkIsFunction(arg, msg) {
     }
 }
 /** @hidden */
+function checkIsArray(arg, msg) {
+    if (!Array.isArray(arg)) {
+        throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
+    }
+}
+/** @hidden */
 function checkIsObject(arg, msg) {
     if (typeof arg !== "object") {
         throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
@@ -114,26 +120,6 @@ function setDefaultFields(arg, defaults) {
     }
 }
 /**
- * The `Rsvim` global object.
- *
- * @example
- * ```javascript
- * // Create a alias to 'Rsvim'.
- * const vim = Rsvim;
- * ```
- *
- * @category Global Object
- * @hideconstructor
- */
-export class Rsvim {
-    buf = new RsvimBuf();
-    cmd = new RsvimCmd();
-    fs = new RsvimFs();
-    opt = new RsvimOpt();
-    rt = new RsvimRt();
-    syn = new RsvimSyn();
-}
-/**
  * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
@@ -143,9 +129,9 @@ export class Rsvim {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
-export class RsvimBuf {
+export var RsvimBuf;
+(function (RsvimBuf) {
     /**
      * Get current buffer's ID.
      *
@@ -167,10 +153,11 @@ export class RsvimBuf {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current() {
+    function current() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_current();
     }
+    RsvimBuf.current = current;
     /**
      * List all buffers' IDs.
      *
@@ -189,10 +176,11 @@ export class RsvimBuf {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list() {
+    function list() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_list();
     }
+    RsvimBuf.list = list;
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -214,12 +202,13 @@ export class RsvimBuf {
      * }
      * ```
      */
-    writeSync(bufId) {
+    function writeSync(bufId) {
         checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
-}
+    RsvimBuf.writeSync = writeSync;
+})(RsvimBuf || (RsvimBuf = {}));
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -230,9 +219,9 @@ export class RsvimBuf {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
-export class RsvimCmd {
+export var RsvimCmd;
+(function (RsvimCmd) {
     /**
      * Create a ex command with a callback function.
      *
@@ -268,7 +257,7 @@ export class RsvimCmd {
      * Rsvim.cmd.create("write", write);
      * ```
      */
-    create(name, callback, attributes, options) {
+    function create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
         attributes = attributes ?? { bang: false, nargs: "0" };
@@ -284,6 +273,7 @@ export class RsvimCmd {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_create(name, callback, attributes, options);
     }
+    RsvimCmd.create = create;
     /**
      * Echo message to the command-line.
      *
@@ -296,11 +286,12 @@ export class RsvimCmd {
      * Rsvim.cmd.echo("Hello Rsvim!");
      * ```
      */
-    echo(message) {
+    function echo(message) {
         checkNotNull(message, `"Rsvim.cmd.echo" message`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.cmd_echo(message);
     }
+    RsvimCmd.echo = echo;
     /**
      * List all registered ex command names.
      *
@@ -317,10 +308,11 @@ export class RsvimCmd {
      * });
      * ```
      */
-    list() {
+    function list() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_list();
     }
+    RsvimCmd.list = list;
     /**
      * Get ex command definition by name.
      *
@@ -336,11 +328,12 @@ export class RsvimCmd {
      * Rsvim.cmd.echo(`Command: ${def.name}`);
      * ```
      */
-    get(name) {
+    function get(name) {
         checkIsString(name, `"Rsvim.cmd.get" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_get(name);
     }
+    RsvimCmd.get = get;
     /**
      * Remove an ex command by name.
      *
@@ -361,12 +354,13 @@ export class RsvimCmd {
      * });
      * ```
      */
-    remove(name) {
+    function remove(name) {
         checkIsString(name, `"Rsvim.cmd.remove" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.cmd_remove(name);
     }
-}
+    RsvimCmd.remove = remove;
+})(RsvimCmd || (RsvimCmd = {}));
 /**
  * The `Rsvim.fs` global object for file system and file IO.
  *
@@ -377,9 +371,9 @@ export class RsvimCmd {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
-export class RsvimFs {
+export var RsvimFs;
+(function (RsvimFs) {
     /**
      * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
      * The caller have to close the file to prevent resource leaking, see {@link RsvimFs.File.close}.
@@ -395,7 +389,7 @@ export class RsvimFs {
      * const file = await Rsvim.fs.open("README.md");
      * ```
      */
-    async open(path, options) {
+    async function open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
@@ -417,6 +411,7 @@ export class RsvimFs {
         const handle = await __InternalRsvimGlobalObject.fs_open(path, options);
         return new RsvimFs.File(handle);
     }
+    RsvimFs.open = open;
     /**
      * The sync version of {@link open}.
      *
@@ -431,7 +426,7 @@ export class RsvimFs {
      * const file = Rsvim.fs.openSync("README.md");
      * ```
      */
-    openSync(path, options) {
+    function openSync(path, options) {
         checkIsString(path, `"Rsvim.fs.openSync" path`);
         options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
@@ -453,6 +448,7 @@ export class RsvimFs {
         const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
         return new RsvimFs.File(handle);
     }
+    RsvimFs.openSync = openSync;
     /**
      * Read a file in binary mode, i.e. into an array of bytes buffer, without open/close a file descriptor/handle.
      *
@@ -466,11 +462,12 @@ export class RsvimFs {
      * const buffer = await Rsvim.fs.readFile("README.md");
      * ```
      */
-    async readFile(path) {
+    async function readFile(path) {
         checkIsString(path, `"Rsvim.fs.readFile" path`);
         // @ts-ignore Ignore warning
         return await __InternalRsvimGlobalObject.fs_read_file(path);
     }
+    RsvimFs.readFile = readFile;
     /**
      * The sync version of {@link readFile}.
      *
@@ -484,11 +481,12 @@ export class RsvimFs {
      * const buffer = Rsvim.fs.readFileSync("README.md");
      * ```
      */
-    readFileSync(path) {
+    function readFileSync(path) {
         checkIsString(path, `"Rsvim.fs.readFileSync" path`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.fs_read_file_sync(path);
     }
+    RsvimFs.readFileSync = readFileSync;
     /**
      * Read a file in text mode, i.e. into a string, without open/close a file descriptor/handle.
      *
@@ -502,11 +500,12 @@ export class RsvimFs {
      * const payload = await Rsvim.fs.readTextFile("README.md");
      * ```
      */
-    async readTextFile(path) {
+    async function readTextFile(path) {
         checkIsString(path, `"Rsvim.fs.readTextFile" path`);
         // @ts-ignore Ignore warning
         return await __InternalRsvimGlobalObject.fs_read_text_file(path);
     }
+    RsvimFs.readTextFile = readTextFile;
     /**
      * The sync version of {@link readTextFile}.
      *
@@ -520,13 +519,12 @@ export class RsvimFs {
      * const payload = Rsvim.fs.readTextFileSync("README.md");
      * ```
      */
-    readTextFileSync(path) {
+    function readTextFileSync(path) {
         checkIsString(path, `"Rsvim.fs.readTextFileSync" path`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.fs_read_text_file_sync(path);
     }
-}
-(function (RsvimFs) {
+    RsvimFs.readTextFileSync = readTextFileSync;
     /**
      * The File object that access to an open file on filesystem.
      *
@@ -1085,6 +1083,65 @@ export class RsvimOpt {
     }
 }
 /**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ */
+export var RsvimProc;
+(function (RsvimProc) {
+    /**
+     * The command that create a child process.
+     */
+    class Command {
+        #execPath;
+        #options;
+        constructor(execPath, options) {
+            checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
+            options = options ?? {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            };
+            checkIsObject(options, `"Rsvim.proc.Command" options`);
+            setDefaultFields(options, {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            });
+            checkIsArray(options.args, `"Rsvim.proc.Command" args option`);
+            checkIsBoolean(options.clearEnv, `"Rsvim.proc.Command" clearEnv option`);
+            checkIsBoolean(options.detached, `"Rsvim.proc.Command" detached option`);
+            checkIsObject(options.env, `"Rsvim.proc.Command" env option`);
+            checkIsOptions(options.stdin, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdin option`);
+            checkIsOptions(options.stdout, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdout option`);
+            checkIsOptions(options.stderr, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stderr option`);
+            this.#execPath = execPath;
+            this.#options = options;
+        }
+        get execPath() {
+            return this.#execPath;
+        }
+        get options() {
+            return this.#options;
+        }
+    }
+    RsvimProc.Command = Command;
+})(RsvimProc || (RsvimProc = {}));
+/**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
  * @example
@@ -1094,9 +1151,9 @@ export class RsvimOpt {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
-export class RsvimRt {
+export var RsvimRt;
+(function (RsvimRt) {
     /**
      * Exit editor.
      *
@@ -1118,13 +1175,14 @@ export class RsvimRt {
      * Rsvim.rt.exit(-1);
      * ```
      */
-    exit(exitCode) {
+    function exit(exitCode) {
         exitCode = exitCode ?? 0;
         checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
         // @ts-ignore Ignore warning
         __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
-}
+    RsvimRt.exit = exit;
+})(RsvimRt || (RsvimRt = {}));
 /**
  * The `Rsvim.syn` global object for javascript runtime (editor process).
  *
@@ -1135,9 +1193,9 @@ export class RsvimRt {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
-export class RsvimSyn {
+export var RsvimSyn;
+(function (RsvimSyn) {
     /**
      * Load tree-sitter parsers.
      *
@@ -1156,7 +1214,7 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    async loadParser(options) {
+    async function loadParser(options) {
         checkIsObject(options, `"Rsvim.syn.loadParser" options`);
         checkIsString(options.grammarPath, `"Rsvim.syn.loadParser" grammarPath option`);
         const parserNames = 
@@ -1164,6 +1222,7 @@ export class RsvimSyn {
         await __InternalRsvimGlobalObject.syn_load_parser(options);
         return parserNames;
     }
+    RsvimSyn.loadParser = loadParser;
     /**
      * Load tree-sitter parsers synchronizely.
      *
@@ -1182,7 +1241,7 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Loaded parsers: ${parserNames}`);
      * ```
      */
-    loadParserSync(options) {
+    function loadParserSync(options) {
         checkIsObject(options, `"Rsvim.syn.loadParserSync" options`);
         checkIsString(options.grammarPath, `"Rsvim.syn.loadParserSync" grammarPath option`);
         const parserNames = 
@@ -1190,6 +1249,7 @@ export class RsvimSyn {
         __InternalRsvimGlobalObject.syn_load_parser_sync(options);
         return parserNames;
     }
+    RsvimSyn.loadParserSync = loadParserSync;
     /**
      * List all loaded tree-sitter parsers.
      *
@@ -1202,10 +1262,11 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`All loaded parsers: ${allParserNames}`);
      * ```
      */
-    listParsers() {
+    function listParsers() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.syn_list_parsers();
     }
+    RsvimSyn.listParsers = listParsers;
     /**
      * Get tree-sitter parser metadata by parser name.
      *
@@ -1220,12 +1281,34 @@ export class RsvimSyn {
      * Rsvim.cmd.echo(`Rust parser metadata: ${parserMetadata}`);
      * ```
      */
-    getParserMetadata(name) {
+    function getParserMetadata(name) {
         checkIsString(name, `"Rsvim.syn.getParserMetadata" name`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
-}
+    RsvimSyn.getParserMetadata = getParserMetadata;
+})(RsvimSyn || (RsvimSyn = {}));
+/**
+ * The `Rsvim` global object.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim'.
+ * const vim = Rsvim;
+ * ```
+ *
+ * @category Global Object
+ */
+export var Rsvim;
+(function (Rsvim) {
+    Rsvim.buf = RsvimBuf;
+    Rsvim.cmd = RsvimCmd;
+    Rsvim.fs = RsvimFs;
+    Rsvim.opt = new RsvimOpt();
+    Rsvim.proc = RsvimProc;
+    Rsvim.rt = RsvimRt;
+    Rsvim.syn = RsvimSyn;
+})(Rsvim || (Rsvim = {}));
 (function (globalThis) {
-    globalThis.Rsvim = new Rsvim();
+    globalThis.Rsvim = Rsvim;
 })(globalThis);
