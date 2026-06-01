@@ -28,4 +28,10 @@ pub struct ProcCommandOptions {
 
   #[builder(default = "null".to_compact_string())]
   pub stdin: CompactString,
+
+  #[builder(default = "piped".to_compact_string())]
+  pub stdout: CompactString,
+
+  #[builder(default = "piped".to_compact_string())]
+  pub stderr: CompactString,
 }
