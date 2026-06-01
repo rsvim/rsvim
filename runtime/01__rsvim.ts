@@ -89,6 +89,13 @@ function checkIsFunction(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsArray(arg: any, msg: string) {
+  if (!Array.isArray(arg)) {
+    throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsObject(arg: any, msg: string) {
   if (typeof arg !== "object") {
     throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
@@ -1377,7 +1384,133 @@ export class RsvimOpt {
  */
 export class RsvimProc {}
 
-export namespace RsvimProc {}
+export namespace RsvimProc {
+  /**
+   * The command that create a child process.
+   */
+  export class Command {
+    #execPath: string;
+    #options: RsvimProc.CommandOptions;
+
+    constructor(execPath: string, options?: RsvimProc.CommandOptions) {
+      checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
+
+      options = options ?? {
+        args: [],
+        clearEnv: false,
+        detached: false,
+        env: {},
+        stdin: "null",
+        stdout: "piped",
+        stderr: "piped",
+      };
+      checkIsObject(options, `"Rsvim.proc.Command" options`);
+      setDefaultFields(options, {
+        args: [],
+        clearEnv: false,
+        detached: false,
+        env: {},
+        stdin: "null",
+        stdout: "piped",
+        stderr: "piped",
+      });
+      checkIsArray(options.args, `"Rsvim.proc.Command" args option`);
+      checkIsBoolean(options.clearEnv, `"Rsvim.proc.Command" clearEnv option`);
+      checkIsBoolean(options.detached, `"Rsvim.proc.Command" detached option`);
+      checkIsObject(options.env, `"Rsvim.proc.Command" env option`);
+      checkIsOptions(
+        options.stdin,
+        ["null", "piped", "inherit"],
+        `"Rsvim.proc.Command" stdin option`,
+      );
+      checkIsOptions(
+        options.stdout,
+        ["null", "piped", "inherit"],
+        `"Rsvim.proc.Command" stdout option`,
+      );
+      checkIsOptions(
+        options.stderr,
+        ["null", "piped", "inherit"],
+        `"Rsvim.proc.Command" stderr option`,
+      );
+
+      this.#execPath = execPath;
+      this.#options = options;
+    }
+
+    get execPath(): string {
+      return this.#execPath;
+    }
+
+    get options(): RsvimProc.CommandOptions {
+      return this.#options;
+    }
+  }
+
+  /**
+   * Command options when creating a child-process command.
+   *
+   * @see {@link RsvimProc.Command}
+   */
+  export type CommandOptions = {
+    /**
+     * Command arguments.
+     *
+     * @defaultValue `[]`
+     */
+    args?: string[];
+
+    /**
+     * Current working directory.
+     *
+     * @defaultValue `undefined`
+     */
+    cwd?: string;
+
+    /**
+     * Whether to clear environment variables when the command creating a child-process.
+     *
+     * @defaultValue `false`
+     */
+    clearEnv?: boolean;
+
+    /**
+     * Whether to detach spawned child process from current process (editor process).
+     * This allows the spawned child process to continue running after current process exits.
+     *
+     * @defaultValue `false`
+     */
+    detached?: boolean;
+
+    /**
+     * Environment variables to pass to the child-process.
+     *
+     * @defaultValue `{}`
+     */
+    env?: Record<string, string>;
+
+    /**
+     * How `stdin` of spawned child process should be handled.
+     *
+     * @defaultValue `null`
+     */
+    stdin?: "piped" | "inherit" | "null";
+
+    /**
+     * How `stdout` of spawned child process should be handled.
+     *
+     * @defaultValue `piped`
+     */
+    stdout?: "piped" | "inherit" | "null";
+
+    /**
+     * How `stderr` of spawned child process should be handled.
+     *
+     * @defaultValue `piped`
+     */
+    stderr?: "piped" | "inherit" | "null";
+  };
+}
 
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
