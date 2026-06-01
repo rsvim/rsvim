@@ -5,6 +5,7 @@ pub mod file;
 pub mod text_decoder;
 
 use crate::prelude::*;
+use child_process::ChildProcessResource;
 use file::FileResource;
 use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
@@ -24,6 +25,7 @@ pub trait Resourcify: Sized + Debug + Clone {
 pub enum Resource {
   File(FileResource),
   TextDecoder(TextDecoderResource),
+  ChildProcess(ChildProcessResource),
 }
 
 impl Resourcify for Resource {
@@ -31,6 +33,7 @@ impl Resourcify for Resource {
     match self {
       Resource::File(r) => r.id(),
       Resource::TextDecoder(r) => r.id(),
+      Resource::ChildProcess(r) => r.id(),
     }
   }
 }
@@ -65,6 +68,13 @@ impl ResourceTable {
     let res = TextDecoderResource::new(data);
     let rid = res.id();
     self.resources.insert(res.id(), Resource::TextDecoder(res));
+    rid
+  }
+
+  pub fn add_child_process(&mut self, data: std::process::Child) -> ResourceId {
+    let res = ChildProcessResource::new(data);
+    let rid = res.id();
+    self.resources.insert(res.id(), Resource::ChildProcess(res));
     rid
   }
 
