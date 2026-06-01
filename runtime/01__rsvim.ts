@@ -141,7 +141,7 @@ function setDefaultFields(arg: object, defaults: object) {
  * @category Editor APIs
  * @hideconstructor
  */
-export const RsvimBuf = {
+export class RsvimBuf {
   /**
    * Get current buffer's ID.
    *
@@ -166,7 +166,7 @@ export const RsvimBuf = {
   current(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
-  },
+  }
 
   /**
    * List all buffers' IDs.
@@ -189,7 +189,7 @@ export const RsvimBuf = {
   list(): number[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_list();
-  },
+  }
 
   /**
    * Write (save) buffer's text contents to local filesystem synchronizely.
@@ -217,8 +217,8 @@ export const RsvimBuf = {
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_write_sync(bufId);
-  },
-} as const;
+  }
+}
 
 /**
  * The `Rsvim.cmd` global object for Ex commands.
@@ -1587,8 +1587,17 @@ export namespace RsvimSyn {
  *
  * @category Global Object
  */
-export const Rsvim = {
-  buf: RsvimBuf,
+export interface Rsvim {
+  readonly buf: RsvimBuf;
+  readonly cmd: RsvimCmd;
+  readonly fs: RsvimFs;
+  readonly opt: RsvimOpt;
+  readonly rt: RsvimRt;
+  readonly syn: RsvimSyn;
+}
+
+const RsvimObject = {
+  buf: new RsvimBuf(),
   cmd: new RsvimCmd(),
   fs: new RsvimFs(),
   opt: new RsvimOpt(),
@@ -1596,12 +1605,11 @@ export const Rsvim = {
   syn: new RsvimSyn(),
 } as const;
 
-(function (globalThis: { Rsvim: typeof Rsvim }) {
-  globalThis.Rsvim = Rsvim;
-})(globalThis as unknown as { Rsvim: typeof Rsvim });
+(function (globalThis: { Rsvim: Rsvim }) {
+  globalThis.Rsvim = RsvimObject;
+})(globalThis as unknown as { Rsvim: Rsvim });
 
 /// Declarations for .d.ts
 declare global {
-  // @ts-ignore Ignore warning
-  var Rsvim: typeof Rsvim;
+  var Rsvim: Rsvim;
 }
