@@ -150,7 +150,7 @@ function setDefaultFields(arg: object, defaults: object) {
  */
 export class Rsvim {
   readonly buf = RsvimBuf;
-  readonly cmd = new RsvimCmd();
+  readonly cmd = RsvimCmd;
   readonly fs = new RsvimFs();
   readonly opt = new RsvimOpt();
   readonly proc = new RsvimProc();
