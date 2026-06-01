@@ -30,6 +30,7 @@
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export declare namespace RsvimBuf {
     /**
@@ -106,6 +107,7 @@ export declare namespace RsvimBuf {
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export declare namespace RsvimCmd {
     /**
@@ -309,6 +311,7 @@ export declare namespace RsvimCmd {
  * ```
  *
  * @category General APIs
+ * @hideconstructor
  */
 export declare namespace RsvimFs {
     /**
@@ -611,7 +614,7 @@ export declare namespace RsvimOpt {
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimOpt {
+export declare const RsvimOpt: {
     /**
      * Get the _expand-tab_ option. Local to buffer.
      *
@@ -630,20 +633,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.expandTab;
      * ```
      */
-    get expandTab(): boolean;
-    /**
-     * Set the _expand-tab_ option.
-     *
-     * @param {boolean} value - The _expand-tab_ option.
-     * @throws Throws {@link !TypeError} if value is not a boolean.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'expand-tab' option.
-     * Rsvim.opt.expandTab = true;
-     * ```
-     */
-    set expandTab(value: boolean);
+    expandTab: boolean;
     /**
      * Get the _file-encoding_ option. Local to buffer.
      *
@@ -664,20 +654,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.fileEncoding;
      * ```
      */
-    get fileEncoding(): RsvimOpt.FileEncodingOption;
-    /**
-     * Set the _file-encoding_ option.
-     *
-     * @param {RsvimOpt.FileEncodingOption} value - The _file-encoding_ option.
-     * @throws Throws {@link !RangeError} if value is an invalid option.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'file-encoding' option.
-     * Rsvim.opt.fileEncoding = "utf-8";
-     * ```
-     */
-    set fileEncoding(value: RsvimOpt.FileEncodingOption);
+    fileEncoding: RsvimOpt.FileEncodingOption;
     /**
      * Get the _file-format_ option. Local to buffer.
      *
@@ -705,20 +682,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.fileFormat;
      * ```
      */
-    get fileFormat(): RsvimOpt.FileFormatOption;
-    /**
-     * Set the _file-format_ option.
-     *
-     * @param {RsvimOpt.FileFormatOption} value - The _file-format_ option.
-     * @throws Throws {@link !RangeError} if value is an invalid option.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'file-format' option.
-     * Rsvim.opt.fileFormat = "unix";
-     * ```
-     */
-    set fileFormat(value: RsvimOpt.FileFormatOption);
+    fileFormat: RsvimOpt.FileFormatOption;
     /**
      * Get the _fix-end-of-line_ option. Local to buffer.
      *
@@ -736,20 +700,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.fixEndOfLine;
      * ```
      */
-    get fixEndOfLine(): boolean;
-    /**
-     * Set the _fix-end-of-line_ option.
-     *
-     * @param {boolean} value - The _fix-end-of-line_ option.
-     * @throws Throws {@link !RangeError} if value is not a boolean.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'fix-end-of-line' option.
-     * Rsvim.opt.fixEndOfLine = false;
-     * ```
-     */
-    set fixEndOfLine(value: boolean);
+    fixEndOfLine: boolean;
     /**
      * Get the _line-break_ option. This options is also known as
      * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
@@ -769,20 +720,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.lineBreak;
      * ```
      */
-    get lineBreak(): boolean;
-    /**
-     * Set the _line-break_ option.
-     *
-     * @param {boolean} value - The _line-break_ option.
-     * @throws Throws {@link !TypeError} if value is not a boolean.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'lineBreak' option.
-     * Rsvim.opt.lineBreak = true;
-     * ```
-     */
-    set lineBreak(value: boolean);
+    lineBreak: boolean;
     /**
      * Get the _shift-width_ option. Local to buffer.
      *
@@ -802,21 +740,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.shiftWidth;
      * ```
      */
-    get shiftWidth(): number;
-    /**
-     * Set the _shift-width_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
-     *
-     *
-     * @param {number} value - The _shift-width_ option.
-     * @throws Throws {@link !TypeError} if value is not an integer.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'shift-width' option.
-     * Rsvim.opt.shiftWidth = 4;
-     * ```
-     */
-    set shiftWidth(value: number);
+    shiftWidth: number;
     /**
      * Get the _syntax-parser-lib-path_ option. Global option.
      *
@@ -834,20 +758,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.syntaxParserLibPath;
      * ```
      */
-    get syntaxParserLibPath(): string;
-    /**
-     * Set the _syntax-parser-lib-path_ option. It only accepts a string which represents the file path on your local machine, which is used to save all compiled tree-sitter parser dynamic libraries.
-     *
-     * @param {string} value - The _syntax-parser-lib-path_ option.
-     * @throws Throws {@link !TypeError} if value is not an string.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'syntax-parser-lib-path' option.
-     * Rsvim.opt.syntaxParserLibPath = ".";
-     * ```
-     */
-    set syntaxParserLibPath(value: string);
+    syntaxParserLibPath: string;
     /**
      * Get the _tab-stop_ option. This option is also known as
      * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
@@ -869,20 +780,7 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.tabStop;
      * ```
      */
-    get tabStop(): number;
-    /**
-     * Set the _tab-stop_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
-     *
-     * @param {number} value - The _tab-stop_ option.
-     * @throws Throws {@link !TypeError} if value is not an integer.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'tab-stop' option.
-     * Rsvim.opt.tabStop = 4;
-     * ```
-     */
-    set tabStop(value: number);
+    tabStop: number;
     /**
      * Get the _wrap_ option. This option is also known as
      * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
@@ -907,99 +805,8 @@ export declare class RsvimOpt {
      * const value = Rsvim.opt.wrap;
      * ```
      */
-    get wrap(): boolean;
-    /**
-     * Set the _wrap_ option.
-     *
-     * @param {boolean} value - The _wrap_ option.
-     * @throws Throws {@link !TypeError} if value is not a boolean.
-     *
-     * @example
-     * ```javascript
-     * // Set the 'wrap' option.
-     * Rsvim.opt.wrap = true;
-     * ```
-     */
-    set wrap(value: boolean);
-}
-/**
- * The `Rsvim.proc` global object for child process.
- *
- * @example
- * ```javascript
- * // Create a alias to 'Rsvim.proc'.
- * const proc = Rsvim.proc;
- * ```
- *
- * @category General APIs
- */
-export declare namespace RsvimProc {
-    /**
-     * The command that can create a child process.
-     */
-    class Command {
-        #private;
-        constructor(execPath: string, options?: RsvimProc.CommandOptions);
-        get execPath(): string;
-        get options(): RsvimProc.CommandOptions;
-    }
-    /**
-     * Command options when creating a child-process command.
-     *
-     * @see {@link RsvimProc.Command}
-     */
-    type CommandOptions = {
-        /**
-         * Command arguments.
-         *
-         * @defaultValue `[]`
-         */
-        args?: string[];
-        /**
-         * Current working directory.
-         *
-         * @defaultValue `undefined`
-         */
-        cwd?: string;
-        /**
-         * Whether to clear environment variables when the command creating a child-process.
-         *
-         * @defaultValue `false`
-         */
-        clearEnv?: boolean;
-        /**
-         * Whether to detach spawned child process from current process (editor process).
-         * This allows the spawned child process to continue running after current process exits.
-         *
-         * @defaultValue `false`
-         */
-        detached?: boolean;
-        /**
-         * Environment variables to pass to the child-process.
-         *
-         * @defaultValue `{}`
-         */
-        env?: Record<string, string>;
-        /**
-         * How `stdin` of spawned child process should be handled.
-         *
-         * @defaultValue `null`
-         */
-        stdin?: "piped" | "inherit" | "null";
-        /**
-         * How `stdout` of spawned child process should be handled.
-         *
-         * @defaultValue `piped`
-         */
-        stdout?: "piped" | "inherit" | "null";
-        /**
-         * How `stderr` of spawned child process should be handled.
-         *
-         * @defaultValue `piped`
-         */
-        stderr?: "piped" | "inherit" | "null";
-    };
-}
+    wrap: boolean;
+};
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
@@ -1010,6 +817,7 @@ export declare namespace RsvimProc {
  * ```
  *
  * @category General APIs
+ * @hideconstructor
  */
 export declare namespace RsvimRt {
     /**
@@ -1045,6 +853,7 @@ export declare namespace RsvimRt {
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export declare namespace RsvimSyn {
     /**
@@ -1195,8 +1004,199 @@ export declare namespace Rsvim {
     export import buf = RsvimBuf;
     export import cmd = RsvimCmd;
     export import fs = RsvimFs;
-    const opt: RsvimOpt;
-    export import proc = RsvimProc;
+    const opt: {
+        /**
+         * Get the _expand-tab_ option. Local to buffer.
+         *
+         * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
+         * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+         *
+         * See {@link shiftWidth} to get the number of spaces when inserting.
+         *
+         * @returns {boolean}
+         *
+         * @defaultValue `false`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'expand-tab' option.
+         * const value = Rsvim.opt.expandTab;
+         * ```
+         */
+        expandTab: boolean;
+        /**
+         * Get the _file-encoding_ option. Local to buffer.
+         *
+         * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
+         * This will determine which character encoding is used when RSVIM read/write a file from file system.
+         *
+         * :::warning
+         * For now, only **utf-8** encoding is supported.
+         * :::
+         *
+         * @returns {RsvimOpt.FileEncodingOption}
+         *
+         * @defaultValue `"utf-8"`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'file-encoding' option.
+         * const value = Rsvim.opt.fileEncoding;
+         * ```
+         */
+        fileEncoding: RsvimOpt.FileEncodingOption;
+        /**
+         * Get the _file-format_ option. Local to buffer.
+         *
+         * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the buffer. There are 3 kinds of line end:
+         * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
+         * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
+         * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS).
+         *
+         * :::warning
+         * Today's Mac also uses `LF` as line end, you should never use `CR` any more.
+         * :::
+         *
+         * For this option, it has below choices:
+         * - `"dos"`: equivalent to `CRLF` line end.
+         * - `"unix"`: equivalent to `LF` line end.
+         * - `"mac"`: equivalent to `CR` line end.
+         *
+         * @returns {RsvimOpt.FileFormatOption}
+         *
+         * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
+         *
+         * @example
+         * ```javascript
+         * // Get the 'file-format' option.
+         * const value = Rsvim.opt.fileFormat;
+         * ```
+         */
+        fileFormat: RsvimOpt.FileFormatOption;
+        /**
+         * Get the _fix-end-of-line_ option. Local to buffer.
+         *
+         * WHen writing a file and this options is enabled, `EOL` (`LF`, `CR`, `CRLF`) at the end of file will be restored if missing. Disable this option if you want to preserve the situation from the original file.
+         *
+         * @see {@link fileFormat}
+         *
+         * @returns {boolean}
+         *
+         * @defaultValue `true`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'fix-end-of-line' option.
+         * const value = Rsvim.opt.fixEndOfLine;
+         * ```
+         */
+        fixEndOfLine: boolean;
+        /**
+         * Get the _line-break_ option. This options is also known as
+         * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
+         *
+         * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
+         * It only affects the way the file is displayed, not its contents.
+         *
+         * This option is not used when the {@link wrap} option is `false`.
+         *
+         * @returns {boolean}
+         *
+         * @defaultValue `false`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'lineBreak' option.
+         * const value = Rsvim.opt.lineBreak;
+         * ```
+         */
+        lineBreak: boolean;
+        /**
+         * Get the _shift-width_ option. Local to buffer.
+         *
+         * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
+         * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+         *
+         * When {@link expandTab} is `false`, this option is not been used.
+         *
+         *
+         * @returns {number}
+         *
+         * @defaultValue `8`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'shift-width' option.
+         * const value = Rsvim.opt.shiftWidth;
+         * ```
+         */
+        shiftWidth: number;
+        /**
+         * Get the _syntax-parser-lib-path_ option. Global option.
+         *
+         * By default the syntax parser libs are stored in `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers` folder. `${RSVIM_CONFIG_HOME}` is the configuration home for rsvim.
+         *
+         * @see [Rsvim Configuration](https://rsvim.github.io/docs/manual/configuration)
+         *
+         * @returns {string}
+         *
+         * @defaultValue `${RSVIM_CONFIG_HOME}/.tree-sitter-parsers`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'syntax-parser-lib-path' option.
+         * const value = Rsvim.opt.syntaxParserLibPath;
+         * ```
+         */
+        syntaxParserLibPath: string;
+        /**
+         * Get the _tab-stop_ option. This option is also known as
+         * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
+         * Local to buffer.
+         *
+         * This option changes how text is displayed.
+         *
+         * Defines how many columns (on the terminal) used to display the
+         * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,255]`.
+         *
+         *
+         * @returns {number}
+         *
+         * @defaultValue `8`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'tab-stop' option.
+         * const value = Rsvim.opt.tabStop;
+         * ```
+         */
+        tabStop: number;
+        /**
+         * Get the _wrap_ option. This option is also known as
+         * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to window.
+         *
+         * This option changes how text is displayed.
+         *
+         * When `true`, lines longer than the width of the window will wrap and
+         * displaying continues on the next line. When `false` lines will not wrap
+         * and only part of long lines will be displayed. When the cursor is
+         * moved to a part that is not shown, the screen will scroll horizontally.
+         *
+         * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
+         * to get the break at a word boundary.
+         *
+         * @returns {boolean}
+         *
+         * @defaultValue `true`
+         *
+         * @example
+         * ```javascript
+         * // Get the 'wrap' option.
+         * const value = Rsvim.opt.wrap;
+         * ```
+         */
+        wrap: boolean;
+    };
     export import rt = RsvimRt;
     export import syn = RsvimSyn;
 }
