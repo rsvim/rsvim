@@ -1197,8 +1197,8 @@ export declare namespace Rsvim {
     export import fs = RsvimFs;
     const opt: RsvimOpt;
     export import proc = RsvimProc;
-    const rt: typeof RsvimRt;
-    const syn: typeof RsvimSyn;
+    export import rt = RsvimRt;
+    export import syn = RsvimSyn;
 }
 declare global {
     var Rsvim: typeof Rsvim;
