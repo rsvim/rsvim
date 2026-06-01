@@ -114,6 +114,26 @@ function setDefaultFields(arg, defaults) {
     }
 }
 /**
+ * The `Rsvim` global object.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim'.
+ * const vim = Rsvim;
+ * ```
+ *
+ * @category Global Object
+ * @hideconstructor
+ */
+export class Rsvim {
+    buf = new RsvimBuf();
+    cmd = new RsvimCmd();
+    fs = new RsvimFs();
+    opt = new RsvimOpt();
+    rt = new RsvimRt();
+    syn = new RsvimSyn();
+}
+/**
  * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
@@ -1206,14 +1226,6 @@ export class RsvimSyn {
         return __InternalRsvimGlobalObject.syn_get_parser_metadata(name);
     }
 }
-const RsvimObject = {
-    buf: new RsvimBuf(),
-    cmd: new RsvimCmd(),
-    fs: new RsvimFs(),
-    opt: new RsvimOpt(),
-    rt: new RsvimRt(),
-    syn: new RsvimSyn(),
-};
 (function (globalThis) {
-    globalThis.Rsvim = RsvimObject;
+    globalThis.Rsvim = new Rsvim();
 })(globalThis);
