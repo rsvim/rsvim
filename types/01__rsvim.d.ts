@@ -33,7 +33,7 @@
  * @hideconstructor
  */
 export declare class Rsvim {
-    readonly buf: RsvimBuf;
+    readonly buf: typeof RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
@@ -53,7 +53,7 @@ export declare class Rsvim {
  * @category Editor APIs
  * @hideconstructor
  */
-export declare class RsvimBuf {
+export declare namespace RsvimBuf {
     /**
      * Get current buffer's ID.
      *
@@ -75,7 +75,7 @@ export declare class RsvimBuf {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current(): number | undefined;
+    function current(): number | undefined;
     /**
      * List all buffers' IDs.
      *
@@ -94,7 +94,7 @@ export declare class RsvimBuf {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list(): number[];
+    function list(): number[];
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -116,7 +116,7 @@ export declare class RsvimBuf {
      * }
      * ```
      */
-    writeSync(bufId: number): number;
+    function writeSync(bufId: number): number;
 }
 /**
  * The `Rsvim.cmd` global object for Ex commands.

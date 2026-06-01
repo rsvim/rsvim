@@ -132,7 +132,7 @@ function setDefaultFields(arg, defaults) {
  * @hideconstructor
  */
 export class Rsvim {
-    buf = new RsvimBuf();
+    buf = RsvimBuf;
     cmd = new RsvimCmd();
     fs = new RsvimFs();
     opt = new RsvimOpt();
@@ -152,7 +152,8 @@ export class Rsvim {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimBuf {
+export var RsvimBuf;
+(function (RsvimBuf) {
     /**
      * Get current buffer's ID.
      *
@@ -174,10 +175,11 @@ export class RsvimBuf {
      * const bufId = Rsvim.buf.current();
      * ```
      */
-    current() {
+    function current() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_current();
     }
+    RsvimBuf.current = current;
     /**
      * List all buffers' IDs.
      *
@@ -196,10 +198,11 @@ export class RsvimBuf {
      * const bufIds = Rsvim.buf.list();
      * ```
      */
-    list() {
+    function list() {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_list();
     }
+    RsvimBuf.list = list;
     /**
      * Write (save) buffer's text contents to local filesystem synchronizely.
      *
@@ -221,12 +224,13 @@ export class RsvimBuf {
      * }
      * ```
      */
-    writeSync(bufId) {
+    function writeSync(bufId) {
         checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
-}
+    RsvimBuf.writeSync = writeSync;
+})(RsvimBuf || (RsvimBuf = {}));
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
