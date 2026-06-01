@@ -146,6 +146,7 @@ export class Rsvim {
   readonly cmd = new RsvimCmd();
   readonly fs = new RsvimFs();
   readonly opt = new RsvimOpt();
+  readonly proc = new RsvimProc();
   readonly rt = new RsvimRt();
   readonly syn = new RsvimSyn();
 }
