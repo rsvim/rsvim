@@ -78,6 +78,12 @@ function checkIsFunction(arg, msg) {
     }
 }
 /** @hidden */
+function checkIsArray(arg, msg) {
+    if (!Array.isArray(arg)) {
+        throw new TypeError(`${msg} must be an array, but found ${typeof arg}`);
+    }
+}
+/** @hidden */
 function checkIsObject(arg, msg) {
     if (typeof arg !== "object") {
         throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
@@ -130,6 +136,7 @@ export class Rsvim {
     cmd = new RsvimCmd();
     fs = new RsvimFs();
     opt = new RsvimOpt();
+    proc = new RsvimProc();
     rt = new RsvimRt();
     syn = new RsvimSyn();
 }
@@ -1084,6 +1091,67 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }
 }
+/**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ * @hideconstructor
+ */
+export class RsvimProc {
+}
+(function (RsvimProc) {
+    /**
+     * The command that create a child process.
+     */
+    class Command {
+        #execPath;
+        #options;
+        constructor(execPath, options) {
+            checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
+            options = options ?? {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            };
+            checkIsObject(options, `"Rsvim.proc.Command" options`);
+            setDefaultFields(options, {
+                args: [],
+                clearEnv: false,
+                detached: false,
+                env: {},
+                stdin: "null",
+                stdout: "piped",
+                stderr: "piped",
+            });
+            checkIsArray(options.args, `"Rsvim.proc.Command" args option`);
+            checkIsBoolean(options.clearEnv, `"Rsvim.proc.Command" clearEnv option`);
+            checkIsBoolean(options.detached, `"Rsvim.proc.Command" detached option`);
+            checkIsObject(options.env, `"Rsvim.proc.Command" env option`);
+            checkIsOptions(options.stdin, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdin option`);
+            checkIsOptions(options.stdout, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stdout option`);
+            checkIsOptions(options.stderr, ["null", "piped", "inherit"], `"Rsvim.proc.Command" stderr option`);
+            this.#execPath = execPath;
+            this.#options = options;
+        }
+        get execPath() {
+            return this.#execPath;
+        }
+        get options() {
+            return this.#options;
+        }
+    }
+    RsvimProc.Command = Command;
+})(RsvimProc || (RsvimProc = {}));
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *

@@ -37,6 +37,7 @@ export declare class Rsvim {
     readonly cmd: RsvimCmd;
     readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
+    readonly proc: RsvimProc;
     readonly rt: RsvimRt;
     readonly syn: RsvimSyn;
 }
@@ -948,6 +949,87 @@ export declare class RsvimOpt {
      * ```
      */
     set wrap(value: boolean);
+}
+/**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ * @hideconstructor
+ */
+export declare class RsvimProc {
+}
+export declare namespace RsvimProc {
+    /**
+     * The command that create a child process.
+     */
+    class Command {
+        #private;
+        constructor(execPath: string, options?: RsvimProc.CommandOptions);
+        get execPath(): string;
+        get options(): RsvimProc.CommandOptions;
+    }
+    /**
+     * Command options when creating a child-process command.
+     *
+     * @see {@link RsvimProc.Command}
+     */
+    type CommandOptions = {
+        /**
+         * Command arguments.
+         *
+         * @defaultValue `[]`
+         */
+        args?: string[];
+        /**
+         * Current working directory.
+         *
+         * @defaultValue `undefined`
+         */
+        cwd?: string;
+        /**
+         * Whether to clear environment variables when the command creating a child-process.
+         *
+         * @defaultValue `false`
+         */
+        clearEnv?: boolean;
+        /**
+         * Whether to detach spawned child process from current process (editor process).
+         * This allows the spawned child process to continue running after current process exits.
+         *
+         * @defaultValue `false`
+         */
+        detached?: boolean;
+        /**
+         * Environment variables to pass to the child-process.
+         *
+         * @defaultValue `{}`
+         */
+        env?: Record<string, string>;
+        /**
+         * How `stdin` of spawned child process should be handled.
+         *
+         * @defaultValue `null`
+         */
+        stdin?: "piped" | "inherit" | "null";
+        /**
+         * How `stdout` of spawned child process should be handled.
+         *
+         * @defaultValue `piped`
+         */
+        stdout?: "piped" | "inherit" | "null";
+        /**
+         * How `stderr` of spawned child process should be handled.
+         *
+         * @defaultValue `piped`
+         */
+        stderr?: "piped" | "inherit" | "null";
+    };
 }
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
