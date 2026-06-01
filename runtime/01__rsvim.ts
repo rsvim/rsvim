@@ -1363,6 +1363,22 @@ export class RsvimOpt {
 }
 
 /**
+ * The `Rsvim.proc` global object for child process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.proc'.
+ * const proc = Rsvim.proc;
+ * ```
+ *
+ * @category General APIs
+ * @hideconstructor
+ */
+export class RsvimProc {}
+
+export namespace RsvimProc {}
+
+/**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
  * @example
