@@ -508,9 +508,8 @@ export namespace RsvimCmd {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
-export class RsvimFs {
+export namespace RsvimFs {
   /**
    * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
    * The caller have to close the file to prevent resource leaking, see {@link RsvimFs.File.close}.
@@ -526,7 +525,7 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  async open(
+  export async function open(
     path: string,
     options?: RsvimFs.OpenOptions,
   ): Promise<RsvimFs.File> {
@@ -568,7 +567,10 @@ export class RsvimFs {
    * const file = Rsvim.fs.openSync("README.md");
    * ```
    */
-  openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
+  export function openSync(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): RsvimFs.File {
     checkIsString(path, `"Rsvim.fs.openSync" path`);
 
     options = options ?? { read: true };
@@ -606,7 +608,7 @@ export class RsvimFs {
    * const buffer = await Rsvim.fs.readFile("README.md");
    * ```
    */
-  async readFile(path: string): Promise<Uint8Array> {
+  export async function readFile(path: string): Promise<Uint8Array> {
     checkIsString(path, `"Rsvim.fs.readFile" path`);
 
     // @ts-ignore Ignore warning
@@ -626,7 +628,7 @@ export class RsvimFs {
    * const buffer = Rsvim.fs.readFileSync("README.md");
    * ```
    */
-  readFileSync(path: string): Uint8Array {
+  export function readFileSync(path: string): Uint8Array {
     checkIsString(path, `"Rsvim.fs.readFileSync" path`);
 
     // @ts-ignore Ignore warning
@@ -646,7 +648,7 @@ export class RsvimFs {
    * const payload = await Rsvim.fs.readTextFile("README.md");
    * ```
    */
-  async readTextFile(path: string): Promise<string> {
+  export async function readTextFile(path: string): Promise<string> {
     checkIsString(path, `"Rsvim.fs.readTextFile" path`);
 
     // @ts-ignore Ignore warning
@@ -666,15 +668,13 @@ export class RsvimFs {
    * const payload = Rsvim.fs.readTextFileSync("README.md");
    * ```
    */
-  readTextFileSync(path: string): string {
+  export function readTextFileSync(path: string): string {
     checkIsString(path, `"Rsvim.fs.readTextFileSync" path`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.fs_read_text_file_sync(path);
   }
-}
 
-export namespace RsvimFs {
   /**
    * Open options.
    *
@@ -1736,7 +1736,7 @@ export namespace RsvimSyn {
 export namespace Rsvim {
   export import buf = RsvimBuf;
   export import cmd = RsvimCmd;
-  export const fs = new RsvimFs();
+  export import fs = RsvimFs;
   export const opt = new RsvimOpt();
   export const proc = new RsvimProc();
   export const rt = new RsvimRt();
