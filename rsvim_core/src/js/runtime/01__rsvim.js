@@ -129,7 +129,6 @@ function setDefaultFields(arg, defaults) {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export var RsvimBuf;
 (function (RsvimBuf) {
@@ -220,7 +219,6 @@ export var RsvimBuf;
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export var RsvimCmd;
 (function (RsvimCmd) {
@@ -1297,13 +1295,13 @@ export class RsvimSyn {
  */
 export var Rsvim;
 (function (Rsvim) {
-    var buf = RsvimBuf;
-    var cmd = RsvimCmd;
-    const fs = new RsvimFs();
-    const opt = new RsvimOpt();
-    const proc = new RsvimProc();
-    const rt = new RsvimRt();
-    const syn = new RsvimSyn();
+    Rsvim.buf = RsvimBuf;
+    Rsvim.cmd = RsvimCmd;
+    Rsvim.fs = new RsvimFs();
+    Rsvim.opt = new RsvimOpt();
+    Rsvim.proc = new RsvimProc();
+    Rsvim.rt = new RsvimRt();
+    Rsvim.syn = new RsvimSyn();
 })(Rsvim || (Rsvim = {}));
 (function (globalThis) {
     globalThis.Rsvim = Rsvim;

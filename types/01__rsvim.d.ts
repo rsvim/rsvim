@@ -30,7 +30,6 @@
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export declare namespace RsvimBuf {
     /**
@@ -107,7 +106,6 @@ export declare namespace RsvimBuf {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export declare namespace RsvimCmd {
     /**
@@ -1205,6 +1203,13 @@ export declare namespace RsvimSyn {
  * @hideconstructor
  */
 export declare namespace Rsvim {
+    export import buf = RsvimBuf;
+    export import cmd = RsvimCmd;
+    const fs: RsvimFs;
+    const opt: RsvimOpt;
+    const proc: RsvimProc;
+    const rt: RsvimRt;
+    const syn: RsvimSyn;
 }
 declare global {
     var Rsvim: typeof Rsvim;
