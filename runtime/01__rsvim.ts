@@ -1737,8 +1737,8 @@ export namespace Rsvim {
   export import fs = RsvimFs;
   export const opt = new RsvimOpt();
   export import proc = RsvimProc;
-  export const rt = RsvimRt;
-  export const syn = RsvimSyn;
+  export import rt = RsvimRt;
+  export import syn = RsvimSyn;
 }
 
 (function (globalThis: { Rsvim: typeof Rsvim }) {
