@@ -979,7 +979,7 @@ export declare namespace RsvimProc {
          *
          * @defaultValue `{}`
          */
-        env?: Record<string, string>;
+        env?: Record<string, string | undefined | null>;
         /**
          * How `stdin` of spawned child process should be handled.
          *

@@ -1370,7 +1370,7 @@ export namespace RsvimProc {
         args: [],
         clearEnv: false,
         detached: false,
-        env: {},
+        env: { __proto__: null },
         stdin: "null",
         stdout: "piped",
         stderr: "piped",
@@ -1380,7 +1380,7 @@ export namespace RsvimProc {
         args: [],
         clearEnv: false,
         detached: false,
-        env: {},
+        env: { __proto__: null },
         stdin: "null",
         stdout: "piped",
         stderr: "piped",
@@ -1458,7 +1458,7 @@ export namespace RsvimProc {
      *
      * @defaultValue `{}`
      */
-    env?: Record<string, string>;
+    env?: Record<string, string | undefined | null>;
 
     /**
      * How `stdin` of spawned child process should be handled.
