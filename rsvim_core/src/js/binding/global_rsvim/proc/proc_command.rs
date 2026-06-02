@@ -132,7 +132,7 @@ impl JsFuture for SpawnChildProcessFuture {
       let stdout_rid = Into::<i32>::into(stdout_rid).to_v8(scope);
       binding::set_property_to(scope, result, "stdout", stdout_rid);
     }
-    if let Some(stderr_rid) = stdout_rid {
+    if let Some(stderr_rid) = stderr_rid {
       let stderr_rid = Into::<i32>::into(stderr_rid).to_v8(scope);
       binding::set_property_to(scope, result, "stderr", stderr_rid);
     }
