@@ -116,7 +116,7 @@ impl JsFuture for SpawnChildProcessFuture {
   }
 }
 
-pub fn spawen_child_process(
+pub fn spawn_child_process(
   resource_table: ResourceTableArc,
   exec_path: &CompactString,
   options: &ProcCommandOptions,
