@@ -82,7 +82,7 @@ async fn test_spawn1() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
   let src: &str = r#"
   const cmd1 = new Rsvim.proc.Command("ls");
