@@ -1418,6 +1418,25 @@ export namespace RsvimProc {
     get options(): RsvimProc.CommandOptions {
       return this.#options;
     }
+
+    async spawn(): Promise<RsvimProc.ChildProcess> {
+      // @ts-ignore Ignore warning
+      const child = (await __InternalRsvimGlobalObject.proc_spawn_child(
+        this.#execPath,
+        this.#options,
+      )) as {
+        rid: number;
+        stdinRid: number | undefined;
+        stdoutRid: number | undefined;
+        stderrRid: number | undefined;
+      };
+      return new RsvimProc.ChildProcess(
+        child.rid,
+        child.stdinRid,
+        child.stdoutRid,
+        child.stderrRid,
+      );
+    }
   }
 
   /**
