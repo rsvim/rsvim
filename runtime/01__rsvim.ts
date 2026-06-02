@@ -1425,13 +1425,26 @@ export namespace RsvimProc {
    */
   export class ChildProcess {
     /** @hidden */
-    #rid: number | null | undefined;
+    #rid: number;
     /** @hidden */
     #stdinRid: number | null | undefined;
     /** @hidden */
     #stdoutRid: number | null | undefined;
     /** @hidden */
     #stderrRid: number | null | undefined;
+
+    /** @hideconstructor */
+    constructor(
+      rid: number,
+      stdinRid: number | null | undefined,
+      stdoutRid: number | null | undefined,
+      stderrRid: number | null | undefined,
+    ) {
+      this.#rid = rid;
+      this.#stdinRid = stdinRid;
+      this.#stdoutRid = stdoutRid;
+      this.#stderrRid = stderrRid;
+    }
   }
 
   /**
