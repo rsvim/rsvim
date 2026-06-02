@@ -1054,17 +1054,19 @@ impl EventLoop {
               &req.exec_path.clone(),
               &req.options.clone(),
             );
-            jsrt_forwarder_tx.send(JsMessage::SpawnChildProcessResp(
-              chan::SpawnChildProcessResp {
-                task_id: req.task_id,
-                maybe_result: match maybe_result {
-                  Ok(child_rids) => {
-                    Some(Ok(postcard::to_allocvec(&child_rids).unwrap()))
-                  }
-                  Err(e) => Some(Err(e)),
+            jsrt_forwarder_tx
+              .send(JsMessage::SpawnChildProcessResp(
+                chan::SpawnChildProcessResp {
+                  task_id: req.task_id,
+                  maybe_result: match maybe_result {
+                    Ok(child_rids) => {
+                      Some(Ok(postcard::to_allocvec(&child_rids).unwrap()))
+                    }
+                    Err(e) => Some(Err(e)),
+                  },
                 },
-              },
-            ));
+              ))
+              .unwrap();
           });
         }
       }
