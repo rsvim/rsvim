@@ -2,8 +2,6 @@
 
 pub mod proc_command;
 
-use crate::chan;
-use crate::chan::MasterMessage;
 use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
