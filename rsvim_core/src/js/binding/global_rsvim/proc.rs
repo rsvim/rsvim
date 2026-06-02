@@ -13,7 +13,7 @@ use proc_command::ProcCommandOptions;
 use proc_command::SpawnChildProcessFuture;
 
 /// The `spawn` method in `Rsvim.proc.Command` class.
-pub fn spawn<'s>(
+pub fn spawn_child<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -22,7 +22,10 @@ pub fn spawn<'s>(
   debug_assert!(is_v8_str!(args.get(0)));
   let exec_path = args.get(0).to_rust_string_lossy(scope);
   let options = ProcCommandOptions::from_v8(scope, args.get(1));
-  trace!("spawn exec_path: {:?}, options: {:?}", exec_path, options);
+  trace!(
+    "spawn_child exec_path: {:?}, options: {:?}",
+    exec_path, options
+  );
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
