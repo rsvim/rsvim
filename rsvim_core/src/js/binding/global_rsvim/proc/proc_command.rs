@@ -71,6 +71,9 @@ pub struct ProcCommandOptions {
   #[builder(default = false)]
   pub clear_env: bool,
 
+  #[builder(default = false)]
+  pub detached: bool,
+
   #[builder(default = FoldMap::new())]
   pub env: FoldMap<CompactString, CompactString>,
 
@@ -121,22 +124,37 @@ pub fn spawn_child_process(
   exec_path: &CompactString,
   options: &ProcCommandOptions,
 ) -> TheResult<ResourceId> {
-  match std::fs::OpenOptions::new()
-    .append(opts.append)
-    .create(opts.create)
-    .create_new(opts.create_new)
-    .read(opts.read)
-    .truncate(opts.truncate)
-    .write(opts.write)
-    .open(path)
-  {
-    Ok(file) => {
-      let mut resource_table = lock!(resource_table);
-      Ok(resource_table.add_file(file))
-    }
-    Err(e) => Err(TheErr::OpenFileFailed(
-      path.to_string_lossy().to_compact_string(),
-      e,
-    )),
+  let mut command = std::process::Command::new(exec_path);
+
+  if let Some(cwd) = &options.cwd {
+    command.current_dir(cwd);
   }
+  if options.clear_env {
+    command.env_clear();
+  }
+  command.envs(
+    options
+      .env
+      .clone()
+      .into_iter()
+      .map(|(k, v)| (k.into_string(), v)),
+  );
+
+  command.stdin(match options.stdin {
+    Stdio::Null => std::process::Stdio::null(),
+    Stdio::Piped => std::process::Stdio::piped(),
+    Stdio::Inherit => std::process::Stdio::inherit(),
+  });
+  command.stdout(match options.stdout {
+    Stdio::Null => std::process::Stdio::null(),
+    Stdio::Piped => std::process::Stdio::piped(),
+    Stdio::Inherit => std::process::Stdio::inherit(),
+  });
+  command.stderr(match options.stderr {
+    Stdio::Null => std::process::Stdio::null(),
+    Stdio::Piped => std::process::Stdio::piped(),
+    Stdio::Inherit => std::process::Stdio::inherit(),
+  });
+
+  Ok(ResourceId::next())
 }
