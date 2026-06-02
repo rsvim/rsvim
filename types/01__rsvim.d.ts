@@ -942,6 +942,15 @@ export declare namespace RsvimProc {
         constructor(execPath: string, options?: RsvimProc.CommandOptions);
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
+        spawn(): Promise<RsvimProc.ChildProcess>;
+    }
+    /**
+     * Child process spawned from command.
+     */
+    class ChildProcess {
+        #private;
+        /** @hideconstructor */
+        constructor(rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
     }
     /**
      * Command options when creating a child-process command.
@@ -979,7 +988,7 @@ export declare namespace RsvimProc {
          *
          * @defaultValue `{}`
          */
-        env?: Record<string, string>;
+        env?: Record<string, string | undefined | null>;
         /**
          * How `stdin` of spawned child process should be handled.
          *

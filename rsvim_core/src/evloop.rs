@@ -23,6 +23,7 @@ use crate::js::binding::global_rsvim::fs::read::fs_read;
 use crate::js::binding::global_rsvim::fs::read_file::async_fs_read_file;
 use crate::js::binding::global_rsvim::fs::read_text_file::async_fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
+use crate::js::binding::global_rsvim::proc::proc_command::spawn_child_process;
 use crate::js::command::CommandManager;
 use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
@@ -1040,6 +1041,32 @@ impl EventLoop {
                   .unwrap();
               }
             }
+          });
+        }
+        MasterMessage::SpawnChildProcessReq(req) => {
+          trace!("Recv SpawnChildProcessReq:{:?}", req.task_id);
+          let resource_table = self.resource_table.clone();
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+
+          self.blocked_tracker.spawn_blocking(move || {
+            let maybe_result = spawn_child_process(
+              resource_table,
+              &req.exec_path.clone(),
+              &req.options.clone(),
+            );
+            jsrt_forwarder_tx
+              .send(JsMessage::SpawnChildProcessResp(
+                chan::SpawnChildProcessResp {
+                  task_id: req.task_id,
+                  maybe_result: match maybe_result {
+                    Ok(child_rids) => {
+                      Some(Ok(postcard::to_allocvec(&child_rids).unwrap()))
+                    }
+                    Err(e) => Some(Err(e)),
+                  },
+                },
+              ))
+              .unwrap();
           });
         }
       }

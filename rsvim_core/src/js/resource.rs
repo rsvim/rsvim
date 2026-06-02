@@ -1,9 +1,14 @@
 //! Resource.
 
+pub mod child_process;
 pub mod file;
 pub mod text_decoder;
 
 use crate::prelude::*;
+use child_process::ChildProcessResource;
+use child_process::ChildProcessStderrResource;
+use child_process::ChildProcessStdinResource;
+use child_process::ChildProcessStdoutResource;
 use file::FileResource;
 use std::fmt::Debug;
 use text_decoder::TextDecoderResource;
@@ -23,6 +28,10 @@ pub trait Resourcify: Sized + Debug + Clone {
 pub enum Resource {
   File(FileResource),
   TextDecoder(TextDecoderResource),
+  ChildProcess(ChildProcessResource),
+  ChildProcessStdin(ChildProcessStdinResource),
+  ChildProcessStdout(ChildProcessStdoutResource),
+  ChildProcessStderr(ChildProcessStderrResource),
 }
 
 impl Resourcify for Resource {
@@ -30,6 +39,10 @@ impl Resourcify for Resource {
     match self {
       Resource::File(r) => r.id(),
       Resource::TextDecoder(r) => r.id(),
+      Resource::ChildProcess(r) => r.id(),
+      Resource::ChildProcessStdin(r) => r.id(),
+      Resource::ChildProcessStdout(r) => r.id(),
+      Resource::ChildProcessStderr(r) => r.id(),
     }
   }
 }
@@ -64,6 +77,49 @@ impl ResourceTable {
     let res = TextDecoderResource::new(data);
     let rid = res.id();
     self.resources.insert(res.id(), Resource::TextDecoder(res));
+    rid
+  }
+
+  pub fn add_child_process(&mut self, data: std::process::Child) -> ResourceId {
+    let res = ChildProcessResource::new(data);
+    let rid = res.id();
+    self.resources.insert(res.id(), Resource::ChildProcess(res));
+    rid
+  }
+
+  pub fn add_child_process_stdin(
+    &mut self,
+    data: std::process::ChildStdin,
+  ) -> ResourceId {
+    let res = ChildProcessStdinResource::new(data);
+    let rid = res.id();
+    self
+      .resources
+      .insert(res.id(), Resource::ChildProcessStdin(res));
+    rid
+  }
+
+  pub fn add_child_process_stdout(
+    &mut self,
+    data: std::process::ChildStdout,
+  ) -> ResourceId {
+    let res = ChildProcessStdoutResource::new(data);
+    let rid = res.id();
+    self
+      .resources
+      .insert(res.id(), Resource::ChildProcessStdout(res));
+    rid
+  }
+
+  pub fn add_child_process_stderr(
+    &mut self,
+    data: std::process::ChildStderr,
+  ) -> ResourceId {
+    let res = ChildProcessStderrResource::new(data);
+    let rid = res.id();
+    self
+      .resources
+      .insert(res.id(), Resource::ChildProcessStderr(res));
     rid
   }
 

@@ -6,8 +6,10 @@ use crate::js::JsRuntimeState;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::binding::global_rsvim::proc::proc_command::ProcCommandOptions;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
+use compact_str::CompactString;
 use tokio::time::Instant;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
@@ -155,6 +157,24 @@ pub fn create_syn_load_parser(
     MasterMessage::LoadTreeSitterParserReq(chan::LoadTreeSitterParserReq {
       task_id,
       grammar_path: grammar_path.to_path_buf(),
+    }),
+  );
+}
+
+pub fn create_spawn_child_process(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  exec_path: CompactString,
+  options: ProcCommandOptions,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::SpawnChildProcessReq(chan::SpawnChildProcessReq {
+      task_id,
+      exec_path,
+      options,
     }),
   );
 }

@@ -1360,7 +1360,9 @@ export namespace RsvimProc {
    * The command that create a child process.
    */
   export class Command {
+    /** @hidden */
     #execPath: string;
+    /** @hidden */
     #options: RsvimProc.CommandOptions;
 
     constructor(execPath: string, options?: RsvimProc.CommandOptions) {
@@ -1370,7 +1372,7 @@ export namespace RsvimProc {
         args: [],
         clearEnv: false,
         detached: false,
-        env: {},
+        env: { __proto__: null },
         stdin: "null",
         stdout: "piped",
         stderr: "piped",
@@ -1380,7 +1382,7 @@ export namespace RsvimProc {
         args: [],
         clearEnv: false,
         detached: false,
-        env: {},
+        env: { __proto__: null },
         stdin: "null",
         stdout: "piped",
         stderr: "piped",
@@ -1415,6 +1417,52 @@ export namespace RsvimProc {
 
     get options(): RsvimProc.CommandOptions {
       return this.#options;
+    }
+
+    async spawn(): Promise<RsvimProc.ChildProcess> {
+      // @ts-ignore Ignore warning
+      const child = (await __InternalRsvimGlobalObject.proc_spawn_child(
+        this.#execPath,
+        this.#options,
+      )) as {
+        rid: number;
+        stdinRid: number | undefined;
+        stdoutRid: number | undefined;
+        stderrRid: number | undefined;
+      };
+      return new RsvimProc.ChildProcess(
+        child.rid,
+        child.stdinRid,
+        child.stdoutRid,
+        child.stderrRid,
+      );
+    }
+  }
+
+  /**
+   * Child process spawned from command.
+   */
+  export class ChildProcess {
+    /** @hidden */
+    #rid: number;
+    /** @hidden */
+    #stdinRid: number | null | undefined;
+    /** @hidden */
+    #stdoutRid: number | null | undefined;
+    /** @hidden */
+    #stderrRid: number | null | undefined;
+
+    /** @hideconstructor */
+    constructor(
+      rid: number,
+      stdinRid: number | null | undefined,
+      stdoutRid: number | null | undefined,
+      stderrRid: number | null | undefined,
+    ) {
+      this.#rid = rid;
+      this.#stdinRid = stdinRid;
+      this.#stdoutRid = stdoutRid;
+      this.#stderrRid = stderrRid;
     }
   }
 
@@ -1458,7 +1506,7 @@ export namespace RsvimProc {
      *
      * @defaultValue `{}`
      */
-    env?: Record<string, string>;
+    env?: Record<string, string | undefined | null>;
 
     /**
      * How `stdin` of spawned child process should be handled.

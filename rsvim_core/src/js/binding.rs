@@ -280,6 +280,16 @@ pub fn create_new_context<'s, 'b>(
     );
   }
 
+  // For `Rsvim.proc`
+  {
+    set_function_to(
+      scope,
+      vim,
+      "proc_spawn_child",
+      global_rsvim::proc::spawn_child,
+    );
+  }
+
   // For `Rsvim.rt`
   {
     set_function_to(scope, vim, "rt_exit", global_rsvim::rt::exit);

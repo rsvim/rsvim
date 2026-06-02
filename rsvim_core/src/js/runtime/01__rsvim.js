@@ -1099,7 +1099,9 @@ export var RsvimProc;
      * The command that create a child process.
      */
     class Command {
+        /** @hidden */
         #execPath;
+        /** @hidden */
         #options;
         constructor(execPath, options) {
             checkIsString(execPath, `"Rsvim.proc.Command" execPath`);
@@ -1107,7 +1109,7 @@ export var RsvimProc;
                 args: [],
                 clearEnv: false,
                 detached: false,
-                env: {},
+                env: { __proto__: null },
                 stdin: "null",
                 stdout: "piped",
                 stderr: "piped",
@@ -1117,7 +1119,7 @@ export var RsvimProc;
                 args: [],
                 clearEnv: false,
                 detached: false,
-                env: {},
+                env: { __proto__: null },
                 stdin: "null",
                 stdout: "piped",
                 stderr: "piped",
@@ -1138,8 +1140,34 @@ export var RsvimProc;
         get options() {
             return this.#options;
         }
+        async spawn() {
+            // @ts-ignore Ignore warning
+            const child = (await __InternalRsvimGlobalObject.proc_spawn_child(this.#execPath, this.#options));
+            return new RsvimProc.ChildProcess(child.rid, child.stdinRid, child.stdoutRid, child.stderrRid);
+        }
     }
     RsvimProc.Command = Command;
+    /**
+     * Child process spawned from command.
+     */
+    class ChildProcess {
+        /** @hidden */
+        #rid;
+        /** @hidden */
+        #stdinRid;
+        /** @hidden */
+        #stdoutRid;
+        /** @hidden */
+        #stderrRid;
+        /** @hideconstructor */
+        constructor(rid, stdinRid, stdoutRid, stderrRid) {
+            this.#rid = rid;
+            this.#stdinRid = stdinRid;
+            this.#stdoutRid = stdoutRid;
+            this.#stderrRid = stderrRid;
+        }
+    }
+    RsvimProc.ChildProcess = ChildProcess;
 })(RsvimProc || (RsvimProc = {}));
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
