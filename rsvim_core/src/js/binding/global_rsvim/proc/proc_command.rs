@@ -1,5 +1,6 @@
 //! Child-process command options.
 
+use crate::js::JsFuture;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
@@ -78,4 +79,36 @@ pub struct ProcCommandOptions {
 
   #[builder(default = Stdio::Piped)]
   pub stderr: Stdio,
+}
+
+pub struct SpawnChildProcessFuture {
+  pub promise: v8::Global<v8::PromiseResolver>,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+impl JsFuture for SpawnChildProcessFuture {
+  fn run(&mut self, scope: &mut v8::PinScope) {
+    trace!("|SpawnChildProcessFuture|");
+
+    let result = self.maybe_result.take().unwrap();
+
+    // Handle when something goes wrong with opening the file.
+    if let Err(e) = result {
+      let message = v8::String::new(scope, &e.to_string()).unwrap();
+      let exception = v8::Exception::error(scope, message);
+      binding::set_exception_code(scope, exception, &e);
+      self.promise.open(scope).reject(scope, exception);
+      return;
+    }
+
+    // Otherwise, get the result and deserialize it.
+    let result = result.unwrap();
+
+    // Deserialize bytes into a file-descriptor.
+    let file_rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
+    let file_rid = Into::<i32>::into(file_rid);
+    let file_rid = file_rid.to_v8(scope);
+
+    self.promise.open(scope).resolve(scope, file_rid).unwrap();
+  }
 }
