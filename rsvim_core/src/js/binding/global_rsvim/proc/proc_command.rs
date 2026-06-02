@@ -112,11 +112,36 @@ impl JsFuture for SpawnChildProcessFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let file_rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
-    let file_rid = Into::<i32>::into(file_rid);
-    let file_rid = file_rid.to_v8(scope);
+    let (child_rid, stdin_rid, stdout_rid, stderr_rid) =
+      postcard::from_bytes::<(
+        /* child process */ ResourceId,
+        /* child stdin */ Option<ResourceId>,
+        /* child stdout */ Option<ResourceId>,
+        /* child stderr */ Option<ResourceId>,
+      )>(&result)
+      .unwrap();
 
-    self.promise.open(scope).resolve(scope, file_rid).unwrap();
+    let result = v8::Object::new(scope);
+    let child_rid = Into::<i32>::into(child_rid).to_v8(scope);
+    binding::set_property_to(scope, result, "rid", child_rid);
+    if let Some(stdin_rid) = stdin_rid {
+      let stdin_rid = Into::<i32>::into(stdin_rid).to_v8(scope);
+      binding::set_property_to(scope, result, "stdin", stdin_rid);
+    }
+    if let Some(stdout_rid) = stdout_rid {
+      let stdout_rid = Into::<i32>::into(stdout_rid).to_v8(scope);
+      binding::set_property_to(scope, result, "stdout", stdout_rid);
+    }
+    if let Some(stderr_rid) = stdout_rid {
+      let stderr_rid = Into::<i32>::into(stderr_rid).to_v8(scope);
+      binding::set_property_to(scope, result, "stderr", stderr_rid);
+    }
+
+    self
+      .promise
+      .open(scope)
+      .resolve(scope, result.into())
+      .unwrap();
   }
 }
 
