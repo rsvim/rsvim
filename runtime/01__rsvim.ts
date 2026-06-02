@@ -1360,7 +1360,9 @@ export namespace RsvimProc {
    * The command that create a child process.
    */
   export class Command {
+    /** @hidden */
     #execPath: string;
+    /** @hidden */
     #options: RsvimProc.CommandOptions;
 
     constructor(execPath: string, options?: RsvimProc.CommandOptions) {
@@ -1416,6 +1418,20 @@ export namespace RsvimProc {
     get options(): RsvimProc.CommandOptions {
       return this.#options;
     }
+  }
+
+  /**
+   * Child process spawned from command.
+   */
+  export class ChildProcess {
+    /** @hidden */
+    #rid: number | null | undefined;
+    /** @hidden */
+    #stdinRid: number | null | undefined;
+    /** @hidden */
+    #stdoutRid: number | null | undefined;
+    /** @hidden */
+    #stderrRid: number | null | undefined;
   }
 
   /**
