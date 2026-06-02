@@ -4,6 +4,7 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::resource::ResourceId;
+use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use compact_str::CompactString;
 use std::str::FromStr;
@@ -112,5 +113,30 @@ impl JsFuture for SpawnChildProcessFuture {
     let file_rid = file_rid.to_v8(scope);
 
     self.promise.open(scope).resolve(scope, file_rid).unwrap();
+  }
+}
+
+pub fn spawen_child_process(
+  resource_table: ResourceTableArc,
+  exec_path: &CompactString,
+  options: &ProcCommandOptions,
+) -> TheResult<ResourceId> {
+  match std::fs::OpenOptions::new()
+    .append(opts.append)
+    .create(opts.create)
+    .create_new(opts.create_new)
+    .read(opts.read)
+    .truncate(opts.truncate)
+    .write(opts.write)
+    .open(path)
+  {
+    Ok(file) => {
+      let mut resource_table = lock!(resource_table);
+      Ok(resource_table.add_file(file))
+    }
+    Err(e) => Err(TheErr::OpenFileFailed(
+      path.to_string_lossy().to_compact_string(),
+      e,
+    )),
   }
 }
