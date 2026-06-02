@@ -1,7 +1,9 @@
 //! Child-process command options.
 
 use crate::js::JsFuture;
+use crate::js::binding;
 use crate::js::converter::*;
+use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use compact_str::CompactString;
 use std::str::FromStr;
