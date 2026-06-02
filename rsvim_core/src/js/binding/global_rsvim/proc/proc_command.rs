@@ -120,6 +120,7 @@ impl JsFuture for SpawnChildProcessFuture {
   }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn spawn_child_process(
   resource_table: ResourceTableArc,
   exec_path: &CompactString,
@@ -132,7 +133,7 @@ pub fn spawn_child_process(
 )> {
   let mut command = std::process::Command::new(exec_path);
 
-  command.args(options.args.clone().into_iter());
+  command.args(options.args.clone());
   if let Some(cwd) = &options.cwd {
     command.current_dir(cwd);
   }
