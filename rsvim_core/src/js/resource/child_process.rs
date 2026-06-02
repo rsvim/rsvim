@@ -15,7 +15,7 @@ pub struct ChildProcessResource {
 }
 
 impl ChildProcessResource {
-  pub fn new(mut data: Child) -> Self {
+  pub fn new(data: Child) -> Self {
     Self {
       id: ResourceId::next(),
       data: Arc::new(Mutex::new(data)),
