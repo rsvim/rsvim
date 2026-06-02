@@ -165,7 +165,7 @@ pub fn spawn_child_process(
       } else {
         exec_path.to_compact_string()
       };
-      return Err(TheErr::SpawnChildProcessFailed(cmd, e.to_compact_string()));
+      return Err(TheErr::SpawnChildProcessFailed(cmd, e));
     }
   }
 

@@ -103,7 +103,7 @@ pub enum TheErr {
   BufferTooSmall(usize),
 
   #[error("Failed to spawn child process `{0}`: {1}.")]
-  SpawnChildProcessFailed(CompactString, CompactString),
+  SpawnChildProcessFailed(CompactString, IoErr),
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.
