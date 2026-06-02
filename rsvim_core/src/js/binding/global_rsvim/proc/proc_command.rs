@@ -124,7 +124,12 @@ pub fn spawn_child_process(
   resource_table: ResourceTableArc,
   exec_path: &CompactString,
   options: &ProcCommandOptions,
-) -> TheResult<ResourceId> {
+) -> TheResult<(
+  /* child process */ ResourceId,
+  /* child stdin */ Option<ResourceId>,
+  /* child stdout */ Option<ResourceId>,
+  /* child stderr */ Option<ResourceId>,
+)> {
   let mut command = std::process::Command::new(exec_path);
 
   command.args(options.args.clone().into_iter());
@@ -158,16 +163,26 @@ pub fn spawn_child_process(
   });
 
   match command.spawn() {
-    Ok(child) => {}
+    Ok(mut child) => {
+      let stdin = child.stdin.take();
+      let stdout = child.stdout.take();
+      let stderr = child.stderr.take();
+      let mut resource_table = lock!(resource_table);
+      let stdin_rid = stdin.map(|s| resource_table.add_child_process_stdin(s));
+      let stdout_rid =
+        stdout.map(|s| resource_table.add_child_process_stdout(s));
+      let stderr_rid =
+        stderr.map(|s| resource_table.add_child_process_stderr(s));
+      let child_rid = resource_table.add_child_process(child);
+      Ok((child_rid, stdin_rid, stdout_rid, stderr_rid))
+    }
     Err(e) => {
       let cmd = if !options.args.is_empty() {
         format!("{} {}", exec_path, options.args.join(" ")).to_compact_string()
       } else {
         exec_path.to_compact_string()
       };
-      return Err(TheErr::SpawnChildProcessFailed(cmd, e));
+      Err(TheErr::SpawnChildProcessFailed(cmd, e))
     }
   }
-
-  Ok(ResourceId::next())
 }
