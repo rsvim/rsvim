@@ -120,7 +120,6 @@ impl JsFuture for SpawnChildProcessFuture {
   }
 }
 
-#[allow(clippy::type_complexity)]
 pub fn spawn_child_process(
   resource_table: ResourceTableArc,
   exec_path: &CompactString,
