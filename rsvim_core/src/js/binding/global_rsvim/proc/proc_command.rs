@@ -7,6 +7,7 @@ use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::str::FromStr;
 
 #[derive(
@@ -126,6 +127,7 @@ pub fn spawn_child_process(
 ) -> TheResult<ResourceId> {
   let mut command = std::process::Command::new(exec_path);
 
+  command.args(options.args.clone().into_iter());
   if let Some(cwd) = &options.cwd {
     command.current_dir(cwd);
   }
@@ -139,7 +141,6 @@ pub fn spawn_child_process(
       .into_iter()
       .map(|(k, v)| (k.into_string(), v)),
   );
-
   command.stdin(match options.stdin {
     Stdio::Null => std::process::Stdio::null(),
     Stdio::Piped => std::process::Stdio::piped(),
@@ -155,6 +156,18 @@ pub fn spawn_child_process(
     Stdio::Piped => std::process::Stdio::piped(),
     Stdio::Inherit => std::process::Stdio::inherit(),
   });
+
+  match command.spawn() {
+    Ok(child) => {}
+    Err(e) => {
+      let cmd = if !options.args.is_empty() {
+        format!("{} {}", exec_path, options.args.join(" ")).to_compact_string()
+      } else {
+        exec_path.to_compact_string()
+      };
+      return Err(TheErr::SpawnChildProcessFailed(cmd, e.to_compact_string()));
+    }
+  }
 
   Ok(ResourceId::next())
 }
