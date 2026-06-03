@@ -942,6 +942,9 @@ export declare namespace RsvimProc {
         constructor(execPath: string, options?: RsvimProc.CommandOptions);
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
+        /**
+         * Spawn a child process with
+         */
         spawn(): RsvimProc.ChildProcess;
     }
     /**
@@ -950,7 +953,9 @@ export declare namespace RsvimProc {
     class ChildProcess {
         #private;
         /** @hideconstructor */
-        constructor(rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
+        constructor(execPath: string, options: RsvimProc.CommandOptions, rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
+        get execPath(): string;
+        get options(): RsvimProc.CommandOptions;
         get rid(): number;
         get stdinRid(): number | null | undefined;
         get stdoutRid(): number | null | undefined;
