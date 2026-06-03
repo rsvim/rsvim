@@ -2,6 +2,7 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
+use crate::js::converter::*;
 use crate::prelude::*;
 
 pub struct ReadTextFromChildProcessStdioFuture {
@@ -25,14 +26,12 @@ impl JsFuture for ReadTextFromChildProcessStdioFuture {
     }
 
     // Otherwise, resolve the promise passing the result.
-    let data = result.unwrap();
+    let result = result.unwrap();
 
-    let bytes_read = v8::Integer::new(scope, data.len() as i32);
+    // Deserialize into string
+    let payload = postcard::from_bytes::<String>(&result).unwrap();
+    let payload = payload.to_v8(scope);
 
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, bytes_read.into())
-      .unwrap();
+    self.promise.open(scope).resolve(scope, payload).unwrap();
   }
 }
