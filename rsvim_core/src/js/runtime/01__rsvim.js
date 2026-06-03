@@ -1166,6 +1166,18 @@ export var RsvimProc;
             this.#stdoutRid = stdoutRid;
             this.#stderrRid = stderrRid;
         }
+        get rid() {
+            return this.#rid;
+        }
+        get stdinRid() {
+            return this.#stdinRid;
+        }
+        get stdoutRid() {
+            return this.#stdoutRid;
+        }
+        get stderrRid() {
+            return this.#stderrRid;
+        }
     }
     RsvimProc.ChildProcess = ChildProcess;
 })(RsvimProc || (RsvimProc = {}));

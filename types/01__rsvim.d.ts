@@ -951,6 +951,10 @@ export declare namespace RsvimProc {
         #private;
         /** @hideconstructor */
         constructor(rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
+        get rid(): number;
+        get stdinRid(): number | null | undefined;
+        get stdoutRid(): number | null | undefined;
+        get stderrRid(): number | null | undefined;
     }
     /**
      * Command options when creating a child-process command.

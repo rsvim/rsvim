@@ -1464,6 +1464,22 @@ export namespace RsvimProc {
       this.#stdoutRid = stdoutRid;
       this.#stderrRid = stderrRid;
     }
+
+    get rid(): number {
+      return this.#rid;
+    }
+
+    get stdinRid(): number | null | undefined {
+      return this.#stdinRid;
+    }
+
+    get stdoutRid(): number | null | undefined {
+      return this.#stdoutRid;
+    }
+
+    get stderrRid(): number | null | undefined {
+      return this.#stderrRid;
+    }
   }
 
   /**
