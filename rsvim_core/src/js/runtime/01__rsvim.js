@@ -1141,7 +1141,16 @@ export var RsvimProc;
             return this.#options;
         }
         /**
-         * Spawn a child process with
+         * Spawn a child process.
+         *
+         * @returns {RsvimProc.ChildProcess} It returns a child process.
+         * @throws Throws {@link !Error} if failed to spawn the child process.
+         *
+         * @example
+         * ```javascript
+         * const cmd = new Rsvim.proc.Command("ls");
+         * const child = cmd.spawn();
+         * ```
          */
         spawn() {
             // @ts-ignore Ignore warning

@@ -943,7 +943,16 @@ export declare namespace RsvimProc {
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
         /**
-         * Spawn a child process with
+         * Spawn a child process.
+         *
+         * @returns {RsvimProc.ChildProcess} It returns a child process.
+         * @throws Throws {@link !Error} if failed to spawn the child process.
+         *
+         * @example
+         * ```javascript
+         * const cmd = new Rsvim.proc.Command("ls");
+         * const child = cmd.spawn();
+         * ```
          */
         spawn(): RsvimProc.ChildProcess;
     }
