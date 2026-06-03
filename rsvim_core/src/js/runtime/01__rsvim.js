@@ -1140,9 +1140,9 @@ export var RsvimProc;
         get options() {
             return this.#options;
         }
-        async spawn() {
+        spawn() {
             // @ts-ignore Ignore warning
-            const child = (await __InternalRsvimGlobalObject.proc_spawn_child(this.#execPath, this.#options));
+            const child = __InternalRsvimGlobalObject.proc_spawn_child(this.#execPath, this.#options);
             return new RsvimProc.ChildProcess(child.rid, child.stdinRid, child.stdoutRid, child.stderrRid);
         }
     }

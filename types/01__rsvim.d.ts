@@ -942,7 +942,7 @@ export declare namespace RsvimProc {
         constructor(execPath: string, options?: RsvimProc.CommandOptions);
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
-        spawn(): Promise<RsvimProc.ChildProcess>;
+        spawn(): RsvimProc.ChildProcess;
     }
     /**
      * Child process spawned from command.
