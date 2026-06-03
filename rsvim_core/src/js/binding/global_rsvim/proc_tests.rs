@@ -164,7 +164,7 @@ async fn test_spawn2() -> IoResult<()> {
     let actual = actual.unwrap();
 
     let re =
-      Regex::new(r"^child2 execPath:ls options:[object Object] rid:\d+ stdin:undefined stdout:\d+ stderr:\d+$")
+      Regex::new(r"^child2 execPath:ls options:\[object Object\] rid:\d+ stdin:undefined stdout:\d+ stderr:\d+$")
         .unwrap();
     assert!(re.is_match(&actual));
   }
