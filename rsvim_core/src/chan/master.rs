@@ -50,9 +50,6 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to load tree-sitter parser.
   LoadTreeSitterParserReq(LoadTreeSitterParserReq),
-
-  /// Js runtime ask master to spawn a child process.
-  SpawnChildProcessReq(SpawnChildProcessReq),
 }
 
 #[derive(Debug)]
@@ -121,13 +118,6 @@ pub struct SyntaxEditResp {
 pub struct LoadTreeSitterParserReq {
   pub task_id: TaskId,
   pub grammar_path: PathBuf,
-}
-
-#[derive(Debug)]
-pub struct SpawnChildProcessReq {
-  pub task_id: TaskId,
-  pub exec_path: CompactString,
-  pub options: ProcCommandOptions,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".

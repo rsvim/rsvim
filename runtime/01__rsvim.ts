@@ -1419,12 +1419,12 @@ export namespace RsvimProc {
       return this.#options;
     }
 
-    async spawn(): Promise<RsvimProc.ChildProcess> {
+    spawn(): RsvimProc.ChildProcess {
       // @ts-ignore Ignore warning
-      const child = (await __InternalRsvimGlobalObject.proc_spawn_child(
+      const child = __InternalRsvimGlobalObject.proc_spawn_child(
         this.#execPath,
         this.#options,
-      )) as {
+      ) as {
         rid: number;
         stdinRid: number | undefined;
         stdoutRid: number | undefined;

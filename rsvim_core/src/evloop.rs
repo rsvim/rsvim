@@ -1043,32 +1043,6 @@ impl EventLoop {
             }
           });
         }
-        MasterMessage::SpawnChildProcessReq(req) => {
-          trace!("Recv SpawnChildProcessReq:{:?}", req.task_id);
-          let resource_table = self.resource_table.clone();
-          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
-
-          self.blocked_tracker.spawn_blocking(move || {
-            let maybe_result = spawn_child_process(
-              resource_table,
-              &req.exec_path.clone(),
-              &req.options.clone(),
-            );
-            jsrt_forwarder_tx
-              .send(JsMessage::SpawnChildProcessResp(
-                chan::SpawnChildProcessResp {
-                  task_id: req.task_id,
-                  maybe_result: match maybe_result {
-                    Ok(child_rids) => {
-                      Some(Ok(postcard::to_allocvec(&child_rids).unwrap()))
-                    }
-                    Err(e) => Some(Err(e)),
-                  },
-                },
-              ))
-              .unwrap();
-          });
-        }
       }
     }
   }
