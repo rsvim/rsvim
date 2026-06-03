@@ -8,6 +8,7 @@ use crate::js::binding;
 use crate::js::binding::global_rsvim::proc::proc_command::spawn_child_process;
 use crate::js::converter::*;
 use crate::prelude::*;
+use compact_str::ToCompactString;
 use proc_command::ProcCommandOptions;
 
 /// The `spawn` method in `Rsvim.proc.Command` class.
@@ -31,6 +32,10 @@ pub fn spawn_child<'s>(
   match spawn_child_process(resource_table, &exec_path, &options) {
     Ok((child_rid, stdin_rid, stdout_rid, stderr_rid)) => {
       let result = v8::Object::new(scope);
+      let exec_path = exec_path.to_compact_string().to_v8(scope);
+      binding::set_property_to(scope, result, "execPath", exec_path);
+      let options = options.to_v8(scope);
+      binding::set_property_to(scope, result, "options", options);
       let child_rid = Into::<i32>::into(child_rid).to_v8(scope);
       binding::set_property_to(scope, result, "rid", child_rid);
       if let Some(stdin_rid) = stdin_rid {
