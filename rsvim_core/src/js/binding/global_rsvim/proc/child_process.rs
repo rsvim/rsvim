@@ -3,7 +3,6 @@
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::prelude::*;
-use compact_str::ToCompactString;
 
 pub struct ReadTextFromChildProcessStdioFuture {
   pub promise: v8::Global<v8::PromiseResolver>,

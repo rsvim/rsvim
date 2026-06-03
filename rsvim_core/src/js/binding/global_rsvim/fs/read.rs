@@ -2,6 +2,7 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
+use crate::js::converter::*;
 use crate::js::resource::Resource;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
@@ -61,19 +62,12 @@ impl JsFuture for FsReadFuture {
     }
 
     // Otherwise, resolve the promise passing the result.
-    let data = result.unwrap();
+    let result = result.unwrap();
 
-    // Copy the slice's bytes into v8's typed-array backing store.
-    for (i, b) in data.iter().enumerate() {
-      self.buffer_store[i].set(*b);
-    }
+    // Deserialize into string
+    let payload = postcard::from_bytes::<String>(&result).unwrap();
+    let payload = payload.to_v8(scope);
 
-    let bytes_read = v8::Integer::new(scope, data.len() as i32);
-
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, bytes_read.into())
-      .unwrap();
+    self.promise.open(scope).resolve(scope, payload).unwrap();
   }
 }
