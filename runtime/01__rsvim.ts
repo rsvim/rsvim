@@ -1427,8 +1427,12 @@ export namespace RsvimProc {
      *
      * @example
      * ```javascript
-     * const cmd = new Rsvim.proc.Command("ls");
-     * const child = cmd.spawn();
+     * try {
+     *   const cmd = new Rsvim.proc.Command("ls");
+     *   const child = cmd.spawn();
+     * } catch (e) {
+     *   Rsvim.cmd.echo(`Failed to spawn child process: ${e}`);
+     * }
      * ```
      */
     spawn(): RsvimProc.ChildProcess {
