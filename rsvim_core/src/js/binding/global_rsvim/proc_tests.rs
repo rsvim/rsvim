@@ -87,7 +87,7 @@ async fn test_spawn1() -> IoResult<()> {
 
   let src: &str = r#"
   const cmd1 = new Rsvim.proc.Command("ls");
-  const child1 = await cmd1.spawn();
+  const child1 = cmd1.spawn();
   Rsvim.cmd.echo(`child1: ${typeof child1}`);
     "#;
 
@@ -133,7 +133,7 @@ async fn test_spawn2() -> IoResult<()> {
 
   let src: &str = r#"
   const cmd2 = new Rsvim.proc.Command("ls");
-  const child2 = await cmd2.spawn();
+  const child2 = cmd2.spawn();
   Rsvim.cmd.echo(`child2 execPath:${child2.execPath} options:${child2.options} rid:${child2.rid} stdin:${child2.stdinRid} stdout:${child2.stdoutRid} stderr:${child2.stderrRid}`);
     "#;
 
