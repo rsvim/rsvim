@@ -1,7 +1,5 @@
 //! Child-process command options.
 
-use crate::js::JsFuture;
-use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::resource::ResourceId;
 use crate::js::resource::ResourceTableArc;
@@ -88,66 +86,9 @@ pub struct ProcCommandOptions {
   pub stderr: Stdio,
 }
 
-pub struct SpawnChildProcessFuture {
-  pub promise: v8::Global<v8::PromiseResolver>,
-  pub maybe_result: Option<TheResult<Vec<u8>>>,
-}
-
-impl JsFuture for SpawnChildProcessFuture {
-  fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|SpawnChildProcessFuture|");
-
-    let result = self.maybe_result.take().unwrap();
-
-    // Handle when something goes wrong with opening the file.
-    if let Err(e) = result {
-      let message = v8::String::new(scope, &e.to_string()).unwrap();
-      let exception = v8::Exception::error(scope, message);
-      binding::set_exception_code(scope, exception, &e);
-      self.promise.open(scope).reject(scope, exception);
-      return;
-    }
-
-    // Otherwise, get the result and deserialize it.
-    let result = result.unwrap();
-
-    // Deserialize bytes into a file-descriptor.
-    let (child_rid, stdin_rid, stdout_rid, stderr_rid) =
-      postcard::from_bytes::<(
-        /* child process */ ResourceId,
-        /* child stdin */ Option<ResourceId>,
-        /* child stdout */ Option<ResourceId>,
-        /* child stderr */ Option<ResourceId>,
-      )>(&result)
-      .unwrap();
-
-    let result = v8::Object::new(scope);
-    let child_rid = Into::<i32>::into(child_rid).to_v8(scope);
-    binding::set_property_to(scope, result, "rid", child_rid);
-    if let Some(stdin_rid) = stdin_rid {
-      let stdin_rid = Into::<i32>::into(stdin_rid).to_v8(scope);
-      binding::set_property_to(scope, result, "stdinRid", stdin_rid);
-    }
-    if let Some(stdout_rid) = stdout_rid {
-      let stdout_rid = Into::<i32>::into(stdout_rid).to_v8(scope);
-      binding::set_property_to(scope, result, "stdoutRid", stdout_rid);
-    }
-    if let Some(stderr_rid) = stderr_rid {
-      let stderr_rid = Into::<i32>::into(stderr_rid).to_v8(scope);
-      binding::set_property_to(scope, result, "stderrRid", stderr_rid);
-    }
-
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, result.into())
-      .unwrap();
-  }
-}
-
 pub fn spawn_child_process(
   resource_table: ResourceTableArc,
-  exec_path: &CompactString,
+  exec_path: &str,
   options: &ProcCommandOptions,
 ) -> TheResult<(
   /* child process */ ResourceId,

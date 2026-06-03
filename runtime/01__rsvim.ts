@@ -1419,18 +1419,38 @@ export namespace RsvimProc {
       return this.#options;
     }
 
-    async spawn(): Promise<RsvimProc.ChildProcess> {
+    /**
+     * Spawn a child process.
+     *
+     * @returns {RsvimProc.ChildProcess} It returns a child process.
+     * @throws Throws {@link !Error} if failed to spawn the child process.
+     *
+     * @example
+     * ```javascript
+     * try {
+     *   const cmd = new Rsvim.proc.Command("ls");
+     *   const child = cmd.spawn();
+     * } catch (e) {
+     *   Rsvim.cmd.echo(`Failed to spawn child process: ${e}`);
+     * }
+     * ```
+     */
+    spawn(): RsvimProc.ChildProcess {
       // @ts-ignore Ignore warning
-      const child = (await __InternalRsvimGlobalObject.proc_spawn_child(
+      const child = __InternalRsvimGlobalObject.proc_spawn_child(
         this.#execPath,
         this.#options,
-      )) as {
+      ) as {
+        execPath: string;
+        options: RsvimProc.CommandOptions;
         rid: number;
         stdinRid: number | undefined;
         stdoutRid: number | undefined;
         stderrRid: number | undefined;
       };
       return new RsvimProc.ChildProcess(
+        child.execPath,
+        child.options,
         child.rid,
         child.stdinRid,
         child.stdoutRid,
@@ -1444,6 +1464,10 @@ export namespace RsvimProc {
    */
   export class ChildProcess {
     /** @hidden */
+    #execPath: string;
+    /** @hidden */
+    #options: RsvimProc.CommandOptions;
+    /** @hidden */
     #rid: number;
     /** @hidden */
     #stdinRid: number | null | undefined;
@@ -1454,15 +1478,43 @@ export namespace RsvimProc {
 
     /** @hideconstructor */
     constructor(
+      execPath: string,
+      options: RsvimProc.CommandOptions,
       rid: number,
       stdinRid: number | null | undefined,
       stdoutRid: number | null | undefined,
       stderrRid: number | null | undefined,
     ) {
+      this.#execPath = execPath;
+      this.#options = options;
       this.#rid = rid;
       this.#stdinRid = stdinRid;
       this.#stdoutRid = stdoutRid;
       this.#stderrRid = stderrRid;
+    }
+
+    get execPath(): string {
+      return this.#execPath;
+    }
+
+    get options(): RsvimProc.CommandOptions {
+      return this.#options;
+    }
+
+    get rid(): number {
+      return this.#rid;
+    }
+
+    get stdinRid(): number | null | undefined {
+      return this.#stdinRid;
+    }
+
+    get stdoutRid(): number | null | undefined {
+      return this.#stdoutRid;
+    }
+
+    get stderrRid(): number | null | undefined {
+      return this.#stderrRid;
     }
   }
 

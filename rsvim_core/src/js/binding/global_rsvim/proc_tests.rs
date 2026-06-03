@@ -2,6 +2,7 @@ use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use regex::Regex;
 use std::time::Duration;
 
 #[tokio::test]
@@ -86,7 +87,7 @@ async fn test_spawn1() -> IoResult<()> {
 
   let src: &str = r#"
   const cmd1 = new Rsvim.proc.Command("ls");
-  const child1 = await cmd1.spawn();
+  const child1 = cmd1.spawn();
   Rsvim.cmd.echo(`child1: ${typeof child1}`);
     "#;
 
@@ -116,6 +117,56 @@ async fn test_spawn1() -> IoResult<()> {
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert_eq!(actual, "child1: object");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_spawn2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+
+  let src: &str = r#"
+  const cmd2 = new Rsvim.proc.Command("ls");
+  const child2 = cmd2.spawn();
+  Rsvim.cmd.echo(`child2 execPath:${child2.execPath} options:${child2.options} rid:${child2.rid} stdin:${child2.stdinRid} stdout:${child2.stdoutRid} stderr:${child2.stderrRid}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  // Before running
+  {}
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 1);
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    let re =
+      Regex::new(r"^child2 execPath:ls options:\[object Object\] rid:\d+ stdin:undefined stdout:\d+ stderr:\d+$")
+        .unwrap();
+    assert!(re.is_match(&actual));
   }
 
   Ok(())

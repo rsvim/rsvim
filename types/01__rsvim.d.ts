@@ -942,7 +942,23 @@ export declare namespace RsvimProc {
         constructor(execPath: string, options?: RsvimProc.CommandOptions);
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
-        spawn(): Promise<RsvimProc.ChildProcess>;
+        /**
+         * Spawn a child process.
+         *
+         * @returns {RsvimProc.ChildProcess} It returns a child process.
+         * @throws Throws {@link !Error} if failed to spawn the child process.
+         *
+         * @example
+         * ```javascript
+         * try {
+         *   const cmd = new Rsvim.proc.Command("ls");
+         *   const child = cmd.spawn();
+         * } catch (e) {
+         *   Rsvim.cmd.echo(`Failed to spawn child process: ${e}`);
+         * }
+         * ```
+         */
+        spawn(): RsvimProc.ChildProcess;
     }
     /**
      * Child process spawned from command.
@@ -950,7 +966,13 @@ export declare namespace RsvimProc {
     class ChildProcess {
         #private;
         /** @hideconstructor */
-        constructor(rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
+        constructor(execPath: string, options: RsvimProc.CommandOptions, rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
+        get execPath(): string;
+        get options(): RsvimProc.CommandOptions;
+        get rid(): number;
+        get stdinRid(): number | null | undefined;
+        get stdoutRid(): number | null | undefined;
+        get stderrRid(): number | null | undefined;
     }
     /**
      * Command options when creating a child-process command.
