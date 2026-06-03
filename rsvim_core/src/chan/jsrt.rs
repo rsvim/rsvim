@@ -41,6 +41,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of load tree-sitter parser.
   LoadTreeSitterParserResp(LoadTreeSitterParserResp),
+
+  /// Master send js runtime the result of child process stdio read text.
+  ReadTextFromChildProcessStdioResp(ReadTextFromChildProcessStdioResp),
 }
 
 #[derive(Debug)]
