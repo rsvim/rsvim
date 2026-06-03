@@ -114,6 +114,14 @@ pub struct LoadTreeSitterParserResp {
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
+#[derive(Debug)]
+pub struct ReadTextFromChildProcessStdioResp {
+  pub task_id: TaskId,
+
+  // type: `String`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
 pub fn send_to_jsrt(master_tx: UnboundedSender<JsMessage>, message: JsMessage) {
   master_tx.send(message).unwrap();

@@ -158,3 +158,18 @@ pub fn create_syn_load_parser(
     }),
   );
 }
+
+pub fn create_read_text_from_child_process_stdio(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  rid: ResourceId,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::ReadTextFromChildProcessStdioReq(
+      chan::ReadTextFromChildProcessStdioReq { task_id, rid },
+    ),
+  );
+}
