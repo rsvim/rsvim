@@ -3,14 +3,12 @@
 pub mod proc_command;
 
 use crate::is_v8_str;
-use crate::js;
 use crate::js::JsRuntime;
+use crate::js::binding;
+use crate::js::binding::global_rsvim::proc::proc_command::spawn_child_process;
 use crate::js::converter::*;
-use crate::js::pending;
 use crate::prelude::*;
-use compact_str::ToCompactString;
 use proc_command::ProcCommandOptions;
-use proc_command::SpawnChildProcessFuture;
 
 /// The `spawn` method in `Rsvim.proc.Command` class.
 pub fn spawn_child<'s>(
@@ -27,32 +25,30 @@ pub fn spawn_child<'s>(
     exec_path, options
   );
 
-  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
-  let promise = promise_resolver.get_promise(scope);
-
   let state_rc = JsRuntime::state(scope);
-  let spawn_cb = {
-    let promise = v8::Global::new(scope, promise_resolver);
-    let state_rc = state_rc.clone();
-    move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = SpawnChildProcessFuture {
-        promise: promise.clone(),
-        maybe_result,
-      };
-      let mut state = state_rc.borrow_mut();
-      state.pending_futures.push(Box::new(fut));
+  let resource_table = state_rc.borrow().resource_table.clone();
+
+  match spawn_child_process(resource_table, &exec_path, &options) {
+    Ok((child_rid, stdin_rid, stdout_rid, stderr_rid)) => {
+      let result = v8::Object::new(scope);
+      let child_rid = Into::<i32>::into(child_rid).to_v8(scope);
+      binding::set_property_to(scope, result, "rid", child_rid);
+      if let Some(stdin_rid) = stdin_rid {
+        let stdin_rid = Into::<i32>::into(stdin_rid).to_v8(scope);
+        binding::set_property_to(scope, result, "stdinRid", stdin_rid);
+      }
+      if let Some(stdout_rid) = stdout_rid {
+        let stdout_rid = Into::<i32>::into(stdout_rid).to_v8(scope);
+        binding::set_property_to(scope, result, "stdoutRid", stdout_rid);
+      }
+      if let Some(stderr_rid) = stderr_rid {
+        let stderr_rid = Into::<i32>::into(stderr_rid).to_v8(scope);
+        binding::set_property_to(scope, result, "stderrRid", stderr_rid);
+      }
+      rv.set(result.into());
     }
-  };
-
-  let mut state = state_rc.borrow_mut();
-  let task_id = js::TaskId::next();
-  pending::create_spawn_child_process(
-    &mut state,
-    task_id,
-    exec_path.to_compact_string(),
-    options,
-    Box::new(spawn_cb),
-  );
-
-  rv.set(promise.into());
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
 }
