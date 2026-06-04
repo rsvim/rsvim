@@ -288,6 +288,12 @@ pub fn create_new_context<'s, 'b>(
       "proc_spawn_child",
       global_rsvim::proc::spawn_child,
     );
+    set_function_to(
+      scope,
+      vim,
+      "proc_read_text_from_child_process_stdio",
+      global_rsvim::proc::read_text_from_child_process_stdio,
+    );
   }
 
   // For `Rsvim.rt`

@@ -104,6 +104,12 @@ pub enum TheErr {
 
   #[error("Failed to spawn child process `{0}`: {1}.")]
   SpawnChildProcessFailed(CompactString, IoErr),
+
+  #[error("Failed to read child process stdio `{0}`: {1}.")]
+  ReadChildProcessStdioFailed(ResourceId, IoErr),
+
+  #[error("Child process stdio resource `{0}` not found.")]
+  ChildProcessStdioResourceNotFound(ResourceId),
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.

@@ -41,6 +41,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of load tree-sitter parser.
   LoadTreeSitterParserResp(LoadTreeSitterParserResp),
+
+  /// Master send js runtime the result of child process stdio read text.
+  ReadTextFromChildProcessStdioResp(ReadTextFromChildProcessStdioResp),
 }
 
 #[derive(Debug)]
@@ -111,6 +114,14 @@ pub struct LoadTreeSitterParserResp {
   pub task_id: TaskId,
 
   // type: `Vec<String>`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct ReadTextFromChildProcessStdioResp {
+  pub task_id: TaskId,
+
+  // type: `String`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

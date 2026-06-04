@@ -1,4 +1,4 @@
-//! Child-process command options.
+//! Child-process command.
 
 use crate::js::converter::*;
 use crate::js::resource::ResourceId;

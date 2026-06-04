@@ -26,6 +26,7 @@ use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::command::CommandManager;
 use crate::js::command::CommandManagerArc;
 use crate::js::module::async_load_import;
+use crate::js::resource::Resource;
 use crate::js::resource::ResourceTable;
 use crate::js::resource::ResourceTableArc;
 use crate::prelude::*;
@@ -1035,6 +1036,76 @@ impl EventLoop {
                     chan::LoadTreeSitterParserResp {
                       task_id: req.task_id,
                       maybe_result: Some(Err(e)),
+                    },
+                  ))
+                  .unwrap();
+              }
+            }
+          });
+        }
+        MasterMessage::ReadTextFromChildProcessStdioReq(req) => {
+          trace!(
+            "Recv ReadTextFromChildProcessStdioReq:{:?} rid:{}",
+            req.task_id, req.rid
+          );
+
+          let resource_table = self.resource_table.clone();
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+
+          self.detached_tracker.spawn_blocking(move || {
+            let handle_read = |result, payload| match result {
+              Ok(_n) => jsrt_forwarder_tx
+                .send(JsMessage::ReadTextFromChildProcessStdioResp(
+                  chan::ReadTextFromChildProcessStdioResp {
+                    task_id: req.task_id,
+                    maybe_result: Some(Ok(
+                      postcard::to_allocvec(&payload).unwrap(),
+                    )),
+                  },
+                ))
+                .unwrap(),
+              Err(e) => jsrt_forwarder_tx
+                .send(JsMessage::ReadTextFromChildProcessStdioResp(
+                  chan::ReadTextFromChildProcessStdioResp {
+                    task_id: req.task_id,
+                    maybe_result: Some(Err(
+                      TheErr::ReadChildProcessStdioFailed(req.rid, e),
+                    )),
+                  },
+                ))
+                .unwrap(),
+            };
+
+            let child_stdio = lock!(resource_table).get(&req.rid).cloned();
+            match child_stdio {
+              Some(child_stdio) => match child_stdio {
+                Resource::ChildProcessStdout(resource) => {
+                  use std::io::Read;
+                  let resource = resource.data();
+                  let mut resource = lock!(resource);
+                  let mut payload = String::new();
+                  let result = resource.read_to_string(&mut payload);
+                  handle_read(result, payload)
+                }
+                Resource::ChildProcessStderr(resource) => {
+                  use std::io::Read;
+                  let resource = resource.data();
+                  let mut resource = lock!(resource);
+                  let mut payload = String::new();
+                  let result = resource.read_to_string(&mut payload);
+                  handle_read(result, payload)
+                }
+                _ => unreachable!(),
+              },
+              None => {
+                // Stdio rid not found in resource_table
+                jsrt_forwarder_tx
+                  .send(JsMessage::ReadTextFromChildProcessStdioResp(
+                    chan::ReadTextFromChildProcessStdioResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Err(
+                        TheErr::ChildProcessStdioResourceNotFound(req.rid),
+                      )),
                     },
                   ))
                   .unwrap();
