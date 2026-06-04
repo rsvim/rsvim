@@ -65,7 +65,7 @@ pub fn spawn_child<'s>(
 }
 
 /// The `text()` method in `Rsvim.proc.ChildProcessReadableStream` class.
-pub fn read_child_process_stdio_as_text<'s>(
+pub fn read_text_from_child_process_stdio<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
