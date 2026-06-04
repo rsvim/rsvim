@@ -1053,8 +1053,15 @@ impl EventLoop {
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
 
           self.detached_tracker.spawn_blocking(move || {
-            let handle_read = |result| match result {
-              Ok(n) => {}
+            let handle_read = |result, payload| match result {
+              Ok(_n) => jsrt_forwarder_tx.send(
+                JsMessage::ReadTextFromChildProcessStdioResp(
+                  chan::ReadTextFromChildProcessStdioResp {
+                    task_id: req.task_id,
+                    maybe_result: Some(Ok(postcard::to_allocvec(value)))
+                  },
+                ),
+              ),
               Err(e) => {
                 jsrt_forwarder_tx
                   .send(JsMessage::ReadTextFromChildProcessStdioResp(
@@ -1078,7 +1085,7 @@ impl EventLoop {
                   let mut resource = lock!(resource);
                   let mut payload = String::new();
                   let result = resource.read_to_string(&mut payload);
-                  handle_read(result)
+                  handle_read(result, payload)
                 }
                 Resource::ChildProcessStderr(resource) => {
                   use std::io::Read;
@@ -1086,7 +1093,7 @@ impl EventLoop {
                   let mut resource = lock!(resource);
                   let mut payload = String::new();
                   let result = resource.read_to_string(&mut payload);
-                  handle_read(result)
+                  handle_read(result, payload)
                 }
                 _ => unreachable!(),
               },
