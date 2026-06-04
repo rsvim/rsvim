@@ -1054,26 +1054,26 @@ impl EventLoop {
 
           self.detached_tracker.spawn_blocking(move || {
             let handle_read = |result, payload| match result {
-              Ok(_n) => jsrt_forwarder_tx.send(
-                JsMessage::ReadTextFromChildProcessStdioResp(
+              Ok(_n) => jsrt_forwarder_tx
+                .send(JsMessage::ReadTextFromChildProcessStdioResp(
                   chan::ReadTextFromChildProcessStdioResp {
                     task_id: req.task_id,
-                    maybe_result: Some(Ok(postcard::to_allocvec(value)))
+                    maybe_result: Some(Ok(
+                      postcard::to_allocvec(&payload).unwrap(),
+                    )),
                   },
-                ),
-              ),
-              Err(e) => {
-                jsrt_forwarder_tx
-                  .send(JsMessage::ReadTextFromChildProcessStdioResp(
-                    chan::ReadTextFromChildProcessStdioResp {
-                      task_id: req.task_id,
-                      maybe_result: Some(Err(
-                        TheErr::ReadChildProcessStdioFailed(req.rid, e),
-                      )),
-                    },
-                  ))
-                  .unwrap();
-              }
+                ))
+                .unwrap(),
+              Err(e) => jsrt_forwarder_tx
+                .send(JsMessage::ReadTextFromChildProcessStdioResp(
+                  chan::ReadTextFromChildProcessStdioResp {
+                    task_id: req.task_id,
+                    maybe_result: Some(Err(
+                      TheErr::ReadChildProcessStdioFailed(req.rid, e),
+                    )),
+                  },
+                ))
+                .unwrap(),
             };
 
             let child_stdio = lock!(resource_table).get(&req.rid).cloned();
