@@ -72,7 +72,7 @@ impl JsFuture for WaitChildFuture {
     binding::set_property_to(scope, result, "success", success);
     if let Some(exit_code) = exit_code {
       let exit_code = exit_code.to_v8(scope);
-      binding::set_property_to(scope, result, "exitCode", exit_code);
+      binding::set_property_to(scope, result, "code", exit_code);
     }
     if let Some(signal) = signal {
       let signal = signal.to_v8(scope);

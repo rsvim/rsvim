@@ -182,3 +182,66 @@ async fn test_spawn2() -> IoResult<()> {
 
   Ok(())
 }
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_spawn3() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+
+  let src: &str = r#"
+  const cmd = new Rsvim.proc.Command("ls");
+  const child = cmd.spawn();
+  const stdout3 = child.stdout;
+  const stdout3Text = await stdout3.text();
+  Rsvim.cmd.echo(`child stdout:${typeof stdout3} text:${stdout3Text}`);
+  const stderr3 = child.stderr;
+  const stderr2Text = await stderr3.text();
+  Rsvim.cmd.echo(`child stderr:${typeof stderr3} text:${stderr2Text}`);
+  const exitStatus = await child.wait();
+  Rsvim.cmd.echo(`child exitStatus:${typeof exitStatus} success:${exitStatus.success} code:${exitStatus.exitCode}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  // Before running
+  {}
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 2);
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    let re = Regex::new(r"^child2 stdout:object text:").unwrap();
+    assert!(re.is_match(&actual));
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    let re = Regex::new(r"^child2 stderr:object text:").unwrap();
+    assert!(re.is_match(&actual));
+  }
+
+  Ok(())
+}
