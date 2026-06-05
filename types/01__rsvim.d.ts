@@ -478,7 +478,7 @@ export declare namespace RsvimFs {
          */
         close(): void;
         /**
-         * Close the file with `using` without `close` API.
+         * Close the file with `using` API instead of `close`.
          *
          * @example
          * ```javascript
@@ -988,7 +988,7 @@ export declare namespace RsvimProc {
          */
         get isDisposed(): boolean;
         /**
-         * Same with `wait`, except it doesn't return exit status.
+         * Wait for the child process finish with `await using` API instead of `wait`.
          *
          * @returns {void} It returns nothing.
          */

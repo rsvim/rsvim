@@ -573,7 +573,7 @@ export var RsvimFs;
             this.#rid = null;
         }
         /**
-         * Close the file with `using` without `close` API.
+         * Close the file with `using` API instead of `close`.
          *
          * @example
          * ```javascript
@@ -1239,7 +1239,7 @@ export var RsvimProc;
             return isNull(this.#rid);
         }
         /**
-         * Same with `wait`, except it doesn't return exit status.
+         * Wait for the child process finish with `await using` API instead of `wait`.
          *
          * @returns {void} It returns nothing.
          */
