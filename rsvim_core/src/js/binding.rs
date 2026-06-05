@@ -291,8 +291,8 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
-      "proc_read_text_from_child_process_stdio",
-      global_rsvim::proc::read_text_from_child_process_stdio,
+      "proc_read_text_from_stdio",
+      global_rsvim::proc::read_text_from_stdio,
     );
   }
 
