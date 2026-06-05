@@ -1529,7 +1529,7 @@ export namespace RsvimProc {
     /**
      * Read text from the stream.
      */
-    async text(): Promise<string | null | undefined> {
+    async text(): Promise<string> {
       const payload =
         // @ts-ignore Ignore warning
         await __InternalRsvimGlobalObject.proc_read_text_from_child_process_stdio(
