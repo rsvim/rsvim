@@ -1098,14 +1098,88 @@ impl EventLoop {
                 _ => unreachable!(),
               },
               None => {
-                // Stdio rid not found in resource_table
+                // Child process (stdio) not found
                 jsrt_forwarder_tx
                   .send(JsMessage::ReadTextFromChildProcessStdioResp(
                     chan::ReadTextFromChildProcessStdioResp {
                       task_id: req.task_id,
-                      maybe_result: Some(Err(
-                        TheErr::ChildProcessStdioResourceNotFound(req.rid),
-                      )),
+                      maybe_result: Some(Err(TheErr::ChildProcessNotFound(
+                        req.rid,
+                      ))),
+                    },
+                  ))
+                  .unwrap();
+              }
+            }
+          });
+        }
+        MasterMessage::WaitChildProcessReq(req) => {
+          trace!("Recv WaitChildProcessReq:{:?} rid:{}", req.task_id, req.rid);
+
+          let resource_table = self.resource_table.clone();
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+
+          self.detached_tracker.spawn_blocking(move || {
+            let child = lock!(resource_table).get(&req.rid).cloned();
+            match child {
+              Some(child) => match child {
+                Resource::ChildProcess(resource) => {
+                  let resource = resource.data();
+                  let mut resource = lock!(resource);
+                  match resource.wait() {
+                    Ok(exit_status) => {
+                      let success = exit_status.success();
+                      let exit_code = exit_status.code();
+                      let signal: Option<i32> = {
+                        #[cfg(target_family = "unix")]
+                        {
+                          use std::os::unix::process::ExitStatusExt;
+                          exit_status.signal()
+                        }
+                        #[cfg(not(target_family = "unix"))]
+                        {
+                          None
+                        }
+                      };
+                      jsrt_forwarder_tx
+                        .send(JsMessage::WaitChildProcessResp(
+                          chan::WaitChildProcessResp {
+                            task_id: req.task_id,
+                            maybe_result: Some(Ok(
+                              postcard::to_allocvec(&(
+                                success, exit_code, signal,
+                              ))
+                              .unwrap(),
+                            )),
+                          },
+                        ))
+                        .unwrap();
+                    }
+                    Err(e) => {
+                      jsrt_forwarder_tx
+                        .send(JsMessage::WaitChildProcessResp(
+                          chan::WaitChildProcessResp {
+                            task_id: req.task_id,
+                            maybe_result: Some(Err(
+                              TheErr::WaitChildProcessFailed(req.rid, e),
+                            )),
+                          },
+                        ))
+                        .unwrap();
+                    }
+                  }
+                }
+                _ => unreachable!(),
+              },
+              None => {
+                // Child process not found
+                jsrt_forwarder_tx
+                  .send(JsMessage::WaitChildProcessResp(
+                    chan::WaitChildProcessResp {
+                      task_id: req.task_id,
+                      maybe_result: Some(Err(TheErr::ChildProcessNotFound(
+                        req.rid,
+                      ))),
                     },
                   ))
                   .unwrap();

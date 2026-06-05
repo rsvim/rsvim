@@ -51,6 +51,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to read from child process stdio as text.
   ReadTextFromChildProcessStdioReq(ReadTextFromChildProcessStdioReq),
+
+  /// Js runtime ask master to wait child process finish.
+  WaitChildProcessReq(WaitChildProcessReq),
 }
 
 #[derive(Debug)]
@@ -123,6 +126,12 @@ pub struct LoadTreeSitterParserReq {
 
 #[derive(Debug)]
 pub struct ReadTextFromChildProcessStdioReq {
+  pub task_id: TaskId,
+  pub rid: ResourceId,
+}
+
+#[derive(Debug)]
+pub struct WaitChildProcessReq {
   pub task_id: TaskId,
   pub rid: ResourceId,
 }

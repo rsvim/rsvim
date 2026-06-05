@@ -1514,6 +1514,34 @@ export namespace RsvimProc {
     get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined {
       return this.#stderr;
     }
+
+    /**
+     * Wait for child process complete.
+     *
+     * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
+     * @throws Throws {@link !Error} if failed to wait for child process.
+     *
+     * @example
+     * ```javascript
+     * try {
+     *   const cmd = new Rsvim.proc.Command("ls");
+     *   const child = cmd.spawn();
+     *   const output = await child.stdout.text();
+     *   const exitStatus = await child.wait();
+     *   Rsvim.cmd.echo(`"ls" command is completed successfully: ${exitStatus.success}.`);
+     * } catch (e) {
+     *   Rsvim.cmd.echo(`Failed to run "ls" command.`);
+     * }
+     * ```
+     */
+    async wait(): Promise<RsvimProc.ChildProcessExitStatus> {
+      const exitStatus =
+        // @ts-ignore Ignore warning
+        (await __InternalRsvimGlobalObject.proc_wait_child(
+          this.#rid,
+        )) as RsvimProc.ChildProcessExitStatus;
+      return exitStatus;
+    }
   }
 
   /**
@@ -1616,6 +1644,28 @@ export namespace RsvimProc {
      * @defaultValue `piped`
      */
     stderr?: "piped" | "inherit" | "null";
+  };
+
+  /**
+   * Child process exit status.
+   *
+   * @see {@link RsvimProc.ChildProcess}
+   */
+  export type ChildProcessExitStatus = {
+    /**
+     * Exit successfully.
+     */
+    success: boolean;
+
+    /**
+     * Exit code.
+     */
+    exit?: number;
+
+    /**
+     * Terminated by signal.
+     */
+    signal?: number;
   };
 }
 

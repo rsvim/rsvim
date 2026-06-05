@@ -9,6 +9,7 @@ use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::proc::child_process::ReadTextFromChildProcessStdioFuture;
+use crate::js::binding::global_rsvim::proc::child_process::WaitChildFuture;
 use crate::js::binding::global_rsvim::proc::proc_command::spawn_child_process;
 use crate::js::converter::*;
 use crate::js::pending;
@@ -17,7 +18,7 @@ use crate::prelude::*;
 use compact_str::ToCompactString;
 use proc_command::ProcCommandOptions;
 
-/// The `spawn` method in `Rsvim.proc.Command` class.
+/// The `spawn()` method in `Rsvim.proc.Command`.
 pub fn spawn_child<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
@@ -74,7 +75,7 @@ pub fn read_text_from_child<'s>(
   debug_assert!(is_v8_int!(args.get(0)));
   let rid = i32::from_v8(scope, args.get(0));
   let rid = ResourceId::from(rid);
-  trace!("read_child_process_stdio_as_text rid: {:?}", rid);
+  trace!("read_text_from_child rid: {:?}", rid);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -100,6 +101,47 @@ pub fn read_text_from_child<'s>(
     task_id,
     rid,
     Box::new(read_cb),
+  );
+
+  rv.set(promise.into());
+}
+
+/// The `wait()` method in `Rsvim.proc.ChildProcess`.
+pub fn wait_child<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_int!(args.get(0)));
+  let rid = i32::from_v8(scope, args.get(0));
+  let rid = ResourceId::from(rid);
+  trace!("wait_child rid: {:?}", rid);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let wait_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = WaitChildFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_wait_child_process(
+    &mut state,
+    task_id,
+    rid,
+    Box::new(wait_cb),
   );
 
   rv.set(promise.into());
