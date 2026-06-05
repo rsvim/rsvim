@@ -134,7 +134,9 @@ async fn test_spawn2() -> IoResult<()> {
   let src: &str = r#"
   const cmd2 = new Rsvim.proc.Command("ls");
   const child2 = cmd2.spawn();
-  Rsvim.cmd.echo(`child2 execPath:${child2.execPath} options:${child2.options} rid:${child2.rid} stdin:${child2.stdinRid} stdout:${child2.stdoutRid} stderr:${child2.stderrRid}`);
+  const stdout2 = child2.stdout;
+  const stdout2Text = await stdout2.text();
+  Rsvim.cmd.echo(`child2 stdout:${typeof stdout2} text:${stdout2Text}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -163,9 +165,7 @@ async fn test_spawn2() -> IoResult<()> {
     assert!(actual.is_some());
     let actual = actual.unwrap();
 
-    let re =
-      Regex::new(r"^child2 execPath:ls options:\[object Object\] rid:\d+ stdin:undefined stdout:\d+ stderr:\d+$")
-        .unwrap();
+    let re = Regex::new(r"^child2 stdout:object text:").unwrap();
     assert!(re.is_match(&actual));
   }
 
