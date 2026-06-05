@@ -58,7 +58,7 @@ lru = "0.18"
 mimalloc = "0.1"
 normpath = "1.5"
 num-traits = "0.2"
-oxc_resolver = "11.19"
+oxc_resolver = "11.21"
 paste = "1.0"
 path-absolutize = "3.1"
 postcard = { version = "1.1", default-features = false, features = ["use-std"] }
