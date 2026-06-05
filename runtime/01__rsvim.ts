@@ -1501,20 +1501,29 @@ export namespace RsvimProc {
       return this.#options;
     }
 
-    get rid(): number {
-      return this.#rid;
+    get stdout(): RsvimProc.ChildProcessReadableStream | null | undefined {
+      return this.#stdoutRid != null
+        ? new RsvimProc.ChildProcessReadableStream(this.#stdoutRid)
+        : null;
     }
 
-    get stdinRid(): number | null | undefined {
-      return this.#stdinRid;
+    get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined {
+      return this.#stderrRid != null
+        ? new RsvimProc.ChildProcessReadableStream(this.#stderrRid)
+        : null;
     }
+  }
 
-    get stdoutRid(): number | null | undefined {
-      return this.#stdoutRid;
-    }
+  /**
+   * Child process readable stream.
+   */
+  export class ChildProcessReadableStream {
+    /** @hidden */
+    #rid: number;
 
-    get stderrRid(): number | null | undefined {
-      return this.#stderrRid;
+    /** @hideconstructor */
+    constructor(rid: number) {
+      this.#rid = rid;
     }
   }
 
