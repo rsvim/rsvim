@@ -1518,6 +1518,23 @@ export namespace RsvimProc {
       return this.#stderr;
     }
 
+    /**
+     * Child process is already completed.
+     *
+     * @example
+     * ```javascript
+     * const child = new Rsvim.proc.Command("ls").spawn();
+     * {
+     *   await using usedChild = child;
+     *   Rsvim.cmd.echo(usedChild.isDisposed); // false
+     * }
+     * Rsvim.cmd.echo(usedChild.isDisposed); // true
+     * ```
+     */
+    get isDisposed(): boolean {
+      return isNull(this.#rid);
+    }
+
     async [Symbol.asyncDispose](): Promise<void> {
       await this.wait();
     }
