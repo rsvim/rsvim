@@ -1660,7 +1660,7 @@ export namespace RsvimProc {
     /**
      * Exit code.
      */
-    exitCode?: number;
+    exit?: number;
 
     /**
      * Terminated by signal.
