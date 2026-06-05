@@ -776,24 +776,36 @@ pub mod boost {
             debug_assert!(
               state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
             );
-            let mut write_cb = state_rc
+            let mut load_cb = state_rc
               .borrow_mut()
               .pending_tasks
               .remove(&resp.task_id)
               .unwrap();
-            write_cb(resp.maybe_result);
+            load_cb(resp.maybe_result);
           }
           JsMessage::ReadTextFromChildProcessStdioResp(resp) => {
             trace!("Recv ReadTextFromChildProcessStdioResp:{:?}", resp.task_id);
             debug_assert!(
               state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
             );
-            let mut write_cb = state_rc
+            let mut read_cb = state_rc
               .borrow_mut()
               .pending_tasks
               .remove(&resp.task_id)
               .unwrap();
-            write_cb(resp.maybe_result);
+            read_cb(resp.maybe_result);
+          }
+          JsMessage::WaitChildProcessResp(resp) => {
+            trace!("Recv WaitChildProcessResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut wait_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            wait_cb(resp.maybe_result);
           }
         }
       }
