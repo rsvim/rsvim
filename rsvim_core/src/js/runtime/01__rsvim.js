@@ -552,6 +552,8 @@ export var RsvimFs;
         /**
          * Close the file.
          *
+         * @throws Throws {@link !Error} if the file is already been closed.
+         *
          * @example
          * ```javascript
          * const file = await Rsvim.fs.open("README.md");
@@ -1236,6 +1238,11 @@ export var RsvimProc;
         get isDisposed() {
             return isNull(this.#rid);
         }
+        /**
+         * Same with `wait`, except it doesn't return exit status.
+         *
+         * @returns {void} It returns nothing.
+         */
         async [Symbol.asyncDispose]() {
             await this.wait();
         }
@@ -1243,7 +1250,7 @@ export var RsvimProc;
          * Wait for child process complete.
          *
          * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
-         * @throws Throws {@link !Error} if failed to wait for child process.
+         * @throws Throws {@link !Error} if the child process is already finished, or failed to wait.
          *
          * @example
          * ```javascript
