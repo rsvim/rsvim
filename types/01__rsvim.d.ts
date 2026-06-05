@@ -1006,6 +1006,19 @@ export declare namespace RsvimProc {
          * ```
          */
         wait(): Promise<RsvimProc.ChildProcessExitStatus>;
+        /**
+         * Get child process exit status.
+         *
+         * @returns {RsvimProc.ChildProcessExitStatus | null | undefined} It returns exit status if the child process is already finished, otherwise it returns `null`.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * await child.wait();
+         * const exitStatus = child.exitStatus;
+         * ```
+         */
+        get exitStatus(): RsvimProc.ChildProcessExitStatus | null | undefined;
     }
     /**
      * Child process readable stream.

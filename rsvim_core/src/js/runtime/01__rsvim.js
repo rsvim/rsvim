@@ -20,6 +20,18 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 /** @hidden */
+function assertTrue(condition, message) {
+    if (!condition) {
+        throw new Error(message);
+    }
+}
+/** @hidden */
+function assertFalse(condition, message) {
+    if (!!condition) {
+        throw new Error(message);
+    }
+}
+/** @hidden */
 function isNull(arg) {
     return arg === undefined || arg === null;
 }
@@ -553,10 +565,9 @@ export var RsvimFs;
          * ```
          */
         close() {
-            if (!isNull(this.#rid)) {
-                // @ts-ignore Ignore warning
-                __InternalRsvimGlobalObject.fs_close(this.#rid);
-            }
+            assertFalse(isNull(this.#rid), "RsvimFs.File is already closed!");
+            // @ts-ignore Ignore warning
+            __InternalRsvimGlobalObject.fs_close(this.#rid);
             this.#rid = null;
         }
         /**
@@ -1248,12 +1259,26 @@ export var RsvimProc;
          * ```
          */
         async wait() {
-            if (this.#rid != null) {
-                this.#exitStatus =
-                    // @ts-ignore Ignore warning
-                    (await __InternalRsvimGlobalObject.proc_wait_child(this.#rid));
-                this.#rid = null;
-            }
+            assertFalse(isNull(this.#rid), "RsvimProc.ChildProcess is already finished!");
+            this.#exitStatus =
+                // @ts-ignore Ignore warning
+                (await __InternalRsvimGlobalObject.proc_wait_child(this.#rid));
+            this.#rid = null;
+            return this.#exitStatus;
+        }
+        /**
+         * Get child process exit status.
+         *
+         * @returns {RsvimProc.ChildProcessExitStatus | null | undefined} It returns exit status if the child process is already finished, otherwise it returns `null`.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * await child.wait();
+         * const exitStatus = child.exitStatus;
+         * ```
+         */
+        get exitStatus() {
             return this.#exitStatus;
         }
     }
