@@ -1130,7 +1130,7 @@ impl EventLoop {
                     Ok(exit_status) => {
                       let success = exit_status.success();
                       let exit_code = exit_status.code();
-                      let signal = {
+                      let signal: Option<i32> = {
                         #[cfg(target_family = "unix")]
                         {
                           use std::os::unix::process::ExitStatusExt;
