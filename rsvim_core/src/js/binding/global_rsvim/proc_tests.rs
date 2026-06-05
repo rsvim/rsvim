@@ -247,10 +247,10 @@ async fn test_spawn3() -> IoResult<()> {
     assert!(actual.is_some());
     let actual = actual.unwrap();
 
-    let re =
-      Regex::new(r"^child exitStatus:object success:true, code:0, signal:")
-        .unwrap();
-    assert!(re.is_match(&actual));
+    assert_eq!(
+      actual,
+      "child exitStatus:object success:true code:0 signal:undefined"
+    );
   }
 
   Ok(())
