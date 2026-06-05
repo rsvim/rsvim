@@ -9,6 +9,7 @@ use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::proc::child_process::ReadTextFromChildProcessStdioFuture;
+use crate::js::binding::global_rsvim::proc::child_process::WaitChildFuture;
 use crate::js::binding::global_rsvim::proc::proc_command::spawn_child_process;
 use crate::js::converter::*;
 use crate::js::pending;
@@ -118,11 +119,11 @@ pub fn wait_child<'s>(
   let promise = promise_resolver.get_promise(scope);
 
   let state_rc = JsRuntime::state(scope);
-  let read_cb = {
+  let wait_cb = {
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = ReadTextFromChildProcessStdioFuture {
+      let fut = WaitChildFuture {
         promise: promise.clone(),
         maybe_result,
       };
@@ -133,11 +134,11 @@ pub fn wait_child<'s>(
 
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
-  pending::create_read_text_from_child_process_stdio(
+  pending::create_wait_child_process(
     &mut state,
     task_id,
     rid,
-    Box::new(read_cb),
+    Box::new(wait_cb),
   );
 
   rv.set(promise.into());
