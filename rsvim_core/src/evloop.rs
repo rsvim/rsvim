@@ -1130,11 +1130,16 @@ impl EventLoop {
                     Ok(exit_status) => {
                       let success = exit_status.success();
                       let exit_code = exit_status.code();
-                      let signal = if cfg!(target_family = "unix") {
-                        use std::os::unix::process::ExitStatusExt;
-                        exit_status.signal()
-                      } else {
-                        None
+                      let signal = {
+                        #[cfg(target_family = "unix")]
+                        {
+                          use std::os::unix::process::ExitStatusExt;
+                          exit_status.signal()
+                        }
+                        #[cfg(not(target_family = "unix"))]
+                        {
+                          None
+                        }
                       };
                       jsrt_forwarder_tx
                         .send(JsMessage::WaitChildProcessResp(
