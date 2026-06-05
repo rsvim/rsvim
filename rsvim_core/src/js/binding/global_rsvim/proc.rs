@@ -75,7 +75,7 @@ pub fn read_text_from_child<'s>(
   debug_assert!(is_v8_int!(args.get(0)));
   let rid = i32::from_v8(scope, args.get(0));
   let rid = ResourceId::from(rid);
-  trace!("read_text_from_child_stdio rid: {:?}", rid);
+  trace!("read_text_from_child rid: {:?}", rid);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
