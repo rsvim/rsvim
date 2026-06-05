@@ -17,7 +17,7 @@ use crate::prelude::*;
 use compact_str::ToCompactString;
 use proc_command::ProcCommandOptions;
 
-/// The `spawn` method in `Rsvim.proc.Command` class.
+/// The `spawn()` method in `Rsvim.proc.Command`.
 pub fn spawn_child<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
@@ -64,8 +64,49 @@ pub fn spawn_child<'s>(
   }
 }
 
-/// The `text()` method in `Rsvim.proc.ChildProcessReadableStream` class.
+/// The `text()` method in `Rsvim.proc.ChildProcessReadableStream`.
 pub fn read_text_from_stdio<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_int!(args.get(0)));
+  let rid = i32::from_v8(scope, args.get(0));
+  let rid = ResourceId::from(rid);
+  trace!("read_child_process_stdio_as_text rid: {:?}", rid);
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let read_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = ReadTextFromChildProcessStdioFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_read_text_from_child_process_stdio(
+    &mut state,
+    task_id,
+    rid,
+    Box::new(read_cb),
+  );
+
+  rv.set(promise.into());
+}
+
+/// The `wait()` method in `Rsvim.proc.ChildProcess`.
+pub fn wait<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
