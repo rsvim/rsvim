@@ -18,7 +18,7 @@ use compact_str::ToCompactString;
 use proc_command::ProcCommandOptions;
 
 /// The `spawn()` method in `Rsvim.proc.Command`.
-pub fn spawn_child<'s>(
+pub fn spawn<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -27,10 +27,7 @@ pub fn spawn_child<'s>(
   debug_assert!(is_v8_str!(args.get(0)));
   let exec_path = args.get(0).to_rust_string_lossy(scope);
   let options = ProcCommandOptions::from_v8(scope, args.get(1));
-  trace!(
-    "spawn_child exec_path: {:?}, options: {:?}",
-    exec_path, options
-  );
+  trace!("spawn exec_path: {:?}, options: {:?}", exec_path, options);
 
   let state_rc = JsRuntime::state(scope);
   let resource_table = state_rc.borrow().resource_table.clone();
@@ -65,7 +62,7 @@ pub fn spawn_child<'s>(
 }
 
 /// The `text()` method in `Rsvim.proc.ChildProcessReadableStream`.
-pub fn read_text_from_stdio<'s>(
+pub fn read_text_from_child_stdio<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
