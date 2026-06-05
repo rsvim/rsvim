@@ -282,12 +282,17 @@ pub fn create_new_context<'s, 'b>(
 
   // For `Rsvim.proc`
   {
-    set_function_to(scope, vim, "proc_spawn_child", global_rsvim::proc::spawn);
     set_function_to(
       scope,
       vim,
-      "proc_read_text_from_child_stdio",
-      global_rsvim::proc::read_text_from_child_stdio,
+      "proc_spawn_child",
+      global_rsvim::proc::spawn_child,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "proc_read_text_from_child",
+      global_rsvim::proc::read_text_from_child,
     );
   }
 

@@ -1549,9 +1549,7 @@ export namespace RsvimProc {
     async text(): Promise<string> {
       const payload =
         // @ts-ignore Ignore warning
-        await __InternalRsvimGlobalObject.proc_read_text_from_child_stdio(
-          this.#rid,
-        );
+        await __InternalRsvimGlobalObject.proc_read_text_from_child(this.#rid);
       return payload;
     }
   }
