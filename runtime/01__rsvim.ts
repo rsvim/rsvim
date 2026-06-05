@@ -1525,6 +1525,18 @@ export namespace RsvimProc {
     constructor(rid: number) {
       this.#rid = rid;
     }
+
+    /**
+     * Read text from the stream.
+     */
+    async text(): Promise<string | null | undefined> {
+      const payload =
+        // @ts-ignore Ignore warning
+        await __InternalRsvimGlobalObject.proc_read_text_from_child_process_stdio(
+          this.#rid,
+        );
+      return payload;
+    }
   }
 
   /**
