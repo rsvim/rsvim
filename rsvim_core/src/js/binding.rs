@@ -294,6 +294,12 @@ pub fn create_new_context<'s, 'b>(
       "proc_read_text_from_child",
       global_rsvim::proc::read_text_from_child,
     );
+    set_function_to(
+      scope,
+      vim,
+      "proc_wait_child",
+      global_rsvim::proc::wait_child,
+    );
   }
 
   // For `Rsvim.rt`
