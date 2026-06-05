@@ -132,7 +132,7 @@ pub struct ReadTextFromChildProcessStdioResp {
 pub struct WaitChildProcessResp {
   pub task_id: TaskId,
 
-  // type: `(/* exit code */ Option<i32>, /* signal */ Option<i32>)`
+  // type: `(/* success */ bool, /* exit code */ Option<i32>, /* signal */ Option<i32>)`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

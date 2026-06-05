@@ -1126,16 +1126,51 @@ impl EventLoop {
                 Resource::ChildProcess(resource) => {
                   let resource = resource.data();
                   let mut resource = lock!(resource);
-                  let result = resource.wait();
-                  handle_read(result, payload)
+                  match resource.wait() {
+                    Ok(exit_status) => {
+                      let success = exit_status.success();
+                      let exit_code = exit_status.code();
+                      let signal = if cfg!(target_family = "unix") {
+                        use std::os::unix::process::ExitStatusExt;
+                        exit_status.signal()
+                      } else {
+                        None
+                      };
+                      jsrt_forwarder_tx
+                        .send(JsMessage::WaitChildProcessResp(
+                          chan::WaitChildProcessResp {
+                            task_id: req.task_id,
+                            maybe_result: Some(Ok(
+                              postcard::to_allocvec(&(
+                                success, exit_code, signal,
+                              ))
+                              .unwrap(),
+                            )),
+                          },
+                        ))
+                        .unwrap();
+                    }
+                    Err(e) => {
+                      jsrt_forwarder_tx
+                        .send(JsMessage::WaitChildProcessResp(
+                          chan::WaitChildProcessResp {
+                            task_id: req.task_id,
+                            maybe_result: Some(Err(
+                              TheErr::WaitChildProcessFailed(req.rid, e),
+                            )),
+                          },
+                        ))
+                        .unwrap();
+                    }
+                  }
                 }
                 _ => unreachable!(),
               },
               None => {
                 // Child process not found
                 jsrt_forwarder_tx
-                  .send(JsMessage::ReadTextFromChildProcessStdioResp(
-                    chan::ReadTextFromChildProcessStdioResp {
+                  .send(JsMessage::WaitChildProcessResp(
+                    chan::WaitChildProcessResp {
                       task_id: req.task_id,
                       maybe_result: Some(Err(TheErr::ChildProcessNotFound(
                         req.rid,

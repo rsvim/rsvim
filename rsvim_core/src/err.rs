@@ -110,6 +110,9 @@ pub enum TheErr {
 
   #[error("Child process `{0}` not found.")]
   ChildProcessNotFound(ResourceId),
+
+  #[error("Failed to wait child process `{0}`: {1}.")]
+  WaitChildProcessFailed(ResourceId, IoErr),
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.
