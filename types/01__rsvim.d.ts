@@ -969,10 +969,20 @@ export declare namespace RsvimProc {
         constructor(execPath: string, options: RsvimProc.CommandOptions, rid: number, stdinRid: number | null | undefined, stdoutRid: number | null | undefined, stderrRid: number | null | undefined);
         get execPath(): string;
         get options(): RsvimProc.CommandOptions;
-        get rid(): number;
-        get stdinRid(): number | null | undefined;
-        get stdoutRid(): number | null | undefined;
-        get stderrRid(): number | null | undefined;
+        get stdout(): RsvimProc.ChildProcessReadableStream | null | undefined;
+        get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined;
+    }
+    /**
+     * Child process readable stream.
+     */
+    class ChildProcessReadableStream {
+        #private;
+        /** @hideconstructor */
+        constructor(rid: number);
+        /**
+         * Read text from the stream.
+         */
+        text(): Promise<string>;
     }
     /**
      * Command options when creating a child-process command.

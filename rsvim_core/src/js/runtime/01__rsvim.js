@@ -1194,20 +1194,39 @@ export var RsvimProc;
         get options() {
             return this.#options;
         }
-        get rid() {
-            return this.#rid;
+        get stdout() {
+            return this.#stdoutRid != null
+                ? new RsvimProc.ChildProcessReadableStream(this.#stdoutRid)
+                : null;
         }
-        get stdinRid() {
-            return this.#stdinRid;
-        }
-        get stdoutRid() {
-            return this.#stdoutRid;
-        }
-        get stderrRid() {
-            return this.#stderrRid;
+        get stderr() {
+            return this.#stderrRid != null
+                ? new RsvimProc.ChildProcessReadableStream(this.#stderrRid)
+                : null;
         }
     }
     RsvimProc.ChildProcess = ChildProcess;
+    /**
+     * Child process readable stream.
+     */
+    class ChildProcessReadableStream {
+        /** @hidden */
+        #rid;
+        /** @hideconstructor */
+        constructor(rid) {
+            this.#rid = rid;
+        }
+        /**
+         * Read text from the stream.
+         */
+        async text() {
+            const payload = 
+            // @ts-ignore Ignore warning
+            await __InternalRsvimGlobalObject.proc_read_text_from_child_process_stdio(this.#rid);
+            return payload;
+        }
+    }
+    RsvimProc.ChildProcessReadableStream = ChildProcessReadableStream;
 })(RsvimProc || (RsvimProc = {}));
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
