@@ -71,7 +71,7 @@ pub fn read_text_from_child_stdio<'s>(
   debug_assert!(is_v8_int!(args.get(0)));
   let rid = i32::from_v8(scope, args.get(0));
   let rid = ResourceId::from(rid);
-  trace!("read_child_process_stdio_as_text rid: {:?}", rid);
+  trace!("read_text_from_child_stdio rid: {:?}", rid);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
@@ -103,7 +103,7 @@ pub fn read_text_from_child_stdio<'s>(
 }
 
 /// The `wait()` method in `Rsvim.proc.ChildProcess`.
-pub fn wait<'s>(
+pub fn wait_child<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -112,7 +112,7 @@ pub fn wait<'s>(
   debug_assert!(is_v8_int!(args.get(0)));
   let rid = i32::from_v8(scope, args.get(0));
   let rid = ResourceId::from(rid);
-  trace!("read_child_process_stdio_as_text rid: {:?}", rid);
+  trace!("wait_child rid: {:?}", rid);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);

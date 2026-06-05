@@ -44,6 +44,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of child process stdio read text.
   ReadTextFromChildProcessStdioResp(ReadTextFromChildProcessStdioResp),
+
+  /// Master send js runtime the result of child process finish.
+  WaitChildProcessResp(WaitChildProcessResp),
 }
 
 #[derive(Debug)]
@@ -122,6 +125,14 @@ pub struct ReadTextFromChildProcessStdioResp {
   pub task_id: TaskId,
 
   // type: `String`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct WaitChildProcessResp {
+  pub task_id: TaskId,
+
+  // type: `(/* exit code */ i32, /* signal */ i32)`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

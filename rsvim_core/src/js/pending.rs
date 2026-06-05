@@ -173,3 +173,19 @@ pub fn create_read_text_from_child_process_stdio(
     ),
   );
 }
+
+pub fn create_wait_child_process(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  rid: ResourceId,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::WaitChildProcessReq(chan::WaitChildProcessReq {
+      task_id,
+      rid,
+    }),
+  );
+}
