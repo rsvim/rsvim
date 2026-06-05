@@ -137,6 +137,9 @@ async fn test_spawn2() -> IoResult<()> {
   const stdout2 = child2.stdout;
   const stdout2Text = await stdout2.text();
   Rsvim.cmd.echo(`child2 stdout:${typeof stdout2} text:${stdout2Text}`);
+  const stderr2 = child2.stderr;
+  const stderr2Text = await stderr2.text();
+  Rsvim.cmd.echo(`child2 stderr:${typeof stderr2} text:${stderr2Text}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -158,7 +161,7 @@ async fn test_spawn2() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
 
     let actual = contents.message_history_mut().pop();
     info!("actual:{:?}", actual);
@@ -166,6 +169,14 @@ async fn test_spawn2() -> IoResult<()> {
     let actual = actual.unwrap();
 
     let re = Regex::new(r"^child2 stdout:object text:").unwrap();
+    assert!(re.is_match(&actual));
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    let re = Regex::new(r"^child2 stderr:object text:").unwrap();
     assert!(re.is_match(&actual));
   }
 
