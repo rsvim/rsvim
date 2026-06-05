@@ -60,9 +60,29 @@ impl JsFuture for WaitChildFuture {
     let result = result.unwrap();
 
     // Deserialize into string
-    let payload = postcard::from_bytes::<String>(&result).unwrap();
-    let payload = payload.to_v8(scope);
+    let (success, exit_code, signal) = postcard::from_bytes::<(
+      /* success */ bool,
+      /* exit code */ Option<i32>,
+      /* signal */ Option<i32>,
+    )>(&result)
+    .unwrap();
 
-    self.promise.open(scope).resolve(scope, payload).unwrap();
+    let result = v8::Object::new(scope);
+    let success = success.to_v8(scope);
+    binding::set_property_to(scope, result, "success", success);
+    if let Some(exit_code) = exit_code {
+      let exit_code = exit_code.to_v8(scope);
+      binding::set_property_to(scope, result, "exitCode", exit_code);
+    }
+    if let Some(signal) = signal {
+      let signal = signal.to_v8(scope);
+      binding::set_property_to(scope, result, "signal", signal);
+    }
+
+    self
+      .promise
+      .open(scope)
+      .resolve(scope, result.into())
+      .unwrap();
   }
 }
