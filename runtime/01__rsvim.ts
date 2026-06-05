@@ -1548,6 +1548,11 @@ export namespace RsvimProc {
       return isNull(this.#rid);
     }
 
+    /**
+     * Same with `wait`, except it doesn't return exit status.
+     *
+     * @returns {void} It returns nothing.
+     */
     async [Symbol.asyncDispose](): Promise<void> {
       await this.wait();
     }
