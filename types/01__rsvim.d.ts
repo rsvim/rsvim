@@ -981,6 +981,21 @@ export declare namespace RsvimProc {
         constructor(rid: number);
         /**
          * Read text from the stream.
+         *
+         * @returns {string} It returns the read text from child process stdio channel.
+         * @throws Throws {@link !Error} if failed to read.
+         *
+         * @example
+         * ```javascript
+         * try {
+         *   const cmd = new Rsvim.proc.Command("ls");
+         *   const child = cmd.spawn();
+         *   const output = await child.stdout.text();
+         *   Rsvim.cmd.echo(`"ls" command output:${output}`);
+         * } catch (e) {
+         *   Rsvim.cmd.echo(`Failed to run "ls" command.`);
+         * }
+         * ```
          */
         text(): Promise<string>;
     }
