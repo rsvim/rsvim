@@ -972,6 +972,21 @@ export declare namespace RsvimProc {
         get stdout(): RsvimProc.ChildProcessReadableStream | null | undefined;
         get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined;
         /**
+         * Child process is already completed.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * {
+         *   await using usedChild = child;
+         *   Rsvim.cmd.echo(usedChild.isDisposed); // false
+         * }
+         * Rsvim.cmd.echo(usedChild.isDisposed); // true
+         * ```
+         */
+        get isDisposed(): boolean;
+        [Symbol.asyncDispose](): Promise<void>;
+        /**
          * Wait for child process complete.
          *
          * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.

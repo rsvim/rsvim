@@ -1174,6 +1174,8 @@ export var RsvimProc;
         /** @hidden */
         #rid;
         /** @hidden */
+        #exitStatus;
+        /** @hidden */
         #stdinRid;
         /** @hidden */
         #stdout;
@@ -1184,6 +1186,7 @@ export var RsvimProc;
             this.#execPath = execPath;
             this.#options = options;
             this.#rid = rid;
+            this.#exitStatus = null;
             this.#stdinRid = stdinRid;
             this.#stdout =
                 stdoutRid != null
@@ -1207,6 +1210,25 @@ export var RsvimProc;
             return this.#stderr;
         }
         /**
+         * Child process is already completed.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * {
+         *   await using usedChild = child;
+         *   Rsvim.cmd.echo(usedChild.isDisposed); // false
+         * }
+         * Rsvim.cmd.echo(usedChild.isDisposed); // true
+         * ```
+         */
+        get isDisposed() {
+            return isNull(this.#rid);
+        }
+        async [Symbol.asyncDispose]() {
+            await this.wait();
+        }
+        /**
          * Wait for child process complete.
          *
          * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
@@ -1226,10 +1248,13 @@ export var RsvimProc;
          * ```
          */
         async wait() {
-            const exitStatus = 
-            // @ts-ignore Ignore warning
-            (await __InternalRsvimGlobalObject.proc_wait_child(this.#rid));
-            return exitStatus;
+            if (this.#rid != null) {
+                this.#exitStatus =
+                    // @ts-ignore Ignore warning
+                    (await __InternalRsvimGlobalObject.proc_wait_child(this.#rid));
+                this.#rid = null;
+            }
+            return this.#exitStatus;
         }
     }
     RsvimProc.ChildProcess = ChildProcess;
