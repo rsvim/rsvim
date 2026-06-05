@@ -1472,9 +1472,9 @@ export namespace RsvimProc {
     /** @hidden */
     #stdinRid: number | null | undefined;
     /** @hidden */
-    #stdoutRid: number | null | undefined;
+    #stdout: RsvimProc.ChildProcessReadableStream | null | undefined;
     /** @hidden */
-    #stderrRid: number | null | undefined;
+    #stderr: RsvimProc.ChildProcessReadableStream | null | undefined;
 
     /** @hideconstructor */
     constructor(
@@ -1489,8 +1489,14 @@ export namespace RsvimProc {
       this.#options = options;
       this.#rid = rid;
       this.#stdinRid = stdinRid;
-      this.#stdoutRid = stdoutRid;
-      this.#stderrRid = stderrRid;
+      this.#stdout =
+        stdoutRid != null
+          ? new RsvimProc.ChildProcessReadableStream(stdoutRid)
+          : null;
+      this.#stderr =
+        stderrRid != null
+          ? new RsvimProc.ChildProcessReadableStream(stderrRid)
+          : null;
     }
 
     get execPath(): string {
@@ -1502,15 +1508,11 @@ export namespace RsvimProc {
     }
 
     get stdout(): RsvimProc.ChildProcessReadableStream | null | undefined {
-      return this.#stdoutRid != null
-        ? new RsvimProc.ChildProcessReadableStream(this.#stdoutRid)
-        : null;
+      return this.#stdout;
     }
 
     get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined {
-      return this.#stderrRid != null
-        ? new RsvimProc.ChildProcessReadableStream(this.#stderrRid)
-        : null;
+      return this.#stderr;
     }
   }
 
