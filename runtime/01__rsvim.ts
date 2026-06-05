@@ -21,6 +21,20 @@
  */
 
 /** @hidden */
+function assertTrue(condition: boolean, message: string) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+/** @hidden */
+function assertFalse(condition: boolean, message: string) {
+  if (!!condition) {
+    throw new Error(message);
+  }
+}
+
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
@@ -763,10 +777,9 @@ export namespace RsvimFs {
      * ```
      */
     close(): void {
-      if (!isNull(this.#rid)) {
-        // @ts-ignore Ignore warning
-        __InternalRsvimGlobalObject.fs_close(this.#rid);
-      }
+      assertFalse(isNull(this.#rid), "RsvimFs.File is already closed!");
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.fs_close(this.#rid);
       this.#rid = null;
     }
 
@@ -1559,15 +1572,33 @@ export namespace RsvimProc {
      * ```
      */
     async wait(): Promise<RsvimProc.ChildProcessExitStatus> {
-      if (this.#rid != null) {
-        this.#exitStatus =
-          // @ts-ignore Ignore warning
-          (await __InternalRsvimGlobalObject.proc_wait_child(
-            this.#rid,
-          )) as RsvimProc.ChildProcessExitStatus;
-        this.#rid = null;
-      }
+      assertFalse(
+        isNull(this.#rid),
+        "RsvimProc.ChildProcess is already finished!",
+      );
+      this.#exitStatus =
+        // @ts-ignore Ignore warning
+        (await __InternalRsvimGlobalObject.proc_wait_child(
+          this.#rid,
+        )) as RsvimProc.ChildProcessExitStatus;
+      this.#rid = null;
       return this.#exitStatus as RsvimProc.ChildProcessExitStatus;
+    }
+
+    /**
+     * Get child process exit status.
+     *
+     * @returns {RsvimProc.ChildProcessExitStatus | null | undefined} It returns exit status if the child process is already finished, otherwise it returns `null`.
+     *
+     * @example
+     * ```javascript
+     * const child = new Rsvim.proc.Command("ls").spawn();
+     * await child.wait();
+     * const exitStatus = child.exitStatus;
+     * ```
+     */
+    get exitStatus(): RsvimProc.ChildProcessExitStatus | null | undefined {
+      return this.#exitStatus;
     }
   }
 
