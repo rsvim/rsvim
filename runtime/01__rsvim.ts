@@ -1468,7 +1468,9 @@ export namespace RsvimProc {
     /** @hidden */
     #options: RsvimProc.CommandOptions;
     /** @hidden */
-    #rid: number;
+    #rid: number | null | undefined;
+    /** @hidden */
+    #exitStatus: RsvimProc.ChildProcessExitStatus | null | undefined;
     /** @hidden */
     #stdinRid: number | null | undefined;
     /** @hidden */
@@ -1488,6 +1490,7 @@ export namespace RsvimProc {
       this.#execPath = execPath;
       this.#options = options;
       this.#rid = rid;
+      this.#exitStatus = null;
       this.#stdinRid = stdinRid;
       this.#stdout =
         stdoutRid != null
@@ -1515,6 +1518,10 @@ export namespace RsvimProc {
       return this.#stderr;
     }
 
+    async [Symbol.asyncDispose](): Promise<void> {
+      await this.wait();
+    }
+
     /**
      * Wait for child process complete.
      *
@@ -1535,12 +1542,15 @@ export namespace RsvimProc {
      * ```
      */
     async wait(): Promise<RsvimProc.ChildProcessExitStatus> {
-      const exitStatus =
-        // @ts-ignore Ignore warning
-        (await __InternalRsvimGlobalObject.proc_wait_child(
-          this.#rid,
-        )) as RsvimProc.ChildProcessExitStatus;
-      return exitStatus;
+      if (this.#rid != null) {
+        this.#exitStatus =
+          // @ts-ignore Ignore warning
+          (await __InternalRsvimGlobalObject.proc_wait_child(
+            this.#rid,
+          )) as RsvimProc.ChildProcessExitStatus;
+        this.#rid = null;
+      }
+      return this.#exitStatus as RsvimProc.ChildProcessExitStatus;
     }
   }
 
