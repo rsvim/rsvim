@@ -3297,9 +3297,9 @@ checksum = "1a80800c0488c3a21695ea981a54918fbb37abf04f4d0720c453632255e2ff0e"
 
 [[package]]
 name = "oxc_resolver"
-version = "11.19.1"
+version = "11.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5632fcd47d4fdaf7ef5ee150c7001fa8ed814ce38d1a073536a366dbfc239aad"
+checksum = "70d6e5e3ac3224a72faa04ce1d7266ba2dbed67f37d561fd268a58aee7f4e271"
 dependencies = [
  "cfg-if",
  "compact_str 0.9.1",
@@ -3309,6 +3309,7 @@ dependencies = [
  "nodejs-built-in-modules",
  "once_cell",
  "papaya",
+ "percent-encoding",
  "rustc-hash",
  "rustix 1.1.4",
  "self_cell",
@@ -3318,7 +3319,6 @@ dependencies = [
  "simdutf8",
  "thiserror",
  "tracing",
- "url",
  "windows",
 ]
 
