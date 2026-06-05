@@ -1206,6 +1206,31 @@ export var RsvimProc;
         get stderr() {
             return this.#stderr;
         }
+        /**
+         * Wait for child process complete.
+         *
+         * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
+         * @throws Throws {@link !Error} if failed to wait for child process.
+         *
+         * @example
+         * ```javascript
+         * try {
+         *   const cmd = new Rsvim.proc.Command("ls");
+         *   const child = cmd.spawn();
+         *   const output = await child.stdout.text();
+         *   const exitStatus = await child.wait();
+         *   Rsvim.cmd.echo(`"ls" command is completed successfully: ${exitStatus.success}.`);
+         * } catch (e) {
+         *   Rsvim.cmd.echo(`Failed to run "ls" command.`);
+         * }
+         * ```
+         */
+        async wait() {
+            const exitStatus = 
+            // @ts-ignore Ignore warning
+            (await __InternalRsvimGlobalObject.proc_wait_child(this.#rid));
+            return exitStatus;
+        }
     }
     RsvimProc.ChildProcess = ChildProcess;
     /**
