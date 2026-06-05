@@ -1176,17 +1176,23 @@ export var RsvimProc;
         /** @hidden */
         #stdinRid;
         /** @hidden */
-        #stdoutRid;
+        #stdout;
         /** @hidden */
-        #stderrRid;
+        #stderr;
         /** @hideconstructor */
         constructor(execPath, options, rid, stdinRid, stdoutRid, stderrRid) {
             this.#execPath = execPath;
             this.#options = options;
             this.#rid = rid;
             this.#stdinRid = stdinRid;
-            this.#stdoutRid = stdoutRid;
-            this.#stderrRid = stderrRid;
+            this.#stdout =
+                stdoutRid != null
+                    ? new RsvimProc.ChildProcessReadableStream(stdoutRid)
+                    : null;
+            this.#stderr =
+                stderrRid != null
+                    ? new RsvimProc.ChildProcessReadableStream(stderrRid)
+                    : null;
         }
         get execPath() {
             return this.#execPath;
@@ -1194,20 +1200,50 @@ export var RsvimProc;
         get options() {
             return this.#options;
         }
-        get rid() {
-            return this.#rid;
+        get stdout() {
+            return this.#stdout;
         }
-        get stdinRid() {
-            return this.#stdinRid;
-        }
-        get stdoutRid() {
-            return this.#stdoutRid;
-        }
-        get stderrRid() {
-            return this.#stderrRid;
+        get stderr() {
+            return this.#stderr;
         }
     }
     RsvimProc.ChildProcess = ChildProcess;
+    /**
+     * Child process readable stream.
+     */
+    class ChildProcessReadableStream {
+        /** @hidden */
+        #rid;
+        /** @hideconstructor */
+        constructor(rid) {
+            this.#rid = rid;
+        }
+        /**
+         * Read text from the stream.
+         *
+         * @returns {string} It returns the read text from child process stdio channel.
+         * @throws Throws {@link !Error} if failed to read.
+         *
+         * @example
+         * ```javascript
+         * try {
+         *   const cmd = new Rsvim.proc.Command("ls");
+         *   const child = cmd.spawn();
+         *   const output = await child.stdout.text();
+         *   Rsvim.cmd.echo(`"ls" command output:${output}`);
+         * } catch (e) {
+         *   Rsvim.cmd.echo(`Failed to run "ls" command.`);
+         * }
+         * ```
+         */
+        async text() {
+            const payload = 
+            // @ts-ignore Ignore warning
+            await __InternalRsvimGlobalObject.proc_read_text_from_child_process_stdio(this.#rid);
+            return payload;
+        }
+    }
+    RsvimProc.ChildProcessReadableStream = ChildProcessReadableStream;
 })(RsvimProc || (RsvimProc = {}));
 /**
  * The `Rsvim.rt` global object for javascript runtime (editor process).
