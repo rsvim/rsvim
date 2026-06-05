@@ -57,9 +57,6 @@ async fn test_new_command1() -> IoResult<()> {
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
-  // Before running
-  {}
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_operations(MockOperationReader::new(mocked_ops))
@@ -96,9 +93,6 @@ async fn test_spawn1() -> IoResult<()> {
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-  // Before running
-  {}
 
   event_loop.initialize()?;
   event_loop
@@ -147,9 +141,6 @@ async fn test_spawn2() -> IoResult<()> {
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-  // Before running
-  {}
 
   event_loop.initialize()?;
   event_loop
@@ -211,9 +202,6 @@ async fn test_spawn3() -> IoResult<()> {
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
-  // Before running
-  {}
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_operations(MockOperationReader::new(mocked_ops))
@@ -251,6 +239,121 @@ async fn test_spawn3() -> IoResult<()> {
       actual,
       "child exitStatus:object success:true code:0 signal:undefined"
     );
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_spawn4() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+
+  let src: &str = r#"
+  const child = new Rsvim.proc.Command("ls").spawn();
+  Rsvim.cmd.echo(`disposed1:${child.isDisposed}`);
+  const exitStatus1 = await child.wait();
+  const exitStatus2 = child.exitStatus;
+  Rsvim.cmd.echo(`exitStatus1.code:${exitStatus1.code} exitStatus2.code:${exitStatus2.code}`);
+  Rsvim.cmd.echo(`disposed2:${child.isDisposed}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 3);
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    assert_eq!(actual, "disposed1:false");
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    assert_eq!(actual, "exitStatus1.code:0 exitStatus2.code:0");
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    assert_eq!(actual, "disposed2:true");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_spawn5() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+
+  let src: &str = r#"
+  const child = new Rsvim.proc.Command("ls").spawn();
+  {
+    await using usedChild = child;
+    Rsvim.cmd.echo(`disposed1:${usedChild.isDisposed}`);
+  }
+  Rsvim.cmd.echo(`exitStatus.code:${child.exitStatus.code} disposed2:${child.isDisposed}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 2);
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    assert_eq!(actual, "disposed1:false");
+
+    let actual = contents.message_history_mut().pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+
+    assert_eq!(actual, "exitStatus.code:0 disposed2:true");
   }
 
   Ok(())
