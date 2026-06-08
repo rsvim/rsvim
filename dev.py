@@ -491,10 +491,10 @@ class NpmPackage(Cmd):
         return None
 
     def run(self, args) -> None:
-        if args.version is not None:
-            self.version(args.version)
+        if args.bump is not None:
+            self.bump(args.bump)
 
-    def version(self, level) -> None:
+    def bump(self, level) -> None:
         cmd = f"npm version {level} --no-git-tag-version"
         run(cmd)
 
