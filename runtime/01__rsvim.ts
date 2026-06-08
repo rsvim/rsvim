@@ -21,6 +21,20 @@
  */
 
 /** @hidden */
+function assertTrue(condition: boolean, message: string) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+/** @hidden */
+function assertFalse(condition: boolean, message: string) {
+  if (!!condition) {
+    throw new Error(message);
+  }
+}
+
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
@@ -750,6 +764,8 @@ export namespace RsvimFs {
     /**
      * Close the file.
      *
+     * @throws Throws {@link !Error} if the file is already been closed.
+     *
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
@@ -763,15 +779,14 @@ export namespace RsvimFs {
      * ```
      */
     close(): void {
-      if (!isNull(this.#rid)) {
-        // @ts-ignore Ignore warning
-        __InternalRsvimGlobalObject.fs_close(this.#rid);
-      }
+      assertFalse(isNull(this.#rid), "RsvimFs.File is already closed!");
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.fs_close(this.#rid);
       this.#rid = null;
     }
 
     /**
-     * Close the file with `using` without `close` API.
+     * Close the file with `using` API instead of `close`.
      *
      * @example
      * ```javascript
@@ -1468,7 +1483,9 @@ export namespace RsvimProc {
     /** @hidden */
     #options: RsvimProc.CommandOptions;
     /** @hidden */
-    #rid: number;
+    #rid: number | null | undefined;
+    /** @hidden */
+    #exitStatus: RsvimProc.ChildProcessExitStatus | null | undefined;
     /** @hidden */
     #stdinRid: number | null | undefined;
     /** @hidden */
@@ -1488,6 +1505,7 @@ export namespace RsvimProc {
       this.#execPath = execPath;
       this.#options = options;
       this.#rid = rid;
+      this.#exitStatus = null;
       this.#stdinRid = stdinRid;
       this.#stdout =
         stdoutRid != null
@@ -1516,10 +1534,36 @@ export namespace RsvimProc {
     }
 
     /**
+     * Child process is already completed.
+     *
+     * @example
+     * ```javascript
+     * const child = new Rsvim.proc.Command("ls").spawn();
+     * {
+     *   await using usedChild = child;
+     *   Rsvim.cmd.echo(usedChild.isDisposed); // false
+     * }
+     * Rsvim.cmd.echo(usedChild.isDisposed); // true
+     * ```
+     */
+    get isDisposed(): boolean {
+      return isNull(this.#rid);
+    }
+
+    /**
+     * Wait for the child process finish with `await using` API instead of `wait`.
+     *
+     * @returns {void} It returns nothing.
+     */
+    async [Symbol.asyncDispose](): Promise<void> {
+      await this.wait();
+    }
+
+    /**
      * Wait for child process complete.
      *
      * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
-     * @throws Throws {@link !Error} if failed to wait for child process.
+     * @throws Throws {@link !Error} if the child process is already finished, or failed to wait.
      *
      * @example
      * ```javascript
@@ -1535,12 +1579,33 @@ export namespace RsvimProc {
      * ```
      */
     async wait(): Promise<RsvimProc.ChildProcessExitStatus> {
-      const exitStatus =
+      assertFalse(
+        isNull(this.#rid),
+        "RsvimProc.ChildProcess is already finished!",
+      );
+      this.#exitStatus =
         // @ts-ignore Ignore warning
         (await __InternalRsvimGlobalObject.proc_wait_child(
           this.#rid,
         )) as RsvimProc.ChildProcessExitStatus;
-      return exitStatus;
+      this.#rid = null;
+      return this.#exitStatus as RsvimProc.ChildProcessExitStatus;
+    }
+
+    /**
+     * Get child process exit status.
+     *
+     * @returns {RsvimProc.ChildProcessExitStatus | null | undefined} It returns exit status if the child process is already finished, otherwise it returns `null`.
+     *
+     * @example
+     * ```javascript
+     * const child = new Rsvim.proc.Command("ls").spawn();
+     * await child.wait();
+     * const exitStatus = child.exitStatus;
+     * ```
+     */
+    get exitStatus(): RsvimProc.ChildProcessExitStatus | null | undefined {
+      return this.#exitStatus;
     }
   }
 

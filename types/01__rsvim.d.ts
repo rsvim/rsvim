@@ -462,6 +462,8 @@ export declare namespace RsvimFs {
         /**
          * Close the file.
          *
+         * @throws Throws {@link !Error} if the file is already been closed.
+         *
          * @example
          * ```javascript
          * const file = await Rsvim.fs.open("README.md");
@@ -476,7 +478,7 @@ export declare namespace RsvimFs {
          */
         close(): void;
         /**
-         * Close the file with `using` without `close` API.
+         * Close the file with `using` API instead of `close`.
          *
          * @example
          * ```javascript
@@ -972,10 +974,30 @@ export declare namespace RsvimProc {
         get stdout(): RsvimProc.ChildProcessReadableStream | null | undefined;
         get stderr(): RsvimProc.ChildProcessReadableStream | null | undefined;
         /**
+         * Child process is already completed.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * {
+         *   await using usedChild = child;
+         *   Rsvim.cmd.echo(usedChild.isDisposed); // false
+         * }
+         * Rsvim.cmd.echo(usedChild.isDisposed); // true
+         * ```
+         */
+        get isDisposed(): boolean;
+        /**
+         * Wait for the child process finish with `await using` API instead of `wait`.
+         *
+         * @returns {void} It returns nothing.
+         */
+        [Symbol.asyncDispose](): Promise<void>;
+        /**
          * Wait for child process complete.
          *
          * @returns {RsvimProc.ChildProcessExitStatus} It returns a child process exit status.
-         * @throws Throws {@link !Error} if failed to wait for child process.
+         * @throws Throws {@link !Error} if the child process is already finished, or failed to wait.
          *
          * @example
          * ```javascript
@@ -991,6 +1013,19 @@ export declare namespace RsvimProc {
          * ```
          */
         wait(): Promise<RsvimProc.ChildProcessExitStatus>;
+        /**
+         * Get child process exit status.
+         *
+         * @returns {RsvimProc.ChildProcessExitStatus | null | undefined} It returns exit status if the child process is already finished, otherwise it returns `null`.
+         *
+         * @example
+         * ```javascript
+         * const child = new Rsvim.proc.Command("ls").spawn();
+         * await child.wait();
+         * const exitStatus = child.exitStatus;
+         * ```
+         */
+        get exitStatus(): RsvimProc.ChildProcessExitStatus | null | undefined;
     }
     /**
      * Child process readable stream.
