@@ -143,6 +143,24 @@ pub fn create_fs_write(
   );
 }
 
+pub fn create_fs_stat(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  follow_symlink: bool,
+  path: &Path,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsStatReq(chan::FsStatReq {
+      task_id,
+      follow_symlink,
+      path: path.to_path_buf(),
+    }),
+  );
+}
+
 pub fn create_syn_load_parser(
   state: &mut JsRuntimeState,
   task_id: TaskId,

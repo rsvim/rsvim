@@ -30,14 +30,17 @@ pub enum JsMessage {
   /// Master send js runtime the result of fs read
   FsReadResp(FsReadResp),
 
+  /// Master send js runtime the result of fs write
+  FsWriteResp(FsWriteResp),
+
   /// Master send js runtime the result of fs read_file
   FsReadFileResp(FsReadFileResp),
 
   /// Master send js runtime the result of fs read_text_file
   FsReadTextFileResp(FsReadTextFileResp),
 
-  /// Master send js runtime the result of fs write
-  FsWriteResp(FsWriteResp),
+  /// Master send js runtime the result of fs status
+  FsStatResp(FsStatResp),
 
   /// Master send js runtime the result of load tree-sitter parser.
   LoadTreeSitterParserResp(LoadTreeSitterParserResp),
@@ -101,6 +104,14 @@ pub struct FsReadTextFileResp {
   pub task_id: TaskId,
 
   // type: `Vec<u8>`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct FsStatResp {
+  pub task_id: TaskId,
+
+  // type: `FsFileInfo`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 

@@ -15,7 +15,7 @@ use std::str::FromStr;
   strum_macros::Display,
   strum_macros::EnumString,
 )]
-pub enum Nargs {
+pub enum CommandNargs {
   #[strum(serialize = "0")]
   /// No arguments
   Zero,
@@ -37,18 +37,18 @@ pub enum Nargs {
   Any,
 }
 
-impl FromV8 for Nargs {
+impl FromV8 for CommandNargs {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
     debug_assert!(value.is_string() || value.is_string_object());
     let nargs = value.to_string(scope).unwrap().to_rust_string_lossy(scope);
-    Nargs::from_str(&nargs).unwrap()
+    CommandNargs::from_str(&nargs).unwrap()
   }
 }
 
-impl ToV8 for Nargs {
+impl ToV8 for CommandNargs {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
@@ -70,6 +70,6 @@ pub struct CommandAttributes {
   #[builder(default = false)]
   pub bang: bool,
 
-  #[builder(default = Nargs::Zero)]
-  pub nargs: Nargs,
+  #[builder(default = CommandNargs::Zero)]
+  pub nargs: CommandNargs,
 }

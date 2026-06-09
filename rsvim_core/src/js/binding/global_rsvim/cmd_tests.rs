@@ -1,5 +1,5 @@
 use crate::cli::CliOptions;
-use crate::js::command::attr::Nargs;
+use crate::js::command::attr::CommandNargs;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
@@ -256,7 +256,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
@@ -327,7 +327,7 @@ setTimeout(() => {
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
@@ -390,7 +390,7 @@ setTimeout(() => {
       assert!(name == "write" || name == "writeSync");
       assert_eq!(name, def.name);
       assert!(!def.attributes.bang);
-      assert_eq!(def.attributes.nargs, Nargs::Zero);
+      assert_eq!(def.attributes.nargs, CommandNargs::Zero);
       assert!(!def.options.force);
       assert_eq!(def.options.alias, None);
     }
@@ -460,7 +460,7 @@ setTimeout(() => {
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(!command_def.options.force);
     assert_eq!(command_def.options.alias, Some("w".to_compact_string()));
   }
@@ -529,7 +529,7 @@ setTimeout(() => {
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(!command_def.options.force);
     assert_eq!(command_def.options.alias, Some("w".to_compact_string()));
   }
@@ -591,7 +591,7 @@ Rsvim.cmd.list().forEach((name) => {
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
@@ -652,7 +652,7 @@ Rsvim.cmd.echo(`name:${def.name}`);
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
@@ -713,7 +713,7 @@ Rsvim.cmd.echo(`name:${def}`);
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
@@ -818,7 +818,7 @@ Rsvim.cmd.echo(`${prev}`);
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert_eq!(command_def.attributes.nargs, CommandNargs::Zero);
     assert!(command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }

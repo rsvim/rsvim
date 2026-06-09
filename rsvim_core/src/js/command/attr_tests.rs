@@ -5,20 +5,20 @@ use std::str::FromStr;
 
 #[test]
 fn test_nargs() {
-  assert_eq!(format!("{}", Nargs::Zero), "0");
-  assert_eq!(Nargs::from_str("0"), Ok(Nargs::Zero));
+  assert_eq!(format!("{}", CommandNargs::Zero), "0");
+  assert_eq!(CommandNargs::from_str("0"), Ok(CommandNargs::Zero));
 
-  assert_eq!(format!("{}", Nargs::One), "1");
-  assert_eq!(Nargs::from_str("1"), Ok(Nargs::One));
+  assert_eq!(format!("{}", CommandNargs::One), "1");
+  assert_eq!(CommandNargs::from_str("1"), Ok(CommandNargs::One));
 
-  assert_eq!(format!("{}", Nargs::Optional), "?");
-  assert_eq!(Nargs::from_str("?"), Ok(Nargs::Optional));
+  assert_eq!(format!("{}", CommandNargs::Optional), "?");
+  assert_eq!(CommandNargs::from_str("?"), Ok(CommandNargs::Optional));
 
-  assert_eq!(format!("{}", Nargs::More), "+");
-  assert_eq!(Nargs::from_str("+"), Ok(Nargs::More));
+  assert_eq!(format!("{}", CommandNargs::More), "+");
+  assert_eq!(CommandNargs::from_str("+"), Ok(CommandNargs::More));
 
-  assert_eq!(format!("{}", Nargs::Any), "*");
-  assert_eq!(Nargs::from_str("*"), Ok(Nargs::Any));
+  assert_eq!(format!("{}", CommandNargs::Any), "*");
+  assert_eq!(CommandNargs::from_str("*"), Ok(CommandNargs::Any));
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn test_converter1() {
   assert_eq!(val1, a1);
 
   let a2 = CommandAttributesBuilder::default()
-    .nargs(Nargs::Any)
+    .nargs(CommandNargs::Any)
     .build()
     .unwrap();
   let obj2 = a2.to_v8(scope);

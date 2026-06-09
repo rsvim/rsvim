@@ -176,6 +176,10 @@ pub fn create_new_context<'s, 'b>(
       "fs_read_text_file_sync",
       global_rsvim::fs::read_text_file_sync,
     );
+    set_function_to(scope, vim, "fs_lstat", global_rsvim::fs::lstat);
+    set_function_to(scope, vim, "fs_lstat_sync", global_rsvim::fs::lstat_sync);
+    set_function_to(scope, vim, "fs_stat", global_rsvim::fs::stat);
+    set_function_to(scope, vim, "fs_stat_sync", global_rsvim::fs::stat_sync);
   }
 
   // For `Rsvim.opt`
