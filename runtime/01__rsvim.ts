@@ -1992,12 +1992,16 @@ export namespace Rsvim {
   export import syn = RsvimSyn;
 }
 
-(function (globalThis: { Rsvim: typeof Rsvim }) {
+// Fix self referencing issue between namespace "Rsvim" and global object "Rsvim",
+// by capturing the "Rsvim" namespace type BEFORE global object "Rsvim" shadows it.
+type RsvimNamespaceType = typeof Rsvim;
+
+(function (globalThis: { Rsvim: RsvimNamespaceType }) {
   globalThis.Rsvim = Rsvim;
-})(globalThis as unknown as { Rsvim: typeof Rsvim });
+})(globalThis as unknown as { Rsvim: RsvimNamespaceType });
 
 /// Declarations for .d.ts
 declare global {
   // @ts-ignore Ignore warning
-  var Rsvim: typeof Rsvim;
+  var Rsvim: RsvimNamespaceType;
 }
