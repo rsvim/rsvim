@@ -144,10 +144,10 @@ fn convert_metadata_to_fileinfo(meta: Metadata) -> FsFileInfo {
     builder.last_access_time(Some(meta.last_access_time()));
     builder.last_write_time(Some(meta.last_write_time()));
     builder.file_size(Some(meta.file_size()));
-    builder.volume_serial_number(Some(meta.volume_serial_number()));
-    builder.number_of_links(Some(meta.number_of_links()));
-    builder.file_index(Some(meta.file_index()));
-    builder.change_time(Some(meta.change_time()));
+    builder.volume_serial_number(meta.volume_serial_number());
+    builder.number_of_links(meta.number_of_links());
+    builder.file_index(meta.file_index());
+    builder.change_time(meta.change_time());
   }
 
   #[cfg(target_family = "unix")]
