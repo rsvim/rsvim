@@ -921,6 +921,18 @@ export namespace RsvimFs {
       return __InternalRsvimGlobalObject.fs_write_sync(this.#rid, buf.buffer);
     }
   }
+
+  /**
+   * File information.
+   */
+  export type FileInfo = {
+    /**
+     * How `stderr` of spawned child process should be handled.
+     *
+     * @defaultValue `piped`
+     */
+    stderr?: "piped" | "inherit" | "null";
+  };
 }
 
 export namespace RsvimOpt {
