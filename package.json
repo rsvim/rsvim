@@ -1,5 +1,5 @@
 {
-  "name": "@rsvim/types",
+  "name": "rsvim-types",
   "version": "0.1.2",
   "description": "TypeScript types for Rsvim text editor.",
   "keywords": [
