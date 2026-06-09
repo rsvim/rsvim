@@ -1015,6 +1015,17 @@ export namespace RsvimFs {
      * :::
      */
     lastWriteTime: number;
+
+    /**
+     * The `nFileSize` value of the file.
+     *
+     * The value doesn't have meaning for directories.
+     *
+     * :::note
+     * This value is only available on Windows platforms.
+     * :::
+     */
+    fileSize: number;
   };
 }
 
