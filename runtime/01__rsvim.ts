@@ -993,6 +993,17 @@ export namespace RsvimFs {
      * :::
      */
     creationTime: number;
+
+    /**
+     * The `ftLastAccessTime` value of the file.
+     *
+     * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
+     *
+     * :::note
+     * This value is only available on Windows platforms.
+     * :::
+     */
+    lastAccessTime: number;
   };
 }
 
