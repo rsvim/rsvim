@@ -696,6 +696,8 @@ export namespace RsvimFs {
    * This api doesn't follow symbolic link.
    * :::
    *
+   * @see {@link RsvimFs.stat}
+   *
    * @param {string} path - File path.
    * @returns {Promise<RsvimFs.FileInfo>} It resolves to the file status.
    *
@@ -737,6 +739,58 @@ export namespace RsvimFs {
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.fs_lstat_sync(path);
+  }
+
+  /**
+   * Get the status of a file by path.
+   *
+   * :::note
+   * This api follows symbolic link.
+   * :::
+   *
+   * @see {@link RsvimFs.lstat}
+   *
+   * @param {string} path - File path.
+   * @returns {Promise<RsvimFs.FileInfo>} It resolves to the file status.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   *
+   * @example
+   * ```javascript
+   * const fstat = await Rsvim.fs.stat("README.md");
+   * ```
+   */
+  export async function stat(path: string): Promise<RsvimFs.FileInfo> {
+    checkIsString(path, `"Rsvim.fs.stat" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_stat(path);
+  }
+
+  /**
+   * Sync version of `stat`.
+   *
+   * :::note
+   * This api follows symbolic link.
+   * :::
+   *
+   * @see {@link RsvimFs.stat}
+   *
+   * @param {string} path - File path.
+   * @returns {RsvimFs.FileInfo} It returns the file status.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   *
+   * @example
+   * ```javascript
+   * const fstat = Rsvim.fs.statSync("README.md");
+   * ```
+   */
+  export function statSync(path: string): RsvimFs.FileInfo {
+    checkIsString(path, `"Rsvim.fs.statSync" path`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_stat_sync(path);
   }
 
   /**
