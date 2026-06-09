@@ -690,6 +690,56 @@ export namespace RsvimFs {
   }
 
   /**
+   * Get the status of a file by path.
+   *
+   * :::note
+   * This api doesn't follow symbolic link.
+   * :::
+   *
+   * @param {string} path - File path.
+   * @returns {Promise<RsvimFs.FileInfo>} It resolves to the file status.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   *
+   * @example
+   * ```javascript
+   * const fstat = await Rsvim.fs.lstat("README.md");
+   * ```
+   */
+  export async function lstat(path: string): Promise<RsvimFs.FileInfo> {
+    checkIsString(path, `"Rsvim.fs.lstat" path`);
+
+    // @ts-ignore Ignore warning
+    return await __InternalRsvimGlobalObject.fs_lstat(path);
+  }
+
+  /**
+   * Sync version of `lstat`.
+   *
+   * :::note
+   * This api doesn't follow symbolic link.
+   * :::
+   *
+   * @see {@link RsvimFs.lstat}
+   *
+   * @param {string} path - File path.
+   * @returns {RsvimFs.FileInfo} It returns the file status.
+   *
+   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   *
+   * @example
+   * ```javascript
+   * const fstat = Rsvim.fs.lstatSync("README.md");
+   * ```
+   */
+  export function lstatSync(path: string): RsvimFs.FileInfo {
+    checkIsString(path, `"Rsvim.fs.lstatSync" path`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_lstat_sync(path);
+  }
+
+  /**
    * Open options.
    *
    * :::tip
@@ -1164,6 +1214,7 @@ export namespace RsvimFs {
 
     /**
      * The number of blocks allocated to the file, in 512-byte units.
+     *
      * Please note that this may be smaller than `st_size / 512` when the file has holes.
      *
      * :::note
