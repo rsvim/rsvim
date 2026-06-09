@@ -112,12 +112,6 @@ pub struct FsReadTextFileReq {
 }
 
 #[derive(Debug)]
-pub struct FsLstatReq {
-  pub task_id: TaskId,
-  pub path: PathBuf,
-}
-
-#[derive(Debug)]
 pub struct FsStatReq {
   pub task_id: TaskId,
   pub follow_symlink: bool,
