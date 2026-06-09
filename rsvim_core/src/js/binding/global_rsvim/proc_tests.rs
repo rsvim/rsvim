@@ -80,12 +80,13 @@ async fn test_spawn1() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30000))];
 
   let src: &str = r#"
   const cmd1 = new Rsvim.proc.Command("ls");
   const child1 = cmd1.spawn();
   Rsvim.cmd.echo(`child1: ${typeof child1}`);
+  Rsvim.rt.exit();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -123,7 +124,7 @@ async fn test_spawn2() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30000))];
 
   let src: &str = r#"
   const cmd2 = new Rsvim.proc.Command("ls");
@@ -134,6 +135,7 @@ async fn test_spawn2() -> IoResult<()> {
   const stderr2 = child2.stderr;
   const stderr2Text = await stderr2.text();
   Rsvim.cmd.echo(`child2 stderr:${typeof stderr2} text:${stderr2Text}`);
+  Rsvim.rt.exit();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -314,7 +316,7 @@ async fn test_spawn5() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+  let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30000))];
 
   let src: &str = r#"
   const child = new Rsvim.proc.Command("ls").spawn();
@@ -323,6 +325,7 @@ async fn test_spawn5() -> IoResult<()> {
     Rsvim.cmd.echo(`disposed1:${usedChild.isDisposed}`);
   }
   Rsvim.cmd.echo(`exitStatus.code:${child.exitStatus.code} disposed2:${child.isDisposed}`);
+  Rsvim.rt.exit();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js

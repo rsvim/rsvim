@@ -471,17 +471,17 @@ class Release(Cmd):
         run(cmd)
 
 
-# npm
-class Npm(Cmd):
+# npm package
+class NpmPackage(Cmd):
     def __init__(self, subparsers) -> None:
-        self._name = "npm"
+        self._name = "npmpack"
 
         self.npm_parser = subparsers.add_parser(
             self._name,
-            help="npm version",
+            help="npm bump and publish package",
         )
         self.npm_parser.add_argument(
-            "-v", "--version", choices=["major", "minor", "patch"]
+            "-b", "--bump", choices=["major", "minor", "patch"]
         )
 
     def name(self) -> str:
@@ -491,10 +491,10 @@ class Npm(Cmd):
         return None
 
     def run(self, args) -> None:
-        if args.version is not None:
-            self.version(args.version)
+        if args.bump is not None:
+            self.bump(args.bump)
 
-    def version(self, level) -> None:
+    def bump(self, level) -> None:
         cmd = f"npm version {level} --no-git-tag-version"
         run(cmd)
 
@@ -524,8 +524,8 @@ if __name__ == "__main__":
         Document(subparsers),
         Format(subparsers),
         Miri(subparsers),
-        Npm(subparsers),
-        # Release(subparsers),
+        NpmPackage(subparsers),
+        Release(subparsers),
         Test(subparsers),
     ]
 
