@@ -658,44 +658,64 @@ export declare namespace RsvimFs {
     }
     /**
      * File information.
+     *
+     * @categoryDescription Common Attributes
+     * @categoryDescription Windows Only
+     * @categoryDescription Unix Only
      */
     type FileInfo = {
         /**
          * Last access time of the file.
          *
          * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common Attributes
          */
         accessed?: Date;
         /**
          * Creation time of the file.
          *
          * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common Attributes
          */
         created?: Date;
         /**
          * Last modification time of the file.
          *
          * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common Attributes
          */
         modified?: Date;
         /**
          * Whether the file is a directory. This value is mutually exclusive to `isFile`.
+         *
+         * @category Common Attributes
          */
         isDir: boolean;
         /**
          * Whether the file is a regular file. This value is mutually exclusive to `isDir`.
+         *
+         * @category Common Attributes
          */
         isFile: boolean;
         /**
          * Whether the file is a symbolic link.
+         *
+         * @category Common Attributes
          */
         isSymlink: boolean;
         /**
          * The size of the file in bytes.
+         *
+         * @category Common Attributes
          */
         len: number;
         /**
          * Whether the file is read-only (unwritable).
+         *
+         * @category Common Attributes
          */
         readOnly: boolean;
         /**
@@ -703,9 +723,7 @@ export declare namespace RsvimFs {
          *
          * For possible values and their descriptions, see [File Attribute Constants](https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants) in the Windows Dev Center.
          *
-         * :::note
-         * This value is only available on Windows platforms.
-         * :::
+         * @category Windows Only
          */
         fileAttributes?: number;
         /**
@@ -713,9 +731,7 @@ export declare namespace RsvimFs {
          *
          * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
          *
-         * :::note
-         * This value is only available on Windows platforms.
-         * :::
+         * @category Windows Only
          */
         creationTime?: number;
         /**
@@ -723,9 +739,7 @@ export declare namespace RsvimFs {
          *
          * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
          *
-         * :::note
-         * This value is only available on Windows platforms.
-         * :::
+         * @category Windows Only
          */
         lastAccessTime?: number;
         /**
@@ -733,9 +747,7 @@ export declare namespace RsvimFs {
          *
          * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
          *
-         * :::note
-         * This value is only available on Windows platforms.
-         * :::
+         * @category Windows Only
          */
         lastWriteTime?: number;
         /**
@@ -743,129 +755,97 @@ export declare namespace RsvimFs {
          *
          * The value doesn't have meaning for directories.
          *
-         * :::note
-         * This value is only available on Windows platforms.
-         * :::
+         * @category Windows Only
          */
         fileSize?: number;
         /**
          * The ID of the device containing the file.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         dev?: number;
         /**
          * The inode number.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         ino?: number;
         /**
          * The rights applied to the file.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         mode?: number;
         /**
          * The number of hard links pointing to the file.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         nlink?: number;
         /**
          * The user ID of the owner of the file.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         uid?: number;
         /**
          * The group ID of the owner of the file.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         gid?: number;
         /**
          * The device ID of the file (if it is a special one).
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         rdev?: number;
         /**
          * The total size of the file in bytes.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         size?: number;
         /**
          * Last access time of the file, in seconds since Unix Epoch.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         atime?: number;
         /**
          * Last access time of the file, in nanoseconds since `atime`.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         atimeNsec?: number;
         /**
          * Last modification time of the file, in seconds since Unix Epoch.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         mtime?: number;
         /**
          * Last modification time of the file, in nanoseconds since `mtime`.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         mtimeNsec?: number;
         /**
          * Last status change time of the file, in seconds since Unix Epoch.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         ctime?: number;
         /**
          * Last status change time of the file, in nanoseconds since `ctime`.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         ctimeNsec?: number;
         /**
          * The block size for filesystem IO.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         blksize?: number;
         /**
@@ -873,9 +853,7 @@ export declare namespace RsvimFs {
          *
          * Please note that this may be smaller than `st_size / 512` when the file has holes.
          *
-         * :::note
-         * This value is only available on Unix platforms.
-         * :::
+         * @category Unix Only
          */
         blocks?: number;
     };
