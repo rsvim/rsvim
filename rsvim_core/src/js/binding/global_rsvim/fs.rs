@@ -1,11 +1,12 @@
 //! APIs for `Rsvim.fs` namespace.
 
 pub mod close;
-// pub mod fd;
+pub mod lstat;
 pub mod open;
 pub mod read;
 pub mod read_file;
 pub mod read_text_file;
+pub mod stat;
 pub mod write;
 
 use crate::is_v8_int;

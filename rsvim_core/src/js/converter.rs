@@ -13,6 +13,9 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::hash::Hash;
 use std::rc::Rc;
+use std::time::Duration;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 pub trait ToV8 {
   fn to_v8<'s>(
@@ -392,6 +395,41 @@ where
       v.push(t);
     }
     v
+  }
+}
+
+impl ToV8 for SystemTime {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    let ms = match self.duration_since(UNIX_EPOCH) {
+      Ok(d) => d.as_millis() as f64,
+      Err(e) => -(e.duration().as_millis() as f64),
+    };
+    v8::Date::new(scope, ms).unwrap().into()
+  }
+}
+
+impl FromV8 for SystemTime {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    debug_assert!(value.is_date());
+
+    let dt = v8::Local::<v8::Date>::try_from(value).unwrap();
+    let ms = dt.value_of();
+    debug_assert!(!ms.is_nan());
+
+    let sys = if ms >= 0.0 {
+      let d = Duration::from_millis(ms as u64);
+      UNIX_EPOCH.checked_add(d)
+    } else {
+      let d = Duration::from_millis((-ms) as u64);
+      UNIX_EPOCH.checked_sub(d)
+    };
+    sys.unwrap()
   }
 }
 
