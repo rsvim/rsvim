@@ -16,40 +16,6 @@ use std::time::UNIX_EPOCH;
   Clone,
   PartialEq,
   Eq,
-  PartialOrd,
-  Ord,
-  Hash,
-  strum_macros::Display,
-  strum_macros::EnumString,
-)]
-pub enum FsFileType {
-  #[strum(serialize = "0")]
-  /// No arguments
-  Zero,
-
-  #[strum(serialize = "1")]
-  /// 1 argument
-  One,
-
-  #[strum(serialize = "?")]
-  /// 0 or 1 argument
-  Optional,
-
-  #[strum(serialize = "+")]
-  /// 1 or more arguments
-  More,
-
-  #[strum(serialize = "*")]
-  /// Any arguments
-  Any,
-}
-
-#[derive(
-  Debug,
-  Copy,
-  Clone,
-  PartialEq,
-  Eq,
   derive_builder::Builder,
   rsvim_macro::ToV8,
   rsvim_macro::FromV8,
@@ -61,8 +27,17 @@ pub struct FsFileInfo {
   #[builder(default = UNIX_EPOCH)]
   pub created: SystemTime,
 
-  #[builder(default = UNIX_EPOCH)]
-  pub file_type: SystemTime,
+  #[builder(default = false)]
+  pub is_dir: bool,
+
+  #[builder(default = false)]
+  pub is_file: bool,
+
+  #[builder(default = false)]
+  pub is_symlink: bool,
+
+  #[builder(default = 0_u64)]
+  pub len: u64,
 }
 
 pub fn fs_lstat(path: &Path) -> TheResult<FsFileInfo> {

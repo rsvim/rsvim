@@ -211,6 +211,44 @@ impl FromV8 for i32 {
   }
 }
 
+impl ToV8 for u64 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Number::new(scope, *self as f64).into()
+  }
+}
+
+impl FromV8 for u64 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    debug_assert!(is_v8_number!(value));
+    value.to_number(scope).unwrap().number_value(scope).unwrap() as u64
+  }
+}
+
+impl ToV8 for i64 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Number::new(scope, *self as f64).into()
+  }
+}
+
+impl FromV8 for i64 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    debug_assert!(is_v8_number!(value));
+    value.to_number(scope).unwrap().number_value(scope).unwrap() as i64
+  }
+}
+
 impl ToV8 for NodeId {
   fn to_v8<'s>(
     &self,
