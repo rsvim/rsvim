@@ -60,18 +60,6 @@ pub struct FsFileInfo {
 
   #[builder(default = None)]
   pub file_size: Option<u64>,
-
-  #[builder(default = None)]
-  pub volume_serial_number: Option<u32>,
-
-  #[builder(default = None)]
-  pub number_of_links: Option<u32>,
-
-  #[builder(default = None)]
-  pub file_index: Option<u64>,
-
-  #[builder(default = None)]
-  pub change_time: Option<u64>,
   // Windows only }}}
 
   // Unix only {{{
@@ -144,10 +132,6 @@ fn convert_metadata_to_fileinfo(meta: Metadata) -> FsFileInfo {
     builder.last_access_time(Some(meta.last_access_time()));
     builder.last_write_time(Some(meta.last_write_time()));
     builder.file_size(Some(meta.file_size()));
-    builder.volume_serial_number(meta.volume_serial_number());
-    builder.number_of_links(meta.number_of_links());
-    builder.file_index(meta.file_index());
-    builder.change_time(meta.change_time());
   }
 
   #[cfg(target_family = "unix")]
