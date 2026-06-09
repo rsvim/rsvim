@@ -3,7 +3,9 @@
 .github
 rsvim_cli
 rsvim_core
+rsvim_macro
 target
+tests_and_benchmarks
 .editorconfig
 .gitignore
 .markdownlint.jsonc
@@ -16,3 +18,5 @@ codecov.yml
 dev.cmd
 *.py
 *.toml
+*.log
+*.bak
