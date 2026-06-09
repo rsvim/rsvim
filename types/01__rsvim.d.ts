@@ -1330,6 +1330,8 @@ export declare namespace Rsvim {
     export import rt = RsvimRt;
     export import syn = RsvimSyn;
 }
+type RsvimNamespaceType = typeof Rsvim;
 declare global {
-    var Rsvim: typeof Rsvim;
+    var Rsvim: RsvimNamespaceType;
 }
+export {};
