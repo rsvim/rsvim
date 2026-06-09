@@ -981,7 +981,7 @@ export namespace RsvimFs {
      * This value is only available on Windows platforms.
      * :::
      */
-    fileAttributes: number;
+    fileAttributes?: number;
 
     /**
      * The `ftCreationTime` value of the file.
@@ -992,7 +992,7 @@ export namespace RsvimFs {
      * This value is only available on Windows platforms.
      * :::
      */
-    creationTime: number;
+    creationTime?: number;
 
     /**
      * The `ftLastAccessTime` value of the file.
@@ -1003,7 +1003,7 @@ export namespace RsvimFs {
      * This value is only available on Windows platforms.
      * :::
      */
-    lastAccessTime: number;
+    lastAccessTime?: number;
 
     /**
      * The `ftLastWriteTime` value of the file.
@@ -1014,7 +1014,7 @@ export namespace RsvimFs {
      * This value is only available on Windows platforms.
      * :::
      */
-    lastWriteTime: number;
+    lastWriteTime?: number;
 
     /**
      * The `nFileSize` value of the file.
@@ -1025,7 +1025,79 @@ export namespace RsvimFs {
      * This value is only available on Windows platforms.
      * :::
      */
-    fileSize: number;
+    fileSize?: number;
+
+    /**
+     * The ID of the device containing the file.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    dev?: number;
+
+    /**
+     * The inode number.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    ino?: number;
+
+    /**
+     * The rights applied to the file.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    mode?: number;
+
+    /**
+     * The number of hard links pointing to the file.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    nlink?: number;
+
+    /**
+     * The user ID of the owner of the file.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    uid?: number;
+
+    /**
+     * The group ID of the owner of the file.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    gid?: number;
+
+    /**
+     * The device ID of the file (if it is a special one).
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    rdev?: number;
+
+    /**
+     * The total size of the file in bytes.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    size?: number;
   };
 }
 
