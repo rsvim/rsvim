@@ -927,11 +927,50 @@ export namespace RsvimFs {
    */
   export type FileInfo = {
     /**
-     * How `stderr` of spawned child process should be handled.
+     * Last access time of the file.
      *
-     * @defaultValue `piped`
+     * The value can be `undefined` if failed to get this information.
      */
-    stderr?: "piped" | "inherit" | "null";
+    accessed?: Date;
+
+    /**
+     * Creation time of the file.
+     *
+     * The value can be `undefined` if failed to get this information.
+     */
+    created?: Date;
+
+    /**
+     * Last modification time of the file.
+     *
+     * The value can be `undefined` if failed to get this information.
+     */
+    modified?: Date;
+
+    /**
+     * Whether the file is a directory. This value is mutually exclusive to `isFile`.
+     */
+    isDir: boolean;
+
+    /**
+     * Whether the file is a regular file. This value is mutually exclusive to `isDir`.
+     */
+    isFile: boolean;
+
+    /**
+     * Whether the file is a symbolic link.
+     */
+    isSymlink: boolean;
+
+    /**
+     * The size of the file in bytes.
+     */
+    len: number;
+
+    /**
+     * Whether the file is read-only (unwritable).
+     */
+    readOnly: boolean;
   };
 }
 
