@@ -36,7 +36,7 @@ impl JsFuture for FsReadTextFileFuture {
 
     let result = self.maybe_result.take().unwrap();
 
-    // Handle when something goes wrong with opening the file.
+    // Handle when something goes wrong with it.
     if let Err(e) = result {
       let message = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, message);

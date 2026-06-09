@@ -16,6 +16,8 @@ use std::time::SystemTime;
   PartialEq,
   Eq,
   derive_builder::Builder,
+  serde::Serialize,
+  serde::Deserialize,
   rsvim_macro::ToV8,
   rsvim_macro::FromV8,
 )]
@@ -238,18 +240,18 @@ pub async fn async_fs_lstat(path: &Path) -> TheResult<FsFileInfo> {
   }
 }
 
-pub struct FsOpenFuture {
+pub struct FsLstatFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for FsOpenFuture {
+impl JsFuture for FsLstatFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|FsOpenFuture|");
+    trace!("|FsLstatFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
-    // Handle when something goes wrong with opening the file.
+    // Handle when something goes wrong with it.
     if let Err(e) = result {
       let message = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, message);
@@ -261,11 +263,10 @@ impl JsFuture for FsOpenFuture {
     // Otherwise, get the result and deserialize it.
     let result = result.unwrap();
 
-    // Deserialize bytes into a file-descriptor.
-    let file_rid = postcard::from_bytes::<ResourceId>(&result).unwrap();
-    let file_rid = Into::<i32>::into(file_rid);
-    let file_rid = file_rid.to_v8(scope);
+    // Deserialize bytes into file info.
+    let file_info = postcard::from_bytes::<FsFileInfo>(&result).unwrap();
+    let file_info = file_info.to_v8(scope);
 
-    self.promise.open(scope).resolve(scope, file_rid).unwrap();
+    self.promise.open(scope).resolve(scope, file_info).unwrap();
   }
 }
