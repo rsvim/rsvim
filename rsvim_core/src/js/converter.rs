@@ -413,7 +413,7 @@ impl ToV8 for SystemTime {
 
 impl FromV8 for SystemTime {
   fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
+    _scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Self {
     debug_assert!(value.is_date());
