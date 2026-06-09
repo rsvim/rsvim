@@ -1098,6 +1098,79 @@ export namespace RsvimFs {
      * :::
      */
     size?: number;
+
+    /**
+     * Last access time of the file, in seconds since Unix Epoch.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    atime?: number;
+
+    /**
+     * Last access time of the file, in nanoseconds since `atime`.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    atimeNsec?: number;
+
+    /**
+     * Last modification time of the file, in seconds since Unix Epoch.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    mtime?: number;
+
+    /**
+     * Last modification time of the file, in nanoseconds since `mtime`.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    mtimeNsec?: number;
+
+    /**
+     * Last status change time of the file, in seconds since Unix Epoch.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    ctime?: number;
+
+    /**
+     * Last status change time of the file, in nanoseconds since `ctime`.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    ctimeNsec?: number;
+
+    /**
+     * The block size for filesystem IO.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    blksize?: number;
+
+    /**
+     * The number of blocks allocated to the file, in 512-byte units.
+     * Please note that this may be smaller than `st_size / 512` when the file has holes.
+     *
+     * :::note
+     * This value is only available on Unix platforms.
+     * :::
+     */
+    blocks?: number;
   };
 }
 
