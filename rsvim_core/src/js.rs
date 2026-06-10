@@ -661,6 +661,21 @@ pub mod boost {
         // Drop(state);
       }
 
+      macro_rules! process_message {
+        ($variant:ident, $resp:expr) => {{
+          trace!("Recv {}:{:?}", stringify!($variant), $resp.task_id);
+          debug_assert!(
+            state_rc.borrow().pending_tasks.contains_key(&$resp.task_id)
+          );
+          let mut cb = state_rc
+            .borrow_mut()
+            .pending_tasks
+            .remove(&$resp.task_id)
+            .unwrap();
+          cb($resp.maybe_result);
+        }};
+      }
+
       for msg in messages {
         match msg {
           JsMessage::TimeoutResp(resp) => {
@@ -711,113 +726,24 @@ pub mod boost {
             loader_cb(resp.maybe_source);
           }
           JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
-          JsMessage::FsOpenResp(resp) => {
-            trace!("Recv FsOpenResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut open_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            open_cb(resp.maybe_result);
-          }
-          JsMessage::FsReadResp(resp) => {
-            trace!("Recv FsReadResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut read_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            read_cb(resp.maybe_result);
-          }
-          JsMessage::FsWriteResp(resp) => {
-            trace!("Recv FsWriteResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut write_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            write_cb(resp.maybe_result);
-          }
+          JsMessage::FsOpenResp(resp) => process_message!(FsOpenResp, resp),
+          JsMessage::FsReadResp(resp) => process_message!(FsReadResp, resp),
+          JsMessage::FsWriteResp(resp) => process_message!(FsWriteResp, resp),
           JsMessage::FsReadFileResp(resp) => {
-            trace!("Recv FsReadFileResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut read_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            read_cb(resp.maybe_result);
+            process_message!(FsReadFileResp, resp)
           }
           JsMessage::FsReadTextFileResp(resp) => {
-            trace!("Recv FsReadTextFileResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut read_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            read_cb(resp.maybe_result);
+            process_message!(FsReadTextFileResp, resp)
           }
-          JsMessage::FsStatResp(resp) => {
-            trace!("Recv FsStatResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut stat_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            stat_cb(resp.maybe_result);
-          }
+          JsMessage::FsStatResp(resp) => process_message!(FsStatResp, resp),
           JsMessage::LoadTreeSitterParserResp(resp) => {
-            trace!("Recv LoadTreeSitterGrammarResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut load_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            load_cb(resp.maybe_result);
+            process_message!(LoadTreeSitterParserResp, resp)
           }
           JsMessage::ReadTextFromChildProcessStdioResp(resp) => {
-            trace!("Recv ReadTextFromChildProcessStdioResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut read_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            read_cb(resp.maybe_result);
+            process_message!(ReadTextFromChildProcessStdioResp, resp)
           }
           JsMessage::WaitChildProcessResp(resp) => {
-            trace!("Recv WaitChildProcessResp:{:?}", resp.task_id);
-            debug_assert!(
-              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
-            );
-            let mut wait_cb = state_rc
-              .borrow_mut()
-              .pending_tasks
-              .remove(&resp.task_id)
-              .unwrap();
-            wait_cb(resp.maybe_result);
+            process_message!(WaitChildProcessResp, resp)
           }
         }
       }
