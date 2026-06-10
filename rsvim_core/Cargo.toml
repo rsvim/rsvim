@@ -80,6 +80,7 @@ geo = { workspace = true }
 icu = { workspace = true }
 itertools = { workspace = true }
 jiff = { workspace = true }
+junction = { workspace = true }
 litemap = { workspace = true }
 log = { workspace = true, features = [
   "max_level_trace",

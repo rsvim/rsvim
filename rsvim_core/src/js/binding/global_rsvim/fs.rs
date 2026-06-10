@@ -6,6 +6,7 @@ pub mod read;
 pub mod read_file;
 pub mod read_text_file;
 pub mod stat;
+pub mod symlink;
 pub mod write;
 
 use crate::is_v8_int;
