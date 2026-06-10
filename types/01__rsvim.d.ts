@@ -399,6 +399,86 @@ export declare namespace RsvimFs {
      */
     function readTextFileSync(path: string): string;
     /**
+     * Get the status of a file by path.
+     *
+     * :::note
+     * This api doesn't follow symbolic link.
+     * :::
+     *
+     * @see {@link RsvimFs.stat}
+     *
+     * @param {string} path - File path.
+     * @returns {Promise<RsvimFs.FileInfo>} It resolves to the file status.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     *
+     * @example
+     * ```javascript
+     * const fstat = await Rsvim.fs.lstat("README.md");
+     * ```
+     */
+    function lstat(path: string): Promise<RsvimFs.FileInfo>;
+    /**
+     * Sync version of `lstat`.
+     *
+     * :::note
+     * This api doesn't follow symbolic link.
+     * :::
+     *
+     * @see {@link RsvimFs.lstat}
+     *
+     * @param {string} path - File path.
+     * @returns {RsvimFs.FileInfo} It returns the file status.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     *
+     * @example
+     * ```javascript
+     * const fstat = Rsvim.fs.lstatSync("README.md");
+     * ```
+     */
+    function lstatSync(path: string): RsvimFs.FileInfo;
+    /**
+     * Get the status of a file by path.
+     *
+     * :::note
+     * This api follows symbolic link.
+     * :::
+     *
+     * @see {@link RsvimFs.lstat}
+     *
+     * @param {string} path - File path.
+     * @returns {Promise<RsvimFs.FileInfo>} It resolves to the file status.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     *
+     * @example
+     * ```javascript
+     * const fstat = await Rsvim.fs.stat("README.md");
+     * ```
+     */
+    function stat(path: string): Promise<RsvimFs.FileInfo>;
+    /**
+     * Sync version of `stat`.
+     *
+     * :::note
+     * This api follows symbolic link.
+     * :::
+     *
+     * @see {@link RsvimFs.stat}
+     *
+     * @param {string} path - File path.
+     * @returns {RsvimFs.FileInfo} It returns the file status.
+     *
+     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     *
+     * @example
+     * ```javascript
+     * const fstat = Rsvim.fs.statSync("README.md");
+     * ```
+     */
+    function statSync(path: string): RsvimFs.FileInfo;
+    /**
      * Open options.
      *
      * :::tip
@@ -576,6 +656,210 @@ export declare namespace RsvimFs {
          */
         writeSync(buf: Uint8Array): number;
     }
+    /**
+     * File information, it contains 3 groups of properties:
+     * - Common properties that are available for all platforms.
+     * - Windows platforms only properties
+     * - Unix platforms only properties
+     *
+     * @categoryDescription Common
+     * @categoryDescription Windows Only
+     * @categoryDescription Unix Only
+     */
+    type FileInfo = {
+        /**
+         * Last access time of the file.
+         *
+         * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common
+         */
+        accessed?: Date;
+        /**
+         * Creation time of the file.
+         *
+         * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common
+         */
+        created?: Date;
+        /**
+         * Last modification time of the file.
+         *
+         * The value can be `undefined` if failed to get this information.
+         *
+         * @category Common
+         */
+        modified?: Date;
+        /**
+         * Whether the file is a directory. This value is mutually exclusive to `isFile`.
+         *
+         * @category Common
+         */
+        isDir: boolean;
+        /**
+         * Whether the file is a regular file. This value is mutually exclusive to `isDir`.
+         *
+         * @category Common
+         */
+        isFile: boolean;
+        /**
+         * Whether the file is a symbolic link.
+         *
+         * @category Common
+         */
+        isSymlink: boolean;
+        /**
+         * The size of the file in bytes.
+         *
+         * @category Common
+         */
+        len: number;
+        /**
+         * Whether the file is read-only (unwritable).
+         *
+         * @category Common
+         */
+        readOnly: boolean;
+        /**
+         * The `dwFileAttributes` value of the file.
+         *
+         * For possible values and their descriptions, see [File Attribute Constants](https://learn.microsoft.com/en-us/windows/win32/fileio/file-attribute-constants) in the Windows Dev Center.
+         *
+         * @category Windows Only
+         */
+        fileAttributes?: number;
+        /**
+         * The `ftCreationTime` value of the file.
+         *
+         * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
+         *
+         * @category Windows Only
+         */
+        creationTime?: number;
+        /**
+         * The `ftLastAccessTime` value of the file.
+         *
+         * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
+         *
+         * @category Windows Only
+         */
+        lastAccessTime?: number;
+        /**
+         * The `ftLastWriteTime` value of the file.
+         *
+         * The value is equivalent to a [FILETIME](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-filetime) struct, which represents the number of 100-nanosecond intervals since January 1, 1601 (UTC).
+         *
+         * @category Windows Only
+         */
+        lastWriteTime?: number;
+        /**
+         * The `nFileSize` value of the file.
+         *
+         * The value doesn't have meaning for directories.
+         *
+         * @category Windows Only
+         */
+        fileSize?: number;
+        /**
+         * The ID of the device containing the file.
+         *
+         * @category Unix Only
+         */
+        dev?: number;
+        /**
+         * The inode number.
+         *
+         * @category Unix Only
+         */
+        ino?: number;
+        /**
+         * The rights applied to the file.
+         *
+         * @category Unix Only
+         */
+        mode?: number;
+        /**
+         * The number of hard links pointing to the file.
+         *
+         * @category Unix Only
+         */
+        nlink?: number;
+        /**
+         * The user ID of the owner of the file.
+         *
+         * @category Unix Only
+         */
+        uid?: number;
+        /**
+         * The group ID of the owner of the file.
+         *
+         * @category Unix Only
+         */
+        gid?: number;
+        /**
+         * The device ID of the file (if it is a special one).
+         *
+         * @category Unix Only
+         */
+        rdev?: number;
+        /**
+         * The total size of the file in bytes.
+         *
+         * @category Unix Only
+         */
+        size?: number;
+        /**
+         * Last access time of the file, in seconds since Unix Epoch.
+         *
+         * @category Unix Only
+         */
+        atime?: number;
+        /**
+         * Last access time of the file, in nanoseconds since `atime`.
+         *
+         * @category Unix Only
+         */
+        atimeNsec?: number;
+        /**
+         * Last modification time of the file, in seconds since Unix Epoch.
+         *
+         * @category Unix Only
+         */
+        mtime?: number;
+        /**
+         * Last modification time of the file, in nanoseconds since `mtime`.
+         *
+         * @category Unix Only
+         */
+        mtimeNsec?: number;
+        /**
+         * Last status change time of the file, in seconds since Unix Epoch.
+         *
+         * @category Unix Only
+         */
+        ctime?: number;
+        /**
+         * Last status change time of the file, in nanoseconds since `ctime`.
+         *
+         * @category Unix Only
+         */
+        ctimeNsec?: number;
+        /**
+         * The block size for filesystem IO.
+         *
+         * @category Unix Only
+         */
+        blksize?: number;
+        /**
+         * The number of blocks allocated to the file, in 512-byte units.
+         *
+         * Please note that this may be smaller than `st_size / 512` when the file has holes.
+         *
+         * @category Unix Only
+         */
+        blocks?: number;
+    };
 }
 export declare namespace RsvimOpt {
     /**
