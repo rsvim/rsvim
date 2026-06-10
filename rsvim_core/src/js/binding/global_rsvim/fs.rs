@@ -37,6 +37,7 @@ use crate::js::pending;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use itertools::Itertools;
+use std::str::FromStr;
 
 /// `Rsvim.fs.open` API.
 pub fn open<'s>(
