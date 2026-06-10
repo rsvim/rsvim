@@ -564,7 +564,7 @@ pub fn symlink<'s>(
   let promise = promise_resolver.get_promise(scope);
 
   let state_rc = JsRuntime::state(scope);
-  let stat_cb = {
+  let link_cb = {
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
@@ -579,12 +579,13 @@ pub fn symlink<'s>(
 
   let mut state = state_rc.borrow_mut();
   let task_id = js::TaskId::next();
-  pending::create_fs_stat(
+  pending::create_fs_symlink(
     &mut state,
     task_id,
-    true,
-    Path::new(&options),
-    Box::new(stat_cb),
+    Path::new(&oldpath),
+    Path::new(&newpath),
+    options,
+    Box::new(link_cb),
   );
 
   rv.set(promise.into());
