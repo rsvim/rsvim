@@ -657,9 +657,12 @@ export declare namespace RsvimFs {
         writeSync(buf: Uint8Array): number;
     }
     /**
-     * File information.
+     * File information, it contains 3 groups of properties:
+     * - Common properties that are available for all platforms.
+     * - Windows platforms only properties
+     * - Unix platforms only properties
      *
-     * @categoryDescription Common Attributes
+     * @categoryDescription Common
      * @categoryDescription Windows Only
      * @categoryDescription Unix Only
      */
@@ -669,7 +672,7 @@ export declare namespace RsvimFs {
          *
          * The value can be `undefined` if failed to get this information.
          *
-         * @category Common Attributes
+         * @category Common
          */
         accessed?: Date;
         /**
@@ -677,7 +680,7 @@ export declare namespace RsvimFs {
          *
          * The value can be `undefined` if failed to get this information.
          *
-         * @category Common Attributes
+         * @category Common
          */
         created?: Date;
         /**
@@ -685,37 +688,37 @@ export declare namespace RsvimFs {
          *
          * The value can be `undefined` if failed to get this information.
          *
-         * @category Common Attributes
+         * @category Common
          */
         modified?: Date;
         /**
          * Whether the file is a directory. This value is mutually exclusive to `isFile`.
          *
-         * @category Common Attributes
+         * @category Common
          */
         isDir: boolean;
         /**
          * Whether the file is a regular file. This value is mutually exclusive to `isDir`.
          *
-         * @category Common Attributes
+         * @category Common
          */
         isFile: boolean;
         /**
          * Whether the file is a symbolic link.
          *
-         * @category Common Attributes
+         * @category Common
          */
         isSymlink: boolean;
         /**
          * The size of the file in bytes.
          *
-         * @category Common Attributes
+         * @category Common
          */
         len: number;
         /**
          * Whether the file is read-only (unwritable).
          *
-         * @category Common Attributes
+         * @category Common
          */
         readOnly: boolean;
         /**
