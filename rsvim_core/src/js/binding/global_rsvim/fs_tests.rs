@@ -861,10 +861,11 @@ async fn test_fs_stat3() -> IoResult<()> {
     assert_eq!(n, 2);
 
     let actual = contents.message_history_mut().pop().unwrap();
-    assert_eq!(actual, "fstat fileAttributes:undefined");
+    let re = Regex::new(r"^fstat dev:([0-9]+), ino:([0-9]+), ino:([0-9]+), mode:([0-9]+), nlink:([0-9]+), uid:([0-9]+), gid:([0-9]+), rdev:([0-9]+), size:([0-9]+), atime:([0-9]+), atimeNsec:([0-9]+), mtime:([0-9]+), mtimeNsec:([0-9]+), ctime:([0-9]+), ctimeNsec:([0-9]+), blksize:([0-9]+), blocks:([0-9]+)$").unwrap();
+    assert!(re.is_match(&actual));
 
     let actual = contents.message_history_mut().pop().unwrap();
-    assert_eq!(actual, "Hello, World!");
+    assert_eq!(actual, "fstat fileAttributes:undefined");
   }
 
   Ok(())
