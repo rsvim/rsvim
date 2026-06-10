@@ -83,12 +83,12 @@ pub fn fs_symlink(
   }
 }
 
-pub struct FsStatFuture {
+pub struct FsSymlinkFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
-impl JsFuture for FsStatFuture {
+impl JsFuture for FsSymlinkFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|FsStatFuture|");
 
