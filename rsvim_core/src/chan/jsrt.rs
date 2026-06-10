@@ -42,6 +42,9 @@ pub enum JsMessage {
   /// Master send js runtime the result of fs status
   FsStatResp(FsStatResp),
 
+  /// Master send js runtime the result of fs symlink.
+  FsSymlinkResp(FsSymlinkResp),
+
   /// Master send js runtime the result of load tree-sitter parser.
   LoadTreeSitterParserResp(LoadTreeSitterParserResp),
 
@@ -112,6 +115,14 @@ pub struct FsStatResp {
   pub task_id: TaskId,
 
   // type: `FsFileInfo`
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct FsSymlinkResp {
+  pub task_id: TaskId,
+
+  // type: `u32`
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
