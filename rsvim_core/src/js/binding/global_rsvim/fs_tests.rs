@@ -4,6 +4,7 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use regex::Regex;
 use std::time::Duration;
 
 #[tokio::test]
@@ -759,7 +760,9 @@ async fn test_fs_stat1() -> IoResult<()> {
     let n = contents.message_history().len();
     assert_eq!(n, 1);
     let actual = contents.message_history_mut().pop().unwrap();
-    assert_eq!(actual, "Hello, World!");
+
+    let re = Regex::new(r"^fstat created:([a-zA-Z0-9 :+()]+), accessed:([a-zA-Z0-9 :+()]+), modified:([a-zA-Z0-9 :+()]+), isDir:(true|false), isFile:(true|false), isSymlink:(true|false), len:([0-9]+), readOnly:(true|false)$").unwrap();
+    assert!(re.is_match(&actual));
   }
 
   Ok(())
