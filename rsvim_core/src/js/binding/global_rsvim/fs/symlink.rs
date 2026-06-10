@@ -34,7 +34,7 @@ pub enum FsSymlinkOptions {
 pub fn fs_symlink(
   oldpath: &Path,
   newpath: &Path,
-  options: FsSymlinkOptions,
+  _options: FsSymlinkOptions,
 ) -> TheResult<()> {
   match std::os::unix::fs::symlink(oldpath, newpath) {
     Ok(_) => Ok(()),
