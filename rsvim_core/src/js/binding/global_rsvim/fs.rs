@@ -27,6 +27,9 @@ use crate::js::binding::global_rsvim::fs::read_text_file::fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::stat::FsStatFuture;
 use crate::js::binding::global_rsvim::fs::stat::fs_lstat;
 use crate::js::binding::global_rsvim::fs::stat::fs_stat;
+use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkFuture;
+use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkOptions;
+use crate::js::binding::global_rsvim::fs::symlink::fs_symlink;
 use crate::js::binding::global_rsvim::fs::write::FsWriteFuture;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
@@ -531,6 +534,82 @@ pub fn stat_sync<'s>(
       let info = info.to_v8(scope);
       rv.set(info);
     }
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
+}
+
+/// `Rsvim.fs.symlink` API.
+pub fn symlink<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 3);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let oldpath = args.get(0).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_str!(args.get(1)));
+  let newpath = args.get(1).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_str!(args.get(2)));
+  let options = args.get(2).to_rust_string_lossy(scope);
+  let options = FsSymlinkOptions::from_str(&options).unwrap();
+  trace!(
+    "RsvimFs.symlink: oldpath:{:?},newpath:{:?},options:{:?}",
+    oldpath, newpath, options
+  );
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let stat_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = FsSymlinkFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.push(Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::TaskId::next();
+  pending::create_fs_stat(
+    &mut state,
+    task_id,
+    true,
+    Path::new(&options),
+    Box::new(stat_cb),
+  );
+
+  rv.set(promise.into());
+}
+
+/// `Rsvim.fs.symlinkSync` API.
+pub fn symlink_sync<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 3);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let oldpath = args.get(0).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_str!(args.get(1)));
+  let newpath = args.get(1).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_str!(args.get(2)));
+  let options = args.get(2).to_rust_string_lossy(scope);
+  let options = FsSymlinkOptions::from_str(&options).unwrap();
+  trace!(
+    "RsvimFs.symlink: oldpath:{:?},newpath:{:?},options:{:?}",
+    oldpath, newpath, options
+  );
+
+  match fs_symlink(Path::new(&oldpath), Path::new(&newpath), options) {
+    Ok(_) => rv.set_undefined(),
     Err(e) => {
       binding::throw_exception(scope, &e);
     }
