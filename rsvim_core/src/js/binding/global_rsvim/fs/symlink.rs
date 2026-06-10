@@ -90,7 +90,7 @@ pub struct FsSymlinkFuture {
 
 impl JsFuture for FsSymlinkFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|FsStatFuture|");
+    trace!("|FsSymlinkFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
