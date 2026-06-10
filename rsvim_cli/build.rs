@@ -94,22 +94,17 @@ fn snapshot() {
     let snapshot = js_runtime.create_snapshot();
     let snapshot = Box::from(&snapshot);
     let snapshot_len = snapshot.len();
-    eprintln!(
-      "[RSVIM] Snapshot blob size is {snapshot_len} before compress..."
-    );
+    println!("{LOG} Snapshot blob size is {snapshot_len} before compress...");
     let mut vec = Vec::with_capacity(snapshot.len());
     vec.extend((snapshot.len() as u32).to_le_bytes());
     let max_compress_level: i32 = *zstd::compression_level_range().end();
-    eprintln!(
-      "[RSVIM] Compress snapshot with zstd-level={max_compress_level}..."
-    );
     vec.extend_from_slice(
       &zstd::bulk::compress(&snapshot, max_compress_level)
         .expect("Failed to compress snapshot with zstd"),
     );
     let snapshot = vec.into_boxed_slice();
     let snapshot_len = snapshot.len();
-    eprintln!("[RSVIM] Snapshot blob size is {snapshot_len} after compress...");
+    println!("{LOG} Snapshot blob size is {snapshot_len} after compress...");
     snapshot
   };
 
