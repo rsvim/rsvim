@@ -167,5 +167,6 @@ inherits = "release"
 [profile.release]
 codegen-units = 1
 lto = true
-opt-level = "s"
+opt-level = "z"
+panic = "abort"
 strip = true
