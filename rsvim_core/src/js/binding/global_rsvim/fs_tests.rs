@@ -717,3 +717,148 @@ async fn test_read_text_file2() -> IoResult<()> {
 
   Ok(())
 }
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_fs_stat1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30000))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  info!("tmpfile:{:?}", tmpfile);
+  tmpfile.touch().unwrap();
+  tmpfile.write_str("Hello, World!").unwrap();
+
+  let src = format!(
+    r#"
+  const fstat = await Rsvim.fs.lstat({:?});
+  Rsvim.cmd.echo(`fstat created:${{fstat.created}}, accessed:${{fstat.accessed}}, modified:${{fstat.modified}}, isDir:${{fstat.isDir}}, isFile:${{fstat.isFile}}, isSymlink:${{fstat.isSymlink}}, len:${{fstat.len}}, readOnly:${{fstat.readOnly}}`);
+  Rsvim.rt.exit();
+    "#,
+    tmpfile.path()
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 1);
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "Hello, World!");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg(target_family = "windows")]
+#[cfg_attr(miri, ignore)]
+async fn test_fs_stat2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30000))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  info!("tmpfile:{:?}", tmpfile);
+  tmpfile.touch().unwrap();
+  tmpfile.write_str("Hello, World!").unwrap();
+
+  let src = format!(
+    r#"
+  const fstat = await Rsvim.fs.lstat({:?});
+  Rsvim.cmd.echo(`fstat fileAttributes:${{fstat.fileAttributes}}, creationTime:${{fstat.creationTime}}, lastAccessTime:${{fstat.lastAccessTime}}, lastWriteTime:${{fstat.lastWriteTime}}, fileSize:${{fstat.fileSize}}`);
+  Rsvim.cmd.echo(`fstat dev:${{fstat.dev}}`);
+  Rsvim.rt.exit();
+    "#,
+    tmpfile.path()
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 1);
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "Hello, World!");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg(target_family = "unix")]
+#[cfg_attr(miri, ignore)]
+async fn test_fs_stat3() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30000))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  info!("tmpfile:{:?}", tmpfile);
+  tmpfile.touch().unwrap();
+  tmpfile.write_str("Hello, World!").unwrap();
+
+  let src = format!(
+    r#"
+  const fstat = await Rsvim.fs.lstat({:?});
+  Rsvim.cmd.echo(`fstat dev:${{fstat.dev}}, ino:${{fstat.ino}}, ino:${{fstat.ino}}, mode:${{fstat.mode}}, nlink:${{fstat.nlink}}, uid:${{fstat.uid}}, gid:${{fstat.gid}}, rdev:${{fstat.rdev}}, size:${{fstat.size}}, atime:${{fstat.atime}}, atimeNsec:${{fstat.atimeNsec}}, mtime:${{fstat.mtime}}, mtimeNsec:${{fstat.mtimeNsec}}, ctime:${{fstat.ctime}}, ctimeNsec:${{fstat.ctimeNsec}}, blksize:${{fstat.blksize}}, blocks:${{fstat.blocks}}`);
+  Rsvim.cmd.echo(`fstat fileAttributes:${{fstat.fileAttributes}}`);
+  Rsvim.rt.exit();
+    "#,
+    tmpfile.path()
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 1);
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "Hello, World!");
+  }
+
+  Ok(())
+}
