@@ -106,10 +106,10 @@ impl JsFuture for FsStatFuture {
     // Otherwise, get the result and deserialize it.
     let result = result.unwrap();
 
-    // Deserialize bytes into file info.
-    let file_info = postcard::from_bytes::<FsFileInfo>(&result).unwrap();
-    let file_info = file_info.to_v8(scope);
+    // Deserialize bytes into u32 integer.
+    let result = postcard::from_bytes::<u32>(&result).unwrap();
+    let result = result.to_v8(scope);
 
-    self.promise.open(scope).resolve(scope, file_info).unwrap();
+    self.promise.open(scope).resolve(scope, result).unwrap();
   }
 }
