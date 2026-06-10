@@ -858,7 +858,11 @@ async fn test_fs_stat3() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
+
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "fstat fileAttributes:undefined");
+
     let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "Hello, World!");
   }
