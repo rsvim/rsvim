@@ -5,7 +5,6 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
-use std::fs::Metadata;
 
 #[derive(
   Debug,
@@ -81,16 +80,6 @@ pub fn fs_symlink(
         e,
       )),
     },
-  }
-}
-
-pub async fn async_fs_symlink(path: &Path) -> TheResult<()> {
-  match tokio::fs::symlink_metadata(path).await {
-    Ok(meta) => Ok(convert_metadata_to_fileinfo(meta)),
-    Err(e) => Err(TheErr::ReadFileByPathFailed(
-      path.to_string_lossy().to_compact_string(),
-      e,
-    )),
   }
 }
 
