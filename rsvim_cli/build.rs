@@ -93,8 +93,7 @@ fn snapshot() {
   let snapshot = {
     let snapshot = js_runtime.create_snapshot();
     let snapshot = Box::from(&snapshot);
-    let snapshot_len = snapshot.len();
-    println!("{LOG} Snapshot blob size is {snapshot_len} before compress...");
+    let snapshot_len_before = snapshot.len();
     let mut vec = Vec::with_capacity(snapshot.len());
     vec.extend((snapshot.len() as u32).to_le_bytes());
     let max_compress_level: i32 = *zstd::compression_level_range().end();
@@ -103,8 +102,10 @@ fn snapshot() {
         .expect("Failed to compress snapshot with zstd"),
     );
     let snapshot = vec.into_boxed_slice();
-    let snapshot_len = snapshot.len();
-    println!("{LOG} Snapshot blob size is {snapshot_len} after compress...");
+    let snapshot_len_after = snapshot.len();
+    println!(
+      "{LOG} Snapshot blob size is compressed from {snapshot_len_before} to {snapshot_len_after}..."
+    );
     snapshot
   };
 
