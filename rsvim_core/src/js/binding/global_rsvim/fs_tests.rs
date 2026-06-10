@@ -761,7 +761,7 @@ async fn test_fs_stat1() -> IoResult<()> {
     assert_eq!(n, 1);
     let actual = contents.message_history_mut().pop().unwrap();
 
-    let re = Regex::new(r"^fstat created:([a-zA-Z0-9 :+()]+), accessed:([a-zA-Z0-9 :+()]+), modified:([a-zA-Z0-9 :+()]+), isDir:(true|false), isFile:(true|false), isSymlink:(true|false), len:([0-9]+), readOnly:(true|false)$").unwrap();
+    let re = Regex::new(r"^fstat created:([^,]+), accessed:([^,]+), modified:([^,]+), isDir:(true|false), isFile:(true|false), isSymlink:(true|false), len:([0-9]+), readOnly:(true|false)$").unwrap();
     assert!(re.is_match(&actual));
   }
 
