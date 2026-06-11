@@ -93,6 +93,9 @@ pub enum TheErr {
   #[error("Failed to write file `{0}`: {1}.")]
   WriteFileByRidFailed(ResourceId, IoErr),
 
+  #[error("Failed to create symlink `{0}` pointing to `{1}`: {2}.")]
+  CreateSymlinkFailed(CompactString, CompactString, IoErr),
+
   #[error("Invalid data.")]
   DataInvalid,
 

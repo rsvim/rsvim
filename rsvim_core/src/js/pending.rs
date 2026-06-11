@@ -6,6 +6,7 @@ use crate::js::JsRuntimeState;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkOptions;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use tokio::time::Instant;
@@ -157,6 +158,26 @@ pub fn create_fs_stat(
       task_id,
       follow_symlink,
       path: path.to_path_buf(),
+    }),
+  );
+}
+
+pub fn create_fs_symlink(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  oldpath: &Path,
+  newpath: &Path,
+  options: FsSymlinkOptions,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsSymlinkReq(chan::FsSymlinkReq {
+      task_id,
+      oldpath: oldpath.to_path_buf(),
+      newpath: newpath.to_path_buf(),
+      options,
     }),
   );
 }

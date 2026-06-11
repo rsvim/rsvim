@@ -5,6 +5,7 @@ use crate::buf::BufferId;
 use crate::js::TaskId;
 use crate::js::TimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkOptions;
 use crate::js::resource::ResourceId;
 use crate::prelude::*;
 use tokio::sync::mpsc::UnboundedSender;
@@ -42,6 +43,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to get fs status.
   FsStatReq(FsStatReq),
+
+  /// Js runtime ask master to create symlink.
+  FsSymlinkReq(FsSymlinkReq),
 
   /// Ask master to parse text for a syntax editing.
   SyntaxEditReq(SyntaxEditReq),
@@ -116,6 +120,14 @@ pub struct FsStatReq {
   pub task_id: TaskId,
   pub follow_symlink: bool,
   pub path: PathBuf,
+}
+
+#[derive(Debug)]
+pub struct FsSymlinkReq {
+  pub task_id: TaskId,
+  pub oldpath: PathBuf,
+  pub newpath: PathBuf,
+  pub options: FsSymlinkOptions,
 }
 
 #[derive(Debug)]

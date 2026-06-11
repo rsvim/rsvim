@@ -49,6 +49,7 @@ heck = "0.5"
 icu = "2"
 itertools = "0.14"
 jiff = "0.2"
+junction = "2"
 litemap = "0.8"
 log = { version = "0.4", features = [
   "max_level_trace",
