@@ -630,12 +630,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * The sync version of {@link readFile}.
-   *
-   * @param {string} path
-   * @returns {Uint8Array}
-   *
-   * @throws
+   * Sync version of {@link readFile}.
    *
    * @example
    * ```javascript
@@ -716,18 +711,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * Sync version of `lstat`.
-   *
-   * :::note
-   * This api doesn't follow symbolic link.
-   * :::
-   *
-   * @see {@link RsvimFs.lstat}
-   *
-   * @param {string} path - File path.
-   * @returns {RsvimFs.FileInfo} It returns the file status.
-   *
-   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   * Sync version of {@link lstat}.
    *
    * @example
    * ```javascript
@@ -768,18 +752,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * Sync version of `stat`.
-   *
-   * :::note
-   * This api follows symbolic link.
-   * :::
-   *
-   * @see {@link RsvimFs.stat}
-   *
-   * @param {string} path - File path.
-   * @returns {RsvimFs.FileInfo} It returns the file status.
-   *
-   * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+   * Sync version of {@link stat}.
    *
    * @example
    * ```javascript
@@ -847,14 +820,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * Sync version of `symlink`.
-   *
-   * @param {string} oldpath - Original file path.
-   * @param {string} newpath - New symbolic link that pointing to the original file.
-   * @param {RsvimFs.SymlinkOptions} options - (Optional) Only used on Windows platforms, will be ignored on Unix platforms. By default is `"junction"`.
-   * @returns {Promise<void>} It resolves to nothing.
-   *
-   * @throws Throws {@link !TypeError} if any parameter is invalid. Or throws {@link Error} if failed to create symbolic link from the file.
+   * Sync version of {@link symlink}.
    *
    * @example
    * ```javascript
