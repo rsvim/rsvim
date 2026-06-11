@@ -328,13 +328,7 @@ export declare namespace RsvimFs {
      */
     function open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
     /**
-     * The sync version of {@link open}.
-     *
-     * @param {string} path
-     * @param {RsvimFs.OpenOptions} options
-     * @returns {RsvimFs.File}
-     *
-     * @throws
+     * Sync version of {@link open}.
      *
      * @example
      * ```javascript
@@ -357,12 +351,7 @@ export declare namespace RsvimFs {
      */
     function readFile(path: string): Promise<Uint8Array>;
     /**
-     * The sync version of {@link readFile}.
-     *
-     * @param {string} path
-     * @returns {Uint8Array}
-     *
-     * @throws
+     * Sync version of {@link readFile}.
      *
      * @example
      * ```javascript
@@ -385,12 +374,7 @@ export declare namespace RsvimFs {
      */
     function readTextFile(path: string): Promise<string>;
     /**
-     * The sync version of {@link readTextFile}.
-     *
-     * @param {string} path
-     * @returns {string}
-     *
-     * @throws
+     * Sync version of {@link readTextFile}.
      *
      * @example
      * ```javascript
@@ -419,18 +403,7 @@ export declare namespace RsvimFs {
      */
     function lstat(path: string): Promise<RsvimFs.FileInfo>;
     /**
-     * Sync version of `lstat`.
-     *
-     * :::note
-     * This api doesn't follow symbolic link.
-     * :::
-     *
-     * @see {@link RsvimFs.lstat}
-     *
-     * @param {string} path - File path.
-     * @returns {RsvimFs.FileInfo} It returns the file status.
-     *
-     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     * Sync version of {@link lstat}.
      *
      * @example
      * ```javascript
@@ -459,18 +432,7 @@ export declare namespace RsvimFs {
      */
     function stat(path: string): Promise<RsvimFs.FileInfo>;
     /**
-     * Sync version of `stat`.
-     *
-     * :::note
-     * This api follows symbolic link.
-     * :::
-     *
-     * @see {@link RsvimFs.stat}
-     *
-     * @param {string} path - File path.
-     * @returns {RsvimFs.FileInfo} It returns the file status.
-     *
-     * @throws Throws {@link !TypeError} if the file name is invalid. Or throws {@link Error} if failed to get file status.
+     * Sync version of {@link stat}.
      *
      * @example
      * ```javascript
@@ -478,6 +440,52 @@ export declare namespace RsvimFs {
      * ```
      */
     function statSync(path: string): RsvimFs.FileInfo;
+    /**
+     * Create symbolic link from a file path.
+     *
+     * On Windows platforms, you should specify the 3rd parameter "options" with below 3 options:
+     *
+     * - `"file"` or `"dir"`: Pointing to [CreateSymbolicLinkW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createsymboliclinkw) function.
+     * - `"junction"`: NTFS v5+ features roughly equivalent to Unix directory symbolic links.
+     *
+     * @param {string} oldpath - Original file path.
+     * @param {string} newpath - New symbolic link that pointing to the original file.
+     * @param {RsvimFs.SymlinkOptions} options - (Optional) Only used on Windows platforms, will be ignored on Unix platforms. By default is `"junction"`.
+     * @returns {Promise<void>} It resolves to nothing.
+     *
+     * @throws Throws {@link !TypeError} if any parameter is invalid. Or throws {@link Error} if failed to create symbolic link from the file.
+     *
+     * @example
+     * ```javascript
+     * try {
+     *   // Linux
+     *   await Rsvim.fs.symlink("README.md", "linked-README.md");
+     *   // Windows
+     *   await Rsvim.fs.symlink("README.md", "linked-README.md", "junction");
+     *   Rsvim.cmd.echo(`Created symbolic link "linked-README.md" pointing to "README.md"`);
+     * } catch (e) {
+     *   Rsvim.cmd.echo(`Failed to create symbolic link pointing to "README.md": ${e}`);
+     * }
+     * ```
+     */
+    function symlink(oldpath: string, newpath: string, options?: RsvimFs.SymlinkOptions): Promise<void>;
+    /**
+     * Sync version of {@link symlink}.
+     *
+     * @example
+     * ```javascript
+     * try {
+     *   // Linux
+     *   Rsvim.fs.symlinkSync("README.md", "linked-README.md");
+     *   // Windows
+     *   Rsvim.fs.symlinkSync("README.md", "linked-README.md", "junction");
+     *   Rsvim.cmd.echo(`Created symbolic link "linked-README.md" pointing to "README.md"`);
+     * } catch (e) {
+     *   Rsvim.cmd.echo(`Failed to create symbolic link pointing to "README.md": ${e}`);
+     * }
+     * ```
+     */
+    function symlinkSync(oldpath: string, newpath: string, options?: RsvimFs.SymlinkOptions): void;
     /**
      * Open options.
      *
@@ -603,12 +611,7 @@ export declare namespace RsvimFs {
          */
         read(buf: Uint8Array): Promise<number>;
         /**
-         * The sync version of {@link read}.
-         *
-         * @param {Uint8Array} buf
-         * @returns {number}
-         *
-         * @throws
+         * Sync version of {@link read}.
          *
          * @example
          * ```javascript
@@ -640,12 +643,7 @@ export declare namespace RsvimFs {
          */
         write(buf: Uint8Array): Promise<number>;
         /**
-         * The sync version of {@link write}.
-         *
-         * @param {Uint8Array} buf
-         * @returns {number}
-         *
-         * @throws
+         * Sync version of {@link write}.
          *
          * @example
          * ```javascript
@@ -860,6 +858,11 @@ export declare namespace RsvimFs {
          */
         blocks?: number;
     };
+    /**
+     * @see {@link RsvimFs.symlink}
+     * @inline
+     * */
+    type SymlinkOptions = "file" | "dir" | "junction";
 }
 export declare namespace RsvimOpt {
     /**
