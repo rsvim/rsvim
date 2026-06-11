@@ -108,8 +108,13 @@ impl JsFuture for FsSymlinkFuture {
 
     // Deserialize bytes into u32 integer.
     let result = postcard::from_bytes::<u32>(&result).unwrap();
-    let result = result.to_v8(scope);
+    debug_assert_eq!(result, 0);
+    let result = v8::undefined(scope);
 
-    self.promise.open(scope).resolve(scope, result).unwrap();
+    self
+      .promise
+      .open(scope)
+      .resolve(scope, result.into())
+      .unwrap();
   }
 }
