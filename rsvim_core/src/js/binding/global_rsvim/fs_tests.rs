@@ -887,20 +887,28 @@ async fn test_fs_symlink1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30000))];
   let tmp = assert_fs::TempDir::new().unwrap();
   let original = tmp.child("hello.txt");
-  let linked = tmp.child("linked.txt");
   original.touch().unwrap();
   original.write_str("Hello, World!").unwrap();
+  let link1 = tmp.child("link1.txt");
+  let link2 = tmp.child("link2.txt");
 
   let src = format!(
     r#"
   await Rsvim.fs.symlink({:?}, {:?});
-  const payload = await Rsvim.fs.readTextFile({:?});
-  Rsvim.cmd.echo(payload);
+  const payload1 = await Rsvim.fs.readTextFile({:?});
+  Rsvim.cmd.echo(payload1);
+
+  Rsvim.fs.symlinkSync({:?}, {:?});
+  const payload2 = await Rsvim.fs.readTextFile({:?});
+  Rsvim.cmd.echo(payload2);
   Rsvim.rt.exit();
     "#,
     original.path(),
-    linked.path(),
-    linked.path(),
+    link1.path(),
+    link1.path(),
+    original.path(),
+    link2.path(),
+    link2.path(),
   );
   info!("src:{:?}", src);
 
@@ -920,7 +928,10 @@ async fn test_fs_symlink1() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
+
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "Hello, World!");
 
     let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "Hello, World!");
