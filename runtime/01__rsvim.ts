@@ -568,13 +568,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * The sync version of {@link open}.
-   *
-   * @param {string} path
-   * @param {RsvimFs.OpenOptions} options
-   * @returns {RsvimFs.File}
-   *
-   * @throws
+   * Sync version of {@link open}.
    *
    * @example
    * ```javascript
@@ -665,12 +659,7 @@ export namespace RsvimFs {
   }
 
   /**
-   * The sync version of {@link readTextFile}.
-   *
-   * @param {string} path
-   * @returns {string}
-   *
-   * @throws
+   * Sync version of {@link readTextFile}.
    *
    * @example
    * ```javascript
@@ -1014,12 +1003,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * The sync version of {@link read}.
-     *
-     * @param {Uint8Array} buf
-     * @returns {number}
-     *
-     * @throws
+     * Sync version of {@link read}.
      *
      * @example
      * ```javascript
@@ -1067,12 +1051,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * The sync version of {@link write}.
-     *
-     * @param {Uint8Array} buf
-     * @returns {number}
-     *
-     * @throws
+     * Sync version of {@link write}.
      *
      * @example
      * ```javascript
