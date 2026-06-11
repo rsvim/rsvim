@@ -180,6 +180,13 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "fs_lstat_sync", global_rsvim::fs::lstat_sync);
     set_function_to(scope, vim, "fs_stat", global_rsvim::fs::stat);
     set_function_to(scope, vim, "fs_stat_sync", global_rsvim::fs::stat_sync);
+    set_function_to(scope, vim, "fs_symlink", global_rsvim::fs::symlink);
+    set_function_to(
+      scope,
+      vim,
+      "fs_symlink_sync",
+      global_rsvim::fs::symlink_sync,
+    );
   }
 
   // For `Rsvim.opt`
