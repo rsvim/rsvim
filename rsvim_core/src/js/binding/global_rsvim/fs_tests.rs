@@ -4,6 +4,7 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
 use assert_fs::prelude::FileWriteStr;
+use assert_fs::prelude::PathChild;
 use regex::Regex;
 use std::time::Duration;
 
@@ -871,6 +872,58 @@ async fn test_fs_stat3() -> IoResult<()> {
 
     let actual = contents.message_history_mut().pop().unwrap();
     assert_eq!(actual, "fstat fileAttributes:undefined");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_fs_symlink1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30000))];
+  let tmp = assert_fs::TempDir::new().unwrap();
+  let original = tmp.child("hello.txt");
+  let linked = tmp.child("linked.txt");
+  original.touch().unwrap();
+  original.write_str("Hello, World!").unwrap();
+
+  let src = format!(
+    r#"
+  await Rsvim.fs.symlink({:?}, {:?});
+  const payload = await Rsvim.fs.readFile({:?});
+  Rsvim.cmd.echo(payload);
+  Rsvim.rt.exit();
+    "#,
+    original.path(),
+    linked.path(),
+    linked.path(),
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.cmdline_text);
+    let n = contents.message_history().len();
+    assert_eq!(n, 1);
+
+    let actual = contents.message_history_mut().pop().unwrap();
+    assert_eq!(actual, "Hello, World!");
   }
 
   Ok(())
