@@ -894,7 +894,7 @@ async fn test_fs_symlink1() -> IoResult<()> {
   let src = format!(
     r#"
   await Rsvim.fs.symlink({:?}, {:?});
-  const payload = await Rsvim.fs.readFile({:?});
+  const payload = await Rsvim.fs.readTextFile({:?});
   Rsvim.cmd.echo(payload);
   Rsvim.rt.exit();
     "#,
