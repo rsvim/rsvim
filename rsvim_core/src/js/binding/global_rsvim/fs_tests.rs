@@ -1048,7 +1048,7 @@ async fn test_fs_symlink3() -> IoResult<()> {
 
   // After running
   {
-    let mut contents = lock!(event_loop.cmdline_text);
+    let contents = lock!(event_loop.cmdline_text);
     let n = contents.message_history().len();
     assert_eq!(n, 0);
 
