@@ -117,3 +117,25 @@ impl JsFuture for FsSymlinkFuture {
       .unwrap();
   }
 }
+
+pub fn fs_link(oldpath: &Path, newpath: &Path) -> TheResult<()> {
+  match std::fs::hard_link(oldpath, newpath) {
+    Ok(_) => Ok(()),
+    Err(e) => Err(TheErr::CreateSymlinkFailed(
+      oldpath.to_string_lossy().to_compact_string(),
+      newpath.to_string_lossy().to_compact_string(),
+      e,
+    )),
+  }
+}
+
+pub async fn async_fs_link(oldpath: &Path, newpath: &Path) -> TheResult<()> {
+  match tokio::fs::hard_link(oldpath, newpath).await {
+    Ok(_) => Ok(()),
+    Err(e) => Err(TheErr::CreateSymlinkFailed(
+      oldpath.to_string_lossy().to_compact_string(),
+      newpath.to_string_lossy().to_compact_string(),
+      e,
+    )),
+  }
+}
