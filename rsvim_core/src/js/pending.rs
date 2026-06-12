@@ -192,11 +192,10 @@ pub fn create_fs_link(
   state.pending_tasks.insert(task_id, cb);
   chan::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsSymlinkReq(chan::FsSymlinkReq {
+    MasterMessage::FsLinkReq(chan::FsLinkReq {
       task_id,
       oldpath: oldpath.to_path_buf(),
       newpath: newpath.to_path_buf(),
-      options,
     }),
   );
 }
