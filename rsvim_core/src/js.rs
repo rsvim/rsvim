@@ -739,6 +739,7 @@ pub mod boost {
           JsMessage::FsSymlinkResp(resp) => {
             process_message!(FsSymlinkResp, resp)
           }
+          JsMessage::FsLinkResp(resp) => process_message!(FsLinkResp, resp),
           JsMessage::LoadTreeSitterParserResp(resp) => {
             process_message!(LoadTreeSitterParserResp, resp)
           }
