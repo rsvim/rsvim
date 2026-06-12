@@ -1,12 +1,12 @@
 //! APIs for `Rsvim.fs` namespace.
 
 pub mod close;
+pub mod link;
 pub mod open;
 pub mod read;
 pub mod read_file;
 pub mod read_text_file;
 pub mod stat;
-pub mod symlink;
 pub mod write;
 
 use crate::is_v8_int;
@@ -15,6 +15,9 @@ use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::close::fs_close;
+use crate::js::binding::global_rsvim::fs::link::FsSymlinkFuture;
+use crate::js::binding::global_rsvim::fs::link::FsSymlinkOptions;
+use crate::js::binding::global_rsvim::fs::link::fs_symlink;
 use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::fs_open;
@@ -27,9 +30,6 @@ use crate::js::binding::global_rsvim::fs::read_text_file::fs_read_text_file;
 use crate::js::binding::global_rsvim::fs::stat::FsStatFuture;
 use crate::js::binding::global_rsvim::fs::stat::fs_lstat;
 use crate::js::binding::global_rsvim::fs::stat::fs_stat;
-use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkFuture;
-use crate::js::binding::global_rsvim::fs::symlink::FsSymlinkOptions;
-use crate::js::binding::global_rsvim::fs::symlink::fs_symlink;
 use crate::js::binding::global_rsvim::fs::write::FsWriteFuture;
 use crate::js::binding::global_rsvim::fs::write::fs_write;
 use crate::js::converter::*;
