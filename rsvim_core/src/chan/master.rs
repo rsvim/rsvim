@@ -47,6 +47,9 @@ pub enum MasterMessage {
   /// Js runtime ask master to create symlink.
   FsSymlinkReq(FsSymlinkReq),
 
+  /// Js runtime ask master to create hard link.
+  FsLinkReq(FsLinkReq),
+
   /// Ask master to parse text for a syntax editing.
   SyntaxEditReq(SyntaxEditReq),
 
@@ -128,6 +131,13 @@ pub struct FsSymlinkReq {
   pub oldpath: PathBuf,
   pub newpath: PathBuf,
   pub options: FsSymlinkOptions,
+}
+
+#[derive(Debug)]
+pub struct FsLinkReq {
+  pub task_id: TaskId,
+  pub oldpath: PathBuf,
+  pub newpath: PathBuf,
 }
 
 #[derive(Debug)]

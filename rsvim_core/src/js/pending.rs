@@ -182,6 +182,25 @@ pub fn create_fs_symlink(
   );
 }
 
+pub fn create_fs_link(
+  state: &mut JsRuntimeState,
+  task_id: TaskId,
+  oldpath: &Path,
+  newpath: &Path,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  chan::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsSymlinkReq(chan::FsSymlinkReq {
+      task_id,
+      oldpath: oldpath.to_path_buf(),
+      newpath: newpath.to_path_buf(),
+      options,
+    }),
+  );
+}
+
 pub fn create_syn_load_parser(
   state: &mut JsRuntimeState,
   task_id: TaskId,
